@@ -263,8 +263,8 @@ void D_DoomMain()
 	{
 		C_DoCommand("logfile");
 	}
-		
-	
+
+
 	OWantFiles newwadfiles, newpatchfiles;
 
 	const char* iwad_filename_cstr = Args.CheckValue("-iwad");

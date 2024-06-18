@@ -38,7 +38,7 @@ void D_ResetMobjInfo(int from, int to)
     }
 }
 
-void D_Initialize_Mobjinfo(mobjinfo_t* source, int count) 
+void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 {
 	mobjinfo.clear();
 	mobjinfo.resize(count);

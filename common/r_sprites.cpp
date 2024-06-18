@@ -57,7 +57,7 @@ void R_CacheSprite(spritedef_t *sprite)
 		{
 			if (sprite->spriteframes[i].width[r] == SPRITE_NEEDS_INFO)
 			{
-				if (sprite->spriteframes[i].lump[r] == -1) 
+				if (sprite->spriteframes[i].lump[r] == -1)
 				{
 					I_Error("Sprite %d, rotation %d has no lump", i, r);
 				}
