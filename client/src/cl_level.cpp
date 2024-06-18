@@ -239,14 +239,14 @@ void G_InitNew (const char *mapname)
 	{
 		if (wantFast)
 		{
-			for (i = 0; i < ::num_state_t_types(); i++)
+			for (i = 0; i < ::NUMSTATES; i++)
 			{
 				if (states[i].flags & STATEF_SKILL5FAST &&
 				    (states[i].tics != 1 || demoplayback))
 					states[i].tics >>= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (i = 0; i < ::num_mobjinfo_types(); ++i)
+			for (i = 0; i < ::NUMMOBJTYPES; ++i)
 			{
 				if (mobjinfo[i].altspeed != NO_ALTSPEED)
 				{
@@ -258,13 +258,13 @@ void G_InitNew (const char *mapname)
 		}
 		else
 		{
-			for (i = 0; i < ::num_state_t_types(); i++)
+			for (i = 0; i < ::NUMSTATES; i++)
 			{
 				if (states[i].flags & STATEF_SKILL5FAST)
 					states[i].tics <<= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (i = 0; i < ::num_mobjinfo_types(); ++i)
+			for (i = 0; i < ::NUMMOBJTYPES; ++i)
 			{
 				if (mobjinfo[i].altspeed != NO_ALTSPEED)
 				{
@@ -297,7 +297,7 @@ void G_InitNew (const char *mapname)
 	viewactive = true;
 
 	D_SetupUserInfo();
-
+	
 	level.mapname = mapname;
 
 	// [AM}] WDL stats (for testing purposes)

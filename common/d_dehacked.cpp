@@ -590,7 +590,7 @@ void D_UndoDehPatch()
 	/*
 		The initialization functions can be re-used to re-initialize doom objects; except OrgSprNames which is used
 		for looking up the original location of a sprite.
-	*/ 
+	*/
 
 	for (i = 0; i < ::NUMSPRITES; i++)
 	{
@@ -599,7 +599,7 @@ void D_UndoDehPatch()
 	}
 	M_Free(OrgSprNames);
 
-	
+
 	/*
 	for (i = 0; i < ::NUMSTATES; i++)
 	{
@@ -616,7 +616,7 @@ void D_UndoDehPatch()
 		free((char*)doomBackup.backupSprnames[i]);
 	}
 	M_Free(doomBackup.backupSprnames);
-	
+
 	extern bool isFast;
 	isFast = false;
 
@@ -1702,7 +1702,7 @@ static int PatchSprite(int sprNum)
 
 /**
  * @brief patch sprites underneath SPRITES header
- * 
+ *
  * @param dummy - int value for function pointer
  * @return int - success or failure
  */
@@ -1730,13 +1730,13 @@ static int PatchSprites(int dummy)
 		const char* zSprIdx = Line1;
         char* newSprName = skipwhite(Line2);
 		stripwhite(newSprName);
-        
+
         if(!newSprName && strlen(newSprName) > maxsprlen)
         {
             DPrintf("Invalid sprite replace at index %s\n", zSprIdx);
             return -1;
         }
-        
+
         // If it's -1 there are two possibilities: it didn't find it or doesn't have enough space
         int sprIdx = D_FindOrgSpriteIndex(OrgSprNames, zSprIdx);
         if (sprIdx == -1 && IsNum(zSprIdx))
@@ -2222,7 +2222,7 @@ static int PatchText(int oldSize)
 	good = false;
 
 	// Search through sprite names
-	for (int i = 0; i < ::num_spritenum_t_types; i++)
+	for (int i = 0; i < ::num_spritenum_t_types(); i++)
 	{
 		if (!strcmp(sprnames[i], oldStr))
 		{
