@@ -490,7 +490,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 	mobjtype_t type = static_cast<mobjtype_t>(msg->current().type());
 	statenum_t state = static_cast<statenum_t>(msg->current().statenum());
 
-	if (type < MT_PLAYER || type >= ::NUMMOBJTYPES)
+	if (type < MT_PLAYER || type >= ::num_mobjinfo_types)
 		return;
 
 	P_ClearId(netid);
@@ -613,7 +613,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			mo->tics = 1;
 	}
 
-	if (state >= S_NULL && state < ::NUMSTATES)
+	if (state >= S_NULL && state < ::num_state_t_types)
 	{
 		P_SetMobjState(mo, state);
 	}
@@ -2148,7 +2148,7 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 		if (i < msg->player().psprites_size())
 		{
 			unsigned int state = msg->player().psprites().Get(i).statenum();
-			if (state >= ::NUMSTATES)
+			if (state >= ::num_state_t_types)
 			{
 				continue;
 			}
@@ -2430,7 +2430,7 @@ static void CL_SetMobjState(const odaproto::svc::MobjState* msg)
 	AActor* mo = P_FindThingById(msg->netid());
 	int s = msg->mostate();
 
-	if (mo == NULL || s < 0 || s >= ::NUMSTATES)
+	if (mo == NULL || s < 0 || s >= ::num_state_t_types)
 		return;
 
 	P_SetMobjState(mo, static_cast<statenum_t>(s));

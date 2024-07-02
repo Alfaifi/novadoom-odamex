@@ -1006,7 +1006,7 @@ static int PatchThing(int thingy)
 		{
 			statenum_t state = (statenum_t)val;
 
-			if (!strnicmp(Line1, "Initial", 7))
+			if (!strnicmp(Line1, "Initial frame", 13))
 			{
 				info->spawnstate = state;
 			}
@@ -1678,14 +1678,15 @@ static int PatchSprites(int dummy)
 	while((result = GetLine()) == 1)
 	{
 		const char* zSprIdx = Line1;
-        const char* newSprName = skipwhite(Line2);
-
+        char* newSprName = skipwhite(Line2);
+		stripwhite(newSprName);
+        
         if(!newSprName && strlen(newSprName) > maxsprlen)
         {
             DPrintf("Invalid sprite replace at index %s\n", zSprIdx);
             return -1;
         }
-
+        
         // If it's -1 there are two possibilities: it didn't find it or doesn't have enough space
         int sprIdx = D_FindOrgSpriteIndex(OrgSprNames, zSprIdx);
         if (sprIdx == -1 && IsNum(zSprIdx))
@@ -1874,11 +1875,12 @@ static int PatchPointer(int ptrNum)
 		{
 			int i = atoi(Line2);
 
-			if (i >= ::NUMSTATES)
+			// [CMB]: dsdhacked allows infinite code pointers
+			if (i >= ::num_state_t_types)
 			{
-				DPrintf("Pointer %d overruns static array (max: %d wanted: %d)."
+				DPrintf("Pointer %d overruns array (max: %d wanted: %d)."
 				        "\n",
-				        ptrNum, ::NUMSTATES, i);
+				        ptrNum, ::num_state_t_types, i);
 			}
 			else
 			{
@@ -2165,7 +2167,7 @@ static int PatchText(int oldSize)
 	good = false;
 
 	// Search through sprite names
-	for (int i = 0; i < ::NUMSPRITES; i++)
+	for (int i = 0; i < ::num_spritenum_t_types; i++)
 	{
 		if (!strcmp(sprnames[i], oldStr))
 		{
@@ -2551,7 +2553,7 @@ void D_PostProcessDeh()
 	int i, j;
 	const CodePtr* bexptr_match;
 
-	for (i = 0; i < ::NUMSTATES; i++)
+	for (i = 0; i < ::num_state_t_types; i++)
 	{
 		bexptr_match = &null_bexptr;
 
@@ -2655,7 +2657,7 @@ static const char* ActionPtrString(actionf_p1 func)
 
 static void PrintState(int index)
 {
-	if (index < 0 || index >= ::NUMSTATES)
+	if (index < 0 || index >= ::num_state_t_types)
 	{
 		return;
 	}
@@ -2671,12 +2673,12 @@ BEGIN_COMMAND(stateinfo)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass one or two state indexes. (0 to %d)\n", ::NUMSTATES - 1);
+		Printf("Must pass one or two state indexes. (0 to %d)\n", ::num_state_t_types - 1);
 		return;
 	}
 
 	int index1 = atoi(argv[1]);
-	if (index1 < 0 || index1 >= ::NUMSTATES)
+	if (index1 < 0 || index1 >= ::num_state_t_types)
 	{
 		Printf("Not a valid index.\n");
 		return;
@@ -2686,7 +2688,7 @@ BEGIN_COMMAND(stateinfo)
 	if (argc == 3)
 	{
 		index2 = atoi(argv[2]);
-		if (index2 < 0 || index2 >= ::NUMSTATES)
+		if (index2 < 0 || index2 >= ::num_state_t_types)
 		{
 			Printf("Not a valid index.\n");
 			return;
@@ -2712,12 +2714,12 @@ BEGIN_COMMAND(playstate)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass state index. (0 to %d)\n", ::NUMSTATES - 1);
+		Printf("Must pass state index. (0 to %d)\n", ::num_state_t_types - 1);
 		return;
 	}
 
 	int index = atoi(argv[1]);
-	if (index < 0 || index >= ::NUMSTATES)
+	if (index < 0 || index >= ::num_state_t_types)
 	{
 		Printf("Not a valid index.\n");
 		return;
