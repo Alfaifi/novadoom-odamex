@@ -976,9 +976,12 @@ static int PatchThing(int thingy)
         DPrintf("Thing %" PRIuSIZE " requires allocation.\n", thingNum);
 #endif
         D_EnsureMobjInfoCapacity(thingNum);
+		/*
         mobjinfo_t* newthing = (mobjinfo_t*) M_Malloc(sizeof(mobjinfo_t));
         mobjinfo[thingNum] = *newthing;
         info = newthing;
+		*/
+		info = &mobjinfo[thingNum];
 		*ednum = *&info->doomednum;
     }
 	else
@@ -1094,7 +1097,7 @@ static int PatchThing(int thingy)
 
 			if (info->infighting_group < 0)
 			{
-				I_Error("Infighting groups must be >= 0 (check your DEHacked "
+				I_Error("Infighting groups must be >= 0 (check your DEHACKED "
 				        "entry, and correct it!)\n");
 			}
 			info->infighting_group = val + IG_END;
@@ -1115,7 +1118,7 @@ static int PatchThing(int thingy)
 		{
 			if (val - 1 < 0 || val - 1 >= ::num_mobjinfo_types)
 			{
-				I_Error("Dropped item out of range. Check your dehacked.\n");
+				I_Error("Dropped item out of range. Check your DEHACKED.\n");
 			}
 			info->droppeditem = (mobjtype_t)(int)(val - 1); // deh is mobj + 1
 		}
@@ -1124,7 +1127,7 @@ static int PatchThing(int thingy)
 			info->splash_group = val;
 			if (info->splash_group < 0)
 			{
-				I_Error("Splash groups must be >= 0 (check your DEHacked entry, "
+				I_Error("Splash groups must be >= 0 (check your DEHACKED entry, "
 				        "and correct it!)\n");
 			}
 			info->splash_group = val + SG_END;
@@ -1527,9 +1530,11 @@ static int PatchFrame(int frameNum)
         DPrintf("Frame %" PRIuSIZE " requires allocation.\n", frameNum);
 #endif
         D_EnsureStateCapacity(frameNum);
+		/*
         state_t* newstate = (state_t*) M_Malloc(sizeof(state_t));
         states[frameNum] = *newstate;
-        info = newstate;
+		*/
+        info = &states[frameNum];
     }
 
 	while ((result = GetLine()) == 1)
@@ -2573,7 +2578,7 @@ void D_PostProcessDeh()
 			if (states[i].args[j] != 0)
 			{
 				I_Error("Action %s on state %d expects no more than %d nonzero args (%d "
-				        "found). Check your dehacked.",
+				        "found). Check your DEHACKED.",
 				        bexptr_match->name, i, bexptr_match->argcount, j + 1);
 			}
 		}
