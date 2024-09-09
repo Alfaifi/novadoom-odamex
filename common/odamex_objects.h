@@ -11,7 +11,7 @@
 #include "info.h" // doom object definitions - including enums with negative indices
 
 /*
-extern state_t odastates[]; //statenum_t 
+extern state_t odastates[]; //statenum_t
 extern mobjinfo_t odathings[]; //mobjtype_t
 extern const char* odasprnames[]; // spritenum_t
 
@@ -46,7 +46,7 @@ class DoomObjectContainer {
 	// convert to ObjType* to allow pointer arithmetic
 	operator ObjType*(void) const;
 	operator ObjType*(void);
-	
+
 	size_t capacity() const;
 	size_t size() const;
 	void clear();
