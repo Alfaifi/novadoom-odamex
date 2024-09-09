@@ -38,7 +38,7 @@ IndexTable odamex_sprnames_indices_map;
 IndexTable odamex_mobjinfo_indices_map;
 
 // reserved odamex states
-state_t odastates_reserved[] = {
+state_t odastates[] = {
     // ZDoom/Odamex stuff starts here
 
     {SPR_GIB0, 0, -1, NULL, S_NULL, 0, 0},             // S_GIB0
@@ -1506,7 +1506,7 @@ state_t* D_GetOdaState(statenum_t statenum)
     if (found == odamex_states_indices_map.end()) return nullptr;
 	
 	int realIdx = found->second;
-	return &odastates_reserved[realIdx];
+	return &odastates[realIdx];
 }
 
 mobjinfo_t* D_GetOdaMobjinfo(mobjtype_t mobjtype)
