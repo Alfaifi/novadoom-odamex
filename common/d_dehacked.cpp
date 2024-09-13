@@ -510,10 +510,23 @@ static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, 
 	return true;
 }
 
+/*
 typedef struct
 {
 	state_t backupStates[::NUMSTATES];
 	mobjinfo_t backupMobjInfo[::NUMMOBJTYPES];
+	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
+	const char** backupSprnames;
+	int backupMaxAmmo[NUMAMMO];
+	int backupClipAmmo[NUMAMMO];
+	DehInfo backupDeh;
+} DoomBackup;
+*/
+
+typedef struct
+{
+	DoomObjectContainer<state_t, statenum_t> backupStates;
+	DoomObjectContainer<mobjinfo_t, mobjtype_t> backupMobjInfo;
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	const char** backupSprnames;
 	int backupMaxAmmo[NUMAMMO];
@@ -552,8 +565,11 @@ static void BackupData(void)
 		OrgActionPtrs[i] = states[i].action;
 	}
 
-	std::copy(states, states + ::NUMSTATES, doomBackup.backupStates);
-	std::copy(mobjinfo, mobjinfo + ::NUMMOBJTYPES, doomBackup.backupMobjInfo);
+	doomBackup.backupStates.resize(::NUMSTATES);
+	doomBackup.backupStates.append(states);
+
+	doomBackup.backupMobjInfo.resize(::NUMMOBJTYPES);
+	doomBackup.backupMobjInfo.append(mobjinfo);
 	std::copy(weaponinfo, weaponinfo + ::NUMWEAPONS + 1, doomBackup.backupWeaponInfo);
 	std::copy(clipammo, clipammo + ::NUMAMMO, doomBackup.backupClipAmmo);
 	std::copy(maxammo, maxammo + ::NUMAMMO, doomBackup.backupMaxAmmo);
@@ -592,8 +608,8 @@ void D_UndoDehPatch()
 	*/
 
 	D_Initialize_sprnames(doomBackup.backupSprnames, ::NUMSPRITES);
-	D_Initialize_States(doomBackup.backupStates, ::NUMSTATES);
-	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo, ::NUMMOBJTYPES);
+	D_Initialize_States(doomBackup.backupStates.ptr(), ::NUMSTATES);
+	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.ptr(), ::NUMMOBJTYPES);
 
 	for (i = 0; i < ::NUMSPRITES; i++)
 	{
@@ -999,7 +1015,7 @@ static int PatchThing(int thingy)
 	{
 		DPrintf("Thing %zu out of range.\n", thingNum);
 	}
-    if(thingNum >= ::num_mobjinfo_types)
+    if(thingNum >= ::num_mobjinfo_types())
     {
 #if defined _DEBUG
         DPrintf("Thing %" PRIuSIZE " requires allocation.\n", thingNum);
@@ -1145,7 +1161,7 @@ static int PatchThing(int thingy)
 		}
 		else if (stricmp(Line1, "Dropped item") == 0)
 		{
-			if (val - 1 < 0 || val - 1 >= ::num_mobjinfo_types)
+			if (val - 1 < 0 || val - 1 >= ::num_mobjinfo_types())
 			{
 				I_Error("Dropped item out of range. Check your DEHACKED.\n");
 			}
@@ -1548,7 +1564,7 @@ static int PatchFrame(int frameNum)
 	}
 
     // [CMB] TODO: ensure capacity if outside current limits
-    if (frameNum >= 0 && frameNum < ::num_state_t_types)
+    if (frameNum >= 0 && frameNum < ::num_state_t_types())
     {
         info = &states[frameNum];
         DPrintf("Frame %d\n", frameNum);
@@ -1629,7 +1645,7 @@ static int PatchFrame(int frameNum)
 		}
 	}
 #if defined _DEBUG
-	const char* sprsub = (info->sprite > 0 && info->sprite < num_spritenum_t_types) ? sprnames[info->sprite] : "";
+	const char* sprsub = (info->sprite > 0 && info->sprite < num_spritenum_t_types()) ? sprnames[info->sprite] : "";
 	DPrintf("FRAME %d: Duration: %d, Next: %d, SprNum: %d(%s), SprSub: %d\n", frameNum,
 	       info->tics, info->nextstate, info->sprite, sprsub,
 			info->frame);
@@ -1671,7 +1687,7 @@ static int PatchSprite(int sprNum)
 		// Calculate offset from beginning of sprite names.
 		offset = (offset - toff[dversion] - 22044) / 8;
 
-		if (offset >= 0 && offset < ::num_spritenum_t_types)
+		if (offset >= 0 && offset < ::num_spritenum_t_types())
 		{
 			sprnames[sprNum] = OrgSprNames[offset];
 		}
@@ -1748,7 +1764,7 @@ static int PatchSprites(int dummy)
 
 
 #if defined _DEBUG
-	for (int i = 0; i < ::num_spritenum_t_types; ++i)
+	for (int i = 0; i < ::num_spritenum_t_types(); ++i)
 	{
 		Printf_Bold("Sprite[%d]=%s\n", i, sprnames[i]);
 	}
@@ -1915,11 +1931,11 @@ static int PatchPointer(int ptrNum)
 			int i = atoi(Line2);
 
 			// [CMB]: dsdhacked allows infinite code pointers
-			if (i >= ::num_state_t_types)
+			if (i >= ::num_state_t_types())
 			{
 				DPrintf("Pointer %d overruns array (max: %d wanted: %d)."
 				        "\n",
-				        ptrNum, ::num_state_t_types, i);
+				        ptrNum, ::num_state_t_types(), i);
 			}
 			else
 			{
@@ -2084,7 +2100,7 @@ static int PatchCodePtrs(int dummy)
 		{
 			int frame = atoi(Line1 + 5);
 
-			if (frame < 0 || frame >= num_state_t_types)
+			if (frame < 0 || frame >= num_state_t_types())
 			{
 				// [CMB] TODO: at this point we should have created more space for the state
 				DPrintf("Frame %d out of range\n", frame);
@@ -2593,7 +2609,7 @@ void D_PostProcessDeh()
 	int i, j;
 	const CodePtr* bexptr_match;
 
-	for (i = 0; i < ::num_state_t_types; i++)
+	for (i = 0; i < ::num_state_t_types(); i++)
 	{
 		bexptr_match = &null_bexptr;
 
@@ -2697,7 +2713,7 @@ static const char* ActionPtrString(actionf_p1 func)
 
 static void PrintState(int index)
 {
-	if (index < 0 || index >= ::num_state_t_types)
+	if (index < 0 || index >= ::num_state_t_types())
 	{
 		return;
 	}
@@ -2713,12 +2729,12 @@ BEGIN_COMMAND(stateinfo)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass one or two state indexes. (0 to %d)\n", ::num_state_t_types - 1);
+		Printf("Must pass one or two state indexes. (0 to %d)\n", ::num_state_t_types() - 1);
 		return;
 	}
 
 	int index1 = atoi(argv[1]);
-	if (index1 < 0 || index1 >= ::num_state_t_types)
+	if (index1 < 0 || index1 >= ::num_state_t_types())
 	{
 		Printf("Not a valid index.\n");
 		return;
@@ -2728,7 +2744,7 @@ BEGIN_COMMAND(stateinfo)
 	if (argc == 3)
 	{
 		index2 = atoi(argv[2]);
-		if (index2 < 0 || index2 >= ::num_state_t_types)
+		if (index2 < 0 || index2 >= ::num_state_t_types())
 		{
 			Printf("Not a valid index.\n");
 			return;
@@ -2754,12 +2770,12 @@ BEGIN_COMMAND(playstate)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass state index. (0 to %d)\n", ::num_state_t_types - 1);
+		Printf("Must pass state index. (0 to %d)\n", ::num_state_t_types() - 1);
 		return;
 	}
 
 	int index = atoi(argv[1]);
-	if (index < 0 || index >= ::num_state_t_types)
+	if (index < 0 || index >= ::num_state_t_types())
 	{
 		Printf("Not a valid index.\n");
 		return;
