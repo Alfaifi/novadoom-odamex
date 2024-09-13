@@ -72,6 +72,11 @@ const char* doom_sprnames[::NUMSPRITES+1] = {
     "SP80", "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
     "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98", "SP99",
 
+	"GIB0","GIB1","GIB2","GIB3","GIB4","GIB5","GIB6","GIB7","UNKN",
+
+	//	[Toke - CTF]
+	"BSOK","RSOK","BFLG","RFLG","BDWN","RDWN","BCAR","RCAR", "GSOK", "GFLG",
+	"GDWN","GCAR","TLGL","WPBF","WPRF","WPGF", "CARE",
     NULL
 };
 
@@ -1255,6 +1260,9 @@ state_t	boomstates[S_MUSHROOM + 1] = {
 // the new DEHExtra state spec starts at 1100, while we have around
 // 1130. To fix this, we'll need to append the states Odamex adds
 // at the end and reference them that way.
+// [CMB] TODO: When we convert this to DSDHacked, we'll need to append the dynamic
+// frame list size to the end of the doom states to get the odamex states.
+// state_t states[NUMSTATES] = {};
 
 mobjinfo_t doom_mobjinfo[::NUMMOBJTYPES] = {
 
@@ -7391,14 +7399,41 @@ mobjinfo_t doom_mobjinfo[::NUMMOBJTYPES] = {
 // [CMB] TODO: there are some other things this does like default behaviors (MBF21, etc).
 void D_Init_DEHEXTRA_Frames(void)
 {
-	// [CMB] TODO: move boomstates to global and initialize using state.cpp function\
 	// [Blair] Combine all the state tables.
-	for (int i = 0; i < ::num_state_t_types; i++)
+	for (int i = 0; i < ::num_state_t_types(); i++)
 	{
+		// [CMB] TODO: this will need to be adjusted based on the highest index added by dsdhacked
+		// [CMB] TODO: currently it only takes into account the highest index for doom states (S_MUSHROOM) and odastates (S_GIB0)
 		if (i <= S_MUSHROOM)
 		{
 			states[i] = boomstates[i];
 		}
+//		else if (i >= S_GIB0)
+//		{
+//			states[i] = odastates[i - S_GIB0];
+//		}
+		else
+		{
+			// These cover both DEHEXTRA states and the undefined states
+			// between the MBF and DEHEXTRA blocks.
+			states[i].sprite = SPR_TNT1;
+			states[i].frame = 0;
+			states[i].tics = -1;
+			states[i].action = NULL;
+			states[i].nextstate = (statenum_t)(i);
+			states[i].misc1 = 0;
+			states[i].misc2 = 0;
+		}
+
+		states[i].flags = STATEF_NONE;
+		states[i].args[0] = 0;
+		states[i].args[1] = 0;
+		states[i].args[2] = 0;
+		states[i].args[3] = 0;
+		states[i].args[4] = 0;
+		states[i].args[5] = 0;
+		states[i].args[6] = 0;
+		states[i].args[7] = 0;
 	}
 
 	// NIGHTMARE! stuff
@@ -7407,7 +7442,7 @@ void D_Init_DEHEXTRA_Frames(void)
 		states[i].flags |= STATEF_SKILL5FAST;
 
 	// Start all MBF21 content here.
-	for (int i = 0; i < ::num_mobjinfo_types ; i++)
+	for (int i = 0; i < ::num_mobjinfo_types() ; i++)
 	{
 		mobjinfo[i].altspeed = NO_ALTSPEED;
 		mobjinfo[i].infighting_group = IG_DEFAULT;
