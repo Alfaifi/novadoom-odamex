@@ -22,6 +22,7 @@ const char* D_GetOdaSprName(spritenum_t spritenum);
 */
 
 #include <vector>
+#include "hashtable.h"
 
 template <typename ObjType, typename IdxType> class DoomObjectContainer;
 
@@ -37,7 +38,7 @@ template <typename ObjType, typename IdxType>
 class DoomObjectContainer
 {
   public:   	
-	typedef void (*ResetObjType)(ObjType*,IdxType);
+	typedef void (*ResetObjType)(ObjType*, IdxType);
 
   private:
 	typedef OHashTable<int, int> IndexTable;
@@ -67,7 +68,7 @@ class DoomObjectContainer
 	void clear();
 	void resize(size_t count);
 	void reserve(size_t new_cap);
-	void insert(const ObjType& pointer, int idx = 0);
+	void insert(const ObjType& pointer, IdxType idx);
 	void append(const DoomObjectContainer<ObjType, IdxType>& container);
 	// [CMB] TODO: this method needs to go, but for now its provided for compatibility
 	ObjType* ptr(void);
@@ -181,9 +182,10 @@ void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 }
 
 template <typename ObjType, typename IdxType>
-void DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, int index)
+void DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
 {
 	this->container.push_back(obj);
+	this->indices_map[(int) idx] = this->container.size() - 1;
 }
 
 template <typename ObjType, typename IdxType>

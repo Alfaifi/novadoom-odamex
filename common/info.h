@@ -1411,6 +1411,7 @@ typedef struct
 /*
 extern state_t* states;
 */
+extern state_t boomstates[];
 extern DoomObjectContainer<state_t, statenum_t> states;
 extern size_t num_state_t_types(); // [CMB] TODO converted to function to just make code work for now
 
