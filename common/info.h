@@ -28,7 +28,7 @@
 // Needed for action function pointer handling.
 #include "dthinker.h"
 #include "farchive.h"
-#include "odamex_objects.h"
+#include "doom_obj_container.h"
 
 typedef enum
 {
@@ -239,7 +239,7 @@ inline auto format_as(spritenum_t eSpriteNum)
 
 // [CMD] TODO: new types and function to allocate sprnames for dsdhacked
 extern const char* doom_sprnames[];
-extern DoomObjectContainer<const char*, spritenum_t> sprnames;
+extern DoomObjectContainer<char*, spritenum_t> sprnames;
 extern size_t num_spritenum_t_types();
 
 inline FArchive &operator<< (FArchive &arc, spritenum_t i) { DWORD out; out = i; return arc << out; }
