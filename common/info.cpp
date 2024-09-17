@@ -7391,67 +7391,26 @@ mobjinfo_t doom_mobjinfo[::NUMMOBJTYPES] = {
 	}
 };
 
-// [CMB] TODO: how to handle this with dsdhacked?
-// [CMB] TODO: do we even need these with dynamically allocated states now? DEHEXTRA added 2910 spaces for doom objects.
-// [CMB] -- states being pre-allocated is a good thing - means we can use that space instead of having to allocate it dynamically
-// [CMB] -- anything beyond the currently supported range can be dynamically allocated
-// [CMB] -- the harder portion is adding on the odastates at the end
-// [CMB] TODO: there are some other things this does like default behaviors (MBF21, etc).
-void D_Init_DEHEXTRA_Frames(void)
+// initialize nightmare flags
+void D_Init_Nightmare_Flags(void)
 {
-	// [Blair] Combine all the state tables.
-	for (int i = 0; i < ::num_state_t_types(); i++)
-	{
-		// [CMB] TODO: this will need to be adjusted based on the highest index added by dsdhacked
-		// [CMB] TODO: currently it only takes into account the highest index for doom states (S_MUSHROOM) and odastates (S_GIB0)
-		if (i <= S_MUSHROOM)
-		{
-			// states[i] = boomstates[i];
-		}
-//		else if (i >= S_GIB0)
-//		{
-//			states[i] = odastates[i - S_GIB0];
-//		}
-		else
-		{
-			// These cover both DEHEXTRA states and the undefined states
-			// between the MBF and DEHEXTRA blocks.
-			states[i].sprite = SPR_TNT1;
-			states[i].frame = 0;
-			states[i].tics = -1;
-			states[i].action = NULL;
-			states[i].nextstate = (statenum_t)(i);
-			states[i].misc1 = 0;
-			states[i].misc2 = 0;
-		}
-
-		states[i].flags = STATEF_NONE;
-		states[i].args[0] = 0;
-		states[i].args[1] = 0;
-		states[i].args[2] = 0;
-		states[i].args[3] = 0;
-		states[i].args[4] = 0;
-		states[i].args[5] = 0;
-		states[i].args[6] = 0;
-		states[i].args[7] = 0;
-	}
-
 	// NIGHTMARE! stuff
 	// Set the flag for nightmare frames
 	for (int i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
-		states[i].flags |= STATEF_SKILL5FAST;
-
-	// Start all MBF21 content here.
-	for (int i = 0; i < ::num_mobjinfo_types() ; i++)
 	{
-		mobjinfo[i].altspeed = NO_ALTSPEED;
-		mobjinfo[i].infighting_group = IG_DEFAULT;
-		mobjinfo[i].projectile_group = PG_DEFAULT;
-		mobjinfo[i].splash_group = SG_DEFAULT;
-		mobjinfo[i].ripsound = "";
-		mobjinfo[i].meleerange = MELEERANGE;
-		mobjinfo[i].droppeditem = MT_NULL;
+		states[i].flags |= STATEF_SKILL5FAST;
 	}
 }
 
+void D_Init_Odamex_Objects(
+	const DoomObjectContainer<mobjinfo_t, mobjtype_t>& mobjinfo,
+	const DoomObjectContainer<const char*, spritenum_t>& sprnames,
+	const DoomObjectContainer<state_t, statenum_t>& states
+	)
+{
+    // using hard coded values here
+	// [CMB] TODO: should this live in here or in odamex_objects.h?
+}
+
 VERSION_CONTROL (info_cpp, "$Id$")
+
