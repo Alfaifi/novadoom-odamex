@@ -71,12 +71,6 @@ const char* doom_sprnames[::NUMSPRITES+1] = {
     "SP70", "SP71", "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79",
     "SP80", "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
     "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98", "SP99",
-
-	"GIB0","GIB1","GIB2","GIB3","GIB4","GIB5","GIB6","GIB7","UNKN",
-
-	//	[Toke - CTF]
-	"BSOK","RSOK","BFLG","RFLG","BDWN","RDWN","BCAR","RCAR", "GSOK", "GFLG",
-	"GDWN","GCAR","TLGL","WPBF","WPRF","WPGF", "CARE",
     NULL
 };
 
@@ -7413,4 +7407,3 @@ void D_Init_Odamex_Objects(
 }
 
 VERSION_CONTROL (info_cpp, "$Id$")
-
