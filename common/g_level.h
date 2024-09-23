@@ -165,6 +165,9 @@ struct level_pwad_info_t
 	float			gravity;
 	float			aircontrol;
 
+	// MUSINFO
+	std::map<int, std::string> music_map;	
+
 	// The following are necessary for UMAPINFO compatibility
 	OLumpName		exitpic;
 	OLumpName		enterpic;
@@ -188,7 +191,7 @@ struct level_pwad_info_t
 	    : mapname(""), levelnum(0), level_name(""), pname(""), nextmap(""), secretmap(""),
 	      partime(0), skypic(""), music(""), flags(0), cluster(0), snapshot(NULL),
 	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
-	      aircontrol(0.0f), exitpic(""), enterpic(""), endpic(""), intertext(""),
+	      aircontrol(0.0f), music_map(), exitpic(""), enterpic(""), endpic(""), intertext(""),
 	      intertextsecret(""), interbackdrop(""), intermusic(""), 
 	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
 	      clearlabel(false), author()
@@ -205,7 +208,7 @@ struct level_pwad_info_t
 	      secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
 	      music(other.music), flags(other.flags), cluster(other.cluster),
 	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
-	      skypic2(""), gravity(0.0f), aircontrol(0.0f), exitpic(""), enterpic(""),
+	      skypic2(""), gravity(0.0f), aircontrol(0.0f), music_map(), exitpic(""), enterpic(""),
 	      endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""),
 	      bossactions(), label(), clearlabel(false), author(), sky1ScrollDelta(0), sky2ScrollDelta(0)
 	{
@@ -240,6 +243,7 @@ struct level_pwad_info_t
 		skypic2 = other.skypic2;
 		gravity = other.gravity;
 		aircontrol = other.aircontrol;
+		music_map = other.music_map;
 		exitpic = other.exitpic;
 		enterpic = other.enterpic;
 		endpic = other.endpic;
@@ -313,6 +317,9 @@ struct level_locals_t
 	float			gravity;
 	fixed_t			aircontrol;
 	fixed_t			airfriction;
+
+	// MUSINFO
+	std::map<int, std::string> music_map;	
 
 	// The following are all used for ACS scripting
 	FBehavior*		behavior;
@@ -443,8 +450,6 @@ void G_InitLevelLocals();
 void G_AirControlChanged();
 
 char *CalcMapName(int episode, int level);
-
-void G_ParseMusInfo();
 
 void G_ClearSnapshots();
 void G_SnapshotLevel();

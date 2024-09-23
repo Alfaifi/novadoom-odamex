@@ -274,13 +274,6 @@ void P_RemoveDefereds()
 	::getLevelInfos().zapDeferreds();
 }
 
-// [ML] Not sure where to put this for now...
-// 	G_ParseMusInfo
-void G_ParseMusInfo()
-{
-	// Nothing yet...
-}
-
 //
 // G_LoadWad
 //

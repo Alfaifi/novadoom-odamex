@@ -671,6 +671,20 @@ void P_TestActorMovement(AActor *mo, fixed_t tryx, fixed_t tryy, fixed_t tryz,
 //
 void AActor::RunThink ()
 {
+	// MUSINFO
+	if (type == MT_MUSICSOURCE)
+	{
+		player_t& player = consoleplayer();
+
+		if (player.MUSINFOactor != this &&
+		    subsector->sector == displayplayer().mo->subsector->sector)
+		{
+			player.MUSINFOactor = this->ptr();
+			player.MUSINFOtics = 30;
+		}
+		return;
+	}
+
 	if(!subsector)
 		return;
 
