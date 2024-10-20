@@ -233,15 +233,14 @@ typedef enum
 
 } spritenum_t;
 
+extern const char* doom_sprnames[];
+extern DoomObjectContainer<const char*> sprnames; // spritenum_t
+extern size_t num_spritenum_t_types();
+
 inline auto format_as(spritenum_t eSpriteNum)
 {
 	return fmt::underlying(eSpriteNum);
 }
-
-// [CMD] TODO: new types and function to allocate sprnames for dsdhacked
-extern const char* doom_sprnames[];
-extern DoomObjectContainer<const char*, spritenum_t> sprnames;
-extern size_t num_spritenum_t_types();
 
 inline FArchive &operator<< (FArchive &arc, spritenum_t i) { DWORD out; out = i; return arc << out; }
 inline FArchive &operator>> (FArchive &arc, spritenum_t &i) { DWORD in; arc >> in; i = (spritenum_t)in; return arc; }
@@ -293,6 +292,8 @@ typedef enum
 	S_RDWN,	// Red Flag
 	S_BCAR,	// Blue Flag
 	S_RCAR,	// Red Flag
+
+	// -----[ Green Flag Animation  ]-------
 
 	S_GSOK,
 	S_GFLG,
@@ -1391,8 +1392,12 @@ inline FArchive &operator>> (FArchive &arc, statenum_t &i) { DWORD in; arc >> in
 #define MAXSTATEARGS 8
 typedef long statearg_t;
 
-typedef struct
+#define STATEF_NONE 0
+#define STATEF_SKILL5FAST BIT(0) // tics halve on nightmare skill
+
+typedef struct _state_t
 {
+	int32_t statenum;
 	spritenum_t	sprite;
 	int			frame;
 	int			tics;
@@ -1407,21 +1412,18 @@ typedef struct
 	DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate);
 	DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate, int misc1, int misc2);
 	DState (spritenum_t sprite, int frame, int tics, acp1, statenum_t nextstate);
-*/
+	*/
 } state_t;
 
 extern state_t boomstates[];
-extern DoomObjectContainer<state_t, statenum_t> states;
+extern DoomObjectContainer<state_t*> states; // statenum_t
 extern size_t num_state_t_types(); // [CMB] TODO converted to function to just make code work for now
 extern state_t odastates[];
-
-#define STATEF_NONE 0
-#define STATEF_SKILL5FAST BIT(0) // tics halve on nightmare skill
 
 inline FArchive &operator<< (FArchive &arc, state_t *state)
 {
 	if (state)
-		return arc << (WORD)(state - states);
+		return arc << (WORD)(state->statenum);
 	else
 		return arc << (WORD)0xffff;
 }
@@ -1433,7 +1435,10 @@ inline FArchive &operator>> (FArchive &arc, state_t *&state)
 	if (ofs == 0xffff)
 		state = NULL;
 	else
-		state = states + ofs;
+	{
+		// [CMB] TODO: until I know how this works, just grab the vector data and add here
+		state = *states.data() + ofs;
+	}
 	return arc;
 }
 
@@ -1716,6 +1721,7 @@ typedef enum
 
 typedef struct _mobjinfo
 {
+	int32_t type;
 	int doomednum;
 	statenum_t spawnstate;
 	int spawnhealth;
@@ -1755,29 +1761,14 @@ typedef struct _mobjinfo
 	const char* ripsound;
 	mobjtype_t droppeditem;
 
-    static _mobjinfo& get_empty()
-    {
-        _mobjinfo m;
-        m.droppeditem = MT_NULL;
-        m.infighting_group = IG_DEFAULT;
-        m.projectile_group = PG_DEFAULT;
-        m.splash_group = SG_DEFAULT;
-        m.altspeed = NO_ALTSPEED;
-        m.meleerange = MELEERANGE;
-        m.translucency = 0x10000;
-        m.altspeed = NO_ALTSPEED;
-        m.ripsound = "";
-        return m;
-    }
-
 } mobjinfo_t;
-
-#define NO_ALTSPEED -1
 
 // [CMB] TODO: new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
-extern DoomObjectContainer<mobjinfo_t, mobjtype_t> mobjinfo;
+extern DoomObjectContainer<mobjinfo_t*> mobjinfo; // mobjtype_t
 extern size_t num_mobjinfo_types();
+// [CMB] spawn map per id24 - the pointer is to the mobjinfo table
+extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
 
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {
