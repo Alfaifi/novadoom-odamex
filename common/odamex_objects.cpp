@@ -133,7 +133,7 @@ mobjinfo_t odamobjinfo[] = {
     0,        // flags2
     S_NULL,        // raisestate
     0x10000,
-    "MT_GIB0"
+    "MT_GIB0",
     },
 
     {        //  MT_GIB1
