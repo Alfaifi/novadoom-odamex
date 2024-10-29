@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <sstream>
+#include <string.h>
 
 #include "cmdlib.h"
 #include "d_dehacked.h"
@@ -1581,7 +1582,7 @@ static int PatchFrame(int frameNum)
 	auto states_it = states.find(frameNum);
 	if(states_it == states.end())
     {
-		auto state_t_default = [](statenum_t idx) -> state_t {
+		auto state_t_default = [](int32_t idx) -> state_t {
 				_state_t s{};
 				s.sprite = SPR_TNT1;
 				s.frame = 0;
@@ -1604,8 +1605,8 @@ static int PatchFrame(int frameNum)
 				return s;
 		};
 		state_t* state = (state_t*) M_Calloc(1, sizeof(state_t));
-		*state = state_t_default((statenum_t)frameNum);
-		states.insert(state, (statenum_t) frameNum);
+		*state = state_t_default(frameNum);
+		states.insert(state, frameNum);
 		// set the proper state number
 		state->statenum = frameNum;
     }
@@ -1767,14 +1768,30 @@ static int PatchSprites(int dummy)
             return -1;
         }
 
-        // If it's -1 there are two possibilities: it didn't find it or doesn't have enough space
-        int sprIdx = D_FindOrgSpriteIndex(OrgSprNames, zSprIdx);
-        if (sprIdx == -1 && IsNum(zSprIdx))
-        {
-            sprIdx = atoi(Line1);
-        }
-        if(sprIdx >= 0)
-        {
+		int32_t sprIdx = -1;
+        // If it's -1 there are two possibilities: it didn't find it or doesn't have
+		// enough space
+		if (IsNum(zSprIdx))
+		{
+			sprIdx = atoi(Line1);
+		}
+		else
+		{
+			// find the value that matches
+			for (auto & sprname : sprnames)
+			{
+				const char* spr = sprname.second;
+				if (strncmp(zSprIdx, spr, 4) == 0)
+				{
+					sprIdx = sprname.first;
+				}
+			}
+		}
+		if (sprIdx == -1)
+		{
+			DPrintf("Sprite %d out of range.\n", sprIdx);
+			return -1;
+		}
 #if defined _DEBUG
 			auto sprnames_it = sprnames.find(sprIdx);
 			const char* prevSprName =
@@ -1790,7 +1807,6 @@ static int PatchSprites(int dummy)
 				free(s);
 			}
 			sprnames.insert(strdup(newSprName), (spritenum_t) sprIdx);
-        }
 	}
 
 	return result;

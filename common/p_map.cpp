@@ -1156,6 +1156,12 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 				bool onfloor) // [RH] Let P_TryMove keep the thing on the floor
 {
 	fixed_t		testz = thing->z;
+
+	if(!thing->subsector)
+	{
+		I_Error("Thing {type: %d, info->type: %d} subsector should not be NULL!", thing->type, thing->info->type);
+	}
+
 	sector_t*	oldsec = thing->subsector->sector;	// [RH] for sector actions
 
 	floatok = false;

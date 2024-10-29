@@ -3,8 +3,6 @@
 #include "mobjinfo.h"
 #include "doom_obj_container.h"
 
-#include <span>
-
 void D_ResetMobjInfo(mobjinfo_t* m, int32_t idx);
 void D_ResetMobjInfoSpawnMap(mobjinfo_t* m, int32_t idx);
 

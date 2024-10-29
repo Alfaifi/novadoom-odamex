@@ -174,7 +174,7 @@ fixed_t P_CalculateWeaponBobY(player_t* player, float scale_amount)
 //
 // P_SetPsprite
 //
-void P_SetPspritePtr(player_t* player, pspdef_t* psp, statenum_t stnum)
+void P_SetPspritePtr(player_t* player, pspdef_t* psp, int32_t stnum)
 {
 	do
 	{
@@ -215,7 +215,7 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, statenum_t stnum)
 	// an initial state of 0 could cycle through
 }
 
-void P_SetPsprite(player_t* player, int position, statenum_t stnum)
+void P_SetPsprite(player_t* player, int position, int32_t stnum)
 {
 	P_SetPspritePtr(player, &player->psprites[position], stnum);
 }
