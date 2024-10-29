@@ -27,7 +27,7 @@ const char* D_GetOdaSprName(spritenum_t spritenum);
 #include <cstddef>
 #include <typeinfo>
 
-template <typename ObjType, typename IdxType>
+template <typename ObjType, typename IdxType, typename InOrderContainer>
 class DoomObjectContainer;
 
 //----------------------------------------------------------------------------------------------
@@ -39,13 +39,13 @@ class DoomObjectContainer;
 // 1055
 //----------------------------------------------------------------------------------------------
 
-template <typename ObjType, typename IdxType = int32_t>
+template <typename ObjType, typename IdxType = int32_t, typename InOrderContainer = std::vector<ObjType>>
 class DoomObjectContainer
 {
 
 	typedef OHashTable<int, ObjType> LookupTable;
-	typedef std::vector<ObjType> DoomObjectContainerData;
-	typedef DoomObjectContainer<ObjType, IdxType> DoomObjectContainerType;
+	typedef InOrderContainer DoomObjectContainerData;
+	typedef DoomObjectContainer<ObjType, IdxType, InOrderContainer> DoomObjectContainerType;
 
 	DoomObjectContainerData container;
 	LookupTable lookup_table;
@@ -59,6 +59,7 @@ class DoomObjectContainer
 	using const_iterator = typename LookupTable::const_iterator;
 
 	typedef void (*ResetObjType)(ObjType, IdxType);
+	typedef bool (*CompareObjType)(ObjType, ObjType);
 
 	explicit DoomObjectContainer(ResetObjType f = nullptr);
 	explicit DoomObjectContainer(size_t count, ResetObjType f = nullptr);
@@ -101,30 +102,30 @@ class DoomObjectContainer
 
 // Construction and Destruction
 
-template <typename ObjType, typename IdxType>
-DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(ResetObjType f)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+DoomObjectContainer<ObjType, IdxType, InOrderContainer>::DoomObjectContainer(ResetObjType f)
     : rf(f == nullptr ? &noop : f)
 {
 }
 
-template <typename ObjType, typename IdxType>
-DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count, ResetObjType f)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+DoomObjectContainer<ObjType, IdxType, InOrderContainer>::DoomObjectContainer(size_t count, ResetObjType f)
     : rf(f == nullptr ? &noop : f)
 {
 	this->container.reserve(count);
 }
 
-template <typename ObjType, typename IdxType>
-DoomObjectContainer<ObjType, IdxType>::~DoomObjectContainer()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+DoomObjectContainer<ObjType, IdxType, InOrderContainer>::~DoomObjectContainer()
 {
 	clear();
 }
 
 // Operators
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::ObjReference DoomObjectContainer<
-    ObjType, IdxType>::operator[](int idx)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::ObjReference DoomObjectContainer<
+    ObjType, IdxType, InOrderContainer>::operator[](int idx)
 {
 	iterator it = this->lookup_table.find(idx);
     if (it == this->end())
@@ -134,9 +135,9 @@ typename DoomObjectContainer<ObjType, IdxType>::ObjReference DoomObjectContainer
     return it->second;
 }
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::ConstObjReference DoomObjectContainer<
-    ObjType, IdxType>::operator[](int idx) const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::ConstObjReference DoomObjectContainer<
+    ObjType, IdxType, InOrderContainer>::operator[](int idx) const
 {
     const_iterator it = this->lookup_table.find(idx);
     if (it == this->end())
@@ -146,70 +147,70 @@ typename DoomObjectContainer<ObjType, IdxType>::ConstObjReference DoomObjectCont
     return it->second;
 }
 
-template <typename ObjType, typename IdxType>
-bool DoomObjectContainer<ObjType, IdxType>::operator==(const ObjType* p) const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+bool DoomObjectContainer<ObjType, IdxType, InOrderContainer>::operator==(const ObjType* p) const
 {
 	return this->container().data() == p;
 }
 
-template <typename ObjType, typename IdxType>
-bool DoomObjectContainer<ObjType, IdxType>::operator!=(const ObjType* p) const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+bool DoomObjectContainer<ObjType, IdxType, InOrderContainer>::operator!=(const ObjType* p) const
 {
 	return this->container().data() != p;
 }
 
-template <typename ObjType, typename IdxType>
-DoomObjectContainer<ObjType, IdxType>::operator const ObjType*() const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+DoomObjectContainer<ObjType, IdxType, InOrderContainer>::operator const ObjType*() const
 {
 	return const_cast<ObjType>(this->container.data());
 }
-template <typename ObjType, typename IdxType>
-DoomObjectContainer<ObjType, IdxType>::operator ObjType*()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+DoomObjectContainer<ObjType, IdxType, InOrderContainer>::operator ObjType*()
 {
 	return this->container.data();
 }
 
-template <typename ObjType, typename IdxType>
-ObjType operator-(ObjType obj, DoomObjectContainer<ObjType, IdxType>& container)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+ObjType operator-(ObjType obj, DoomObjectContainer<ObjType, IdxType, InOrderContainer>& container)
 {
 	return obj - container.data();
 }
-template <typename ObjType, typename IdxType>
-ObjType operator+(DoomObjectContainer<ObjType, IdxType>& container, WORD ofs)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+ObjType operator+(DoomObjectContainer<ObjType, IdxType, InOrderContainer>& container, WORD ofs)
 {
 	return container.data() + ofs;
 }
 
-// PTR functions for quicker access to all
+// data functions for quicker access to all objects presently stored
 
-template <typename ObjType, typename IdxType>
-ObjType* DoomObjectContainer<ObjType, IdxType>::data()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+ObjType* DoomObjectContainer<ObjType, IdxType, InOrderContainer>::data()
 {
 	return this->container.data();
 }
 
-template <typename ObjType, typename IdxType>
-const ObjType* DoomObjectContainer<ObjType, IdxType>::data() const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+const ObjType* DoomObjectContainer<ObjType, IdxType, InOrderContainer>::data() const
 {
 	return this->container.data();
 }
 
 // Capacity and Size
 
-template <typename ObjType, typename IdxType>
-size_t DoomObjectContainer<ObjType, IdxType>::size() const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+size_t DoomObjectContainer<ObjType, IdxType, InOrderContainer>::size() const
 {
 	return this->container.size();
 }
 
-template <typename ObjType, typename IdxType>
-size_t DoomObjectContainer<ObjType, IdxType>::capacity() const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+size_t DoomObjectContainer<ObjType, IdxType, InOrderContainer>::capacity() const
 {
 	return this->container.capacity();
 }
 
-template <typename ObjType, typename IdxType>
-void DoomObjectContainer<ObjType, IdxType>::clear()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::clear()
 {
 	this->container.erase(container.begin(), container.end());
 	this->lookup_table.erase(lookup_table.begin(), lookup_table.end());
@@ -217,15 +218,15 @@ void DoomObjectContainer<ObjType, IdxType>::clear()
 
 // Allocation changes
 
-template <typename ObjType, typename IdxType>
-void DoomObjectContainer<ObjType, IdxType>::resize(size_t count)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::resize(size_t count)
 {
 	this->container.resize(count);
 	// this->lookup_table.resize(count);
 }
 
-template <typename ObjType, typename IdxType>
-void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::reserve(size_t new_cap)
 {
 	this->container.reserve(new_cap);
 	// this->lookup_table.resize(new_cap);
@@ -233,17 +234,17 @@ void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 
 // Insertion
 
-template <typename ObjType, typename IdxType>
-void DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::insert(const ObjType& obj, IdxType idx)
 {
-	this->container.push_back(obj);
+	this->container.insert(this->container.end(), obj);
 	this->lookup_table[static_cast<int>(idx)] = obj;
 }
 
 // TODO: more of a copy construct in a sense
-template <typename ObjType, typename IdxType>
-void DoomObjectContainer<ObjType, IdxType>::append(
-    const DoomObjectContainer<ObjType, IdxType>& dObjContainer)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::append(
+    const DoomObjectContainer<ObjType, IdxType, InOrderContainer>& dObjContainer)
 {
 	for (auto it = dObjContainer.lookup_table.begin();
 	     it != dObjContainer.lookup_table.end(); ++it)
@@ -256,35 +257,35 @@ void DoomObjectContainer<ObjType, IdxType>::append(
 
 // Iterators
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::begin()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::iterator DoomObjectContainer<ObjType, IdxType, InOrderContainer>::begin()
 {
 	return lookup_table.begin();
 }
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::end()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::iterator DoomObjectContainer<ObjType, IdxType, InOrderContainer>::end()
 {
 	return lookup_table.end();
 }
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cbegin()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::const_iterator DoomObjectContainer<ObjType, IdxType, InOrderContainer>::cbegin()
 {
 	return lookup_table.begin();
 }
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cend()
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::const_iterator DoomObjectContainer<ObjType, IdxType, InOrderContainer>::cend()
 {
 	return lookup_table.end();
 }
 
 // Lookup
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<
-    ObjType, IdxType>::find(IdxType idx)
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::iterator DoomObjectContainer<
+    ObjType, IdxType, InOrderContainer>::find(IdxType idx)
 {
 	typename LookupTable::iterator it = this->lookup_table.find(idx);
 	if (it != this->lookup_table.end())
@@ -294,9 +295,9 @@ typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<
 	return this->lookup_table.end();
 }
 
-template <typename ObjType, typename IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<
-    ObjType, IdxType>::find(IdxType idx) const
+template <typename ObjType, typename IdxType, typename InOrderContainer>
+typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::const_iterator DoomObjectContainer<
+    ObjType, IdxType, InOrderContainer>::find(IdxType idx) const
 {
 	typename LookupTable::iterator it = this->lookup_table.find(idx);
 	if (it != this->lookup_table.end())

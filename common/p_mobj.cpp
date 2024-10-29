@@ -346,6 +346,7 @@ void P_AnimationTick(AActor *mo)
 		mo->tics--;
 
 		// you can cycle through multiple states in a tic
+		// [CMB] TODO: current bug is mo->state is null pointer
 		if (!mo->tics)
 			if (!P_SetMobjState (mo, mo->state->nextstate) )
 				return;         // freed itself
@@ -1011,7 +1012,7 @@ int P_ThingInfoHeight(mobjinfo_t *mi)
 // P_SetMobjState
 //
 // Returns true if the mobj is still present.
-bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
+bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 {
 	state_t* st;
 	int cycle_counter = 0;
@@ -1019,19 +1020,22 @@ bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
 	do
 	{
 		// if (state >= ::num_state_t_types() || state < 0)
+		// [CMB] TODO: find will find NULL as it can be interpreted as 0
 		if (states.find(state) == states.end())
 		{
 			I_Error("P_SetMobjState: State %d does not exist in state table.", state);
 		}
 
-		if (state == S_NULL)
+		// strongly typed enum
+		if (static_cast<statenum_t>(state) == S_NULL)
 		{
-			mobj->state = (state_t *) S_NULL;
+			mobj->state = states[S_NULL];
 			mobj->Destroy();
 			return false;
 		}
 
 		st = states[state];
+
 		mobj->state = st;
 		mobj->tics = st->tics;
 		mobj->sprite = st->sprite;
@@ -1049,7 +1053,7 @@ bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
 		// Call action functions when the state is set
 		if (st->action)
 		{
-			st->action(mobj); // [CMB] access violation here on windows
+			st->action(mobj);
 		}
 
 		state = st->nextstate;

@@ -7214,9 +7214,9 @@ void D_Init_Nightmare_Flags(void)
 }
 
 void D_Init_Odamex_Objects(
-	const DoomObjectContainer<mobjinfo_t, mobjtype_t>& mobjinfo,
-	const DoomObjectContainer<const char*, spritenum_t>& sprnames,
-	const DoomObjectContainer<state_t, statenum_t>& states
+	const DoomObjectContainer<mobjinfo_t>& mobjinfo,
+	const DoomObjectContainer<const char*>& sprnames,
+	const DoomObjectContainer<state_t>& states
 	)
 {
     // using hard coded values here

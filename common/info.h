@@ -30,11 +30,14 @@
 #include "farchive.h"
 #include "doom_obj_container.h"
 
-typedef enum
+#define NO_ALTSPEED -1
+#define MELEERANGE (64 * FRACUNIT)
+
+typedef enum spritenum_e: int32_t
 {
     // ---------------odamex sprites------------------------ //
     // [RH] Gibs
-    SPR_GIB0 = 0x80000000,
+    SPR_GIB0 = -2147483647,
     SPR_GIB1,
     SPR_GIB2,
     SPR_GIB3,
@@ -229,9 +232,19 @@ typedef enum
     SPR_SP80, SPR_SP81, SPR_SP82, SPR_SP83, SPR_SP84, SPR_SP85, SPR_SP86, SPR_SP87, SPR_SP88, SPR_SP89,
     SPR_SP90, SPR_SP91, SPR_SP92, SPR_SP93, SPR_SP94, SPR_SP95, SPR_SP96, SPR_SP97, SPR_SP98, SPR_SP99,
 
-	NUMSPRITES
+	NUMSPRITES,
+
+	EXTRASPRITES=255, // [CMB] TODO: allow extra sprites
 
 } spritenum_t;
+
+// id24 spriteinfo_t struct
+typedef struct spriteinfo_s
+{
+	int32_t				spritenum;
+	int32_t				minimumfeatures; // [CMB] use for id24spec
+	const char*			sprite;
+} spriteinfo_t;
 
 extern const char* doom_sprnames[];
 extern DoomObjectContainer<const char*> sprnames; // spritenum_t
@@ -245,12 +258,12 @@ inline auto format_as(spritenum_t eSpriteNum)
 inline FArchive &operator<< (FArchive &arc, spritenum_t i) { DWORD out; out = i; return arc << out; }
 inline FArchive &operator>> (FArchive &arc, spritenum_t &i) { DWORD in; arc >> in; i = (spritenum_t)in; return arc; }
 
-typedef enum
+typedef enum statenum_e: int32_t
 {
 	//------------ odamex states -----------
 
 	// [RH] gibs
-	S_GIB0 = 0x80000000,
+	S_GIB0 = -2147483647,
 	S_GIB1,
 	S_GIB2,
 	S_GIB3,
@@ -1398,11 +1411,11 @@ typedef long statearg_t;
 typedef struct _state_t
 {
 	int32_t statenum;
-	spritenum_t	sprite;
+	int32_t	sprite;
 	int			frame;
 	int			tics;
 	actionf_p1 	action;
-	statenum_t	nextstate;
+	int32_t	nextstate;
 	int			misc1, misc2;
 
 	// MBF21
@@ -1442,12 +1455,12 @@ inline FArchive &operator>> (FArchive &arc, state_t *&state)
 	return arc;
 }
 
-typedef enum {
+typedef enum mobjtype_e: int32_t {
     
     // -------------------- odamex things ----------------------------------- //
     
     // [RH] Gibs (code is disabled)
-    MT_GIB0 = 0x8000000,
+    MT_GIB0 = -2147483647,
     MT_GIB1,
     MT_GIB2,
     MT_GIB3,
