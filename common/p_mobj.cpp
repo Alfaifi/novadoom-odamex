@@ -2927,16 +2927,16 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 	// [CMB] find the value in the mobjinfo table if we asked for a specific type; otherwise check the spawn table
 	mobjinfo_t* info = nullptr;
-	if (i == -1)	// we have to search for the type based on doomednum
+	int32_t spawn_idx = i == -1 ? mthing->type : i;
+	auto mobj_it = spawn_map.find(spawn_idx);
+	if (mobj_it != spawn_map.end())
 	{
-		auto mobj_it = spawn_map.find(mthing->type);
-		if (mobj_it != mobjinfo.end())
-		{
-			info = mobj_it->second;
-		}
+		info = mobj_it->second;
+		// set this for further down
+		i = mobj_it->first;
 	}
 
-	if (info == nullptr) // [CMB] TODO 'i' can be negative now
+	if (info == nullptr)
 	{
 		// [RH] Don't die if the map tries to spawn an unknown thing
 		Printf (PRINT_WARNING, "Unknown type %i at (%i, %i)\n",
@@ -3017,10 +3017,11 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	if (i == MT_HORDESPAWN)
 	{
 		// Store the spawn type for later.
+		// [CMB] specific types must be checked; otherwise they won't spawn correctly
 		mobj->special1 = mthing->type;
-		if (mthing->type == 5301) // Supply cache
+		if (mthing->type == 5301) // Supply cache (5301)
 			M_LogWDLItemSpawn(mobj, WDL_PICKUP_CAREPACKAGE);
-		else if (mthing->type == 5307)
+		else if (mthing->type == 5307) // Horde Powerup (5307)
 			M_LogWDLItemSpawn(mobj, WDL_PICKUP_POWERUPSPAWNER);
 	}
 
