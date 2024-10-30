@@ -88,8 +88,9 @@ class DoomObjectContainer
 	iterator end();
 	const_iterator cbegin();
 	const_iterator cend();
-	iterator find(IdxType index);
-	const_iterator find(IdxType index) const;
+	iterator find(IdxType idx);
+	const_iterator find(IdxType idx) const;
+	bool contains(IdxType idx) const;
 
 	friend ObjType operator-(ObjType obj, DoomObjectContainerType& container);
 	friend ObjType operator+(DoomObjectContainerType& container, WORD ofs);
@@ -305,6 +306,12 @@ typename DoomObjectContainer<ObjType, IdxType, InOrderContainer>::const_iterator
 		return it;
 	}
 	return this->lookup_table.end();
+}
+
+template<typename ObjType, typename IdxType, typename InOrderContainer>
+bool DoomObjectContainer<ObjType, IdxType, InOrderContainer>::contains(IdxType idx) const
+{
+	return this->find(idx) != this->end();
 }
 
 //----------------------------------------------------------------------------------------------
