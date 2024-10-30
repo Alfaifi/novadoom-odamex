@@ -614,8 +614,6 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			mo->tics = 1;
 	}
 
-    // [CMB] TODO: checking state existing here
-	//if (state >= S_NULL && state < ::num_state_t_types())
     if(state >= S_NULL && states.find(state) != states.end())
 	{
 		P_SetMobjState(mo, state);
@@ -684,7 +682,6 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			tics = -1;
 
 		// already spawned as gibs?
-		// [CMB] TODO: pointer difference to check the order of a fixed data structure...come on guy
 		state_t* s_gibs_state = states[S_GIBS];
 		if (!mo || mo->state == s_gibs_state)
 			return;
@@ -2152,10 +2149,8 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 	{
 		if (i < msg->player().psprites_size())
 		{
-			unsigned int state = msg->player().psprites().Get(i).statenum();
-            // [CMB] TODO: checking state existing here
-			// if (state >= ::num_state_t_types())
-            if (states.find(static_cast<statenum_t>(state)) == states.end())
+			int state = msg->player().psprites().Get(i).statenum();
+            if (states.find(state) == states.end())
 			{
 				continue;
 			}
@@ -2437,9 +2432,7 @@ static void CL_SetMobjState(const odaproto::svc::MobjState* msg)
 	AActor* mo = P_FindThingById(msg->netid());
 	int s = msg->mostate();
 
-    // [CMB] TODO: checking state existing here
-	// if (mo == NULL || s < 0 || s >= ::num_state_t_types())
-    if (mo == NULL || states.find(static_cast<statenum_t>(s)) == states.end())
+    if (mo == NULL || states.find(s) == states.end())
 		return;
 
 	P_SetMobjState(mo, static_cast<statenum_t>(s));

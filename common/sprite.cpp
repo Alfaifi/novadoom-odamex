@@ -21,7 +21,7 @@ inline void DoomObjectContainer<const char*, int32_t>::clear()
 			M_Free(p);
 		}
 	}
-	// [CMB] TODO: cleanup the lookup table too
+	this->lookup_table.erase(lookup_table.begin(), lookup_table.end());
 }
 
 //----------------------------------------------------------------------------------------------

@@ -43,33 +43,33 @@
 #include <stdlib.h>
 #include <time.h>
 
-
-#include "m_random.h"
-#include "minilzo.h"
+#include "c_dispatch.h"
+#include "d_dehacked.h"
+#include "d_main.h"
+#include "g_game.h"
+#include "g_horde.h"
+#include "g_mapinfo.h"
+#include "gi.h"
 #include "gstrings.h"
-#include "z_zone.h"
-#include "w_wad.h"
-#include "v_video.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "m_misc.h"
-#include "c_dispatch.h"
-#include "i_system.h"
-#include "g_game.h"
+#include "m_random.h"
+#include "minilzo.h"
+#include "mobjinfo.h"
+#include "odamex_objects.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
-#include "d_main.h"
-#include "d_dehacked.h"
 #include "s_sound.h"
-#include "gi.h"
-#include "g_mapinfo.h"
-#include "sv_main.h"
-#include "sv_banlist.h"
-#include "g_horde.h"
 #include "sprite.h"
-#include "mobjinfo.h"
 #include "state.h"
+#include "sv_banlist.h"
+#include "sv_main.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #include "w_ident.h"
 
@@ -241,13 +241,13 @@ void D_DoomMain()
 
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
-	// [CMB] TODO: Initialize all doom objects
 	D_Initialize_States(boomstates, ::NUMSTATES);
     D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
 	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
-	// [CMD] TODO: This will need to be called after DEHACKED
 	// Initialize all extra frames
 	D_Init_Nightmare_Flags();
+	// Initialize the odamex specific objects
+	D_Initialize_Odamex_Objects();
 
 	M_FindResponseFile();		// [ML] 23/1/07 - Add Response file support back in
 

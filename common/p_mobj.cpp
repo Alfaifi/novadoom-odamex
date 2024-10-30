@@ -1276,7 +1276,6 @@ static void P_ApplyXYFriction(AActor* mo)
 	{
 		// if in a walking frame, stop moving
 		// killough 10/98: Don't affect main player when voodoo dolls stop:
-		// [CMB] TODO: statenum arithmetic was previously here
 		if (mo->player && !P_IsVoodooDoll(mo) && (unsigned)((mo->state->statenum) - S_PLAY_RUN1) < 4)
 			P_SetMobjState(mo, S_PLAY);
 
@@ -2942,7 +2941,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		Printf (PRINT_WARNING, "Unknown type %i at (%i, %i)\n",
 			mthing->type,
 			mthing->x, mthing->y);
-		info = mobjinfo[MT_UNKNOWNTHING]; // [CMB] TODO: odamex specific unknown thing - without doomednum it lives in the main map
+		info = mobjinfo[MT_UNKNOWNTHING]; // [CMB] odamex specific MT_UNKNOWNTHING
 	}
 	// [RH] If the thing's corresponding sprite has no frames, also map
 	//		it to the unknown thing.
@@ -3057,7 +3056,6 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	}
 
 	// [AM] Adjust monster health based on server setting
-	// [CMB] TODO: we have already spawned the value - use it here
 	if ((i == MT_SKULL || (info->flags & MF_COUNTKILL)) && sv_monstershealth != 1.0f)
 		mobj->health *= sv_monstershealth;
 
@@ -3270,7 +3268,7 @@ BEGIN_COMMAND(cheat_mobjs)
 	const char* mobj_type = argv[1];
 	ptrdiff_t mobj_index = -1;
 
-	// [CMB] TODO: for (size_t i = 0; i < ARRAY_LENGTH(::mobjinfo); i++)
+	// [CMB] TODO: should we use an iterator here?
 	for (size_t i = 0; i < ::num_mobjinfo_types(); i++)
 	{
 		if (stricmp(::mobjinfo[i]->name, mobj_type) == 0)

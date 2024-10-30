@@ -1146,7 +1146,6 @@ const char* PlayerState(size_t state)
 	}
 }
 
-// [CMB] TODO pointer difference to statenum_t conversion unchecked
 #define STATE_NUM(mo) (statenum_t)(mo ->state->statenum )
 
 BEGIN_COMMAND(cheat_players)
