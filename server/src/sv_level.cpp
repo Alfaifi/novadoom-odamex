@@ -424,9 +424,9 @@ void G_InitNew(const char *mapname)
 		{
 			for (i = 0; i < ::num_state_t_types(); i++)
 			{
-				if (states[i].flags & STATEF_SKILL5FAST &&
-				    (states[i].tics != 1 || demoplayback))
-					states[i].tics >>= 1; // don't change 1->0 since it causes cycles
+				if (states[i]->flags & STATEF_SKILL5FAST &&
+				    (states[i]->tics != 1 || demoplayback))
+					states[i]->tics >>= 1; // don't change 1->0 since it causes cycles
 			}
 
 			for (i = 0; i < ::num_mobjinfo_types(); ++i)
@@ -434,7 +434,7 @@ void G_InitNew(const char *mapname)
 				if (mobjinfo[i]->altspeed != NO_ALTSPEED)
 				{
 					int swap = mobjinfo[i]->speed;
-					mobjinfo[i].speed = mobjinfo[i]->altspeed;
+					mobjinfo[i]->speed = mobjinfo[i]->altspeed;
 					mobjinfo[i]->altspeed = swap;
 				}
 			}
@@ -443,8 +443,8 @@ void G_InitNew(const char *mapname)
 		{
 			for (i = 0; i < ::num_state_t_types(); i++)
 			{
-				if (states[i].flags & STATEF_SKILL5FAST)
-					states[i].tics <<= 1; // don't change 1->0 since it causes cycles
+				if (states[i]->flags & STATEF_SKILL5FAST)
+					states[i]->tics <<= 1; // don't change 1->0 since it causes cycles
 			}
 
 			for (i = 0; i < ::num_mobjinfo_types(); ++i)
@@ -452,7 +452,7 @@ void G_InitNew(const char *mapname)
 				if (mobjinfo[i]->altspeed != NO_ALTSPEED)
 				{
 					int swap = mobjinfo[i]->altspeed;
-					mobjinfo[i].altspeed = mobjinfo[i]->speed;
+					mobjinfo[i]->altspeed = mobjinfo[i]->speed;
 					mobjinfo[i]->speed = swap;
 				}
 			}

@@ -1251,11 +1251,8 @@ state_t	boomstates[S_MUSHROOM + 1] = {
 
 // [Blair] Since Odamex has more out-of-the-box states,
 // the new DEHExtra state spec starts at 1100, while we have around
-// 1130. To fix this, we'll need to append the states Odamex adds
-// at the end and reference them that way.
-// [CMB] TODO: When we convert this to DSDHacked, we'll need to append the dynamic
-// frame list size to the end of the doom states to get the odamex states.
-// state_t states[NUMSTATES] = {};
+// 1130.
+// [CMB] odamex objects are now handled separately
 
 mobjinfo_t doom_mobjinfo[::NUMMOBJTYPES] = {
 

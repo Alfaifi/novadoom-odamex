@@ -2140,8 +2140,6 @@ static int PatchCodePtrs(int dummy)
 		if (!strnicmp("Frame", Line1, 5) && isspace(Line1[5]))
 		{
 			int frame = atoi(Line1 + 5);
-            // [CMB] TODO: this is not a valid way to test this anymore - just look it up
-			//if (frame < 0 || frame >= num_state_t_types())
             if (states.find(frame) == states.end())
 			{
 				DPrintf("Frame %d out of range\n", frame);
@@ -2759,15 +2757,14 @@ static const char* ActionPtrString(actionf_p1 func)
 
 static void PrintState(int index)
 {
-    // [CMB] TODO: checking state existing here
-	// if (index < 0 || index >= ::num_state_t_types())
-    if (states.find(index) == states.end())
+	auto it = states.find(index);
+    if (it == states.end())
 	{
 		return;
 	}
 
 	// Print this state.
-	state_t& state = *::states[index];
+	state_t& state = *it->second;
 	Printf("%4d | s:%s f:%d t:%d a:%s m1:%d m2:%d\n", index, ::sprnames[state.sprite],
 	       state.frame, state.tics, ActionPtrString(state.action), state.misc1,
 	       state.misc2);
@@ -2775,12 +2772,13 @@ static void PrintState(int index)
 
 static void PrintMobjinfo(int index)
 {
-    if (mobjinfo.find(index) == mobjinfo.end())
+	auto it = mobjinfo.find(index);
+    if (it == mobjinfo.end())
     {
         return;
     }
     
-    mobjinfo_t& mob = *::mobjinfo[index];
+    mobjinfo_t& mob = *it->second;
     std::stringstream ss;
     ss << "%4d | ";
     // doomednum, spawnstate, spawnhealth, seestate, seesound
@@ -2847,14 +2845,11 @@ BEGIN_COMMAND(stateinfo)
 {
 	if (argc < 2)
 	{
-        // [CMB] TODO: checking state existing here -- indices should be printed differently
 		Printf("Must pass one or two state indexes. (0 to %d)\n", ::num_state_t_types() - 1);
 		return;
 	}
 
 	int index1 = atoi(argv[1]);
-    // [CMB] TODO: checking state existing here
-	// if (index1 < 0 || index1 >= ::num_state_t_types())
     if (states.find(index1) == states.end())
 	{
 		Printf("Index 1: Not a valid index.\n");
@@ -2865,8 +2860,6 @@ BEGIN_COMMAND(stateinfo)
 	if (argc == 3)
 	{
 		index2 = atoi(argv[2]);
-        // [CMB] TODO: checking state existing here
-		// if (index2 < 0 || index2 >= ::num_state_t_types())
         if (states.find(index2) == states.end())
 		{
 			Printf("Index 2: Not a valid index.\n");
