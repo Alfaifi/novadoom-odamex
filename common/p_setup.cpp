@@ -2148,7 +2148,6 @@ void P_Init (void)
 {
 	P_InitSwitchList ();
 	P_InitPicAnims ();
-	// [CMB] TODO: what may be tripping me up here is that we are passing a fixed list of names without the concept of an index
 	// code below ASSUMES the sprites are in-order rather than passing an order down-ward
 	std::vector<spriteinfo_t*> infos = P_GetSpriteInfos ();
 	R_InitSprites(infos);
