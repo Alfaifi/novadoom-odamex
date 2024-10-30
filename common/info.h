@@ -234,7 +234,7 @@ typedef enum spritenum_e: int32_t
 
 	NUMSPRITES,
 
-	EXTRASPRITES=255, // [CMB] TODO: allow extra sprites
+	EXTRASPRITES=255,
 
 } spritenum_t;
 
