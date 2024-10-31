@@ -39,7 +39,7 @@ class DoomObjectContainer;
 // 1055
 //----------------------------------------------------------------------------------------------
 
-template <typename ObjType, typename IdxType = int32_t, typename InOrderContainer = std::vector<ObjType>>
+template <typename ObjType, typename IdxType = int32_t, typename InOrderContainer = std::vector<ObjType> >
 class DoomObjectContainer
 {
 
