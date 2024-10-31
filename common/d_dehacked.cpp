@@ -561,34 +561,31 @@ static void BackupData(void)
 		OrgActionPtrs[i] = states[i]->action;
 	}
 
+	// states
 	doomBackup.backupStates.resize(::NUMSTATES);
 	doomBackup.backupStates.clear();
-	// doomBackup.backupStates.append(states);
-	for(auto & it : states)
+	for (const auto & it : states)
 	{
-		statenum_t idx = statenum_t(it.first);
 		state_t state = *it.second;
-		doomBackup.backupStates.insert(state, idx);
+		doomBackup.backupStates.insert(state, it.first);
 	}
 
+	// mobjinfo
 	doomBackup.backupMobjInfo.resize(::NUMMOBJTYPES);
 	doomBackup.backupMobjInfo.clear();
-	// doomBackup.backupMobjInfo.append(mobjinfo);
-	for(auto & it : mobjinfo)
+	for (const auto & it : mobjinfo)
 	{
-		mobjtype_t idx = mobjtype_t(it.first);
 		mobjinfo_t mobj = *it.second;
-		doomBackup.backupMobjInfo.insert(mobj, idx);
+		doomBackup.backupMobjInfo.insert(mobj, it.first);
 	}
 
+	// sprites
 	doomBackup.backupSprnames.resize(::NUMSPRITES);
 	doomBackup.backupSprnames.clear();
-	// doomBackup.backupSprnames.append(sprnames);
-	for(auto & it : sprnames)
+	for(const auto & it : sprnames)
 	{
-		spritenum_t idx = spritenum_t(it.first);
 		const char* spr = strdup(it.second);
-		doomBackup.backupSprnames.insert(spr, idx);
+		doomBackup.backupSprnames.insert(spr, it.first);
 	}
 
 	std::copy(weaponinfo, weaponinfo + ::NUMWEAPONS + 1, doomBackup.backupWeaponInfo);
@@ -1792,8 +1789,8 @@ static int PatchSprites(int dummy)
 			DPrintf("Sprite %d out of range.\n", sprIdx);
 			return -1;
 		}
+		auto sprnames_it = sprnames.find(sprIdx);
 #if defined _DEBUG
-			auto sprnames_it = sprnames.find(sprIdx);
 			const char* prevSprName =
 			    sprnames_it != sprnames.end() ? sprnames_it->second : "No Sprite";
 			DPrintf("Patching sprite at %d with name %s with new name %s\n",
