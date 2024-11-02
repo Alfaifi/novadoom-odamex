@@ -538,6 +538,11 @@ typedef struct
 
 DoomBackup doomBackup = {};
 
+// [CMB] useful typedefs for iteration over global doom object containers
+typedef DoomObjectContainer<state_t*, int32_t>::const_iterator StatesIterator;
+typedef DoomObjectContainer<mobjinfo_t*, int32_t>::const_iterator MobjIterator;
+typedef DoomObjectContainer<const char*, int32_t>::const_iterator SpriteNamesIterator;
+
 static void BackupData(void)
 {
 	int i;
@@ -564,7 +569,7 @@ static void BackupData(void)
 	// states
 	doomBackup.backupStates.resize(::NUMSTATES);
 	doomBackup.backupStates.clear();
-	for (const auto & it : states)
+	for (const std::pair<int32_t, state_t*> & it : states)
 	{
 		state_t state = *it.second;
 		doomBackup.backupStates.insert(state, it.first);
@@ -573,7 +578,7 @@ static void BackupData(void)
 	// mobjinfo
 	doomBackup.backupMobjInfo.resize(::NUMMOBJTYPES);
 	doomBackup.backupMobjInfo.clear();
-	for (const auto & it : mobjinfo)
+	for (const std::pair<int32_t, mobjinfo_t*> & it : mobjinfo)
 	{
 		mobjinfo_t mobj = *it.second;
 		doomBackup.backupMobjInfo.insert(mobj, it.first);
@@ -582,7 +587,7 @@ static void BackupData(void)
 	// sprites
 	doomBackup.backupSprnames.resize(::NUMSPRITES);
 	doomBackup.backupSprnames.clear();
-	for(const auto & it : sprnames)
+	for(const std::pair<int32_t, const char*> & it : sprnames)
 	{
 		const char* spr = strdup(it.second);
 		doomBackup.backupSprnames.insert(spr, it.first);
@@ -1014,7 +1019,7 @@ static int PatchThing(int thingy)
 	ednum = &dummyed;
 
 	thingNum--;
-	auto mobjinfo_it = mobjinfo.find(static_cast<mobjtype_t>(thingNum));
+	MobjIterator mobjinfo_it = mobjinfo.find(static_cast<mobjtype_t>(thingNum));
 	if (mobjinfo_it == mobjinfo.end())
 	{
 		auto mobjinfo_t_default = []() -> mobjinfo_t
@@ -1485,7 +1490,7 @@ static int PatchThing(int thingy)
 	// update spawn map
 	if (info->doomednum && info->doomednum != -1)
 	{
-		auto spawn_map_it = spawn_map.find(info->doomednum);
+		MobjIterator spawn_map_it = spawn_map.find(info->doomednum);
 		if (spawn_map_it == spawn_map.end())
 		{
 			spawn_map.insert(info, info->doomednum);
@@ -1576,7 +1581,7 @@ static int PatchFrame(int frameNum)
         {1, "SKILL5FAST"},
     };
 
-	auto states_it = states.find(frameNum);
+	StatesIterator states_it = states.find(frameNum);
 	if(states_it == states.end())
     {
 		auto state_t_default = [](int32_t idx) -> state_t {
@@ -1672,7 +1677,7 @@ static int PatchFrame(int frameNum)
 		}
 	}
 #if defined _DEBUG
-	auto sprnames_it = sprnames.find(info->sprite);
+	SpriteNamesIterator sprnames_it = sprnames.find(info->sprite);
 	const char* sprsub = (sprnames_it == sprnames.end()) ? "<No Sprite>" : sprnames_it->second;
 	DPrintf("FRAME %d: Duration: %d, Next: %d, SprNum: %d(%s), SprSub: %d\n", frameNum,
 	       info->tics, info->nextstate, info->sprite, sprsub,
@@ -1775,7 +1780,7 @@ static int PatchSprites(int dummy)
 		else
 		{
 			// find the value that matches
-			for (auto & sprname : sprnames)
+			for (const std::pair<int32_t, const char*> & sprname : sprnames)
 			{
 				const char* spr = sprname.second;
 				if (strncmp(zSprIdx, spr, 4) == 0)
@@ -1789,7 +1794,7 @@ static int PatchSprites(int dummy)
 			DPrintf("Sprite %d out of range.\n", sprIdx);
 			return -1;
 		}
-		auto sprnames_it = sprnames.find(sprIdx);
+		SpriteNamesIterator sprnames_it = sprnames.find(sprIdx);
 #if defined _DEBUG
 			const char* prevSprName =
 			    sprnames_it != sprnames.end() ? sprnames_it->second : "No Sprite";
@@ -2754,7 +2759,7 @@ static const char* ActionPtrString(actionf_p1 func)
 
 static void PrintState(int index)
 {
-	auto it = states.find(index);
+	StatesIterator it = states.find(index);
     if (it == states.end())
 	{
 		return;
@@ -2769,7 +2774,7 @@ static void PrintState(int index)
 
 static void PrintMobjinfo(int index)
 {
-	auto it = mobjinfo.find(index);
+	MobjIterator it = mobjinfo.find(index);
     if (it == mobjinfo.end())
     {
         return;
