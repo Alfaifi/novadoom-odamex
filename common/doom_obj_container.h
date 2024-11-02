@@ -53,16 +53,16 @@ class DoomObjectContainer
 	static void noop(ObjType p, IdxType idx) { }
 
   public:
-	using ObjReference = typename DoomObjectContainerData::reference;
-	using ConstObjReference = typename DoomObjectContainerData::const_reference;
-	using iterator = typename LookupTable::iterator;
-	using const_iterator = typename LookupTable::const_iterator;
+	typedef typename DoomObjectContainerData::reference ObjReference;
+	typedef typename DoomObjectContainerData::const_reference ConstObjReference;
+	typedef typename LookupTable::iterator iterator;
+	typedef typename LookupTable::const_iterator const_iterator;
 
 	typedef void (*ResetObjType)(ObjType, IdxType);
 	typedef bool (*CompareObjType)(ObjType, ObjType);
 
-	explicit DoomObjectContainer(ResetObjType f = nullptr);
-	explicit DoomObjectContainer(size_t count, ResetObjType f = nullptr);
+	explicit DoomObjectContainer(ResetObjType f = NULL);
+	explicit DoomObjectContainer(size_t count, ResetObjType f = NULL);
 	~DoomObjectContainer();
 
 	ObjReference operator[](int);
@@ -105,13 +105,13 @@ class DoomObjectContainer
 
 template <typename ObjType, typename IdxType, typename InOrderContainer>
 DoomObjectContainer<ObjType, IdxType, InOrderContainer>::DoomObjectContainer(ResetObjType f)
-    : rf(f == nullptr ? &noop : f)
+    : rf(f == NULL ? &noop : f)
 {
 }
 
 template <typename ObjType, typename IdxType, typename InOrderContainer>
 DoomObjectContainer<ObjType, IdxType, InOrderContainer>::DoomObjectContainer(size_t count, ResetObjType f)
-    : rf(f == nullptr ? &noop : f)
+    : rf(f == NULL ? &noop : f)
 {
 	this->container.reserve(count);
 }
@@ -247,7 +247,7 @@ template <typename ObjType, typename IdxType, typename InOrderContainer>
 void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::append(
     const DoomObjectContainer<ObjType, IdxType, InOrderContainer>& dObjContainer)
 {
-	for (auto it = dObjContainer.lookup_table.begin();
+	for (DoomObjectContainerType::iterator it = dObjContainer.lookup_table.begin();
 	     it != dObjContainer.lookup_table.end(); ++it)
 	{
 		int idx = it->first;
