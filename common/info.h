@@ -1786,7 +1786,7 @@ extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {
 	if (info)
-		return arc << (WORD)(info - mobjinfo);
+		return arc << (WORD)(info->type);
 	else
 		return arc << (WORD)0xffff;
 }
