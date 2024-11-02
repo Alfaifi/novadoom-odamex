@@ -1445,15 +1445,13 @@ inline FArchive &operator<< (FArchive &arc, state_t *state)
 
 inline FArchive &operator>> (FArchive &arc, state_t *&state)
 {
-	WORD ofs;
+	int32_t ofs;
 	arc >> ofs;
-	if (ofs == 0xffff)
-		state = NULL;
+	auto it = states.find(ofs);
+	if (it != states.end())
+		state = it->second;
 	else
-	{
-		// [CMB] TODO: until I know how this works, just grab the vector data and add here
-		state = *states.data() + ofs;
-	}
+		state = NULL;
 	return arc;
 }
 
@@ -1795,11 +1793,12 @@ inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 
 inline FArchive &operator>> (FArchive &arc, mobjinfo_t *&info)
 {
-	WORD ofs;
-	arc >> ofs;
-	if (ofs == 0xffff)
-		info = NULL;
-	else
-		info = mobjinfo + ofs;
-	return arc;
+    int32_t ofs;
+    arc >> ofs;
+    auto it = mobjinfo.find(ofs);
+    if (it != mobjinfo.end())
+        info = it->second;
+    else
+        info = NULL;
+    return arc;
 }
