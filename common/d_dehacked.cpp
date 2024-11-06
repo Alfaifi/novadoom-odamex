@@ -536,7 +536,7 @@ typedef struct
 	DehInfo backupDeh;
 } DoomBackup;
 
-DoomBackup doomBackup = {};
+DoomBackup doomBackup;
 
 // [CMB] useful typedefs for iteration over global doom object containers
 typedef DoomObjectContainer<state_t*, int32_t>::const_iterator StatesIterator;
