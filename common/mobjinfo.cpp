@@ -38,14 +38,14 @@ void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 	{
 
 		mobjinfo_t mobjinfo_source;
-		int32_t idx = source->type;
+		int32_t idx = 0;
 		for(int i = 0; i < count; ++i)
 		{
-			mobjinfo_source = source[idx];
+			mobjinfo_source = source[i];
+			idx = mobjinfo_source.type;
 			mobjinfo_t* newmobjinfo = (mobjinfo_t*) M_Calloc(1, sizeof(mobjinfo_t));
 			*newmobjinfo = mobjinfo_source;
 
-            D_ResetMobjInfo(newmobjinfo, idx);
 			mobjinfo.insert(newmobjinfo, idx);
 
 			// [CMB] -1 is used as the placeholder for now; id24 allows negative range for doomednum
@@ -54,7 +54,6 @@ void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 				mobjinfo_t* spawn_info = mobjinfo.find(idx)->second;
 				spawn_map.insert(spawn_info, mobjinfo_source.doomednum);
 			}
-			++idx;
 		}
 	}
 #if defined _DEBUG

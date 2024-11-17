@@ -1019,7 +1019,7 @@ static int PatchThing(int thingy)
 	ednum = &dummyed;
 
 	thingNum--;
-	MobjIterator mobjinfo_it = mobjinfo.find(static_cast<mobjtype_t>(thingNum));
+	MobjIterator mobjinfo_it = mobjinfo.find(thingNum);
 	if (mobjinfo_it == mobjinfo.end())
 	{
 		auto mobjinfo_t_default = []() -> mobjinfo_t
@@ -2772,6 +2772,7 @@ static void PrintState(int index)
 	       state.misc2);
 }
 
+// [CMB] TODO: format specifier error
 static void PrintMobjinfo(int index)
 {
 	MobjIterator it = mobjinfo.find(index);
@@ -2780,29 +2781,29 @@ static void PrintMobjinfo(int index)
         return;
     }
     
-    mobjinfo_t& mob = *it->second;
+    mobjinfo_t* mob = it->second;
     std::stringstream ss;
     ss << "%4d | ";
     // doomednum, spawnstate, spawnhealth, seestate, seesound
-    ss << "doomednum: %d, spawnstate: %d, spawnhealth: %d, seestate: %d, seesound: %d\n";
+    ss << "doomednum: %d, spawnstate: %d, spawnhealth: %d, seestate: %d, seesound: %s\n";
     // reactiontime, attacksound, painstate, painchance, painsound
-    ss << "reactiontime: %d, attacksound: %d, painstate: %d, painchance: %d, painsound: %d\n";
+    ss << "reactiontime: %d, attacksound: %s, painstate: %d, painchance: %d, painsound: %s\n";
     // meleestate, missilestate, deathstate, xdeathstate, deathsound
-    ss << "meleestate: %d, missilestate: %d, deathstate: %d, xdeathstate: %d, deathsound: %d\n";
+    ss << "meleestate: %d, missilestate: %d, deathstate: %d, xdeathstate: %d, deathsound: %s\n";
     // speed, radius, height, mass, damage
     ss << "speed: %d, radius: %d, height: %d, mass: %d, damage: %d\n";
     // activesound, flags, raisestate, droppeditem, flags2
-    ss << "activesound: %d, flags: %ul, raisestate: %d, droppeditem: %d, flags2: %ul\n";
+    ss << "activesound: %s, flags: %ul, raisestate: %d, droppeditem: %d, flags2: %ul\n";
     // infighting_group, projectile_group, splash_group, ripsound, altspeed, meleerange
     ss << "infighting_group: %d, projectile_group: %d, splash_group: %d, ripsound: %d, altspeed: %d, meleerange: %d\n";
     // translucency
     ss << "translucency: %d\n";
-    Printf(ss.str().c_str(), index, mob.doomednum, mob.spawnstate, mob.spawnhealth, mob.seestate, mob.seesound,
-                             mob.reactiontime, mob.attacksound, mob.painstate, mob.painchance, mob.painsound,
-                             mob.meleestate, mob.missilestate, mob.deathstate, mob.xdeathstate, mob.deathsound,
-                             mob.speed, mob.radius, mob.height, mob.mass, mob.damage,
-                             mob.activesound, mob.flags, mob.raisestate, mob.droppeditem, mob.flags2,
-                             mob.infighting_group, mob.projectile_group, mob.splash_group, mob.ripsound, mob.altspeed, mob.meleerange, mob.translucency);
+    Printf(ss.str().c_str(), index, mob->doomednum, mob->spawnstate, mob->spawnhealth, mob->seestate, mob->seesound,
+                             mob->reactiontime, mob->attacksound, mob->painstate, mob->painchance, mob->painsound,
+                             mob->meleestate, mob->missilestate, mob->deathstate, mob->xdeathstate, mob->deathsound,
+                             mob->speed, mob->radius, mob->height, mob->mass, mob->damage,
+                             mob->activesound, mob->flags, mob->raisestate, mob->droppeditem, mob->flags2,
+                             mob->infighting_group, mob->projectile_group, mob->splash_group, mob->ripsound, mob->altspeed, mob->meleerange, mob->translucency);
 }
 
 BEGIN_COMMAND(mobinfo)
