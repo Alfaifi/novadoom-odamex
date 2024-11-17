@@ -40,14 +40,14 @@ void D_Initialize_States(state_t* source, int count)
     if (source) {
 
     	state_t state_source;
-    	int32_t idx = source->statenum;
+    	int32_t state_statenum = -1;
         for(int i = 0; i < count; i++)
         {
         	state_source = source[i];
+            state_statenum = state_source.statenum;
         	state_t* newstate = (state_t*) M_Calloc(1, sizeof(state_t));
         	*newstate = state_source;
-			states.insert(newstate, idx);
-        	++idx;
+			states.insert(newstate, state_statenum);
         }
     }
 #if defined _DEBUG
