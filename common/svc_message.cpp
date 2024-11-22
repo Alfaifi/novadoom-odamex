@@ -987,7 +987,8 @@ odaproto::svc::PlayerState SVC_PlayerState(player_t& player)
 	for (int i = 0; i < NUMPSPRITES; i++)
 	{
 		pspdef_t* psp = &player.psprites[i];
-		unsigned int state = (statenum_t)(psp->state->statenum);
+		unsigned int state =
+		    (psp->state != NULL) ? (statenum_t)(psp->state->statenum) : 0;
 		odaproto::Player_Psp* plpsp = pl->add_psprites();
 		plpsp->set_statenum(state);
 	}
