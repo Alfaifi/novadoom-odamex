@@ -340,7 +340,7 @@ CVAR_RANGE (sv_teamsinplay, "2", "Teams that are enabled", CVARTYPE_BYTE, CVAR_S
 // --------------
 
 CVAR(cl_downloadsites,
-     "https://static.allfearthesentinel.net/wads/ https://doomshack.org/wads/ "
+     "https://static.allfearthesentinel.com/wads/ https://doomshack.org/wads/ "
      "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
      "http://files.funcrusher.net/wads/ https://doomshack.org/uploads/ "
      "https://doom.dogsoft.net/getwad.php?search=",
