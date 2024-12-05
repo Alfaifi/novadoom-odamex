@@ -498,7 +498,7 @@ void MIType_InterLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 		*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->second = tok.substr(1);
 		return;
 	}
-	*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->first = tok;
+	*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->second = tok;
 }
 
 // Sets the inputted data as an OLumpName, checking LANGUAGE for the actual OLumpName
@@ -1088,11 +1088,13 @@ template <>
 struct MapInfoDataSetter<level_pwad_info_t>
 {
 	MapInfoDataContainer mapInfoDataContainer;
+	std::pair<OLumpName*, OLumpName*> enterpicscript;
+	std::pair<OLumpName*, OLumpName*> exitpicscript;
 
-	MapInfoDataSetter(level_pwad_info_t& ref)
+	MapInfoDataSetter(level_pwad_info_t& ref) :
+	enterpicscript(&ref.enterpic, &ref.enterscript),
+	exitpicscript(&ref.exitpic, &ref.exitscript)
 	{
-		std::pair<OLumpName*, OLumpName*> enterpicscript = std::make_pair(&ref.enterpic, &ref.enterscript);
-		std::pair<OLumpName*, OLumpName*> exitpicscript = std::make_pair(&ref.exitpic, &ref.exitscript);
 		mapInfoDataContainer = {
 			{ "levelnum", &MIType_Int, &ref.levelnum },
 	        { "next", &MIType_MapName, &ref.nextmap },
