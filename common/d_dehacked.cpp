@@ -2263,12 +2263,14 @@ static int PatchText(int oldSize)
 	good = false;
 
 	// Search through sprite names
-	for (int i = 0; i < ::num_spritenum_t_types(); i++)
+	// for (int i = 0; i < ::num_spritenum_t_types(); i++)
+	for(auto it = sprnames.begin(); it != sprnames.end(); ++it)
 	{
-		if (!strcmp(sprnames[i], oldStr))
+		const char* sprname = it->second;
+		if (!strcmp(sprname, oldStr))
 		{
 			// sprnames[i] = copystring(newStr);
-			sprnames.insert(copystring(newStr), (spritenum_t) i);
+			sprnames.insert(copystring(newStr), it->first);
 			good = true;
 			// See above.
 		}
