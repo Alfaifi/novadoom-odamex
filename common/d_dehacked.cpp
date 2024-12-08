@@ -135,21 +135,6 @@ static short codepconv[522] = {
     1075 // Total: 522
 };
 
-void D_Initialize_SoundMap(const char** source, int count)
-{
-	SoundMap.clear();
-    if (source)
-    {
-		for (int i = 0; i < count; i++)
-		{
-			SoundMap.insert(source[i] ? strdup(source[i]) : NULL, i);
-		}
-    }
-#if defined _DEBUG
-	Printf(PRINT_HIGH, "D_Allocate_sounds:: allocated %d sounds.\n", count);
-#endif
-}
-
 static bool BackedUpData = false;
 // This is the original data before it gets replaced by a patch.
 static const char** OrgSprNames;
@@ -466,6 +451,23 @@ static const struct
 	{"[SOUNDS]", PatchSounds},
     {NULL, NULL},
 };
+
+DoomObjectContainer<const char*> SoundMap(ARRAY_LENGTH(doom_SoundMap));
+
+void D_Initialize_SoundMap(const char** source, int count)
+{
+	SoundMap.clear();
+    if (source)
+    {
+		for (int i = 0; i < count; i++)
+		{
+			SoundMap.insert(source[i] ? strdup(source[i]) : NULL, i);
+		}
+    }
+#if defined _DEBUG
+	Printf(PRINT_HIGH, "D_Allocate_sounds:: allocated %d sounds.\n", count);
+#endif
+}
 
 static int HandleMode(const char* mode, int num);
 static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,

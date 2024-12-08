@@ -223,7 +223,7 @@ static const char* doom_SoundMap[] = {NULL,
                             // ZDOOM-Specific sounds
                             "misc/teamchat"};
 
-static DoomObjectContainer<const char*> SoundMap(ARRAY_LENGTH(doom_SoundMap));
+extern DoomObjectContainer<const char*> SoundMap;
 
 void D_UndoDehPatch();
 void D_PostProcessDeh();
