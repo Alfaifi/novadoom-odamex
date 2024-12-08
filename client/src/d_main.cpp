@@ -777,6 +777,7 @@ void D_DoomMain()
 	D_Initialize_States(boomstates, ::NUMSTATES);
     D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
 	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
+	D_Initialize_SoundMap(doom_SoundMap, ARRAY_LENGTH(doom_SoundMap));
 	// Initialize all extra frames
 	D_Init_Nightmare_Flags();
     // Initialize the odamex specific objects

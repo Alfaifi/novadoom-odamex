@@ -135,6 +135,21 @@ static short codepconv[522] = {
     1075 // Total: 522
 };
 
+void D_Initialize_SoundMap(const char** source, int count)
+{
+	SoundMap.clear();
+    if (source)
+    {
+		for (int i = 0; i < count; i++)
+		{
+			SoundMap.insert(strdup(source[i]), i);
+		}
+    }
+#if defined _DEBUG
+	Printf(PRINT_HIGH, "D_Allocate_sounds:: allocated %d sounds.\n", count);
+#endif
+}
+
 static bool BackedUpData = false;
 // This is the original data before it gets replaced by a patch.
 static const char** OrgSprNames;
@@ -405,6 +420,7 @@ struct Key
 
 static int PatchThing(int);
 static int PatchSound(int);
+static int PatchSounds(int);
 static int PatchFrame(int);
 static int PatchSprite(int);
 static int PatchSprites(int);
@@ -443,9 +459,11 @@ static const struct
     {"[STRINGS]", PatchStrings},
     {"[PARS]", PatchPars},
     {"[CODEPTR]", PatchCodePtrs},
-	{"[SPRITES]", PatchSprites},
     // Eternity engine added a few more features to BEX
     {"[MUSIC]", PatchMusic},
+	// DSDHacked BEX additions
+	{"[SPRITES]", PatchSprites},
+	{"[SOUNDS]", PatchSounds},
     {NULL, NULL},
 };
 
@@ -626,7 +644,7 @@ void D_UndoDehPatch()
 	D_Initialize_sprnames(doomBackup.backupSprnames.data(), ::NUMSPRITES, SPR_TROO);
 	D_Initialize_States(doomBackup.backupStates.data(), ::NUMSTATES);
 	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), ::NUMMOBJTYPES);
-	
+
 	extern bool isFast;
 	isFast = false;
 
@@ -1052,13 +1070,6 @@ static int PatchThing(int thingy)
 
 	while ((result = GetLine()) == 1)
 	{
-		size_t sndmap = atoi(Line2);
-
-		if (sndmap >= ARRAY_LENGTH(SoundMap))
-		{
-			sndmap = 0;
-		}
-
 		size_t val = atoi(Line2);
 		int linelen = strlen(Line1);
 
@@ -1103,7 +1114,7 @@ static int PatchThing(int thingy)
 		{
 			char* snd;
 
-			if (val == 0 || val >= ARRAY_LENGTH(SoundMap))
+			if (val == 0 || val >= SoundMap.size())
 			{
 				val = 0;
 			}
@@ -1572,7 +1583,7 @@ static int PatchFrame(int frameNum)
         {NULL, 0}};
     int result;
     state_t *info, dummy;
-    
+
     static const struct
     {
         short Bit;
@@ -1811,6 +1822,37 @@ static int PatchSprites(int dummy)
 			sprnames.insert(strdup(newSprName), (spritenum_t) sprIdx);
 	}
 
+	return result;
+}
+
+static int PatchSounds(int dummy)
+{
+	int result;
+	char keystring[128];
+#if defined _DEBUG
+	DPrintf("[Sounds]\n");
+#endif
+	while ((result = GetLine()) == 1)
+	{
+		const char* newname = skipwhite(Line2);
+
+		if (IsNum(Line1))
+		{
+			size_t soundIdx = atoi(Line1);
+			SoundMap.insert(strdup(newname), soundIdx);
+			S_AddSound(newname, fmt::sprintf("DS%s", newname).c_str());
+		}
+		else
+		{
+			snprintf(keystring, ARRAY_LENGTH(keystring), "SOUND_%s", Line1);
+			if (GStrings.hasString(keystring))
+			{
+				GStrings.setString(keystring, newname);
+				DPrintf("Sound %s set to:\n%s\n", keystring, newname);
+			}
+		}
+	}
+	S_HashSounds();
 	return result;
 }
 
@@ -2704,7 +2746,7 @@ bool CheckIfDehActorDefined(const mobjtype_t mobjtype)
 	if (mobj.doomednum == -1 &&
 		mobj.spawnstate == S_TNT1 &&
 		mobj.spawnhealth == 0 &&
-		mobj.gibhealth == 0 && 
+		mobj.gibhealth == 0 &&
 		mobj.seestate == S_NULL &&
 		mobj.seesound == NULL &&
 	    mobj.reactiontime == 0 &&
@@ -2782,7 +2824,7 @@ static void PrintMobjinfo(int index)
     {
         return;
     }
-    
+
     mobjinfo_t* mob = it->second;
     std::stringstream ss;
     ss << "%4d | ";
@@ -2815,7 +2857,7 @@ BEGIN_COMMAND(mobinfo)
         Printf("Must pass one or two mobjinfo indexes. (0 to %d)\n", ::num_mobjinfo_types() - 1);
         return;
     }
-    
+
     int index1 = atoi(argv[1]);
     if (mobjinfo.find(index1) == mobjinfo.end())
     {
@@ -2823,7 +2865,7 @@ BEGIN_COMMAND(mobinfo)
         return;
     }
     int index2 = index1;
-    
+
     if (argc == 3)
     {
         index2 = atoi(argv[2]);
@@ -2833,12 +2875,12 @@ BEGIN_COMMAND(mobinfo)
             return;
         }
     }
-    
+
     if (index2 < index1)
     {
         std::swap(index1, index2);
     }
-    
+
     for(int i = index1; i <= index2; i++)
     {
         PrintMobjinfo(i);
