@@ -1117,6 +1117,7 @@ static int PatchThing(int thingy)
 		{
 			char* snd;
 
+			// TODO: make sure SoundMap is populated with new values from PatchSounds first
 			if (val == 0 || val >= SoundMap.size())
 			{
 				val = 0;
@@ -1831,28 +1832,27 @@ static int PatchSprites(int dummy)
 static int PatchSounds(int dummy)
 {
 	int result;
-	char keystring[128];
 #if defined _DEBUG
 	DPrintf("[Sounds]\n");
 #endif
 	while ((result = GetLine()) == 1)
 	{
 		const char* newname = skipwhite(Line2);
+		OLumpName newnameds = fmt::sprintf("DS%s", newname);
 
 		if (IsNum(Line1))
 		{
-			size_t soundIdx = atoi(Line1);
+			int32_t soundIdx = atoi(Line1);
 			SoundMap.insert(strdup(newname), soundIdx);
-			S_AddSound(newname, fmt::sprintf("DS%s", newname).c_str());
+			S_AddSound(newname, newnameds.c_str());
 		}
 		else
 		{
-			snprintf(keystring, ARRAY_LENGTH(keystring), "SOUND_%s", Line1);
-			if (GStrings.hasString(keystring))
-			{
-				GStrings.setString(keystring, newname);
-				DPrintf("Sound %s set to:\n%s\n", keystring, newname);
-			}
+			int lumpnum = W_CheckNumForName(fmt::sprintf("DS%s", Line1).c_str());
+			int sndIdx = S_FindSoundByLump(lumpnum);
+			if (sndIdx == -1)
+				I_Error("Sound %s not found.", newname);
+			S_AddSound(S_sfx[sndIdx].name, newnameds.c_str());
 		}
 	}
 	S_HashSounds();
