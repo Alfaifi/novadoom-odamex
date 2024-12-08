@@ -3103,14 +3103,20 @@ void A_PlaySound(AActor* mo)
 	// Play the sound from the SoundMap
 
 	int sndmap = mo->state->misc1;
+	char* snd;
 
-	if (SoundMap.find(sndmap) == SoundMap.end())
+	auto soundIt = SoundMap.find(sndmap);
+	if (soundIt == SoundMap.end())
 	{
 		DPrintf("Warning: Sound ID is beyond the array of the Sound Map!\n");
-		sndmap = 0;
+		snd = nullptr;
+	}
+	else
+	{
+		snd = (char*)soundIt->second;
 	}
 
-	S_Sound(mo, CHAN_BODY, SoundMap[sndmap], 1,
+	S_Sound(mo, CHAN_BODY, snd, 1,
 		        (mo->state->misc2 ? ATTN_NONE : ATTN_NORM));
 }
 

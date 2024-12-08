@@ -1129,12 +1129,8 @@ static int PatchThing(int thingy)
 			char* snd;
 
 			// TODO: make sure SoundMap is populated with new values from PatchSounds first
-			if (SoundMap.find(val) == SoundMap.end())
-			{
-				val = 0;
-			}
-
-			snd = (char*)SoundMap[val];
+			auto soundIt = SoundMap.find(val);
+			snd = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
 
 			if (!strnicmp(Line1, "Alert", 5))
 			{
