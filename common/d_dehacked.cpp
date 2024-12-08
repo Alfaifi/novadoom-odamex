@@ -613,6 +613,15 @@ static void BackupData(void)
 		doomBackup.backupSprnames.insert(spr, it.first);
 	}
 
+	// sounds
+	doomBackup.backupSoundMap.resize(ARRAY_LENGTH(doom_SoundMap));
+	doomBackup.backupSoundMap.clear();
+	for(const std::pair<int32_t, const char*> & it : SoundMap)
+	{
+		const char* sound = strdup(it.second);
+		doomBackup.backupSoundMap.insert(sound, it.first);
+	}
+
 	std::copy(weaponinfo, weaponinfo + ::NUMWEAPONS + 1, doomBackup.backupWeaponInfo);
 	std::copy(clipammo, clipammo + ::NUMAMMO, doomBackup.backupClipAmmo);
 	std::copy(maxammo, maxammo + ::NUMAMMO, doomBackup.backupMaxAmmo);
@@ -1851,7 +1860,7 @@ static int PatchSounds(int dummy)
 			int lumpnum = W_CheckNumForName(fmt::sprintf("DS%s", Line1).c_str());
 			int sndIdx = S_FindSoundByLump(lumpnum);
 			if (sndIdx == -1)
-				I_Error("Sound %s not found.", newname);
+				I_Error("Sound %s not found.", Line1);
 			S_AddSound(S_sfx[sndIdx].name, newnameds.c_str());
 		}
 	}
