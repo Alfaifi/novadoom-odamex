@@ -142,7 +142,7 @@ void D_Initialize_SoundMap(const char** source, int count)
     {
 		for (int i = 0; i < count; i++)
 		{
-			SoundMap.insert(strdup(source[i]), i);
+			SoundMap.insert(source[i] ? strdup(source[i]) : NULL, i);
 		}
     }
 #if defined _DEBUG
@@ -548,6 +548,7 @@ typedef struct
 	DoomObjectContainer<state_t> backupStates; // boomstates
 	DoomObjectContainer<mobjinfo_t> backupMobjInfo; // doom_mobjinfo
 	DoomObjectContainer<const char*> backupSprnames; // doom_sprnames
+	DoomObjectContainer<const char*> backupSoundMap; // doom_SoundMap
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	int backupMaxAmmo[NUMAMMO];
 	int backupClipAmmo[NUMAMMO];
@@ -560,6 +561,7 @@ DoomBackup doomBackup;
 typedef DoomObjectContainer<state_t*, int32_t>::const_iterator StatesIterator;
 typedef DoomObjectContainer<mobjinfo_t*, int32_t>::const_iterator MobjIterator;
 typedef DoomObjectContainer<const char*, int32_t>::const_iterator SpriteNamesIterator;
+typedef DoomObjectContainer<const char*, int32_t>::const_iterator SoundMapIterator;
 
 static void BackupData(void)
 {
@@ -644,6 +646,7 @@ void D_UndoDehPatch()
 	D_Initialize_sprnames(doomBackup.backupSprnames.data(), ::NUMSPRITES, SPR_TROO);
 	D_Initialize_States(doomBackup.backupStates.data(), ::NUMSTATES);
 	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), ::NUMMOBJTYPES);
+	D_Initialize_SoundMap(doomBackup.backupSoundMap.data(), ARRAY_LENGTH(doom_SoundMap));
 
 	extern bool isFast;
 	isFast = false;
