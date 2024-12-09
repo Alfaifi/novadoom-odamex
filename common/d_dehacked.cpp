@@ -1849,6 +1849,7 @@ void IdxToSoundName(char** sound)
 	if (*sound && IsNum(*sound))
 	{
 		auto soundIt = SoundMap.find(atoi(*sound));
+		free(*sound);
 		*sound = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
 	}
 }
