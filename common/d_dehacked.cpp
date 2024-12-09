@@ -1128,9 +1128,17 @@ static int PatchThing(int thingy)
 		{
 			char* snd;
 
-			// TODO: make sure SoundMap is populated with new values from PatchSounds first
+			// If sound is not yet in SoundMap, store the index to be used in PatchSounds
 			auto soundIt = SoundMap.find(val);
-			snd = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
+			if (soundIt == SoundMap.end())
+			{
+				snd = strdup(Line2);
+				stripwhite(snd);
+			}
+			else
+			{
+				snd =  (char*)soundIt->second;
+			}
 
 			if (!strnicmp(Line1, "Alert", 5))
 			{
@@ -1836,6 +1844,15 @@ static int PatchSprites(int dummy)
 	return result;
 }
 
+void IdxToSoundName(char** sound)
+{
+	if (*sound && IsNum(*sound))
+	{
+		auto soundIt = SoundMap.find(atoi(*sound));
+		*sound = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
+	}
+}
+
 static int PatchSounds(int dummy)
 {
 	int result;
@@ -1861,6 +1878,16 @@ static int PatchSounds(int dummy)
 				I_Error("Sound %s not found.", Line1);
 			S_AddSound(S_sfx[sndIdx].name, newnameds.c_str());
 		}
+	}
+	for (auto& pair : mobjinfo)
+	{
+		auto& info = pair.second;
+		IdxToSoundName(const_cast<char**>(&info->seesound));
+		IdxToSoundName(const_cast<char**>(&info->attacksound));
+		IdxToSoundName(const_cast<char**>(&info->painsound));
+		IdxToSoundName(const_cast<char**>(&info->deathsound));
+		IdxToSoundName(const_cast<char**>(&info->activesound));
+		IdxToSoundName(const_cast<char**>(&info->ripsound));
 	}
 	S_HashSounds();
 	return result;
