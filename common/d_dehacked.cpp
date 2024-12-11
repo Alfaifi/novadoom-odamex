@@ -1844,13 +1844,13 @@ static int PatchSprites(int dummy)
 	return result;
 }
 
-void IdxToSoundName(char** sound)
+void IdxToSoundName(const char* sound)
 {
-	if (*sound && IsNum(*sound))
+	if (sound && IsNum(sound))
 	{
-		auto soundIt = SoundMap.find(atoi(*sound));
-		free(*sound);
-		*sound = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
+		auto soundIt = SoundMap.find(atoi(sound));
+		free((char*)sound);
+		sound = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
 	}
 }
 
@@ -1883,12 +1883,12 @@ static int PatchSounds(int dummy)
 	for (auto& pair : mobjinfo)
 	{
 		auto& info = pair.second;
-		IdxToSoundName(const_cast<char**>(&info->seesound));
-		IdxToSoundName(const_cast<char**>(&info->attacksound));
-		IdxToSoundName(const_cast<char**>(&info->painsound));
-		IdxToSoundName(const_cast<char**>(&info->deathsound));
-		IdxToSoundName(const_cast<char**>(&info->activesound));
-		IdxToSoundName(const_cast<char**>(&info->ripsound));
+		IdxToSoundName(const_cast<char*>(info->seesound));
+		IdxToSoundName(const_cast<char*>(info->attacksound));
+		IdxToSoundName(const_cast<char*>(info->painsound));
+		IdxToSoundName(const_cast<char*>(info->deathsound));
+		IdxToSoundName(const_cast<char*>(info->activesound));
+		IdxToSoundName(const_cast<char*>(info->ripsound));
 	}
 	S_HashSounds();
 	return result;
