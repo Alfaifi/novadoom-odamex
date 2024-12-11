@@ -89,7 +89,9 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, BOOL fli
 		rotation = (rot >= 17) ? rot - 7 : 17;
 	
 	if (frame >= MAX_SPRITE_FRAMES || rotation > 16)
+	{
 		I_FatalError("R_InstallSpriteLump: Bad frame characters in lump %i", lump);
+	}	
 
 	if (static_cast<int>(frame) > maxframe)
 		maxframe = frame;
@@ -232,7 +234,7 @@ static void R_InitSpriteDefs(std::vector<spriteinfo_t*>& namelist)
 		//	filling in the frames for whatever is found
 		for (int l = lastspritelump; l >= firstspritelump; l--)
 		{
-			if (*(int *)lumpinfo[l].name == intname)
+			if (*(int*)lumpinfo[l].name == intname && lumpinfo[l].size > 0)
 			{
 				R_InstallSpriteLump (l,
 									 lumpinfo[l].name[4] - 'A', // denis - fixme - security
