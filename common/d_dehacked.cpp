@@ -1066,7 +1066,6 @@ static int PatchThing(int thingy)
 			m.meleerange = MELEERANGE;
 			m.translucency = 0x10000;
 			m.altspeed = NO_ALTSPEED;
-			m.ripsound = "";
 			return m;
 		};
 		mobjinfo_t* mobj = (mobjinfo_t*) M_Calloc(1, sizeof(mobjinfo_t));
@@ -1846,7 +1845,7 @@ static int PatchSprites(int dummy)
 
 void IdxToSoundName(const char* sound)
 {
-	if (sound && IsNum(sound))
+	if (sound && sound[0] && IsNum(sound))
 	{
 		auto soundIt = SoundMap.find(atoi(sound));
 		free((char*)sound);
