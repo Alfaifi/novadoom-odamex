@@ -1131,7 +1131,7 @@ static int PatchThing(int thingy)
 			auto soundIt = SoundMap.find(val);
 			if (soundIt == SoundMap.end())
 			{
-				snd = strdup(Line2);
+				snd = Line2;
 				stripwhite(snd);
 			}
 			else
@@ -1848,7 +1848,6 @@ void IdxToSoundName(const char* sound)
 	if (sound && sound[0] && IsNum(sound))
 	{
 		auto soundIt = SoundMap.find(atoi(sound));
-		free((char*)sound);
 		sound = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
 	}
 }
