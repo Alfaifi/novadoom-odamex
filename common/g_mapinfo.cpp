@@ -498,7 +498,7 @@ void MIType_InterLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 		*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->second = tok.substr(1);
 		return;
 	}
-	*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->second = tok;
+	*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->first = tok;
 }
 
 // Sets the inputted data as an OLumpName, checking LANGUAGE for the actual OLumpName
