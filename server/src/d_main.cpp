@@ -202,7 +202,7 @@ void STACK_ARGS D_Shutdown()
 
 	// stop sound effects and music
 	S_Stop();
-	
+
 	DThinker::DestroyAllThinkers();
 
 	D_UndoDehPatch();
@@ -217,7 +217,7 @@ void STACK_ARGS D_Shutdown()
 
 	// [AM] Level is now invalid due to torching zone memory.
 	g_ValidLevel = false;
-	
+
 	// [AM] All of our dyncolormaps are freed, tidy up so we
 	//      don't follow wild pointers.
 	NormalLight.next = NULL;
@@ -244,6 +244,7 @@ void D_DoomMain()
 	D_Initialize_States(boomstates, ::NUMSTATES);
     D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
 	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
+	D_Initialize_SoundMap(doom_SoundMap, ARRAY_LENGTH(doom_SoundMap));
 	// Initialize all extra frames
 	D_Init_Nightmare_Flags();
 	// Initialize the odamex specific objects
@@ -387,7 +388,7 @@ void D_DoomMain()
 		startmap = Args.GetArg(p + 1);
 		((char*)Args.GetArg(p))[0] = '-';
 	}
-	
+
 	level.mapname = startmap;
 
 	G_ChangeMap();

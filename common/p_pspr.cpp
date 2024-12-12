@@ -1091,10 +1091,17 @@ void A_WeaponMeleeAttack(AActor* mo)
 	hitsound = psp->state->args[3];
 	range = psp->state->args[4];
 
-	if (hitsound >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
+	char* snd;
+
+	auto soundIt = SoundMap.find(hitsound);
+	if (soundIt == SoundMap.end())
 	{
 		DPrintf("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
-		hitsound = 0;
+		snd = nullptr;
+	}
+	else
+	{
+		snd = (char*)soundIt->second;
 	}
 
 	if (range <= 0)
@@ -1123,7 +1130,7 @@ void A_WeaponMeleeAttack(AActor* mo)
 		return;
 
 	// un-missed!
-	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, SoundMap[hitsound],
+	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, snd,
 	                    ATTN_NORM);
 
 	// turn to face target
@@ -1146,14 +1153,20 @@ void A_WeaponSound(AActor *mo)
 		return;
 
 	int sndmap = psp->state->args[0];
+	char* snd;
 
-	if (sndmap >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
+	auto soundIt = SoundMap.find(sndmap);
+	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon Sound ID is beyond the array of the Sound Map!\n");
-		sndmap = 0;
+		DPrintf("Warning: Weapon sound ID is beyond the array of the Sound Map!\n");
+		snd = nullptr;
+	}
+	else
+	{
+		snd = (char*)soundIt->second;
 	}
 
-	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, SoundMap[sndmap],
+	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, snd,
 	                    (psp->state->args[1] ? ATTN_NONE : ATTN_NORM));
 }
 
