@@ -1860,7 +1860,8 @@ static int PatchSounds(int dummy)
 #endif
 	while ((result = GetLine()) == 1)
 	{
-		const char* newname = skipwhite(Line2);
+		char* newname = Line2;
+		stripwhite(newname);
 		OLumpName newnameds = fmt::sprintf("DS%s", newname);
 
 		if (IsNum(Line1))
@@ -1881,12 +1882,12 @@ static int PatchSounds(int dummy)
 	for (auto& pair : mobjinfo)
 	{
 		auto& info = pair.second;
-		IdxToSoundName(const_cast<char*>(info->seesound));
-		IdxToSoundName(const_cast<char*>(info->attacksound));
-		IdxToSoundName(const_cast<char*>(info->painsound));
-		IdxToSoundName(const_cast<char*>(info->deathsound));
-		IdxToSoundName(const_cast<char*>(info->activesound));
-		IdxToSoundName(const_cast<char*>(info->ripsound));
+		IdxToSoundName(info->seesound);
+		IdxToSoundName(info->attacksound);
+		IdxToSoundName(info->painsound);
+		IdxToSoundName(info->deathsound);
+		IdxToSoundName(info->activesound);
+		IdxToSoundName(info->ripsound);
 	}
 	S_HashSounds();
 	return result;
