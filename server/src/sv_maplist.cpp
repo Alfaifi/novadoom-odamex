@@ -130,6 +130,7 @@ bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry) {
 
 	// capitalize the map names
 	maplist_entry.map = StdStringToUpper(maplist_entry.map);
+	maplist_entry.lastmap = StdStringToUpper(maplist_entry.lastmap);
 
 	// Puts the map into its proper place
 	this->maplist.insert(this->maplist.begin() + position, maplist_entry);
@@ -661,9 +662,14 @@ BEGIN_COMMAND (maplist) {
 		} else if (it->first == next_index) {
 			flag = '+';
 		}
-		Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
-			   JoinStrings(it->second->wads, " ").c_str(),
-			   it->second->map.c_str());
+		if (it->second->lastmap.empty())
+			Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
+				   JoinStrings(it->second->wads, " ").c_str(),
+				   it->second->map.c_str());
+		else
+			Printf(PRINT_HIGH, "%c%lu. %s %s lastmap=%s\n", flag, it->first + 1,
+				   JoinStrings(it->second->wads, " ").c_str(),
+				   it->second->map.c_str(), it->second->lastmap.c_str());
 	}
 } END_COMMAND (maplist)
 
