@@ -551,6 +551,7 @@ typedef struct
 	DoomObjectContainer<mobjinfo_t> backupMobjInfo; // doom_mobjinfo
 	DoomObjectContainer<const char*> backupSprnames; // doom_sprnames
 	DoomObjectContainer<const char*> backupSoundMap; // doom_SoundMap
+	std::vector<sfxinfo_t> backupS_sfx;
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	int backupMaxAmmo[NUMAMMO];
 	int backupClipAmmo[NUMAMMO];
@@ -628,6 +629,7 @@ static void BackupData(void)
 	std::copy(clipammo, clipammo + ::NUMAMMO, doomBackup.backupClipAmmo);
 	std::copy(maxammo, maxammo + ::NUMAMMO, doomBackup.backupMaxAmmo);
 	doomBackup.backupDeh = deh;
+	doomBackup.backupS_sfx = S_sfx;
 
 	BackedUpData = true;
 }
@@ -653,10 +655,16 @@ void D_UndoDehPatch()
 	}
 	M_Free(OrgSprNames);
 
+
+	sprnames.clear();
+	sprnames.reserve(doomBackup.backupSprnames.size());
+	for (const auto& sprname : doomBackup.backupSprnames)
+	{
+		sprnames.insert(sprname.second, sprname.first);
+	}
 	// unsafe usage of data() here but to keep a consistent API
-	D_Initialize_sprnames(doomBackup.backupSprnames.data(), ::NUMSPRITES, SPR_TROO);
-	D_Initialize_States(doomBackup.backupStates.data(), ::NUMSTATES);
-	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), ::NUMMOBJTYPES);
+	D_Initialize_States(doomBackup.backupStates.data(), doomBackup.backupStates.size());
+	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), doomBackup.backupMobjInfo.size());
 	D_Initialize_SoundMap(doomBackup.backupSoundMap.data(), ARRAY_LENGTH(doom_SoundMap));
 
 	extern bool isFast;
@@ -668,6 +676,7 @@ void D_UndoDehPatch()
 	std::copy(doomBackup.backupMaxAmmo, doomBackup.backupMaxAmmo + ::NUMAMMO, maxammo);
 
 	deh = doomBackup.backupDeh;
+	S_sfx = doomBackup.backupS_sfx;
 
 	BackedUpData = false;
 }
