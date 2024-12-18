@@ -663,9 +663,9 @@ void D_UndoDehPatch()
 		sprnames.insert(sprname.second, sprname.first);
 	}
 	// unsafe usage of data() here but to keep a consistent API
-	D_Initialize_States(doomBackup.backupStates.data(), doomBackup.backupStates.size());
-	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), doomBackup.backupMobjInfo.size());
-	D_Initialize_SoundMap(doomBackup.backupSoundMap.data(), ARRAY_LENGTH(doom_SoundMap));
+	D_Initialize_States(doomBackup.backupStates.data(), static_cast<int>(doomBackup.backupStates.size()));
+	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), static_cast<int>(doomBackup.backupMobjInfo.size()));
+	D_Initialize_SoundMap(doomBackup.backupSoundMap.data(), static_cast<int>(doomBackup.backupSoundMap.size()));
 
 	extern bool isFast;
 	isFast = false;
