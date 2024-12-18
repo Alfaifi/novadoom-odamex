@@ -2738,43 +2738,41 @@ static CodePtr null_bexptr = {"(NULL)", NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
 
 void D_PostProcessDeh()
 {
-	int i, j;
+	int i;
 	const CodePtr* bexptr_match;
-	int num_state_t_types = ::num_state_t_types();
 
-	// [CMB] TODO: using ptr here is just to go from front to back - iterator is BETTER but this works
-	state_t** statesptr = states.data();
-	for (i = 0; i < num_state_t_types; i++)
+	for (const auto& it : states)
 	{
+		state_t* state = it.second;
 		bexptr_match = &null_bexptr;
 
-		for (j = 1; CodePtrs[j].func != NULL; ++j)
+		for (i = 1; CodePtrs[i].func != NULL; ++i)
 		{
-			if (statesptr[i]->action == CodePtrs[j].func)
+			if (state->action == CodePtrs[i].func)
 			{
-				bexptr_match = &CodePtrs[j];
+				bexptr_match = &CodePtrs[i];
 				break;
 			}
 		}
 
 		// ensure states don't use more mbf21 args than their
 		// action pointer expects, for future-proofing's sake
-		for (j = MAXSTATEARGS - 1; j >= bexptr_match->argcount; j--)
+		for (i = MAXSTATEARGS - 1; i >= bexptr_match->argcount; i--)
 		{
-			if (statesptr[i]->args[j] != 0)
+			if (state->args[i] != 0)
 			{
 				I_Error("Action %s on state %d expects no more than %d nonzero args (%d "
 				        "found). Check your DEHACKED.",
-				        bexptr_match->name, i, bexptr_match->argcount, j + 1);
+				        bexptr_match->name, state->statenum, bexptr_match->argcount, i + 1);
 			}
 		}
 
 		// replace unset fields with default values
-		for (; j >= 0; j--)
+		for (; i >= 0; i--)
 		{
-			if (statesptr[i]->args[j] == 0 && bexptr_match->default_args[j])
+			if (state->args[i] == 0 && bexptr_match->default_args[i])
 			{
-				statesptr[i]->args[j] = bexptr_match->default_args[j];
+				state->args[i] = bexptr_match->default_args[i];
 			}
 		}
 	}
