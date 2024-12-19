@@ -26,7 +26,6 @@ const char* D_GetOdaSprName(spritenum_t spritenum);
 #include <vector>
 #include <cstddef>
 #include <typeinfo>
-#include <unordered_map>
 
 template <typename ObjType, typename IdxType, typename InOrderContainer>
 class DoomObjectContainer;
@@ -44,7 +43,7 @@ template <typename ObjType, typename IdxType = int32_t, typename InOrderContaine
 class DoomObjectContainer
 {
 
-	typedef std::unordered_map<int, ObjType> LookupTable;
+	typedef OHashTable<int, ObjType> LookupTable;
 	typedef InOrderContainer DoomObjectContainerData;
 	typedef DoomObjectContainer<ObjType, IdxType, InOrderContainer> DoomObjectContainerType;
 
@@ -214,9 +213,8 @@ size_t DoomObjectContainer<ObjType, IdxType, InOrderContainer>::capacity() const
 template <typename ObjType, typename IdxType, typename InOrderContainer>
 void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::clear()
 {
-	this->container.erase(container.begin(), container.end());
-	this->lookup_table.erase(lookup_table.begin(), lookup_table.end());
-	// this->lookup_table.clear(); // needed if we use OHashTable, maybe a bug with its implementation of erase?
+	this->container.clear();
+	this->lookup_table.clear();
 }
 
 // Allocation changes
