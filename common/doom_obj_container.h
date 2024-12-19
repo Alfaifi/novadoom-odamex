@@ -12,7 +12,7 @@
 #include "info.h" // doom object definitions - including enums with negative indices
 
 /*
-extern state_t odastates[]; //statenum_t 
+extern state_t odastates[]; //statenum_t
 extern mobjinfo_t odathings[]; //mobjtype_t
 extern const char* odasprnames[]; // spritenum_t
 
@@ -26,6 +26,7 @@ const char* D_GetOdaSprName(spritenum_t spritenum);
 #include <vector>
 #include <cstddef>
 #include <typeinfo>
+#include <unordered_map>
 
 template <typename ObjType, typename IdxType, typename InOrderContainer>
 class DoomObjectContainer;
@@ -43,7 +44,7 @@ template <typename ObjType, typename IdxType = int32_t, typename InOrderContaine
 class DoomObjectContainer
 {
 
-	typedef OHashTable<int, ObjType> LookupTable;
+	typedef std::unordered_map<int, ObjType> LookupTable;
 	typedef InOrderContainer DoomObjectContainerData;
 	typedef DoomObjectContainer<ObjType, IdxType, InOrderContainer> DoomObjectContainerType;
 
@@ -215,6 +216,7 @@ void DoomObjectContainer<ObjType, IdxType, InOrderContainer>::clear()
 {
 	this->container.erase(container.begin(), container.end());
 	this->lookup_table.erase(lookup_table.begin(), lookup_table.end());
+	// this->lookup_table.clear(); // needed if we use OHashTable, maybe a bug with its implementation of erase?
 }
 
 // Allocation changes

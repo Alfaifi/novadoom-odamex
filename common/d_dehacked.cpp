@@ -532,26 +532,12 @@ static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, 
 	return true;
 }
 
-/*
-typedef struct
-{
-	state_t backupStates[::NUMSTATES];
-	mobjinfo_t backupMobjInfo[::NUMMOBJTYPES];
-	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
-	const char** backupSprnames;
-	int backupMaxAmmo[NUMAMMO];
-	int backupClipAmmo[NUMAMMO];
-	DehInfo backupDeh;
-} DoomBackup;
-*/
-
 typedef struct
 {
 	DoomObjectContainer<state_t> backupStates; // boomstates
 	DoomObjectContainer<mobjinfo_t> backupMobjInfo; // doom_mobjinfo
 	DoomObjectContainer<const char*> backupSprnames; // doom_sprnames
 	DoomObjectContainer<const char*> backupSoundMap; // doom_SoundMap
-	std::vector<sfxinfo_t> backupS_sfx;
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	int backupMaxAmmo[NUMAMMO];
 	int backupClipAmmo[NUMAMMO];
@@ -590,8 +576,8 @@ static void BackupData(void)
 	}
 
 	// states
-	doomBackup.backupStates.resize(::NUMSTATES);
 	doomBackup.backupStates.clear();
+	doomBackup.backupStates.reserve(states.size());
 	for (const std::pair<int32_t, state_t*> & it : states)
 	{
 		state_t state = *it.second;
@@ -599,8 +585,8 @@ static void BackupData(void)
 	}
 
 	// mobjinfo
-	doomBackup.backupMobjInfo.resize(::NUMMOBJTYPES);
 	doomBackup.backupMobjInfo.clear();
+	doomBackup.backupMobjInfo.reserve(mobjinfo.size());
 	for (const std::pair<int32_t, mobjinfo_t*> & it : mobjinfo)
 	{
 		mobjinfo_t mobj = *it.second;
@@ -608,8 +594,8 @@ static void BackupData(void)
 	}
 
 	// sprites
-	doomBackup.backupSprnames.resize(::NUMSPRITES);
 	doomBackup.backupSprnames.clear();
+	doomBackup.backupSprnames.reserve(sprnames.size());
 	for(const std::pair<int32_t, const char*> & it : sprnames)
 	{
 		const char* spr = strdup(it.second);
@@ -617,8 +603,8 @@ static void BackupData(void)
 	}
 
 	// sounds
-	doomBackup.backupSoundMap.resize(ARRAY_LENGTH(doom_SoundMap));
 	doomBackup.backupSoundMap.clear();
+	doomBackup.backupSoundMap.reserve(SoundMap.size());
 	for(const std::pair<int32_t, const char*> & it : SoundMap)
 	{
 		const char* sound = strdup(it.second);
@@ -629,7 +615,6 @@ static void BackupData(void)
 	std::copy(clipammo, clipammo + ::NUMAMMO, doomBackup.backupClipAmmo);
 	std::copy(maxammo, maxammo + ::NUMAMMO, doomBackup.backupMaxAmmo);
 	doomBackup.backupDeh = deh;
-	doomBackup.backupS_sfx = S_sfx;
 
 	BackedUpData = true;
 }
@@ -676,7 +661,6 @@ void D_UndoDehPatch()
 	std::copy(doomBackup.backupMaxAmmo, doomBackup.backupMaxAmmo + ::NUMAMMO, maxammo);
 
 	deh = doomBackup.backupDeh;
-	S_sfx = doomBackup.backupS_sfx;
 
 	BackedUpData = false;
 }
@@ -2061,12 +2045,11 @@ static int PatchPointer(int ptrNum)
 			int i = atoi(Line2);
 
 			// [CMB]: dsdhacked allows infinite code pointers
-			// if (i >= ::num_state_t_types())
+			// is patchpointer supported at all for dsdhacked or does it only work for the original set of states, its deprecated in bex anyway
             if (states.find(i) == states.end())
 			{
-				DPrintf("Pointer %d overruns array (max: %d wanted: %d)."
-				        "\n",
-				        ptrNum, ::num_state_t_types(), i);
+				DPrintf("Source frame %d not found while patching pointer %d.\n",
+				        i, ptrNum);
 			}
 			else
 			{
