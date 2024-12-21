@@ -47,10 +47,4 @@ void R_UpdateSkies();
 bool R_IsSkyFlat(int flatnum);
 void R_ActivateSkies(const byte* hitlist, std::vector<int>& skytextures);
 
-// Interpolation functions
-
-void R_InterpolateSkyDefs(fixed_t amount);
-void R_TicSkyDefInterpolation();
-void R_RestoreSkyDefs();
-
 void R_RenderSkyRange(visplane_t* pl);

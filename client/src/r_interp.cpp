@@ -47,6 +47,10 @@ extern int ConBottomStep;
 extern fixed_t bobx;
 extern fixed_t boby;
 
+void R_InterpolateSkyDefs(fixed_t amount);
+void R_TicSkyDefInterpolation();
+void R_RestoreSkyDefs();
+
 //
 // OInterpolation::getInstance
 //
