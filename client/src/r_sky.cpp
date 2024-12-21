@@ -127,7 +127,7 @@ OHashTable<OLumpName, sky_t*> skylookup;
 OHashTable<int32_t, sky_t*> skyflatlookup;
 
 /**
- * @brief Used by OInterpolation
+ * @brief Used by OInterpolation::beginGameInterpolation
  */
 void R_InterpolateSkyDefs(fixed_t amount)
 {
@@ -176,7 +176,7 @@ void R_InterpolateSkyDefs(fixed_t amount)
 }
 
 /**
- * @brief Used by OInterpolation
+ * @brief Used by OInterpolation::ticInterpolation
  */
 void R_TicSkyDefInterpolation()
 {
@@ -206,7 +206,7 @@ void R_TicSkyDefInterpolation()
 }
 
 /**
- * @brief Used by OInterpolation
+ * @brief Used by OInterpolation::endGameInterpolation
  */
 void R_RestoreSkyDefs()
 {
