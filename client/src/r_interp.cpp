@@ -67,9 +67,7 @@ OInterpolation::~OInterpolation()
 
 OInterpolation::OInterpolation()
 {
-	// Skies
-	saved_sky1offset = 0;
-	prev_sky1offset = 0;
+	// Sky 2 -- sky 1 uses skydefs and must be handled differently
 	saved_sky2offset = 0;
 	prev_sky2offset = 0;
 
@@ -110,9 +108,7 @@ void OInterpolation::resetGameInterpolation()
 	saved_linescrollingtex.clear();
 	saved_sectorceilingscrollingflat.clear();
 	saved_sectorfloorscrollingflat.clear();
-	prev_sky1offset = 0;
 	prev_sky2offset = 0;
-	saved_sky1offset = 0;
 	saved_sky2offset = 0;
 	prev_bobx = 0;
 	prev_boby = 0;
@@ -156,13 +152,14 @@ void OInterpolation::ticGameInterpolation()
 	prev_linescrollingtex.clear();
 	prev_sectorceilingscrollingflat.clear();
 	prev_sectorfloorscrollingflat.clear();
-	prev_sky1offset = 0;
 	prev_sky2offset = 0;
 	prev_camerax = 0;
 	prev_cameray = 0;
 	prev_cameraz = 0;
 	prev_bobx = 0;
 	prev_boby = 0;
+
+	R_TicSkyDefInterpolation();
 
 	if (gamestate == GS_LEVEL)
 	{
@@ -214,7 +211,6 @@ void OInterpolation::ticGameInterpolation()
 		}
 
 		// Update sky offsets
-		//prev_sky1offset = sky1columnoffset;
 		prev_sky2offset = sky2columnoffset;
 
 		// Update bob - this happens once per gametic
@@ -344,15 +340,11 @@ void OInterpolation::interpolateWalls(fixed_t amount)
 void OInterpolation::interpolateSkies(fixed_t amount)
 {
 	// Perform interp for any scrolling skies
-	//fixed_t newsky1offset = prev_sky1offset +
-	//                     FixedMul(amount, sky1columnoffset - prev_sky1offset);
 	fixed_t newsky2offset = prev_sky2offset +
 	                    FixedMul(amount, sky2columnoffset - prev_sky2offset);
 
-	//saved_sky1offset = sky1columnoffset;
 	saved_sky2offset = sky2columnoffset;
 
-	//sky1columnoffset = newsky1offset;
 	sky2columnoffset = newsky2offset;
 }
 
@@ -384,10 +376,11 @@ void OInterpolation::beginGameInterpolation(fixed_t amount)
 	saved_sectorceilingscrollingflat.clear();
 	saved_sectorfloorscrollingflat.clear();
 	saved_linescrollingtex.clear();
-	saved_sky1offset = 0;
 	saved_sky2offset = 0;
 	saved_bobx = 0;
 	saved_boby = 0;
+
+	R_InterpolateSkyDefs(amount);
 
 	if (gamestate == GS_LEVEL)
 	{
@@ -470,8 +463,8 @@ void OInterpolation::restoreWalls(void)
 void OInterpolation::restoreSkies(void)
 {
 	// Restore scrolling skies
-	//sky1columnoffset = saved_sky1offset;
 	sky2columnoffset = saved_sky2offset;
+	R_RestoreSkyDefs();
 }
 
 void OInterpolation::restoreBob(void)
