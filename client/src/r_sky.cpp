@@ -138,6 +138,7 @@ void R_InterpolateSkyDefs(fixed_t amount)
 
 		// Perform interp for any active scrolling skies
 		skytex_t* background = &sky->background;
+		skytex_t* foreground = &sky->foreground;
 
 		if (gamestate == GS_LEVEL)
 		{
@@ -151,34 +152,25 @@ void R_InterpolateSkyDefs(fixed_t amount)
 
 			background->currx = newbackgroundxoffset;
 			background->curry = newbackgroundyoffset;
+
+			fixed_t newforegroundxoffset = foreground->prevx +
+			                    FixedMul(amount, foreground->currx - foreground->prevx);
+			fixed_t newforegroundyoffset = foreground->prevy +
+			                    FixedMul(amount, foreground->curry - foreground->prevy);
+
+			foreground->savedx = foreground->currx;
+			foreground->savedy = foreground->curry;
+
+			foreground->currx = newforegroundxoffset;
+			foreground->curry = newforegroundyoffset;
 		}
 		else
 		{
 			background->savedx = 0;
 			background->savedy = 0;
-		}
-		if (sky->type == skytype_t::DOUBLESKY)
-		{
-			skytex_t* foreground = &sky->foreground;
-			if (gamestate == GS_LEVEL)
-			{
 
-				fixed_t newforegroundxoffset = foreground->prevx +
-				                    FixedMul(amount, foreground->currx - foreground->prevx);
-				fixed_t newforegroundyoffset = foreground->prevy +
-				                    FixedMul(amount, foreground->curry - foreground->prevy);
-
-				foreground->savedx = foreground->currx;
-				foreground->savedy = foreground->curry;
-
-				foreground->currx = newforegroundxoffset;
-				foreground->curry = newforegroundyoffset;
-			}
-			else
-			{
-				foreground->savedx = 0;
-				foreground->savedy = 0;
-			}
+			foreground->savedx = 0;
+			foreground->savedy = 0;
 		}
 	}
 }
@@ -194,30 +186,21 @@ void R_TicSkyDefInterpolation()
 		if (!sky->active) continue;
 
 		skytex_t* background = &sky->background;
+		skytex_t* foreground = &sky->foreground;
 
 		if (gamestate == GS_LEVEL)
 		{
 			background->prevx = background->currx;
 			background->prevy = background->curry;
+			foreground->prevx = foreground->currx;
+			foreground->prevy = foreground->curry;
 		}
 		else
 		{
 			background->prevx = 0;
 			background->prevy = 0;
-		}
-		if (sky->type == skytype_t::DOUBLESKY)
-		{
-			skytex_t* foreground = &sky->foreground;
-			if (gamestate == GS_LEVEL)
-			{
-				foreground->prevx = foreground->currx;
-				foreground->prevy = foreground->curry;
-			}
-			else
-			{
-				foreground->prevx = 0;
-				foreground->prevy = 0;
-			}
+			foreground->prevx = 0;
+			foreground->prevy = 0;
 		}
 	}
 }
@@ -232,15 +215,10 @@ void R_RestoreSkyDefs()
 		sky_t* sky = skypair.second;
 		if (!sky->active) continue;
 
-		skytex_t* background = &sky->background;
-		background->currx = background->savedx;
-		background->curry = background->savedy;
-		if (sky->type == skytype_t::DOUBLESKY)
-		{
-			skytex_t* foreground = &sky->foreground;
-			foreground->currx = foreground->savedx;
-			foreground->curry = foreground->savedy;
-		}
+		sky->background.currx = sky->background.savedx;
+		sky->background.curry = sky->background.savedy;
+		sky->foreground.currx = sky->foreground.savedx;
+		sky->foreground.curry = sky->foreground.savedy;
 	}
 }
 
