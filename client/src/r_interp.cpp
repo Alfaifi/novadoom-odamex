@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -215,7 +215,7 @@ void OInterpolation::ticGameInterpolation()
 
 		// Update sky offsets
 		//prev_sky1offset = sky1columnoffset;
-		//prev_sky2offset = sky2columnoffset;
+		prev_sky2offset = sky2columnoffset;
 
 		// Update bob - this happens once per gametic
 		prev_bobx = bobx;
@@ -345,22 +345,22 @@ void OInterpolation::interpolateSkies(fixed_t amount)
 {
 	// Perform interp for any scrolling skies
 	//fixed_t newsky1offset = prev_sky1offset +
-	//                     FixedMul(render_lerp_amount, sky1columnoffset - prev_sky1offset);
-	//fixed_t newsky2offset = prev_sky2offset +
-	//                     FixedMul(render_lerp_amount, sky2columnoffset - prev_sky2offset);
+	//                     FixedMul(amount, sky1columnoffset - prev_sky1offset);
+	fixed_t newsky2offset = prev_sky2offset +
+	                    FixedMul(amount, sky2columnoffset - prev_sky2offset);
 
 	//saved_sky1offset = sky1columnoffset;
-	//saved_sky2offset = sky2columnoffset;
+	saved_sky2offset = sky2columnoffset;
 
 	//sky1columnoffset = newsky1offset;
-	//sky2columnoffset = newsky2offset;
+	sky2columnoffset = newsky2offset;
 }
 
 void OInterpolation::interpolateBob(fixed_t amount)
 {
 	// Perform interp on weapons bob
-	fixed_t newbobx = prev_bobx + FixedMul(render_lerp_amount, bobx - prev_bobx);
-	fixed_t newboby = prev_boby + FixedMul(render_lerp_amount, boby - prev_boby);
+	fixed_t newbobx = prev_bobx + FixedMul(amount, bobx - prev_bobx);
+	fixed_t newboby = prev_boby + FixedMul(amount, boby - prev_boby);
 
 	saved_bobx = bobx;
 	saved_boby = boby;
@@ -469,9 +469,9 @@ void OInterpolation::restoreWalls(void)
 
 void OInterpolation::restoreSkies(void)
 {
-		// Restore scrolling skies
+	// Restore scrolling skies
 	//sky1columnoffset = saved_sky1offset;
-	//sky2columnoffset = saved_sky2offset;
+	sky2columnoffset = saved_sky2offset;
 }
 
 void OInterpolation::restoreBob(void)
@@ -593,7 +593,7 @@ void OInterpolation::interpolateView(player_t* player, fixed_t amount)
 	    (consolePlayer.id == displayplayer().id && consolePlayer.health > 0 &&
 	     !consolePlayer.mo->reactiontime && !netdemo.isPlaying() && !demoplayback);
 
-	interpolateCamera(render_lerp_amount, use_localview, player->cheats & CF_CHASECAM);
+	interpolateCamera(amount, use_localview, player->cheats & CF_CHASECAM);
 }
 
 //
@@ -634,7 +634,7 @@ void OInterpolation::beginConsoleInterpolation(fixed_t amount)
 fixed_t OInterpolation::getInterpolatedConsoleBottom(fixed_t amount)
 {
 	// Perform interp on console rise/drop
-	return prev_conbottomstep + FixedMul(render_lerp_amount, saved_conbottomstep - prev_conbottomstep);
+	return prev_conbottomstep + FixedMul(amount, saved_conbottomstep - prev_conbottomstep);
 }
 
 VERSION_CONTROL (r_interp_cpp, "$Id$")
