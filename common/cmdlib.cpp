@@ -798,7 +798,7 @@ uint32_t Log2(uint32_t n)
 		LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)
 	};
 
-	register unsigned int t, tt;		// temporaries
+	unsigned int t, tt;		// temporaries
 
 	if ((tt = (n >> 16)))
 		return (t = (tt >> 8)) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
