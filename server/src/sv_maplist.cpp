@@ -33,6 +33,7 @@
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_fileio.h"
+#include "m_random.h"
 #include "sv_main.h"
 #include "svc_message.h"
 #include "w_wad.h"
@@ -51,7 +52,7 @@ void Maplist::shuffle() {
 	for (size_t i = 0;i < maplist.size();++i) {
 		this->s_maplist.push_back(i);
 	}
-	std::random_shuffle(this->s_maplist.begin(), this->s_maplist.end());
+	std::shuffle(this->s_maplist.begin(), this->s_maplist.end(), rng);
 
 	// Update s_index based on our newly-shuffled maplist.
 	this->update_shuffle_index();
