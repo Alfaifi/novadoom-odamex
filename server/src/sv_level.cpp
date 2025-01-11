@@ -204,9 +204,9 @@ std::string G_NextMap()
 {
 	std::string next = level.nextmap.c_str();
 
-	if (gamestate == GS_STARTUP || sv_gametype != GM_COOP || next.empty())
+	if (gamestate == GS_STARTUP || (sv_gametype != GM_COOP && forcedlastmap.empty()) || next.empty())
 	{
-		// if not coop, stay on same level
+		// if not coop, and lastmap is not specified, stay on same level
 		// [ML] 1/25/10: OR if next is empty
 		next = level.mapname.c_str();
 	}
