@@ -68,6 +68,7 @@ extern int nextupdate;
 
 EXTERN_CVAR (sv_endmapscript)
 EXTERN_CVAR (sv_startmapscript)
+EXTERN_CVAR (sv_curpwad)
 EXTERN_CVAR (sv_curmap)
 EXTERN_CVAR (sv_nextmap)
 EXTERN_CVAR (sv_intermissionlimit)
@@ -369,8 +370,16 @@ void G_DoNewGame()
 
 	sv_curmap.ForceSet(d_mapname.c_str());
 
-	G_InitNew(d_mapname);
-	gameaction = ga_nothing;
+	if (::wadfiles.size() < 3) // odamex.wad, iwad, pwad(s)
+	{
+		sv_curpwad.ForceSet("");
+	}
+	else
+	{
+		OResFiles::const_iterator it = ::wadfiles.begin();
+		std::advance(it, 2);
+		sv_curpwad.ForceSet(it->getBasename().c_str());
+	}
 
 	// run script at the start of each map
 	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
@@ -378,6 +387,9 @@ void G_DoNewGame()
 	// reason why the mapscripts ahve to be safe mode?
 	if (strlen(sv_startmapscript.cstring()))
 		AddCommandString(sv_startmapscript.cstring());
+
+	G_InitNew (d_mapname);
+	gameaction = ga_nothing;
 
 	for (Players::iterator it = players.begin();it != players.end();++it)
 	{
