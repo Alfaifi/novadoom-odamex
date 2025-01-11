@@ -790,9 +790,9 @@ void WI_initNetgameStats()
 	cnt_secret_c.clear();
 	cnt_frags_c.clear();
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
 		cnt_kills_c.push_back(0);
@@ -800,7 +800,7 @@ void WI_initNetgameStats()
 		cnt_secret_c.push_back(0);
 		cnt_frags_c.push_back(0);
 
-		dofrags += WI_fragSum(*it);
+		dofrags += WI_fragSum(player);
 	}
 
 	dofrags = !!dofrags;
@@ -1230,28 +1230,26 @@ void WI_checkForAccelerate()
 		return;
 
 	// check for button presses to skip delays
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 		{
-			player_t *player = &*it;
-
-			if (player->cmd.buttons & BT_ATTACK)
+			if (player.cmd.buttons & BT_ATTACK)
 			{
-				if (!player->attackdown)
+				if (!player.attackdown)
 					acceleratestage = 1;
-				player->attackdown = true;
+				player.attackdown = true;
 			}
 			else
-				player->attackdown = false;
-			if (player->cmd.buttons & BT_USE)
+				player.attackdown = false;
+			if (player.cmd.buttons & BT_USE)
 			{
-				if (!player->usedown)
+				if (!player.usedown)
 					acceleratestage = 1;
-				player->usedown = true;
+				player.usedown = true;
 			}
 			else
-				player->usedown = false;
+				player.usedown = false;
 		}
 	}
 }

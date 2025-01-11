@@ -150,25 +150,25 @@ const PlayersView& sortedPlayers()
 	specInQueue.clear();
 	specNormal.clear();
 
-	for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!it->ingame())
+		if (!player.ingame())
 			continue;
 
-		if (it->spectator)
+		if (player.spectator)
 		{
-			if (it->QueuePosition > 0)
+			if (player.QueuePosition > 0)
 			{
-				specInQueue.push_back(&(*it));
+				specInQueue.push_back(&player);
 			}
 			else
 			{
-				specNormal.push_back(&(*it));
+				specNormal.push_back(&player);
 			}
 		}
 		else
 		{
-			inGame.push_back(&(*it));
+			inGame.push_back(&player);
 		}
 	}
 
@@ -205,16 +205,14 @@ const PlayersView& sortedPlayers()
 
 	std::sort(specInQueue.begin(), specInQueue.end(), cmpQueue);
 
-	for (std::vector<player_t*>::iterator it = inGame.begin(); it != inGame.end(); it++)
-		sortedplayers.push_back(*it);
+	for (auto& player : inGame)
+		sortedplayers.push_back(player);
 
-	for (std::vector<player_t*>::iterator it = specInQueue.begin();
-	     it != specInQueue.end(); it++)
-		sortedplayers.push_back(*it);
+	for (auto& player : specInQueue)
+		sortedplayers.push_back(player);
 
-	for (std::vector<player_t*>::iterator it = specNormal.begin(); it != specNormal.end();
-	     it++)
-		sortedplayers.push_back(*it);
+	for (auto& player : specNormal)
+		sortedplayers.push_back(player);
 
 	sp_tic = gametic;
 	return sortedplayers;
@@ -808,8 +806,8 @@ void TeamLives(std::string& str, int& color, byte team)
 	PlayerResults results = PlayerQuery().hasLives().onTeam(static_cast<team_t>(team)).execute();
 	int lives = 0;
 	PlayersView::const_iterator it = results.players.begin();
-	for (; it != results.players.end(); ++it)
-		lives += (*it)->lives;
+	for (const auto& player : results.players)
+		lives += player->lives;
 
 	str = fmt::sprintf("%d", lives);
 }
@@ -1702,21 +1700,21 @@ void EATargets(int x, int y, const float scale,
 	std::vector<TargetInfo_t> Targets;
 
 	// What players should be drawn?
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->spectator || !(it->mo) || it->mo->health <= 0)
+		if (player.spectator || !(player.mo) || player.mo->health <= 0)
 			continue;
 
 		// We don't care about the player whose eyes we are looking through.
-		if (&*it == &(displayplayer()))
+		if (&player == &(displayplayer()))
 			continue;
 
-		if (!P_ActorInFOV(displayplayer().mo, it->mo, 45.0f, 512 * FRACUNIT))
+		if (!P_ActorInFOV(displayplayer().mo, player.mo, 45.0f, 512 * FRACUNIT))
 			continue;
 
 		// The server doesn't want us to see enemy target names.
 		if (!netdemoplaying && !::sv_allowtargetnames && !consoleplayer().spectator &&
-		    !P_AreTeammates(displayplayer(), *it))
+		    !P_AreTeammates(displayplayer(), player))
 		{
 			continue;
 		}
@@ -1725,15 +1723,15 @@ void EATargets(int x, int y, const float scale,
 		int color;
 		if (G_IsTeamGame()) {
 			// In teamgames, we want to use team colors for targets.
-			color = V_GetTextColor(GetTeamInfo(it->userinfo.team)->TextColor.c_str());
+			color = V_GetTextColor(GetTeamInfo(player.userinfo.team)->TextColor.c_str());
 		} else {
 			color = CR_GREY;
 		}
 
 		// Ok, make the temporary player info then add it
 		TargetInfo_t temp = {
-			&*it,
-			P_AproxDistance2(displayplayer().mo, it->mo) >> FRACBITS,
+			&player,
+			P_AproxDistance2(displayplayer().mo, player.mo) >> FRACBITS,
 			color
 		};
 		Targets.push_back(temp);

@@ -615,14 +615,14 @@ BEGIN_COMMAND (chase)
 		if (chasedemo)
 		{
 			chasedemo.Set (0.0f);
-			for (Players::iterator it = players.begin(); it != players.end(); ++it)
-				it->cheats &= ~CF_CHASECAM;
+			for (auto& player : players)
+				player.cheats &= ~CF_CHASECAM;
 		}
 		else
 		{
 			chasedemo.Set (1.0f);
-			for (Players::iterator it = players.begin(); it != players.end(); ++it)
-				it->cheats |= CF_CHASECAM;
+			for (auto& player : players)
+				player.cheats |= CF_CHASECAM;
 		}
 	}
 	else

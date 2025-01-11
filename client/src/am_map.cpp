@@ -481,11 +481,11 @@ void AM_initVariables()
 	player_t* pl = &displayplayer();
 	if (!pl->ingame())
 	{
-		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		for (auto& player : players)
 		{
-			if (it->ingame())
+			if (player.ingame())
 			{
-				pl = &*it;
+				pl = &player;
 				break;
 			}
 		}
@@ -1592,22 +1592,21 @@ void AM_drawPlayers()
 		return;
 	}
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& p : players)
 	{
-		player_t* p = &*it;
 		am_color_t color;
 
-		if (!(it->ingame()) || !p->mo ||
-		    (((G_IsFFAGame() && p != &conplayer) ||
-		      (G_IsTeamGame() && p->userinfo.team != conplayer.userinfo.team)) &&
+		if (!(p.ingame()) || !p.mo ||
+		    (((G_IsFFAGame() && &p != &conplayer) ||
+		      (G_IsTeamGame() && p.userinfo.team != conplayer.userinfo.team)) &&
 		     !(netdemo.isPlaying() || netdemo.isPaused()) && !demoplayback &&
 		     !(conplayer.spectator)) ||
-		    p->spectator)
+		    p.spectator)
 		{
 			continue;
 		}
 
-		if (p->powers[pw_invisibility])
+		if (p.powers[pw_invisibility])
 		{
 			color = gameinfo.currentAutomapColors.AlmostBackground;
 		}
@@ -1615,7 +1614,7 @@ void AM_drawPlayers()
 		{
 			const argb_t* palette = V_GetDefaultPalette()->colors;
 
-			switch (it->id)
+			switch (p.id)
 			{
 			case 1:
 				color = AM_GetColorFromString(palette, "00 FF 00");
@@ -1635,7 +1634,7 @@ void AM_drawPlayers()
 		}
 		else
 		{
-			color.rgb = CL_GetPlayerColor(p);
+			color.rgb = CL_GetPlayerColor(&p);
 			color.index = V_BestColor(V_GetDefaultPalette()->basecolors, color.rgb);
 		}
 
@@ -1647,15 +1646,15 @@ void AM_drawPlayers()
 
 		if (oi.enabled())
 		{
-			moangle = p->mo->prevangle + FixedMul(p->mo->angle - p->mo->prevangle, render_lerp_amount);
-			mox = p->mo->prevx + FixedMul(p->mo->x - p->mo->prevx, render_lerp_amount);
-			moy = p->mo->prevy + FixedMul(p->mo->y - p->mo->prevy, render_lerp_amount);
+			moangle = p.mo->prevangle + FixedMul(p.mo->angle - p.mo->prevangle, render_lerp_amount);
+			mox = p.mo->prevx + FixedMul(p.mo->x - p.mo->prevx, render_lerp_amount);
+			moy = p.mo->prevy + FixedMul(p.mo->y - p.mo->prevy, render_lerp_amount);
 		}
 		else
 		{
-			moangle = p->mo->angle;
-			mox = p->mo->x;
-			moy = p->mo->y;
+			moangle = p.mo->angle;
+			mox = p.mo->x;
+			moy = p.mo->y;
 		}
 
 		M_SetVec2Fixed64(&pt, FIXED2FIXED64(mox), FIXED2FIXED64(moy));

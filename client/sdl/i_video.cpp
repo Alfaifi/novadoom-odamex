@@ -194,8 +194,8 @@ IWindowSurface::IWindowSurface(IWindowSurface* base_surface, uint16_t width, uin
 IWindowSurface::~IWindowSurface()
 {
 	// free all DCanvas objects allocated by this surface
-	for (DCanvasCollection::iterator it = mCanvasStore.begin(); it != mCanvasStore.end(); ++it)
-		delete *it;
+	for (auto& canvas : mCanvasStore)
+		delete canvas;
 
 	// calculate the buffer's original address when freeing mSurfaceBuffer
 	if (mOwnsSurfaceBuffer)
@@ -727,26 +727,26 @@ static IVideoMode I_ValidateVideoMode(const IVideoMode& mode)
 	unsigned int closest_dist = UINT_MAX;
 	const IVideoMode* closest_mode = NULL;
 
-	const IVideoModeList* modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
+	const IVideoModeList& modelist = *I_GetVideoCapabilities()->getSupportedVideoModes();
 	for (int iteration = 0; iteration < 2; iteration++)
 	{
-		for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
+		for (const auto& mode : modelist)
 		{
-			if (*it == desired_mode)		// perfect match?
-				return *it;
+			if (mode == desired_mode)		// perfect match?
+				return mode;
 
-			if (it->bpp == desired_mode.bpp && it->window_mode == desired_mode.window_mode)
+			if (mode.bpp == desired_mode.bpp && mode.window_mode == desired_mode.window_mode)
 			{
-				if (iteration == 0 && (it->width < desired_mode.width || it->height < desired_mode.height))
+				if (iteration == 0 && (mode.width < desired_mode.width || mode.height < desired_mode.height))
 					continue;
 
-				unsigned int dist = (it->width - desired_mode.width) * (it->width - desired_mode.width)
-						+ (it->height - desired_mode.height) * (it->height - desired_mode.height);
+				unsigned int dist = (mode.width - desired_mode.width) * (mode.width - desired_mode.width)
+						+ (mode.height - desired_mode.height) * (mode.height - desired_mode.height);
 
 				if (dist < closest_dist)
 				{
 					closest_dist = dist;
-					closest_mode = &(*it);
+					closest_mode = &mode;
 				}
 			}
 		}

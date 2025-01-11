@@ -202,11 +202,11 @@ void G_InitNew (const char *mapname)
 	// [RH] Remove all particles
 	R_ClearParticles ();
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		it->mo = AActor::AActorPtr();
-		it->camera = AActor::AActorPtr();
-		it->attacker = AActor::AActorPtr();
+		player.mo = AActor::AActorPtr();
+		player.camera = AActor::AActorPtr();
+		player.attacker = AActor::AActorPtr();
 	}
 
 	if (!savegamerestore)
@@ -349,11 +349,11 @@ void G_ExitLevel (int position, int drawscores, bool resetinv)
 {
 	if (resetinv)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->ingame())
+			if (player.ingame())
 			{
-				it->doreborn = true;
+				player.doreborn = true;
 			}
 		}
 	}
@@ -370,11 +370,11 @@ void G_SecretExitLevel (int position, int drawscores, bool resetinv)
 {
 	if (resetinv)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->ingame())
+			if (player.ingame())
 			{
-				it->doreborn = true;
+				player.doreborn = true;
 			}
 		}
 	}
@@ -394,9 +394,9 @@ void G_DoCompleted (void)
 {
 	gameaction = ga_nothing;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		if (it->ingame())
-			G_PlayerFinishLevel(*it);
+	for (auto& player : players)
+		if (player.ingame())
+			G_PlayerFinishLevel(player);
 
 	V_RestoreScreenPalette();
 	R_ExitLevel();
@@ -475,20 +475,21 @@ void G_DoCompleted (void)
 
 	wminfo.plyr.resize(players.size());
 
-	size_t i = 0;
-	for (Players::iterator it = players.begin();it != players.end();++it,++i)
+	unsigned int i = 0;
+	for (const auto& player : players)
 	{
-		wminfo.plyr[i].in = it->ingame();
-		wminfo.plyr[i].skills = it->killcount;
-		wminfo.plyr[i].sitems = it->itemcount;
-		wminfo.plyr[i].ssecret = it->secretcount;
+		wminfo.plyr[i].in = player.ingame();
+		wminfo.plyr[i].skills = player.killcount;
+		wminfo.plyr[i].sitems = player.itemcount;
+		wminfo.plyr[i].ssecret = player.secretcount;
 		wminfo.plyr[i].stime = level.time;
 		//memcpy (wminfo.plyr[i].frags, players[i].frags
 		//		, sizeof(wminfo.plyr[i].frags));
-		wminfo.plyr[i].fragcount = it->fragcount;
+		wminfo.plyr[i].fragcount = player.fragcount;
 
-		if(&*it == &consoleplayer())
-			wminfo.pnum = static_cast<unsigned int>(i);
+		if(&player == &consoleplayer())
+			wminfo.pnum = i;
+		i++;
 	}
 
 	wminfo.didsecret = consoleplayer().didsecret;
@@ -506,9 +507,9 @@ void G_DoCompleted (void)
 
 		if (&thiscluster != &nextcluster || sv_gametype == GM_DM || !(thiscluster.flags & CLUSTER_HUB))
 		{
-			for (Players::iterator it = players.begin();it != players.end();++it)
-				if (it->ingame())
-					G_PlayerFinishLevel(*it); // take away cards and stuff
+			for (auto& player : players)
+				if (player.ingame())
+					G_PlayerFinishLevel(player); // take away cards and stuff
 
 			if (nextcluster.flags & CLUSTER_HUB) {
 				memset (ACS_WorldVars, 0, sizeof(ACS_WorldVars));
@@ -628,22 +629,22 @@ void G_DoLoadLevel (int position)
 	// [RH] Set up details about sky rendering
 	R_InitSkyMap();
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 		{
-			if (::g_resetinvonexit || it->playerstate == PST_DEAD ||
-			    it->playerstate == PST_REBORN)
+			if (::g_resetinvonexit || player.playerstate == PST_DEAD ||
+			    player.playerstate == PST_REBORN)
 			{
-				it->doreborn = true;
+				player.doreborn = true;
 			}
-			it->playerstate = PST_ENTER;
+			player.playerstate = PST_ENTER;
 		}
 
 		// Properly reset Cards, Powerups, and scores.
-		P_ClearPlayerCards(*it);
-		P_ClearPlayerPowerups(*it);
-		P_ClearPlayerScores(*it, SCORES_CLEAR_ALL);
+		P_ClearPlayerCards(player);
+		P_ClearPlayerPowerups(player);
+		P_ClearPlayerScores(player, SCORES_CLEAR_ALL);
 	}
 
 	// initialize the msecnode_t freelist.					phares 3/25/98

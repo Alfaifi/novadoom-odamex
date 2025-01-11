@@ -516,25 +516,25 @@ bool StrToTime(std::string str, time_t &tim) {
 		}
 	}
 
-	for (tokens_t::iterator it = tokens.begin();it != tokens.end();++it) {
-		if (it->second.compare(std::string("seconds").substr(0, it->second.size())) == 0) {
-			tim += it->first;
-		} else if (it->second.compare("secs") == 0) {
-			tim += it->first;
-		} else if (it->second.compare(std::string("minutes").substr(0, it->second.size())) == 0) {
-			tim += it->first * 60;
-		} else if (it->second.compare("mins") == 0) {
-			tim += it->first * 60;
-		} else if (it->second.compare(std::string("hours").substr(0, it->second.size())) == 0) {
-			tim += it->first * 3600;
-		} else if (it->second.compare(std::string("days").substr(0, it->second.size())) == 0) {
-			tim += it->first * 86400;
-		} else if (it->second.compare(std::string("weeks").substr(0, it->second.size())) == 0) {
-			tim += it->first * 604800;
-		} else if (it->second.compare(std::string("months").substr(0, it->second.size())) == 0) {
-			tim += it->first * 2592000;
-		} else if (it->second.compare(std::string("years").substr(0, it->second.size())) == 0) {
-			tim += it->first * 31536000;
+	for (const auto& [count, timeword] : tokens) {
+		if (timeword.compare(std::string("seconds").substr(0, timeword.size())) == 0) {
+			tim += count;
+		} else if (timeword.compare("secs") == 0) {
+			tim += count;
+		} else if (timeword.compare(std::string("minutes").substr(0, timeword.size())) == 0) {
+			tim += count * 60;
+		} else if (timeword.compare("mins") == 0) {
+			tim += count * 60;
+		} else if (timeword.compare(std::string("hours").substr(0, timeword.size())) == 0) {
+			tim += count * 3600;
+		} else if (timeword.compare(std::string("days").substr(0, timeword.size())) == 0) {
+			tim += count * 86400;
+		} else if (timeword.compare(std::string("weeks").substr(0, timeword.size())) == 0) {
+			tim += count * 604800;
+		} else if (timeword.compare(std::string("months").substr(0, timeword.size())) == 0) {
+			tim += count * 2592000;
+		} else if (timeword.compare(std::string("years").substr(0, timeword.size())) == 0) {
+			tim += count * 31536000;
 		} else {
 			// Unrecognized timeword
 			return false;
@@ -617,9 +617,8 @@ std::string &TrimString(std::string &s)
 // Ensure that a string only has valid viewable ASCII in it.
 bool ValidString(const std::string& s)
 {
-	for (std::string::const_iterator it = s.begin();it != s.end();++it)
+	for (const auto& c : s)
 	{
-		const char c = *it;
 		if (c < ' ' || c > '~')
 			return false;
 	}
@@ -631,11 +630,11 @@ bool IsHexString(const std::string& str, const size_t len)
 	if (str.length() != len)
 		return false;
 
-	for (std::string::const_iterator it = str.begin(); it != str.end(); ++it)
+	for (const auto& c : str)
 	{
-		if (*it >= '0' && *it <= '9')
+		if (c >= '0' && c <= '9')
 			continue;
-		if (*it >= 'A' && *it <= 'F')
+		if (c >= 'A' && c <= 'F')
 			continue;
 		return false;
 	}

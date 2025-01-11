@@ -228,9 +228,8 @@ BEGIN_COMMAND(callvote) {
 	MSG_WriteMarker(&net_buffer, clc_callvote);
 	MSG_WriteByte(&net_buffer, (byte)votecmd);
 	MSG_WriteByte(&net_buffer, (byte)(arguments.size()));
-	for (std::vector<std::string>::iterator it = arguments.begin();
-		 it != arguments.end();++it) {
-		MSG_WriteString(&net_buffer, it->c_str());
+	for (const auto& argument : arguments) {
+		MSG_WriteString(&net_buffer, argument.c_str());
 	}
 } END_COMMAND(callvote)
 

@@ -232,8 +232,8 @@ static void CL_RebuildAllPlayerTranslations()
 	if (demoplayback)
 		return;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-		R_BuildPlayerTranslation(it->id, CL_GetPlayerColor(&*it));
+	for (auto& player : players)
+		R_BuildPlayerTranslation(player.id, CL_GetPlayerColor(&player));
 }
 
 CVAR_FUNC_IMPL (r_enemycolor)
@@ -407,8 +407,7 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char* file, const int l
 
 	{
 		// [jsd] unlink player pointers from AActors; solves crash in R_ProjectSprites after a svc_disconnect message.
-		for (Players::iterator it = players.begin(); it != players.end(); it++) {
-			player_s &player = *it;
+		for (auto& player : players) {
 			if (player.mo) {
 				player.mo->player = NULL;
 			}
@@ -790,16 +789,16 @@ BEGIN_COMMAND (players)
 {
 	// Gather all ingame players
 	std::map<int, std::string> mplayers;
-	for (Players::const_iterator it = players.begin();it != players.end();++it) {
-		if (it->ingame()) {
-			mplayers[it->id] = it->userinfo.netname;
+	for (const auto& player : players) {
+		if (player.ingame()) {
+			mplayers[player.id] = player.userinfo.netname;
 		}
 	}
 
 	// Print them, ordered by player id.
 	Printf("PLAYERS IN GAME:\n");
-	for (std::map<int, std::string>::iterator it = mplayers.begin();it != mplayers.end();++it) {
-		Printf("%3d. %s\n", (*it).first, (*it).second.c_str());
+	for (const auto& [id, name] : mplayers) {
+		Printf("%3d. %s\n", id, name.c_str());
 	}
 	Printf("%lu %s\n", mplayers.size(), mplayers.size() == 1 ? "PLAYER" : "PLAYERS");
 }
@@ -2134,10 +2133,10 @@ void CL_SendCmd(void)
 //
 void CL_PlayerTimes()
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame())
-			it->GameTime++;
+		if (player.ingame())
+			player.GameTime++;
 	}
 }
 
@@ -2321,17 +2320,16 @@ void CL_SimulateSectors()
 //
 void CL_SimulatePlayers()
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		player_t *player = &*it;
-		if (!player || !player->mo || player->spectator)
+		if (!player.mo || player.spectator)
 			continue;
 
 		// Consoleplayer is handled in CL_PredictWorld
-		if (player->id == consoleplayer_id)
+		if (player.id == consoleplayer_id)
 			continue;
 
-		PlayerSnapshot snap = player->snapshots.getSnapshot(world_index);
+		PlayerSnapshot snap = player.snapshots.getSnapshot(world_index);
 		if (snap.isValid())
 		{
 			// Examine the old position.  If it doesn't match the snapshot for the
@@ -2343,18 +2341,18 @@ void CL_SimulatePlayers()
 			{
 				// [SL] Save the position prior to the new update so it can be
 				// used for rendering interpolation
-				player->mo->prevx = player->mo->x;
-				player->mo->prevy = player->mo->y;
-				player->mo->prevz = player->mo->z;
-				player->mo->prevangle = player->mo->angle;
-				player->mo->prevpitch = player->mo->pitch;
+				player.mo->prevx = player.mo->x;
+				player.mo->prevy = player.mo->y;
+				player.mo->prevz = player.mo->z;
+				player.mo->prevangle = player.mo->angle;
+				player.mo->prevpitch = player.mo->pitch;
 
-				PlayerSnapshot prevsnap = player->snapshots.getSnapshot(world_index - 1);
+				PlayerSnapshot prevsnap = player.snapshots.getSnapshot(world_index - 1);
 
 				v3fixed_t offset;
-				M_SetVec3Fixed(&offset, prevsnap.getX() - player->mo->x,
-										prevsnap.getY() - player->mo->y,
-										prevsnap.getZ() - player->mo->z);
+				M_SetVec3Fixed(&offset, prevsnap.getX() - player.mo->x,
+										prevsnap.getY() - player.mo->y,
+										prevsnap.getZ() - player.mo->z);
 
 				fixed_t dist = M_LengthVec3Fixed(&offset);
 				if (dist > 2 * FRACUNIT)
@@ -2374,21 +2372,21 @@ void CL_SimulatePlayers()
 				}
 			}
 
-			int oldframe = player->mo->frame;
-			snap.toPlayer(player);
+			int oldframe = player.mo->frame;
+			snap.toPlayer(&player);
 
-			if (player->playerstate != PST_LIVE)
-				player->mo->frame = oldframe;
+			if (player.playerstate != PST_LIVE)
+				player.mo->frame = oldframe;
 
 			if (!snap.isContinuous())
 			{
 				// [SL] Save the position after to the new update so this position
 				// won't be interpolated.
-				player->mo->prevx = player->mo->x;
-				player->mo->prevy = player->mo->y;
-				player->mo->prevz = player->mo->z;
-				player->mo->prevangle = player->mo->angle;
-				player->mo->prevpitch = player->mo->pitch;
+				player.mo->prevx = player.mo->x;
+				player.mo->prevy = player.mo->y;
+				player.mo->prevz = player.mo->z;
+				player.mo->prevangle = player.mo->angle;
+				player.mo->prevpitch = player.mo->pitch;
 			}
 		}
 	}

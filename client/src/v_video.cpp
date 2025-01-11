@@ -318,14 +318,12 @@ CVAR_FUNC_IMPL(vid_maxfps)
 //
 BEGIN_COMMAND(vid_listmodes)
 {
-	const IVideoModeList* modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
-
-	for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
+	for (const auto& mode : *I_GetVideoCapabilities()->getSupportedVideoModes())
 	{
-		if (*it == I_GetWindow()->getVideoMode())
-			Printf_Bold("%s\n", I_GetVideoModeString(*it).c_str());
+		if (mode == I_GetWindow()->getVideoMode())
+			Printf_Bold("%s\n", I_GetVideoModeString(mode).c_str());
 		else
-			Printf(PRINT_HIGH, "%s\n", I_GetVideoModeString(*it).c_str());
+			Printf(PRINT_HIGH, "%s\n", I_GetVideoModeString(mode).c_str());
 	}
 }
 END_COMMAND(vid_listmodes)

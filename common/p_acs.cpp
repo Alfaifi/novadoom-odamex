@@ -99,12 +99,12 @@ static void ClearInventory(AActor* activator)
 {
 	if (activator == NULL)
 	{
-		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		for (auto& player : players)
 		{
-			if (it->ingame() && !it->spectator)
+			if (player.ingame() && !player.spectator)
 			{
-				DoClearInv(&(*it));
-				SERVER_ONLY(SV_SendPlayerInfo(*it));
+				DoClearInv(&player);
+				SERVER_ONLY(SV_SendPlayerInfo(player));
 			}
 		}
 	}
@@ -368,11 +368,10 @@ static void GiveInventory(AActor* activator, const char* type, int amount)
 	{
 		for (int i = 0; i < MAXPLAYERS; ++i)
 		{
-			Players::iterator it;
-			for (it = players.begin();it != players.end();++it)
+			for (auto& player : players)
 			{
-				if (it->ingame() && !it->spectator)
-					DoGiveInv(&(*it), type, amount);
+				if (player.ingame() && !player.spectator)
+					DoGiveInv(&player, type, amount);
 			}
 		}
 	}
@@ -512,11 +511,10 @@ static void TakeInventory(AActor* activator, const char* type, int amount)
 {
 	if (activator == NULL)
 	{
-		Players::iterator it;
-		for (it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->ingame() && !it->spectator)
-				DoTakeInv(&(*it), type, amount);
+			if (player.ingame() && !player.spectator)
+				DoTakeInv(&player, type, amount);
 		}
 	}
 	else if (activator->player != NULL)

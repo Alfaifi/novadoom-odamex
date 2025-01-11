@@ -849,8 +849,8 @@ static void CL_LoadMap(const odaproto::svc::LoadMap* msg)
 	::teleported_players.clear();
 
 	CL_ClearSectorSnapshots();
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-		it->snapshots.clearSnapshots();
+	for (auto& player : players)
+		player.snapshots.clearSnapshots();
 
 	// reset the world_index (force it to sync)
 	CL_ResyncWorldIndex();
@@ -1834,11 +1834,11 @@ static void CL_Say(const odaproto::svc::Say* msg)
 static void CL_CTFRefresh(const odaproto::svc::CTFRefresh* msg)
 {
 	// clear player flags client may have imagined
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
 		for (size_t i = 0; i < NUMTEAMS; i++)
 		{
-			it->flags[i] = false;
+			player.flags[i] = false;
 		}
 	}
 

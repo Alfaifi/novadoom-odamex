@@ -882,20 +882,20 @@ void MIType_Map07Special(OScanner& os, bool newStyleMapInfo, void* data, unsigne
 	    *static_cast<std::vector<bossaction_t>*>(data);
 
 	// mancubus
-	bossactionvector.push_back(bossaction_t());
-	std::vector<bossaction_t>::iterator it = (bossactionvector.end() - 1);
+	bossactionvector.emplace_back();
+	bossaction_t& lastaction = bossactionvector.back();
 
-	it->type = MT_FATSO;
-	it->special = 23;
-	it->tag = 666;
+	lastaction.type = MT_FATSO;
+	lastaction.special = 23;
+	lastaction.tag = 666;
 
 	// arachnotron
-	bossactionvector.push_back(bossaction_t());
-	it = (bossactionvector.end() - 1);
+	bossactionvector.emplace_back();
+	lastaction = bossactionvector.back();
 
-	it->type = MT_BABY;
-	it->special = 30;
-	it->tag = 667;
+	lastaction.type = MT_BABY;
+	lastaction.special = 30;
+	lastaction.tag = 667;
 }
 
 // Sets the map to use the baron bossaction
@@ -905,12 +905,11 @@ void MIType_BaronSpecial(OScanner& os, bool newStyleMapInfo, void* data, unsigne
 	std::vector<bossaction_t>& bossactionvector = *static_cast<std::vector<bossaction_t>*>(data);
 
 	if (bossactionvector.size() == 0)
-		bossactionvector.push_back(bossaction_t());
+		bossactionvector.emplace_back();
 
-	for (std::vector<bossaction_t>::iterator it = bossactionvector.begin();
-	     it != bossactionvector.end(); ++it)
+	for (auto& bossaction : bossactionvector)
 	{
-		it->type = MT_BRUISER;
+		bossaction.type = MT_BRUISER;
 	}
 }
 
@@ -922,12 +921,11 @@ void MIType_CyberdemonSpecial(OScanner& os, bool newStyleMapInfo, void* data, un
 	    *static_cast<std::vector<bossaction_t>*>(data);
 
 	if (bossactionvector.size() == 0)
-		bossactionvector.push_back(bossaction_t());
+		bossactionvector.emplace_back();
 
-	for (std::vector<bossaction_t>::iterator it = bossactionvector.begin();
-	     it != bossactionvector.end(); ++it)
+	for (auto& bossaction : bossactionvector)
 	{
-		it->type = MT_CYBORG;
+		bossaction.type = MT_CYBORG;
 	}
 }
 
@@ -939,12 +937,11 @@ void MIType_SpiderMastermindSpecial(OScanner& os, bool newStyleMapInfo, void* da
 	    *static_cast<std::vector<bossaction_t>*>(data);
 
 	if (bossactionvector.size() == 0)
-		bossactionvector.push_back(bossaction_t());
+		bossactionvector.emplace_back();
 
-	for (std::vector<bossaction_t>::iterator it = bossactionvector.begin();
-	     it != bossactionvector.end(); ++it)
+	for (auto& bossaction : bossactionvector)
 	{
-		it->type = MT_SPIDER;
+		bossaction.type = MT_SPIDER;
 	}
 }
 
@@ -954,21 +951,20 @@ void MIType_SpecialAction_ExitLevel(OScanner& os, bool newStyleMapInfo, void* da
 {
 	std::vector<bossaction_t>& bossactionvector = *static_cast<std::vector<bossaction_t>*>(data);
 
-	std::vector<bossaction_t>::iterator it;
-	for (it = bossactionvector.begin(); it != bossactionvector.end(); ++it)
+	for (auto& bossaction : bossactionvector)
 	{
-		if (it->type != MT_NULL)
+		if (bossaction.type != MT_NULL)
 		{
-			it->special = 11;
-			it->tag = 0;
+			bossaction.special = 11;
+			bossaction.tag = 0;
 			return;
 		}
 	}
 
-	bossactionvector.push_back(bossaction_t());
-	it = bossactionvector.end() - 1;
-	it->special = 11;
-	it->tag = 0;
+	bossactionvector.emplace_back();
+	bossaction_t& lastaction = bossactionvector.back();
+	lastaction.special = 11;
+	lastaction.tag = 0;
 }
 
 //
@@ -977,21 +973,20 @@ void MIType_SpecialAction_OpenDoor(OScanner& os, bool newStyleMapInfo, void* dat
 {
 	std::vector<bossaction_t>& bossactionvector = *static_cast<std::vector<bossaction_t>*>(data);
 
-	std::vector<bossaction_t>::iterator it;
-	for (it = bossactionvector.begin(); it != bossactionvector.end(); ++it)
+	for (auto& bossaction : bossactionvector)
 	{
-		if (it->type != MT_NULL)
+		if (bossaction.type != MT_NULL)
 		{
-			it->special = 29;
-			it->tag = 666;
+			bossaction.special = 29;
+			bossaction.tag = 666;
 			return;
 		}
 	}
 
-	bossactionvector.push_back(bossaction_t());
-	it = bossactionvector.end() - 1;
-	it->special = 29;
-	it->tag = 666;
+	bossactionvector.emplace_back();
+	bossaction_t& lastaction = bossactionvector.back();
+	lastaction.special = 29;
+	lastaction.tag = 666;
 }
 
 //
@@ -1000,21 +995,20 @@ void MIType_SpecialAction_LowerFloor(OScanner& os, bool newStyleMapInfo, void* d
 {
 	std::vector<bossaction_t>& bossactionvector = *static_cast<std::vector<bossaction_t>*>(data);
 
-	std::vector<bossaction_t>::iterator it;
-	for (it = bossactionvector.begin(); it != bossactionvector.end(); ++it)
+	for (auto& bossaction : bossactionvector)
 	{
-		if (it->type != MT_NULL)
+		if (bossaction.type != MT_NULL)
 		{
-			it->special = 23;
-			it->tag = 666;
+			bossaction.special = 23;
+			bossaction.tag = 666;
 			return;
 		}
 	}
 
-	bossactionvector.push_back(bossaction_t());
-	it = (bossactionvector.end() - 1);
-	it->special = 23;
-	it->tag = 666;
+	bossactionvector.emplace_back();
+	bossaction_t& lastaction = bossactionvector.back();
+	lastaction.special = 23;
+	lastaction.tag = 666;
 }
 
 //

@@ -301,15 +301,14 @@ bool M_ResolveWantedFile(OResFile& out, const OWantFile& wanted)
 
 	// And now...we resolve.
 	const std::vector<std::string> dirs = M_FileSearchDirs();
-	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end();
-	     ++it)
+	for (const auto& dir : dirs)
 	{
 		const std::string result =
-		    M_BaseFileSearchDir(*it, basename, exts, wanted.getWantedMD5());
+		    M_BaseFileSearchDir(dir, basename, exts, wanted.getWantedMD5());
 		if (!result.empty())
 		{
 			// Found a file.
-			const std::string fullpath = *it + PATHSEP + result;
+			const std::string fullpath = dir + PATHSEP + result;
 			return OResFile::make(out, fullpath);
 		}
 	}

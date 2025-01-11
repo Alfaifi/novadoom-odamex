@@ -401,10 +401,8 @@ bool C_DoKey(event_t* ev, OKeyBindings* binds, OKeyBindings* doublebinds)
 //
 void C_ReleaseKeys()
 {
-	for (KeyStateTable::iterator it = KeyStates.begin(); it != KeyStates.end(); ++it)
+	for (auto& [key, key_state] : KeyStates)
 	{
-		int key = it->first;
-		KeyState& key_state = it->second;
 		if (key_state.key_down)
 		{
 			key_state.key_down = false;

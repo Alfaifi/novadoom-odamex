@@ -794,16 +794,16 @@ std::string C_QuoteString(const std::string &argstr)
 {
 	std::ostringstream buffer;
 	buffer << "\"";
-	for (std::string::const_iterator it = argstr.begin();it != argstr.end();++it)
+	for (const auto& c : argstr)
 	{
-		if (ValidEscape(*it))
+		if (ValidEscape(c))
 		{
 			// Escape this char.
-			buffer << '\\' << *it;
+			buffer << '\\' << c;
 		}
 		else
 		{
-			buffer << *it;
+			buffer << c;
 		}
 	}
 	buffer << "\"";

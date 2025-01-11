@@ -822,10 +822,9 @@ void D_DoomMain()
 			iwad = wads.iwad;
 			pwads = wads.pwads;
 
-			for (StringTokens::iterator it = wads.options.begin();
-		    	 it != wads.options.end(); ++it)
+			for (const auto& option : wads.options)
 			{
-				Args.AppendArg((*it).c_str());
+				Args.AppendArg(option.c_str());
 			}
 		}
 	}

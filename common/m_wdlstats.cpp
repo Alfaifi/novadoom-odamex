@@ -169,11 +169,10 @@ static void AddWDLPlayer(player_t* player)
 	// Don't add player if their name is already in the vector.
 	// [Blair] Check the player's team too as version six tracks all
 	// connects/disconnects/team switches
-	WDLPlayers::const_iterator it = ::wdlplayers.begin();
-	for (; it != ::wdlplayers.end(); ++it)
+	for (const auto& wdlplayer : ::wdlplayers)
 	{
-		if ((*it).netname == player->userinfo.netname &&
-		    (*it).team == player->userinfo.team && (*it).pid == player->id)
+		if (wdlplayer.netname == player->userinfo.netname &&
+		    wdlplayer.team == player->userinfo.team && wdlplayer.pid == player->id)
 			return;
 	}
 
@@ -202,11 +201,10 @@ static void AddWDLPlayerSpawn(const mapthing2_t* mthing)
 	}
 
 	// [Blair] Add player spawns to the table with team info.
-	WDLPlayerSpawns::const_iterator it = ::wdlplayerspawns.begin();
-	for (; it != ::wdlplayerspawns.end(); ++it)
+	for (const auto& spawn : ::wdlplayerspawns)
 	{
-		if ((*it).x == mthing->x && (*it).y == mthing->y && (*it).z == mthing->z &&
-		    (*it).team == team)
+		if (spawn.x == mthing->x && spawn.y == mthing->y && spawn.z == mthing->z &&
+		    spawn.team == team)
 			return;
 	}
 
@@ -218,11 +216,10 @@ static void AddWDLPlayerSpawn(const mapthing2_t* mthing)
 static void AddWDLFlagLocation(const mapthing2_t* mthing, team_t team)
 {
 	// [Blair] Add flag pedestals to the table.
-	WDLFlagLocations::const_iterator it = ::wdlflaglocations.begin();
-	for (; it != ::wdlflaglocations.end(); ++it)
+	for (const auto& loc : ::wdlflaglocations)
 	{
-		if ((*it).x == mthing->x && (*it).y == mthing->y && (*it).z == mthing->z &&
-		    (*it).team == team)
+		if (loc.x == mthing->x && loc.y == mthing->y && loc.z == mthing->z &&
+		    loc.team == team)
 			return;
 	}
 
@@ -900,13 +897,12 @@ void M_HandleWDLNameChange(team_t team, std::string oldname, std::string newname
 	if (!::wdlstate.recording)
 		return;
 
-	WDLPlayers::iterator it = ::wdlplayers.begin();
-	for (; it != ::wdlplayers.end(); ++it)
+	for (auto& player : ::wdlplayers)
 	{
 		// Attempt a rename but don't go nuts.
-		if ((*it).pid == pid && (*it).netname == oldname && (*it).team == team)
+		if (player.pid == pid && player.netname == oldname && player.team == team)
 		{
-			(*it).netname = newname;
+			player.netname = newname;
 			return;
 		}
 	}
@@ -966,7 +962,7 @@ void M_CommitWDLLog()
 	    (uint64_t)(::level.level_fingerprint[6]) << 48 |
 		(uint64_t)(::level.level_fingerprint[7]) << 56;
 
-	uint64_t reconsthash2 = 
+	uint64_t reconsthash2 =
 		(uint64_t)(::level.level_fingerprint[8]) |
 	    (uint64_t)(::level.level_fingerprint[9]) << 8 |
 	    (uint64_t)(::level.level_fingerprint[10]) << 16 |

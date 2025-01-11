@@ -1949,11 +1949,11 @@ void HU_ConsoleScores(player_t *player)
 	PlayerPtrList sortedplayers;
 	PlayerPtrList sortedspectators;
 
-	for (Players::const_iterator it = players.begin(); it != players.end(); ++it)
-		if (it->ingame() && !it->spectator)
-			sortedplayers.push_back(&*it);
+	for (const auto& player : players)
+		if (player.ingame() && !player.spectator)
+			sortedplayers.push_back(&player);
 		else
-			sortedspectators.push_back(&*it);
+			sortedspectators.push_back(&player);
 
 	// One of these at each end prevents the following from
 	// drawing on the screen itself.
@@ -1995,9 +1995,8 @@ void HU_ConsoleScores(player_t *player)
 			Printf_Bold("Name            Points Caps Frags Time\n");
 			Printf_Bold("--------------------------------------\n");
 
-			for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+			for (const auto& itplayer : sortedplayers)
 			{
-				const player_t* itplayer = *it;
 				if (itplayer->userinfo.team == team_num)
 				{
 					snprintf(str, 1024, "%-15s %-6d N/A  %-5d %4d\n",
@@ -2052,9 +2051,8 @@ void HU_ConsoleScores(player_t *player)
 			Printf_Bold("Name            Frags Deaths  K/D Time\n");
 			Printf_Bold("--------------------------------------\n");
 
-			for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+			for (const auto& itplayer : sortedplayers)
 			{
-				const player_t* itplayer = *it;
 				if (itplayer->userinfo.team == team_num)
 				{
 					snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
@@ -2098,9 +2096,8 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("Name            Frags Deaths  K/D Time\n");
 		Printf_Bold("--------------------------------------\n");
 
-		for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+		for (const auto& itplayer : sortedplayers)
 		{
-			const player_t* itplayer = *it;
 			snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
 					itplayer->userinfo.netname.c_str(),
 					itplayer->fragcount,
@@ -2129,9 +2126,8 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("Name            Kills Deaths  K/D Time\n");
 		Printf_Bold("--------------------------------------\n");
 
-		for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+		for (const auto& itplayer : sortedplayers)
 		{
-			const player_t* itplayer = *it;
 			snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
 					itplayer->userinfo.netname.c_str(),
 					itplayer->killcount,
@@ -2153,9 +2149,8 @@ void HU_ConsoleScores(player_t *player)
 
 		Printf_Bold("\n----------------------------SPECTATORS\n");
 
-		for (PlayerPtrList::const_iterator it = sortedspectators.begin(); it != sortedspectators.end(); ++it)
+		for (const auto& itplayer : sortedspectators)
 		{
-			const player_t* itplayer = *it;
 			snprintf(str, 1024, "%-15s\n", itplayer->userinfo.netname.c_str());
 			if (itplayer == player)
 				Printf_Bold("%s", str);

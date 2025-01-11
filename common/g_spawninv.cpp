@@ -263,9 +263,9 @@ static bool InvSetWeapons(spawnInventory_t& inv, const std::string& value)
 	bool newowned[NUMWEAPONS];
 	ArrayInit(newowned, false);
 
-	for (std::string::const_iterator it = value.begin(); it != value.end(); ++it)
+	for (const auto& c : value)
 	{
-		int owned = WeaponTypeFromChar(*it);
+		int owned = WeaponTypeFromChar(c);
 		if (owned == MININT)
 			return false;
 

@@ -600,9 +600,9 @@ void HordeState::tick()
 	if (m_state != HS_WANTBOSS && m_bossRecipe.isValid())
 	{
 		size_t alive = 0;
-		for (AActors::iterator it = m_bosses.begin(); it != m_bosses.end(); ++it)
+		for (auto& boss : m_bosses)
 		{
-			if (*it && (*it)->health > 0)
+			if (boss && boss->health > 0)
 				alive += 1;
 		}
 		if (!alive)

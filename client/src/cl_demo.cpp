@@ -1098,10 +1098,10 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 	MSG_WriteLong(netbuffer, (DWORD)0x01020304);
 	MSG_WriteShort(netbuffer, sv_maxplayers);
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (it->ingame())
-			MSG_WriteBool(netbuffer, it->spectator);
+		if (player.ingame())
+			MSG_WriteBool(netbuffer, player.spectator);
 	}
 
 	MSG_WriteLong	(netbuffer, (DWORD)0x01020305);
@@ -1485,10 +1485,10 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_WorldVars[i];
 		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
 		arc << worldarr.size();
-		for (ACSWorldGlobalArray::iterator it = worldarr.begin(); it != worldarr.end(); it++)
+		for (const auto& [key, val] : worldarr)
 		{
-			arc << it->first;
-			arc << it->second;
+			arc << key;
+			arc << val;
 		}
 	}
 
@@ -1498,10 +1498,10 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_GlobalVars[i];
 		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
 		arc << globalarr.size();
-		for (ACSWorldGlobalArray::iterator it = globalarr.begin(); it != globalarr.end(); it++)
+		for (const auto& [key, val] : globalarr)
 		{
-			arc << it->first;
-			arc << it->second;
+			arc << key;
+			arc << val;
 		}
 	}
 
@@ -1665,10 +1665,10 @@ void NetDemo::readSnapshotData(std::vector<byte>& buf)
 		displayplayer_id = cid;
 
 	// setup psprites and restore player colors
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		P_SetupPsprites(&*it);
-		R_BuildPlayerTranslation(it->id, CL_GetPlayerColor(&*it));
+		P_SetupPsprites(&player);
+		R_BuildPlayerTranslation(player.id, CL_GetPlayerColor(&player));
 	}
 
 	R_CopyTranslationRGB (0, consoleplayer_id);

@@ -662,7 +662,7 @@ void MSG_WriteSVC(buf_t* b, const google::protobuf::Message& msg)
 
 /**
  * @brief Broadcast message to all players.
- * 
+ *
  * @param buf Type of buffer to broadcast in, per player.
  * @param msg Message to broadcast to all players.
  * @param skip If passed, skip this player id.
@@ -693,16 +693,16 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message& ms
 		return;
 	}
 
-	for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!it->ingame())
+		if (!player.ingame())
 			continue;
 
-		if (static_cast<int>(it->id) == skipPlayer)
+		if (static_cast<int>(player.id) == skipPlayer)
 			continue;
 
 		// Select the correct buffer.
-		buf_t* b = buf == CLBUF_RELIABLE ? &it->client.reliablebuf : &it->client.netbuf;
+		buf_t* b = buf == CLBUF_RELIABLE ? &player.client.reliablebuf : &player.client.netbuf;
 
 		// Do we actaully have room for this upcoming message?
 		const size_t MAX_HEADER_SIZE = 4; // header + 3 bytes for varint size.
@@ -1034,7 +1034,7 @@ float MSG_ReadFloat(void)
 
 /**
  * @brief Initialize a svc_info member.
- * 
+ *
  * @detail do-while is used to force a semicolon afterwards.
  */
 #define SVC_INFO(n)                    \

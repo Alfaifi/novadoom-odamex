@@ -103,12 +103,12 @@ void LevelInfos::clear()
 // Clear all stored snapshots
 void LevelInfos::clearSnapshots()
 {
-	for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		if (it->snapshot)
+		if (info.snapshot)
 		{
-			delete it->snapshot;
-			it->snapshot = NULL;
+			delete info.snapshot;
+			info.snapshot = nullptr;
 		}
 	}
 }
@@ -123,11 +123,11 @@ level_pwad_info_t& LevelInfos::create()
 // Find a levelinfo by mapname
 level_pwad_info_t& LevelInfos::findByName(const char* mapname)
 {
-	for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		if (it->mapname == mapname)
+		if (info.mapname == mapname)
 		{
-			return *it;
+			return info;
 		}
 	}
 	return ::g_EmptyLevel;
@@ -135,11 +135,11 @@ level_pwad_info_t& LevelInfos::findByName(const char* mapname)
 
 level_pwad_info_t& LevelInfos::findByName(const std::string &mapname)
 {
-	for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		if (it->mapname == mapname)
+		if (info.mapname == mapname)
 		{
-			return *it;
+			return info;
 		}
 	}
 	return ::g_EmptyLevel;
@@ -147,11 +147,11 @@ level_pwad_info_t& LevelInfos::findByName(const std::string &mapname)
 
 level_pwad_info_t& LevelInfos::findByName(const OLumpName& mapname)
 {
-	for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		if (it->mapname == mapname)
+		if (info.mapname == mapname)
 		{
-			return *it;
+			return info;
 		}
 	}
 	return ::g_EmptyLevel;
@@ -160,11 +160,11 @@ level_pwad_info_t& LevelInfos::findByName(const OLumpName& mapname)
 // Find a levelinfo by mapnum
 level_pwad_info_t& LevelInfos::findByNum(int levelnum)
 {
-	for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		if (it->levelnum == levelnum && W_CheckNumForName(it->mapname.c_str()) != -1)
+		if (info.levelnum == levelnum && W_CheckNumForName(info.mapname.c_str()) != -1)
 		{
-			return *it;
+			return info;
 		}
 	}
 	return ::g_EmptyLevel;
@@ -179,15 +179,15 @@ size_t LevelInfos::size()
 // Zap all deferred ACS scripts
 void LevelInfos::zapDeferreds()
 {
-	for (_LevelInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		acsdefered_t* def = it->defered;
+		acsdefered_t* def = info.defered;
 		while (def) {
 			acsdefered_t* next = def->next;
 			delete def;
 			def = next;
 		}
-		it->defered = NULL;
+		info.defered = nullptr;
 	}
 }
 
@@ -234,12 +234,12 @@ cluster_info_t& ClusterInfos::at(size_t i)
 void ClusterInfos::clear()
 {
 	// Free all strings.
-	for (_ClusterInfoArray::iterator it = m_infos.begin(); it != m_infos.end(); ++it)
+	for (auto& info : m_infos)
 	{
-		free(it->exittext);
-		it->exittext = NULL;
-		free(it->entertext);
-		it->entertext = NULL;
+		free(info.exittext);
+		info.exittext = nullptr;
+		free(info.entertext);
+		info.entertext = nullptr;
 	}
 	return m_infos.clear();
 }
@@ -254,11 +254,11 @@ cluster_info_t& ClusterInfos::create()
 // Find a clusterinfo by mapname
 cluster_info_t& ClusterInfos::findByCluster(int i)
 {
-	for (_ClusterInfoArray::iterator it = m_infos.begin();it != m_infos.end();++it)
+	for (auto& info : m_infos)
 	{
-		if (it->cluster == i)
+		if (info.cluster == i)
 		{
-			return *it;
+			return info;
 		}
 	}
 	return ::g_EmptyCluster;

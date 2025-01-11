@@ -165,9 +165,8 @@ void MaplistCache::ev_tic() {
 
 		// Our deferred queries are similarly useless.
 		this->error = "You are not connected to a server.";
-		for (std::vector<deferred_query_t>::iterator it = this->deferred_queries.begin();
-			 it != this->deferred_queries.end();++it) {
-			it->errback(this->error);
+		for (const auto& query : deferred_queries) {
+			query.errback(this->error);
 		}
 		this->deferred_queries.clear();
 		return;
@@ -182,11 +181,10 @@ void MaplistCache::ev_tic() {
 	case MAPLIST_OK:
 		// If we have an "OK" maplist status, we ought to run
 		// our callbacks and get things over with.
-		for (std::vector<deferred_query_t>::iterator it = this->deferred_queries.begin();
-			 it != this->deferred_queries.end();++it) {
+		for (const auto& query : deferred_queries) {
 			maplist_qrows_t query_result;
-			this->query(it->query, query_result);
-			it->callback(query_result);
+			this->query(query.query, query_result);
+			query.callback(query_result);
 		}
 		this->deferred_queries.clear();
 		return;
@@ -210,9 +208,8 @@ void MaplistCache::ev_tic() {
 	}
 
 	// Handle our error conditions by running our errbacks.
-	for (std::vector<deferred_query_t>::iterator it = this->deferred_queries.begin();
-		 it != this->deferred_queries.end();++it) {
-		it->errback(this->error);
+	for (const auto& query : deferred_queries) {
+		query.errback(this->error);
 	}
 	this->deferred_queries.clear();
 }

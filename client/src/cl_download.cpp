@@ -338,9 +338,8 @@ static StringTokens GetDownloadDirs()
 	dirs.push_back(M_GetCWD());
 
 	// Clean up all of the directories before deduping them.
-	StringTokens::iterator it = dirs.begin();
-	for (; it != dirs.end(); ++it)
-		*it = M_CleanPath(*it);
+	for (auto& dir : dirs)
+		dir = M_CleanPath(dir);
 
 	// Dedupe directories.
 	dirs.erase(std::unique(dirs.begin(), dirs.end()), dirs.end());
@@ -373,12 +372,12 @@ static void TickDownload()
 		// Figure out where our destination should be.
 		std::string dest;
 		StringTokens dirs = GetDownloadDirs();
-		for (StringTokens::iterator it = dirs.begin(); it != dirs.end(); ++it)
+		for (const auto& dir : dirs)
 		{
 			// Ensure no path-traversal shenanegins are going on.
-			dest = *it + PATHSEP + ::dlstate.filename;
+			dest = dir + PATHSEP + ::dlstate.filename;
 			M_CleanPath(dest);
-			if (dest.find(*it) != 0)
+			if (dest.find(dir) != 0)
 			{
 				// Something about the filename is trying to escape the
 				// download directory.  This is almost certainly malicious.

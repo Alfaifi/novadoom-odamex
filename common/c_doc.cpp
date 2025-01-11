@@ -280,9 +280,9 @@ BEGIN_COMMAND(cvardoc)
 
 	// Stamp out our CVars
 	CvarView view = GetSortedCvarView();
-	for (CvarView::const_iterator it = view.begin(); it != view.end(); ++it)
+	for (const auto& cvar : view)
 	{
-		HTMLCvarRow(buffer, **it);
+		HTMLCvarRow(buffer, *cvar);
 		fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
 	}
 

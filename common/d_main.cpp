@@ -412,14 +412,13 @@ void D_LoadResolvedPatches()
 {
 	// Load external patch files first.
 	bool chexLoaded = false;
-	for (OResFiles::const_iterator it = ::patchfiles.begin(); it != ::patchfiles.end();
-	     ++it)
+	for (const auto& file : ::patchfiles)
 	{
-		if (StdStringToUpper(it->getBasename()) == "CHEX.DEH")
+		if (StdStringToUpper(file.getBasename()) == "CHEX.DEH")
 		{
 			chexLoaded = true;
 		}
-		D_DoDehPatch(&*it, -1);
+		D_DoDehPatch(&file, -1);
 	}
 
 	// Check WAD files for lumps.
@@ -642,22 +641,21 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 	// Resolve wanted wads.
 	OResFiles resolved_wads;
 	resolved_wads.reserve(newwadfiles.size());
-	for (OWantFiles::const_iterator it = newwadfiles.begin(); it != newwadfiles.end();
-	     ++it)
+	for (const auto& wantfile : newwadfiles)
 	{
 		OResFile file;
-		if (!M_ResolveWantedFile(file, *it))
+		if (!M_ResolveWantedFile(file, wantfile))
 		{
 			// Give more useful information when trying to load an IWAD.
-			const bool isCommercial = CommercialIWADWarning(*it);
+			const bool isCommercial = CommercialIWADWarning(wantfile);
 			if (isCommercial && !::missingCommercialIWAD)
 			{
 				::missingCommercialIWAD = true;
 			}
 
-			::missingfiles.push_back(*it);
+			::missingfiles.push_back(wantfile);
 			Printf(PRINT_WARNING, "Could not resolve resource file \"%s\".",
-			       it->getWantedPath().c_str());
+			       wantfile.getWantedPath().c_str());
 			continue;
 		}
 		resolved_wads.push_back(file);
@@ -666,15 +664,14 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 	// Resolve wanted patches.
 	OResFiles resolved_patches;
 	resolved_patches.reserve(newpatchfiles.size());
-	for (OWantFiles::const_iterator it = newpatchfiles.begin(); it != newpatchfiles.end();
-	     ++it)
+	for (const auto& wantfile : newpatchfiles)
 	{
 		OResFile file;
-		if (!M_ResolveWantedFile(file, *it))
+		if (!M_ResolveWantedFile(file, wantfile))
 		{
-			::missingfiles.push_back(*it);
+			::missingfiles.push_back(wantfile);
 			Printf(PRINT_WARNING, "Could not resolve patch file \"%s\".",
-			       it->getWantedPath().c_str());
+			       wantfile.getWantedPath().c_str());
 			continue;
 		}
 		resolved_patches.push_back(file);

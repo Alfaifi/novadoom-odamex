@@ -434,7 +434,7 @@ static void I_UpdateGrab()
 	// force I_ResumeMouse or I_PauseMouse if toggling between fullscreen/windowed
 	bool fullscreen = I_GetWindow()->isFullScreen();
 	static bool prev_fullscreen = fullscreen;
-	if (fullscreen != prev_fullscreen) 
+	if (fullscreen != prev_fullscreen)
 		I_ForceUpdateGrab();
 	prev_fullscreen = fullscreen;
 
@@ -478,7 +478,7 @@ CVAR_FUNC_IMPL(joy_active)
 		}
 	}
 
-#ifdef GCONSOLE	
+#ifdef GCONSOLE
 	// Don't let console users choose an invalid joystick because
 	// they won't have any way to reenable through the menu.
 	if (!devices.empty())
@@ -517,7 +517,7 @@ std::string I_GetJoystickNameFromIndex(int index)
 bool I_OpenJoystick()
 {
 	I_CloseJoystick();		// just in case it was left open...
-	
+
 	if (use_joystick != 0)
 	{
 		// Verify that the joystick ID indicated by the joy_active CVAR
@@ -794,7 +794,7 @@ void IInputSubsystem::disableTextEntry()
 // Joystick hat events also repeat but each directional trigger repeats
 // concurrently as long as they are held down. Thus a unique value is returned
 // for each of them.
-// 
+//
 static int I_GetEventRepeaterKey(const event_t* ev)
 {
 	if (ev->type != ev_keydown && ev->type != ev_keyup)
@@ -854,9 +854,8 @@ void IInputSubsystem::addToEventRepeaters(event_t& ev)
 //
 void IInputSubsystem::repeatEvents()
 {
-	for (EventRepeaterTable::iterator it = mEventRepeaters.begin(); it != mEventRepeaters.end(); ++it)
+	for (auto& [_, repeater] : mEventRepeaters)
 	{
-		EventRepeater& repeater = it->second;
 		uint64_t current_time = I_GetTime();
 
 		if (!repeater.repeating && current_time - repeater.last_time >= mRepeatDelay)
@@ -881,9 +880,8 @@ void IInputSubsystem::repeatEvents()
 void IInputSubsystem::gatherEvents()
 {
 	event_t ev;
-	for (InputDeviceList::iterator it = mInputDevices.begin(); it != mInputDevices.end(); ++it)
+	for (const auto& device : mInputDevices)
 	{
-		IInputDevice* device = *it;
 		device->gatherEvents();
 		while (device->hasEvent())
 		{
