@@ -76,7 +76,6 @@ EXTERN_CVAR (sv_warmup)
 EXTERN_CVAR (sv_timelimit)
 EXTERN_CVAR (sv_teamsinplay)
 EXTERN_CVAR(g_resetinvonexit)
-EXTERN_CVAR(sv_mapliststayonwad)
 
 extern int mapchange;
 extern std::string forcedlastmap;
@@ -187,7 +186,7 @@ BEGIN_COMMAND (wad) // denis - changes wads
 	}
 
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
-	G_LoadWadString(wadstr, lastmap);
+	G_LoadWadString(wadstr, "", lastmap);
 }
 END_COMMAND (wad)
 
@@ -271,12 +270,12 @@ void G_ChangeMap()
 		if (!Maplist::instance().lobbyempty())
 		{
 			std::string wadstr = C_EscapeWadList(lobby_entry.wads);
-			G_LoadWadString(wadstr, "", lobby_entry.map);
+			G_LoadWadString(wadstr, lobby_entry.map);
 		}
 		else
 		{
 			size_t next_index;
-			if ((sv_mapliststayonwad && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
+			if (!isLastMap() || !Maplist::instance().get_next_index(next_index))
 			{
 				// We don't have a maplist, so grab the next 'natural' map lump.
 				std::string next = G_NextMap();
@@ -288,7 +287,7 @@ void G_ChangeMap()
 				Maplist::instance().get_map_by_index(next_index, maplist_entry);
 
 				std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-				G_LoadWadString(wadstr, maplist_entry.lastmap, maplist_entry.map);
+				G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
 
 				// Set the new map as the current map
 				Maplist::instance().set_index(next_index);
@@ -314,7 +313,7 @@ void G_ChangeMap(size_t index) {
 	}
 
 	std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-	G_LoadWadString(wadstr, maplist_entry.lastmap, maplist_entry.map);
+	G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
 
 	// Set the new map as the current map
 	Maplist::instance().set_index(index);
