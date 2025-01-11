@@ -95,9 +95,6 @@ CVAR(			sv_curmap, "", "Set to the last played map",
 CVAR(			sv_nextmap, "", "Set to the next map to be played",
 				CVARTYPE_STRING, CVAR_NOSET | CVAR_NOENABLEDISABLE)
 
-CVAR(			sv_loopepisode, "0", "Determines whether Doom 1 episodes carry over",
-				CVARTYPE_BOOL, CVAR_SERVERARCHIVE)
-
 CVAR_FUNC_DECL(	sv_shufflemaplist, "0", "Randomly shuffle the maplist",
 				CVARTYPE_BOOL, CVAR_SERVERARCHIVE)
 

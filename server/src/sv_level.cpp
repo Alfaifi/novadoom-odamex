@@ -70,7 +70,6 @@ EXTERN_CVAR (sv_endmapscript)
 EXTERN_CVAR (sv_startmapscript)
 EXTERN_CVAR (sv_curmap)
 EXTERN_CVAR (sv_nextmap)
-EXTERN_CVAR (sv_loopepisode)
 EXTERN_CVAR (sv_intermissionlimit)
 EXTERN_CVAR (sv_warmup)
 EXTERN_CVAR (sv_timelimit)
@@ -203,7 +202,7 @@ bool isLastMap()
 	if (iequals(next.substr(0, 7), "EndGame") ||
 			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
 	{
-		if (sv_loopepisode || gameinfo.flags & GI_MAPxx || gamemode == shareware ||
+		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
 				((gamemode == registered && level.cluster == 3) ||
 				 ((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4)))
 			return true;
@@ -235,15 +234,11 @@ std::string G_NextMap()
 			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
 	{
 		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-			(!sv_loopepisode && (level.nextmap == "" || level.mapname == forcedlastmap)) ||
-			(!sv_loopepisode && ((gamemode == registered && level.cluster == 3) ||
+			((level.nextmap == "" || level.mapname == forcedlastmap)) ||
+			(((gamemode == registered && level.cluster == 3) ||
 			((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
 		{
 			next = CalcMapName(1, 1);
-		}
-		else if (sv_loopepisode)
-		{
-			next = CalcMapName(level.cluster, 1);
 		}
 		else
 		{
@@ -275,7 +270,7 @@ void G_ChangeMap()
 		else
 		{
 			size_t next_index;
-			if (!isLastMap() || !Maplist::instance().get_next_index(next_index))
+			if ((!forcedlastmap.empty() && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
 			{
 				// We don't have a maplist, so grab the next 'natural' map lump.
 				std::string next = G_NextMap();
