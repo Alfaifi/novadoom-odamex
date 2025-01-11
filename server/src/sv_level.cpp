@@ -196,20 +196,7 @@ EXTERN_CVAR(sv_shufflemaplist)
 
 bool isLastMap()
 {
-	if (level.nextmap == "" || level.mapname == forcedlastmap)
-		return true;
-
-	std::string next = level.nextmap.c_str();
-	if (iequals(next.substr(0, 7), "EndGame") ||
-			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
-	{
-		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-				((gamemode == registered && level.cluster == 3) ||
-				 ((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4)))
-			return true;
-	}
-
-	return false;
+	return level.nextmap == "" || level.mapname == forcedlastmap;
 }
 
 // Returns the next map, assuming there is no maplist.
@@ -230,12 +217,10 @@ std::string G_NextMap()
 
 	// NES - exiting a Doom 1 episode moves to the next episode,
 	// rather than always going back to E1M1
-	if (level.nextmap == "" || level.mapname == forcedlastmap ||
-			iequals(next.substr(0, 7), "EndGame") ||
-			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
+	if (iequals(next.substr(0, 7), "EndGame") ||
+	    (gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
 	{
 		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-			((level.nextmap == "" || level.mapname == forcedlastmap)) ||
 			(((gamemode == registered && level.cluster == 3) ||
 			((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
 		{
