@@ -87,6 +87,7 @@ static tallpost_t* topposts[MAXWIDTH];
 static tallpost_t* midposts[MAXWIDTH];
 static tallpost_t* bottomposts[MAXWIDTH];
 
+static fixed_t wallscaley;
 static fixed_t wallscalex[MAXWIDTH];
 static int texoffs[MAXWIDTH];
 
@@ -289,9 +290,8 @@ static inline void R_BlastSolidSegColumn(void (*drawfunc)())
 		dcol.post = destpost;
 	}
 
-	dcol.iscale = 0xffffffffu / unsigned(wallscalex[dcol.x]);
+	dcol.iscale = FixedMul(0xffffffffu / unsigned(wallscalex[dcol.x]), wallscaley);
 	dcol.source = dcol.post->data();
-	// TODO: dcol.texturefrac should take y-scaling of textures into account
 	dcol.texturefrac = dcol.texturemid + FixedMul((dcol.yl - centery + 1) << FRACBITS, dcol.iscale);
 
 	if (dcol.yl <= dcol.yh)
@@ -510,8 +510,9 @@ void R_RenderSolidSegRange(int start, int stop)
 
 		rw_light = initial_light;
 
+		wallscaley = texturescaley[midtexture];
 		dcol.textureheight = textureheight[midtexture];
-		dcol.texturemid = rw_midtexturemid;
+		dcol.texturemid = R_TexScaleY(rw_midtexturemid, midtexture);
 
 		R_RenderColumnRange(start, stop, walltopf, lower, midposts,
 					SolidColumnBlaster, true, columnmethod);
@@ -533,8 +534,9 @@ void R_RenderSolidSegRange(int start, int stop)
 				lower[x] = walltopb[x] - 1;
 			}
 
+			wallscaley = texturescaley[toptexture];
 			dcol.textureheight = textureheight[toptexture];
-			dcol.texturemid = rw_toptexturemid;
+			dcol.texturemid = R_TexScaleY(rw_toptexturemid, toptexture);
 
 			R_RenderColumnRange(start, stop, walltopf, lower, topposts,
 						SolidColumnBlaster, true, columnmethod);
@@ -558,8 +560,9 @@ void R_RenderSolidSegRange(int start, int stop)
 				lower[x] = wallbottomf[x] - 1;
 			}
 
+			wallscaley = texturescaley[bottomtexture];
 			dcol.textureheight = textureheight[bottomtexture];
-			dcol.texturemid = rw_bottomtexturemid;
+			dcol.texturemid = R_TexScaleY(rw_bottomtexturemid, bottomtexture);
 
 			R_RenderColumnRange(start, stop, wallbottomb, lower, bottomposts,
 						SolidColumnBlaster, true, columnmethod);
