@@ -638,7 +638,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 
 	// find texture positioning
 	if (curline->linedef->flags & ML_DONTPEGBOTTOM)
-		dcol.texturemid = MAX(P_FloorHeight(frontsector), P_FloorHeight(backsector)) + texheight;
+		dcol.texturemid = MAX(P_FloorHeight(frontsector), P_FloorHeight(backsector)) + R_TexInvScaleY(textureheight[texnum], texnum);
 	else
 		dcol.texturemid = MIN(P_CeilingHeight(frontsector), P_CeilingHeight(backsector));
 
@@ -878,7 +878,7 @@ void R_StoreWallRange(int start, int stop)
 		if (linedef->flags & ML_DONTPEGBOTTOM)
 		{
 			// bottom of texture at bottom
-			fixed_t texheight = R_TexScaleY(textureheight[midtexture], midtexture);
+			fixed_t texheight = R_TexInvScaleY(textureheight[midtexture], midtexture);
 			rw_midtexturemid = P_FloorHeight(frontsector) - viewz + texheight;
 		}
 		else
@@ -1005,7 +1005,7 @@ void R_StoreWallRange(int start, int stop)
 			else
 			{
 				// bottom of texture
-				fixed_t texheight = R_TexScaleY(textureheight[toptexture], toptexture);
+				fixed_t texheight = R_TexInvScaleY(textureheight[toptexture], toptexture);
 				rw_toptexturemid = P_CeilingHeight(backsector) - viewz + texheight;
 			}
 		}
