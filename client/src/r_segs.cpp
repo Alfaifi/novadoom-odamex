@@ -512,7 +512,7 @@ void R_RenderSolidSegRange(int start, int stop)
 
 		wallscaley = texturescaley[midtexture];
 		dcol.textureheight = textureheight[midtexture];
-		dcol.texturemid = R_TexScaleY(rw_midtexturemid, midtexture);
+		dcol.texturemid = R_TexScaleY(rw_midtexturemid, midtexture) + sidedef->rowoffset;
 
 		R_RenderColumnRange(start, stop, walltopf, lower, midposts,
 					SolidColumnBlaster, true, columnmethod);
@@ -536,7 +536,7 @@ void R_RenderSolidSegRange(int start, int stop)
 
 			wallscaley = texturescaley[toptexture];
 			dcol.textureheight = textureheight[toptexture];
-			dcol.texturemid = R_TexScaleY(rw_toptexturemid, toptexture);
+			dcol.texturemid = R_TexScaleY(rw_toptexturemid, toptexture) + sidedef->rowoffset;
 
 			R_RenderColumnRange(start, stop, walltopf, lower, topposts,
 						SolidColumnBlaster, true, columnmethod);
@@ -562,7 +562,7 @@ void R_RenderSolidSegRange(int start, int stop)
 
 			wallscaley = texturescaley[bottomtexture];
 			dcol.textureheight = textureheight[bottomtexture];
-			dcol.texturemid = R_TexScaleY(rw_bottomtexturemid, bottomtexture);
+			dcol.texturemid = R_TexScaleY(rw_bottomtexturemid, bottomtexture) + sidedef->rowoffset;
 
 			R_RenderColumnRange(start, stop, wallbottomb, lower, bottomposts,
 						SolidColumnBlaster, true, columnmethod);
@@ -888,8 +888,6 @@ void R_StoreWallRange(int start, int stop)
 			rw_midtexturemid = fc - viewz;
 		}
 
-		rw_midtexturemid += sidedef->rowoffset;
-
 		ds_p->silhouette = SIL_BOTH;
 		ds_p->sprtopclip = viewheightarray;
 		ds_p->sprbottomclip = negonearray;
@@ -1028,9 +1026,6 @@ void R_StoreWallRange(int start, int stop)
 				rw_bottomtexturemid = bf - viewz;
 			}
 		}
-
-		rw_toptexturemid += sidedef->rowoffset;
-		rw_bottomtexturemid += sidedef->rowoffset;
 
 		// allocate space for masked texture tables
 		if (sidedef->midtexture)
