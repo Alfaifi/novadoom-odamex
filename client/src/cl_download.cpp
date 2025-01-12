@@ -25,7 +25,9 @@
 
 #include "cl_download.h"
 
+#ifndef CURL_STATICLIB
 #define CURL_STATICLIB
+#endif
 #include "curl/curl.h"
 
 #include "c_dispatch.h"
@@ -35,6 +37,7 @@
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "w_ident.h"
+#include "m_random.h"
 
 EXTERN_CVAR(cl_waddownloaddir)
 EXTERN_CVAR(waddirs)
@@ -171,15 +174,20 @@ bool CL_StartDownload(const Websites& urls, const OWantFile& filename, unsigned 
 		return false;
 	}
 
-	if (W_IsFilenameCommercialIWAD(filename.getBasename()))
+	if (W_IsFilenameCommercialWAD(filename.getBasename()))
 	{
-		Printf(PRINT_WARNING, "Refusing to download commercial IWAD file.\n");
+		Printf(PRINT_WARNING, "%s is a commercial WAD file and cannot be downloaded by Odamex.\n"
+		                      "A copy can be obtained through purchasing DOOM + DOOM II from Steam or GOG.\n",
+							  filename.getBasename().c_str());
 		return false;
 	}
 
-	if (W_IsFilehashCommercialIWAD(filename.getWantedMD5()))
+	if (W_IsFilehashCommercialWAD(filename.getWantedMD5()))
 	{
-		Printf(PRINT_WARNING, "Refusing to download renamed commercial IWAD file.\n");
+		const fileIdentifier_t* id = W_GameInfo(filename.getWantedMD5());
+		Printf(PRINT_WARNING, "%s is a renamed commercial wad file containing %s.\n"
+		                      "A copy of %s can be obtained through purchasing DOOM + DOOM II from Steam or GOG.\n",
+							  filename.getBasename().c_str(), id->mNiceName.c_str(), id->mFilename.c_str());
 		return false;
 	}
 
@@ -277,11 +285,15 @@ static void TickCheck()
 			::dlstate.checkfilename = StdStringToLower(::dlstate.checkfilename);
 		}
 
-		// Now we have the full URL.
-		fullurl += ::dlstate.checkfilename;
-
 		// Create the check transfer.
 		::dlstate.check = new OTransferCheck(CheckDone, CheckError);
+
+		std::string safeFileName =
+		    ::dlstate.check->escapeFileName(::dlstate.checkfilename.c_str());
+
+		// Now we have the full URL.
+		fullurl += safeFileName;
+
 		::dlstate.check->setURL(fullurl.c_str());
 		if (!::dlstate.check->start())
 		{
@@ -516,7 +528,7 @@ BEGIN_COMMAND(download)
 		Websites clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
 		// Shuffle the sites so we evenly distribute our requests.
-		std::random_shuffle(clientsites.begin(), clientsites.end());
+		std::shuffle(clientsites.begin(), clientsites.end(), rng);
 
 		// Attach the website to the file and download it.
 		OWantFile file;

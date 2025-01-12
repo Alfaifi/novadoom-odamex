@@ -41,6 +41,7 @@
 typedef uint32_t levelFlags_t;
 
 const static levelFlags_t LEVEL_NOINTERMISSION = BIT(0);
+const static levelFlags_t LEVEL_SECRET = BIT(1);
 const static levelFlags_t LEVEL_DOUBLESKY = BIT(2);
 const static levelFlags_t LEVEL_NOSOUNDCLIPPING = BIT(3);
 
@@ -64,6 +65,7 @@ const static levelFlags_t LEVEL_FREELOOK_NO = BIT(16);
 const static levelFlags_t LEVEL_FREELOOK_YES = BIT(17);
 const static levelFlags_t LEVEL_COMPAT_DROPOFF = BIT(18);
 const static levelFlags_t LEVEL_COMPAT_NOPASSOVER = BIT(19);
+const static levelFlags_t LEVEL_COMPAT_LIMITPAIN = BIT(20);
 
  // Automatically start lightning
 const static levelFlags_t LEVEL_STARTLIGHTNING = BIT(24);
@@ -97,7 +99,7 @@ struct level_info_t
 	int				partime;
 	OLumpName		skypic;
 	OLumpName		music;
-	uint32_t		flags;
+	levelFlags_t	flags;
 	int				cluster;
 	FLZOMemFile*	snapshot;
 	acsdefered_s*	defered;
@@ -144,7 +146,7 @@ struct level_pwad_info_t
 	int				partime;
 	OLumpName		skypic;
 	OLumpName		music;
-	uint32_t		flags;
+	levelFlags_t	flags;
 	int				cluster;
 	FLZOMemFile*	snapshot;
 	acsdefered_s*	defered;
@@ -167,21 +169,34 @@ struct level_pwad_info_t
 	// The following are necessary for UMAPINFO compatibility
 	OLumpName		exitpic;
 	OLumpName		enterpic;
+	OLumpName		exitscript;
+	OLumpName		enterscript;
+	OLumpName		exitanim;
+	OLumpName		enteranim;
 	OLumpName		endpic;
 
 	std::string		intertext;
 	std::string		intertextsecret;
 	OLumpName		interbackdrop;
 	OLumpName		intermusic;
-	
+
+	fixed_t			sky1ScrollDelta;
+	fixed_t			sky2ScrollDelta;
+
 	std::vector<bossaction_t> bossactions;
-	
+
+	std::string		label;
+	bool			clearlabel;
+	std::string		author;
+
 	level_pwad_info_t()
 	    : mapname(""), levelnum(0), level_name(""), pname(""), nextmap(""), secretmap(""),
 	      partime(0), skypic(""), music(""), flags(0), cluster(0), snapshot(NULL),
 	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
-	      aircontrol(0.0f), exitpic(""), enterpic(""), endpic(""), intertext(""),
-	      intertextsecret(""), interbackdrop(""), intermusic(""), bossactions()
+	      aircontrol(0.0f), exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""), endpic(""), intertext(""),
+	      intertextsecret(""), interbackdrop(""), intermusic(""),
+	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
+	      clearlabel(false), author()
 	{
 		ArrayInit(fadeto_color, 0);
 		ArrayInit(level_fingerprint, 0);
@@ -192,12 +207,13 @@ struct level_pwad_info_t
 	level_pwad_info_t(const level_info_t& other)
 	    : mapname(other.mapname), levelnum(other.levelnum), level_name(other.level_name),
 	      pname(other.pname), nextmap(other.nextmap),
-		  secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
-		  music(other.music), flags(other.flags), cluster(other.cluster),
-		  snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
-		  skypic2(""), gravity(0.0f), aircontrol(0.0f), exitpic(""), enterpic(""),
-		  endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""),
-		  bossactions()
+	      secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
+	      music(other.music), flags(other.flags), cluster(other.cluster),
+	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
+	      skypic2(""), gravity(0.0f), aircontrol(0.0f), exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""),
+	      endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""),
+	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
+	      clearlabel(false), author()
 	{
 		ArrayInit(fadeto_color, 0);
 		ArrayInit(outsidefog_color, 0);
@@ -231,15 +247,24 @@ struct level_pwad_info_t
 		gravity = other.gravity;
 		aircontrol = other.aircontrol;
 		exitpic = other.exitpic;
+		exitscript = other.exitscript;
+		exitanim = other.exitanim;
 		enterpic = other.enterpic;
+		enterscript = other.enterscript;
+		enteranim = other.enteranim;
 		endpic = other.endpic;
 		intertext = other.intertext;
 		intertextsecret = other.intertextsecret;
 		interbackdrop = other.interbackdrop;
 		intermusic = other.intermusic;
+		sky1ScrollDelta = other.sky1ScrollDelta;
+		sky2ScrollDelta = other.sky2ScrollDelta;
 		bossactions.clear();
 		std::copy(other.bossactions.begin(), other.bossactions.end(),
 		          bossactions.begin());
+		label = other.label;
+		clearlabel = other.clearlabel;
+		author = other.author;
 
 		return *this;
 	}
@@ -282,6 +307,9 @@ struct level_locals_t
 	OLumpName		skypic;
 	OLumpName		skypic2;
 
+	fixed_t			sky1ScrollDelta;
+	fixed_t			sky2ScrollDelta;
+
 	int				total_secrets;
 	int				found_secrets;
 
@@ -302,16 +330,24 @@ struct level_locals_t
 
 	// The following are used for UMAPINFO
 	OLumpName		exitpic;
+	OLumpName		exitscript;
+	OLumpName		exitanim;
 	OLumpName		enterpic;
+	OLumpName		enterscript;
+	OLumpName		enteranim;
 	OLumpName		endpic;
 
 	std::string		intertext;
 	std::string		intertextsecret;
 	OLumpName		interbackdrop;
 	OLumpName		intermusic;
-	
+
 	std::vector<bossaction_t> bossactions;
-	
+
+	std::string		label;
+	bool			clearlabel;
+	std::string		author;
+
 	// The following is used for automatic gametype detection.
 	float			detected_gametype;
 };
@@ -391,12 +427,17 @@ public:
 	size_t size() const;
 };
 
+typedef OHashTable<int, int> ACSWorldGlobalArray;
+
 extern int ACS_WorldVars[NUM_WORLDVARS];
 extern int ACS_GlobalVars[NUM_GLOBALVARS];
+extern ACSWorldGlobalArray ACS_WorldArrays[NUM_WORLDVARS];
+extern ACSWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
 
 extern BOOL savegamerestore;
 
 void G_InitNew(const char *mapname);
+inline void G_InitNew(const OLumpName& mapname) { G_InitNew(mapname.c_str()); }
 void G_ChangeMap();
 void G_ChangeMap(size_t index);
 void G_RestartMap();
@@ -410,8 +451,8 @@ void G_DeferedInitNew(const char *mapname);
 void G_DeferedFullReset();
 void G_DeferedReset();
 
-void G_ExitLevel(int position, int drawscores);
-void G_SecretExitLevel(int position, int drawscores);
+void G_ExitLevel(int position, int drawscores, bool resetinv = false);
+void G_SecretExitLevel(int position, int drawscores, bool resetinv = false);
 
 void G_DoLoadLevel(int position);
 void G_DoResetLevel(bool full_reset);
@@ -437,7 +478,7 @@ void P_RemoveDefereds();
 
 bool G_LoadWad(const OWantFiles& newwadfiles, const OWantFiles& newpatchfiles,
                const std::string& mapname = "");
-bool G_LoadWadString(const std::string& str, const std::string& mapname = "");
+bool G_LoadWadString(const std::string& str, const std::string& lastmap, const std::string& mapname = "");
 
 LevelInfos& getLevelInfos();
 ClusterInfos& getClusterInfos();

@@ -22,7 +22,7 @@ if(WIN32)
   list(APPEND CLIENT_SDL_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/client.rc")
 endif()
 
-# Include console folders if compiling 
+# Include console folders if compiling
 if (GCONSOLE)
   if (NSWITCH)
     set(CLIENT_DIR ${CLIENT_DIR} switch)  # Nintendo Switch
@@ -76,7 +76,7 @@ if(ENABLE_PORTMIDI)
     set(PORTMIDI_LIBRARY "portmidi")
     set(PORTMIDI_LIBRARIES ${PORTMIDI_LIBRARY})
     set(PORTMIDI_DIR ../libraries/portmidi)
-    set(PORTMIDI_INCLUDE_DIR ${PORTMIDI_DIR}/pm_common/ ${PORTMIDI_DIR}/porttime/)  
+    set(PORTMIDI_INCLUDE_DIR ${PORTMIDI_DIR}/pm_common/ ${PORTMIDI_DIR}/porttime/)
 
     if(APPLE)
       find_library(COREFOUNDATION_LIBRARY CoreFoundation)
@@ -136,7 +136,7 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     set(TEXTSCREEN_LIBRARY "textscreen")
     set(TEXTSCREEN_DIR ../libraries/textscreen)
     set(TEXTSCREEN_HEADERS ${TEXTSCREEN_DIR}/txt_sdl.h ${TEXTSCREEN_DIR}/txt_main.h)
-    set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.c)
+    set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.cpp)
 
     include_directories(${TEXTSCREEN_DIR})
     add_library(${TEXTSCREEN_LIBRARY} STATIC ${TEXTSCREEN_SOURCES} ${TEXTSCREEN_HEADERS})
@@ -180,6 +180,11 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     message(STATUS "Default SIMD flags not used on user request")
   endif()
 
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    message(STATUS "GNU Detected, forcing GCC to link math.h")
+    target_compile_options(odamex PRIVATE -lm)
+  endif()
+
   if(MSVC)
     # We supply our own manifest, don't use the default one.
     set_target_properties(odamex PROPERTIES LINK_FLAGS "/MANIFEST:NO")
@@ -203,14 +208,22 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   target_link_libraries(odamex ${PNG_LIBRARY} ${ZLIB_LIBRARY} CURL::libcurl)
   if(NOT GCONSOLE)
     target_include_directories(odamex PRIVATE gui)
-    target_link_libraries(odamex fltk fltk_images)
+    target_link_libraries(odamex fltk::fltk fltk::images)
+  endif()
+
+  if(USE_INTERNAL_JSONCPP)
+    target_link_libraries(odamex jsoncpp_lib_static)
+  else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
+    target_link_libraries(odamex PkgConfig::JSONCPP)
   endif()
 
   if(ENABLE_PORTMIDI)
     target_link_libraries(odamex ${PORTMIDI_LIBRARY})
   endif()
 
-  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt)
+  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo)
 
   if(WIN32)
     target_link_libraries(odamex winmm wsock32 shlwapi)

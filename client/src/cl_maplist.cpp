@@ -65,7 +65,7 @@ bool MaplistCache::query(maplist_qrows_t &result) {
 	// Return everything
 	result.reserve(this->maplist.size());
 	for (size_t i = 0;i < maplist.size();i++) {
-		result.push_back(std::pair<size_t, maplist_entry_t*>(i, &(this->maplist[i])));
+		result.emplace_back(i, &(this->maplist[i]));
 	}
 	return true;
 }
@@ -103,7 +103,7 @@ bool MaplistCache::query(const std::vector<std::string> &query,
 			}
 			index -= 1;
 
-			result.push_back(std::pair<size_t, maplist_entry_t*>(index, &(this->maplist[index])));
+			result.emplace_back(index, &(this->maplist[index]));
 			return true;
 		}
 	}
@@ -116,7 +116,7 @@ bool MaplistCache::query(const std::vector<std::string> &query,
 				bool f_map = CheckWildcards(pattern.c_str(), this->maplist[i].map.c_str());
 				bool f_wad = CheckWildcards(pattern.c_str(), JoinStrings(this->maplist[i].wads).c_str());
 				if (f_map || f_wad) {
-					result.push_back(std::pair<size_t, maplist_entry_t*>(i, &(this->maplist[i])));
+					result.emplace_back(i, &(this->maplist[i]));
 				}
 			}
 		} else {
@@ -196,8 +196,8 @@ void MaplistCache::ev_tic() {
 	case MAPLIST_TIMEOUT:
 		this->error = "Maplist update timed out.";
 		DPrintf("MaplistCache::ev_tic: Maplist Cache Update Timeout.\n");
-		DPrintf("- Successfully Cached Maps: %d\n", this->maplist.size());
-		DPrintf("- Destionation Maplist Size: %d\n", this->size);
+		DPrintf("- Successfully Cached Maps: %lu\n", this->maplist.size());
+		DPrintf("- Destination Maplist Size: %lu\n", this->size);
 		DPrintf("- Valid Indexes: %d\n", this->valid_indexes);
 		break;
 	case MAPLIST_THROTTLED:
@@ -388,7 +388,7 @@ void CMD_MaplistCallback(const maplist_qrows_t &result) {
 		} else if (it->first == next_index) {
 			flag = '+';
 		}
-		Printf(PRINT_HIGH, "%c%d. %s %s\n", flag, it->first + 1,
+		Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
 			   JoinStrings(it->second->wads, " ").c_str(),
 			   it->second->map.c_str());
 	}
