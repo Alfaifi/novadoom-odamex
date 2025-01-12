@@ -999,6 +999,9 @@ void DCanvas::DrawPatchFullScreen(const patch_t* patch, bool clear) const
 	int x = (surface_width - destw) / 2;
 	int y = (surface_height - desth) / 2;
 
+	// Dim everything before drawing the patch.
+	mSurface->getDefaultCanvas()->Dim(0, 0, I_GetVideoWidth(), I_GetVideoHeight());
+
 	DrawPatchStretched(patch, x, y, destw, desth);
 }
 
