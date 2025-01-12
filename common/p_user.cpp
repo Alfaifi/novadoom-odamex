@@ -67,6 +67,7 @@ extern bool predicting, step_mode;
 
 static player_t nullplayer;		// used to indicate 'player not found' when searching
 EXTERN_CVAR (sv_allowmovebob)
+EXTERN_CVAR (sv_showplayerpowerups)
 EXTERN_CVAR (cl_movebob)
 
 player_t &idplayer(byte id)
@@ -888,6 +889,18 @@ void SV_SendPlayerInfo(player_t &);
 
 void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
 {
+	if (sv_showplayerpowerups)
+	{
+		// Don't show blood if the player is invuln
+		if (powers[pw_invulnerability])
+			player->mo->flags |= MF_NOBLOOD;
+		else
+			player->mo->flags &= ~MF_NOBLOOD;
+	}
+}
+
+void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
+{
 	if (powers[pw_strength])
 		player->mo->statusflags |= SF_BERSERK;
 	else
@@ -921,6 +934,8 @@ void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
 		player->mo->statusflags |= SF_ALLMAP;
 	else
 		player->mo->statusflags &= ~SF_ALLMAP;
+
+	P_SetPlayerPowerupStatuses(player, powers);
 }
 
 //
