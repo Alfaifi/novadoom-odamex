@@ -580,7 +580,7 @@ void R_RenderSolidSegRange(int start, int stop)
 			// save texturecol for backdrawing of masked mid texture
 			for (int x = start; x <= stop; x++)
 			{
-				int colnum = R_TexScaleX(texoffs[x], maskedtexture) >> FRACBITS;
+				int colnum = (R_TexScaleX(texoffs[x], maskedtexture) + curline->sidedef->textureoffset) >> FRACBITS;
 				masked_midposts[x] = R_GetTextureColumn(maskedtexture, colnum);
 			}
 		}
@@ -728,7 +728,7 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 	fixed_t seglen = R_LineLength(px1, py1, px2, py2);
 
 	// distance from lineseg start to start of clipped lineseg
-	fixed_t segoffs = R_LineLength(v1->x, v1->y, px1, py1) + curline->sidedef->textureoffset;
+	fixed_t segoffs = R_LineLength(v1->x, v1->y, px1, py1);
 
 	const fixed_t mindist = NEARCLIP;
 	const fixed_t maxdist = 16384*FRACUNIT;
@@ -751,6 +751,8 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 	// column in this range and calculate the scaling factor for
 	// each column.
 
+	fixed_t textureoffset = curline->sidedef->textureoffset;
+
 	float uinvz = 0.0f;
 	float curscale = scale1;
 	for (int i = start; i <= stop; i++)
@@ -762,17 +764,17 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 
 		if (toptexture)
 		{
-			int colnum = R_TexScaleX(colfrac, toptexture) >> FRACBITS;
+			int colnum = (R_TexScaleX(colfrac, toptexture) + textureoffset) >> FRACBITS;
 			topposts[i] = R_GetTextureColumn(toptexture, colnum);
 		}
 		if (midtexture)
 		{
-			int colnum = R_TexScaleX(colfrac, midtexture) >> FRACBITS;
+			int colnum = (R_TexScaleX(colfrac, midtexture) + textureoffset) >> FRACBITS;
 			midposts[i] = R_GetTextureColumn(midtexture, colnum);
 		}
 		if (bottomtexture)
 		{
-			int colnum = R_TexScaleX(colfrac, bottomtexture) >> FRACBITS;
+			int colnum = (R_TexScaleX(colfrac, bottomtexture) + textureoffset) >> FRACBITS;
 			bottomposts[i] = R_GetTextureColumn(bottomtexture, colnum);
 		}
 
