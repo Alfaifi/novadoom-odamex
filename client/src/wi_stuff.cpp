@@ -568,7 +568,7 @@ void WI_drawLF()
 		// draw <LevelName>
 		patch_t* lnames0 = W_ResolvePatchHandle(lnames[0]);
 		screen->DrawPatchClean(lnames0, (320 - lnames0->width()) / 2, y);
-		y += (5 * lnames0->height()) / 4;
+			y += (5 * lnames0->height()) / 4;
 	}
 	else
 	{
@@ -1394,7 +1394,7 @@ void WI_loadData()
 	const DCanvas* canvas = background_surface->getDefaultCanvas();
 
 	background_surface->lock();
-	canvas->DrawPatch(bg_patch, 0, 0);
+	canvas->DrawPatch(bg_patch, bg_patch->leftoffset(), bg_patch->topoffset());
 	background_surface->unlock();
 
 	for (int i = 0, j; i < 2; i++)
