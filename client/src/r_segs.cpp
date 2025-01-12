@@ -642,7 +642,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 	else
 		dcol.texturemid = MIN(P_CeilingHeight(frontsector), P_CeilingHeight(backsector));
 
-	dcol.texturemid = R_TexScaleY(dcol.texturemid - viewz + curline->sidedef->rowoffset, texnum);
+	dcol.texturemid = R_TexScaleY(dcol.texturemid - viewz, texnum) + curline->sidedef->rowoffset;
 
 	int64_t topscreenclip = int64_t(centery) << 2*FRACBITS;
 	int64_t botscreenclip = int64_t(centery - viewheight) << 2*FRACBITS;
