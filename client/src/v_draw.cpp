@@ -786,6 +786,11 @@ void DCanvas::DrawPatchFlipped(const patch_t *patch, int x, int y) const
 	if (patch->width() <= 0 || patch->height() <= 0)
 		return;
 
+	// [FG] automatically center wide patches without horizontal offset
+	// (taken from dsda but inverted since we center above this)
+	if (patch->width() > 320 && patch->leftoffset() != 0)
+		x += (patch->width() - 320) / 2;
+
 	y -= patch->topoffset();
 	x -= patch->leftoffset();
 
