@@ -887,7 +887,7 @@ bool P_CanSpy(player_t &viewer, player_t &other, bool demo)
 
 void SV_SendPlayerInfo(player_t &);
 
-void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
+void P_SetPlayerInvulnBleed(player_t* player, int powers[NUMPOWERS])
 {
 	if (sv_showplayerpowerups)
 	{
@@ -935,7 +935,7 @@ void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
 	else
 		player->mo->statusflags &= ~SF_ALLMAP;
 
-	P_SetPlayerPowerupStatuses(player, powers);
+	P_SetPlayerInvulnBleed(player, powers);
 }
 
 //
