@@ -655,22 +655,17 @@ BEGIN_COMMAND (maplist) {
 	size_t this_index, next_index;
 	bool show_this_map = Maplist::instance().get_this_index(this_index);
 	Maplist::instance().get_next_index(next_index);
-	for (std::vector<std::pair<size_t, maplist_entry_t*> >::iterator it = result.begin();
-		 it != result.end();++it) {
+	for (const auto& [index, entry] : result) {
+		const auto& [map, lastmap, wads] = *entry;
 		char flag = ' ';
-		if (show_this_map && it->first == this_index) {
+		if (show_this_map && index == this_index) {
 			flag = '*';
-		} else if (it->first == next_index) {
+		} else if (index == next_index) {
 			flag = '+';
 		}
-		if (it->second->lastmap.empty())
-			Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
-				   JoinStrings(it->second->wads, " ").c_str(),
-				   it->second->map.c_str());
-		else
-			Printf(PRINT_HIGH, "%c%lu. %s %s lastmap=%s\n", flag, it->first + 1,
-				   JoinStrings(it->second->wads, " ").c_str(),
-				   it->second->map.c_str(), it->second->lastmap.c_str());
+		Printf(PRINT_HIGH, "%c%lu. %s %s%s\n", flag, index + 1,
+			   JoinStrings(wads, " ").c_str(), map.c_str(),
+			   lastmap.empty() ? "" : fmt::sprintf(" lastmap=%s", lastmap));
 	}
 } END_COMMAND (maplist)
 
