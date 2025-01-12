@@ -568,7 +568,7 @@ void WI_drawLF()
 		// draw <LevelName>
 		patch_t* lnames0 = W_ResolvePatchHandle(lnames[0]);
 		screen->DrawPatchClean(lnames0, (320 - lnames0->width()) / 2, y);
-			y += (5 * lnames0->height()) / 4;
+		y += (5 * lnames0->height()) / 4;
 	}
 	else
 	{
