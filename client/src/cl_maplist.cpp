@@ -388,9 +388,14 @@ void CMD_MaplistCallback(const maplist_qrows_t &result) {
 		} else if (it->first == next_index) {
 			flag = '+';
 		}
-		Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
-			   JoinStrings(it->second->wads, " ").c_str(),
-			   it->second->map.c_str());
+		if (it->second->lastmap.empty())
+			Printf(PRINT_HIGH, "%c%lu. %s %s\n", flag, it->first + 1,
+				   JoinStrings(it->second->wads, " ").c_str(),
+				   it->second->map.c_str());
+		else
+			Printf(PRINT_HIGH, "%c%lu. %s %s lastmap=%s\n", flag, it->first + 1,
+				   JoinStrings(it->second->wads, " ").c_str(),
+				   it->second->map.c_str(), it->second->lastmap.c_str());
 	}
 }
 

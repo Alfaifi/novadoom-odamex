@@ -71,7 +71,6 @@ EXTERN_CVAR (sv_startmapscript)
 EXTERN_CVAR (sv_curpwad)
 EXTERN_CVAR (sv_curmap)
 EXTERN_CVAR (sv_nextmap)
-EXTERN_CVAR (sv_loopepisode)
 EXTERN_CVAR (sv_intermissionlimit)
 EXTERN_CVAR (sv_warmup)
 EXTERN_CVAR (sv_timelimit)
@@ -188,7 +187,7 @@ BEGIN_COMMAND (wad) // denis - changes wads
 	}
 
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
-	G_LoadWadString(wadstr, lastmap);
+	G_LoadWadString(wadstr, "", lastmap);
 }
 END_COMMAND (wad)
 
@@ -198,20 +197,7 @@ EXTERN_CVAR(sv_shufflemaplist)
 
 bool isLastMap()
 {
-	if (level.nextmap == "" || level.mapname == forcedlastmap)
-		return true;
-
-	std::string next = level.nextmap.c_str();
-	if (iequals(next.substr(0, 7), "EndGame") ||
-			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
-	{
-		if (sv_loopepisode || gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-				((gamemode == registered && level.cluster == 3) ||
-				 ((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4)))
-			return true;
-	}
-
-	return false;
+	return level.nextmap == "" || level.mapname == forcedlastmap;
 }
 
 // Returns the next map, assuming there is no maplist.
@@ -219,9 +205,10 @@ std::string G_NextMap()
 {
 	std::string next = level.nextmap.c_str();
 
-	if (gamestate == GS_STARTUP || next.empty())
+	if (gamestate == GS_STARTUP || (sv_gametype != GM_COOP && forcedlastmap.empty()) || next.empty())
 	{
-		// [ML] 1/25/10: if next is empty, stay on same level
+		// if not coop, and lastmap is not specified, stay on same level
+		// [ML] 1/25/10: OR if next is empty
 		next = level.mapname.c_str();
 	}
 	else if (secretexit && W_CheckNumForName(level.secretmap.c_str()) != -1)
@@ -237,15 +224,10 @@ std::string G_NextMap()
 			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
 	{
 		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-			(!sv_loopepisode && (level.nextmap == "" || level.mapname == forcedlastmap)) ||
-			(!sv_loopepisode && ((gamemode == registered && level.cluster == 3) ||
+			(((gamemode == registered && level.cluster == 3) ||
 			((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
 		{
 			next = CalcMapName(1, 1);
-		}
-		else if (sv_loopepisode)
-		{
-			next = CalcMapName(level.cluster, 1);
 		}
 		else
 		{
@@ -277,7 +259,7 @@ void G_ChangeMap()
 		else
 		{
 			size_t next_index;
-			if ((sv_mapliststayonwad && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
+			if ((!forcedlastmap.empty() && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
 			{
 				// We don't have a maplist, so grab the next 'natural' map lump.
 				std::string next = G_NextMap();
@@ -289,7 +271,7 @@ void G_ChangeMap()
 				Maplist::instance().get_map_by_index(next_index, maplist_entry);
 
 				std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-				G_LoadWadString(wadstr, maplist_entry.lastmap, maplist_entry.map);
+				G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
 
 				// Set the new map as the current map
 				Maplist::instance().set_index(next_index);
@@ -315,7 +297,7 @@ void G_ChangeMap(size_t index) {
 	}
 
 	std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-	G_LoadWadString(wadstr, maplist_entry.lastmap, maplist_entry.map);
+	G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
 
 	// Set the new map as the current map
 	Maplist::instance().set_index(index);

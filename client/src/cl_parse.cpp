@@ -2733,9 +2733,11 @@ static void CL_MaplistUpdate(const odaproto::svc::MaplistUpdate* msg)
 	{
 		const odaproto::svc::MaplistUpdate::Row& row = msg->maplist().Get(i);
 		const std::string& map = indexer.getString(row.map());
+		const std::string& lastmap = indexer.getString(row.lastmap());
 
 		maplist_entry_t maplist_entry;
 		maplist_entry.map = map;
+		maplist_entry.lastmap = lastmap;
 		for (int j = 0; j < row.wads_size(); j++)
 		{
 			const std::string& wad = indexer.getString(row.wads().Get(j));
