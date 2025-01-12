@@ -792,7 +792,7 @@ void DCanvas::DrawPatchFlipped(const patch_t *patch, int x, int y) const
 		x += (patch->width() - 320) / 2;
 
 	y -= patch->topoffset();
-	x -= patch->leftoffset();
+	x -= (patch->width() - patch->leftoffset());
 
 #ifdef RANGECHECK
 	if (x < 0 || x + patch->width() > surface_width || y < 0 || y + patch->height() > surface_height)
@@ -866,7 +866,7 @@ void DCanvas::DrawPatchIndirectFlipped(const patch_t *patch, int x0, int y0) con
 	int ymul = (destheight << 16) / patch->height();
 
 	y0 -= (patch->topoffset() * ymul) >> 16;
-	x0 -= (patch->leftoffset() * xmul) >> 16;
+	x0 -= ((patch->width() - patch->leftoffset()) * xmul) >> 16;
 
 #ifdef RANGECHECK
 	if (x0 < 0 || x0 + destwidth > surface_width || y0 < 0 || y0 + destheight > surface_height)
