@@ -717,12 +717,7 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 	int midtexture = texturetranslation[curline->sidedef->midtexture];
 	int bottomtexture = texturetranslation[curline->sidedef->bottomtexture];
 
-	// determine which vertex of the linedef should be used for texture alignment
-	vertex_t *v1;
-	if (curline->linedef->sidenum[0] == curline->sidedef - sides)
-		v1 = curline->linedef->v1;
-	else
-		v1 = curline->linedef->v2;
+	vertex_t *v1 = curline->v1;
 
 	// clipped lineseg length
 	fixed_t seglen = R_LineLength(px1, py1, px2, py2);
