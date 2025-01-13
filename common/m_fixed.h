@@ -74,44 +74,42 @@ constexpr fixed_t INT2FIXED(int x)
 	return x << FRACBITS;
 }
 
-inline float FIXED642FLOAT(fixed64_t x)
+constexpr float FIXED642FLOAT(fixed64_t x)
 {
-	static const float factor = 1.0f / float(FRACUNIT64);
-	return x * factor;
+	return x * (1.0f / float(FRACUNIT64));
 }
 
-inline double FIXED642DOUBLE(fixed64_t x)
+constexpr double FIXED642DOUBLE(fixed64_t x)
 {
-	static const double factor = 1.0 / double(FRACUNIT64);
-	return x * factor;
+	return x * (1.0f / double(FRACUNIT64));
 }
 
-inline fixed64_t FLOAT2FIXED64(float x)
+constexpr fixed64_t FLOAT2FIXED64(float x)
 {
 	return fixed64_t(x * float(FRACUNIT64));
 }
 
-inline fixed64_t DOUBLE2FIXED64(double x)
+constexpr fixed64_t DOUBLE2FIXED64(double x)
 {
 	return fixed64_t(x * double(FRACUNIT64));
 }
 
-inline int FIXED642INT(fixed64_t x)
+constexpr int FIXED642INT(fixed64_t x)
 {
 	return ((int32_t)FRAC64FILL(x >> FRACBITS64, x));
 }
 
-inline fixed64_t INT2FIXED64(int64_t x)
+constexpr fixed64_t INT2FIXED64(int64_t x)
 {
 	return x << FRACBITS64;
 }
 
-inline fixed_t FIXED642FIXED(fixed64_t x)
+constexpr fixed_t FIXED642FIXED(fixed64_t x)
 {
 	return (fixed_t)FRAC64FILLFIXED(x >> (FRACBITS64 - FRACBITS), x);
 }
 
-inline fixed64_t FIXED2FIXED64(fixed_t x)
+constexpr fixed64_t FIXED2FIXED64(fixed_t x)
 {
 	return (fixed64_t)x << (FRACBITS64 - FRACBITS);
 }
