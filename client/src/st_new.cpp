@@ -88,8 +88,6 @@ static lumpHandle_t FlagIconDropped[NUMTEAMS];
 static lumpHandle_t LivesIcon[NUMTEAMS];
 static lumpHandle_t ToastIcon[NUMMODS];
 
-static int		NameUp = -1;
-
 extern lumpHandle_t negminus;
 extern lumpHandle_t tallnum[10];
 extern lumpHandle_t faces[];
@@ -174,10 +172,6 @@ void ST_initNew()
 
 	::widest_num = widest;
 	::num_height = W_ResolvePatchHandle(::tallnum[0])->height();
-
-	// [AM] FIXME: What does this do, exactly?
-	if (multiplayer && (sv_gametype == GM_COOP || demoplayback) && level.time)
-		NameUp = level.time + 2 * TICRATE;
 
 	::flagiconteam = W_CachePatchHandle("FLAGIT", PU_STATIC);
 	::flagiconteamoffense = W_CachePatchHandle("FLAGITO", PU_STATIC);
