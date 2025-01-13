@@ -149,8 +149,8 @@ bool V_CheckModeAdjustment()
 	if (V_GetRequestedVideoMode() != window->getVideoMode())
 		return true;
 
-	bool using_widescreen = I_IsWideResolution();
-	if (vid_widescreen.asInt() > 0 && sv_allowwidescreen != using_widescreen)
+	bool allow_widescreen = sv_allowwidescreen != 0.0f;
+	if (vid_widescreen.asInt() > 0 && allow_widescreen != I_IsWideResolution())
 		return true;
 
 	if (vid_widescreen.asInt() != vid_widescreen_old)
@@ -268,7 +268,8 @@ CVAR_FUNC_IMPL(vid_pillarbox)
 static bool CheckWideModeAdjustment()
 {
 	bool using_widescreen = I_IsWideResolution();
-	if (vid_widescreen.asInt() > 0 && sv_allowwidescreen != using_widescreen)
+	bool allow_widescreen = sv_allowwidescreen != 0.0f;
+	if (vid_widescreen.asInt() > 0 && allow_widescreen != using_widescreen)
 		return true;
 
 	if (vid_widescreen.asInt() > 0 != using_widescreen)
