@@ -721,7 +721,7 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 	fixed_t seglen = R_LineLength(px1, py1, px2, py2);
 
 	// distance from lineseg start to start of clipped lineseg
-	fixed_t segoffs = curline->offset + (curline->length - R_LineLength(px1, py1, curline->v2->x, curline->v2->y));
+	fixed_t segoffs = curline->offset + R_LineLength(curline->v1->x, curline->v1->y, px1, py1);
 
 	const fixed_t mindist = NEARCLIP;
 	const fixed_t maxdist = 16384*FRACUNIT;
