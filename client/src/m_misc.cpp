@@ -188,6 +188,7 @@ void M_LoadDefaults(void)
 	}
 	else if (::configver > 93 && ::configver <= 10060)
 	{
+		// Add new defaults - doomshack's wadlist dir, firestick, euroboros, audrealms, and captainpollutiontv.
 		// Update the TSPG url from .net to .com.
 
 		const char* cl_download_old =
