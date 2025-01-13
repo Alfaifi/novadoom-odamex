@@ -39,6 +39,8 @@
 #include "i_system.h"
 #include "cmdlib.h"
 
+#include "fmt/ranges.h"
+
 #ifdef GEKKO
 #include "i_wii.h"
 #endif
@@ -327,15 +329,7 @@ std::vector<std::string> VectorArgs(size_t argc, char **argv) {
 
 // [AM] Return a joined string based on a vector of strings
 std::string JoinStrings(const std::vector<std::string> &pieces, const std::string &glue) {
-	std::ostringstream result;
-	for (std::vector<std::string>::const_iterator it = pieces.begin();
-		 it != pieces.end();++it) {
-		result << *it;
-		if (it != (pieces.end() - 1)) {
-			result << glue;
-		}
-	}
-	return result.str();
+	return fmt::format("{}", fmt::join(pieces, glue));
 }
 
 // Tokenize a string
