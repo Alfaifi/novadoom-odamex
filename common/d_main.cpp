@@ -971,19 +971,19 @@ public:
 		mTask(task)
 	{ }
 
-	virtual ~UncappedTaskScheduler() { }
+	~UncappedTaskScheduler() override { }
 
-	virtual void run()
+	void run() override
 	{
 		mTask();
 	}
 
-	virtual dtime_t getNextTime() const
+	dtime_t getNextTime() const override
 	{
 		return I_GetTime();
 	}
 
-	virtual float getRemainder() const
+	float getRemainder() const override
 	{
 		return 0.0f;
 	}
@@ -1003,9 +1003,9 @@ public:
 	{
 	}
 
-	virtual ~CappedTaskScheduler() { }
+	~CappedTaskScheduler() override { }
 
-	virtual void run()
+	void run() override
 	{
 		mFrameStartTime = I_GetTime();
 		mAccumulator += mFrameStartTime - mPreviousFrameStartTime;
@@ -1020,12 +1020,12 @@ public:
 		}
 	}
 
-	virtual dtime_t getNextTime() const
+	dtime_t getNextTime() const override
 	{
 		return mFrameStartTime + mFrameDuration - mAccumulator;
 	}
 
-	virtual float getRemainder() const
+	float getRemainder() const override
 	{
 		// mAccumulator can be greater than mFrameDuration so only get the
 		// time remaining until the next frame
