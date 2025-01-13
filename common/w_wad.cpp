@@ -169,7 +169,7 @@ OCRC32Sum W_CRC32(const std::string& filename)
 
 	std::string hashStr;
 
-	StrFormat(hashStr, "%08X", crc);
+	hashStr = fmt::sprintf("%08X", crc);
 
 	OCRC32Sum::makeFromHexStr(rvo, hashStr);
 	return rvo; // bubble up failure

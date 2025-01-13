@@ -644,9 +644,7 @@ static std::string C_GetLatchedValueString(const cvar_t* var)
 
 	if (var->flags() & CVAR_NOENABLEDISABLE)
 	{
-		std::string str = "";
-		StrFormat(str, "\"%s\"", var->latched());
-		return str;
+		return fmt::sprintf("\"%s\"", var->latched());
 	}
 
 	if (atof(var->latched()) == 0.0f)

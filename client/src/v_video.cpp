@@ -719,15 +719,15 @@ void V_DrawFPSWidget()
 		             argb_t(0x13, 0x13, 0x13));
 
 		// Min
-		StrFormat(buffer, "%4.1f", ::g_GraphData.minimum);
+		buffer = fmt::sprintf("%4.1f", ::g_GraphData.minimum);
 		screen->PrintStr(graphBox.max.x, graphBox.max.y - 3, buffer.c_str());
 
 		// Max
-		StrFormat(buffer, "%4.1f", ::g_GraphData.maximum);
+		buffer = fmt::sprintf("%4.1f", ::g_GraphData.maximum);
 		screen->PrintStr(graphBox.max.x, graphBox.min.y - 3, buffer.c_str());
 
 		// Actual
-		StrFormat(buffer, "%4.1f", delta_time_ms);
+		buffer = fmt::sprintf("%4.1f", delta_time_ms);
 		screen->PrintStr(graphBox.max.x, graphBox.min.y + (::GRAPH_HEIGHT / 2) - 3,
 		                 buffer.c_str());
 
@@ -748,7 +748,7 @@ void V_DrawFPSWidget()
 		}
 
 		// FPS counter
-		StrFormat(buffer, "FPS %5.1f", last_fps);
+		buffer = fmt::sprintf("FPS %5.1f", last_fps);
 		screen->PrintStr(graphBox.min.x, graphBox.max.y + 1, buffer.c_str());
 	}
 	else if (vid_displayfps.asInt() == FPS_COUNTER)
@@ -769,7 +769,7 @@ void V_DrawFPSWidget()
 
 		// FPS counter
 		std::string buffer;
-		StrFormat(buffer, "FPS %5.1f", last_fps);
+		buffer = fmt::sprintf("FPS %5.1f", last_fps);
 		screen->PrintStr(botleft.x, botleft.y + 1, buffer.c_str());
 	}
 }

@@ -1039,8 +1039,7 @@ void WI_drawNetgameStats()
 		// Display player names online!
 		if (!demoplayback)
 		{
-			std::string str;
-			StrFormat(str, "%s", it->userinfo.netname.c_str());
+			std::string str = fmt::sprintf("%s", it->userinfo.netname.c_str());
 			WI_DrawSmallName(str.c_str(), x+10, y+24);
 		}
 

@@ -1746,8 +1746,8 @@ void C_DrawConsole()
 			StrFormatBytes(dlnow, progress.dlnow);
 			std::string dltotal;
 			StrFormatBytes(dltotal, progress.dltotal);
-			StrFormat(download, "%s: %s/%s", filename.c_str(), dlnow.c_str(),
-			          dltotal.c_str());
+			download = fmt::sprintf("%s: %s/%s", filename.c_str(), dlnow.c_str(),
+			                        dltotal.c_str());
 
 			// Avoid divide by zero.
 			if (progress.dltotal == 0)

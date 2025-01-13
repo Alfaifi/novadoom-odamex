@@ -604,7 +604,7 @@ FUNC(LS_Thing_Stop)
 			target->momx = target->momy = target->momz = 0;
 			if (target->player != NULL)
 				target->momx = target->momy = 0;
-			
+
 			return true;
 		}
 	}
@@ -2938,7 +2938,7 @@ BOOL CheckIfExitIsGood (AActor *self)
 
 	// Bypass the exit restrictions if we're on a lobby.
 	if (level.flags & LEVEL_LOBBYSPECIAL)
-		return true;	
+		return true;
 
 	// [Toke - dmflags] Old location of DF_NO_EXIT
 	if (sv_gametype != GM_COOP && self)
@@ -2960,12 +2960,12 @@ BOOL CheckIfExitIsGood (AActor *self)
 		std::string tstr;
 		if (tspan.hours)
 		{
-			StrFormat(tstr, "%02d:%02d:%02d.%02d", tspan.hours, tspan.minutes,
-			          tspan.seconds, tspan.csecs);
+			tstr = fmt::sprintf("%02d:%02d:%02d.%02d", tspan.hours, tspan.minutes,
+			                    tspan.seconds, tspan.csecs);
 		}
 		else
 		{
-			StrFormat(tstr, "%02d:%02d.%02d", tspan.minutes, tspan.seconds, tspan.csecs);
+			tstr = fmt::sprintf("%02d:%02d.%02d", tspan.minutes, tspan.seconds, tspan.csecs);
 		}
 
 		SV_BroadcastPrintf("%s exited the level in %s.\n",

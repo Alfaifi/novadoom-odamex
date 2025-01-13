@@ -354,17 +354,6 @@ StringTokens TokenizeString(const std::string& str, const std::string& delim) {
 //
 // A quick and dirty std::string formatting that uses snprintf under the covers.
 //
-FORMAT_PRINTF(2, 3) void STACK_ARGS StrFormat(std::string& out, const char* fmt, ...)
-{
-	va_list va;
-	va_start(va, fmt);
-	VStrFormat(out, fmt, va);
-	va_end(va);
-}
-
-//
-// A quick and dirty std::string formatting that uses snprintf under the covers.
-//
 void STACK_ARGS VStrFormat(std::string& out, const char* fmt, va_list va)
 {
 	va_list va2;
@@ -420,9 +409,9 @@ void StrFormatBytes(std::string& out, size_t bytes)
 	}
 
 	if (magnitude)
-		StrFormat(out, "%.2f %s", checkbytes, BYTE_MAGS[magnitude]);
+		out = fmt::sprintf("%.2f %s", checkbytes, BYTE_MAGS[magnitude]);
 	else
-		StrFormat(out, "%.0f %s", checkbytes, BYTE_MAGS[magnitude]);
+		out = fmt::sprintf("%.0f %s", checkbytes, BYTE_MAGS[magnitude]);
 }
 
 // [AM] Format a tm struct as an ISO8601-compliant extended format string.

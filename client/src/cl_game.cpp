@@ -1692,7 +1692,7 @@ void G_BuildSaveName(std::string &name, int slot)
 #else
 	std::string path = M_GetUserFileName(name.c_str());
 #endif
-	StrFormat(name, "%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
+	name = fmt::sprintf("%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
 }
 
 void G_DoSaveGame()
