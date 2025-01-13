@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -317,7 +317,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 	unsigned int flags = (unsigned short)mld->flags;
 	bool passthrough = (flags & ML_PASSUSE);
 	int i;
-	
+
 	flags &= 0x01ff;	// Ignore flags unknown to DOOM
 
 	if (special <= NUM_SPECIALS)
@@ -325,7 +325,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 		// This is a regular special; translate thru LUT
 		flags = flags | (SpecialTranslation[special].flags);
 		if (passthrough)
-		{	
+		{
 			if (GET_SPAC(flags) == ML_SPAC_USE)
 			{
 				flags &= ~ML_SPAC_MASK;
@@ -336,7 +336,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 				flags &= ~ML_SPAC_MASK;
 				flags |= ML_SPAC_CROSSTHROUGH;
 			}
-			
+
 			// TODO: what to do with gun-activated lines with passthrough?
 		}
 		ld->special = SpecialTranslation[special].newspecial;
@@ -359,7 +359,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 		ld->flags = flags;
 		ld->id = tag;
 		memset(ld->args, 0, sizeof(ld->args));
-		
+
 		switch (special)
 		{
 		case 340:		// Slope the Floor in front of the line
@@ -418,6 +418,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 		{
 		case WalkMany:
 			flags |= ML_REPEATSPECIAL;
+			[[fallthrough]];
 		case WalkOnce:
             if (passthrough)
 				flags |= ML_SPAC_CROSSTHROUGH;
@@ -428,6 +429,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 		case SwitchMany:
 		case PushMany:
 			flags |= ML_REPEATSPECIAL;
+			[[fallthrough]];
 		case SwitchOnce:
 		case PushOnce:
 			if (passthrough)
@@ -438,6 +440,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 
 		case GunMany:
 			flags |= ML_REPEATSPECIAL;
+			[[fallthrough]];
 		case GunOnce:
 			flags |= ML_SPAC_IMPACT;
 			break;
