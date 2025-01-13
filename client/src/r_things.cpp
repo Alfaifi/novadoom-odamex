@@ -26,6 +26,8 @@
 
 #include "m_alloc.h"
 
+#include "m_random.h"
+
 #include "m_argv.h"
 
 #include "i_system.h"
@@ -188,6 +190,34 @@ void SpriteColumnBlaster()
 	R_BlastSpriteColumn(colfunc);
 }
 
+// WARNING
+// The following will break vanilla demos!
+void R_SpawnBerserkPuff(int x, int y, int z)
+{
+	// don't run if menu is open
+	if (menuactive || ConsoleState == c_down || paused)
+		return;
+
+	AActor* puff;
+
+	int ang = P_RandomHitscanAngle(256 * 65535);
+
+	puff = new AActor(x, y, z, MT_PUFF);
+
+	puff->x += FixedMul(((P_RandomDiff() >> 4) * FRACUNIT) - -(16 * FRACUNIT),
+	                    finecosine[ang >> ANGLETOFINESHIFT]);
+	puff->y += FixedMul(((P_RandomDiff() >> 4) * FRACUNIT) - -(16 * FRACUNIT),
+	                    finesine[ang >> ANGLETOFINESHIFT]);
+	puff->z += abs((P_RandomDiff() >> 2) * FRACUNIT);
+	puff->momz = abs((FRACUNIT * P_RandomDiff()) >> 4);
+	puff->tics -= P_Random(puff) & 3;
+
+	if (puff->tics < 1)
+		puff->tics = 1;
+}
+
+EXTERN_CVAR(sv_showplayerpowerups)
+
 //
 // R_DrawVisSprite
 //	mfloorclip and mceilingclip should also be set.
@@ -242,6 +272,38 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 		translated = true;
 		dcol.translation = translationref_t(translationtables + (MAXPLAYERS-1)*256 +
 			( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) ));
+	}
+	int id = vis->mo && vis->mo->player ? vis->mo->player->id : 0;
+
+	// Add powerup colormaps
+	// invis overrides all
+	if (vis->statusflags & SF_INVIS)
+	{
+		vis->mobjflags |= MF_SHADOW;
+	}
+	else if (sv_showplayerpowerups > 0)
+	{
+		if (vis->statusflags & SF_INVULN)
+		{
+			// draw invuln palette on vissprite only
+			// and don't include sector colored lighting because it creates strange
+			// colors.
+			const palette_t* pal = V_GetDefaultPalette();
+			dcol.colormap = shaderef_t(&pal->maps, INVERSECOLORMAP);
+		}
+		else if (vis->statusflags & SF_BERSERK)
+		{
+			// draw a red palette on the vissprite
+			dcol.translation = translationref_t(&::redtable[id][0]);
+
+			if (vis && vis->mo && !(vis->statusflags & SF_INVIS))
+				R_SpawnBerserkPuff(vis->mo->x, vis->mo->y, vis->mo->z);
+		}
+		else if (vis->statusflags & SF_IRONFEET)
+		{
+			// draw a green palette on the vissprite
+			dcol.translation = translationref_t(&::greentable[id][0]);
+		}
 	}
 
 	if (vis->mobjflags & MF_SHADOW)
@@ -588,6 +650,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 		return;
 
 	vis->mobjflags = thing->flags;
+	vis->statusflags = thing->statusflags;
 	vis->spectator = thing->oflags & MFO_SPECTATOR;
 	vis->translation = thing->translation;		// [RH] thing translation table
 	vis->translucency = thing->translucency;
@@ -716,6 +779,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 	// store information in a vissprite
 	vis = &avis;
 	vis->mobjflags = flags;
+	vis->statusflags = camera->player && camera->player->mo ? camera->player->mo->statusflags : 0;
 
 // [RH] +0x6000 helps it meet the screen bottom
 //		at higher resolutions while still being in
@@ -769,9 +833,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 		// local light
 		vis->colormap = basecolormap.with(spritelights[MAXLIGHTSCALE-1]);	// [RH] add basecolormap
 	}
-	if (camera->player &&
-		(camera->player->powers[pw_invisibility] > 4*32
-		 || camera->player->powers[pw_invisibility] & 8))
+	if (vis->statusflags & SF_INVIS)
 	{
 		// shadow draw
 		vis->mobjflags = MF_SHADOW;
@@ -779,8 +841,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 
 	if (r_softinvulneffect)
 	{
-		if (camera->player && (camera->player->powers[pw_invulnerability] > 4 * 32 ||
-		                       camera->player->powers[pw_invulnerability] & 8))
+		if (vis->statusflags & SF_INVULN)
 		{
 			// draw invuln palette on vissprite only
 			// and don't include sector colored lighting because it creates strange colors.
@@ -1142,6 +1203,7 @@ void R_ProjectParticle (particle_t *particle, const sector_t *sector, int fakesi
 	vis->startfrac = particle->color;
 	vis->patch = NO_PARTICLE;
 	vis->mobjflags = particle->trans;
+	vis->statusflags = 0;
 	vis->mo = NULL;
 	vis->spectator = false;
 
