@@ -211,17 +211,17 @@ public:
 class DoomGammaStrategy : public GammaStrategy
 {
 public:
-	float min() const
+	float min() const override
 	{
 		return 0.0f;
 	}
 
-	float max() const
+	float max() const override
 	{
 		return 7.0f;
 	}
 
-	float increment(float level) const
+	float increment(float level) const override
 	{
 		level += 1.0f;
 		if (level > max())
@@ -229,7 +229,7 @@ public:
 		return level;
 	}
 
-	void generateGammaTable(byte* table, float level) const
+	void generateGammaTable(byte* table, float level) const override
 	{
 		// [SL] Use vanilla Doom's gamma table
 		//
@@ -250,17 +250,17 @@ public:
 class ZDoomGammaStrategy : public GammaStrategy
 {
 public:
-	float min() const
+	float min() const override
 	{
 		return 0.5f;
 	}
 
-	float max() const
+	float max() const override
 	{
 		return 3.0f;
 	}
 
-	float increment(float level) const
+	float increment(float level) const override
 	{
 		level += 0.1f;
 		if (level > max())
@@ -268,7 +268,7 @@ public:
 		return level;
 	}
 
-	void generateGammaTable(byte* table, float level) const
+	void generateGammaTable(byte* table, float level) const override
 	{
 		// [SL] Use ZDoom 1.22 gamma correction
 
@@ -711,7 +711,7 @@ void BuildDefaultColorAndShademap(const palette_t* pal, shademap_t& maps)
 
 	const argb_t* palette = pal->basecolors;
 	argb_t fadecolor(level.fadeto_color[0], level.fadeto_color[1], level.fadeto_color[2], level.fadeto_color[3]);
-	
+
 	palindex_t* colormap = maps.colormap;
 	argb_t* shademap = maps.shademap;
 
@@ -740,9 +740,9 @@ void BuildDefaultColorAndShademap(const palette_t* pal, shademap_t& maps)
 						 palette[c].getg() * 0.00229296875f +
 			 			 palette[c].getb() * 0.0005625f), 0.0f, 1.0f));
 
-		argb_t color(255, grayint, grayint, grayint); 
+		argb_t color(255, grayint, grayint, grayint);
 		colormap[c] = V_BestColor(palette, color);
-		shademap[c] = V_GammaCorrect(color); 
+		shademap[c] = V_GammaCorrect(color);
 	}
 }
 
@@ -755,7 +755,7 @@ void BuildDefaultShademap(const palette_t* pal, shademap_t& maps)
 
 	const argb_t* palette = pal->basecolors;
 	argb_t fadecolor(level.fadeto_color[0], level.fadeto_color[1], level.fadeto_color[2], level.fadeto_color[3]);
-	
+
 	argb_t* shademap = maps.shademap;
 
 	for (int i = 0; i < NUMCOLORMAPS; i++, shademap += 256)
@@ -782,8 +782,8 @@ void BuildDefaultShademap(const palette_t* pal, shademap_t& maps)
 						 palette[c].getg() * 0.00229296875f +
 			 			 palette[c].getb() * 0.0005625f), 0.0f, 1.0f));
 
-		argb_t color(255, grayint, grayint, grayint); 
-		shademap[c] = V_GammaCorrect(color); 
+		argb_t color(255, grayint, grayint, grayint);
+		shademap[c] = V_GammaCorrect(color);
 	}
 }
 
@@ -940,7 +940,7 @@ fahsv_t V_RGBtoHSV(const fargb_t &color)
 	float largest = std::max(std::max(r, g), b);
 	float delta = largest - smallest;
 
-	if (delta == 0.0f)	
+	if (delta == 0.0f)
 		return fahsv_t(a, 0, 0, largest);
 
 	float hue;
@@ -1212,7 +1212,7 @@ void V_DoPaletteEffects()
 			if (bonus_amount > 0.0f)
 			{
 				bonus_amount = MIN(bonus_amount, 24.0f);
-				float alpha = (bonus_amount + 8.0f) / 64.0f;				
+				float alpha = (bonus_amount + 8.0f) / 64.0f;
 
 				static const float red = 215.0f / 255.0f;
 				static const float green = 186.0f / 255.0f;
