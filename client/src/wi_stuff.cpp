@@ -1163,6 +1163,8 @@ void WI_updateStats()
 					S_ChangeMusic(enteranim->musiclump.c_str(), true);
 				else if (!nextlevel.zintermusic.empty())
 					S_ChangeMusic(nextlevel.zintermusic.c_str(), true);
+				else
+					S_ChangeMusic(gameinfo.intermissionMusic.c_str(), true);
 				// background
 				const char* bg_lump = enteranim == nullptr ? enterpic.c_str() : enteranim->backgroundlump.c_str();
 				const patch_t* bg_patch = W_CachePatch(bg_lump);
@@ -1278,17 +1280,14 @@ void WI_Ticker()
 	if (bcnt == 1)
 	{
 		level_pwad_info_t& currentlevel = getLevelInfos().findByName(wbs->current);
-		OLumpName winmusic;
-		if (W_CheckNumForName(wbs->winner ? "D_OWIN" : "D_OLOSE") != -1)
-			winmusic = wbs->winner ? "D_OWIN" : "D_OLOSE";
-		else if (W_CheckNumForName(wbs->winner ? "D_STWIN" : "D_STLOSE") != -1)
-			winmusic = wbs->winner ? "D_STWIN" : "D_STLOSE";
 
 		// intermission music
 		if (exitanim != nullptr && !exitanim->musiclump.empty())
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
-		else if (!winmusic.empty())
-			S_ChangeMusic (winmusic.c_str(), true);
+		else if (W_CheckNumForName(wbs->winner ? "D_OWIN" : "D_OLOSE") != -1)
+			S_ChangeMusic (wbs->winner ? "D_OWIN" : "D_OLOSE", true);
+		else if (W_CheckNumForName(wbs->winner ? "D_STWIN" : "D_STLOSE") != -1)
+			S_ChangeMusic (wbs->winner ? "D_STWIN" : "D_STLOSE", true);
 		else if (!currentlevel.zintermusic.empty())
 			S_ChangeMusic (currentlevel.zintermusic.c_str(), true);
 		else
