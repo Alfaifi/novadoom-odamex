@@ -1169,6 +1169,8 @@ void WI_updateStats()
 			{
 				if (enteranim != nullptr && !enteranim->musiclump.empty())
 					S_ChangeMusic(enteranim->musiclump.c_str(), true);
+				else if (!nextlevel.intermusic.empty())
+					S_ChangeMusic(nextlevel.intermusic.c_str(), true);
 				// background
 				const char* bg_lump = enteranim == nullptr ? enterpic.c_str() : enteranim->backgroundlump.c_str();
 				const patch_t* bg_patch = W_CachePatch(bg_lump);
@@ -1283,11 +1285,14 @@ void WI_Ticker()
 
 	if (bcnt == 1)
 	{
+		level_pwad_info_t& currentlevel = getLevelInfos().findByName(wbs->current);
 		// intermission music
 		if (exitanim != nullptr && !exitanim->musiclump.empty())
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
 		else if (!winlumps.music.empty())
 			S_ChangeMusic (winlumps.music.c_str(), true);
+		else if (!currentlevel.intermusic.empty())
+			S_ChangeMusic (currentlevel.intermusic.c_str(), true);
 		else
 			S_ChangeMusic (gameinfo.intermissionMusic.c_str(), true);
 	}
