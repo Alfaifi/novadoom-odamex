@@ -1363,7 +1363,7 @@ bool G_CheckSpot (player_t &player, mapthing2_t *mthing)
 			}
 		}
 
-		mo = new AActor (x+20*xa, y+20*ya, z, MT_TFOG);
+		mo = new AActor(x + 20 * xa, y + 20 * ya, z + INT2FIXED(gameinfo.telefogHeight), MT_TFOG);
 
 		if (level.time)
 			S_Sound (mo, CHAN_VOICE, "misc/teleport", 1, ATTN_NORM);	// don't start sound on first frame
@@ -1692,7 +1692,7 @@ void G_BuildSaveName(std::string &name, int slot)
 #else
 	std::string path = M_GetUserFileName(name.c_str());
 #endif
-	StrFormat(name, "%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
+	name = fmt::sprintf("%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
 }
 
 void G_DoSaveGame()

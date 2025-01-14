@@ -793,8 +793,8 @@ void AActor::RunThink ()
 
 void AActor::Serialize (FArchive &arc)
 {
-	const DWORD TLATE_NONE = 0xFFFFFFFF;
-	const DWORD TLATE_BOSS = 0xFFFFFFFE;
+	constexpr DWORD TLATE_NONE = 0xFFFFFFFF;
+	constexpr DWORD TLATE_BOSS = 0xFFFFFFFE;
 
 	Super::Serialize (arc);
 	if (arc.IsStoring ())
@@ -1078,8 +1078,8 @@ static void P_WindThrustActor(AActor* mo)
 {
 	if (mo->flags2 & MF2_WINDTHRUST)
 	{
-		static const int windTab[3] = {2048*5, 2048*10, 2048*25};
-		int special = mo->subsector->sector->special;
+		static constexpr int windTab[3] = {2048*5, 2048*10, 2048*25};
+		const int special = mo->subsector->sector->special;
 		switch (special)
 		{
 			case 40: case 41: case 42: // Wind_East
@@ -1869,7 +1869,7 @@ void P_NightmareRespawn (AActor *mobj)
 	mo = new AActor(
         mobj->x,
         mobj->y,
-        P_FloorHeight(mobj),
+        P_FloorHeight(mobj) + INT2FIXED(gameinfo.telefogHeight),
         MT_TFOG
     );
 	// initiate teleport sound
@@ -1880,7 +1880,7 @@ void P_NightmareRespawn (AActor *mobj)
     ss = P_PointInSubsector (x,y);
 
 	// spawn a teleport fog at the new spot
-    mo = new AActor (x, y,  P_FloorHeight(x, y, ss->sector), MT_TFOG);
+    mo = new AActor (x, y,  P_FloorHeight(x, y, ss->sector) + INT2FIXED(gameinfo.telefogHeight), MT_TFOG);
     if (clientside)
         S_Sound (mo, CHAN_VOICE, "misc/teleport", 1, ATTN_NORM);
 

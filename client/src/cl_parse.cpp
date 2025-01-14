@@ -193,11 +193,11 @@ static void CL_Disconnect(const odaproto::svc::Disconnect* msg)
 	std::string buffer;
 	if (!msg->message().empty())
 	{
-		StrFormat(buffer, "Disconnected from server: %s", msg->message().c_str());
+		buffer = fmt::sprintf("Disconnected from server: %s", msg->message().c_str());
 	}
 	else
 	{
-		StrFormat(buffer, "Disconnected from server\n");
+		buffer = fmt::sprintf("Disconnected from server\n");
 	}
 
 	Printf("%s", msg->message().c_str());
@@ -1126,7 +1126,7 @@ static void CL_SpawnPlayer(const odaproto::svc::SpawnPlayer* msg)
 	p->viewz = z + VIEWHEIGHT;
 
 	// spawn a teleport fog
-	// tfog = new AActor (x, y, z, MT_TFOG);
+	// tfog = new AActor (x, y, z + gameinfo.telefogHeight, MT_TFOG);
 
 	// setup gun psprite
 	P_SetupPsprites(p);
@@ -2002,8 +2002,8 @@ static void CL_SecretEvent(const odaproto::svc::SecretEvent* msg)
 		return;
 
 	std::string buf;
-	StrFormat(buf, "%s%s %sfound a secret!\n", TEXTCOLOR_YELLOW,
-	          player.userinfo.netname.c_str(), TEXTCOLOR_NORMAL);
+	buf = fmt::sprintf("%s%s %sfound a secret!\n", TEXTCOLOR_YELLOW,
+	                   player.userinfo.netname.c_str(), TEXTCOLOR_NORMAL);
 	Printf("%s", buf.c_str());
 
 	if (::hud_revealsecrets == 1)
