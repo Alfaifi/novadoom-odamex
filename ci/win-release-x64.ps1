@@ -22,7 +22,7 @@ else
 
 if ($env:build_number.length -gt 0)
 {
-    Set-Variable -Name "OdamexTestSuffix" -Value "-build_${env:build_number}" # "-build_112"
+    Set-Variable -Name "OdamexTestSuffix" -Value "-pre.${env:build_number}" # "-pre.112"
 }
 else
 {
@@ -47,11 +47,23 @@ function BuildX64 {
     New-Item  -Force -ItemType "directory" -Path "${CurrentDir}\BuildX64"
     Set-Location -Path "${CurrentDir}\BuildX64"
     
-    cmake.exe -G "Visual Studio 17 2022" -A "x64" "${CurrentDir}" `
-        -DBUILD_OR_FAIL=1 `
-        -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
-        -DBUILD_MASTER=1 -DBUILD_LAUNCHER=1
-    cmake.exe --build . --config RelWithDebInfo
+    if ($OdamexTestSuffix -eq "")
+    {
+        cmake.exe -G "Visual Studio 17 2022" -A "x64" "${CurrentDir}" `
+            -DBUILD_OR_FAIL=1 `
+            -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
+            -DBUILD_MASTER=1 -DBUILD_LAUNCHER=1
+        cmake.exe --build . --config RelWithDebInfo
+    }
+    else
+    {
+        cmake.exe -G "Visual Studio 17 2022" -A "x64" "${CurrentDir}" `
+            -DBUILD_OR_FAIL=1 `
+            -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
+            -DBUILD_MASTER=1 -DBUILD_LAUNCHER=1 `
+            -DODAMEXTESTSUFFIX=$OdamexTestSuffix
+        cmake.exe --build . --config RelWithDebInfo
+    }
 
     Set-Location -Path "${CurrentDir}"
 }

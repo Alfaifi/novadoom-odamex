@@ -21,25 +21,23 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
-
 
 #ifndef ODAMEX_NO_GITVER
 #include "git_describe.h"
 #endif
 
 #include <map>
-#include <sstream>
 #include <memory>
+#include <sstream>
 
-#include "cmdlib.h"
 #include "c_dispatch.h"
+#include "cmdlib.h"
 
 /**
  * @brief Compare two "packed" versions of Odamex to see if they are expected
  *        to be protocol-compatible.
- * 
+ *
  * @param server Packed version of the server.
  * @param client Packed version of the client.
  * @return 0 if they are compatible, -1 if the server is on the older verison
@@ -96,12 +94,12 @@ int VersionCompat(const int server, const int client)
 
 /**
  * @brief Generate a version mismatch message.
- * 
+ *
  * @param server Packed version of the server.
  * @param client Packed version of the client.
  * @param email E-mail address of server host.
  * @return String message, or blank string if compatible.
-*/
+ */
 std::string VersionMessage(const int server, const int client, const char* email)
 {
 	std::string rvo, buf;
@@ -153,14 +151,14 @@ std::string VersionMessage(const int server, const int client, const char* email
 
 typedef std::map<std::string, std::string> source_files_t;
 
-source_files_t &get_source_files()
+source_files_t& get_source_files()
 {
 	static std::auto_ptr<source_files_t> source_files(new source_files_t);
 	return *source_files.get();
 }
 
-
-file_version::file_version(const char *uid, const char *id, const char *pp, int l, const char *t, const char *d)
+file_version::file_version(const char* uid, const char* id, const char* pp, int l,
+                           const char* t, const char* d)
 {
 	std::stringstream rs(id), ss;
 	std::string p = pp;
@@ -168,7 +166,8 @@ file_version::file_version(const char *uid, const char *id, const char *pp, int 
 	size_t e = p.find_last_of("/\\");
 	std::string file = p.substr(e == std::string::npos ? 0 : e + 1);
 
-	ss << id << " " << l << " " << t << " " << d << " " << p.substr(e == std::string::npos ? 0 : e + 1);
+	ss << id << " " << l << " " << t << " " << d << " "
+	   << p.substr(e == std::string::npos ? 0 : e + 1);
 
 	get_source_files()[file] = ss.str();
 }
@@ -211,7 +210,7 @@ const char* GitBranch()
 
 /**
  * @brief Return the number of commits since the first commit.
- * 
+ *
  * @detail Two branches that are the same distance from the first commit
  *         can have the same number.
  */
@@ -304,8 +303,13 @@ const char* NiceVersion()
 	const char* details = NiceVersionDetails();
 	if (details[0] == '\0')
 	{
+		// Is this a release candidate?
+#if defined(ODAMEXTESTSUFFIX)
+		version = DOTVERSIONSTR + "-pre." + ODAMEXTESTSUFFIX;
+#else
 		// No version details, no parenthesis.
 		version = DOTVERSIONSTR;
+#endif
 	}
 	else
 	{
@@ -316,7 +320,7 @@ const char* NiceVersion()
 	return version.c_str();
 }
 
-BEGIN_COMMAND (version)
+BEGIN_COMMAND(version)
 {
 	if (argc == 1)
 	{
@@ -334,13 +338,14 @@ BEGIN_COMMAND (version)
 			Printf(PRINT_HIGH, "%s", it->second.c_str());
 	}
 }
-END_COMMAND (version)
+END_COMMAND(version)
 
-BEGIN_COMMAND (listsourcefiles)
+BEGIN_COMMAND(listsourcefiles)
 {
-	for (source_files_t::const_iterator it = get_source_files().begin(); it != get_source_files().end(); ++it)
+	for (source_files_t::const_iterator it = get_source_files().begin();
+	     it != get_source_files().end(); ++it)
 		Printf(PRINT_HIGH, "%s\n", it->first.c_str());
-		
+
 	Printf(PRINT_HIGH, "End of list\n");
 }
 END_COMMAND(listsourcefiles)
