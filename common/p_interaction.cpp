@@ -518,7 +518,7 @@ ItemEquipVal P_GiveCard(player_t *player, card_t card)
 	{
 #ifdef SERVER_APP
 		// Register the key
-		SV_ShareKeys(card, *player);	
+		SV_ShareKeys(card, *player);
 #endif
 
 
@@ -578,7 +578,7 @@ ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power)
 
 /**
  * @brief Give the player a care package.
- * 
+ *
  * @detail A care package gives you a small collection of items based on what
  *         you're already holding.  TODO: These messages should be LANGUAGE'ed.
  */
@@ -709,7 +709,7 @@ static void P_GiveCarePack(player_t* player)
 				case NUMWEAPONS:
 					break;
 				}
-				
+
 				break;
 			}
 		}
@@ -1372,7 +1372,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 			}
 			if (subst != NULL)
 			{
-				int len = strlen (subst);
+				size_t len = strlen (subst);
 				memcpy (to, subst, len);
 				to += len;
 				from++;
@@ -2100,8 +2100,8 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 	// inflict thrust and push the victim out of reach,
 	// thus kick away unless using the chainsaw.
 
-	if (inflictor && 
-		!(target->flags & MF_NOCLIP) && 
+	if (inflictor &&
+		!(target->flags & MF_NOCLIP) &&
 	    (!source || !source->player || !(weaponinfo[source->player->readyweapon].flags & WPF_NOTHRUST)) &&
 	    !(inflictor->flags2 & MF2_NODMGTHRUST))
 	{
@@ -2156,7 +2156,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		if (!sv_friendlyfire && source && source->player && target != source &&
 			mod != MOD_TELEFRAG)
 		{
-			if (G_IsCoopGame() || 
+			if (G_IsCoopGame() ||
 				(G_IsTeamGame() && player->userinfo.team == source->player->userinfo.team))
 			{
 				damage = 0;
@@ -2254,7 +2254,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 			else
 			{
 				player->health = 0;
-			} 
+			}
 		}
 
 		player->attacker = source ? source->ptr() : AActor::AActorPtr();

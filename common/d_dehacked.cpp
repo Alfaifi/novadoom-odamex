@@ -987,7 +987,7 @@ static int PatchThing(int thingy)
 		}
 
 		size_t val = atoi(Line2);
-		int linelen = strlen(Line1);
+		size_t linelen = strlen(Line1);
 
 		if (stricmp(Line1 + linelen - 6, " frame") == 0)
 		{
@@ -1510,7 +1510,7 @@ static int PatchFrame(int frameNum)
 	while ((result = GetLine()) == 1)
 	{
 		size_t val = atoi(Line2);
-		int linelen = strlen(Line1);
+		size_t linelen = strlen(Line1);
 
 		if (HandleKey(keys, info, Line1, val, sizeof(*info)))
 		{
@@ -1698,7 +1698,7 @@ static int PatchWeapon(int weapNum)
 	while ((result = GetLine()) == 1)
 	{
 		size_t val = atoi(Line2);
-		int linelen = strlen(Line1);
+		size_t linelen = strlen(Line1);
 
 		if (HandleKey(keys, info, Line1, val, sizeof(*info)))
 		{
@@ -2198,7 +2198,7 @@ static int PatchStrings(int dummy)
 			    (i >= GStrings.toIndex(OB_FRIENDLY1) &&
 			     i <= GStrings.toIndex(OB_FRIENDLY4) && strstr(holdstring, "%k") == NULL))
 			{
-				int len = strlen(holdstring);
+				size_t len = strlen(holdstring);
 				memmove(holdstring + 3, holdstring, len);
 				holdstring[0] = '%';
 				holdstring[1] = i <= GStrings.toIndex(OB_DEFAULT) ? 'o' : 'k';

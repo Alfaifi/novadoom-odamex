@@ -2158,13 +2158,13 @@ void AdjustPusher (int tag, int magnitude, int angle, DPusher::EPusher type)
 		}
 	}
 
-	int numcollected = Collection.Size ();
+	size_t numcollected = Collection.Size ();
 	int secnum = -1;
 
 	// Now create pushers for any sectors that don't already have them.
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
-		int i;
+		size_t i;
 		for (i = 0; i < numcollected; i++)
 		{
 			if (Collection[i].RefNum == sectors[secnum].tag)
@@ -2264,13 +2264,13 @@ FUNC(LS_Scroll_Texture_Both)
 			}
 		}
 
-		int numcollected = Collection.Size ();
+		size_t numcollected = Collection.Size ();
 		int linenum = -1;
 
 		// Now create scrollers for any walls that don't already have them.
 		while ((linenum = P_FindLineFromID (arg0, linenum)) >= 0)
 		{
-			int i;
+			size_t i;
 			for (i = 0; i < numcollected; i++)
 			{
 				if (Collection[i].RefNum == lines[linenum].sidenum[sidechoice])

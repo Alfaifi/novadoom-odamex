@@ -1150,7 +1150,7 @@ void C_AddNotifyString(int printlevel, const char* color_code, const char* sourc
 	char work[MAX_LINE_LENGTH];
 	brokenlines_t *lines;
 
-	size_t len = strlen(source);
+	const size_t len = strlen(source);
 
 	if ((printlevel != 128 && !show_messages) || len == 0 ||
 		(gamestate != GS_LEVEL && gamestate != GS_INTERMISSION) )
@@ -1693,7 +1693,7 @@ void C_DrawConsole()
 	int primary_surface_height = primary_surface->getHeight();
 
 	int left = CONPX(8);
-	size_t lines = (ConBottom - CONPX(12)) / CONPX(8);
+	int lines = (ConBottom - CONPX(12)) / CONPX(8);
 
 	int offset;
 	if (lines * CONPX(8) > ConBottom - CONPX(16))

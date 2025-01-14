@@ -158,7 +158,7 @@ OCRC32Sum W_CRC32(const std::string& filename)
 	if (!fp)
 		return rvo;
 
-	unsigned n = 0;
+	size_t n = 0;
 	unsigned char buf[file_chunk_size];
 	uint32_t crc = 0;
 
@@ -189,7 +189,7 @@ OMD5Hash W_MD5(const std::string& filename)
 	md5_state_t state;
 	md5_init(&state);
 
-	unsigned n = 0;
+	size_t n = 0;
 	unsigned char buf[file_chunk_size];
 
 	while((n = fread(buf, 1, sizeof(buf), fp)))

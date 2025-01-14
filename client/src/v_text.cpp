@@ -485,7 +485,7 @@ static void breakit(brokenlines_t* line, const byte* start, const byte* string, 
 	while (string > start && isspace(*(string - 1)))
 		string--;
 
-	int prefix_len = prefix ? strlen(prefix) : 0;
+	size_t prefix_len = prefix ? strlen(prefix) : 0;
 
 	line->string = new char[string - start + 1 + prefix_len];
 

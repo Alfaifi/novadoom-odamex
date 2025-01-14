@@ -400,7 +400,7 @@ void ST_voteDraw (int y) {
 		return;
 	}
 
-	size_t x1, x2;
+	int x1, x2;
 	x1 = (I_GetSurfaceWidth() - V_StringWidth(result_string.c_str()) * xscale) >> 1;
 	if (hud_scale) {
 		screen->DrawTextClean(result_color, x1, y, result_string.c_str());

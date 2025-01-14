@@ -674,7 +674,7 @@ void V_DrawFPSWidget()
 		                         v2int_t(::GRAPH_WIDTH, ::GRAPH_HEIGHT));
 
 		// Data
-		for (size_t count = 1; count < ::GRAPH_WIDTH - 2; count++)
+		for (int count = 1; count < ::GRAPH_WIDTH - 2; count++)
 		{
 			const double start = ::g_GraphData.getTail(count - 1);
 			const double end = ::g_GraphData.getTail(count);
