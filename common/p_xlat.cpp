@@ -418,6 +418,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 		{
 		case WalkMany:
 			flags |= ML_REPEATSPECIAL;
+			[[fallthrough]];
 		case WalkOnce:
             if (passthrough)
 				flags |= ML_SPAC_CROSSTHROUGH;
@@ -428,6 +429,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 		case SwitchMany:
 		case PushMany:
 			flags |= ML_REPEATSPECIAL;
+			[[fallthrough]];
 		case SwitchOnce:
 		case PushOnce:
 			if (passthrough)
@@ -438,6 +440,7 @@ void P_TranslateLineDef (line_t *ld, maplinedef_t *mld)
 
 		case GunMany:
 			flags |= ML_REPEATSPECIAL;
+			[[fallthrough]];
 		case GunOnce:
 			flags |= ML_SPAC_IMPACT;
 			break;

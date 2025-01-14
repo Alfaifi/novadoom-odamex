@@ -1951,12 +1951,12 @@ void AM_Drawer()
 			{
 				if (G_IsHordeMode())
 				{
-					StrFormat(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d",
+					line = fmt::sprintf(TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d",
 				        level.killed_monsters);
 				}
 				else
 				{
-					StrFormat(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d",
+					line = fmt::sprintf(TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d",
 				        level.killed_monsters,
 				        (level.total_monsters + level.respawned_monsters));
 				}
@@ -1984,9 +1984,9 @@ void AM_Drawer()
 
 			if (am_showitems && !G_IsHordeMode())
 			{
-				StrFormat(line, TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d",
-				        level.found_items,
-				        level.total_items);
+				line = fmt::sprintf(TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d",
+				                    level.found_items,
+				                    level.total_items);
 
 				int x, y;
 				const int text_width = V_StringWidth(line.c_str()) * CleanXfac;
@@ -2007,8 +2007,8 @@ void AM_Drawer()
 
 			if (am_showsecrets && !G_IsHordeMode())
 			{
-				StrFormat(line, TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d",
-				        level.found_secrets, level.total_secrets);
+				line = fmt::sprintf(TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d",
+				                    level.found_secrets, level.total_secrets);
 				int x, y;
 				const int text_width = V_StringWidth(line.c_str()) * CleanXfac;
 
@@ -2120,8 +2120,7 @@ void AM_Drawer()
 
 		if (am_showtime)
 		{
-			StrFormat(line, " %02d:%02d:%02d", time / 3600, (time % 3600) / 60,
-			        time % 60); // Time
+			line = fmt::sprintf(" %02d:%02d:%02d", time / 3600, (time % 3600) / 60, time % 60); // Time
 
 			int x, y;
 			const int text_width = V_StringWidth(line.c_str()) * CleanXfac;

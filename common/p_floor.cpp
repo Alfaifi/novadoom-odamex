@@ -302,6 +302,7 @@ DFloor::DFloor(sector_t* sec, DFloor::EFloor floortype, line_t* line, fixed_t sp
 
 	case DFloor::floorLowerInstant:
 		m_Speed = height;
+		[[fallthrough]];
 	case DFloor::floorLowerByValue:
 		m_Direction = -1;
 		m_FloorDestHeight = floorheight - height;
@@ -309,6 +310,7 @@ DFloor::DFloor(sector_t* sec, DFloor::EFloor floortype, line_t* line, fixed_t sp
 
 	case DFloor::floorRaiseInstant:
 		m_Speed = height;
+		[[fallthrough]];
 	case DFloor::floorRaiseByValue:
 		m_Direction = 1;
 		m_FloorDestHeight = floorheight + height;
@@ -321,6 +323,7 @@ DFloor::DFloor(sector_t* sec, DFloor::EFloor floortype, line_t* line, fixed_t sp
 
 	case DFloor::floorRaiseAndCrushDoom:
 		height = 8 * FRACUNIT;
+		[[fallthrough]];
 	case DFloor::floorRaiseToLowestCeiling:
 		m_Direction = 1;
 		m_FloorDestHeight = P_FindLowestCeilingSurrounding(sec);
@@ -345,6 +348,7 @@ DFloor::DFloor(sector_t* sec, DFloor::EFloor floortype, line_t* line, fixed_t sp
 
 	case DFloor::floorRaiseAndCrush:
 		height = 8 * FRACUNIT;
+		[[fallthrough]];
 	case DFloor::floorRaiseToCeiling:
 		m_Direction = 1;
 		m_FloorDestHeight = ceilingheight - height;
@@ -721,6 +725,7 @@ DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line,
 
 	case DFloor::floorLowerInstant:
 		m_Speed = height;
+		[[fallthrough]];
 	case DFloor::floorLowerByValue:
 		m_Direction = -1;
 		m_FloorDestHeight = floorheight - height;
@@ -728,6 +733,7 @@ DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line,
 
 	case DFloor::floorRaiseInstant:
 		m_Speed = height;
+		[[fallthrough]];
 	case DFloor::floorRaiseByValue:
 		m_Direction = 1;
 		m_FloorDestHeight = floorheight + height;
@@ -740,6 +746,7 @@ DFloor::DFloor(sector_t *sec, DFloor::EFloor floortype, line_t *line,
 
 	case DFloor::floorRaiseAndCrush:
 		m_Crush = crush;
+		[[fallthrough]];
 	case DFloor::floorRaiseToLowestCeiling:
 		m_Direction = 1;
 		m_FloorDestHeight =
@@ -2060,7 +2067,7 @@ void DWaggle::RunThink()
 
 	m_Accumulator += m_AccDelta;
 	fixed_t changeamount = m_OriginalHeight + FixedMul(FloatBobOffsets[(m_Accumulator >> FRACBITS) & 63], m_Scale);
-	
+
 	if (m_Ceiling)
 	{
 		P_SetCeilingHeight(m_Sector, changeamount);

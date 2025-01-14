@@ -438,7 +438,7 @@ void R_InitTranslationTables()
 	}
 
 	// Create powerup tints by grabbing each players rgb translation table
-	for (size_t i = 0; i < MAXPLAYERS + 1; i++)
+	for (int i = 0; i < MAXPLAYERS + 1; i++)
 	{
 		R_RebuildPlayerGreenTintTables(i);
 		R_RebuildPlayerRedTintTables(i);

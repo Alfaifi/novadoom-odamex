@@ -29,7 +29,7 @@
 
 #include "nonstd/scope.hpp"
 
-#include "i_sdl.h" 
+#include "i_sdl.h"
 #include <stdlib.h>
 
 #ifdef OSX
@@ -553,7 +553,7 @@ void I_BaseError(const std::string& errortext)
 	abort();
 }
 
-NORETURN void I_BaseFatalError(const std::string& errortext)
+[[noreturn]] void I_BaseFatalError(const std::string& errortext)
 {
 	std::string messagetext;
 

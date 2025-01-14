@@ -182,6 +182,7 @@ bool P_TestActivateZDoomLine(line_t* line, AActor* mo, int side,
 				case Door_Raise:
 					if (line->args[1] >= 64)
 						break;
+					[[fallthrough]];
 				case Teleport:
 				case Teleport_NoFog:
 				case Teleport_Line:

@@ -1148,8 +1148,8 @@ struct MapInfoDataSetter<level_pwad_info_t>
 			{ "sucktime", &MIType_EatNext },
 			{ "enterpic", &MIType_InterLumpName, &enterpicscript },
 			{ "exitpic", &MIType_InterLumpName, &exitpicscript },
-			{ "enteranim", &MIType_LumpName, &ref.enteranim }, // nonstandard, from ID24 UMAPINFO, only present here for _D1NFO in odamex.wad
-			{ "exitanim", &MIType_LumpName, &ref.exitanim }, // nonstandard, from ID24 UMAPINFO, only present here for _D1NFO in odamex.wad
+			{ "enteranim", &MIType_LumpName, &ref.enteranim },
+			{ "exitanim", &MIType_LumpName, &ref.exitanim },
 			{ "interpic", &MIType_EatNext },
 			{ "translator", &MIType_EatNext },
 			{ "compat_shorttex", &MIType_CompatFlag, &ref.flags }, // todo: not implemented

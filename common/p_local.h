@@ -414,7 +414,7 @@ class DRotatePoly : public DPolyAction
 	DECLARE_SERIAL (DRotatePoly, DPolyAction)
 public:
 	DRotatePoly (int polyNum);
-	void RunThink ();
+	void RunThink () override;
 protected:
 	friend BOOL EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, BOOL overRide);
 private:
@@ -426,7 +426,7 @@ class DMovePoly : public DPolyAction
 	DECLARE_SERIAL (DMovePoly, DPolyAction)
 public:
 	DMovePoly (int polyNum);
-	void RunThink ();
+	void RunThink () override;
 protected:
 	DMovePoly ();
 	int m_Angle;
@@ -441,7 +441,7 @@ class DPolyDoor : public DMovePoly
 	DECLARE_SERIAL (DPolyDoor, DMovePoly)
 public:
 	DPolyDoor (int polyNum, podoortype_t type);
-	void RunThink ();
+	void RunThink () override;
 protected:
 	int m_Direction;
 	int m_TotalDist;

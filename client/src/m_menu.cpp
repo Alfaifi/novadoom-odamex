@@ -1044,7 +1044,7 @@ void M_DrawEpisode()
 	{
 		y -= (LINEHEIGHT * (episodenum - 4));
 	}
-		
+
 	screen->DrawPatchClean(W_CachePatch("M_EPISOD"), 54, y);
 }
 
@@ -1257,13 +1257,12 @@ void M_QuitResponse(int ch)
 
 void M_QuitDOOM(int choice)
 {
-	static std::string endstring;
-
 	// We pick index 0 which is language sensitive,
 	//  or one at random, between 1 and maximum number.
-	StrFormat(endstring, "%s\n\n%s",
-	          GStrings.getIndex(GStrings.toIndex(QUITMSG) + (gametic % NUM_QUITMESSAGES)),
-	          GStrings(DOSY));
+	static std::string endstring =
+		fmt::sprintf("%s\n\n%s",
+		             GStrings.getIndex(GStrings.toIndex(QUITMSG) + (gametic % NUM_QUITMESSAGES)),
+		             GStrings(DOSY));
 
 	M_StartMessage(endstring.c_str(), M_QuitResponse, true);
 }
@@ -1709,16 +1708,12 @@ static void M_PlayerTeamChanged (int choice)
 
 static void SendNewColor(int red, int green, int blue)
 {
-	std::string colorcommand;
-	std::string customcolorcommand;
 	int colorpreset = D_ColorPreset(cl_colorpreset.cstring());
 
-	StrFormat(colorcommand, "cl_color \"%02x %02x %02x\"", red, green, blue);
-	AddCommandString(colorcommand);
+	AddCommandString(fmt::sprintf("cl_color \"%02x %02x %02x\"", red, green, blue));
 	if (colorpreset == COLOR_CUSTOM)
 	{
-		StrFormat(customcolorcommand, "cl_customcolor \"%02x %02x %02x\"", red, green, blue);
-		AddCommandString(customcolorcommand);
+		AddCommandString(fmt::sprintf("cl_customcolor \"%02x %02x %02x\"", red, green, blue));
 	}
 
 	// [SL] not connected to a server so we don't have to wait for the server
@@ -1875,7 +1870,7 @@ bool M_Responder (event_t* ev)
 	if (ch == -1 || HU_ChatMode() != CHAT_INACTIVE)
 		return false;
 
-	// Transfer any action to the Options Menu Responder 
+	// Transfer any action to the Options Menu Responder
 	// if we're not on the main menu.
 	if (menuactive && OptionsActive) {
 		M_OptResponder (ev);
@@ -1909,7 +1904,7 @@ bool M_Responder (event_t* ev)
 				saveCharIndex--;
 				savegamestrings[saveSlot][saveCharIndex] = 0;
 			}
-		} 
+		}
 		else if (Key_IsCancelKey(ch))
 		{
 			genStringEnter = 0;
@@ -1923,8 +1918,8 @@ bool M_Responder (event_t* ev)
 			if (savegamestrings[saveSlot][0])
 				genStringEnd(saveSlot);	// [RH] Function to call when enter is pressed
 		}
-		else 
-		{ 
+		else
+		{
 			ch = ev->data3;	// [RH] Use user keymap
 			if (ch >= 32 && ch <= 127 &&
 				saveCharIndex < genStringLen &&
@@ -1943,8 +1938,8 @@ bool M_Responder (event_t* ev)
 	if (messageToPrint)
 	{
 		if (messageNeedsInput &&
-		    (!(ch2 == ' ' || Key_IsMenuKey(ch) || Key_IsYesKey(ch) || Key_IsNoKey(ch) || 
-			(isascii(ch2) && (toupper(ch2) == 'N' || toupper(ch2) == 'Y'))))) 
+		    (!(ch2 == ' ' || Key_IsMenuKey(ch) || Key_IsYesKey(ch) || Key_IsNoKey(ch) ||
+			(isascii(ch2) && (toupper(ch2) == 'N' || toupper(ch2) == 'Y')))))
 			return true;
 
 		menuactive = messageLastMenuActive;

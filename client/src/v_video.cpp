@@ -149,8 +149,8 @@ bool V_CheckModeAdjustment()
 	if (V_GetRequestedVideoMode() != window->getVideoMode())
 		return true;
 
-	const bool using_widescreen = I_IsWideResolution();
-	if (vid_widescreen.asInt() > 0 && sv_allowwidescreen != using_widescreen)
+	const bool allow_widescreen = sv_allowwidescreen != 0.0f;
+	if (vid_widescreen.asInt() > 0 && allow_widescreen != I_IsWideResolution())
 		return true;
 
 	if (vid_widescreen.asInt() != vid_widescreen_old)
@@ -268,7 +268,8 @@ CVAR_FUNC_IMPL(vid_pillarbox)
 static bool CheckWideModeAdjustment()
 {
 	const bool using_widescreen = I_IsWideResolution();
-	if (vid_widescreen.asInt() > 0 && sv_allowwidescreen != using_widescreen)
+	const bool allow_widescreen = sv_allowwidescreen != 0.0f;
+	if (vid_widescreen.asInt() > 0 && allow_widescreen != using_widescreen)
 		return true;
 
 	if (vid_widescreen.asInt() > 0 != using_widescreen)
@@ -673,7 +674,7 @@ void V_DrawFPSWidget()
 		                         v2int_t(::GRAPH_WIDTH, ::GRAPH_HEIGHT));
 
 		// Data
-		for (size_t count = 1; count < ::GRAPH_WIDTH - 2; count++)
+		for (int count = 1; count < ::GRAPH_WIDTH - 2; count++)
 		{
 			const double start = ::g_GraphData.getTail(count - 1);
 			const double end = ::g_GraphData.getTail(count);
@@ -719,15 +720,15 @@ void V_DrawFPSWidget()
 		             argb_t(0x13, 0x13, 0x13));
 
 		// Min
-		StrFormat(buffer, "%4.1f", ::g_GraphData.minimum);
+		buffer = fmt::sprintf("%4.1f", ::g_GraphData.minimum);
 		screen->PrintStr(graphBox.max.x, graphBox.max.y - 3, buffer.c_str());
 
 		// Max
-		StrFormat(buffer, "%4.1f", ::g_GraphData.maximum);
+		buffer = fmt::sprintf("%4.1f", ::g_GraphData.maximum);
 		screen->PrintStr(graphBox.max.x, graphBox.min.y - 3, buffer.c_str());
 
 		// Actual
-		StrFormat(buffer, "%4.1f", delta_time_ms);
+		buffer = fmt::sprintf("%4.1f", delta_time_ms);
 		screen->PrintStr(graphBox.max.x, graphBox.min.y + (::GRAPH_HEIGHT / 2) - 3,
 		                 buffer.c_str());
 
@@ -748,7 +749,7 @@ void V_DrawFPSWidget()
 		}
 
 		// FPS counter
-		StrFormat(buffer, "FPS %5.1f", last_fps);
+		buffer = fmt::sprintf("FPS %5.1f", last_fps);
 		screen->PrintStr(graphBox.min.x, graphBox.max.y + 1, buffer.c_str());
 	}
 	else if (vid_displayfps.asInt() == FPS_COUNTER)
@@ -769,7 +770,7 @@ void V_DrawFPSWidget()
 
 		// FPS counter
 		std::string buffer;
-		StrFormat(buffer, "FPS %5.1f", last_fps);
+		buffer = fmt::sprintf("FPS %5.1f", last_fps);
 		screen->PrintStr(botleft.x, botleft.y + 1, buffer.c_str());
 	}
 }

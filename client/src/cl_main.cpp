@@ -1990,7 +1990,7 @@ static std::string SVCName(byte header)
 	std::string svc = ::svc_info[header].getName();
 	if (svc.empty())
 	{
-		StrFormat(svc, "svc_%u", header);
+		svc = fmt::sprintf("svc_%u", header);
 	}
 	return svc;
 }

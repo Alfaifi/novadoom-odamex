@@ -111,12 +111,12 @@
 
 //
 // [SL] 2012-04-30 - A bit field to store a bool value for every player.
-// 
+//
 class PlayerBitField
 {
 public:
 	PlayerBitField() { clear(); }
-	
+
 	void clear()
 	{
 		memset(bitfield, 0, sizeof(bitfield));
@@ -126,26 +126,26 @@ public:
 	{
 		int bytenum = id >> 3;
 		int bitnum = id & bytemask;
-	
+
 		bitfield[bytenum] |= (1 << bitnum);
 	}
-	
+
 	void unset(byte id)
 	{
 		int bytenum = id >> 3;
 		int bitnum = id & bytemask;
-	
+
 		bitfield[bytenum] &= ~(1 << bitnum);
 	}
-	
+
 	bool get(byte id) const
 	{
 		int bytenum = id >> 3;
-		int bitnum = id & bytemask;	
-	
+		int bitnum = id & bytemask;
+
 		return ((bitfield[bytenum] & (1 << bitnum)) != 0);
 	}
-	
+
 private:
 	static constexpr int bytesize = 8 * sizeof(byte);
 	static constexpr int bytemask = bytesize - 1;
@@ -432,7 +432,7 @@ public:
 	void Destroy ();
 	~AActor ();
 
-	virtual void RunThink ();
+	void RunThink () override;
 
     // Info for drawing: position.
     fixed_t		x;
@@ -481,7 +481,7 @@ public:
     mobjinfo_t*		info;	// &mobjinfo[mobj->type]
     int				tics;	// state tic counter
 	state_t			*state;
-	int				damage;			// For missiles	
+	int				damage;			// For missiles
 	int				flags;
 	int				flags2;	// Heretic flags
 	int				flags3;	// MBF21 flags
@@ -575,7 +575,7 @@ public:
 	void SetOrigin (fixed_t x, fixed_t y, fixed_t z);
 
 	AActorPtr ptr(){ return self; }
-	
+
 	//
 	// ActorBlockMapListNode
 	//
@@ -600,7 +600,7 @@ public:
 		static constexpr size_t BLOCKSY = 3;
 
 		AActor		*actor;
-			
+
 		// the top-left blockmap the actor is in
 		int			originx;
 		int			originy;
@@ -613,7 +613,7 @@ public:
 		AActor		*next[BLOCKSX * BLOCKSY];
 		AActor		**prev[BLOCKSX * BLOCKSY];
 	};
-	
+
 	ActorBlockMapListNode bmapnode;
 };
 

@@ -17,7 +17,7 @@
 //
 // DESCRIPTION:
 //
-// A static array implementation utilizing unique IDs for access. 
+// A static array implementation utilizing unique IDs for access.
 //
 //-----------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@
 
 // ============================================================================
 //
-// SArray 
+// SArray
 //
 // Lightweight fixed-size array implementation with iterator.
 // The class provides many desirable characteristics:
@@ -43,7 +43,7 @@
 //		Iterators that are STL conformant for use with <algorithm>
 //
 // ------------------------------------------------------------------------
-// 
+//
 // Notes:
 //
 // There are a fixed number of slots for the array, between 1 and MAX_SIZE.
@@ -96,7 +96,7 @@ public:
 	typedef generic_iterator<const VT, const SArrayType> const_iterator;
 
 	template <typename IVT, typename ISAT>
-	class generic_iterator : public std::iterator<std::forward_iterator_tag, SArray>
+	class generic_iterator
 	{
 	private:
 		// typedef for easier-to-read code
@@ -104,6 +104,12 @@ public:
 		typedef generic_iterator<const IVT, const ISAT> ConstThisClass;
 
 	public:
+		using iterator_category = std::forward_iterator_tag;
+		using value_type = SArray;
+		using difference_type = std::ptrdiff_t;
+		using pointer = value_type*;
+		using reference = value_type&;
+
 		generic_iterator(ISAT& sarray) :
 			mSArray(sarray), mSlot(NOT_FOUND)
 		{ }
@@ -365,7 +371,7 @@ public:
 	inline const_iterator end() const
 	{
 		return const_iterator(*this, NOT_FOUND);
-	}	
+	}
 
 	//
 	// SArray::validate
@@ -418,7 +424,7 @@ public:
 		assert(slot != NOT_FOUND);
 		return mItemRecords[slot].mItem;
 	}
-		
+
 	//
 	// SArray::operator[]
 	//
@@ -549,7 +555,7 @@ private:
 		}
 		for (SlotNumber i = mNextUnused; i < newsize; i++)
 			newitemrecords[i].mId = NOT_FOUND;
-		
+
 		delete [] mItemRecords;
 		mSize = newsize;
 		mItemRecords = newitemrecords;
@@ -665,7 +671,7 @@ private:
 			mFreeHead = mItemRecords[slot].mId;
 		else
 			slot = mNextUnused++;
-		
+
 		assert(slot < mSize);
 		mItemRecords[slot].mId = generateId(slot);
 		mUsed++;

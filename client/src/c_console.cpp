@@ -56,12 +56,6 @@
 #include "nx_io.h"
 #endif
 
-// These functions are standardized in C++11, POSIX standard otherwise
-#if defined(_WIN32) && (__cplusplus <= 199711L)
-#	define vsnprintf _vsnprintf
-#	define snprintf  _snprintf
-#endif
-
 static constexpr int MAX_LINE_LENGTH = 8192;
 
 static bool ShouldTabCycle = false;
@@ -1156,7 +1150,7 @@ void C_AddNotifyString(int printlevel, const char* color_code, const char* sourc
 	char work[MAX_LINE_LENGTH];
 	brokenlines_t *lines;
 
-	const int len = strlen(source);
+	const size_t len = strlen(source);
 
 	if ((printlevel != 128 && !show_messages) || len == 0 ||
 		(gamestate != GS_LEVEL && gamestate != GS_INTERMISSION) )
@@ -1698,7 +1692,7 @@ void C_DrawConsole()
 	int primary_surface_height = primary_surface->getHeight();
 
 	int left = CONPX(8);
-	size_t lines = (ConBottom - CONPX(12)) / CONPX(8);
+	int lines = (ConBottom - CONPX(12)) / CONPX(8);
 
 	int offset;
 	if (lines * CONPX(8) > ConBottom - CONPX(16))
@@ -1751,8 +1745,8 @@ void C_DrawConsole()
 			StrFormatBytes(dlnow, progress.dlnow);
 			std::string dltotal;
 			StrFormatBytes(dltotal, progress.dltotal);
-			StrFormat(download, "%s: %s/%s", filename.c_str(), dlnow.c_str(),
-			          dltotal.c_str());
+			download = fmt::sprintf("%s: %s/%s", filename.c_str(), dlnow.c_str(),
+			                        dltotal.c_str());
 
 			// Avoid divide by zero.
 			if (progress.dltotal == 0)
