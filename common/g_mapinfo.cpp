@@ -1317,7 +1317,6 @@ struct MapInfoDataSetter<level_pwad_info_t>
 			{ "exitpic", &MIType_InterLumpName, &exitpicscript },
 			{ "enteranim", &MIType_LumpName, &ref.enteranim },
 			{ "exitanim", &MIType_LumpName, &ref.exitanim },
-			{ "interpic", &MIType_EatNext },
 			{ "translator", &MIType_EatNext },
 			{ "compat_shorttex", &MIType_CompatFlag, &ref.flags }, // todo: not implemented
 			{ "compat_limitpain", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_LIMITPAIN },
