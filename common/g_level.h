@@ -179,6 +179,7 @@ struct level_pwad_info_t
 	std::string		intertextsecret;
 	OLumpName		interbackdrop;
 	OLumpName		intermusic;
+	OLumpName		zintermusic;
 
 	fixed_t			sky1ScrollDelta;
 	fixed_t			sky2ScrollDelta;
@@ -194,7 +195,7 @@ struct level_pwad_info_t
 	      partime(0), skypic(""), music(""), flags(0), cluster(0), snapshot(NULL),
 	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
 	      aircontrol(0.0f), exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""), endpic(""), intertext(""),
-	      intertextsecret(""), interbackdrop(""), intermusic(""),
+	      intertextsecret(""), interbackdrop(""), intermusic(""), zintermusic(""),
 	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
 	      clearlabel(false), author()
 	{
@@ -211,7 +212,7 @@ struct level_pwad_info_t
 	      music(other.music), flags(other.flags), cluster(other.cluster),
 	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
 	      skypic2(""), gravity(0.0f), aircontrol(0.0f), exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""),
-	      endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""),
+	      endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""), zintermusic(""),
 	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
 	      clearlabel(false), author()
 	{
@@ -257,6 +258,7 @@ struct level_pwad_info_t
 		intertextsecret = other.intertextsecret;
 		interbackdrop = other.interbackdrop;
 		intermusic = other.intermusic;
+		zintermusic = other.zintermusic;
 		sky1ScrollDelta = other.sky1ScrollDelta;
 		sky2ScrollDelta = other.sky2ScrollDelta;
 		bossactions.clear();
@@ -340,7 +342,10 @@ struct level_locals_t
 	std::string		intertext;
 	std::string		intertextsecret;
 	OLumpName		interbackdrop;
+	// umapinfo intermusic -- used for text screens
 	OLumpName		intermusic;
+	// zdoom intermusic -- used for intermissions
+	OLumpName		zintermusic;
 
 	std::vector<bossaction_t> bossactions;
 

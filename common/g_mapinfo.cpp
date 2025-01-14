@@ -1310,7 +1310,7 @@ struct MapInfoDataSetter<level_pwad_info_t>
 			{ "islobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL },
 			{ "lobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL },
 			{ "nocrouch" },
-			{ "intermusic", &MIType_EatNext },
+			{ "intermusic", &MIType_LumpName, &ref.zintermusic },
 			{ "par", &MIType_Int, &ref.partime },
 			{ "sucktime", &MIType_EatNext },
 			{ "enterpic", &MIType_InterLumpName, &enterpicscript },

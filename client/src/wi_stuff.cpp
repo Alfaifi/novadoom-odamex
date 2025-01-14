@@ -1169,8 +1169,8 @@ void WI_updateStats()
 			{
 				if (enteranim != nullptr && !enteranim->musiclump.empty())
 					S_ChangeMusic(enteranim->musiclump.c_str(), true);
-				else if (!nextlevel.intermusic.empty())
-					S_ChangeMusic(nextlevel.intermusic.c_str(), true);
+				else if (!nextlevel.zintermusic.empty())
+					S_ChangeMusic(nextlevel.zintermusic.c_str(), true);
 				// background
 				const char* bg_lump = enteranim == nullptr ? enterpic.c_str() : enteranim->backgroundlump.c_str();
 				const patch_t* bg_patch = W_CachePatch(bg_lump);
@@ -1291,8 +1291,8 @@ void WI_Ticker()
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
 		else if (!winlumps.music.empty())
 			S_ChangeMusic (winlumps.music.c_str(), true);
-		else if (!currentlevel.intermusic.empty())
-			S_ChangeMusic (currentlevel.intermusic.c_str(), true);
+		else if (!currentlevel.zintermusic.empty())
+			S_ChangeMusic (currentlevel.zintermusic.c_str(), true);
 		else
 			S_ChangeMusic (gameinfo.intermissionMusic.c_str(), true);
 	}
