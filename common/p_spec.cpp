@@ -2008,7 +2008,7 @@ void P_ShootSpecialLine(AActor*	thing, line_t* line)
 	if (map_format.getZDoom()) // All zdoom specials can be impact activated
 	{
 		lineresult = LineSpecials[line->special](line, thing, line->args[0], line->args[1],
-		                            line->args[2], line->args[3], line->args[4]);
+		                            line->args[2], line->args[3], line->args[4], line->special);
 	}
 	else // Only certain specials from Doom/Boom can be impact activated
 	{
@@ -2147,7 +2147,7 @@ bool P_PushSpecialLine(AActor* thing, line_t* line, int side)
 
 	if(LineSpecials[line->special] (line, thing, line->args[0],
 					line->args[1], line->args[2],
-					line->args[3], line->args[4]))
+					line->args[3], line->args[4], line->special))
 	{
 		SV_OnActivatedLine(line, thing, side, LinePush, false);
 
@@ -3107,7 +3107,8 @@ bool A_CheckTrigger(AActor *mo, AActor *triggerer) {
 		TeleportSide = 0;
 		bool res = (LineSpecials[mo->special](NULL, triggerer, mo->args[0],
 											 mo->args[1], mo->args[2],
-											 mo->args[3], mo->args[4]) != 0);
+											 mo->args[3], mo->args[4],
+											 mo->special) != 0);
 		TeleportSide = savedSide;
 		return res;
 	}

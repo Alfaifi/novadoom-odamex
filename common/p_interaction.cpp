@@ -1308,7 +1308,7 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 	{
 		LineSpecials[special->special](NULL, toucher, special->args[0], special->args[1],
 		                               special->args[2], special->args[3],
-		                               special->args[4]);
+		                               special->args[4], special->special);
 		special->special = 0;
 	}
 
@@ -1723,7 +1723,8 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 	{
 		LineSpecials[target->special] (NULL, source, target->args[0],
 									   target->args[1], target->args[2],
-									   target->args[3], target->args[4]);
+									   target->args[3], target->args[4],
+									   target->special);
 		target->special = 0;
 	}
 	// [RH] Also set the thing's tid to 0. [why?]

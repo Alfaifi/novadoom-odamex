@@ -1065,7 +1065,7 @@ bool P_ExecuteZDoomLineSpecial(int special, short* args, line_t* line, int side,
                                    AActor* mo)
 {
 	return LineSpecials[special](line, mo, args[0], args[1], args[2], args[3],
-		                                args[4]);
+		                                args[4], special);
 }
 
 unsigned int P_TranslateZDoomLineFlags(const unsigned int flags)

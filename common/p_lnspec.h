@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -418,7 +418,7 @@ typedef enum {
 	dDamage_LavaHefty = 83,
 	dScroll_EastLavaDamage = 84,
 	hDamage_Sludge = 85,
-	
+
 	sLight_Strobe_Hurt = 104,
 	sDamage_Hellslime = 105,
 	Damage_InstantDeath = 115,
@@ -519,7 +519,8 @@ typedef BOOL (*lnSpecFunc)(struct line_s	*line,
 						   int				arg2,
 						   int				arg3,
 						   int				arg4,
-						   int				arg5);
+						   int				arg5,
+						   int				special);
 
 extern lnSpecFunc LineSpecials[283];
 
