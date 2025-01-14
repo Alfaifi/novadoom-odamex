@@ -155,11 +155,6 @@ void D_Init()
 	// [AM] Init rand() PRNG, needed for non-deterministic maplist shuffling.
 	srand(time(NULL));
 
-	// start the Zone memory manager
-	Z_Init();
-	if (first_time)
-		Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
-
 	// Load palette and set up colormaps
 	V_InitPalette("PLAYPAL");
 	R_InitColormaps();
@@ -279,6 +274,10 @@ void D_DoomMain()
 
 	D_AddWadCommandLineFiles(newwadfiles);
 	D_AddDehCommandLineFiles(newpatchfiles);
+
+	// start the Zone memory manager
+	Z_Init();
+	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
 	D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
