@@ -47,23 +47,11 @@ function BuildX64 {
     New-Item  -Force -ItemType "directory" -Path "${CurrentDir}\BuildX64"
     Set-Location -Path "${CurrentDir}\BuildX64"
     
-    if ($OdamexTestSuffix -eq "")
-    {
-        cmake.exe -G "Visual Studio 17 2022" -A "x64" "${CurrentDir}" `
-            -DBUILD_OR_FAIL=1 `
-            -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
-            -DBUILD_MASTER=1 -DBUILD_LAUNCHER=1
-        cmake.exe --build . --config RelWithDebInfo
-    }
-    else
-    {
-        cmake.exe -G "Visual Studio 17 2022" -A "x64" "${CurrentDir}" `
-            -DBUILD_OR_FAIL=1 `
-            -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
-            -DBUILD_MASTER=1 -DBUILD_LAUNCHER=1 `
-            -DODAMEXTESTSUFFIX="${OdamexTestSuffix}"
-        cmake.exe --build . --config RelWithDebInfo
-    }
+    cmake.exe -G "Visual Studio 17 2022" -A "x64" "${CurrentDir}" `
+        -DBUILD_OR_FAIL=1 `
+        -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
+        -DBUILD_MASTER=1 -DBUILD_LAUNCHER=1
+    cmake.exe --build . --config RelWithDebInfo
 
     Set-Location -Path "${CurrentDir}"
 }

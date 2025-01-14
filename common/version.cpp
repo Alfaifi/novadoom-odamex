@@ -224,6 +224,22 @@ const char* GitRevCount()
 }
 
 /**
+ * @brief Return the number of commits since the first commit of the
+ * base branch this created from.
+ *
+ * @detail Two branches that are the same distance from the first commit
+ *         can have the same number.
+ */
+const char* GitRevCountFromSource()
+{
+#ifdef GIT_REV_COUNT_FROM_SOURCE
+	return GIT_REV_COUNT_FROM_SOURCE; // Won't be defined by cmake if 0
+#else
+	return "1"; // The first RC!!
+#endif
+}
+
+/**
  * @brief Return a truncated unambiguous hash.
  */
 const char* GitShortHash()
@@ -271,8 +287,8 @@ const char* NiceVersionDetails()
 	}
 	else if (!strncmp(GitBranch(), "release", ARRAY_LENGTH(RELEASE_PREFIX) - 1))
 	{
-		// "Release" branch is omitted.
-		StrFormat(version, "g%s-%s%s", GitShortHash(), GitRevCount(), debug);
+		// "Release" branch shows git commits from source as RC number
+		StrFormat(version, "-pre.%s%s", GitRevCountFromSource(), debug);
 	}
 	else
 	{
@@ -292,6 +308,7 @@ const char* NiceVersion()
 {
 	static std::string version;
 	static bool tried = false;
+	const char RELEASE_PREFIX[] = "release";
 
 	if (tried)
 	{
@@ -303,18 +320,21 @@ const char* NiceVersion()
 	const char* details = NiceVersionDetails();
 	if (details[0] == '\0')
 	{
-		// Is this a release candidate?
-#ifdef ODAMEXTESTSUFFIX
-		version = DOTVERSIONSTR + std::string("-pre.") + ODAMEXTESTSUFFIX;
-#else
 		// No version details, no parenthesis.
 		version = DOTVERSIONSTR;
-#endif
 	}
 	else
 	{
-		// Put details in parens.
-		StrFormat(version, "%s (%s)", DOTVERSIONSTR, details);
+		// Release candidates show everything together
+		if (!strncmp(GitBranch(), "release", ARRAY_LENGTH(RELEASE_PREFIX) - 1))
+		{
+			StrFormat(version, "%s%s", DOTVERSIONSTR, details);
+		}
+		else
+		{
+			// Put details in parens.
+			StrFormat(version, "%s (%s)", DOTVERSIONSTR, details);
+		}
 	}
 
 	return version.c_str();

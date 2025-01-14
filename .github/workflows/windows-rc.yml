@@ -84,14 +84,8 @@ jobs:
         PATCHVERSION: ${{ needs.pre_job.outputs.patch }}
     - name: Checkout submodules
       run: git submodule update --init --recursive
-    - name: Remove .git folders
-      shell: bash
-      run: rm -rf .git
     - name: Turn on problem matcher
       uses: ammaraskar/msvc-problem-matcher@master
-    - name: Remove .git folders
-      shell: bash
-      run: rm -rf .git
     - name: Run build powershell
       shell: pwsh
       run: |
@@ -137,14 +131,8 @@ jobs:
         PATCHVERSION: ${{ needs.pre_job.outputs.patch }}
     - name: Checkout submodules
       run: git submodule update --init --recursive
-    - name: Remove .git folders
-      shell: bash
-      run: rm -rf .git
     - name: Turn on problem matcher
       uses: ammaraskar/msvc-problem-matcher@master
-    - name: Remove .git folders
-      shell: bash
-      run: rm -rf .git
     - name: Run build-x32 powershell
       shell: pwsh
       run: |
@@ -190,9 +178,6 @@ jobs:
         PATCHVERSION: ${{ needs.pre_job.outputs.patch }}
     - name: Checkout submodules
       run: git submodule update --init --recursive
-    - name: Remove .git folders
-      shell: bash
-      run: rm -rf .git
     - name: Create tar.gz
       shell: bash
       run: |
