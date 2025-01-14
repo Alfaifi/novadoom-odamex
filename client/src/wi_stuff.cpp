@@ -1089,7 +1089,8 @@ void WI_updateStats()
 		if (!(bcnt&3))
 		    S_Sound (CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
-		if (!wminfo.maxkills || cnt_kills >= (level.killed_monsters * 100) / wminfo.maxkills)
+		if (!gameinfo.intermissionCounter || !wminfo.maxkills ||
+		    cnt_kills >= (level.killed_monsters * 100) / wminfo.maxkills)
 		{
 		    cnt_kills = (wminfo.maxkills) ? (level.killed_monsters * 100) / wminfo.maxkills : 0;
 		    S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
@@ -1103,7 +1104,8 @@ void WI_updateStats()
 		if (!(bcnt&3))
 		    S_Sound (CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
-		if (!wminfo.maxitems || cnt_items >= (level.found_items * 100) / wminfo.maxitems)
+		if (!gameinfo.intermissionCounter || !wminfo.maxitems ||
+		    cnt_items >= (level.found_items * 100) / wminfo.maxitems)
 		{
 		    cnt_items = (wminfo.maxitems) ? (level.found_items * 100) / wminfo.maxitems : 0;
 		    S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
@@ -1117,7 +1119,8 @@ void WI_updateStats()
 		if (!(bcnt&3))
 		    S_Sound (CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
-		if (!wminfo.maxsecret || cnt_secret >= (level.found_secrets * 100) / wminfo.maxsecret)
+		if (!gameinfo.intermissionCounter || !wminfo.maxsecret ||
+		    cnt_secret >= (level.found_secrets * 100) / wminfo.maxsecret)
 		{
 		    cnt_secret = (wminfo.maxsecret) ? (level.found_secrets * 100) / wminfo.maxsecret : 0;
 		    S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
@@ -1136,7 +1139,7 @@ void WI_updateStats()
 
 		cnt_par += 3;
 
-		if (cnt_par >= wminfo.partime / TICRATE)
+		if (!gameinfo.intermissionCounter || cnt_par >= wminfo.partime / TICRATE)
 		{
 		    cnt_par = wminfo.partime / TICRATE;
 
@@ -1275,10 +1278,8 @@ void WI_Ticker()
 		// intermission music
 		if (exitanim != nullptr && !exitanim->musiclump.empty())
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
-		else if ((gameinfo.flags & GI_MAPxx))
-			S_ChangeMusic ("d_dm2int", true);
 		else
-			S_ChangeMusic ("d_inter", true);
+			S_ChangeMusic (gameinfo.intermissionMusic.c_str(), true);
 	}
 
     WI_checkForAccelerate();
