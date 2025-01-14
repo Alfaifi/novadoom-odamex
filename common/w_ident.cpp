@@ -37,10 +37,10 @@
 
 #include "w_ident.h"
 
-//static const uint32_t IDENT_NONE = 0; // unused
-static const uint32_t IDENT_COMMERCIAL = BIT(0);
-static const uint32_t IDENT_IWAD = BIT(1);
-static const uint32_t IDENT_DEPRECATED = BIT(2);
+//static constexpr uint32_t IDENT_NONE = 0; // unused
+static constexpr uint32_t IDENT_COMMERCIAL = BIT(0);
+static constexpr uint32_t IDENT_IWAD = BIT(1);
+static constexpr uint32_t IDENT_DEPRECATED = BIT(2);
 
 struct identData_t
 {
@@ -67,7 +67,7 @@ struct identData_t
 
 #define PWAD_NO_WEIGHT 0
 
-static const identData_t identdata[] = {
+static constexpr identData_t identdata[] = {
     // ------------------------------------------------------------------------
     // DOOM2.WAD
     // ------------------------------------------------------------------------
@@ -1164,8 +1164,8 @@ public:
 
 		// [SL] not an offical IWAD.
 		// Check for lumps that are required by vanilla Doom.
-		static const int NUM_CHECKLUMPS = 6;
-		static const char checklumps[NUM_CHECKLUMPS][8] = {
+		static constexpr int NUM_CHECKLUMPS = 6;
+		static constexpr char checklumps[NUM_CHECKLUMPS][8] = {
 		    {'P', 'L', 'A', 'Y', 'P', 'A', 'L'},      // 0
 		    {'C', 'O', 'L', 'O', 'R', 'M', 'A', 'P'}, // 1
 		    {'F', '_', 'S', 'T', 'A', 'R', 'T'},      // 2
@@ -1192,7 +1192,7 @@ public:
 		return file1->mGroupName == file2->mGroupName;
 	}
 
-	const OString identify(const OResFile& file)
+	const OString identify(const OResFile& file) const
 	{
 		const fileIdentifier_t* fileid = lookupByMd5Sum(file.getMD5());
 
@@ -1202,8 +1202,8 @@ public:
 		// Not a registered file.
 		// Try to identify if it's compatible with known IWADs.
 
-		static const int NUM_CHECKLUMPS = 12;
-		static const char checklumps[NUM_CHECKLUMPS][8] = {
+		static constexpr int NUM_CHECKLUMPS = 12;
+		static constexpr char checklumps[NUM_CHECKLUMPS][8] = {
 			{ 'E','1','M','1' },					// 0
 			{ 'E','2','M','1' },					// 1
 			{ 'E','4','M','1' },					// 2
