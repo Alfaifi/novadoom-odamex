@@ -67,7 +67,7 @@
 //
 // ============================================================================
 
-typedef unsigned int SArrayId;
+using SArrayId = unsigned int;
 
 // ----------------------------------------------------------------------------
 // SArray interface & inline implementation
@@ -318,7 +318,7 @@ public:
 	// Returns the maximum size that the container can grow to. This number
 	// is directly based on the template parameter N.
 	//
-	inline size_t max_size() const
+	static constexpr size_t max_size()
 	{
 		return MAX_SIZE;
 	}
@@ -487,7 +487,7 @@ public:
 	//
 	inline void erase(const SArrayId id)
 	{
-		SlotNumber slot = getSlot(id);
+		const SlotNumber slot = getSlot(id);
 		assert(slot != NOT_FOUND);
 		eraseSlot(slot);
 	}
@@ -502,7 +502,7 @@ public:
 	//
 	inline void erase(const VT& item)
 	{
-		SlotNumber slot = getSlot(item);
+		const SlotNumber slot = getSlot(item);
 		assert(slot != NOT_FOUND);
 		eraseSlot(slot);
 	}
@@ -600,7 +600,7 @@ private:
 	inline SArrayId generateId(SlotNumber slot)
 	{
 		assert(slot < mSize);
-		SArrayId id = (mIdKey << SLOT_BITS) | slot;
+		const SArrayId id = (mIdKey << SLOT_BITS) | slot;
 		mIdKey++;
 		if (mIdKey > MAX_KEY)
 			mIdKey = MIN_KEY;
@@ -657,7 +657,7 @@ private:
 		// need to resize?
 		if (mUsed == mSize)
 		{
-			unsigned int newsize = 2 * mSize > MAX_SIZE ? MAX_SIZE : 2 * mSize;
+			const unsigned int newsize = 2 * mSize > MAX_SIZE ? MAX_SIZE : 2 * mSize;
 			// is it full and not able to be resized?
 			assert(mSize != newsize);
 			if (mSize == newsize)
@@ -716,18 +716,18 @@ private:
 		mIdKey = other.mIdKey;
 	}
 
-	static const unsigned int SLOT_BITS = N;
-	static const unsigned int KEY_BITS = 32 - SLOT_BITS;
-	static const unsigned int MAX_SIZE = 1 << SLOT_BITS;
+	static constexpr unsigned int SLOT_BITS = N; 
+	static constexpr unsigned int KEY_BITS = 32 - SLOT_BITS;
+	static constexpr unsigned int MAX_SIZE = 1 << SLOT_BITS;
 
-	static const unsigned int MIN_KEY = 2;
-	static const unsigned int MAX_KEY = (1 << KEY_BITS) - 1;
+	static constexpr unsigned int MIN_KEY = 2;
+	static constexpr unsigned int MAX_KEY = (1 << KEY_BITS) - 1;
 
-	static const unsigned int MIN_SLOT = 0;
-	static const unsigned int MAX_SLOT = (1 << SLOT_BITS) - 1;
-	static const unsigned int SLOT_MASK = (1 << SLOT_BITS) - 1;
+	static constexpr unsigned int MIN_SLOT = 0;
+	static constexpr unsigned int MAX_SLOT = (1 << SLOT_BITS) - 1; 
+	static constexpr unsigned int SLOT_MASK = (1 << SLOT_BITS) - 1;
 
-	static const unsigned int NOT_FOUND = (1 << SLOT_BITS) | MAX_SLOT;
+	static constexpr unsigned int NOT_FOUND = (1 << SLOT_BITS) | MAX_SLOT;
 
 	ItemRecord*		mItemRecords;
 	unsigned int	mSize;

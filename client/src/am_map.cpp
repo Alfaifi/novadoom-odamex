@@ -1248,7 +1248,7 @@ void AM_drawGrid(am_color_t color)
 	centerp.x = FixedDiv64(m_ur.x + m_ll.x, INT2FIXED64(2));
 	centerp.y = FixedDiv64(m_ur.y + m_ll.y, INT2FIXED64(2));
 
-	const fixed64_t w = INT2FIXED64(MAPBLOCKUNITS);
+	constexpr fixed64_t w = INT2FIXED(MAPBLOCKUNITS);
 	const fixed64_t minimum_x = centerp.x - half_dist;
 	const fixed64_t maximum_x = centerp.x + half_dist;
 	const fixed64_t minimum_y = centerp.y - half_dist;
@@ -1841,8 +1841,8 @@ void AM_drawMarks()
 
 			//      w = LESHORT(marknums[i]->width);
 			//      h = LESHORT(marknums[i]->height);
-			const int w = 5; // because something's wrong with the wad, i guess
-			const int h = 6; // because something's wrong with the wad, i guess
+			constexpr int w = 5; // because something's wrong with the wad, i guess
+			constexpr int h = 6; // because something's wrong with the wad, i guess
 
 			if (fx >= f.x && fx <= f_w - w && fy >= f.y && fy <= f_h - h)
 			{
