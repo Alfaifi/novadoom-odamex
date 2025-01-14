@@ -176,6 +176,14 @@ static IWindowSurface*	anim_surface;
 static interlevel_t* enteranim;
 static interlevel_t* exitanim;
 
+struct wi_win_t
+{
+	OLumpName music;
+	OLumpName pic;
+	OLumpName anim;
+};
+static wi_win_t winlumps;
+
 EXTERN_CVAR (sv_maxplayers)
 EXTERN_CVAR (wi_oldintermission)
 EXTERN_CVAR (cl_autoscreenshot)
@@ -1278,6 +1286,8 @@ void WI_Ticker()
 		// intermission music
 		if (exitanim != nullptr && !exitanim->musiclump.empty())
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
+		else if (!winlumps.music.empty())
+			S_ChangeMusic (winlumps.music.c_str(), true);
 		else
 			S_ChangeMusic (gameinfo.intermissionMusic.c_str(), true);
 	}
@@ -1356,7 +1366,10 @@ void WI_loadData()
 
 	animation = new wi_animation_t();
 
-	if (!currentlevel.exitanim.empty())
+	if (!winlumps.anim.empty())
+	{
+		exitanim = WI_GetInterlevel(winlumps.anim.c_str());
+	} else if (!currentlevel.exitanim.empty())
 	{
 		exitanim = WI_GetInterlevel(currentlevel.exitanim.c_str());
 	} else if (!currentlevel.exitscript.empty())
@@ -1379,7 +1392,7 @@ void WI_loadData()
 	else if (currentlevel.exitpic[0] != '\0')
 		strcpy(name, currentlevel.exitpic.c_str());
 	else if ((gameinfo.flags & GI_MAPxx) || ((gameinfo.flags & GI_MENUHACK_RETAIL) && wbs->epsd >= 3))
-		strcpy(name, "INTERPIC");
+		winlumps.pic.empty() ? strcpy(name, "INTERPIC") : strcpy(name, winlumps.pic.c_str());
 	else
 		snprintf(name, 17, "WIMAP%d", wbs->epsd);
 
@@ -1586,6 +1599,29 @@ void WI_initVariables (wbstartstruct_t *wbstartstruct)
 	cnt = bcnt = 0;
 	me = wbs->pnum;
 	plrs = wbs->plyr;
+
+	if (W_CheckNumForName(wbs->winner ? "D_OWIN" : "D_OLOSE") != -1)
+		winlumps.music = wbs->winner ? "D_OWIN" : "D_OLOSE";
+	else if (W_CheckNumForName(wbs->winner ? "D_STWIN" : "D_STLOSE") != -1)
+		winlumps.music = wbs->winner ? "D_STWIN" : "D_STLOSE";
+	else
+		winlumps.music.clear();
+
+	if (W_CheckNumForName(wbs->winner ? "WINANIM" : "LOSEANIM") != -1)
+	{
+		winlumps.anim = wbs->winner ? "WINANIM" : "LOSEANIM";
+		winlumps.pic.clear();
+	}
+	else if (W_CheckNumForName(wbs->winner ? "WINERPIC" : "LOSERPIC") != -1)
+	{
+		winlumps.pic = wbs->winner ? "WINERPIC" : "LOSERPIC";
+		winlumps.anim.clear();
+	}
+	else
+	{
+		winlumps.pic.clear();
+		winlumps.anim.clear();
+	}
 }
 
 void WI_Start (wbstartstruct_t *wbstartstruct)
