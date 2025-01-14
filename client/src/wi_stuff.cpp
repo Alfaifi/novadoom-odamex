@@ -176,14 +176,6 @@ static IWindowSurface*	anim_surface;
 static interlevel_t* enteranim;
 static interlevel_t* exitanim;
 
-struct wi_win_t
-{
-	OLumpName music;
-	OLumpName pic;
-	OLumpName anim;
-};
-static wi_win_t winlumps;
-
 EXTERN_CVAR (sv_maxplayers)
 EXTERN_CVAR (wi_oldintermission)
 EXTERN_CVAR (cl_autoscreenshot)
@@ -1286,11 +1278,17 @@ void WI_Ticker()
 	if (bcnt == 1)
 	{
 		level_pwad_info_t& currentlevel = getLevelInfos().findByName(wbs->current);
+		OLumpName winmusic;
+		if (W_CheckNumForName(wbs->winner ? "D_OWIN" : "D_OLOSE") != -1)
+			winmusic = wbs->winner ? "D_OWIN" : "D_OLOSE";
+		else if (W_CheckNumForName(wbs->winner ? "D_STWIN" : "D_STLOSE") != -1)
+			winmusic = wbs->winner ? "D_STWIN" : "D_STLOSE";
+
 		// intermission music
 		if (exitanim != nullptr && !exitanim->musiclump.empty())
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
-		else if (!winlumps.music.empty())
-			S_ChangeMusic (winlumps.music.c_str(), true);
+		else if (!winmusic.empty())
+			S_ChangeMusic (winmusic.c_str(), true);
 		else if (!currentlevel.zintermusic.empty())
 			S_ChangeMusic (currentlevel.zintermusic.c_str(), true);
 		else
@@ -1369,11 +1367,18 @@ void WI_loadData()
 	level_pwad_info_t& currentlevel = levels.findByName(wbs->current);
 	level_pwad_info_t& nextlevel = levels.findByName(wbs->next);
 
+	OLumpName winanim;
+	OLumpName winpic;
+	if (W_CheckNumForName(wbs->winner ? "WINANIM" : "LOSEANIM") != -1)
+		winanim = wbs->winner ? "WINANIM" : "LOSEANIM";
+	else if (W_CheckNumForName(wbs->winner ? "WINERPIC" : "LOSERPIC") != -1)
+		winpic = wbs->winner ? "WINERPIC" : "LOSERPIC";
+
 	animation = new wi_animation_t();
 
-	if (!winlumps.anim.empty())
+	if (!winanim.empty())
 	{
-		exitanim = WI_GetInterlevel(winlumps.anim.c_str());
+		exitanim = WI_GetInterlevel(winanim.c_str());
 	} else if (!currentlevel.exitanim.empty())
 	{
 		exitanim = WI_GetInterlevel(currentlevel.exitanim.c_str());
@@ -1397,7 +1402,7 @@ void WI_loadData()
 	else if (currentlevel.exitpic[0] != '\0')
 		strcpy(name, currentlevel.exitpic.c_str());
 	else if ((gameinfo.flags & GI_MAPxx) || ((gameinfo.flags & GI_MENUHACK_RETAIL) && wbs->epsd >= 3))
-		winlumps.pic.empty() ? strcpy(name, "INTERPIC") : strcpy(name, winlumps.pic.c_str());
+		winpic.empty() ? strcpy(name, "INTERPIC") : strcpy(name, winpic.c_str());
 	else
 		snprintf(name, 17, "WIMAP%d", wbs->epsd);
 
@@ -1604,29 +1609,6 @@ void WI_initVariables (wbstartstruct_t *wbstartstruct)
 	cnt = bcnt = 0;
 	me = wbs->pnum;
 	plrs = wbs->plyr;
-
-	if (W_CheckNumForName(wbs->winner ? "D_OWIN" : "D_OLOSE") != -1)
-		winlumps.music = wbs->winner ? "D_OWIN" : "D_OLOSE";
-	else if (W_CheckNumForName(wbs->winner ? "D_STWIN" : "D_STLOSE") != -1)
-		winlumps.music = wbs->winner ? "D_STWIN" : "D_STLOSE";
-	else
-		winlumps.music.clear();
-
-	if (W_CheckNumForName(wbs->winner ? "WINANIM" : "LOSEANIM") != -1)
-	{
-		winlumps.anim = wbs->winner ? "WINANIM" : "LOSEANIM";
-		winlumps.pic.clear();
-	}
-	else if (W_CheckNumForName(wbs->winner ? "WINERPIC" : "LOSERPIC") != -1)
-	{
-		winlumps.pic = wbs->winner ? "WINERPIC" : "LOSERPIC";
-		winlumps.anim.clear();
-	}
-	else
-	{
-		winlumps.pic.clear();
-		winlumps.anim.clear();
-	}
 }
 
 void WI_Start (wbstartstruct_t *wbstartstruct)
