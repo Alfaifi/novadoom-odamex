@@ -304,8 +304,8 @@ const char* NiceVersion()
 	if (details[0] == '\0')
 	{
 		// Is this a release candidate?
-#if defined(ODAMEXTESTSUFFIX)
-		version = DOTVERSIONSTR + "-pre." + ODAMEXTESTSUFFIX;
+#ifdef ODAMEXTESTSUFFIX
+		version = DOTVERSIONSTR + std::string("-pre.") + ODAMEXTESTSUFFIX;
 #else
 		// No version details, no parenthesis.
 		version = DOTVERSIONSTR;
