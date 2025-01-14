@@ -1013,7 +1013,7 @@ void P_AdjustLine (line_t *ld)
 void P_FinishLoadingLineDefs (void)
 {
 	int i, linenum;
-	register line_t *ld = lines;
+	line_t *ld = lines;
 
 	for (i = numlines, linenum = 0; i--; ld++, linenum++)
 	{
@@ -1045,8 +1045,6 @@ void P_LoadLineDefs (const int lump)
 	// We'll fix this for now by just checking for the E2M7 FarmHash
 	const std::string e2m7hash = "43ffa244f5ae923b7df59dbf511c0468";
 
-	std::string levelHash;
-
 	// [Blair] Serialize the hashes before reading.
 	uint64_t reconsthash1 = (uint64_t)(::level.level_fingerprint[0]) |
 	                        (uint64_t)(::level.level_fingerprint[1]) << 8 |
@@ -1066,7 +1064,7 @@ void P_LoadLineDefs (const int lump)
 	                        (uint64_t)(::level.level_fingerprint[14]) << 48 |
 	                        (uint64_t)(::level.level_fingerprint[15]) << 56;
 
-	StrFormat(levelHash, "%16llx%16llx", reconsthash1, reconsthash2);
+	std:: string levelHash = fmt::sprintf("%16llx%16llx", reconsthash1, reconsthash2);
 
 	bool isE2M7 = (levelHash == e2m7hash);
 
@@ -1292,9 +1290,9 @@ void P_LoadSideDefs2 (int lump)
 
 	for (int i = 0; i < numsides; i++)
 	{
-		register mapsidedef_t* msd = (mapsidedef_t*)data + i;
-		register side_t* sd = sides + i;
-		register sector_t* sec;
+		mapsidedef_t* msd = (mapsidedef_t*)data + i;
+		side_t* sd = sides + i;
+		sector_t* sec;
 
 		sd->textureoffset = LESHORT(msd->textureoffset)<<FRACBITS;
 		sd->rowoffset = LESHORT(msd->rowoffset)<<FRACBITS;
@@ -1921,7 +1919,7 @@ extern polyblock_t **PolyBlockMap;
 // Hash the sector tags across the sectors and linedefs.
 static void P_InitTagLists(void)
 {
-	register int i;
+	int i;
 
 	for (i = numsectors; --i >= 0; )		// Initially make all slots empty.
 		sectors[i].firsttag = -1;

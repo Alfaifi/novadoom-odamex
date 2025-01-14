@@ -161,7 +161,7 @@ EXTERN_CVAR(screenblocks)
 #define M_ZOOMOUT ((int)(FRACUNIT64 / 1.02))
 
 // translates between frame-buffer and map distances
-#define FTOM(x) FixedMul64(((x) << FRACBITS64), scale_ftom)
+#define FTOM(x) FixedMul64((INT2FIXED64((x))), scale_ftom)
 #define MTOF(x) FIXED642INT(FixedMul64((x), scale_mtof))
 
 #define PUTDOTP(xx, yy, cc) fb[(yy)*f_p + (xx)] = (cc)
@@ -364,7 +364,7 @@ void AM_restoreScaleAndLoc()
 	M_AddVec2Fixed64(&m_ur, &m_ll, &m_wh);
 
 	// Change the scaling multipliers
-	scale_mtof = FixedDiv64(f_w << FRACBITS64, m_wh.x);
+	scale_mtof = FixedDiv64(INT2FIXED64(f_w), m_wh.x);
 	scale_ftom = FixedDiv64(FRACUNIT64, scale_mtof);
 }
 
@@ -405,11 +405,11 @@ void AM_findMinMaxBoundaries()
 	const fixed64_t max_w = max.x - min.x;
 	const fixed64_t max_h = max.y - min.y;
 
-	const fixed64_t a = FixedDiv64((I_GetSurfaceWidth()) << FRACBITS64, max_w);
-	const fixed64_t b = FixedDiv64((I_GetSurfaceHeight()) << FRACBITS64, max_h);
+	const fixed64_t a = FixedDiv64(INT2FIXED64(I_GetSurfaceWidth()), max_w);
+	const fixed64_t b = FixedDiv64(INT2FIXED64(I_GetSurfaceHeight()), max_h);
 
 	min_scale_mtof = a < b ? a : b;
-	max_scale_mtof = FixedDiv64((I_GetSurfaceHeight()) << FRACBITS64, 2 * PLAYERRADIUS64);
+	max_scale_mtof = FixedDiv64(INT2FIXED64(I_GetSurfaceHeight()), 2 * PLAYERRADIUS64);
 }
 
 //
@@ -1248,7 +1248,7 @@ void AM_drawGrid(am_color_t color)
 	centerp.x = FixedDiv64(m_ur.x + m_ll.x, INT2FIXED64(2));
 	centerp.y = FixedDiv64(m_ur.y + m_ll.y, INT2FIXED64(2));
 
-	const fixed64_t w = INT2FIXED64(MAPBLOCKUNITS);
+	constexpr fixed64_t w = INT2FIXED(MAPBLOCKUNITS);
 	const fixed64_t minimum_x = centerp.x - half_dist;
 	const fixed64_t maximum_x = centerp.x + half_dist;
 	const fixed64_t minimum_y = centerp.y - half_dist;
@@ -1841,8 +1841,8 @@ void AM_drawMarks()
 
 			//      w = LESHORT(marknums[i]->width);
 			//      h = LESHORT(marknums[i]->height);
-			const int w = 5; // because something's wrong with the wad, i guess
-			const int h = 6; // because something's wrong with the wad, i guess
+			constexpr int w = 5; // because something's wrong with the wad, i guess
+			constexpr int h = 6; // because something's wrong with the wad, i guess
 
 			if (fx >= f.x && fx <= f_w - w && fy >= f.y && fy <= f_h - h)
 			{
@@ -1951,12 +1951,12 @@ void AM_Drawer()
 			{
 				if (G_IsHordeMode())
 				{
-					StrFormat(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d",
+					line = fmt::sprintf(TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d",
 				        level.killed_monsters);
 				}
 				else
 				{
-					StrFormat(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d",
+					line = fmt::sprintf(TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d",
 				        level.killed_monsters,
 				        (level.total_monsters + level.respawned_monsters));
 				}
@@ -1984,9 +1984,9 @@ void AM_Drawer()
 
 			if (am_showitems && !G_IsHordeMode())
 			{
-				StrFormat(line, TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d",
-				        level.found_items,
-				        level.total_items);
+				line = fmt::sprintf(TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d",
+				                    level.found_items,
+				                    level.total_items);
 
 				int x, y;
 				const int text_width = V_StringWidth(line.c_str()) * CleanXfac;
@@ -2007,8 +2007,8 @@ void AM_Drawer()
 
 			if (am_showsecrets && !G_IsHordeMode())
 			{
-				StrFormat(line, TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d",
-				        level.found_secrets, level.total_secrets);
+				line = fmt::sprintf(TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d",
+				                    level.found_secrets, level.total_secrets);
 				int x, y;
 				const int text_width = V_StringWidth(line.c_str()) * CleanXfac;
 
@@ -2120,8 +2120,7 @@ void AM_Drawer()
 
 		if (am_showtime)
 		{
-			StrFormat(line, " %02d:%02d:%02d", time / 3600, (time % 3600) / 60,
-			        time % 60); // Time
+			line = fmt::sprintf(" %02d:%02d:%02d", time / 3600, (time % 3600) / 60, time % 60); // Time
 
 			int x, y;
 			const int text_width = V_StringWidth(line.c_str()) * CleanXfac;

@@ -195,6 +195,9 @@ CVAR_RANGE(			con_buffersize, "1024", "Size of console scroll-back buffer",
 CVAR(				con_coloredmessages, "1", "Activates colored messages in printed messages",
 					CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
+CVAR_RANGE_FUNC_DECL(con_scaletext, "0", "Scale factor of console text (0 = auto).",
+					CVARTYPE_INT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 4.0f)
+
 CVAR(message_showpickups, "1", "Show item pickup messages on the message line.",
      CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
@@ -343,7 +346,9 @@ CVAR(cl_downloadsites,
      "https://static.allfearthesentinel.com/wads/ https://doomshack.org/wads/ "
      "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
      "http://files.funcrusher.net/wads/ https://doomshack.org/uploads/ "
-     "https://doom.dogsoft.net/getwad.php?search=",
+     "https://doom.dogsoft.net/getwad.php?search= https://doomshack.org/wadlist.php "
+     "https://wads.firestick.games/ https://euroboros.net/zandronum/wads/ "
+     "https://static.audrealms.org/wads/ https://downloadbox.captainpollutiontv.de/DooM/WADSEEKER/",
      "A list of websites to download WAD files from.  These websites are used if the "
      "server doesn't provide any websites to download files from, or the file can't be "
      "found on any of their sites.  The list of sites is separated by spaces.  These "
