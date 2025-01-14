@@ -1683,9 +1683,6 @@ void R_DrawViewBorder()
 	const int surface_height = surface->getHeight();
 	const int top = 0, bottom = ST_StatusBarY(surface_width, surface_height);
 	const int left = 0, right = surface_width;
-	const gameborder_t* border = gameinfo.border;
-	const int offset = border->offset;
-	const int size = border->size;
 
 	// draw top border
 	R_DrawBorder(left, top, right, viewwindowy);
