@@ -489,7 +489,7 @@ void D_DoAdvanceDemo (void)
 
             break;
         case 2:
-		    pagetic = gameinfo.pageTime * TICRATE;
+            pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
             pagename = gameinfo.creditPages[0].c_str();
 
@@ -503,7 +503,7 @@ void D_DoAdvanceDemo (void)
 
             if ((gameinfo.flags & GI_MAPxx) || (gameinfo.flags & GI_MENUHACK_RETAIL))
             {
-			    pagetic = gameinfo.titleTime * TICRATE;
+                pagetic = gameinfo.titleTime * TICRATE;
 
                 pagename = gameinfo.titlePage.c_str();
                 currentmusic = gameinfo.titleMusic.c_str();
@@ -513,7 +513,7 @@ void D_DoAdvanceDemo (void)
             else
             {
                 pagetic = gameinfo.pageTime * TICRATE;
-			    pagename = gameinfo.creditPages[1].c_str();
+                pagename = gameinfo.creditPages[1].c_str();
             }
 
             break;
@@ -522,9 +522,9 @@ void D_DoAdvanceDemo (void)
 
             break;
         case 6:
-		    pagetic = gameinfo.pageTime * TICRATE;
+            pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-		    pagename = gameinfo.creditPages[1].c_str();
+            pagename = gameinfo.creditPages[1].c_str();
 
             break;
         case 7:

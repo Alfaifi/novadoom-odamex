@@ -2250,7 +2250,7 @@ EXTERN_CVAR (screenblocks)
 
 void M_Init()
 {
-	// [Russell] - Set this beforehand, because when you switch wads
+    // [Russell] - Set this beforehand, because when you switch wads
     // (ie from doom to doom2 back to doom), you will have less menu items
     {
         MainDef.numitems = d1_main_end;
