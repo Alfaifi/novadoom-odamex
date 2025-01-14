@@ -72,7 +72,7 @@ void SV_ExplodeMissile(AActor *);
 void SV_UpdateMonsterRespawnCount();
 
 EXTERN_CVAR(sv_freelook)
-EXTERN_CVAR(sv_itemsrespawn) 
+EXTERN_CVAR(sv_itemsrespawn)
 EXTERN_CVAR(sv_respawnsuper)
 EXTERN_CVAR(sv_itemrespawntime)
 EXTERN_CVAR(co_zdoomphys)
@@ -129,11 +129,11 @@ AActor::AActor()
       subsector(NULL), floorz(0), ceilingz(0), dropoffz(0), floorsector(NULL), radius(0),
       height(0), momx(0), momy(0), momz(0), validcount(0), type(MT_UNKNOWNTHING),
       info(NULL), tics(0), state(NULL), damage(0), flags(0), flags2(0), 
-      flags3(0), oflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0),
+      flags3(0), oflags(0), statusflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0),
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
+      rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
 {
 	memset(args, 0, sizeof(args));
 	memset(&baseline, 0, sizeof(baseline));
@@ -149,8 +149,8 @@ AActor::AActor(const AActor& other)
       dropoffz(other.dropoffz), floorsector(other.floorsector), radius(other.radius),
       height(other.height), momx(other.momx), momy(other.momy), momz(other.momz),
       validcount(other.validcount), type(other.type), info(other.info), tics(other.tics),
-      state(other.state), damage(other.damage), 
-      flags(other.flags), flags2(other.flags2), flags3(other.flags3), oflags(other.oflags), 
+      state(other.state), damage(other.damage),
+      flags(other.flags), flags2(other.flags2), flags3(other.flags3), oflags(other.oflags),
       special1(other.special1), special2(other.special2),
       health(other.health), movedir(other.movedir), movecount(other.movecount),
       visdir(other.visdir), reactiontime(other.reactiontime), threshold(other.threshold),
@@ -159,7 +159,7 @@ AActor::AActor(const AActor& other)
       translucency(other.translucency), waterlevel(other.waterlevel), gear(other.gear),
       onground(other.onground), touching_sectorlist(other.touching_sectorlist),
       deadtic(other.deadtic), oldframe(other.oldframe), rndindex(other.rndindex),
-      netid(other.netid), tid(other.tid), bmapnode(other.bmapnode), baseline_set(false)
+      netid(other.netid), tid(other.tid), baseline_set(false), bmapnode(other.bmapnode)
 {
 	memcpy(args, other.args, sizeof(args));
 	memcpy(&baseline, &other.baseline, sizeof(baseline));
@@ -203,6 +203,7 @@ AActor &AActor::operator= (const AActor &other)
     flags2 = other.flags2;
 	flags3 = other.flags3;
 	oflags = other.oflags;
+	statusflags = other.statusflags;
     special1 = other.special1;
     special2 = other.special2;
     health = other.health;
@@ -247,11 +248,11 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       subsector(NULL), floorz(0), ceilingz(0), dropoffz(0), floorsector(NULL), radius(0),
       height(0), momx(0), momy(0), momz(0), validcount(0), type(MT_UNKNOWNTHING),
       info(NULL), tics(0), state(NULL), damage(0), flags(0), flags2(0), flags3(0), oflags(0),
-      special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0),
+      statusflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0),
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), bmapnode(this), baseline_set(false)
+      rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
 {
 	// Fly!!! fix it in P_RespawnSpecial
 	if ((unsigned int)itype >= NUMMOBJTYPES)
@@ -762,7 +763,7 @@ void AActor::RunThink ()
 		if (!(flags & MF_COUNTKILL) || !respawnmonsters)
 			return;
 
-		// Ch0wW - Let the server handle it alone. 
+		// Ch0wW - Let the server handle it alone.
 		// (CHECKME: Does that interfere with vanilla demos?)
 		if ((multiplayer && clientside && !serverside))
 			return;
@@ -792,8 +793,8 @@ void AActor::RunThink ()
 
 void AActor::Serialize (FArchive &arc)
 {
-	const DWORD TLATE_NONE = 0xFFFFFFFF;
-	const DWORD TLATE_BOSS = 0xFFFFFFFE;
+	constexpr DWORD TLATE_NONE = 0xFFFFFFFF;
+	constexpr DWORD TLATE_BOSS = 0xFFFFFFFE;
 
 	Super::Serialize (arc);
 	if (arc.IsStoring ())
@@ -828,6 +829,7 @@ void AActor::Serialize (FArchive &arc)
 			<< flags2
 			<< flags3
 			<< oflags
+		  << statusflags
 			<< special1
 			<< special2
 			<< health
@@ -907,9 +909,10 @@ void AActor::Serialize (FArchive &arc)
 			>> tics
 			>> state
 			>> flags
-			>> flags2 
+			>> flags2
 			>> flags3
 			>> oflags
+			>> statusflags
 			>> special1
 			>> special2
 			>> health
@@ -1075,8 +1078,8 @@ static void P_WindThrustActor(AActor* mo)
 {
 	if (mo->flags2 & MF2_WINDTHRUST)
 	{
-		static const int windTab[3] = {2048*5, 2048*10, 2048*25};
-		int special = mo->subsector->sector->special;
+		static constexpr int windTab[3] = {2048*5, 2048*10, 2048*25};
+		const int special = mo->subsector->sector->special;
 		switch (special)
 		{
 			case 40: case 41: case 42: // Wind_East
@@ -1197,7 +1200,7 @@ static void P_ActorSlideAgainstActor(AActor* mo, fixed_t ptryx, fixed_t ptryy)
 {
 	// try sliding in the x direction
 	fixed_t tx = 0, ty = ptryy - mo->y;
-	
+
 	bool walkplane = P_CheckSlopeWalk(mo, tx, ty);
 
 	if (P_TryMove(mo, mo->x + tx, mo->y + ty, true, walkplane))
@@ -1227,7 +1230,7 @@ static void P_ApplyXYFriction(AActor* mo)
 {
 	// No friction for missiles ever
 	if (mo->flags & (MF_MISSILE | MF_SKULLFLY))
-		return; 	
+		return;
 
 	// Apply air friction
 	if (mo->z > mo->floorz && !(mo->flags2 & (MF2_ONMOBJ | MF2_FLY)) && mo->waterlevel == 0)
@@ -1452,7 +1455,7 @@ static void P_PlayerSmoothStepUp(AActor* mo)
 static fixed_t P_CalculateActorGravityDoom(AActor* mo)
 {
 	fixed_t velocity_change = FLOAT2FIXED(level.gravity * mo->subsector->sector->gravity) / 800;
-			
+
 	if (mo->momz == 0)
 		velocity_change *= 2;
 	if (mo->flags2 & MF2_LOGRAV)
@@ -1475,7 +1478,7 @@ static fixed_t P_CalculateActorGravityZDoom(AActor* mo)
 
 	if (mo->flags2 & MF2_LOGRAV)
 		velocity_change >>= 3;
- 
+
 	return velocity_change;
 }
 
@@ -1689,8 +1692,6 @@ static void P_ActorFakeSectorTriggers(AActor* mo, fixed_t oldz)
 
 void P_ApplyBouncyPhysics(AActor *mo)
 {
-	bool sentient = mo->health > 0 && mo->info->seestate;
-
 	if (mo->flags & MF_BOUNCES && mo->momz)
 	{
 		mo->z += mo->momz;
@@ -2090,7 +2091,7 @@ void P_SpawnPuff (fixed_t x, fixed_t y, fixed_t z)
 //
 // P_SpawnTracerPuff
 //
-// Does not pay any attention to shootthing, because revenants do not 
+// Does not pay any attention to shootthing, because revenants do not
 // set that pointer, thus any decision-making based on that pointer will
 // be complete nonsense.
 //
@@ -2481,7 +2482,7 @@ void P_SpawnMBF21PlayerMissile(AActor* source, mobjtype_t type, fixed_t angle, f
 	th->target = source->ptr();
 	an += (angle_t)(((int64_t)angle << 16) / 360);
 	th->angle = an;
-	
+
 	if (co_zdoomphys)
 	{
 		v3float_t velocity;
@@ -2562,7 +2563,7 @@ void P_RespawnSpecials (void)
 	{
 		if (mthing->type == mobjinfo[i].doomednum)
 		{
-			// Allow or not Partial Invisibility & Invulnerability from respawning 
+			// Allow or not Partial Invisibility & Invulnerability from respawning
 			if (!sv_respawnsuper && (mthing->type == 2022 || mthing->type == 2024))
 			{
 				iquetail = (iquetail + 1)&(ITEMQUESIZE - 1);
@@ -2838,7 +2839,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	}
 
 	// Filter mapthings based on the gamemode
-	if (!multiplayer)
+	if (!multiplayer && g_thingfilter != -1 && !G_GetCurrentSkill().spawn_multi)
 	{
 		if (!(mthing->flags & MTF_SINGLE))
 			return;
@@ -2960,7 +2961,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		case MT_MISC26: // chainsaw
 		case MT_MISC27: // rocket launcher
 		case MT_MISC28: // plasma gun
-			if (!multiplayer)
+			if (!multiplayer && g_thingfilter != -1 && !G_GetCurrentSkill().spawn_multi)
 			{
 				if ((mthing->flags & (MTF_DEATHMATCH | MTF_SINGLE)) == MTF_DEATHMATCH)
 					return;
@@ -3104,7 +3105,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 /**
  * @brief Spawn all avatars.  Must have spawned other items first.
- * 
+ *
  * @detail An avatar is an mobj that attempts to take the place of a voodoo
  *         doll in multiplayer.  Instead of pretending to be any player in
  *         particular, it is a mere mobj, but with special handling in order
@@ -3189,7 +3190,7 @@ void P_SetMobjBaseline(AActor& mo)
 }
 
 /**
- * @brief Generate flags that lists which fields are different 
+ * @brief Generate flags that lists which fields are different
  */
 uint32_t P_GetMobjBaselineFlags(AActor& mo)
 {

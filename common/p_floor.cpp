@@ -31,7 +31,7 @@
 #include "tables.h"
 
 void P_ResetTransferSpecial(newspecial_s* newspecial);
-const unsigned int P_ResetSectorTransferFlags(const unsigned int flags);
+unsigned int P_ResetSectorTransferFlags(const unsigned int flags);
 
 EXTERN_CVAR(co_boomphys)
 
@@ -511,7 +511,6 @@ DFloor::DFloor(sector_t* sec, line_t* line, int speed,
     : DMovingFloor(sec), m_Status(init)
 {
 	fixed_t floorheight = P_FloorHeight(sec);
-	fixed_t ceilingheight = P_CeilingHeight(sec);
 
 	m_Type = genFloor;
 	m_Crush = crush ? DOOM_CRUSH : NO_CRUSH;
@@ -997,7 +996,6 @@ BOOL EV_DoGenFloor(line_t* line)
 	BOOL rtn;
 	bool manual;
 	sector_t* sec;
-	DFloor* floor;
 	unsigned value = (unsigned)line->special - GenFloorBase;
 
 	// parse the bit fields in the line's special type
@@ -1908,7 +1906,7 @@ bool EV_DoZDoomElevator(line_t* line, DElevator::EElevator type, fixed_t speed,
 /// Waggle
 ///////////////////////////////////////
 
-static const fixed_t FloatBobOffsets[64] = {
+static constexpr fixed_t FloatBobOffsets[64] = {
     0,       51389,   102283,  152192,  200636,  247147,  291278,  332604,
     370727,  405280,  435929,  462380,  484378,  501712,  514213,  521763,
     524287,  521763,  514213,  501712,  484378,  462380,  435929,  405280,

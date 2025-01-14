@@ -26,12 +26,15 @@
 
 #include "m_alloc.h"
 
+#include "m_random.h"
+
 #include "m_argv.h"
 
 #include "i_system.h"
 #include "w_wad.h"
 
 #include "r_local.h"
+#include "r_interp.h"
 #include "p_local.h"
 
 #include "c_console.h"
@@ -61,6 +64,9 @@ fixed_t 		pspritexiscale;
 									// [ML] 5/11/06 - Removed sky2
 int*			spritelights;
 
+fixed_t bobx;
+fixed_t boby;
+
 #define MAX_SPRITE_FRAMES 29		// [RH] Macro-ized as in BOOM.
 #define SPRITE_NEEDS_INFO	MAXINT
 
@@ -83,6 +89,7 @@ extern int				ActiveParticles;
 extern int				InactiveParticles;
 extern particle_t		*Particles;
 TArray<WORD>			ParticlesInSubsec;
+
 
 
 //
@@ -183,6 +190,34 @@ void SpriteColumnBlaster()
 	R_BlastSpriteColumn(colfunc);
 }
 
+// WARNING
+// The following will break vanilla demos!
+void R_SpawnBerserkPuff(int x, int y, int z)
+{
+	// don't run if menu is open
+	if (menuactive || ConsoleState == c_down || paused)
+		return;
+
+	AActor* puff;
+
+	int ang = P_RandomHitscanAngle(256 * 65535);
+
+	puff = new AActor(x, y, z, MT_PUFF);
+
+	puff->x += FixedMul(((P_RandomDiff() >> 4) * FRACUNIT) - -(16 * FRACUNIT),
+	                    finecosine[ang >> ANGLETOFINESHIFT]);
+	puff->y += FixedMul(((P_RandomDiff() >> 4) * FRACUNIT) - -(16 * FRACUNIT),
+	                    finesine[ang >> ANGLETOFINESHIFT]);
+	puff->z += abs((P_RandomDiff() >> 2) * FRACUNIT);
+	puff->momz = abs((FRACUNIT * P_RandomDiff()) >> 4);
+	puff->tics -= P_Random(puff) & 3;
+
+	if (puff->tics < 1)
+		puff->tics = 1;
+}
+
+EXTERN_CVAR(sv_showplayerpowerups)
+
 //
 // R_DrawVisSprite
 //	mfloorclip and mceilingclip should also be set.
@@ -237,6 +272,38 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 		translated = true;
 		dcol.translation = translationref_t(translationtables + (MAXPLAYERS-1)*256 +
 			( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) ));
+	}
+	int id = vis->mo && vis->mo->player ? vis->mo->player->id : 0;
+
+	// Add powerup colormaps
+	// invis overrides all
+	if (vis->statusflags & SF_INVIS)
+	{
+		vis->mobjflags |= MF_SHADOW;
+	}
+	else if (sv_showplayerpowerups > 0)
+	{
+		if (vis->statusflags & SF_INVULN)
+		{
+			// draw invuln palette on vissprite only
+			// and don't include sector colored lighting because it creates strange
+			// colors.
+			const palette_t* pal = V_GetDefaultPalette();
+			dcol.colormap = shaderef_t(&pal->maps, INVERSECOLORMAP);
+		}
+		else if (vis->statusflags & SF_BERSERK)
+		{
+			// draw a red palette on the vissprite
+			dcol.translation = translationref_t(&::redtable[id][0]);
+
+			if (vis && vis->mo && !(vis->statusflags & SF_INVIS))
+				R_SpawnBerserkPuff(vis->mo->x, vis->mo->y, vis->mo->z);
+		}
+		else if (vis->statusflags & SF_IRONFEET)
+		{
+			// draw a green palette on the vissprite
+			dcol.translation = translationref_t(&::greentable[id][0]);
+		}
 	}
 
 	if (vis->mobjflags & MF_SHADOW)
@@ -412,7 +479,7 @@ static vissprite_t* R_GenerateVisSprite(const sector_t* sector, int fakeside,
 void R_DrawHitBox(AActor* thing)
 {
 	v3fixed_t vertices[8];
-	const byte color = 0x80;
+	constexpr byte color = 0x80;
 
 	// bottom front left
 	vertices[0].x = thing->x - thing->radius;
@@ -503,7 +570,8 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 	// [SL] interpolate the position of thing
 	fixed_t thingx, thingy, thingz;
 
-	if (P_AproxDistance2(thing, thing->prevx, thing->prevy) < 128*FRACUNIT)
+	if (P_AproxDistance2(thing, thing->prevx, thing->prevy) < 128*FRACUNIT &&
+		OInterpolation::getInstance().enabled())
 	{
 		// the actor probably did not teleport
 		// interpolate between previous and current position
@@ -582,6 +650,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 		return;
 
 	vis->mobjflags = thing->flags;
+	vis->statusflags = thing->statusflags;
 	vis->spectator = thing->oflags & MFO_SPECTATOR;
 	vis->translation = thing->translation;		// [RH] thing translation table
 	vis->translucency = thing->translucency;
@@ -653,12 +722,6 @@ void R_AddSprites (sector_t *sec, int lightlevel, int fakeside)
 }
 
 
-EXTERN_CVAR(sv_allowmovebob)
-EXTERN_CVAR(cl_movebob)
-
-fixed_t P_CalculateWeaponBobX(player_t* player, float scale_amount);
-fixed_t P_CalculateWeaponBobY(player_t* player, float scale_amount);
-
 //
 // R_DrawPSprite
 //
@@ -673,11 +736,6 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 	BOOL 				flip;
 	vissprite_t*		vis;
 	vissprite_t 		avis;
-
-
-	const float bob_amount = ((clientside && sv_allowmovebob) || (clientside && serverside)) ? cl_movebob : 1.0f;
-	fixed_t sx = P_CalculateWeaponBobX(&displayplayer(), bob_amount);
-	fixed_t sy = P_CalculateWeaponBobY(&displayplayer(), bob_amount);
 
 	// decide which patch to use
 #ifdef RANGECHECK
@@ -702,7 +760,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 		R_CacheSprite (sprdef);	// [RH] speeds up game startup time
 
 	// calculate edges of the shape
-	tx = sx - ((320 / 2) << FRACBITS);
+	tx = bobx - ((320 / 2) << FRACBITS);
 
 	tx -= sprframe->offset[0];	// [RH] Moved out of spriteoffset[]
 	x1 = (centerxfrac + FixedMul (tx, pspritexscale)) >>FRACBITS;
@@ -721,6 +779,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 	// store information in a vissprite
 	vis = &avis;
 	vis->mobjflags = flags;
+	vis->statusflags = camera->player && camera->player->mo ? camera->player->mo->statusflags : 0;
 
 // [RH] +0x6000 helps it meet the screen bottom
 //		at higher resolutions while still being in
@@ -729,7 +788,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 #define WEAPONTWEAK				(0x9000)
 
 	vis->texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 -
-		(sy + WEAPONTWEAK - sprframe->topoffset[0]);	// [RH] Moved out of spritetopoffset[]
+		(boby + WEAPONTWEAK - sprframe->topoffset[0]);	// [RH] Moved out of spritetopoffset[]
 	vis->x1 = x1 < 0 ? 0 : x1;
 	vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;
 	vis->xscale = pspritexscale;
@@ -774,9 +833,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 		// local light
 		vis->colormap = basecolormap.with(spritelights[MAXLIGHTSCALE-1]);	// [RH] add basecolormap
 	}
-	if (camera->player &&
-		(camera->player->powers[pw_invisibility] > 4*32
-		 || camera->player->powers[pw_invisibility] & 8))
+	if (vis->statusflags & SF_INVIS)
 	{
 		// shadow draw
 		vis->mobjflags = MF_SHADOW;
@@ -784,8 +841,7 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 
 	if (r_softinvulneffect)
 	{
-		if (camera->player && (camera->player->powers[pw_invulnerability] > 4 * 32 ||
-		                       camera->player->powers[pw_invulnerability] & 8))
+		if (vis->statusflags & SF_INVULN)
 		{
 			// draw invuln palette on vissprite only
 			// and don't include sector colored lighting because it creates strange colors.
@@ -819,7 +875,7 @@ void R_DrawPlayerSprites()
 		(consoleplayer().cheats & CF_CHASECAM))
 		return;
 
-	sector_t* sec = R_FakeFlat(camera->subsector->sector, &tempsec, &floorlight,
+	sector_t* sec = R_FakeFlat(viewsector, &tempsec, &floorlight,
 	                           &ceilinglight, false);
 
 	// [RH] set foggy flag
@@ -941,8 +997,8 @@ void R_DrawSprite (vissprite_t *spr)
 	{
 		if (spr->FakeFlat != FAKED_AboveCeiling)
 		{
-			fixed_t h = P_FloorHeight(spr->heightsec);
-			h = (centeryfrac - FixedMul(h - viewz, spr->yscale)) >> FRACBITS;
+			fixed64_t h = P_FloorHeight(spr->heightsec);
+			h = (FIXED2FIXED64(centeryfrac) - FixedMul64(FIXED2FIXED64(h - viewz), FIXED2FIXED64(spr->yscale))) >> FRACBITS64;
 
 			if (spr->FakeFlat == FAKED_BelowFloor)
 			{ // seen below floor: clip top
@@ -957,8 +1013,8 @@ void R_DrawSprite (vissprite_t *spr)
 		}
 		if (spr->FakeFlat != FAKED_BelowFloor)
 		{
-			fixed_t h = P_CeilingHeight(spr->heightsec);
-			h = (centeryfrac - FixedMul(h - viewz, spr->yscale)) >> FRACBITS;
+			fixed64_t h = P_CeilingHeight(spr->heightsec);
+			h = (FIXED2FIXED64(centeryfrac) - FixedMul64(FIXED2FIXED64(h - viewz), FIXED2FIXED64(spr->yscale))) >> FRACBITS64;
 
 			if (spr->FakeFlat == FAKED_AboveCeiling)
 			{ // seen above ceiling: clip bottom
@@ -1147,6 +1203,7 @@ void R_ProjectParticle (particle_t *particle, const sector_t *sector, int fakesi
 	vis->startfrac = particle->color;
 	vis->patch = NO_PARTICLE;
 	vis->mobjflags = particle->trans;
+	vis->statusflags = 0;
 	vis->mo = NULL;
 	vis->spectator = false;
 

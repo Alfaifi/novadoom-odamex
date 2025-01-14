@@ -1396,18 +1396,18 @@ FUNC(LS_Line_SetBlocking)
 	if (arg0)
 	{
 		int i, s;
-		static const int flags[] = {ML_BLOCKING,
-		                            ML_BLOCKMONSTERS,
-		                            ML_BLOCKPLAYERS,
-		                            0, // block floaters (not supported)
-		                            0, // block projectiles (not supported)
-		                            ML_BLOCKEVERYTHING,
-		                            0, // railing (not supported)
-		                            0, // block use (not supported)
-		                            0, // block sight (not supported)
-		                            0, // block hitscan (not supported)
-		                            ML_SOUNDBLOCK,
-		                            -1};
+		static constexpr int flags[] = {ML_BLOCKING,
+		                                ML_BLOCKMONSTERS,
+		                                ML_BLOCKPLAYERS,
+		                                0, // block floaters (not supported)
+		                                0, // block projectiles (not supported)
+		                                ML_BLOCKEVERYTHING,
+		                                0, // railing (not supported)
+		                                0, // block use (not supported)
+		                                0, // block sight (not supported)
+		                                0, // block hitscan (not supported)
+		                                ML_SOUNDBLOCK,
+		                                -1};
 
 		int setflags = 0;
 		int clearflags = 0;
@@ -1751,7 +1751,6 @@ FUNC(LS_Clear_ForceField)
 	while ((s = P_FindSectorFromTag(arg0, s)) >= 0)
 	{
 		int i;
-		line_t* line;
 
 		for (i = 0; i < sectors[s].linecount; i++)
 		{
@@ -2407,9 +2406,6 @@ FUNC(LS_Sector_SetFade)
 				sectors[secnum].colormap->color.getg(),
 				sectors[secnum].colormap->color.getb(),
 				arg1, arg2, arg3);
-		byte r = sectors[secnum].colormap->fade.getr();
-		byte g = sectors[secnum].colormap->fade.getg();
-		byte b = sectors[secnum].colormap->fade.getb();
 		sectors[secnum].SectorChanges |= SPC_Fade;
 	}
 	return true;

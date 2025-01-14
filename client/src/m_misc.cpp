@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -186,6 +186,23 @@ void M_LoadDefaults(void)
 			::cl_downloadsites.RestoreDefault();
 		}
 	}
+	else if (::configver > 93 && ::configver <= 10060)
+	{
+		// Add new defaults - doomshack's wadlist dir, firestick, euroboros, audrealms, and captainpollutiontv.
+		// Update the TSPG url from .net to .com.
+
+		const char* cl_download_old =
+		    "https://static.allfearthesentinel.net/wads/ https://doomshack.org/wads/ "
+    	    "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
+		    "http://files.funcrusher.net/wads/ https://doomshack.org/uploads/ "
+		    "https://doom.dogsoft.net/getwad.php?search=";
+
+		if (!strcmp(::cl_downloadsites.cstring(), cl_download_old))
+		{
+			updated = true;
+			::cl_downloadsites.RestoreDefault();
+		}
+	}
 
 	if (::configver < 10000)
 	{
@@ -199,7 +216,7 @@ void M_LoadDefaults(void)
 	if (updated)
 		Printf("%s: Updating old defaults.\n", __FUNCTION__);
 
-	AddCommandString("alias ? help");	
+	AddCommandString("alias ? help");
 
 	DefaultsLoaded = true;
 }

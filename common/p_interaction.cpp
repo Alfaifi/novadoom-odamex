@@ -585,7 +585,7 @@ ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power)
  */
 static void P_GiveCarePack(player_t* player)
 {
-	const int ammomulti[NUMAMMO] = {2, 1, 1, 2};
+	constexpr int ammomulti[NUMAMMO] = {2, 1, 1, 2};
 
 	// [AM] There is way too much going on in here to accurately predict.
 	if (!::serverside)
@@ -703,6 +703,11 @@ static void P_GiveCarePack(player_t* player)
 					break;
 				case wp_supershotgun:
 					midmessage = "Got Super Shotgun";
+					break;
+				case wp_none:
+				case wp_fist:
+				case wp_nochange:
+				case NUMWEAPONS:
 					break;
 				}
 				
@@ -1340,7 +1345,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 		{ "she", "her", "her" },
 		{ "it",  "it",  "its" }
 	};
-	static const int gendershift[3][3] =
+	static constexpr int gendershift[3][3] =
 	{
 		{ 2, 3, 3 },
 		{ 3, 3, 3 },
@@ -2020,9 +2025,6 @@ static bool P_InfightingImmune(AActor* target, AActor* source)
 // [Toke] This is no longer needed client-side
 void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage, int mod, int flags)
 {
-    unsigned	ang;
-	int 		saved = 0;
-
 	if (!serverside)
     {
 		return;

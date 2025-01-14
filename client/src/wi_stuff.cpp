@@ -184,7 +184,7 @@ EXTERN_CVAR (cl_autoscreenshot)
 // ID24 STUFF - largely based on the implementation from Woof, with some bits from Rum and Raisin
 //
 
-typedef struct
+struct wi_animationstate_t
 {
 	std::vector<interlevelframe_t> frames;
 	const int xpos;
@@ -192,15 +192,18 @@ typedef struct
 	int frame_index;
 	bool frame_start;
 	int duration_left;
-} wi_animationstate_t;
 
-typedef struct
+	wi_animationstate_t(std::vector<interlevelframe_t> f = {}, int x = 0, int y = 0, int fi = 0, bool fs = false, int dl = 0) :
+		frames(f), xpos(x), ypos(y), frame_index(fi), frame_start(fs), duration_left(dl) {}
+};
+
+struct wi_animation_t
 {
 	std::vector<wi_animationstate_t> exiting_states;
 	std::vector<wi_animationstate_t> entering_states;
 
 	std::vector<wi_animationstate_t>* states;
-} wi_animation_t;
+};
 
 static wi_animation_t* animation;
 
@@ -214,7 +217,9 @@ static bool WI_checkConditions(const std::vector<interlevelcond_t>& conditions,
 	bool conditionsmet = true;
 
 	LevelInfos& levels = getLevelInfos();
-	level_pwad_info_t& currentlevel = enteringcondition ? levels.findByName(wbs->next) : levels.findByName(wbs->current);
+	level_pwad_info_t& exitinglevel = levels.findByName(wbs->current);
+	level_pwad_info_t& enteringlevel = levels.findByName(wbs->next);
+	level_pwad_info_t& currentlevel = enteringcondition ? enteringlevel : exitinglevel;
 	int map_number = currentlevel.levelnum;
 
 	for (const auto& cond : conditions)
@@ -222,15 +227,23 @@ static bool WI_checkConditions(const std::vector<interlevelcond_t>& conditions,
 		switch (cond.condition)
 		{
 			case animcondition_t::CurrMapGreater:
-				conditionsmet = conditionsmet && (map_number > cond.param);
+				conditionsmet = conditionsmet && (map_number > cond.param1);
 				break;
 
 			case animcondition_t::CurrMapEqual:
-				conditionsmet = conditionsmet && (map_number == cond.param);
+				conditionsmet = conditionsmet && (map_number == cond.param1);
+				break;
+
+			case animcondition_t::CurrMapNotEqual:
+				conditionsmet = conditionsmet && !(map_number == cond.param1);
 				break;
 
 			case animcondition_t::MapVisited:
-				conditionsmet = conditionsmet && levels.findByNum(cond.param).flags & LEVEL_VISITED;
+				conditionsmet = conditionsmet && levels.findByNum(cond.param1).flags & LEVEL_VISITED;
+				break;
+
+			case animcondition_t::MapNotVisited:
+				conditionsmet = conditionsmet && !(levels.findByNum(cond.param1).flags & LEVEL_VISITED);
 				break;
 
 			case animcondition_t::CurrMapNotSecret:
@@ -247,6 +260,14 @@ static bool WI_checkConditions(const std::vector<interlevelcond_t>& conditions,
 
 			case animcondition_t::OnEnteringScreen:
 				conditionsmet = conditionsmet && enteringcondition;
+				break;
+
+			case animcondition_t::TravelingBetween:
+				conditionsmet = conditionsmet && (exitinglevel.levelnum == cond.param1) && (enteringlevel.levelnum == cond.param2);
+				break;
+
+			case animcondition_t::NotTravelingBetween:
+				conditionsmet = conditionsmet && !((exitinglevel.levelnum == cond.param1) && (enteringlevel.levelnum == cond.param2));
 				break;
 
 			default:
@@ -381,8 +402,7 @@ static void WI_initAnimationStates(std::vector<wi_animationstate_t>& out,
 				continue;
 			}
 
-			wi_animationstate_t state = { anim.frames, anim.xpos, anim.ypos, 0, true, 0 };
-			out.push_back(state);
+			out.emplace_back(anim.frames, anim.xpos, anim.ypos, 0, true, 0);
 		}
 	}
 }
@@ -488,7 +508,7 @@ static int WI_DrawName (const char *str, int x, int y)
 	while (*str)
 	{
 		char charname[9];
-		sprintf (charname, "FONTB%02u", toupper(*str) - 32);
+		snprintf (charname, 9, "FONTB%02u", toupper(*str) - 32);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)
@@ -515,7 +535,7 @@ static int WI_DrawSmallName(const char* str, int x, int y)
 	while (*str)
 	{
 		char charname[9];
-		sprintf(charname, "STCFN%.3d", HU_FONTSTART + (toupper(*str) - 32) - 1);
+		snprintf(charname, 9, "STCFN%.3d", HU_FONTSTART + (toupper(*str) - 32) - 1);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)
@@ -581,7 +601,8 @@ void WI_drawEL()
 	screen->DrawPatchClean(ent, (320 - ent->width()) / 2, y);
 
 	// [RH] Changed to adjust by height of entering patch instead of title
-	y += (5 * ent->height()) / 4;
+	if (lnames1->height() < 200)
+		y += (5 * ent->height()) / 4;
 
 	if (!lnames[1].empty())
 	{
@@ -1139,7 +1160,7 @@ void WI_updateStats()
 
 			if (!enterpic.empty() || enteranim != nullptr)
 			{
-				if (enteranim != nullptr)
+				if (enteranim != nullptr && !enteranim->musiclump.empty())
 					S_ChangeMusic(enteranim->musiclump.c_str(), true);
 				// background
 				const char* bg_lump = enteranim == nullptr ? enterpic.c_str() : enteranim->backgroundlump.c_str();
@@ -1256,7 +1277,7 @@ void WI_Ticker()
 	if (bcnt == 1)
 	{
 		// intermission music
-		if (exitanim != nullptr)
+		if (exitanim != nullptr && !exitanim->musiclump.empty())
 			S_ChangeMusic (exitanim->musiclump.c_str(), true);
 		else
 			S_ChangeMusic (gameinfo.intermissionMusic.c_str(), true);
@@ -1312,7 +1333,7 @@ static int WI_CalcWidth (const char *str)
 	while (*str)
 	{
 		char charname[9];
-		sprintf (charname, "FONTB%02u", toupper(*str) - 32);
+		snprintf (charname, 9, "FONTB%02u", toupper(*str) - 32);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)
@@ -1339,10 +1360,16 @@ void WI_loadData()
 	if (!currentlevel.exitanim.empty())
 	{
 		exitanim = WI_GetInterlevel(currentlevel.exitanim.c_str());
+	} else if (!currentlevel.exitscript.empty())
+	{
+		exitanim = WI_GetIntermissionScript(currentlevel.exitscript.c_str());
 	}
 	if (!nextlevel.enteranim.empty())
 	{
 		enteranim = WI_GetInterlevel(nextlevel.enteranim.c_str());
+	} else if (!nextlevel.enterscript.empty())
+	{
+		enteranim = WI_GetIntermissionScript(nextlevel.enterscript.c_str());
 	}
 	WI_initAnimation();
 
@@ -1355,7 +1382,7 @@ void WI_loadData()
 	else if ((gameinfo.flags & GI_MAPxx) || ((gameinfo.flags & GI_MENUHACK_RETAIL) && wbs->epsd >= 3))
 		strcpy(name, "INTERPIC");
 	else
-		sprintf(name, "WIMAP%d", wbs->epsd);
+		snprintf(name, 17, "WIMAP%d", wbs->epsd);
 
 	// background
 	const patch_t* bg_patch = W_CachePatch(name);
@@ -1368,7 +1395,7 @@ void WI_loadData()
 	const DCanvas* canvas = background_surface->getDefaultCanvas();
 
 	background_surface->lock();
-	canvas->DrawPatch(bg_patch, 0, 0);
+	canvas->DrawPatch(bg_patch, bg_patch->leftoffset(), bg_patch->topoffset());
 	background_surface->unlock();
 
 	for (int i = 0, j; i < 2; i++)
@@ -1395,7 +1422,7 @@ void WI_loadData()
 	for (int i = 0; i < 10; i++)
 	{
 		// numbers 0-9
-		sprintf(name, "WINUM%d", i);
+		snprintf(name, 17, "WINUM%d", i);
 			num[i] = W_CachePatchHandle(name, PU_STATIC);
 	}
 

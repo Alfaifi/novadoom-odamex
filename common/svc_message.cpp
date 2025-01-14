@@ -147,11 +147,14 @@ odaproto::svc::MovePlayer SVC_MovePlayer(player_t& player, const int tic)
 	mom->set_y(player.mo->momy);
 	mom->set_z(player.mo->momz);
 
-	// [Russell] - hack, tell the client about the partial
-	// invisibility power of another player.. (cheaters can disable
-	// this but its all we have for now)
-	pl->mutable_powers()->Resize(pw_invisibility + 1, 0);
+	// Send all available powers information to show the clients
+	pl->mutable_powers()->Resize(NUMPOWERS + 1, 0);
+	pl->set_powers(pw_invulnerability, player.powers[pw_invulnerability]);
+	pl->set_powers(pw_strength, player.powers[pw_strength] > 0 ? 1 : 0);
 	pl->set_powers(pw_invisibility, player.powers[pw_invisibility]);
+	pl->set_powers(pw_ironfeet, player.powers[pw_ironfeet]);
+	pl->set_powers(pw_allmap, player.powers[pw_allmap]);
+	pl->set_powers(pw_infrared, player.powers[pw_infrared]);
 
 	return msg;
 }
@@ -341,7 +344,7 @@ odaproto::svc::SpawnMobj SVC_SpawnMobj(AActor* mo)
 	cur->set_netid(mo->netid);
 
 	// denis - sending state fixes monster ghosts appearing under doors
-	cur->set_statenum(mo->state - states); 
+	cur->set_statenum(mo->state - states);
 
 	if (mo->type == MT_FOUNTAIN)
 	{
@@ -610,7 +613,7 @@ odaproto::svc::KillMobj SVC_KillMobj(AActor* source, AActor* target, AActor* inf
 	tgt->set_rndindex(target->rndindex);
 
 	// [SL] 2012-12-26 - Get real position since this actor is at
-	// a reconciled position with sv_unlag 1
+	// a reconciled position due to unlag
 	fixed_t xoffs = 0, yoffs = 0, zoffs = 0;
 	if (target->player)
 	{
@@ -1510,6 +1513,10 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status,
 			const std::string& map = it->second->map;
 			const uint32_t mapidx = indexer.getIndex(map);
 			row->set_map(mapidx);
+
+			const std::string& lastmap = it->second->lastmap;
+			const uint32_t lastmapidx = indexer.getIndex(lastmap);
+			row->set_lastmap(lastmapidx);
 
 			for (std::vector<std::string>::iterator itr = it->second->wads.begin();
 			     itr != it->second->wads.end(); ++itr)

@@ -485,7 +485,7 @@ void MIType_MapName(OScanner& os, bool newStyleMapInfo, void* data, unsigned int
 		if (IsNum(map_name))
 		{
 			const int map = std::atoi(map_name);
-			sprintf(map_name, "MAP%02d", map);
+			snprintf(map_name, 9, "MAP%02d", map);
 		}
 
 		*static_cast<OLumpName*>(data) = map_name;
@@ -509,11 +509,11 @@ void MIType_InterLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 	const std::string tok = os.getToken();
 	if (!tok.empty() && tok.at(0) == '$')
 	{
-		os.mustScan();
-		// Intermission scripts are not supported.
+		// intermission script lump
+		*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->second = tok.substr(1);
 		return;
 	}
-	*static_cast<OLumpName*>(data) = tok;
+	*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->first = tok;
 }
 
 // Sets the inputted data as an OLumpName, checking LANGUAGE for the actual OLumpName
@@ -1122,7 +1122,7 @@ bool ScanAndCompareString(OScanner& os, std::string cmp)
 }
 
 //
-bool ScanAndSetRealNum(OScanner& os, fixed_t& num)
+bool ScanAndSetRealNum(OScanner& os, fixed64_t& num)
 {
 	os.scan();
 	if (!IsRealNum(os.getToken().c_str()))
@@ -1130,7 +1130,7 @@ bool ScanAndSetRealNum(OScanner& os, fixed_t& num)
 		os.warning("Expected number, got \"%s\". Aborting parsing", os.getToken().c_str());
 		return false;
 	}
-	num = FLOAT2FIXED(os.getTokenFloat());
+	num = FLOAT2FIXED64(os.getTokenFloat());
 
 	return true;
 }
@@ -1255,8 +1255,12 @@ template <>
 struct MapInfoDataSetter<level_pwad_info_t>
 {
 	MapInfoDataContainer mapInfoDataContainer;
+	std::pair<OLumpName*, OLumpName*> enterpicscript;
+	std::pair<OLumpName*, OLumpName*> exitpicscript;
 
-	MapInfoDataSetter(level_pwad_info_t& ref)
+	MapInfoDataSetter(level_pwad_info_t& ref) :
+	enterpicscript(&ref.enterpic, &ref.enterscript),
+	exitpicscript(&ref.exitpic, &ref.exitscript)
 	{
 		mapInfoDataContainer = {
 			{ "levelnum", &MIType_Int, &ref.levelnum },
@@ -1309,8 +1313,8 @@ struct MapInfoDataSetter<level_pwad_info_t>
 			{ "intermusic", &MIType_EatNext },
 			{ "par", &MIType_Int, &ref.partime },
 			{ "sucktime", &MIType_EatNext },
-			{ "enterpic", &MIType_InterLumpName, &ref.enterpic }, // todo: add intermission script support
-			{ "exitpic", &MIType_InterLumpName, &ref.exitpic }, // todo: add intermission script support
+			{ "enterpic", &MIType_InterLumpName, &enterpicscript },
+			{ "exitpic", &MIType_InterLumpName, &exitpicscript },
 			{ "enteranim", &MIType_LumpName, &ref.enteranim }, // nonstandard, from ID24 UMAPINFO, only present here for _D1NFO in odamex.wad
 			{ "exitanim", &MIType_LumpName, &ref.exitanim }, // nonstandard, from ID24 UMAPINFO, only present here for _D1NFO in odamex.wad
 			{ "interpic", &MIType_EatNext },
@@ -1476,6 +1480,7 @@ void ParseEpisodeInfo(OScanner& os)
 	int new_mapinfo = false; // is int instead of bool for template purposes
 	OLumpName map;
 	std::string pic;
+	std::string name;
 	bool picisgfx = false;
 	bool remove = false;
 	char key = 0;
@@ -1529,7 +1534,7 @@ void ParseEpisodeInfo(OScanner& os)
 			ParseMapInfoHelper<std::string>(os, new_mapinfo);
 
 			if (picisgfx == false)
-				pic = os.getToken();
+				name = os.getToken();
 		}
 		else if (os.compareTokenNoCase("lookup"))
 		{
@@ -1623,7 +1628,8 @@ void ParseEpisodeInfo(OScanner& os)
 				i = episodenum++;
 		}
 
-		EpisodeInfos[i].name = pic;
+		EpisodeInfos[i].pic_name = pic;
+		EpisodeInfos[i].menu_name = name;
 		EpisodeInfos[i].key = static_cast<char>(tolower(key));
 		EpisodeInfos[i].fulltext = !picisgfx;
 		EpisodeInfos[i].noskillmenu = noskillmenu;
@@ -1787,8 +1793,7 @@ void ParseMapInfoLump(int lump, const char* lumpname)
 				// MAPNAME is a number, assume a Hexen wad
 				const int map = std::atoi(map_name);
 
-				sprintf(map_name, "MAP%02d", map);
-				SKYFLATNAME[5] = 0;
+				snprintf(map_name, 9, "MAP%02d", map);
 				HexenHack = true;
 				// Hexen levels are automatically nointermission
 				// and even lighting and no auto sound sequences
