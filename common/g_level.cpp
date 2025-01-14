@@ -46,6 +46,7 @@
 #include "w_ident.h"
 
 level_locals_t level;			// info about current level
+std::string forcedlastmap;		// forced last map for the current wad
 
 level_pwad_info_t g_EmptyLevel;
 cluster_info_t g_EmptyCluster;
@@ -401,7 +402,7 @@ const char *ParseString2(const char *data);
 // Takes a string of random wads and patches, which is sorted through and
 // trampolined to the implementation of G_LoadWad.
 //
-bool G_LoadWadString(const std::string& str, const std::string& mapname)
+bool G_LoadWadString(const std::string& str, const std::string& mapname, const std::string& lastmap)
 {
 	const std::vector<std::string>& wad_exts = M_FileTypeExts(OFILE_WAD);
 	const std::vector<std::string>& deh_exts = M_FileTypeExts(OFILE_DEH);
@@ -459,6 +460,7 @@ bool G_LoadWadString(const std::string& str, const std::string& mapname)
 		continue;
 	}
 
+	forcedlastmap = StdStringToUpper(lastmap);
 	return G_LoadWad(newwadfiles, newpatchfiles, mapname);
 }
 
@@ -831,7 +833,7 @@ void G_InitLevelLocals()
 		if (info.mapname[0] == 'E' && info.mapname[2] == 'M')
 		{
 			std::string search;
-			StrFormat(search, "E%cM%c: ", info.mapname[1], info.mapname[3]);
+			search = fmt::sprintf("E%cM%c: ", info.mapname[1], info.mapname[3]);
 
 			const std::size_t pos = info.level_name.find(search);
 
@@ -843,7 +845,7 @@ void G_InitLevelLocals()
 		else if (strstr(info.mapname.c_str(), "MAP") == &info.mapname[0])
 		{
 			std::string search;
-			StrFormat(search, "%u: ", info.levelnum);
+			search = fmt::sprintf("%u: ", info.levelnum);
 
 			const std::size_t pos = info.level_name.find(search);
 

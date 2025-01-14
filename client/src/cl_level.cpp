@@ -119,6 +119,15 @@ void G_DeferedReset() {
 
 BEGIN_COMMAND (wad) // denis - changes wads
 {
+	std::string lastmap = argv[argc-1];
+	if (lastmap.rfind("lastmap=", 0) == 0)
+	{
+		lastmap = lastmap.substr(8);
+		argc--;
+	}
+	else
+		lastmap = "";
+
 	// [Russell] print out some useful info
 	if (argc == 1)
 	{
@@ -140,7 +149,7 @@ BEGIN_COMMAND (wad) // denis - changes wads
 	C_HideConsole();
 
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
-	G_LoadWadString(wadstr);
+	G_LoadWadString(wadstr, lastmap);
 
 	D_StartTitle ();
 	CL_QuitNetGame(NQ_SILENT);
@@ -735,15 +744,15 @@ void G_WorldDone()
 
 	if (!level.interbackdrop.empty())
 	{
-		options.flat = level.interbackdrop.c_str();
+		options.flat = level.interbackdrop;
 	}
 	else if (!thiscluster.finalepic.empty())
 	{
-		options.pic = &thiscluster.finalepic[0];
+		options.pic = thiscluster.finalepic;
 	}
 	else
 	{
-		options.flat = &thiscluster.finaleflat[0];
+		options.flat = thiscluster.finaleflat;
 	}
 
 	if (secretexit)
@@ -777,14 +786,14 @@ void G_WorldDone()
 			if (nextcluster.entertext)
 			{
 				// All of our options need to be from the next cluster.
-				options.music = nextcluster.messagemusic.c_str();
+				options.music = nextcluster.messagemusic;
 				if (!nextcluster.finalepic.empty())
 				{
-					options.pic = &nextcluster.finalepic[0];
+					options.pic = nextcluster.finalepic;
 				}
 				else
 				{
-					options.flat = &nextcluster.finaleflat[0];
+					options.flat = nextcluster.finaleflat;
 				}
 				options.text = nextcluster.entertext;
 

@@ -119,7 +119,7 @@ BOOL      connected;
 netadr_t  serveraddr; // address of a server
 netadr_t  lastconaddr;
 
-const static size_t PACKET_SEQ_MASK = 0xFF;
+constexpr static size_t PACKET_SEQ_MASK = 0xFF;
 static int packetseq[256];
 
 // denis - unique session key provided by the server
@@ -202,7 +202,7 @@ argb_t CL_GetPlayerColor(player_t *player)
 
 	argb_t base_color(255, player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
 	argb_t shade_color = base_color;
-	
+
 	bool teammate = false;
 	if (G_IsCoopGame())
 		teammate = true;
@@ -264,7 +264,7 @@ CVAR_FUNC_IMPL (cl_team)
 {
 	if (var.asInt() >= sv_teamsinplay)
 		var.Set(sv_teamsinplay.asInt() - 1);
-	
+
 	CL_RebuildAllPlayerTranslations();
 }
 
@@ -331,7 +331,7 @@ static int CL_CalculateWorldIndexSync()
 //
 static int CL_CalculateWorldIndexDriftCorrection()
 {
-	static const float CORRECTION_PERIOD = 1.0f / 16.0f;
+	static constexpr float CORRECTION_PERIOD = 1.0f / 16.0f;
 
 	int delta = CL_CalculateWorldIndexSync() - world_index;
 	if (delta == 0)
@@ -915,7 +915,7 @@ BEGIN_COMMAND (rcon)
 		char  command[256];
 
 		strncpy(command, args, ARRAY_LENGTH(command) - 1);
-		command[255] = '\0';		
+		command[255] = '\0';
 
 		MSG_WriteMarker(&net_buffer, clc_rcon);
 		MSG_WriteString(&net_buffer, command);
@@ -1380,7 +1380,7 @@ player_t &CL_FindPlayer(size_t id)
 
 /**
  * @brief Update a player's spectate setting and do any necessary busywork for it.
- * 
+ *
  * @param player Plyaer to update.
  * @param spectate New spectate setting.
 */
@@ -1524,8 +1524,8 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 	StringTokens clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
 	// Shuffle the sites so we evenly distribute our requests.
-	std::random_shuffle(serversites.begin(), serversites.end());
-	std::random_shuffle(clientsites.begin(), clientsites.end());
+	std::shuffle(serversites.begin(), serversites.end(), rng);
+	std::shuffle(clientsites.begin(), clientsites.end(), rng);
 
 	// Combine them into one big site list.
 	Websites downloadsites;
@@ -1879,8 +1879,8 @@ void CL_TryToConnect(DWORD server_token)
 
 		// [SL] The "rate" CVAR has been deprecated. Now just send a hard-coded
 		// maximum rate that the server will ignore.
-		const int rate = 0xFFFF;
-		MSG_WriteLong(&net_buffer, rate); 
+		constexpr int rate = 0xFFFF;
+		MSG_WriteLong(&net_buffer, rate);
 
         MSG_WriteString(&net_buffer, (char *)connectpasshash.c_str());
 
@@ -1940,7 +1940,7 @@ void CL_Decompress()
 
 /**
  * @brief Read the header of the packet and prepare the rest of it for reading.
- * 
+ *
  * @return False if the packet was scuttled, otherwise true.
  */
 bool CL_ReadPacketHeader()
@@ -1990,7 +1990,7 @@ static std::string SVCName(byte header)
 	std::string svc = ::svc_info[header].getName();
 	if (svc.empty())
 	{
-		StrFormat(svc, "svc_%u", header);
+		svc = fmt::sprintf("svc_%u", header);
 	}
 	return svc;
 }
@@ -2354,7 +2354,7 @@ void CL_SimulatePlayers()
 							world_index, dist >> FRACBITS);
 					#endif	// _SNAPSHOT_DEBUG_
 
-					static const fixed_t correction_amount = FRACUNIT * 0.80f;
+					static constexpr fixed_t correction_amount = FRACUNIT * 0.80f;
 					M_ScaleVec3Fixed(&offset, &offset, correction_amount);
 
 					// Apply a smoothing offset to the current snapshot
@@ -2398,8 +2398,8 @@ void CL_SimulateWorld()
 		return;
 
 	// if the world_index falls outside this range, resync it
-	static const int MAX_BEHIND = 16;
-	static const int MAX_AHEAD = 16;
+	static constexpr int MAX_BEHIND = 16;
+	static constexpr int MAX_AHEAD = 16;
 
 	int lower_sync_limit = CL_CalculateWorldIndexSync() - MAX_BEHIND;
 	int upper_sync_limit = CL_CalculateWorldIndexSync() + MAX_AHEAD;

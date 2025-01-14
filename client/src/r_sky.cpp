@@ -95,6 +95,12 @@ struct skytex_t
 	fixed_t curry;
 	int32_t texnum;
 	OLumpName texture;
+
+	// for interpolation
+	fixed_t prevx;
+	fixed_t prevy;
+	fixed_t savedx;
+	fixed_t savedy;
 };
 
 struct sky_t
@@ -119,6 +125,99 @@ struct sky_t
 
 OHashTable<OLumpName, sky_t*> skylookup;
 OHashTable<int32_t, sky_t*> skyflatlookup;
+
+/**
+ * @brief Used by OInterpolation::beginGameInterpolation
+ */
+void R_InterpolateSkyDefs(fixed_t amount)
+{
+	for (const auto& [_, sky] : skylookup)
+	{
+		if (!sky->active) continue;
+
+		// Perform interp for any active scrolling skies
+		skytex_t* background = &sky->background;
+		skytex_t* foreground = &sky->foreground;
+
+		if (gamestate == GS_LEVEL)
+		{
+			fixed_t newbackgroundxoffset = background->prevx +
+			                    FixedMul(amount, background->currx - background->prevx);
+			fixed_t newbackgroundyoffset = background->prevy +
+			                    FixedMul(amount, background->curry - background->prevy);
+
+			background->savedx = background->currx;
+			background->savedy = background->curry;
+
+			background->currx = newbackgroundxoffset;
+			background->curry = newbackgroundyoffset;
+
+			fixed_t newforegroundxoffset = foreground->prevx +
+			                    FixedMul(amount, foreground->currx - foreground->prevx);
+			fixed_t newforegroundyoffset = foreground->prevy +
+			                    FixedMul(amount, foreground->curry - foreground->prevy);
+
+			foreground->savedx = foreground->currx;
+			foreground->savedy = foreground->curry;
+
+			foreground->currx = newforegroundxoffset;
+			foreground->curry = newforegroundyoffset;
+		}
+		else
+		{
+			background->savedx = 0;
+			background->savedy = 0;
+
+			foreground->savedx = 0;
+			foreground->savedy = 0;
+		}
+	}
+}
+
+/**
+ * @brief Used by OInterpolation::ticInterpolation
+ */
+void R_TicSkyDefInterpolation()
+{
+	for (const auto& [_, sky] : skylookup)
+	{
+		if (!sky->active) continue;
+
+		skytex_t* background = &sky->background;
+		skytex_t* foreground = &sky->foreground;
+
+		if (gamestate == GS_LEVEL)
+		{
+			background->prevx = background->currx;
+			background->prevy = background->curry;
+			foreground->prevx = foreground->currx;
+			foreground->prevy = foreground->curry;
+		}
+		else
+		{
+			background->prevx = 0;
+			background->prevy = 0;
+			foreground->prevx = 0;
+			foreground->prevy = 0;
+		}
+	}
+}
+
+/**
+ * @brief Used by OInterpolation::endGameInterpolation
+ */
+void R_RestoreSkyDefs()
+{
+	for (const auto& [_, sky] : skylookup)
+	{
+		if (!sky->active) continue;
+
+		sky->background.currx = sky->background.savedx;
+		sky->background.curry = sky->background.savedy;
+		sky->foreground.currx = sky->foreground.savedx;
+		sky->foreground.curry = sky->foreground.savedy;
+	}
+}
 
 //
 // R_InitXToViewAngle
@@ -174,8 +273,6 @@ void R_GenerateLookup(int texnum, int *const errors); // from r_data.cpp
 
 void R_InitSkyMap()
 {
-	fixed_t fskyheight;
-
 	if (textureheight == NULL)
 		return;
 
@@ -185,7 +282,7 @@ void R_InitSkyMap()
 
 	sky_t* defaultsky = skyflatlookup[skyflatnum];
 
-	fskyheight = textureheight[defaultsky->background.texnum];
+	const fixed_t fskyheight = textureheight[defaultsky->background.texnum];
 
 	if (fskyheight <= (128 << FRACBITS))
 	{
@@ -483,11 +580,11 @@ static void R_UpdateSky(sky_t* sky)
 
 void R_UpdateSkies()
 {
-	for(auto& skypair : skylookup)
+	for(auto& [_, sky] : skylookup)
 	{
-		if(skypair.second->active)
+		if(sky->active)
 		{
-			R_UpdateSky(skypair.second);
+			R_UpdateSky(sky);
 		}
 	}
 }
@@ -511,16 +608,16 @@ void R_ActivateSky(sky_t* sky)
 
 void R_ActivateSkies(const byte* hitlist, std::vector<int>& skytextures)
 {
-	for(auto& skypair : skyflatlookup)
+	for(auto& [flat, sky] : skyflatlookup)
 	{
-		if (hitlist[skypair.first])
-			R_ActivateSky(skypair.second);
+		if (hitlist[flat])
+			R_ActivateSky(sky);
 
-		skytextures.push_back(skypair.second->background.texnum);
-		if (skypair.second->type == skytype_t::DOUBLESKY)
+		skytextures.push_back(sky->background.texnum);
+		if (sky->type == skytype_t::DOUBLESKY)
 		{
-			skytextures.push_back(skypair.second->foreground.texnum);
-			auto foreskypair = skylookup.find(skypair.second->foreground.texture);
+			skytextures.push_back(sky->foreground.texnum);
+			auto foreskypair = skylookup.find(sky->foreground.texture);
 			if (foreskypair != skylookup.end())
 			{
 				R_ActivateSky(foreskypair->second);
@@ -531,13 +628,21 @@ void R_ActivateSkies(const byte* hitlist, std::vector<int>& skytextures)
 
 void R_InitSkiesForLevel()
 {
-	for(auto& skypair : skylookup)
+	for(auto& [_, sky] : skylookup)
 	{
-		skypair.second->active = false;
-		skypair.second->foreground.currx = 0;
-		skypair.second->foreground.curry = 0;
-		skypair.second->background.currx = 0;
-		skypair.second->background.curry = 0;
+		sky->active = false;
+		sky->foreground.currx = 0;
+		sky->foreground.curry = 0;
+		sky->background.currx = 0;
+		sky->background.curry = 0;
+		sky->foreground.prevx = 0;
+		sky->foreground.prevy = 0;
+		sky->background.prevx = 0;
+		sky->background.prevy = 0;
+		sky->foreground.savedx = 0;
+		sky->foreground.savedy = 0;
+		sky->background.savedx = 0;
+		sky->background.savedy = 0;
 	}
 }
 
@@ -571,7 +676,7 @@ void R_SetDefaultSky(const char* sky)
 //
 // R_BlastSkyColumn
 //
-static inline void R_BlastSkyColumn(void (*drawfunc)(void))
+static inline void R_BlastSkyColumn(void (*drawfunc)())
 {
 	if (dcol.yl <= dcol.yh)
 	{
@@ -614,7 +719,7 @@ void R_RenderSkyRange(visplane_t* pl)
 	if (pl->minx > pl->maxx)
 		return;
 
-	int columnmethod = 2;
+	constexpr int columnmethod = 2;
 	int frontskytex, backskytex;
 	fixed_t front_offset = 0;
 	fixed_t back_offset = 0;
@@ -675,7 +780,7 @@ void R_RenderSkyRange(visplane_t* pl)
 	else
 	{
 		// MBF's linedef-controlled skies
-		int picnum = (pl->picnum & ~PL_SKYFLAT) - 1;
+		const int picnum = (pl->picnum & ~PL_SKYFLAT) - 1;
 		const line_t* line = &lines[picnum < numlines ? picnum : 0];
 
 		// Sky transferred from first sidedef
