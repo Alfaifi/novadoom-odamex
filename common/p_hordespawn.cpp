@@ -83,9 +83,6 @@ static AActor::AActorPtr SpawnMonster(hordeSpawn_t& spawn, const hordeRecipe_t& 
 			// update current count
 			monsterCounts[recipe.type] = count + 1;
 
-			// Don't respawn
-			mo->flags |= MF_DROPPED;
-
 			if (recipe.isBoss)
 			{
 				// Heavy is the head that wears the crown.
