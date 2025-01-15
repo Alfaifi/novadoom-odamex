@@ -102,13 +102,13 @@ class DoomObjectContainer
 template <class ObjType, class IdxType, class FreeFunction>
 DoomObjectContainer<ObjType, IdxType, FreeFunction>::DoomObjectContainer(ResetObjType resetFunc,
                                                                          FreeFunction freeFunc)
-    : rf(resetFunc == NULL ? &noop : resetFunc)
+    : rf(resetFunc == NULL ? &noop : resetFunc), ff(freeFunc)
 {
 }
 
 template <class ObjType, class IdxType, class FreeFunction>
 DoomObjectContainer<ObjType, IdxType, FreeFunction>::DoomObjectContainer(size_t count, ResetObjType resetFunc, FreeFunction freeFunc)
-    : rf(resetFunc == NULL ? &noop : resetFunc)
+    : rf(resetFunc == NULL ? &noop : resetFunc), ff(freeFunc)
 {
 	this->container.reserve(count);
 }

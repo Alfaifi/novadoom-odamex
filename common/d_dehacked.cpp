@@ -641,6 +641,7 @@ void D_UndoDehPatch()
 	M_Free(OrgSprNames);
 
 
+	// [CMB] investigate after using z zone alloc functions
 	sprnames.clear();
 	sprnames.reserve(doomBackup.backupSprnames.size());
 	for (const auto& sprname : doomBackup.backupSprnames)
@@ -1061,7 +1062,7 @@ static int PatchThing(int thingy)
 			m.altspeed = NO_ALTSPEED;
 			return m;
 		};
-		mobjinfo_t* mobj = (mobjinfo_t*) M_Calloc(1, sizeof(mobjinfo_t));
+		mobjinfo_t* mobj = (mobjinfo_t*) Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
 		*mobj = mobjinfo_t_default();
 		mobjinfo.insert(mobj, (mobjtype_t) thingNum);
 		// set the type
@@ -1628,7 +1629,7 @@ static int PatchFrame(int frameNum)
 				s.args[7] = 0;
 				return s;
 		};
-		state_t* state = (state_t*) M_Calloc(1, sizeof(state_t));
+		state_t* state = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
 		*state = state_t_default(frameNum);
 		states.insert(state, frameNum);
 		// set the proper state number
@@ -1828,9 +1829,10 @@ static int PatchSprites(int dummy)
 			{
 				const char* found = sprnames_it->second;
 				char* s = const_cast<char*>(found);
-				free(s);
+				Z_Free(s); // ozone allocated memory
 			}
-			sprnames.insert(strdup(newSprName), (spritenum_t) sprIdx);
+			// [CMB] remember to Z_Free this instead of free(...)
+			sprnames.insert(Z_StrDup(newSprName, PU_STATIC, NULL), (spritenum_t) sprIdx);
 	}
 
 	return result;

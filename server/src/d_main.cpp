@@ -235,6 +235,10 @@ void D_DoomMain()
 
 	W_SetupFileIdentifiers();
 
+	// start the Zone memory manager
+	Z_Init();
+	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
+
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
 	D_Initialize_States(boomstates, ::NUMSTATES);
@@ -270,14 +274,8 @@ void D_DoomMain()
 		newwadfiles.push_back(file);
 	}
 
-
-
 	D_AddWadCommandLineFiles(newwadfiles);
 	D_AddDehCommandLineFiles(newpatchfiles);
-
-	// start the Zone memory manager
-	Z_Init();
-	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
 	D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
