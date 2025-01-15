@@ -124,6 +124,7 @@ class BootWindow : public Fl_Window
 	Fl_Check_Browser* m_gameOptionsBrowser;
 	StringTokens m_WADDirs;
 	Fl_Hold_Browser* m_WADDirList;
+	Fl_Input* m_searchPWADs;
 
   public:
 	BootWindow(int X, int Y, int W, int H, const char* L)
@@ -150,7 +151,13 @@ class BootWindow : public Fl_Window
 			{
 				m_tabPWADs = new Fl_Group(0, 25, 425, 175, "PWAD Select");
 				{
-					m_PWADSelectBrowser = new Fl_Check_Browser(10, 35, 183, 155);
+					m_searchPWADs = new Fl_Input(36, 35, 154, 20);
+					m_searchPWADs->label("@search");
+					m_searchPWADs->callback(BootWindow::doSearchCB, static_cast<void*>(this));
+					m_searchPWADs->when(FL_WHEN_CHANGED);
+				} // Fl_Input* m_searchPWADs
+				{
+					m_PWADSelectBrowser = new Fl_Check_Browser(10, 65, 183, 135);
 					m_PWADSelectBrowser->callback(BootWindow::scanCheckedPWADsCB,
 					                              static_cast<void*>(this));
 					m_PWADSelectBrowser->when(FL_WHEN_CHANGED);
@@ -273,7 +280,7 @@ class BootWindow : public Fl_Window
 		bool pwadsIsEmpty = boot->m_PWADSelectBrowser->nitems() == 0;
 
 		// User clicked on the second tab, regenerate the
-		// list of IWADs if waddirs changed or browser is empty.
+		// list of PWADs if waddirs changed or browser is empty.
 		if ((clicked == boot->m_tabPWADs) && (pwadsIsEmpty || waddirsChanged))
 		{
 			boot->rescanPWADs();
@@ -308,6 +315,13 @@ class BootWindow : public Fl_Window
 	}
 
 	// -- PWAD Boot Order --
+
+	static void doSearchCB(Fl_Widget*, void* data)
+	{
+		BootWindow* boot = static_cast<BootWindow*>(data);
+
+		boot->filterPWADs();
+	}
 
 	static void doWADUpCB(Fl_Widget*, void* data)
 	{
@@ -459,6 +473,17 @@ class BootWindow : public Fl_Window
 		// clear order browser since selection browser is being reset
 		m_PWADOrderBrowser->clear();
 		m_selectedPWADs.clear();
+	}
+
+	void filterPWADs()
+	{
+		m_PWADSelectBrowser->clear();
+		for (const auto& pwad : m_PWADs)
+		{
+			if (m_searchPWADs->value()[0] == 0 ||
+				StdStringFind(pwad.filename, m_searchPWADs->value(), 0, m_searchPWADs->size(), true) != std::string::npos)
+				m_PWADSelectBrowser->add(pwad.filename.c_str(), std::find(m_selectedPWADs.begin(), m_selectedPWADs.end(), &pwad) != m_selectedPWADs.end());
+		}
 	}
 
 	/**
