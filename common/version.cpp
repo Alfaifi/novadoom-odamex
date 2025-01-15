@@ -224,22 +224,6 @@ const char* GitRevCount()
 }
 
 /**
- * @brief Return the number of commits since the first commit of the
- * base branch this created from.
- *
- * @detail Two branches that are the same distance from the first commit
- *         can have the same number.
- */
-const char* GitRevCountFromSource()
-{
-#ifdef GIT_REV_COUNT_FROM_SOURCE
-	return GIT_REV_COUNT_FROM_SOURCE; // Won't be defined by cmake if 0
-#else
-	return "1"; // The first RC!!
-#endif
-}
-
-/**
  * @brief Return a truncated unambiguous hash.
  */
 const char* GitShortHash()
@@ -287,8 +271,8 @@ const char* NiceVersionDetails()
 	}
 	else if (!strncmp(GitBranch(), "release", ARRAY_LENGTH(RELEASE_PREFIX) - 1))
 	{
-		// "Release" branch shows git commits from source as RC number
-		StrFormat(version, "-pre.%s%s", GitRevCountFromSource(), debug);
+		// "Release" branch shows total revisions as a build number
+		StrFormat(version, "-prerelease.%s%s", GitRevCount(), debug);
 	}
 	else
 	{
