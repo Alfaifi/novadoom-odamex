@@ -2,4 +2,3 @@
 #cmakedefine GIT_HASH "@GIT_HASH@"
 #cmakedefine GIT_REV_COUNT "@GIT_REV_COUNT@"
 #cmakedefine GIT_SHORT_HASH "@GIT_SHORT_HASH@"
-#cmakedefine GIT_REV_COUNT_FROM_SOURCE "@GIT_REV_COUNT_FROM_SOURCE@"

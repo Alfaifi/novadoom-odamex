@@ -152,7 +152,6 @@ get_git_head_revision(HEAD GIT_HASH)
 git_describe(GIT_DESCRIBE --all --long --abbrev=4)
 git_rev_count(HEAD GIT_REV_COUNT)
 git_branch(HEAD GIT_BRANCH)
-
 string(REGEX REPLACE "^(heads\/|tags\/)(.+)(-0-g)([0-9a-f]+)"
   "\\4" GIT_SHORT_HASH "${GIT_DESCRIBE}")
 
