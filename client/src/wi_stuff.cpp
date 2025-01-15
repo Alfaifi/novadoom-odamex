@@ -1398,12 +1398,12 @@ void WI_loadData()
 
 	if (exitanim != nullptr)
 		strcpy(name, exitanim->backgroundlump.c_str());
+	else if (!winpic.empty())
+		strcpy(name, winpic.c_str());
 	else if (currentlevel.exitpic[0] != '\0')
 		strcpy(name, currentlevel.exitpic.c_str());
-	else if ((gameinfo.flags & GI_MAPxx) || ((gameinfo.flags & GI_MENUHACK_RETAIL) && wbs->epsd >= 3))
-		winpic.empty() ? strcpy(name, "INTERPIC") : strcpy(name, winpic.c_str());
 	else
-		snprintf(name, 17, "WIMAP%d", wbs->epsd);
+		strcpy(name, "INTERPIC");
 
 	// background
 	const patch_t* bg_patch = W_CachePatch(name);
