@@ -46,7 +46,7 @@ function BuildX86 {
     }
     New-Item  -Force -ItemType "directory" -Path "${CurrentDir}\BuildX86"
     Set-Location -Path "${CurrentDir}\BuildX86"
-
+    
     cmake.exe -G "Visual Studio 17 2022" -A "Win32" "${CurrentDir}" `
         -DBUILD_OR_FAIL=1 `
         -DBUILD_CLIENT=1 -DBUILD_SERVER=1 `
