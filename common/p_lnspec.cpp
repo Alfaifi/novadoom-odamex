@@ -34,7 +34,7 @@
 #include "p_mapformat.h"
 
 #define FUNC(a) static BOOL a (line_t *ln, AActor *it, int arg0, int arg1, \
-							   int arg2, int arg3, int arg4, int special = -1)
+							   int arg2, int arg3, int arg4)
 
 // Used by the teleporters to know if they were
 // activated by walking across the backside of a line.
@@ -432,7 +432,7 @@ FUNC(LS_NOP)
 
 FUNC(LS_NOTIMP)
 {
-	Printf(PRINT_HIGH, "Line special not implemented yet: special number %d", special);
+	Printf(PRINT_HIGH, "Line special not implemented yet.");
 	return false;
 }
 

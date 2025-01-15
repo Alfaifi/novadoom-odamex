@@ -1313,7 +1313,7 @@ void DPlaneWatcher::RunThink ()
 		(LastD > WatchD && newd <= WatchD))
 	{
 		TeleportSide = LineSide;
-		LineSpecials[Special] (Line, Activator, Arg0, Arg1, Arg2, Arg3, Arg4, Special);
+		LineSpecials[Special] (Line, Activator, Arg0, Arg1, Arg2, Arg3, Arg4);
 
 		if (serverside)
 		{
@@ -1827,7 +1827,7 @@ void DLevelScript::ActivateLineSpecial(byte special, line_t* line, AActor* activ
 {
 	if (serverside)
 	{
-		LineSpecials[special](line, activator, arg0, arg1, arg2, arg3, arg4, special);
+		LineSpecials[special](line, activator, arg0, arg1, arg2, arg3, arg4);
 		SERVER_ONLY(SV_SendExecuteLineSpecial(special, line, activator, arg0, arg1, arg2,
 		                                      arg3, arg4));
 	}

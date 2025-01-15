@@ -169,7 +169,7 @@ static void ActivateLine(AActor* mo, line_s* line, byte side,
 			P_PushSpecialLine(mo, line, side);
 		break;
 	case LineACS:
-		LineSpecials[special](line, mo, arg0, arg1, arg2, arg3, arg4, special);
+		LineSpecials[special](line, mo, arg0, arg1, arg2, arg3, arg4);
 		break;
 	default:
 		break;
