@@ -927,6 +927,7 @@ void G_InitLevelLocals()
 	::level.intertextsecret = info.intertextsecret;
 	::level.interbackdrop = info.interbackdrop;
 	::level.intermusic = info.intermusic;
+	::level.zintermusic = info.zintermusic;
 
 	::level.bossactions = info.bossactions;
 	::level.label = info.label;
