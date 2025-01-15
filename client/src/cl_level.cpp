@@ -601,7 +601,7 @@ void G_DoLoadLevel (int position)
 	//	setting one.
 	skyflatnum = R_FlatNumForName(SKYFLATNAME);
 
-	R_SetDefaultSky(level.skypic.c_str());
+	R_SetDefaultSky(level.skypic);
 
 	R_InitSkiesForLevel();
 

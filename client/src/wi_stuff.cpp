@@ -1039,8 +1039,7 @@ void WI_drawNetgameStats()
 		// Display player names online!
 		if (!demoplayback)
 		{
-			std::string str = fmt::sprintf("%s", it->userinfo.netname.c_str());
-			WI_DrawSmallName(str.c_str(), x+10, y+24);
+			WI_DrawSmallName(it->userinfo.netname.c_str(), x+10, y+24);
 		}
 
 		x += NG_SPACINGX;
@@ -1376,16 +1375,16 @@ void WI_loadData()
 	animation = new wi_animation_t();
 
 	if (!winanim.empty())
-		exitanim = WI_GetInterlevel(winanim.c_str());
+		exitanim = WI_GetInterlevel(winanim);
 	else if (!currentlevel.exitanim.empty())
-		exitanim = WI_GetInterlevel(currentlevel.exitanim.c_str());
+		exitanim = WI_GetInterlevel(currentlevel.exitanim);
 	else if (!currentlevel.exitscript.empty())
-		exitanim = WI_GetIntermissionScript(currentlevel.exitscript.c_str());
+		exitanim = WI_GetIntermissionScript(currentlevel.exitscript);
 
 	if (!nextlevel.enteranim.empty())
-		enteranim = WI_GetInterlevel(nextlevel.enteranim.c_str());
+		enteranim = WI_GetInterlevel(nextlevel.enteranim);
 	else if (!nextlevel.enterscript.empty())
-		enteranim = WI_GetIntermissionScript(nextlevel.enterscript.c_str());
+		enteranim = WI_GetIntermissionScript(nextlevel.enterscript);
 
 	WI_initAnimation();
 

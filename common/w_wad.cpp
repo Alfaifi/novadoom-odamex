@@ -664,6 +664,28 @@ int W_CheckNumForName(const char *name, int namespc)
 }
 
 //
+// W_CheckNumForName
+// Returns -1 if name not found.
+//
+// Rewritten by Lee Killough to use hash table for performance. Significantly
+// cuts down on time -- increases Doom performance over 300%. This is the
+// single most important optimization of the original Doom sources, because
+// lump name lookup is used so often, and the original Doom used a sequential
+// search. For large wads with > 1000 lumps this meant an average of over
+// 500 were probed during every search. Now the average is under 2 probes per
+// search. There is no significant benefit to packing the names into longwords
+// with this new hashing algorithm, because the work to do the packing is
+// just as much work as simply doing the string comparisons with the new
+// algorithm, which minimizes the expected number of comparisons to under 2.
+//
+// [SL] taken from prboom-plus
+//
+int W_CheckNumForName(OLumpName& name, int namespc)
+{
+	return W_CheckNumForName(name.c_str(), namespc);
+}
+
+//
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //

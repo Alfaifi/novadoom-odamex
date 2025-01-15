@@ -128,9 +128,7 @@ shaderef_t::shaderef_t(const shademap_t* const colors, const int mapnum) :
 	// NOTE(jsd): Arbitrary value picked here because we don't record the max number of colormaps for dynamic ones... or do we?
 	if (m_mapnum >= 8192)
 	{
-		char tmp[100];
-		sprintf(tmp, "32bpp: shaderef_t::shaderef_t() called with mapnum = %d, which looks too large", m_mapnum);
-		throw CFatalError(tmp);
+		throw CFatalError(fmt::format("32bpp: shaderef_t::shaderef_t() called with mapnum = {}, which looks too large", m_mapnum));
 	}
 	#endif
 
@@ -686,7 +684,7 @@ static float lightScale(float a)
 	// 1 - ((Exp[1] - Exp[a*2 - 1]) / (Exp[1] - Exp[-1]))
 	static float e1 = exp(1.0f);
 	static float e1sube0 = e1 - exp(-1.0f);
-	
+
 	return clamp(1.0f - (e1 - (float)exp(a * 2.0f - 1.0f)) / e1sube0, 0.0f, 1.0f);
 }
 

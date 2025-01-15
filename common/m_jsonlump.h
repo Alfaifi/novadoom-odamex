@@ -109,3 +109,8 @@ inline jsonlumpresult_t M_ParseJSONLump(const char* lumpname, const char* lumpty
 {
 	return M_ParseJSONLump(W_CheckNumForName(lumpname), lumptype, maxversion, parsefunc);
 }
+
+inline jsonlumpresult_t M_ParseJSONLump(OLumpName& lumpname, const char* lumptype, const JSONLumpVersion& maxversion, JSONLumpFunc&& parsefunc)
+{
+	return M_ParseJSONLump(W_CheckNumForName(lumpname), lumptype, maxversion, parsefunc);
+}
