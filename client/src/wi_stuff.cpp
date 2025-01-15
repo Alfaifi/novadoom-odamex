@@ -1376,22 +1376,17 @@ void WI_loadData()
 	animation = new wi_animation_t();
 
 	if (!winanim.empty())
-	{
 		exitanim = WI_GetInterlevel(winanim.c_str());
-	} else if (!currentlevel.exitanim.empty())
-	{
+	else if (!currentlevel.exitanim.empty())
 		exitanim = WI_GetInterlevel(currentlevel.exitanim.c_str());
-	} else if (!currentlevel.exitscript.empty())
-	{
+	else if (!currentlevel.exitscript.empty())
 		exitanim = WI_GetIntermissionScript(currentlevel.exitscript.c_str());
-	}
+
 	if (!nextlevel.enteranim.empty())
-	{
 		enteranim = WI_GetInterlevel(nextlevel.enteranim.c_str());
-	} else if (!nextlevel.enterscript.empty())
-	{
+	else if (!nextlevel.enterscript.empty())
 		enteranim = WI_GetIntermissionScript(nextlevel.enterscript.c_str());
-	}
+
 	WI_initAnimation();
 
 	OLumpName name;
