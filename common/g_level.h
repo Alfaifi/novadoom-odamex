@@ -165,6 +165,7 @@ struct level_pwad_info_t
 	OLumpName		skypic2;
 	float			gravity;
 	float			aircontrol;
+	int				airsupply;
 
 	// The following are necessary for UMAPINFO compatibility
 	OLumpName		exitpic;
@@ -193,7 +194,8 @@ struct level_pwad_info_t
 	    : mapname(""), levelnum(0), level_name(""), pname(""), nextmap(""), secretmap(""),
 	      partime(0), skypic(""), music(""), flags(0), cluster(0), snapshot(NULL),
 	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
-	      aircontrol(0.0f), exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""), endpic(""), intertext(""),
+	      aircontrol(0.0f), airsupply(10),
+		  exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""), endpic(""), intertext(""),
 	      intertextsecret(""), interbackdrop(""), intermusic(""),
 	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
 	      clearlabel(false), author()
@@ -210,7 +212,8 @@ struct level_pwad_info_t
 	      secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
 	      music(other.music), flags(other.flags), cluster(other.cluster),
 	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
-	      skypic2(""), gravity(0.0f), aircontrol(0.0f), exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""),
+	      skypic2(""), gravity(0.0f), aircontrol(0.0f), airsupply(10),
+		  exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""),
 	      endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""),
 	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(),
 	      clearlabel(false), author()
@@ -246,6 +249,7 @@ struct level_pwad_info_t
 		skypic2 = other.skypic2;
 		gravity = other.gravity;
 		aircontrol = other.aircontrol;
+		airsupply = other.airsupply;
 		exitpic = other.exitpic;
 		exitscript = other.exitscript;
 		exitanim = other.exitanim;
@@ -323,6 +327,7 @@ struct level_locals_t
 	float			gravity;
 	fixed_t			aircontrol;
 	fixed_t			airfriction;
+	int 			airsupply;
 
 	// The following are all used for ACS scripting
 	FBehavior*		behavior;
