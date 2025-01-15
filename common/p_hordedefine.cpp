@@ -21,9 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <math.h>
-#include <climits>
-
 #include "odamex.h"
 
 #include "p_hordedefine.h"
@@ -37,6 +34,9 @@
 #include "oscanner.h"
 #include "v_textcolors.h"
 #include "w_wad.h"
+
+#include <limits>
+#include <cmath>
 
 EXTERN_CVAR(g_horde_mintotalhp)
 EXTERN_CVAR(g_horde_maxtotalhp)
@@ -256,7 +256,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 	// Randomly select a monster to spawn.
 	const hordeDefine_t::monster_t* monster = NULL;
-	int limit = INT_MAX;
+	int limit = std::numeric_limits<int>::max();
 	for (size_t i = 0; i < 5; i++)
 	{
 		monster = P_RandomFloatWeighted(monsters, MonsterChance);
@@ -268,7 +268,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 		// Scale the limit, but whatever number we come up with must end
 		// up as an integer anyway.
-		limit = ceilf(float(monster->config.limit) * SkillScaler());
+		limit = std::ceilf(monster->config.limit * SkillScaler());
 		const int numAlive = P_HordeMobjCount(monsterCounts, monster->mobj);
 		if (numAlive < limit)
 		{
@@ -278,7 +278,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 		// Can't fit this monster.
 		monster = NULL;
-		limit = INT_MAX;
+		limit = std::numeric_limits<int>::max();
 	}
 
 	if (monster == NULL)
@@ -358,7 +358,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 	out.type = outType;
 	out.count = outCount;
-	out.limit = limit == INT_MAX ? 0 : limit;
+	out.limit = limit == std::numeric_limits<int>::max() ? 0 : limit;
 	out.totalCount = MAX(outTotalCount, outCount);
 	out.isBoss = outIsBoss;
 
