@@ -147,15 +147,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 # Grabs the git hash and branch a few different ways.
 include(GetGitBranch)
 include(GetGitRevisionDescription)
+include(GetGitLastTag)
 include(GetGitRevisionNumber)
 include(GetGitRevisionNumberFromSource)
 get_git_head_revision(HEAD GIT_HASH)
 git_describe(GIT_DESCRIBE --all --long --abbrev=4)
 git_rev_count(HEAD GIT_REV_COUNT)
 git_branch(HEAD GIT_BRANCH)
-git_rev_count_from_source("${GIT_BRANCH}" GIT_REV_COUNT_FROM_SOURCE)
-
-message(STATUS "Revision count from source: ${GIT_REV_COUNT_FROM_SOURCE}")
+git_last_tag(GIT_LAST_TAG)
+git_rev_count_from_source("${GIT_LAST_TAG}" GIT_REV_COUNT_FROM_SOURCE)
 
 string(REGEX REPLACE "^(heads\/|tags\/)(.+)(-0-g)([0-9a-f]+)"
   "\\4" GIT_SHORT_HASH "${GIT_DESCRIBE}")

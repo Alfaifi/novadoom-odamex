@@ -10,7 +10,7 @@ jobs:
     name: Build Preparation
     runs-on: ubuntu-latest
     outputs:
-      build_number: ${{ steps.revlist.outputs.revisionsAfterSource }}
+      build_number: ${{ steps.revlist.outputs.commitsAfterSource }}
       new_version: ${{ steps.gitversion.outputs.majorMinorPatch }}
       major: ${{ steps.gitversion.outputs.major }}
       minor: ${{ steps.gitversion.outputs.minor }}
@@ -31,9 +31,9 @@ jobs:
         id:   revlist
         shell: pwsh
         run: |
-          $commitsaftersource = git rev-list ${{ steps.gitversion.outputs.branchName }}... --count
-          if ($commitsaftersource -eq 0) { $commitsaftersource = 1 }
-          Write-Output "::set-output name=revisionsAfterSource::$commitsaftersource"
+          $lasttag = git describe --tags --abbrev=0
+          $commitsaftersource = git rev-list $lasttag..HEAD --count
+          Write-Output "::set-output name=commitsAfterSource::$commitsaftersource"
       - name: Display GitVersion outputs
         run: |
           echo "Major: ${{ steps.gitversion.outputs.major }}"
@@ -68,6 +68,7 @@ jobs:
           echo "CommitsSinceVersionSourcePadded: ${{ steps.gitversion.outputs.commitsSinceVersionSourcePadded }}"
           echo "UncommittedChanges: ${{ steps.gitversion.outputs.uncommittedChanges }}"
           echo "CommitDate: ${{ steps.gitversion.outputs.commitDate }}"
+          echo "CommitsFromSource: ${{ steps.revlist.outputs.commitsAfterSource }}"
   build:
     name: Build (Visual Studio)
     needs: pre_job

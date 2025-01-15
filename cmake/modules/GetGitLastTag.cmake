@@ -2,13 +2,13 @@
 # Copyright (C) 2020 Alex Mayfield.
 #
 
-function(git_rev_count_from_source _refspecvar _countvar)
+function(git_last_tag _countvar)
   if(NOT GIT_FOUND)
     find_package(Git QUIET)
   endif()
 
   execute_process(COMMAND
-    "${GIT_EXECUTABLE}" rev-list ${_refspecvar}..HEAD --count
+    "${GIT_EXECUTABLE}" describe --tags --abbrev=0
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		RESULT_VARIABLE res
 		OUTPUT_VARIABLE out
