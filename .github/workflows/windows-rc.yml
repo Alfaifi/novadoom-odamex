@@ -26,13 +26,15 @@ jobs:
           versionSpec: '5.x'
       - name: Determine Version
         id:   gitversion
-        uses: gittools/actions/gitversion/execute@v0.9.7
+        uses: gittools/actions/gitversion/execute@v0.9.7 
       - name: Get Commits From Source
         id:   revlist
         shell: pwsh
         run: |
           $lasttag = git describe --tags --abbrev=0
+          Write-Output $lasttag
           $commitsaftersource = git rev-list $lasttag..HEAD --count
+          Write-Output $commitsaftersource
           Write-Output "::set-output name=commitsAfterSource::$commitsaftersource"
       - name: Display GitVersion outputs
         run: |
