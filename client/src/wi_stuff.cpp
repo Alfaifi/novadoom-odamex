@@ -1394,16 +1394,16 @@ void WI_loadData()
 	}
 	WI_initAnimation();
 
-	char name[17];
+	OLumpName name;
 
 	if (exitanim != nullptr)
-		strcpy(name, exitanim->backgroundlump.c_str());
+		name = exitanim->backgroundlump;
 	else if (!winpic.empty())
-		strcpy(name, winpic.c_str());
+		name = winpic;
 	else if (currentlevel.exitpic[0] != '\0')
-		strcpy(name, currentlevel.exitpic.c_str());
+		currentlevel.exitpic;
 	else
-		strcpy(name, "INTERPIC");
+		name = "INTERPIC";
 
 	// background
 	const patch_t* bg_patch = W_CachePatch(name);
@@ -1443,8 +1443,8 @@ void WI_loadData()
 	for (int i = 0; i < 10; i++)
 	{
 		// numbers 0-9
-		snprintf(name, 17, "WINUM%d", i);
-			num[i] = W_CachePatchHandle(name, PU_STATIC);
+		name = fmt::format("WINUM{}", i);
+		num[i] = W_CachePatchHandle(name.c_str(), PU_STATIC);
 	}
 
 	wiminus = W_CachePatchHandle("WIMINUS", PU_STATIC);
@@ -1527,8 +1527,8 @@ void WI_loadData()
 	// [Nes] Classic vanilla lifebars.
 	for (int i = 0; i < 4; i++)
 	{
-		sprintf(name, "STPB%d", i);
-		faceclassic[i] = W_CachePatchHandle(name, PU_STATIC);
+		name = fmt::format("STPB{}", i);
+		faceclassic[i] = W_CachePatchHandle(name.c_str(), PU_STATIC);
 	}
 }
 
