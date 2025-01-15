@@ -1307,6 +1307,7 @@ struct MapInfoDataSetter<level_pwad_info_t>
 			{ "warptrans", &MIType_EatNext },
 			{ "gravity", &MIType_Float, &ref.gravity },
 			{ "aircontrol", &MIType_Float, &ref.aircontrol },
+			{ "airsupply", &MIType_Int, &ref.airsupply },
 			{ "islobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL },
 			{ "lobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL },
 			{ "nocrouch" },

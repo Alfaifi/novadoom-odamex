@@ -817,6 +817,7 @@ void G_InitLevelLocals()
 	{
 		::level.aircontrol = static_cast<fixed_t>(info.aircontrol * 65536.f);
 	}
+	::level.airsupply = info.airsupply;
 
 	::level.partime = info.partime;
 	::level.cluster = info.cluster;
