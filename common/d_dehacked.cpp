@@ -1832,7 +1832,7 @@ static int PatchSprites(int dummy)
 				Z_Free(s); // ozone allocated memory
 			}
 			// [CMB] remember to Z_Free this instead of free(...)
-			sprnames.insert(Z_StrDup(newSprName, PU_STATIC, NULL), (spritenum_t) sprIdx);
+			sprnames.insert(Z_StrDup(newSprName, PU_STATIC), (spritenum_t) sprIdx);
 	}
 
 	return result;
