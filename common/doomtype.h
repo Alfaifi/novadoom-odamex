@@ -188,32 +188,6 @@ static inline uint32_t BIT_MASK(uint32_t a, uint32_t b)
     return (static_cast<uint32_t>(-1) >> (31 - b)) & ~(BIT(a) - 1);
 }
 
-/**
- * @brief Print to all clients in a server, or to the local player offline.
- *
- * @note This could really use a new name, like "ServerPrintf".
- *
- * @param format printf-style format string.
- * @param ... printf-style arguments.
- */
-void STACK_ARGS SV_BroadcastPrintf(const char* format, ...) FORMAT_PRINTF(1, 2);
-
-/**
- * @brief Print to all clients in a server, or to the local player offline.
- *
- * @note This could really use a new name, like "ServerPrintf".
- *
- * @param printlevel PRINT_* constant designating what kind of print this is.
- * @param format printf-style format string.
- * @param ... printf-style arguments.
- */
-void STACK_ARGS SV_BroadcastPrintf(int printlevel, const char* format, ...)
-    FORMAT_PRINTF(2, 3);
-
-#ifdef SERVER_APP
-void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const char* format, ...);
-#endif
-
 // game print flags
 typedef enum {
 	PRINT_PICKUP,		// Pickup messages

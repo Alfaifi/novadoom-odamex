@@ -644,6 +644,27 @@ void SV_MidPrint(const char* msg, player_t* p, int msgtime)
 	MSG_WriteSVC(&cl->reliablebuf, SVC_MidPrint(msg, msgtime));
 }
 
+void SV_BasePrintAllPlayers(const int printlevel, const std::string& str)
+{
+	for (auto& player : players)
+		MSG_WriteSVC(&player.client.reliablebuf, SVC_Print(static_cast<printlevel_t>(printlevel), str));
+}
+
+void SV_BasePrintButPlayer(const int printlevel, const int player_id, const std::string& str)
+{
+	for (auto& player : players)
+	{
+		client_t* cl = &(player.client);
+
+		client_t* excluded_client = &idplayer(player_id).client;
+
+		if (cl == excluded_client)
+			continue;
+
+		MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(printlevel), str));
+	}
+}
+
 //
 // SV_Sound
 //
@@ -2355,162 +2376,6 @@ BEGIN_COMMAND (showscores)
     SV_DrawScores();
 }
 END_COMMAND (showscores)
-
-FORMAT_PRINTF(2, 3)
-void STACK_ARGS SV_BroadcastPrintf(int printlevel, const char* format, ...)
-{
-	va_list argptr;
-	std::string string;
-	client_t* cl;
-
-	va_start(argptr, format);
-	VStrFormat(string, format, argptr);
-	va_end(argptr);
-
-	Printf(printlevel, "%s", string.c_str()); // print to the console
-
-	// Hacky code to display messages as normal ones to clients
-	if (printlevel == PRINT_NORCON)
-		printlevel = PRINT_HIGH;
-
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-	{
-		cl = &(it->client);
-
-		MSG_WriteSVC(&cl->reliablebuf,
-		             SVC_Print(static_cast<printlevel_t>(printlevel), string));
-	}
-}
-
-FORMAT_PRINTF(1, 2)
-void STACK_ARGS SV_BroadcastPrintf(const char* fmt, ...)
-{
-	va_list argptr;
-	char string[2048];
-
-	va_start(argptr, fmt);
-	vsnprintf(string, sizeof(string), fmt, argptr);
-	va_end(argptr);
-
-	SV_BroadcastPrintf(PRINT_NORCON, "%s", string);
-}
-
-void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const char* format, ...)
-{
-	va_list argptr;
-	std::string string;
-
-	va_start(argptr, format);
-	VStrFormat(string, format, argptr);
-	va_end(argptr);
-
-	Printf(printlevel, "%s", string.c_str()); // print to the console
-
-	// Hacky code to display messages as normal ones to clients
-	if (printlevel == PRINT_NORCON)
-		printlevel = PRINT_HIGH;
-
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-	{
-		client_t* cl = &(it->client);
-
-		client_t* excluded_client = &idplayer(player_id).client;
-
-		if (cl == excluded_client)
-			continue;
-
-		MSG_WriteSVC(&cl->reliablebuf,
-		             SVC_Print(static_cast<printlevel_t>(printlevel), string));
-	}
-}
-
-// GhostlyDeath -- same as above but ONLY for spectators
-void STACK_ARGS SV_SpectatorPrintf(int level, const char *fmt, ...)
-{
-	va_list argptr;
-	char string[2048];
-	client_t *cl;
-
-	va_start(argptr,fmt);
-	vsnprintf(string, 2048, fmt, argptr);
-	va_end(argptr);
-
-	Printf(level, "%s", string);  // print to the console
-
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-	{
-		cl = &(it->client);
-
-		bool spectator = it->spectator || !it->ingame();
-		if (spectator)
-		{
-			MSG_WriteSVC(&cl->reliablebuf,
-			             SVC_Print(static_cast<printlevel_t>(level), string));
-		}
-	}
-}
-
-// Print directly to a specific client.
-void STACK_ARGS SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...)
-{
-	va_list argptr;
-	char string[2048];
-
-	va_start(argptr, fmt);
-	vsnprintf(string, 2048, fmt, argptr);
-	va_end(argptr);
-
-	MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), string));
-}
-
-// Print directly to a specific player.
-void STACK_ARGS SV_PlayerPrintf(int level, int player_id, const char *fmt, ...)
-{
-	va_list argptr;
-	char string[2048];
-
-	va_start(argptr,fmt);
-	vsnprintf(string, 2048, fmt,argptr);
-	va_end(argptr);
-
-	client_t* cl = &idplayer(player_id).client;
-	MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), string));
-}
-
-void STACK_ARGS SV_TeamPrintf(int level, int who, const char *fmt, ...)
-{
-	if (sv_gametype != GM_TEAMDM && sv_gametype != GM_CTF)
-		return;
-
-	va_list argptr;
-	char string[2048];
-
-	va_start(argptr,fmt);
-	vsnprintf(string, 2048, fmt,argptr);
-	va_end(argptr);
-
-	Printf(level, "%s", string);  // print to the console
-
-	player_t* player = &idplayer(who);
-
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-	{
-		if (it->userinfo.team != player->userinfo.team)
-			continue;
-
-		bool spectator = it->spectator || !it->ingame();
-		if (spectator)
-			continue;
-
-		client_t* cl = &(it->client);
-
-		if (cl->allow_rcon) // [mr.crispy -- sept 23 2013] RCON guy already got it when it printed to the console
-			continue;
-
-		MSG_WriteSVC(&cl->reliablebuf,
-		             SVC_Print(static_cast<printlevel_t>(level), string));
-	}
-}
 
 /**
  * Send a message to teammates of a player.
