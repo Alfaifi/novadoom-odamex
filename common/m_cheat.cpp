@@ -501,10 +501,16 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 		                                 finesine[source->angle >> ANGLETOFINESHIFT]);
 		fixed_t z = source->z + 8 * FRACUNIT;
 
+		if (mobjinfo[mobjtype].flags & MF_MISSILE)
+		{
+			entity = P_SpawnPlayerMissile(source, mobjtype);
+		}
+		else
+		{
+			entity = new AActor(x, y, z, mobjtype);
 
-		entity = new AActor(x, y, z, mobjtype);
-
-		entity->angle = source->angle;
+			entity->angle = source->angle;
+		}
 
 		return entity;
 	}
