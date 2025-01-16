@@ -680,7 +680,7 @@ int W_CheckNumForName(const char *name, int namespc)
 //
 // [SL] taken from prboom-plus
 //
-int W_CheckNumForName(OLumpName& name, int namespc)
+int W_CheckNumForName(const OLumpName& name, int namespc)
 {
 	return W_CheckNumForName(name.c_str(), namespc);
 }
@@ -706,7 +706,7 @@ int W_GetNumForName(const char* name, int namespc)
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-int W_GetNumForName(OLumpName& name, int namespc)
+int W_GetNumForName(const OLumpName& name, int namespc)
 {
 	return W_GetNumForName(name.c_str(), namespc);
 }

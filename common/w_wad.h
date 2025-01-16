@@ -117,9 +117,9 @@ lumpHandle_t W_LumpToHandle(const unsigned lump);
 int W_HandleToLump(const lumpHandle_t handle);
 
 int W_CheckNumForName(const char *name, int ns = ns_global);
-int W_CheckNumForName(OLumpName& name, int ns = ns_global);
+int W_CheckNumForName(const OLumpName& name, int ns = ns_global);
 int W_GetNumForName(const char *name, int ns = ns_global);
-int W_GetNumForName(OLumpName& name, int ns = ns_global);
+int W_GetNumForName(const OLumpName& name, int ns = ns_global);
 
 std::string W_LumpName(unsigned lump);
 unsigned	W_LumpLength (unsigned lump);

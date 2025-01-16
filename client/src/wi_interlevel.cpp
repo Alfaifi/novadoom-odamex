@@ -162,7 +162,7 @@ jsonlumpresult_t WI_ParseInterlevelLayer(const Json::Value& anim, interlevellaye
 	return jsonlumpresult_t::SUCCESS;
 }
 
-interlevel_t* WI_GetInterlevel(OLumpName& lumpname)
+interlevel_t* WI_GetInterlevel(const OLumpName& lumpname)
 {
 	auto found = interlevelstorage.find(lumpname);
 	if (found != interlevelstorage.end())
@@ -308,7 +308,7 @@ void WI_ParseZDoomAnim(OScanner& os, std::vector<interlevelanim_t>& anims, inter
 	}
 }
 
-interlevel_t* WI_GetIntermissionScript(OLumpName& lumpname)
+interlevel_t* WI_GetIntermissionScript(const OLumpName& lumpname)
 {
 	auto found = interlevelstorage.find(lumpname);
 	if (found != interlevelstorage.end())
