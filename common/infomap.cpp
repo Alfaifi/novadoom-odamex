@@ -26,7 +26,9 @@
 
 #include "hashtable.h"
 
-typedef OHashTable<std::string, mobjtype_t> MobjMap;
+#include "c_dispatch.h"
+
+typedef std::vector<std::pair<std::string, mobjtype_t>> MobjMap;
 
 /**
  * "Class" of mobj, used to determine how to "give" them to players.
@@ -45,7 +47,7 @@ static MobjMap g_MonsterMap;
 
 static void MapMobj(const mobjtype_t type, const std::string& name, const uint32_t flags)
 {
-	::g_MonsterMap.insert(MobjMap::value_type(name, type));
+	::g_MonsterMap.push_back(std::pair<std::string, mobjtype_t>(name, type));
 }
 
 static void InitMap()
@@ -299,6 +301,11 @@ static void InitMap()
 	MapMobj(MT_EXTRA97, "Deh_Actor_247", MC_NONE);
 	MapMobj(MT_EXTRA98, "Deh_Actor_248", MC_NONE);
 	MapMobj(MT_EXTRA99, "Deh_Actor_249", MC_NONE);
+
+	std::sort(::g_MonsterMap.begin(), ::g_MonsterMap.end(),
+	          [](const auto& left, const auto& right) {
+		          return left.second < right.second;
+	          });
 }
 
 /**
@@ -311,7 +318,20 @@ mobjtype_t P_NameToMobj(const std::string& name)
 		InitMap();
 	}
 
-	MobjMap::iterator it = ::g_MonsterMap.find(name);
+	MobjMap::iterator it = std::find_if(
+	    ::g_MonsterMap.begin(), ::g_MonsterMap.end(),
+	    [name](const std::pair<std::string, mobjtype_t>& p) 
+			{
+		    std::string first = p.first;
+		    std::string uppername = name;
+		    std::transform(p.first.begin(), p.first.end(), uppername.begin(),
+		                   ::toupper);
+		    std::transform(name.begin(), name.end(), first.begin(),
+		                   ::toupper);
+		    return first == uppername; 
+			}
+	);
+
 	if (it == ::g_MonsterMap.end())
 	{
 		return MT_NULL;
@@ -398,3 +418,19 @@ weapontype_t P_NameToWeapon(const std::string& name)
 
 	return wp_none;
 }
+
+BEGIN_COMMAND(dumpactors)
+{
+	if (::g_MonsterMap.empty())
+	{
+		InitMap();
+	}
+
+	Printf(PRINT_HIGH, "Total amount of actors: \n", ::g_MonsterMap.size());
+
+	for (MobjMap::iterator it = ::g_MonsterMap.begin(); it != ::g_MonsterMap.end(); ++it)
+	{
+		Printf(PRINT_HIGH, "%d - %s\n", it->second, it->first.c_str());
+	}
+}
+END_COMMAND(dumpactors)
