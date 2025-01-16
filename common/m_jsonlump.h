@@ -27,7 +27,6 @@
 
 #include "odamex.h"
 
-#include "doomtype.h"
 #include "w_wad.h"
 
 #include <functional>

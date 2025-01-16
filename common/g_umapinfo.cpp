@@ -351,7 +351,7 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	return 1;
 }
 
-void ParseUMapInfoLump(int lump, const char* lumpname)
+void ParseUMapInfoLump(int lump, const OLumpName& lumpname)
 {
 	LevelInfos& levels = getLevelInfos();
 

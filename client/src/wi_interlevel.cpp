@@ -334,9 +334,9 @@ interlevel_t* WI_GetIntermissionScript(const OLumpName& lumpname)
 	const char* buffer = static_cast<char*>(W_CacheLumpNum(lumpnum, PU_STATIC));
 
 	const OScannerConfig config = {
-	    lumpname.c_str(), // lumpName
-	    false,            // semiComments
-	    false,            // cComments
+	    lumpname, // lumpName
+	    false,    // semiComments
+	    false,    // cComments
 	};
 	OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lumpnum));
 
