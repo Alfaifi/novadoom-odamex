@@ -659,7 +659,7 @@ static menuitem_t NetworkItems[] = {
 	{ discrete,		"Predict sector actions",		{&cl_predictsectors},{3.0},		{0.0},		{0.0},		{PredictSectors} },
 	{ discrete,		"Predict weapon effects",		{&cl_predictweapons},{2.0},		{0.0},		{0.0},		{OnOff} },
 	{ redtext,		" ",							{NULL},				{0.0}, 		{0.0}, 		{0.0}, 		{NULL} },
-	{ discrete, 	"Download From Server", 		{&cl_serverdownload}, {2.0}, 		{0.0}, 		{0.0}, 		{OnOff} },
+	{ discrete, 	"Download From Internet", 		{&cl_serverdownload}, {2.0}, 		{0.0}, 		{0.0}, 		{OnOff} },
 
 	{ redtext,		" ",							{NULL},				{0.0},		{0.0},		{0.0},		{NULL} },
 	{ yellowtext,	"Netdemo Settings",				{NULL},				{0.0},		{0.0},		{0.0},		{NULL} },
