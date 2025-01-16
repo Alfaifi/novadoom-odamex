@@ -128,12 +128,14 @@ unsigned	W_ReadChunk (const char *file, unsigned offs, unsigned len, void *dest,
 
 void* W_CacheLumpNum(unsigned lump, const zoneTag_e tag);
 void* W_CacheLumpName(const char* name, const zoneTag_e tag);
-void* W_CacheLumpName(OLumpName& name, const zoneTag_e tag);
+void* W_CacheLumpName(const OLumpName& name, const zoneTag_e tag);
 patch_t* W_CachePatch(unsigned lump, const zoneTag_e tag = PU_CACHE);
 patch_t* W_CachePatch(const char* name, const zoneTag_e tag = PU_CACHE);
-patch_t* W_CachePatch(OLumpName& name, const zoneTag_e tag = PU_CACHE);
+patch_t* W_CachePatch(const OLumpName& name, const zoneTag_e tag = PU_CACHE);
 lumpHandle_t W_CachePatchHandle(const int lumpNum, const zoneTag_e tag = PU_CACHE);
 lumpHandle_t W_CachePatchHandle(const char* name, const zoneTag_e tag = PU_CACHE,
+                                int ns = ns_global);
+lumpHandle_t W_CachePatchHandle(const OLumpName&, const zoneTag_e tag = PU_CACHE,
                                 int ns = ns_global);
 patch_t* W_ResolvePatchHandle(const lumpHandle_t lump);
 
@@ -155,7 +157,7 @@ void uppercopy (char *to, const char *from);
 // [RH] Copies the lump name to to using uppercopy
 void W_GetLumpName(char* to, unsigned lump);
 
-// [RH] Copies the lump name to to using uppercopy
+// Copies the lump name to to
 void W_GetOLumpName(OLumpName& to, unsigned lump);
 
 // [RH] Returns file handle for specified lump

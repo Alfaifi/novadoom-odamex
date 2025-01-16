@@ -102,7 +102,7 @@ bool isFast = false;
 //
 static OLumpName d_mapname;
 
-void G_DeferedInitNew (const char *mapname)
+void G_DeferedInitNew (const OLumpName& mapname)
 {
 	G_CleanupDemo();
 	d_mapname = mapname;

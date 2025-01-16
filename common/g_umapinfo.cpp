@@ -141,7 +141,7 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	else if (!stricmp(pname.c_str(), "next"))
 	{
 		ParseOLumpName(os, mape->nextmap);
-		if (!ValidateMapName(mape->nextmap.c_str()))
+		if (!ValidateMapName(mape->nextmap))
 		{
 			os.error("Invalid map name %s.", mape->nextmap.c_str());
 			return 0;
@@ -150,7 +150,7 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	else if (!stricmp(pname.c_str(), "nextsecret"))
 	{
 		ParseOLumpName(os, mape->secretmap);
-		if (!ValidateMapName(mape->secretmap.c_str()))
+		if (!ValidateMapName(mape->secretmap))
 		{
 			os.error("Invalid map name %s", mape->nextmap.c_str());
 			return 0;
@@ -447,19 +447,17 @@ void ParseUMapInfoLump(int lump, const OLumpName& lumpname)
 			}
 			else
 			{
-				char arr[9] = "";
 				int ep, map;
-				ValidateMapName(info.mapname.c_str(), &ep, &map);
+				ValidateMapName(info.mapname, &ep, &map);
 				map++;
 				if (gamemode == commercial)
 				{
-					snprintf(arr, 9, "MAP%02d", map);
+					info.nextmap = fmt::format("MAP{:2d}", map);
 				}
 				else
 				{
-					snprintf(arr, 9, "E%dM%d", ep, map);
+					info.nextmap = fmt::format("E{}M{}", ep, map);
 				}
-				info.nextmap = arr;
 			}
 		}
 	}

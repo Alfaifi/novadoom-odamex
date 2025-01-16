@@ -507,9 +507,7 @@ static int WI_DrawName (const char *str, int x, int y)
 	::V_ColorMap = translationref_t(::Ranges + CR_GREY * 256);
 	while (*str)
 	{
-		char charname[9];
-		snprintf (charname, 9, "FONTB%02u", toupper(*str) - 32);
-		int lump = W_CheckNumForName(charname);
+		int lump = W_CheckNumForName(fmt::format("FONTB{:2d}", toupper(*str) - 32));
 
 		if (lump != -1)
 		{

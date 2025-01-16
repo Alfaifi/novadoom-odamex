@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -258,7 +258,7 @@ int S_FindSound(const char *logicalname)
 
 int S_FindSoundByLump(int lump)
 {
-	if (lump != -1) 
+	if (lump != -1)
 	{
 		for (unsigned i = 0; i < S_sfx.size(); i++)
 			if (S_sfx[i].lumpnum == lump)
@@ -451,10 +451,8 @@ void S_ParseSndInfo()
 				else if (os.compareTokenNoCase("map"))
 				{
 					// Hexen-style $MAP command
-					char mapname[8];
-
 					os.mustScanInt();
-					snprintf(mapname, 8, "MAP%02d", os.getTokenInt());
+					OLumpName mapname = fmt::format("MAP{:2d}", os.getTokenInt());
 					level_pwad_info_t& info = getLevelInfos().findByName(mapname);
 					os.mustScan();
 					if (info.mapname[0])

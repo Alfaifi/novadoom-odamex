@@ -818,7 +818,7 @@ void W_GetLumpName(char *to, unsigned lump)
 }
 
 //
-// W_GetLumpName
+// W_GetOLumpName
 //
 void W_GetOLumpName(OLumpName& to, unsigned lump)
 {
@@ -870,7 +870,7 @@ void* W_CacheLumpName(const char* name, const zoneTag_e tag)
 //
 // W_CacheLumpName
 //
-void* W_CacheLumpName(OLumpName& name, const zoneTag_e tag)
+void* W_CacheLumpName(const OLumpName& name, const zoneTag_e tag)
 {
 	return W_CacheLumpNum(W_GetNumForName(name.c_str()), tag);
 }
@@ -935,9 +935,9 @@ patch_t* W_CachePatch(const char* name, const zoneTag_e tag)
 	// denis - todo - would be good to replace non-existant patches with a default '404' patch
 }
 
-patch_t* W_CachePatch(OLumpName& name, const zoneTag_e tag)
+patch_t* W_CachePatch(const OLumpName& name, const zoneTag_e tag)
 {
-	return W_CachePatch(W_GetNumForName(name.c_str()), tag);
+	return W_CachePatch(W_GetNumForName(name), tag);
 	// denis - todo - would be good to replace non-existant patches with a default '404'
 	// patch
 }
@@ -955,6 +955,14 @@ lumpHandle_t W_CachePatchHandle(const int lumpNum, const zoneTag_e tag)
  * @brief Cache a patch by name and namespace and return a handle to it.
  */
 lumpHandle_t W_CachePatchHandle(const char* name, const zoneTag_e tag, const int ns)
+{
+	return W_CachePatchHandle(W_GetNumForName(name, ns), tag);
+}
+
+/**
+ * @brief Cache a patch by name and namespace and return a handle to it.
+ */
+lumpHandle_t W_CachePatchHandle(const OLumpName& name, const zoneTag_e tag, const int ns)
 {
 	return W_CachePatchHandle(W_GetNumForName(name, ns), tag);
 }
