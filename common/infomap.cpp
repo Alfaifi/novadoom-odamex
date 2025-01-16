@@ -302,10 +302,9 @@ static void InitMap()
 	MapMobj(MT_EXTRA98, "Deh_Actor_248", MC_NONE);
 	MapMobj(MT_EXTRA99, "Deh_Actor_249", MC_NONE);
 
-	std::sort(::g_MonsterMap.begin(), ::g_MonsterMap.end(),
-	          [](const auto& left, const auto& right) {
-		          return left.second < right.second;
-	          });
+	std::sort(
+	    ::g_MonsterMap.begin(), ::g_MonsterMap.end(),
+	    [](const auto& left, const auto& right) { return left.second < right.second; });
 }
 
 /**
@@ -320,17 +319,7 @@ mobjtype_t P_NameToMobj(const std::string& name)
 
 	MobjMap::iterator it = std::find_if(
 	    ::g_MonsterMap.begin(), ::g_MonsterMap.end(),
-	    [name](const std::pair<std::string, mobjtype_t>& p) 
-			{
-		    std::string first = p.first;
-		    std::string uppername = name;
-		    std::transform(p.first.begin(), p.first.end(), uppername.begin(),
-		                   ::toupper);
-		    std::transform(name.begin(), name.end(), first.begin(),
-		                   ::toupper);
-		    return first == uppername; 
-			}
-	);
+	    [name](const std::pair<std::string, mobjtype_t>& p) { return p.first == name; });
 
 	if (it == ::g_MonsterMap.end())
 	{
@@ -340,7 +329,8 @@ mobjtype_t P_NameToMobj(const std::string& name)
 }
 
 /**
- * @brief Convert a UMAPINFO/ZDoom class name to a MT Mobj index. Case insensitive for UMAPINFO
+ * @brief Convert a UMAPINFO/ZDoom class name to a MT Mobj index. Case insensitive for
+ * UMAPINFO
  */
 mobjtype_t P_INameToMobj(const std::string& name)
 {

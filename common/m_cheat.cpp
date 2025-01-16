@@ -463,7 +463,7 @@ void CHEAT_DoCheat(player_t* player, int cheat, bool silentmsg)
 bool CHEAT_ValidSummonActor(const char* summon) {
 	std::string mobname = "";
 
-	mobjtype_t mobjtype = P_NameToMobj(summon);
+	mobjtype_t mobjtype = P_INameToMobj(summon);
 
 	if (mobjtype == MT_NULL)
 	{
@@ -486,7 +486,7 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 	if (serverside)
 	{
 		// First, find whatever the heck we summoned.
-		mobjtype_t mobjtype = P_NameToMobj(sum);
+		mobjtype_t mobjtype = P_INameToMobj(sum);
 
 		if (mobjtype == MT_NULL)
 		{
