@@ -559,8 +559,7 @@ void MIType_MusicLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 
 		// Music lumps in the stringtable do not begin
 		// with a D_, so we must add it.
-		char lumpname[9];
-		snprintf(lumpname, ARRAY_LENGTH(lumpname), "D_%s", s.c_str());
+		OLumpName lumpname = fmt::format("D_{}", s);
 		if (W_CheckNumForName(lumpname) != -1)
 		{
 			*static_cast<OLumpName*>(data) = lumpname;
@@ -568,7 +567,7 @@ void MIType_MusicLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 	}
 	else
 	{
-		if (W_CheckNumForName(musicname.c_str()) != -1)
+		if (W_CheckNumForName(musicname) != -1)
 		{
 			*static_cast<OLumpName*>(data) = musicname;
 		}
@@ -1146,9 +1145,9 @@ bool InterpretLines(const std::string& name, std::vector<mline_t>& lines)
 		const char* buffer = static_cast<char*>(W_CacheLumpNum(lump, PU_STATIC));
 
 		const OScannerConfig config = {
-		    name.c_str(), // lumpName
-		    false,        // semiComments
-		    true,         // cComments
+		    name,  // lumpName
+		    false, // semiComments
+		    true,  // cComments
 		};
 		OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
 
@@ -1755,7 +1754,7 @@ void G_MapNameToLevelNum(level_pwad_info_t& info)
 namespace
 {
 
-void ParseMapInfoLump(int lump, const char* lumpname)
+void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 {
 	LevelInfos& levels = getLevelInfos();
 	ClusterInfos& clusters = getClusterInfos();
