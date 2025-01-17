@@ -28,7 +28,6 @@
 #include "d_player.h"
 #include "i_net.h"
 #include "g_gametype.h"
-#include "svc_message.h"
 
 #include <json/json.h>
 
@@ -53,14 +52,16 @@ void SV_DrawScores();
 void SV_ServerSettingChange();
 bool SV_IsPlayerAllowedToSee(player_t &pl, AActor *mobj);
 
+void SV_BasePrint(client_t* cl, const int printlevel, const std::string& str);
+
 // Print directly to a specific client.
 template <typename... ARGS>
 void SV_ClientPrintf(client_t *cl, int level, const fmt::string_view format, const ARGS&... args)
 {
-	MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), fmt::sprintf(format, args...)));
+	SV_BasePrint(cl, level, fmt::sprintf(format, args...));
 }
 
-// GhostlyDeath -- same as above but ONLY for spectators
+// Print to all spectators
 template <typename... ARGS>
 void SV_SpectatorPrintf(int level, const fmt::string_view format, const ARGS&... args)
 {
@@ -74,7 +75,7 @@ void SV_SpectatorPrintf(int level, const fmt::string_view format, const ARGS&...
 		bool spectator = player.spectator || !player.ingame();
 		if (spectator)
 		{
-			MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), string));
+			SV_BasePrint(cl, level, string);
 		}
 	}
 }
@@ -112,7 +113,7 @@ void SV_TeamPrintf(int level, int who, const fmt::string_view format, const ARGS
 		if (cl->allow_rcon) // [mr.crispy -- sept 23 2013] RCON guy already got it when it printed to the console
 			continue;
 
-		MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), string));
+		SV_BasePrint(cl, level, string);
 	}
 }
 

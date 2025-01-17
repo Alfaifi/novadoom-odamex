@@ -644,6 +644,11 @@ void SV_MidPrint(const char* msg, player_t* p, int msgtime)
 	MSG_WriteSVC(&cl->reliablebuf, SVC_MidPrint(msg, msgtime));
 }
 
+void SV_BasePrint(client_t* cl, const int printlevel, const std::string& str)
+{
+	MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(printlevel), str));
+}
+
 void SV_BasePrintAllPlayers(const int printlevel, const std::string& str)
 {
 	for (auto& player : players)
