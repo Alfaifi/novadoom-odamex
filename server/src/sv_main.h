@@ -61,6 +61,14 @@ void SV_ClientPrintf(client_t *cl, int level, const fmt::string_view format, con
 	SV_BasePrint(cl, level, fmt::sprintf(format, args...));
 }
 
+// Print directly to a specific player.
+template <typename... ARGS>
+void SV_PlayerPrintf(int level, int player_id, const fmt::string_view format, const ARGS&... args)
+{
+	client_t* cl = &idplayer(player_id).client;
+	SV_ClientPrintf(cl, level, format, args...);
+}
+
 // Print to all spectators
 template <typename... ARGS>
 void SV_SpectatorPrintf(int level, const fmt::string_view format, const ARGS&... args)
@@ -78,14 +86,6 @@ void SV_SpectatorPrintf(int level, const fmt::string_view format, const ARGS&...
 			SV_BasePrint(cl, level, string);
 		}
 	}
-}
-
-// Print directly to a specific player.
-template <typename... ARGS>
-void SV_PlayerPrintf(int level, int player_id, const fmt::string_view format, const ARGS&... args)
-{
-	client_t* cl = &idplayer(player_id).client;
-	SV_ClientPrintf(cl, level, format, args...);
 }
 
 template <typename... ARGS>
