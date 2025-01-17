@@ -1494,8 +1494,8 @@ static void M_PlayerSetupDrawer()
 	// Draw team setting
 	{
 		const team_t team = D_TeamByName(cl_team.cstring());
-		const int x = V_StringWidth ("Prefered Team") + 8 + PSetupDef.x;
-		screen->DrawTextCleanMove (CR_RED, PSetupDef.x, PSetupDef.y + LINEHEIGHT, "Prefered Team");
+		const int x = V_StringWidth ("Preferred Team") + 8 + PSetupDef.x;
+		screen->DrawTextCleanMove (CR_RED, PSetupDef.x, PSetupDef.y + LINEHEIGHT, "Preferred Team");
 		screen->DrawTextCleanMove (CR_GREY, x, PSetupDef.y + LINEHEIGHT, team == TEAM_NONE ? "NONE" : GetTeamInfo(team)->ColorStringUpper.c_str());
 	}
 

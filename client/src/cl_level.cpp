@@ -102,7 +102,7 @@ bool isFast = false;
 //
 static OLumpName d_mapname;
 
-void G_DeferedInitNew (const char *mapname)
+void G_DeferedInitNew (const OLumpName& mapname)
 {
 	G_CleanupDemo();
 	d_mapname = mapname;
@@ -601,7 +601,7 @@ void G_DoLoadLevel (int position)
 	//	setting one.
 	skyflatnum = R_FlatNumForName(SKYFLATNAME);
 
-	R_SetDefaultSky(level.skypic.c_str());
+	R_SetDefaultSky(level.skypic);
 
 	R_InitSkiesForLevel();
 

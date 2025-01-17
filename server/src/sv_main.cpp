@@ -75,7 +75,7 @@
 
 #include "server.pb.h"
 
-extern void G_DeferedInitNew (const char *mapname);
+extern void G_DeferedInitNew (const OLumpName& mapname);
 extern level_locals_t level;
 
 // Unnatural Level Progression.  True if we've used 'map' or another command
@@ -4243,7 +4243,7 @@ void SV_RunTics()
 		else
 		{
 			// [AM] Make a copy of mapname for safety's sake.
-			OLumpName mapname = ::level.mapname.c_str();
+			OLumpName mapname = ::level.mapname;
 			G_InitNew(mapname);
 		}
 	}
