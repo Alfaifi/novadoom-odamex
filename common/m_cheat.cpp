@@ -183,7 +183,7 @@ BEGIN_COMMAND(tntem)
 }
 END_COMMAND(tntem)
 
- BEGIN_COMMAND(summon)
+BEGIN_COMMAND(summon)
 {
 	if (!CHEAT_AreCheatsEnabled())
 		return;
@@ -195,14 +195,14 @@ END_COMMAND(tntem)
 
 	if (!CHEAT_ValidSummonActor(mobname.c_str()))
 	{
-		Printf(PRINT_HIGH, "Invalid summon argument: %s. Please use `dumpactorlist` for a valid list of ids and actor names.\n", mobname.c_str());
+		Printf(PRINT_HIGH, "Invalid summon argument: %s. Please use `dumpactors` for a valid list of actor names.\n", mobname.c_str());
 		return;
 	}
 
 	CHEAT_Summon(&consoleplayer(), mobname.c_str(), false);
 	CL_SendSummonCheat(mobname.c_str());
  }
- END_COMMAND(summon)
+END_COMMAND(summon)
 
 BEGIN_COMMAND(mdk)
 {
@@ -478,8 +478,6 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 	AActor* entity = AActor::AActorPtr();
 	AActor* source = player->mo;
 
-	std::string mobname = "";
-
 	if (player->spectator || source == NULL)
 		return entity;
 
@@ -490,8 +488,8 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 
 		if (mobjtype == MT_NULL)
 		{
-				Printf(PRINT_HIGH, "%s tried to cheat but can't even summon right\n",
-				       player->userinfo.netname.c_str());
+			PrintFmt(PRINT_HIGH, "{} tried to cheat but can't even summon right\n",
+				       player->userinfo.netname);
 				return entity;
 		}
 
@@ -511,12 +509,14 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 
 			entity->angle = source->angle;
 		}
-
-		return entity;
 	}
 
-	Printf(PRINT_HIGH, "%s is a cheater: summon %s\n", player->userinfo.netname.c_str(),
-	       mobname.c_str());
+	if (multiplayer)
+		PrintFmt(PRINT_HIGH, "{} is a cheater: summon {}\n",
+		         player->userinfo.netname,
+		 sum);
+
+	return entity;
 }
 
 void CHEAT_GiveTo(player_t* player, const char* name)

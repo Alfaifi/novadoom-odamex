@@ -28,7 +28,7 @@
 
 #include "c_dispatch.h"
 
-typedef std::vector<std::pair<std::string, mobjtype_t>> MobjMap;
+typedef OHashTable<std::string, mobjtype_t> MobjMap;
 
 /**
  * "Class" of mobj, used to determine how to "give" them to players.
@@ -47,7 +47,7 @@ static MobjMap g_MonsterMap;
 
 static void MapMobj(const mobjtype_t type, const std::string& name, const uint32_t flags)
 {
-	::g_MonsterMap.push_back(std::pair<std::string, mobjtype_t>(name, type));
+	::g_MonsterMap.insert(MobjMap::value_type(name, type));
 }
 
 static void InitMap()
@@ -301,10 +301,6 @@ static void InitMap()
 	MapMobj(MT_EXTRA97, "Deh_Actor_247", MC_NONE);
 	MapMobj(MT_EXTRA98, "Deh_Actor_248", MC_NONE);
 	MapMobj(MT_EXTRA99, "Deh_Actor_249", MC_NONE);
-
-	std::sort(
-	    ::g_MonsterMap.begin(), ::g_MonsterMap.end(),
-	    [](const auto& left, const auto& right) { return left.second < right.second; });
 }
 
 /**
@@ -317,9 +313,7 @@ mobjtype_t P_NameToMobj(const std::string& name)
 		InitMap();
 	}
 
-	MobjMap::iterator it = std::find_if(
-	    ::g_MonsterMap.begin(), ::g_MonsterMap.end(),
-	    [name](const std::pair<std::string, mobjtype_t>& p) { return p.first == name; });
+	MobjMap::iterator it = ::g_MonsterMap.find(name);
 
 	if (it == ::g_MonsterMap.end())
 	{
@@ -409,6 +403,28 @@ weapontype_t P_NameToWeapon(const std::string& name)
 	return wp_none;
 }
 
+typedef std::pair<std::string, mobjtype_t> MobjPair;
+
+// Hashtables don't work with std::sort
+// This is a half measure to sort it without
+// Messing with the internals of hashtable.
+std::vector<MobjPair> OrderedMobjMap()
+{
+	std::vector<MobjPair> orderedVector;
+
+	for (MobjMap::iterator it = ::g_MonsterMap.begin(); it != ::g_MonsterMap.end(); ++it)
+	{
+		orderedVector.push_back(MobjPair(it->first, it->second));
+	}
+
+	std::sort(orderedVector.begin(), orderedVector.end(),
+			[](const auto& left, const auto& right) {
+		    return left.second < right.second;
+			});
+
+	return orderedVector;
+}
+
 BEGIN_COMMAND(dumpactors)
 {
 	if (::g_MonsterMap.empty())
@@ -416,11 +432,14 @@ BEGIN_COMMAND(dumpactors)
 		InitMap();
 	}
 
-	Printf(PRINT_HIGH, "Total amount of actors: \n", ::g_MonsterMap.size());
+	std::vector<MobjPair> infomap = OrderedMobjMap();
 
-	for (MobjMap::iterator it = ::g_MonsterMap.begin(); it != ::g_MonsterMap.end(); ++it)
+	PrintFmt(PRINT_HIGH, "Total amount of actors: {}\n", infomap.size());
+
+	for (std::vector<MobjPair>::iterator it = infomap.begin(); it != infomap.end();
+	     ++it)
 	{
-		Printf(PRINT_HIGH, "%d - %s\n", it->second, it->first.c_str());
+		PrintFmt(PRINT_HIGH, "{}\n", it->first);
 	}
 }
 END_COMMAND(dumpactors)
