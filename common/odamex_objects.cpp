@@ -2266,6 +2266,7 @@ size_t odamobjinfo_size()
 
 void D_Initialize_Odamex_Objects()
 {
+	// [CMB] TODO: Z Memory functions for states, mobjinfo, and sprnames
 	size_t size = odastates_size();
 	// states
 	for (int i = 0; i < size; i++)
