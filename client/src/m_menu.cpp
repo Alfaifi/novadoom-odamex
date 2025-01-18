@@ -1677,10 +1677,7 @@ static void M_EditPlayerName (int choice)
 
 static void M_PlayerNameChanged (int choice)
 {
-	char command[SAVESTRINGSIZE+8+2];
-
-	snprintf (command, 34, "cl_name \"%s\"", savegamestrings[0]);
-	AddCommandString (command);
+	AddCommandString (fmt::format("cl_name \"{}\"", savegamestrings[0]));
 }
 /*
 static void M_PlayerTeamChanged (int choice)
