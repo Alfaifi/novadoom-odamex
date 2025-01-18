@@ -127,17 +127,13 @@ std::string M_GetDownloadDir()
 #if defined(_XBOX)
 	return "T:" PATHSEP;
 #else
-	// Does the user folder exist?
-	std::string downloadPath = M_GetUserDir() + PATHSEP "downloads";
+	// Does the download folder exist?
+	std::string downloadPath = M_GetWriteDir() + PATHSEP "downloads";
 	int ok = SHCreateDirectoryEx(NULL, downloadPath.c_str(), NULL);
 	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
-	{
 		return M_CleanPath(downloadPath);
-	}
 	else
-	{
 		I_FatalError("Failed to create %s directory.\n", downloadPath.c_str());
-	}
 #endif
 }
 
@@ -146,32 +142,13 @@ std::string M_GetScreenshotDir()
 #if defined(_XBOX)
 	return "T:" PATHSEP;
 #else
-	// Has Odamex been installed?
-	std::string installed = M_GetBinaryDir() + PATHSEP "odamex-installed.txt";
-	std::string screenshotPath;
-	if (M_FileExists(installed))
-	{
-		screenshotPath = M_GetUserDir();
-	}
-	else
-	{
-		// Our path is relative to the binary directory.
-		// [AM] Don't change this back to CWD because this means your write dir
-		//      depends on where you launch it from, which is not great.
-		screenshotPath = M_GetBinaryDir();
-	}
-	screenshotPath += PATHSEP "screenshots";
 	// Does the screenshot folder exist?
+	std::string screenshotPath = M_GetWriteDir() + PATHSEP "screenshots";
 	int ok = SHCreateDirectoryEx(NULL, screenshotPath.c_str(), NULL);
 	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
-	{
 		return M_CleanPath(screenshotPath);
-	}
 	else
-	{
 		I_FatalError("Failed to create %s directory.\n", screenshotPath.c_str());
-	}
-	return M_CleanPath(M_GetBinaryDir());
 #endif
 }
 
@@ -180,32 +157,13 @@ std::string M_GetNetDemoDir()
 #if defined(_XBOX)
 	return "T:" PATHSEP;
 #else
-	// Has Odamex been installed?
-	std::string installed = M_GetBinaryDir() + PATHSEP "odamex-installed.txt";
-	std::string netdemoPath;
-	if (M_FileExists(installed))
-	{
-		netdemoPath = M_GetUserDir();
-	}
-	else
-	{
-		// Our path is relative to the binary directory.
-		// [AM] Don't change this back to CWD because this means your write dir
-		//      depends on where you launch it from, which is not great.
-		netdemoPath = M_GetBinaryDir();
-	}
-	netdemoPath += PATHSEP "netdemos";
-	// Does the screenshot folder exist?
-	int ok = SHCreateDirectoryEx(NULL, netdemoPath.c_str(), NULL);
+	// Does the netdemo folder exist?
+	std::string netDemoPath = M_GetWriteDir() + PATHSEP "netdemos";
+	int ok = SHCreateDirectoryEx(NULL, netDemoPath.c_str(), NULL);
 	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
-	{
-		return M_CleanPath(netdemoPath);
-	}
+		return M_CleanPath(netDemoPath);
 	else
-	{
-		I_FatalError("Failed to create %s directory.\n", netdemoPath.c_str());
-	}
-	return M_CleanPath(M_GetBinaryDir());
+		I_FatalError("Failed to create %s directory.\n", netDemoPath.c_str());
 #endif
 }
 

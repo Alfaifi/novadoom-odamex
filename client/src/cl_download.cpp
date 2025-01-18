@@ -377,7 +377,7 @@ static void TickDownload()
 		{
 			// Ensure no path-traversal shenanegins are going on.
 			dest = *it + PATHSEP + ::dlstate.filename;
-			M_CleanPath(dest);
+			dest = M_CleanPath(dest);
 			if (dest.find(*it) != 0)
 			{
 				// Something about the filename is trying to escape the
