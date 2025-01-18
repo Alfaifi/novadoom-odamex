@@ -175,6 +175,40 @@ std::string M_GetScreenshotDir()
 #endif
 }
 
+std::string M_GetNetDemoDir()
+{
+#if defined(_XBOX)
+	return "T:" PATHSEP;
+#else
+	// Has Odamex been installed?
+	std::string installed = M_GetBinaryDir() + PATHSEP "odamex-installed.txt";
+	std::string netdemoPath;
+	if (M_FileExists(installed))
+	{
+		netdemoPath = M_GetUserDir();
+	}
+	else
+	{
+		// Our path is relative to the binary directory.
+		// [AM] Don't change this back to CWD because this means your write dir
+		//      depends on where you launch it from, which is not great.
+		netdemoPath = M_GetBinaryDir();
+	}
+	netdemoPath += PATHSEP "netdemos";
+	// Does the screenshot folder exist?
+	int ok = SHCreateDirectoryEx(NULL, netdemoPath.c_str(), NULL);
+	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
+	{
+		return M_CleanPath(netdemoPath);
+	}
+	else
+	{
+		I_FatalError("Failed to create %s directory.\n", netdemoPath.c_str());
+	}
+	return M_CleanPath(M_GetBinaryDir());
+#endif
+}
+
 std::string M_GetUserFileName(const std::string& file)
 {
 #if defined(_XBOX)
@@ -226,6 +260,28 @@ std::string M_GetScreenshotFileName(const std::string& file)
 #else
 	// Direct our path to our screenshot directory.
 	std::string path = M_GetScreenshotDir();
+	if (!M_IsPathSep(*(path.end() - 1)))
+	{
+		path += PATHSEP;
+	}
+	path += file;
+
+	return path;
+#endif
+}
+
+std::string M_GetNetDemoFileName(const std::string& file)
+{
+#if defined(_XBOX)
+	std::string path = "T:";
+
+	path += PATHSEP;
+	path += file;
+
+	return M_CleanPath(path);
+#else
+	// Direct our path to our netdemo directory.
+	std::string path = M_GetNetDemoDir();
 	if (!M_IsPathSep(*(path.end() - 1)))
 	{
 		path += PATHSEP;

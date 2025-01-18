@@ -126,6 +126,23 @@ std::string M_GetUserFileName(const std::string& file);
 std::string M_GetScreenshotFileName(const std::string& file);
 
 /**
+ * @brief Resolve a file name into a user netdemo directory.
+ *
+ * @detail This function is OS-specific.
+ *
+ *         The file is resolved relative to a platform and
+ *         user specific directory in their home directory.
+ *
+ *         The resolution process will create a user home directory and netdemo subdirectory
+ *         if it doesn't exist, but otherwise this process is blind and does not
+ *         consider the existence of the file in question.
+ *
+ * @param file Filename to resolve.
+ * @return An absolute path pointing to the resolved file.
+ */
+std::string M_GetNetDemoFileName(const std::string& file);
+
+/**
  * @brief Attempt to find a file in a directory - case insensitive.
  *
  * @detail This function is OS-specific.
