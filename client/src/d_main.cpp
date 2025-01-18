@@ -84,6 +84,7 @@
 #include "g_horde.h"
 #include "w_ident.h"
 #include "gui_boot.h"
+#include "g_episode.h"
 
 #ifdef GEKKO
 #include "i_wii.h"
@@ -95,11 +96,11 @@
 
 extern size_t got_heapsize;
 
-void D_CheckNetGame (void);
-void D_ProcessEvents (void);
-void D_DoAdvanceDemo (void);
+void D_CheckNetGame();
+void D_ProcessEvents();
+void D_DoAdvanceDemo();
 
-void D_DoomLoop (void);
+void D_DoomLoop();
 
 extern int testingmode;
 extern BOOL gameisdead;
@@ -111,7 +112,7 @@ BOOL devparm;				// started game with -devparm
 const char *D_DrawIcon;			// [RH] Patch name of icon to draw on next refresh
 static bool wiping_screen = false;
 
-char startmap[8];
+OLumpName startmap;
 BOOL autostart;
 BOOL advancedemo;
 event_t events[MAXEVENTS];
@@ -132,6 +133,7 @@ EXTERN_CVAR (sv_allowexit)
 EXTERN_CVAR (sv_nomonsters)
 EXTERN_CVAR (sv_monstersrespawn)
 EXTERN_CVAR (sv_fastmonsters)
+EXTERN_CVAR (g_thingfilter)
 EXTERN_CVAR (sv_freelook)
 EXTERN_CVAR (sv_allowjump)
 EXTERN_CVAR (sv_allowredscreen)
@@ -181,7 +183,7 @@ void D_ProcessEvents (void)
 	// [RH] If testing mode, do not accept input until test is over
 	if (testingmode)
 	{
-		if (testingmode <= I_MSTime() * TICRATE / 1000)
+		if (static_cast <dtime_t>(testingmode) <= I_MSTime() * TICRATE / 1000)
 			M_RestoreVideoMode();
 		else
 			M_ModeFlashTestText();
@@ -271,6 +273,7 @@ void D_Display()
 		case GS_CONNECTING:
         case GS_CONNECTED:
 			C_DrawConsole();
+			C_DisplayTicker();
 			M_Drawer();
 			I_FinishUpdate();
 			return;
@@ -321,24 +324,24 @@ void D_Display()
 	// draw pause pic
 	if (paused && !menuactive)
 	{
-		patch_t *pause = W_CachePatch ("M_PAUSE");
-		int y;
+		const patch_t* pause = W_CachePatch(gameinfo.pauseSign.c_str());
 
-		y = AM_ClassicAutomapVisible() ? 4 : viewwindowy + 4;
+		// todo: properly center "PAUSED" graphic for Heretic
+		const int y = AM_ClassicAutomapVisible() ? 4 : viewwindowy + 4;
 		screen->DrawPatchCleanNoMove (pause, (I_GetSurfaceWidth()-(pause->width())*CleanXfac)/2, y);
 	}
 
 	// [RH] Draw icon, if any
 	if (D_DrawIcon)
 	{
-		int lump = W_CheckNumForName (D_DrawIcon);
+		const int lump = W_CheckNumForName(D_DrawIcon);
 
 		D_DrawIcon = NULL;
 		if (lump >= 0)
 		{
-			patch_t *p = W_CachePatch (lump);
+			const patch_t *p = W_CachePatch(lump);
 
-			screen->DrawPatchIndirect (p, 160-p->width()/2, 100-p->height()/2);
+			screen->DrawPatchIndirect(p, 160-p->width()/2, 100-p->height()/2);
 		}
 		NoWipe = 10;
 	}
@@ -347,6 +350,7 @@ void D_Display()
 		Wipe_Drawer();
 
 	C_DrawConsole();	// draw console
+	C_DisplayTicker(); // Display console tic
 	M_Drawer();			// menu is drawn even on top of everything
 	I_FinishUpdate();	// page flip or blit buffer
 
@@ -356,9 +360,9 @@ void D_Display()
 //
 //  D_DoomLoop
 //
-void D_DoomLoop (void)
+void D_DoomLoop()
 {
-	while (1)
+	while (true)
 	{
 		try
 		{
@@ -388,10 +392,10 @@ void D_DoomLoop (void)
 // D_PageTicker
 // Handles timing for warped projection
 //
-void D_PageTicker (void)
+void D_PageTicker()
 {
     if (--pagetic < 0)
-		D_AdvanceDemo ();
+		D_AdvanceDemo();
 }
 
 //
@@ -470,10 +474,7 @@ void D_DoAdvanceDemo (void)
     switch (demosequence)
     {
         case 0:
-            if (gameinfo.flags & GI_MAPxx)
-                pagetic = TICRATE * 11;
-            else
-                pagetic = 170;
+            pagetic = gameinfo.titleTime * TICRATE;
 
             gamestate = GS_DEMOSCREEN;
             pagename = gameinfo.titlePage.c_str();
@@ -488,9 +489,9 @@ void D_DoAdvanceDemo (void)
 
             break;
         case 2:
-            pagetic = 200;
+            pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.creditPage1;
+            pagename = gameinfo.creditPages[0].c_str();
 
             break;
         case 3:
@@ -502,10 +503,8 @@ void D_DoAdvanceDemo (void)
 
             if ((gameinfo.flags & GI_MAPxx) || (gameinfo.flags & GI_MENUHACK_RETAIL))
             {
-				if (gameinfo.flags & GI_MAPxx)
-					pagetic = TICRATE * 11;
-				else
-					pagetic = 170;
+                pagetic = gameinfo.titleTime * TICRATE;
+
                 pagename = gameinfo.titlePage.c_str();
                 currentmusic = gameinfo.titleMusic.c_str();
 
@@ -513,11 +512,8 @@ void D_DoAdvanceDemo (void)
             }
             else
             {
-                pagetic = 200;
-				if (gamemode == retail_chex)	// [ML] Chex mode just cycles this screen
-					pagename = gameinfo.creditPage1;
-				else
-					pagename = gameinfo.creditPage2;
+                pagetic = gameinfo.pageTime * TICRATE;
+                pagename = gameinfo.creditPages[1].c_str();
             }
 
             break;
@@ -526,9 +522,9 @@ void D_DoAdvanceDemo (void)
 
             break;
         case 6:
-            pagetic = 200;
+            pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.creditPage2;
+            pagename = gameinfo.creditPages[1].c_str();
 
             break;
         case 7:
@@ -577,7 +573,7 @@ void STACK_ARGS D_Close()
 
 	D_ClearTaskSchedulers();
 
-	page_height, page_width = 0;
+	page_height = 0, page_width = 0;
 }
 
 //
@@ -724,6 +720,8 @@ void STACK_ARGS D_Shutdown()
 	C_ShutdownConsoleBackground();
 
 	R_Shutdown();
+
+	WI_Shutdown();
 
 //	Res_ShutdownTextureManager();
 
@@ -911,8 +909,12 @@ void D_DoomMain()
 	// Pistol start
 	g_resetinvonexit = Args.CheckParm("-pistolstart");
 
+	// Multiplayer things
+	if (Args.CheckParm("-coop-things"))
+		g_thingfilter = -1;
+
 	// get skill / episode / map from parms
-	strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+	startmap = EpisodeMaps[0];
 
 	const char* val = Args.CheckValue("-skill");
 	if (val)
@@ -934,7 +936,7 @@ void D_DoomMain()
 			map = Args.GetArg(p+2)[0]-'0';
 		}
 
-		strncpy(startmap, CalcMapName(ep, map), 8);
+		startmap = CalcMapName(ep, map);
 		autostart = true;
 	}
 
@@ -942,7 +944,7 @@ void D_DoomMain()
 	p = Args.CheckParm("+map");
 	if (p && p < Args.NumArgs()-1)
 	{
-		strncpy(startmap, Args.GetArg(p+1), 8);
+		startmap = Args.GetArg(p+1);
 		((char *)Args.GetArg(p))[0] = '-';
 		autostart = true;
 	}

@@ -54,6 +54,13 @@ ClientReplay::~ClientReplay()
 	ClientReplay::reset();
 }
 
+ClientReplay::ClientReplay()
+{
+	replayed = false;
+	replayDoneCounter = TICRATE * 7;
+	firstReadyTic = 0;
+}
+
 //
 // ClientReplay::reset
 //
@@ -95,7 +102,7 @@ bool ClientReplay::wasReplayed()
 //
 void ClientReplay::recordReplayItem(int tic, const uint32_t netId)
 {
-	itemReplayStack.push_back(std::make_pair(tic, netId));
+	itemReplayStack.emplace_back(tic, netId);
 }
 
 //
@@ -124,7 +131,7 @@ void ClientReplay::removeReplayItem(const std::pair<int, uint32_t> replayItem)
 // ClientReplay::itemReplayThink
 //
 // Runs logic for the current tic
-// 
+//
 void ClientReplay::itemReplay()
 {
 	if (itemReplayStack.empty() || !consoleplayer().mo || !enabled() ||
@@ -153,7 +160,7 @@ void ClientReplay::itemReplay()
 	std::vector<std::pair<int, uint32_t> >::iterator it = itemReplayStack.begin();
 	while (it != itemReplayStack.end())
 	{
-		if (it->first + MAX_REPLAY_TIC_LENGTH < ::last_svgametic)
+		if (it->first + MAX_REPLAY_TIC_LENGTH < static_cast<uint32_t>(::last_svgametic))
 		{
 			it = itemReplayStack.erase(it);
 			continue;

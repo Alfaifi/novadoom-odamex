@@ -155,7 +155,7 @@ static int ListActionCommands (void)
 
 unsigned int MakeKey (const char *s)
 {
-	register unsigned int v = 0;
+	unsigned int v = 0;
 
 	if (*s)
 		v = tolower(*s++);
@@ -971,17 +971,17 @@ void C_ExecCmdLineParams (bool onlyset, bool onlylogfile)
 	if (onlylogfile && !didlogfile) AddCommandString("version");
 }
 
-BEGIN_COMMAND (dumpactors)
+BEGIN_COMMAND (actorlist)
 {
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
 	Printf (PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %" PRIdSIZE " tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
 	}
 }
-END_COMMAND (dumpactors)
+END_COMMAND(actorlist)
 
 BEGIN_COMMAND(logfile)
 {

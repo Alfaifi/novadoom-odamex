@@ -39,6 +39,8 @@
 #include "i_system.h"
 #include "cmdlib.h"
 
+#include "fmt/ranges.h"
+
 #ifdef GEKKO
 #include "i_wii.h"
 #endif
@@ -327,15 +329,7 @@ std::vector<std::string> VectorArgs(size_t argc, char **argv) {
 
 // [AM] Return a joined string based on a vector of strings
 std::string JoinStrings(const std::vector<std::string> &pieces, const std::string &glue) {
-	std::ostringstream result;
-	for (std::vector<std::string>::const_iterator it = pieces.begin();
-		 it != pieces.end();++it) {
-		result << *it;
-		if (it != (pieces.end() - 1)) {
-			result << glue;
-		}
-	}
-	return result.str();
+	return fmt::format("{}", fmt::join(pieces, glue));
 }
 
 // Tokenize a string
@@ -355,17 +349,6 @@ StringTokens TokenizeString(const std::string& str, const std::string& delim) {
 	}
 
 	return tokens;
-}
-
-//
-// A quick and dirty std::string formatting that uses snprintf under the covers.
-//
-FORMAT_PRINTF(2, 3) void STACK_ARGS StrFormat(std::string& out, const char* fmt, ...)
-{
-	va_list va;
-	va_start(va, fmt);
-	VStrFormat(out, fmt, va);
-	va_end(va);
 }
 
 //
@@ -403,8 +386,8 @@ void STACK_ARGS VStrFormat(std::string& out, const char* fmt, va_list va)
 }
 
 /**
- * @brief Format passed number of bytes with a byte multiple suffix. 
- * 
+ * @brief Format passed number of bytes with a byte multiple suffix.
+ *
  * @param out Output string buffer.
  * @param bytes Number of bytes to format.
  */
@@ -426,9 +409,9 @@ void StrFormatBytes(std::string& out, size_t bytes)
 	}
 
 	if (magnitude)
-		StrFormat(out, "%.2f %s", checkbytes, BYTE_MAGS[magnitude]);
+		out = fmt::sprintf("%.2f %s", checkbytes, BYTE_MAGS[magnitude]);
 	else
-		StrFormat(out, "%.0f %s", checkbytes, BYTE_MAGS[magnitude]);
+		out = fmt::sprintf("%.0f %s", checkbytes, BYTE_MAGS[magnitude]);
 }
 
 // [AM] Format a tm struct as an ISO8601-compliant extended format string.
@@ -563,7 +546,7 @@ bool StrToTime(std::string str, time_t &tim) {
 
 /**
  * @brief Turn the given number of tics into a time.
- * 
+ *
  * @param str String buffer to write into.
  * @param time Number of tics to turn into a time.
  * @param ceil Round up to the nearest second.
@@ -614,14 +597,14 @@ static int _isspace(int c)
 // Trim whitespace from the start of a string
 std::string &TrimStringStart(std::string &s)
 {
-	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(_isspace))));
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not_fn([](int c){ return _isspace(c); })));
 	return s;
 }
 
 // Trim whitespace from the end of a string
 std::string &TrimStringEnd(std::string &s)
 {
-	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(_isspace))).base(), s.end());
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not_fn([](int c){ return _isspace(c); })).base(), s.end());
 	return s;
 }
 
@@ -791,14 +774,14 @@ double Remap(const double value, const double low1, const double high1, const do
 uint32_t Log2(uint32_t n)
 {
 	#define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
-	static const signed char LogTable256[256] = 
+	static constexpr signed char LogTable256[256] =
 	{
 		-1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
 		LT(4), LT(5), LT(5), LT(6), LT(6), LT(6), LT(6),
 		LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)
 	};
 
-	register unsigned int t, tt;		// temporaries
+	unsigned int t, tt;		// temporaries
 
 	if ((tt = (n >> 16)))
 		return (t = (tt >> 8)) ? 24 + LogTable256[t] : 16 + LogTable256[tt];

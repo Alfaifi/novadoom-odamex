@@ -143,13 +143,13 @@ typedef struct menuitem_s {
 } menuitem_t;
 
 typedef struct menu_s {
-	char			title[9];
+	OLumpName		title;
 	int				lastOn;
 	int				numitems;
 	int				indent;
 	menuitem_t	   *items;
 	int				scrolltop;
-	int				scrollpos;	
+	int				scrollpos;
 	void			(*refreshfunc)();	// Callback func for M_OptResponder
 } menu_t;
 
@@ -164,6 +164,7 @@ typedef struct
 	short		status;
 
 	char		name[10];
+	char		textname[32];
 
 	// choice = menu item #.
 	// if status = 2,

@@ -67,7 +67,7 @@ static void HTMLHeader(std::string& out, const char* title)
 	    "</style>"
 	    "</head>"
 	    "<body>";
-	StrFormat(out, HEADER, title);
+	out = fmt::sprintf(HEADER, title);
 }
 
 /**
@@ -100,6 +100,10 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 	case CVARTYPE_STRING:
 		info.push_back("String");
 		break;
+	case CVARTYPE_NONE:
+	case CVARTYPE_MAX:
+		return;
+		break;
 	}
 
 	// Default and range
@@ -115,18 +119,18 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 	case CVARTYPE_INT: {
 		std::string buffer;
 		int val = atoi(cvar.getDefault().c_str());
-		StrFormat(buffer, "Default: %d", val);
+		buffer = fmt::sprintf("Default: %d", val);
 		info.push_back(buffer);
 
 		if (cvar.getMinValue() != -FLT_MAX)
 		{
-			StrFormat(buffer, "Min: %d", static_cast<int>(cvar.getMinValue()));
+			buffer = fmt::sprintf("Min: %d", static_cast<int>(cvar.getMinValue()));
 			info.push_back(buffer);
 		}
 
 		if (cvar.getMaxValue() != FLT_MAX)
 		{
-			StrFormat(buffer, "Max: %d", static_cast<int>(cvar.getMaxValue()));
+			buffer = fmt::sprintf("Max: %d", static_cast<int>(cvar.getMaxValue()));
 			info.push_back(buffer);
 		}
 
@@ -135,18 +139,18 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 	case CVARTYPE_FLOAT: {
 		std::string buffer;
 		float val = atof(cvar.getDefault().c_str());
-		StrFormat(buffer, "Default: %f", val);
+		buffer = fmt::sprintf("Default: %f", val);
 		info.push_back(buffer);
 
 		if (cvar.getMinValue() != -FLT_MAX)
 		{
-			StrFormat(buffer, "Min: %f", cvar.getMinValue());
+			buffer = fmt::sprintf("Min: %f", cvar.getMinValue());
 			info.push_back(buffer);
 		}
 
 		if (cvar.getMaxValue() != FLT_MAX)
 		{
-			StrFormat(buffer, "Max: %f", cvar.getMaxValue());
+			buffer = fmt::sprintf("Max: %f", cvar.getMaxValue());
 			info.push_back(buffer);
 		}
 
@@ -156,9 +160,13 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 		if (!cvar.getDefault().empty())
 		{
 			std::string buf;
-			StrFormat(buf, "Default: \"%s\"", cvar.getDefault().c_str());
+			buf = fmt::sprintf("Default: \"%s\"", cvar.getDefault().c_str());
 			info.push_back(buf);
 		}
+		break;
+	case CVARTYPE_NONE:
+	case CVARTYPE_MAX:
+		return;
 		break;
 	}
 
@@ -186,7 +194,7 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 	                  "<p><small><em>%s</em></small></p>"
 	                  "<p>%s</p>"
 	                  "</dd>";
-	StrFormat(out, ROW, cvar.name(), flagstr.c_str(), cvar.helptext());
+	out = fmt::sprintf(ROW, cvar.name(), flagstr.c_str(), cvar.helptext());
 }
 
 /**
@@ -248,7 +256,7 @@ BEGIN_COMMAND(cvardoc)
 
 	// First the header.
 	std::string title;
-	StrFormat(title, "%s %s Console Variables", CS_STRING, DOTVERSIONSTR);
+	title = fmt::sprintf("%s %s Console Variables", CS_STRING, DOTVERSIONSTR);
 	HTMLHeader(buffer, title.c_str());
 	fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
 
@@ -264,7 +272,7 @@ BEGIN_COMMAND(cvardoc)
 	    "number with a decimal point in it, like 3.14."
 	    "</p>";
 
-	StrFormat(buffer, PREAMBLE, title.c_str(), NiceVersion());
+	buffer = fmt::sprintf(PREAMBLE, title.c_str(), NiceVersion());
 	fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
 
 	// Initial tag for cvars.

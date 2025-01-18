@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// $Id: 
+// $Id:
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 2006-2020 by The Odamex Team.
@@ -18,7 +18,7 @@
 //
 // DESCRIPTION:
 //   Episode data for defining new episodes.
-// 
+//
 //-----------------------------------------------------------------------------
 
 #pragma once
@@ -27,15 +27,16 @@
 
 struct EpisodeInfo
 {
-	std::string name;
+	std::string pic_name;
+	std::string menu_name;
 	char key;
 	bool fulltext;
 	bool noskillmenu;
 
-	EpisodeInfo() : name(""), key('\0'), fulltext(false), noskillmenu(false) {}
+	EpisodeInfo() : pic_name(""), menu_name(""), key('\0'), fulltext(false), noskillmenu(false) {}
 };
 
-extern OLumpName EpisodeMaps[MAX_EPISODES];
-extern EpisodeInfo EpisodeInfos[MAX_EPISODES];
-extern byte episodenum;
-extern bool episodes_modified; // Used by UMAPINFO only
+inline OLumpName EpisodeMaps[MAX_EPISODES];
+inline EpisodeInfo EpisodeInfos[MAX_EPISODES];
+inline byte episodenum;
+inline bool episodes_modified; // Used by UMAPINFO only

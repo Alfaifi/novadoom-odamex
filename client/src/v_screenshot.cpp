@@ -147,8 +147,7 @@ static void SetPNGComments(PNGStrings& out, png_struct* png_ptr, png_info* info_
 	return;
 #endif
 
-	std::string strbuf;
-	const int PNG_TEXT_LINES = 6;
+	constexpr int PNG_TEXT_LINES = 6;
 	png_text pngtext[PNG_TEXT_LINES];
 	int text_line = 0;
 
@@ -183,8 +182,7 @@ static void SetPNGComments(PNGStrings& out, png_struct* png_ptr, png_info* info_
 	                              : (png_charp) "32bpp";
 	text_line++;
 
-	StrFormat(strbuf, "%#.3f", gammalevel.value());
-	out.at(text_line) = strbuf;
+	out.at(text_line) = fmt::sprintf("%#.3f", gammalevel.value());
 	pngtext[text_line].key = (png_charp) "In-game Gamma Correction Level";
 	pngtext[text_line].text = (png_charp)out.at(text_line).c_str();
 	text_line++;

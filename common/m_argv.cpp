@@ -144,6 +144,17 @@ const std::vector<std::string> DArgs::GetArgList (size_t start) const
 	return out;
 }
 
+std::vector<const char*> DArgs::GetArgv() const
+{
+	std::vector<const char*> rvo;
+	rvo.reserve(args.size());
+	for (auto& arg : args)
+	{
+		rvo.push_back(arg.c_str());
+	}
+	return rvo;
+}
+
 size_t DArgs::NumArgs () const
 {
 	return args.size();
@@ -394,7 +405,7 @@ void M_FindResponseFile (void)
 			delete[] file;
 		
 			// DISPLAY ARGS
-			Printf("%" PRIuSIZE " command-line args:\n", Args.NumArgs());
+			Printf("%zu command-line args:\n", Args.NumArgs());
 			for (size_t k = 1; k < Args.NumArgs (); k++)
 				Printf (PRINT_HIGH,"%s\n", Args.GetArg (k));
 
@@ -486,7 +497,7 @@ static long ParseCommandLine (const char *args, int *argc, char **argv)
 	{
 		*argc = count;
 	}
-	return (long)(buffplace - (char *)0);
+	return (long)reinterpret_cast<uintptr_t>(buffplace);
 }
 
 

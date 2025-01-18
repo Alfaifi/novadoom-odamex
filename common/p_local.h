@@ -47,6 +47,7 @@
 
 // player radius for movement checking
 #define PLAYERRADIUS	16*FRACUNIT
+#define PLAYERRADIUS64	16*FRACUNIT64
 
 // MAXRADIUS is for precalculated sector block boxes
 // the spider demon is larger,
@@ -96,7 +97,8 @@ weaponstate_t P_GetWeaponState(player_t* player);
 //
 void P_FallingDamage (AActor *ent);
 void P_PlayerThink (player_t *player);
-bool P_AreTeammates(player_t &a, player_t &b);
+void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS]);
+bool P_AreTeammates(player_t& a, player_t& b);
 bool P_CanSpy(player_t &viewer, player_t &other, bool demo = false);
 
 //
@@ -120,7 +122,7 @@ bool	P_SetMobjState (AActor* mobj, statenum_t state, bool cl_update = false);
 
 void	P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage);
 AActor* P_SpawnMissile (AActor* source, AActor* dest, mobjtype_t type);
-void	P_SpawnPlayerMissile (AActor* source, mobjtype_t type);
+AActor* P_SpawnPlayerMissile(AActor* source, mobjtype_t type);
 void P_SpawnMBF21PlayerMissile(AActor* source, mobjtype_t type, fixed_t angle,
                                fixed_t pitch, fixed_t xyofs, fixed_t zofs);
 bool P_CheckSwitchWeapon(player_t* player, weapontype_t weapon);
@@ -298,6 +300,7 @@ void	P_LineAttack (AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, i
 // [RH] Position the chasecam
 void	P_AimCamera (AActor *t1);
 extern	fixed_t CameraX, CameraY, CameraZ;
+extern	sector_t* CameraSector;
 
 // [RH] Means of death
 void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance, bool hurtSelf, int mod);
@@ -379,8 +382,8 @@ typedef enum
 	PODOOR_NONE,
 	PODOOR_SLIDE,
 	PODOOR_SWING,
-	
-	NUMTYPES	
+
+	NUMTYPES
 } podoortype_t;
 
 inline FArchive &operator<< (FArchive &arc, podoortype_t type)
@@ -411,7 +414,7 @@ class DRotatePoly : public DPolyAction
 	DECLARE_SERIAL (DRotatePoly, DPolyAction)
 public:
 	DRotatePoly (int polyNum);
-	void RunThink ();
+	void RunThink () override;
 protected:
 	friend BOOL EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, BOOL overRide);
 private:
@@ -423,7 +426,7 @@ class DMovePoly : public DPolyAction
 	DECLARE_SERIAL (DMovePoly, DPolyAction)
 public:
 	DMovePoly (int polyNum);
-	void RunThink ();
+	void RunThink () override;
 protected:
 	DMovePoly ();
 	int m_Angle;
@@ -438,7 +441,7 @@ class DPolyDoor : public DMovePoly
 	DECLARE_SERIAL (DPolyDoor, DMovePoly)
 public:
 	DPolyDoor (int polyNum, podoortype_t type);
-	void RunThink ();
+	void RunThink () override;
 protected:
 	int m_Direction;
 	int m_TotalDist;
@@ -491,6 +494,7 @@ BOOL PO_Busy (int polyobj);
 bool P_CheckFov(AActor* t1, AActor* t2, angle_t fov);
 bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest);
 bool P_IsTeamMate(AActor* actor, AActor* player);
+bool P_IsVoodooDoll(const AActor* mo);
 
 
 //

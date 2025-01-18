@@ -160,6 +160,11 @@ StringTokens hordeDefine_t::weaponStrings(player_t* player) const
 		case wp_bfg:
 			rvo.push_back("7");
 			break;
+		case wp_fist:
+		case wp_pistol:
+		case wp_nochange:
+		case NUMWEAPONS:
+			break;
 		}
 	}
 
@@ -221,7 +226,6 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 	for (size_t i = 0; i < define.monsters.size(); i++)
 	{
 		const hordeDefine_t::monster_t& waveMon = define.monsters.at(i);
-		const mobjinfo_t& info = ::mobjinfo[waveMon.mobj];
 
 		// Boss spawns have to spawn boss things.
 		if (wantBoss && waveMon.monster == hordeDefine_t::RM_NORMAL)
@@ -335,8 +339,7 @@ static void PrintDefines(const std::vector<hordeDefine_t>::const_iterator& begin
 	for (; it != end; ++it)
 	{
 		const ptrdiff_t idx = it - ::WAVE_DEFINES.begin();
-		Printf("%" PRIdSIZE ": %s (Group HP: %d)\n", idx, it->name.c_str(),
-		       it->maxGroupHealth);
+		Printf("%zd: %s (Group HP: %d)\n", idx, it->name.c_str(), it->maxGroupHealth);
 	}
 }
 
@@ -377,7 +380,7 @@ BEGIN_COMMAND(hordedefine)
 						const size_t start = static_cast<size_t>(section_offset);
 						const size_t end =
 						    MIN<size_t>(section_offset + section_choice, section_limit);
-						Printf("[Wave %d/%d - Start:%" PRIuSIZE " End:%" PRIuSIZE "]\n",
+						Printf("[Wave %d/%d - Start:%" "zu" " End:%" "zu" "]\n",
 						       current, total, start, end);
 						PrintDefines(::WAVE_DEFINES.begin() + start,
 						             ::WAVE_DEFINES.begin() + end + 1);

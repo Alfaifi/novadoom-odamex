@@ -75,7 +75,7 @@
 
 #include "server.pb.h"
 
-extern void G_DeferedInitNew (const char *mapname);
+extern void G_DeferedInitNew (const OLumpName& mapname);
 extern level_locals_t level;
 
 // Unnatural Level Progression.  True if we've used 'map' or another command
@@ -103,7 +103,6 @@ bool keysfound[NUMCARDS];		// Ch0wW : Found keys
 EXTERN_CVAR(sv_motd)
 EXTERN_CVAR(sv_hostname)
 EXTERN_CVAR(sv_email)
-EXTERN_CVAR(sv_website)
 EXTERN_CVAR(sv_waddownload)
 EXTERN_CVAR(sv_maxrate)
 EXTERN_CVAR(sv_emptyreset)
@@ -268,23 +267,10 @@ CVAR_FUNC_IMPL (rcon_password) // Remote console password.
 		Printf(PRINT_HIGH, "RCON password set.");
 }
 
-
-EXTERN_CVAR(sv_waddownloadcap)
 CVAR_FUNC_IMPL(sv_maxrate)
 {
-	// sv_waddownloadcap can not be larger than sv_maxrate
-	if (sv_waddownloadcap > var)
-		sv_waddownloadcap.Set(var);
-
 	for (Players::iterator it = players.begin();it != players.end();++it)
 		it->client.rate = int(sv_maxrate);
-}
-
-CVAR_FUNC_IMPL (sv_waddownloadcap)
-{
-	// sv_waddownloadcap can not be larger than sv_maxrate
-	if (var > sv_maxrate)
-		var.Set(sv_maxrate);
 }
 
 CVAR_FUNC_IMPL(sv_sharekeys)
@@ -404,7 +390,7 @@ void SV_InvalidateClient(player_t &player, const std::string& reason)
 {
 	if (&(player.client) == NULL)
 	{
-		Printf("Player with NULL client fails security check (%s), client cannot be safely dropped.\n");
+		Printf("Player with NULL client fails security check (%s), client cannot be safely dropped.\n", reason.c_str());
 		return;
 	}
 
@@ -665,21 +651,15 @@ void SV_Sound (AActor *mo, byte channel, const char *name, byte attenuation)
 {
 	int sfx_id;
 	client_t* cl;
-	int x = 0, y = 0;
 
 	sfx_id = S_FindSound (name);
 
-	if (sfx_id >= S_sfx.size() || sfx_id < 0)
+	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
 		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
 		return;
 	}
 
-	if (mo)
-	{
-		x = mo->x;
-		y = mo->y;
-	}
 
 	for (Players::iterator it = players.begin();it != players.end();++it)
 	{
@@ -694,20 +674,13 @@ void SV_Sound(player_t& pl, AActor* mo, const byte channel, const char* name,
               const byte attenuation)
 {
 	int sfx_id;
-	int x = 0, y = 0;
 
 	sfx_id = S_FindSound (name);
 
-	if (sfx_id >= S_sfx.size() || sfx_id < 0)
+	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
 		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
 		return;
-	}
-
-	if(mo)
-	{
-		x = mo->x;
-		y = mo->y;
 	}
 
 	client_t *cl = &pl.client;
@@ -732,7 +705,7 @@ void UV_SoundAvoidPlayer (AActor *mo, byte channel, const char *name, byte atten
 
 	sfx_id = S_FindSound (name);
 
-	if (sfx_id >= S_sfx.size() || sfx_id < 0)
+	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
 		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
 		return;
@@ -762,7 +735,7 @@ void SV_SoundTeam (byte channel, const char* name, byte attenuation, int team)
 
 	sfx_id = S_FindSound( name );
 
-	if (sfx_id >= S_sfx.size() || sfx_id < 0)
+	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
 		Printf("SV_StartSound: range error. Sfx_id = %d\n", sfx_id );
 		return;
@@ -787,7 +760,7 @@ void SV_Sound (fixed_t x, fixed_t y, byte channel, const char *name, byte attenu
 
 	sfx_id = S_FindSound (name);
 
-	if (sfx_id >= S_sfx.size() || sfx_id < 0)
+	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
 		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
 		return;
@@ -1388,7 +1361,7 @@ void SV_LineStateUpdate(client_t *cl)
 
 		if (!line->SidedefChanged)
 			continue;
-		
+
 		for (int sideNum = 0; sideNum < 2; sideNum++)
 		{
 			if (line->sidenum[sideNum] != R_NOSIDE)
@@ -1605,8 +1578,6 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 	int cl_major = 0;
 	int cl_minor = 0;
 	int cl_patch = 0;
-	int sv_major, sv_minor, sv_patch;
-	BREAKVER(GAMEVER, sv_major, sv_minor, sv_patch);
 
 	switch (cl->version)
 	{
@@ -1614,7 +1585,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 		GameVer = MSG_ReadLong();
 		BREAKVER(GameVer, cl_major, cl_minor, cl_patch);
 
-		StrFormat(VersionStr, "%d.%d.%d", cl_major, cl_minor, cl_patch);
+		VersionStr = fmt::sprintf("%d.%d.%d", cl_major, cl_minor, cl_patch);
 
 		cl->packedversion = GameVer;
 
@@ -1650,8 +1621,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 		if (msg.empty())
 		{
 			// Failsafe.
-			StrFormat(
-			    msg,
+			msg = fmt::sprintf(
 			    "Your version of Odamex does not match the server %s.\nFor updates, "
 			    "visit https://odamex.net/\n",
 			    DOTVERSIONSTR);
@@ -1680,7 +1650,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 static void SV_DisconnectOldClient()
 {
 	int cl_version = MSG_ReadShort();
-	byte connection_type = MSG_ReadByte();
+	MSG_ReadByte(); //connection_type (unused)
 	std::string VersionStr;
 
 	int GameVer = 0;
@@ -1701,7 +1671,7 @@ static void SV_DisconnectOldClient()
 	if (msg.empty())
 	{
 		// Failsafe.
-		StrFormat(msg,
+		msg = fmt::sprintf(
 		          "Your version of Odamex does not match the server %s.\nFor updates, "
 		          "visit https://odamex.net/\n",
 		          DOTVERSIONSTR);
@@ -1798,7 +1768,7 @@ void SV_ConnectClient()
 
 	SZ_Clear(&cl->netbuf);
 	SZ_Clear(&cl->reliablebuf);
-	
+
 	for (size_t i = 0; i < ARRAY_LENGTH(cl->oldpackets); i++)
 	{
 		cl->oldpackets[i].sequence = -1;
@@ -1808,7 +1778,7 @@ void SV_ConnectClient()
 	cl->sequence = 0;
 	cl->last_sequence = -1;
 	cl->packetnum = 0;
-	
+
 	// generate a random string
 	std::stringstream ss;
 	ss << time(NULL) << level.time << VERSION << NET_AdrToString(net_from);
@@ -1818,7 +1788,7 @@ void SV_ConnectClient()
 	player->JoinTime = time(NULL);
 
 	cl->version = MSG_ReadShort();
-	byte connection_type = MSG_ReadByte();
+	MSG_ReadByte(); //connection_type (unused)
 
 	// [SL] 2011-05-11 - Register the player with the reconciliation system
 	// for unlagging
@@ -1929,7 +1899,7 @@ void SV_ConnectClient2(player_t& player)
 	}
 
 	// Notify this player of other player's queue positions
-	SV_SendPlayerQueuePositions(&player, true); 
+	SV_SendPlayerQueuePositions(&player, true);
 
 	// Send out the server's MOTD.
 	SV_MidPrint((char*)sv_motd.cstring(), &player, 6);
@@ -1952,27 +1922,27 @@ std::string SV_BuildKillsDeathsStatusString(player_t& player)
 	{
 		if (G_IsTeamGame())
 		{
-			sprintf(temp_str, "%s TEAM, ", GetTeamInfo(player.userinfo.team)->ColorStringUpper.c_str());
+			snprintf(temp_str, 100, "%s TEAM, ", GetTeamInfo(player.userinfo.team)->ColorStringUpper.c_str());
 			status += temp_str;
 		}
 
 		// Points (CTF).
 		if (sv_gametype == GM_CTF)
 		{
-			sprintf(temp_str, "%d POINTS, ", player.points);
+			snprintf(temp_str, 100, "%d POINTS, ", player.points);
 			status += temp_str;
 		}
 
 		// Frags (DM/TDM/CTF) or Kills (Coop).
 		if (G_IsCoopGame())
-			sprintf(temp_str, "%d KILLS, ", player.killcount);
+			snprintf(temp_str, 100, "%d KILLS, ", player.killcount);
 		else
-			sprintf(temp_str, "%d FRAGS, ", player.fragcount);
+			snprintf(temp_str, 100, "%d FRAGS, ", player.fragcount);
 
 		status += temp_str;
 
 		// Deaths.
-		sprintf(temp_str, "%d DEATHS", player.deathcount);
+		snprintf(temp_str, 100, "%d DEATHS", player.deathcount);
 		status += temp_str;
 	}
 	return status;
@@ -1984,7 +1954,6 @@ std::string SV_BuildKillsDeathsStatusString(player_t& player)
 //
 void SV_DisconnectClient(player_t &who)
 {
-	char str[100];
 	std::string disconnectmessage;
 
 	// already gone though this procedure?
@@ -2198,16 +2167,16 @@ void SV_DrawScores()
         Printf_Bold("-----------------------------------------------------------");
 
 		if (sv_scorelimit)
-			sprintf(str, "Scorelimit: %-6d", sv_scorelimit.asInt());
+			snprintf(str, 1024, "Scorelimit: %-6d", sv_scorelimit.asInt());
 		else
-			sprintf(str, "Scorelimit: N/A   ");
+			snprintf(str, 1024, "Scorelimit: N/A   ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
+			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
 		else
-			sprintf(str, "Timelimit: N/A");
+			snprintf(str, 1024, "Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2252,16 +2221,16 @@ void SV_DrawScores()
         Printf_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
-			sprintf(str, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
 		else
-			sprintf(str, "Fraglimit: N/A    ");
+			snprintf(str, 1024, "Fraglimit: N/A    ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
+			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
 		else
-			sprintf(str, "Timelimit: N/A");
+			snprintf(str, 1024, "Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2306,16 +2275,16 @@ void SV_DrawScores()
         Printf_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
-			sprintf(str, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
 		else
-			sprintf(str, "Fraglimit: N/A    ");
+			snprintf(str, 1024, "Fraglimit: N/A    ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
+			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
 		else
-			sprintf(str, "Timelimit: N/A");
+			snprintf(str, 1024, "Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2418,7 +2387,6 @@ void STACK_ARGS SV_BroadcastPrintf(const char* fmt, ...)
 {
 	va_list argptr;
 	char string[2048];
-	client_t* cl;
 
 	va_start(argptr, fmt);
 	vsnprintf(string, sizeof(string), fmt, argptr);
@@ -2431,7 +2399,6 @@ void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const
 {
 	va_list argptr;
 	std::string string;
-	client_t* cl;
 
 	va_start(argptr, format);
 	VStrFormat(string, format, argptr);
@@ -2445,7 +2412,7 @@ void STACK_ARGS SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const
 
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
-		cl = &(it->client);
+		client_t* cl = &(it->client);
 
 		client_t* excluded_client = &idplayer(player_id).client;
 
@@ -2465,7 +2432,7 @@ void STACK_ARGS SV_SpectatorPrintf(int level, const char *fmt, ...)
 	client_t *cl;
 
 	va_start(argptr,fmt);
-	vsprintf(string, fmt,argptr);
+	vsnprintf(string, 2048, fmt, argptr);
 	va_end(argptr);
 
 	Printf(level, "%s", string);  // print to the console
@@ -2490,7 +2457,7 @@ void STACK_ARGS SV_ClientPrintf(client_t *cl, int level, const char *fmt, ...)
 	char string[2048];
 
 	va_start(argptr, fmt);
-	vsprintf(string, fmt, argptr);
+	vsnprintf(string, 2048, fmt, argptr);
 	va_end(argptr);
 
 	MSG_WriteSVC(&cl->reliablebuf, SVC_Print(static_cast<printlevel_t>(level), string));
@@ -2503,7 +2470,7 @@ void STACK_ARGS SV_PlayerPrintf(int level, int player_id, const char *fmt, ...)
 	char string[2048];
 
 	va_start(argptr,fmt);
-	vsprintf(string, fmt,argptr);
+	vsnprintf(string, 2048, fmt,argptr);
 	va_end(argptr);
 
 	client_t* cl = &idplayer(player_id).client;
@@ -2519,7 +2486,7 @@ void STACK_ARGS SV_TeamPrintf(int level, int who, const char *fmt, ...)
 	char string[2048];
 
 	va_start(argptr,fmt);
-	vsprintf(string, fmt,argptr);
+	vsnprintf(string, 2048, fmt,argptr);
 	va_end(argptr);
 
 	Printf(level, "%s", string);  // print to the console
@@ -2553,8 +2520,6 @@ void STACK_ARGS SV_TeamPrintf(int level, int who, const char *fmt, ...)
  */
 void SVC_TeamSay(player_t &player, const char* message)
 {
-	const char* team = GetTeamInfo(player.userinfo.team)->ColorStringUpper.c_str();
-
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
 		// Player needs to be valid.
@@ -2870,7 +2835,7 @@ void SV_UpdateGametype(player_t& pl)
 {
 	if (G_IsHordeMode())
 	{
-		static hordeInfo_t lastInfo = {HS_STARTING, -1, -1, -1, 0, 0, -1, -1, -1, -1, -1};
+		static hordeInfo_t lastInfo = {HS_STARTING, -1, -1, -1, 0, -1, -1, -1, -1, -1};
 		static int ticsent;
 
 		// If the hordeinfo has changed since last tic, save and send it.
@@ -3478,10 +3443,10 @@ void SV_SetPlayerSpec(player_t &player, bool setting, bool silent)
 }
 
 /**
- * @brief Have a player join the game.  Note that this function does no 
+ * @brief Have a player join the game.  Note that this function does no
  *        checking against maxplayers or round limits or whatever, that's
  *        the job of the caller.
- * 
+ *
  * @param player Player that should join the game.
  * @param silent True if the join should be done "silently".
 */
@@ -3700,11 +3665,11 @@ void SV_SetReady(player_t &player, bool setting, bool silent)
 
 /**
  * @brief Tell the client about any custom commands we have.
- * 
+ *
  * @detail A stock server is not expected to have any custom commands.
  *         Custom servers can implement their own features, and this is
  *         where you tell players about it.
- * 
+ *
  * @param player Player who asked for help.
  */
 static void HelpCmd(player_t& player)
@@ -3717,7 +3682,7 @@ static void HelpCmd(player_t& player)
 
 /**
  * @brief Toggle a player as ready/unready.
- * 
+ *
  * @param player Player to toggle.
  */
 static void ReadyCmd(player_t &player)
@@ -3763,7 +3728,7 @@ static void ReadyCmd(player_t &player)
 
 /**
  * @brief Send the player a MOTD on demand.
- * 
+ *
  * @param player Player who wants the MOTD.
  */
 void MOTDCmd(player_t& player)
@@ -3773,7 +3738,7 @@ void MOTDCmd(player_t& player)
 
 /**
  * @brief Interpret a "netcmd" string from a client.
- * 
+ *
  * @param player Player who sent the netcmd.
  */
 void SV_NetCmd(player_t& player)
@@ -3878,7 +3843,7 @@ void SV_Suicide(player_t &player)
 void SV_Cheat(player_t &player)
 {
 	byte cheatType = MSG_ReadByte();
-	
+
 	if (cheatType == 0)
 	{
 		unsigned int cheat = MSG_ReadShort();
@@ -3914,6 +3879,24 @@ void SV_Cheat(player_t &player)
 			SV_SendPlayerStateUpdate(cl, &player);
 		}
 
+	}
+	else if (cheatType == 2)
+	{
+		const char* wantsummon = MSG_ReadString();
+
+		if (!CHEAT_AreCheatsEnabled())
+			return;
+
+		AActor* actor = CHEAT_Summon(&player, wantsummon, false);
+
+		if (actor == NULL)
+			return;
+
+		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		{
+			client_t* cl = &it->client;
+			SV_SendMobjToClient(actor, cl);
+		}
 	}
 }
 
@@ -4083,7 +4066,6 @@ void SV_ParseCommands(player_t &player)
 	 }
 }
 
-EXTERN_CVAR (sv_waddownloadcap)
 EXTERN_CVAR (sv_download_test)
 
 
@@ -4146,10 +4128,10 @@ void SV_GameTics (void)
 
 void SV_TouchSpecial(AActor *special, player_t *player)
 {
-    client_t *cl = &player->client;
+	client_t *cl = &player->client;
 
-    if (cl == NULL || special == NULL)
-        return;
+	if (cl == NULL || special == NULL)
+		return;
 
 	MSG_WriteSVC(&cl->reliablebuf, SVC_TouchSpecial(special));
 }
@@ -4274,13 +4256,13 @@ void SV_RunTics()
 		if (!Maplist::instance().lobbyempty())
 		{
 			std::string wadstr = C_EscapeWadList(lobby_entry.wads);
-			G_LoadWadString(wadstr, lobby_entry.map);
+			G_LoadWadString(wadstr, "", lobby_entry.map);
 		}
 		else
 		{
 			// [AM] Make a copy of mapname for safety's sake.
-			std::string mapname = ::level.mapname.c_str();
-			G_InitNew(mapname.c_str());
+			OLumpName mapname = ::level.mapname;
+			G_InitNew(mapname);
 		}
 	}
 	last_player_count = players.size();
@@ -4335,12 +4317,12 @@ BEGIN_COMMAND (playerinfo)
 	}
 
 	char ip[16];
-	sprintf(ip, "%d.%d.%d.%d",
+	snprintf(ip, 16, "%d.%d.%d.%d",
 			player->client.address.ip[0], player->client.address.ip[1],
 			player->client.address.ip[2], player->client.address.ip[3]);
 
 	char color[8];
-	sprintf(color, "#%02X%02X%02X",
+	snprintf(color, 8, "#%02X%02X%02X",
 			player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
 
 	const char* team = GetTeamInfo(player->userinfo.team)->ColorStringUpper.c_str();
@@ -4397,22 +4379,21 @@ BEGIN_COMMAND(playerlist)
 		}
 
 		std::string strMain, strScore;
-		StrFormat(strMain, "(%02d): %s %s - %s - time:%d - ping:%d", it->id,
-		          it->userinfo.netname.c_str(), it->spectator ? "(SPEC)" : "",
-		          NET_AdrToString(it->client.address), it->GameTime, it->ping);
+		strMain = fmt::sprintf("(%02d): %s %s - %s - time:%d - ping:%d", it->id,
+		                       it->userinfo.netname.c_str(), it->spectator ? "(SPEC)" : "",
+		                       NET_AdrToString(it->client.address), it->GameTime, it->ping);
 
 		if (G_IsCoopGame())
 		{
 			if (G_IsLivesGame())
 			{
 				// Kills and Lives
-				StrFormat(strScore, " - kills:%d - lives:%d", it->killcount, it->lives);
+				strScore = fmt::sprintf(" - kills:%d - lives:%d", it->killcount, it->lives);
 			}
 			else
 			{
 				// Kills and Deaths
-				StrFormat(strScore, " - kills:%d - deaths:%d", it->killcount,
-				          it->deathcount);
+				strScore = fmt::sprintf(" - kills:%d - deaths:%d", it->killcount, it->deathcount);
 			}
 		}
 		else if (sv_gametype == GM_DM)
@@ -4420,13 +4401,13 @@ BEGIN_COMMAND(playerlist)
 			if (G_IsLivesGame())
 			{
 				// Wins, Lives, and Frags
-				StrFormat(strScore, " - wins:%d - lives:%d - frags:%d", it->roundwins,
+				strScore = fmt::sprintf(" - wins:%d - lives:%d - frags:%d", it->roundwins,
 				          it->lives, frags);
 			}
 			else
 			{
 				// Frags, Deaths
-				StrFormat(strScore, " - frags:%d - deaths:%d", frags, deaths);
+				strScore = fmt::sprintf(" - frags:%d - deaths:%d", frags, deaths);
 			}
 		}
 		else if (sv_gametype == GM_TEAMDM)
@@ -4434,12 +4415,12 @@ BEGIN_COMMAND(playerlist)
 			if (G_IsLivesGame())
 			{
 				// Frags and Lives
-				StrFormat(strScore, " - frags:%d - lives:%d", frags, it->lives);
+				strScore = fmt::sprintf(" - frags:%d - lives:%d", frags, it->lives);
 			}
 			else
 			{
 				// Frags
-				StrFormat(strScore, " - frags:%d", frags);
+				strScore = fmt::sprintf(" - frags:%d", frags);
 			}
 		}
 		else if (sv_gametype == GM_CTF)
@@ -4447,13 +4428,13 @@ BEGIN_COMMAND(playerlist)
 			if (G_IsLivesGame())
 			{
 				// Points and Lives
-				StrFormat(strScore, " - points:%d - lives:%d", points, it->lives);
+				strScore = fmt::sprintf(" - points:%d - lives:%d", points, it->lives);
 			}
 			else
 			{
 				// Points and Frags
 				// Special case here: frags will only be from the current round, not global.
-				StrFormat(strScore, " - points:%d - frags:%d", points, it->fragcount);
+				strScore = fmt::sprintf(" - points:%d - frags:%d", points, it->fragcount);
 			}
 		}
 
@@ -4477,7 +4458,6 @@ END_COMMAND (players)
 
 void OnChangedSwitchTexture (line_t *line, int useAgain)
 {
-	int l = line - lines;
 	unsigned state = 0, time = 0;
 	P_GetButtonInfo(line, state, time);
 
@@ -4629,7 +4609,6 @@ void SV_UpdatePlayerQueueLevelChange(const WinInfo& win)
 {
 	if (::g_winnerstays)
 	{
-		int queuedPlayerCount = 0;
 		std::vector<player_t*> loserPlayers;
 
 		PlayerResults pr = PlayerQuery().execute();
@@ -4696,7 +4675,6 @@ void SV_UpdatePlayerQueueLevelChange(const WinInfo& win)
 
 void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t* disconnectPlayer)
 {
-	int playerCount = 0;
 	int queuePos = 1;
 	PlayersView queued;
 	PlayersView queueUpdates;
@@ -4705,9 +4683,6 @@ void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t* disconnectPlayer
 	{
 		if (it->QueuePosition > 0 && disconnectPlayer != &(*it))
 			queued.push_back(&(*it));
-
-		if (!it->spectator && it->ingame())
-			playerCount++;
 	}
 
 	std::sort(queued.begin(), queued.end(), CompareQueuePosition);
@@ -4724,7 +4699,6 @@ void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t* disconnectPlayer
 			p->QueuePosition = 0;
 			SV_JoinPlayer(*p, false);
 			queueUpdates.push_back(p);
-			playerCount++;
 		}
 		else
 		{
@@ -4855,8 +4829,8 @@ void SV_ShareKeys(card_t card, player_t &player)
 		return;
 
 	// Broadcast the key shared to
-	gitem_t* item;
-	if (item = FindCardItem(card))
+	gitem_t* item = FindCardItem(card);
+	if (item != NULL)
 	{
 		switch (card)
 		{

@@ -432,7 +432,7 @@ FUNC(LS_NOP)
 
 FUNC(LS_NOTIMP)
 {
-	Printf(PRINT_HIGH, "Line special not implemented yet: special number %d", ln->special);
+	Printf(PRINT_HIGH, "Line special not implemented yet.");
 	return false;
 }
 
@@ -604,7 +604,7 @@ FUNC(LS_Thing_Stop)
 			target->momx = target->momy = target->momz = 0;
 			if (target->player != NULL)
 				target->momx = target->momy = 0;
-			
+
 			return true;
 		}
 	}
@@ -1396,18 +1396,18 @@ FUNC(LS_Line_SetBlocking)
 	if (arg0)
 	{
 		int i, s;
-		static const int flags[] = {ML_BLOCKING,
-		                            ML_BLOCKMONSTERS,
-		                            ML_BLOCKPLAYERS,
-		                            0, // block floaters (not supported)
-		                            0, // block projectiles (not supported)
-		                            ML_BLOCKEVERYTHING,
-		                            0, // railing (not supported)
-		                            0, // block use (not supported)
-		                            0, // block sight (not supported)
-		                            0, // block hitscan (not supported)
-		                            ML_SOUNDBLOCK,
-		                            -1};
+		static constexpr int flags[] = {ML_BLOCKING,
+		                                ML_BLOCKMONSTERS,
+		                                ML_BLOCKPLAYERS,
+		                                0, // block floaters (not supported)
+		                                0, // block projectiles (not supported)
+		                                ML_BLOCKEVERYTHING,
+		                                0, // railing (not supported)
+		                                0, // block use (not supported)
+		                                0, // block sight (not supported)
+		                                0, // block hitscan (not supported)
+		                                ML_SOUNDBLOCK,
+		                                -1};
 
 		int setflags = 0;
 		int clearflags = 0;
@@ -1751,7 +1751,6 @@ FUNC(LS_Clear_ForceField)
 	while ((s = P_FindSectorFromTag(arg0, s)) >= 0)
 	{
 		int i;
-		line_t* line;
 
 		for (i = 0; i < sectors[s].linecount; i++)
 		{
@@ -2159,13 +2158,13 @@ void AdjustPusher (int tag, int magnitude, int angle, DPusher::EPusher type)
 		}
 	}
 
-	int numcollected = Collection.Size ();
+	size_t numcollected = Collection.Size ();
 	int secnum = -1;
 
 	// Now create pushers for any sectors that don't already have them.
 	while ((secnum = P_FindSectorFromTag (tag, secnum)) >= 0)
 	{
-		int i;
+		size_t i;
 		for (i = 0; i < numcollected; i++)
 		{
 			if (Collection[i].RefNum == sectors[secnum].tag)
@@ -2265,13 +2264,13 @@ FUNC(LS_Scroll_Texture_Both)
 			}
 		}
 
-		int numcollected = Collection.Size ();
+		size_t numcollected = Collection.Size ();
 		int linenum = -1;
 
 		// Now create scrollers for any walls that don't already have them.
 		while ((linenum = P_FindLineFromID (arg0, linenum)) >= 0)
 		{
-			int i;
+			size_t i;
 			for (i = 0; i < numcollected; i++)
 			{
 				if (Collection[i].RefNum == lines[linenum].sidenum[sidechoice])
@@ -2407,9 +2406,6 @@ FUNC(LS_Sector_SetFade)
 				sectors[secnum].colormap->color.getg(),
 				sectors[secnum].colormap->color.getb(),
 				arg1, arg2, arg3);
-		byte r = sectors[secnum].colormap->fade.getr();
-		byte g = sectors[secnum].colormap->fade.getg();
-		byte b = sectors[secnum].colormap->fade.getb();
 		sectors[secnum].SectorChanges |= SPC_Fade;
 	}
 	return true;
@@ -2942,7 +2938,7 @@ BOOL CheckIfExitIsGood (AActor *self)
 
 	// Bypass the exit restrictions if we're on a lobby.
 	if (level.flags & LEVEL_LOBBYSPECIAL)
-		return true;	
+		return true;
 
 	// [Toke - dmflags] Old location of DF_NO_EXIT
 	if (sv_gametype != GM_COOP && self)
@@ -2964,12 +2960,12 @@ BOOL CheckIfExitIsGood (AActor *self)
 		std::string tstr;
 		if (tspan.hours)
 		{
-			StrFormat(tstr, "%02d:%02d:%02d.%02d", tspan.hours, tspan.minutes,
-			          tspan.seconds, tspan.csecs);
+			tstr = fmt::sprintf("%02d:%02d:%02d.%02d", tspan.hours, tspan.minutes,
+			                    tspan.seconds, tspan.csecs);
 		}
 		else
 		{
-			StrFormat(tstr, "%02d:%02d.%02d", tspan.minutes, tspan.seconds, tspan.csecs);
+			tstr = fmt::sprintf("%02d:%02d.%02d", tspan.minutes, tspan.seconds, tspan.csecs);
 		}
 
 		SV_BroadcastPrintf("%s exited the level in %s.\n",

@@ -48,6 +48,7 @@
 #include "md5.h"
 #include "m_fileio.h"
 #include "r_sky.h"
+#include "r_interp.h"
 #include "cl_demo.h"
 #include "cl_download.h"
 #include "cl_maplist.h"
@@ -118,7 +119,7 @@ BOOL      connected;
 netadr_t  serveraddr; // address of a server
 netadr_t  lastconaddr;
 
-const static size_t PACKET_SEQ_MASK = 0xFF;
+constexpr static size_t PACKET_SEQ_MASK = 0xFF;
 static int packetseq[256];
 
 // denis - unique session key provided by the server
@@ -201,7 +202,7 @@ argb_t CL_GetPlayerColor(player_t *player)
 
 	argb_t base_color(255, player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
 	argb_t shade_color = base_color;
-	
+
 	bool teammate = false;
 	if (G_IsCoopGame())
 		teammate = true;
@@ -263,7 +264,7 @@ CVAR_FUNC_IMPL (cl_team)
 {
 	if (var.asInt() >= sv_teamsinplay)
 		var.Set(sv_teamsinplay.asInt() - 1);
-	
+
 	CL_RebuildAllPlayerTranslations();
 }
 
@@ -298,8 +299,6 @@ void D_Display(void);
 void D_DoAdvanceDemo(void);
 void M_Ticker(void);
 
-void R_InterpolationTicker();
-
 size_t P_NumPlayersInGame();
 void G_PlayerReborn (player_t &player);
 void P_KillMobj (AActor *source, AActor *target, AActor *inflictor, bool joinkill);
@@ -332,7 +331,7 @@ static int CL_CalculateWorldIndexSync()
 //
 static int CL_CalculateWorldIndexDriftCorrection()
 {
-	static const float CORRECTION_PERIOD = 1.0f / 16.0f;
+	static constexpr float CORRECTION_PERIOD = 1.0f / 16.0f;
 
 	int delta = CL_CalculateWorldIndexSync() - world_index;
 	if (delta == 0)
@@ -633,7 +632,7 @@ void CL_StepTics(unsigned int count)
 
 		Maplist_Runtic();
 
-		R_InterpolationTicker();
+		OInterpolation::getInstance().ticGameInterpolation();
 
 		G_Ticker ();
 		gametic++;
@@ -802,7 +801,7 @@ BEGIN_COMMAND (players)
 	for (std::map<int, std::string>::iterator it = mplayers.begin();it != mplayers.end();++it) {
 		Printf("%3d. %s\n", (*it).first, (*it).second.c_str());
 	}
-	Printf("%d %s\n", mplayers.size(), mplayers.size() == 1 ? "PLAYER" : "PLAYERS");
+	Printf("%lu %s\n", mplayers.size(), mplayers.size() == 1 ? "PLAYER" : "PLAYERS");
 }
 END_COMMAND (players)
 
@@ -831,7 +830,7 @@ BEGIN_COMMAND (playerinfo)
 	}
 
 	char color[8];
-	sprintf(color, "#%02X%02X%02X",
+	snprintf(color, 8, "#%02X%02X%02X",
 			player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
 
 	Printf (PRINT_HIGH, "---------------[player info]----------- \n");
@@ -890,7 +889,7 @@ BEGIN_COMMAND (serverinfo)
 	std::sort(server_cvars.begin(), server_cvars.end());
 
     // Heading
-    Printf ("\n%*s - Value\n", MaxFieldLength, "Name");
+    Printf ("\n%*s - Value\n", static_cast<int>(MaxFieldLength), "Name");
 
     // Data
 	for (size_t i = 0; i < server_cvars.size(); i++)
@@ -899,7 +898,7 @@ BEGIN_COMMAND (serverinfo)
 		Cvar = cvar_t::FindCVar(server_cvars[i].c_str(), &dummy);
 
 		Printf( "%*s - %s\n",
-				MaxFieldLength,
+				static_cast<int>(MaxFieldLength),
 				Cvar->name(),
 				Cvar->cstring());
 	}
@@ -916,7 +915,7 @@ BEGIN_COMMAND (rcon)
 		char  command[256];
 
 		strncpy(command, args, ARRAY_LENGTH(command) - 1);
-		command[255] = '\0';		
+		command[255] = '\0';
 
 		MSG_WriteMarker(&net_buffer, clc_rcon);
 		MSG_WriteString(&net_buffer, command);
@@ -1260,10 +1259,10 @@ BEGIN_COMMAND(netdemostats)
 	Printf(PRINT_HIGH, "Total time: %i seconds\n", totaltime);
 	Printf(PRINT_HIGH, "Current position: %i seconds (%i%%)\n",
 		curtime, curtime * 100 / totaltime);
-	Printf(PRINT_HIGH, "Number of maps: %i\n", maptimes.size());
+	Printf(PRINT_HIGH, "Number of maps: %lu\n", maptimes.size());
 	for (size_t i = 0; i < maptimes.size(); i++)
 	{
-		Printf(PRINT_HIGH, "> %02i Starting time: %i seconds\n",
+		Printf(PRINT_HIGH, "> %02lu Starting time: %i seconds\n",
 			i + 1, maptimes[i]);
 	}
 }
@@ -1273,7 +1272,7 @@ BEGIN_COMMAND(netff)
 {
 	if (netdemo.isPlaying())
 		netdemo.nextSnapshot();
-	else if (netdemo.isPaused());
+	else if (netdemo.isPaused())
 		netdemo.nextTic();
 }
 END_COMMAND(netff)
@@ -1381,7 +1380,7 @@ player_t &CL_FindPlayer(size_t id)
 
 /**
  * @brief Update a player's spectate setting and do any necessary busywork for it.
- * 
+ *
  * @param player Plyaer to update.
  * @param spectate New spectate setting.
 */
@@ -1484,8 +1483,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 	{
 		Printf(PRINT_WARNING,
 		       "Tried to download an empty file.  This is probably a bug "
-		       "in the client where an empty file is considered missing.\n",
-		       missing_file.getBasename().c_str());
+		       "in the client where an empty file is considered missing.\n");
 		CL_QuitNetGame(NQ_DISCONNECT);
 		return;
 	}
@@ -1526,8 +1524,8 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 	StringTokens clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
 	// Shuffle the sites so we evenly distribute our requests.
-	std::random_shuffle(serversites.begin(), serversites.end());
-	std::random_shuffle(clientsites.begin(), clientsites.end());
+	std::shuffle(serversites.begin(), serversites.end(), rng);
+	std::shuffle(clientsites.begin(), clientsites.end(), rng);
 
 	// Combine them into one big site list.
 	Websites downloadsites;
@@ -1721,7 +1719,7 @@ bool CL_PrepareConnect()
 		CL_QuitNetGame(NQ_ABORT);
 		return false;
 	}
-	else if (!ok && !missingfiles.empty() || cl_forcedownload)
+	else if ((!ok && !missingfiles.empty()) || cl_forcedownload)
 	{
 		if (::missingCommercialIWAD)
 		{
@@ -1881,8 +1879,8 @@ void CL_TryToConnect(DWORD server_token)
 
 		// [SL] The "rate" CVAR has been deprecated. Now just send a hard-coded
 		// maximum rate that the server will ignore.
-		const int rate = 0xFFFF;
-		MSG_WriteLong(&net_buffer, rate); 
+		constexpr int rate = 0xFFFF;
+		MSG_WriteLong(&net_buffer, rate);
 
         MSG_WriteString(&net_buffer, (char *)connectpasshash.c_str());
 
@@ -1942,7 +1940,7 @@ void CL_Decompress()
 
 /**
  * @brief Read the header of the packet and prepare the rest of it for reading.
- * 
+ *
  * @return False if the packet was scuttled, otherwise true.
  */
 bool CL_ReadPacketHeader()
@@ -1992,7 +1990,7 @@ static std::string SVCName(byte header)
 	std::string svc = ::svc_info[header].getName();
 	if (svc.empty())
 	{
-		StrFormat(svc, "svc_%u", header);
+		svc = fmt::sprintf("svc_%u", header);
 	}
 	return svc;
 }
@@ -2047,8 +2045,8 @@ void CL_ParseCommands()
 					ptrdiff_t idx = it - protos.begin() + 1;
 					std::string svc = SVCName(it->header);
 					size_t siz = it->size;
-					Printf(PRINT_WARNING, "%c %2" PRIdSIZE " [%s] %" PRIuSIZE "b\n",
-					       latest, idx, svc.c_str(), siz);
+					Printf(PRINT_WARNING, "%c %2zd [%s] %zub\n", latest, idx, svc.c_str(),
+					       siz);
 				}
 			}
 			else
@@ -2062,7 +2060,7 @@ void CL_ParseCommands()
 		// Measure length of each message, so we can keep track of bandwidth.
 		if (::net_message.BytesRead() < byteStart)
 		{
-			Printf("CL_ParseCommands: end byte (%d) < start byte (%d)\n",
+			Printf("CL_ParseCommands: end byte (%lu) < start byte (%lu)\n",
 			       ::net_message.BytesRead(), byteStart);
 		}
 
@@ -2161,6 +2159,16 @@ void CL_SendGiveCheat(const char* item)
 	MSG_WriteMarker(&net_buffer, clc_cheat);
 	MSG_WriteByte(&net_buffer, 1);
 	MSG_WriteString(&net_buffer, item);
+}
+
+//
+// CL_SendSummonCheat
+//
+void CL_SendSummonCheat(const char* summon)
+{
+	MSG_WriteMarker(&net_buffer, clc_cheat);
+	MSG_WriteByte(&net_buffer, 2);
+	MSG_WriteString(&net_buffer, summon);
 }
 
 
@@ -2356,7 +2364,7 @@ void CL_SimulatePlayers()
 							world_index, dist >> FRACBITS);
 					#endif	// _SNAPSHOT_DEBUG_
 
-					static const fixed_t correction_amount = FRACUNIT * 0.80f;
+					static constexpr fixed_t correction_amount = FRACUNIT * 0.80f;
 					M_ScaleVec3Fixed(&offset, &offset, correction_amount);
 
 					// Apply a smoothing offset to the current snapshot
@@ -2400,8 +2408,8 @@ void CL_SimulateWorld()
 		return;
 
 	// if the world_index falls outside this range, resync it
-	static const int MAX_BEHIND = 16;
-	static const int MAX_AHEAD = 16;
+	static constexpr int MAX_BEHIND = 16;
+	static constexpr int MAX_AHEAD = 16;
 
 	int lower_sync_limit = CL_CalculateWorldIndexSync() - MAX_BEHIND;
 	int upper_sync_limit = CL_CalculateWorldIndexSync() + MAX_AHEAD;

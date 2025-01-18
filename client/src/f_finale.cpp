@@ -53,7 +53,7 @@ static IWindowSurface* finale_surface = NULL;
 // Draw the bunny scroll on 2 surfaces
 // and clip them against the screen
 static IWindowSurface* bunny1_surface = NULL;
-static IWindowSurface* bunny2_surface = NULL; 
+static IWindowSurface* bunny2_surface = NULL;
 
 // Stage of animation:
 //	0 = text, 1 = art screen, 2 = character cast
@@ -75,7 +75,7 @@ enum finale_lump_t
 };
 
 const char* finaletext;
-const char* finalelump;
+OLumpName finalelump;
 finale_lump_t finalelumptype = FINALE_NONE;
 
 void	F_StartCast (void);
@@ -172,29 +172,23 @@ void F_StartFinale(finale_options_t& options)
 	//  determined in G_WorldDone() based on data in
 	//  a level_info_t and a cluster_info_t.
 
-	if (options.music == NULL)
+	if (options.music.empty())
 	{
 		::currentmusic = ::gameinfo.finaleMusic.c_str();
-		S_ChangeMusic(
-			::currentmusic.c_str(),
-			!(::gameinfo.flags & GI_NOLOOPFINALEMUSIC)
-		);
+		S_ChangeMusic(::currentmusic, !::gameinfo.noLoopFinaleMusic);
 	}
 	else
 	{
-		::currentmusic = options.music;
-		S_ChangeMusic(
-			::currentmusic,
-			!(::gameinfo.flags & GI_NOLOOPFINALEMUSIC)
-		);
+		::currentmusic = options.music.c_str();
+		S_ChangeMusic(::currentmusic, !::gameinfo.noLoopFinaleMusic);
 	}
 
-	if (options.pic != NULL)
+	if (!options.pic.empty())
 	{
 		::finalelumptype = FINALE_GRAPHIC;
 		::finalelump = options.pic;
 	}
-	else if (options.flat != NULL)
+	else if (!options.flat.empty())
 	{
 		::finalelumptype = FINALE_FLAT;
 		::finalelump = options.flat;
@@ -202,7 +196,7 @@ void F_StartFinale(finale_options_t& options)
 	else
 	{
 		::finalelumptype = FINALE_FLAT;
-		::finalelump = gameinfo.finaleFlat.c_str();
+		::finalelump = gameinfo.finaleFlat;
 	}
 
 	if (options.text)
@@ -341,7 +335,7 @@ void F_TextWrite ()
 		lump = W_CheckNumForName(finalelump, ns_global);
 		if (lump >= 0)
 		{
-			screen->DrawPatchFullScreen((patch_t*)W_CachePatch(lump, PU_CACHE), true);
+			screen->DrawPatchFullScreen(W_CachePatch(lump, PU_CACHE), true);
 		}
 		break;
 	case FINALE_FLAT:
@@ -373,22 +367,22 @@ void F_TextWrite ()
 	V_MarkRect(x, y, width, height);
 
 	// draw some of the text onto the screen
-	int cx = 10, cy = 10;
+	int cx = gameinfo.textScreenX, cy = gameinfo.textScreenY;
 	const char* ch = finaletext;
 
-	if (finalecount < 11)
+	if (finalecount < gameinfo.textScreenY + 1)
 		return;
 
 	int count = (finalecount - 10) / TEXTSPEED;
-	for ( ; count ; count-- )
+	for ( ; count; count-- )
 	{
 		int c = *ch++;
 		if (!c)
 			break;
 		if (c == '\n')
 		{
-			cx = 10;
-			cy += 11;
+			cx = gameinfo.textScreenX;
+			cy += 11; // (gamemission == heretic) ? 10 : 11;
 			continue;
 		}
 
@@ -399,15 +393,14 @@ void F_TextWrite ()
 			continue;
 		}
 
-		const patch_t* ch = W_ResolvePatchHandle(hu_font[c]);
+		const patch_t* chr = W_ResolvePatchHandle(hu_font[c]);
 
-		const int w = ch->width();
+		const int w = chr->width();
 		if (cx + w > width)
 			break;
-		screen->DrawPatchClean(ch, cx, cy);
+		screen->DrawPatchClean(chr, cx, cy);
 		cx += w;
 	}
-
 }
 
 //
@@ -421,7 +414,7 @@ typedef struct
 	mobjtype_t	type;
 } castinfo_t;
 
-castinfo_t		castorder[] = {
+castinfo_t castorder[] = {
 	{NULL, MT_POSSESSED},
 	{NULL, MT_SHOTGUY},
 	{NULL, MT_CHAINGUY},
@@ -443,14 +436,14 @@ castinfo_t		castorder[] = {
 	{NULL, MT_UNKNOWNTHING}
 };
 
-static int 			castnum;
-static int 			casttics;
-static int			castsprite;
-static state_t*		caststate;
-static BOOL	 		castdeath;
-static int 			castframes;
-static int 			castonmelee;
-static BOOL	 		castattacking;
+static int 		castnum;
+static int 		casttics;
+static int		castsprite;
+static state_t*	caststate;
+static bool	 	castdeath;
+static int 		castframes;
+static int 		castonmelee;
+static bool	 	castattacking;
 
 
 //
@@ -514,7 +507,7 @@ void F_CastTicker()
 			castnum = 0;
 		if (mobjinfo[castorder[castnum].type].seesound)
 		{
-			const int atten = ATTN_NONE;
+			constexpr int atten = ATTN_NONE;
 			S_Sound (CHAN_VOICE, mobjinfo[castorder[castnum].type].seesound, 1, atten);
 		}
 		caststate = &states[mobjinfo[castorder[castnum].type].seestate];
@@ -648,7 +641,7 @@ void F_CastDrawer()
 	finale_height = background_patch->height() + (background_patch->height() / 5);
 
 	I_FreeSurface(cast_surface);
-	cast_surface = I_AllocateSurface(finale_width, finale_height, 8);
+	cast_surface = I_AllocateSurface(background_patch->width(), background_patch->height(), 8);
 
 	// draw the background to the surface
 	cast_surface->lock();
@@ -712,8 +705,8 @@ void F_BunnyScroll()
 	int bunnywidth = p1->width();
 	int bunnyheight = p1->height() + (p1->height() / 5);
 
-	bunny1_surface = I_AllocateSurface(bunnywidth, bunnyheight, 8);
-	bunny2_surface = I_AllocateSurface(bunnywidth, bunnyheight, 8);
+	bunny1_surface = I_AllocateSurface(p1->width(), p1->height(), 8);
+	bunny2_surface = I_AllocateSurface(p2->width(), p2->height(), 8);
 
 	DCanvas* c1 = bunny1_surface->getDefaultCanvas();
 	DCanvas* c2 = bunny2_surface->getDefaultCanvas();
@@ -803,7 +796,7 @@ void F_BunnyScroll()
 		laststage = stage;
 	}
 
-	sprintf (name,"END%i",stage);
+	snprintf (name, 6, "END%i", stage);
 	screen->DrawPatchIndirect(W_CachePatch(name), (320-13*8)/2, (200-8*8)/2);
 }
 
@@ -813,7 +806,7 @@ void F_BunnyScroll()
 // Draws an endpic on the finale canvas.
 // If using a normal 320x200 endpic,
 // It will be scaled to fit the viewport.
-// 
+//
 // If using a widescreen endpic, it will
 // be scaled keeping aspect ratio to fill
 // the screen and may be too wide for the
@@ -830,14 +823,14 @@ void F_DrawEndPic(const char* page)
 	finale_height = background_patch->height() + (background_patch->height() / 5);
 
 	I_FreeSurface(finale_surface);
-	finale_surface = I_AllocateSurface(finale_width, finale_height, 8);
+	finale_surface = I_AllocateSurface(background_patch->width(), background_patch->height(), 8);
 
 	const int width = F_GetCWidth();
 	const int height = primary_surface->getHeight();
 
 	const int x = (primary_surface->getWidth() - width) / 2;
 	const int y = (primary_surface->getHeight() - height) / 2;
-	
+
 	// draw the background to the surface
 	finale_surface->lock();
 
@@ -867,19 +860,19 @@ void F_Drawer (void)
 				default:
 				case '1':
 				{
-					const char* page = !level.endpic.empty() ? level.endpic.c_str() : gameinfo.finalePage1;
+					const char* page = !level.endpic.empty() ? level.endpic.c_str() : gameinfo.finalePage[0].c_str();
 
 					F_DrawEndPic(page);
 					break;
 				}
 				case '2':
-					F_DrawEndPic(gameinfo.finalePage2);
+			        F_DrawEndPic(gameinfo.finalePage[1].c_str());
 					break;
 				case '3':
 					F_BunnyScroll ();
 					break;
 				case '4':
-					F_DrawEndPic(gameinfo.finalePage3);
+			        F_DrawEndPic(gameinfo.finalePage[2].c_str());
 					break;
 			}
 			break;

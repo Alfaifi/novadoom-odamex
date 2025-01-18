@@ -144,7 +144,7 @@ void uppercopy (char *to, const char *from)
 
 /**
  * @brief Calculate a CRC32 hash from a file.
- * 
+ *
  * @param filename Filename of file to hash.
  * @return Output hash, or blank if file could not be found.
  */
@@ -158,7 +158,7 @@ OCRC32Sum W_CRC32(const std::string& filename)
 	if (!fp)
 		return rvo;
 
-	unsigned n = 0;
+	size_t n = 0;
 	unsigned char buf[file_chunk_size];
 	uint32_t crc = 0;
 
@@ -169,7 +169,7 @@ OCRC32Sum W_CRC32(const std::string& filename)
 
 	std::string hashStr;
 
-	StrFormat(hashStr, "%08X", crc);
+	hashStr = fmt::sprintf("%08X", crc);
 
 	OCRC32Sum::makeFromHexStr(rvo, hashStr);
 	return rvo; // bubble up failure
@@ -189,7 +189,7 @@ OMD5Hash W_MD5(const std::string& filename)
 	md5_state_t state;
 	md5_init(&state);
 
-	unsigned n = 0;
+	size_t n = 0;
 	unsigned char buf[file_chunk_size];
 
 	while((n = fread(buf, 1, sizeof(buf), fp)))
@@ -325,7 +325,7 @@ void AddFile(const OResFile& file)
 		std::string lumpname;
 		M_ExtractFileBase(filename, lumpname);
 
-		fileinfo = new filelump_t[1];	
+		fileinfo = new filelump_t[1];
 		fileinfo->filepos = 0;
 		fileinfo->size = M_FileLength(handle);
 		std::transform(lumpname.c_str(), lumpname.c_str() + 8, fileinfo->name, toupper);
@@ -365,7 +365,7 @@ void AddFile(const OResFile& file)
 			std::transform(fileinfo[i].name, fileinfo[i].name + 8, fileinfo[i].name, toupper);
 		}
 
-		newlumps = header.numlumps;	
+		newlumps = header.numlumps;
 		Printf(PRINT_HIGH, " (%d lumps)\n", header.numlumps);
 	}
 
@@ -647,7 +647,7 @@ int W_CheckNumForName(const char *name, int namespc)
 	// It has been tuned so that the average chain length never exceeds 2.
 
 	// proff 2001/09/07 - check numlumps==0, this happens when called before WAD loaded
-	register int i = (numlumps==0)?(-1):(lumpinfo[W_LumpNameHash(name) % numlumps].index);
+	int i = (numlumps==0)?(-1):(lumpinfo[W_LumpNameHash(name) % numlumps].index);
 
 	// We search along the chain until end, looking for case-insensitive
 	// matches which also match a namespace tag. Separate hash tables are
@@ -661,6 +661,28 @@ int W_CheckNumForName(const char *name, int namespc)
 
 	// Return the matching lump, or -1 if none found.
 	return i;
+}
+
+//
+// W_CheckNumForName
+// Returns -1 if name not found.
+//
+// Rewritten by Lee Killough to use hash table for performance. Significantly
+// cuts down on time -- increases Doom performance over 300%. This is the
+// single most important optimization of the original Doom sources, because
+// lump name lookup is used so often, and the original Doom used a sequential
+// search. For large wads with > 1000 lumps this meant an average of over
+// 500 were probed during every search. Now the average is under 2 probes per
+// search. There is no significant benefit to packing the names into longwords
+// with this new hashing algorithm, because the work to do the packing is
+// just as much work as simply doing the string comparisons with the new
+// algorithm, which minimizes the expected number of comparisons to under 2.
+//
+// [SL] taken from prboom-plus
+//
+int W_CheckNumForName(const OLumpName& name, int namespc)
+{
+	return W_CheckNumForName(name.c_str(), namespc);
 }
 
 //
@@ -680,9 +702,18 @@ int W_GetNumForName(const char* name, int namespc)
 	return i;
 }
 
+//
+// W_GetNumForName
+// Calls W_CheckNumForName, but bombs out if not found.
+//
+int W_GetNumForName(const OLumpName& name, int namespc)
+{
+	return W_GetNumForName(name.c_str(), namespc);
+}
+
 /**
  * @brief Return the name of a lump number.
- * 
+ *
  * @detail You likely only need this for debugging, since a name can be
  *         ambiguous.
  */
@@ -774,7 +805,7 @@ bool W_CheckLumpName (unsigned lump, const char *name)
 //
 // W_GetLumpName
 //
-void W_GetLumpName (char *to, unsigned  lump)
+void W_GetLumpName(char *to, unsigned lump)
 {
 	if (lump >= numlumps)
 		*to = 0;
@@ -784,6 +815,17 @@ void W_GetLumpName (char *to, unsigned  lump)
 		to[8] = '\0';
 		std::transform(to, to + strlen(to), to, toupper);
 	}
+}
+
+//
+// W_GetOLumpName
+//
+void W_GetOLumpName(OLumpName& to, unsigned lump)
+{
+	if (lump >= numlumps)
+		to.clear();
+	else
+		to = lumpinfo[lump].name;
 }
 
 //
@@ -822,7 +864,15 @@ void* W_CacheLumpNum(unsigned int lump, const zoneTag_e tag)
 //
 void* W_CacheLumpName(const char* name, const zoneTag_e tag)
 {
-	return W_CacheLumpNum (W_GetNumForName(name), tag);
+	return W_CacheLumpNum(W_GetNumForName(name), tag);
+}
+
+//
+// W_CacheLumpName
+//
+void* W_CacheLumpName(const OLumpName& name, const zoneTag_e tag)
+{
+	return W_CacheLumpNum(W_GetNumForName(name.c_str()), tag);
 }
 
 size_t R_CalculateNewPatchSize(patch_t *patch, size_t length);
@@ -885,6 +935,13 @@ patch_t* W_CachePatch(const char* name, const zoneTag_e tag)
 	// denis - todo - would be good to replace non-existant patches with a default '404' patch
 }
 
+patch_t* W_CachePatch(const OLumpName& name, const zoneTag_e tag)
+{
+	return W_CachePatch(W_GetNumForName(name), tag);
+	// denis - todo - would be good to replace non-existant patches with a default '404'
+	// patch
+}
+
 /**
  * @brief Cache a patch by lump number and return a handle to it.
  */
@@ -898,6 +955,14 @@ lumpHandle_t W_CachePatchHandle(const int lumpNum, const zoneTag_e tag)
  * @brief Cache a patch by name and namespace and return a handle to it.
  */
 lumpHandle_t W_CachePatchHandle(const char* name, const zoneTag_e tag, const int ns)
+{
+	return W_CachePatchHandle(W_GetNumForName(name, ns), tag);
+}
+
+/**
+ * @brief Cache a patch by name and namespace and return a handle to it.
+ */
+lumpHandle_t W_CachePatchHandle(const OLumpName& name, const zoneTag_e tag, const int ns)
 {
 	return W_CachePatchHandle(W_GetNumForName(name, ns), tag);
 }

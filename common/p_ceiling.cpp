@@ -36,7 +36,7 @@ EXTERN_CVAR(co_boomphys)
 extern bool predicting;
 
 void P_ResetTransferSpecial(newspecial_s* newspecial);
-const unsigned int P_ResetSectorTransferFlags(const unsigned int flags);
+unsigned int P_ResetSectorTransferFlags(const unsigned int flags);
 
 //
 // CEILINGS
@@ -159,6 +159,7 @@ void DCeiling::RunThink ()
 				m_Sector->damageinterval = m_NewDmgInterval;
 				m_Sector->leakrate = m_NewLeakRate;
 				m_Sector->flags = m_NewFlags;
+				[[fallthrough]];
 			case genCeilingChg:
 				m_Sector->ceilingpic = m_Texture;
 				Destroy();
@@ -227,6 +228,7 @@ void DCeiling::RunThink ()
 				m_Sector->damageinterval = m_NewDmgInterval;
 				m_Sector->leakrate = m_NewLeakRate;
 				m_Sector->flags = m_NewFlags;
+				[[fallthrough]];
 			case genCeilingChg:
 				m_Sector->ceilingpic = m_Texture;
 				Destroy();
@@ -301,8 +303,6 @@ DCeiling::DCeiling (sector_t *sec, fixed_t speed1, fixed_t speed2, int silent)
 DCeiling::DCeiling(sector_t* sec, line_t* line, int silent, int speed)
     : DMovingCeiling(sec), m_Status(init)
 {
-	fixed_t targheight;
-
 	m_Type = silent ? genSilentCrusher : genCrusher;
 	m_Crush = DOOM_CRUSH;
 	m_CrushMode = crushDoom;
@@ -650,6 +650,7 @@ BOOL P_SpawnZDoomCeiling(DCeiling::ECeiling type, line_t* line, int tag, fixed_t
 		case DCeiling::ceilCrushAndRaise:
 		case DCeiling::ceilCrushRaiseAndStay:
 			ceiling->m_TopHeight = ceilingheight;
+			[[fallthrough]];
 		case DCeiling::ceilLowerAndCrush:
 			targheight = ceiling->m_BottomHeight = floorheight + height;
 			ceiling->m_Direction = -1;
@@ -911,6 +912,7 @@ manual_ceiling:
 		case DCeiling::silentCrushAndRaise:
 		case DCeiling::ceilCrushRaiseAndStay:
 			ceiling->m_TopHeight = ceilingheight;
+			[[fallthrough]];
 		case DCeiling::lowerAndCrush:
 			ceiling->m_Crush = crush ? DOOM_CRUSH : NO_CRUSH;
 			targheight = ceiling->m_BottomHeight = floorheight + 8*FRACUNIT;
@@ -1105,9 +1107,7 @@ BOOL EV_DoGenCeiling(line_t* line)
 	int secnum;
 	BOOL rtn;
 	BOOL manual;
-	fixed_t targheight;
 	sector_t* sec;
-	DCeiling* ceiling;
 	unsigned value = (unsigned)line->special - GenCeilingBase;
 
 	// parse the bit fields in the line's special type
@@ -1175,9 +1175,7 @@ BOOL EV_DoGenCrusher(line_t* line)
 	int secnum;
 	BOOL rtn;
 	BOOL manual;
-	fixed_t targheight;
 	sector_t* sec;
-	DCeiling* ceiling;
 	unsigned value = (unsigned)line->special - GenCrusherBase;
 
 	// parse the bit fields in the line's special type

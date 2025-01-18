@@ -22,10 +22,11 @@
 
 #pragma once
 
+#include "i_system.h"
 
 struct OScannerConfig
 {
-	const char* lumpName;
+	OLumpName lumpName;
 	bool semiComments;
 	bool cComments;
 };
@@ -82,6 +83,18 @@ class OScanner
 	void assertTokenNoCaseIs(const char* string) const;
 	bool compareToken(const char* string) const;
 	bool compareTokenNoCase(const char* string) const;
-	void STACK_ARGS warning(const char* message, ...) const;
-	void STACK_ARGS error(const char* message, ...) const;
+
+	template <typename... ARGS>
+	void warning(const fmt::string_view format, const ARGS&... args) const
+	{
+		PrintFmt(PRINT_WARNING, "Parse Warning: {}:{}: {}\n", m_config.lumpName,
+		       m_lineNumber, fmt::sprintf(format, args...));
+	}
+
+	template <typename... ARGS>
+	void error(const fmt::string_view format, const ARGS&... args) const
+	{
+		I_Error("Parse Error: %s:%d: %s", m_config.lumpName.c_str(), m_lineNumber,
+		        fmt::sprintf(format, args...));
+	}
 };

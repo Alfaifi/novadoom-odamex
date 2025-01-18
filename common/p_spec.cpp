@@ -71,8 +71,10 @@
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
+EXTERN_CVAR(co_boomphys)
 
 std::list<movingsector_t> movingsectors;
+std::list<sector_t*> specialdoors;
 bool s_SpecialFromServer;
 
 int P_FindSectorFromLineTag(int tag, int start);
@@ -105,7 +107,7 @@ fixed_t P_ArgsToFixed(fixed_t arg_i, fixed_t arg_f)
 
 int P_ArgToCrushMode(byte arg, bool slowdown)
 {
-	static const crushmode_e map[] = {crushDoom, crushHexen, crushSlowdown};
+	static constexpr crushmode_e map[] = {crushDoom, crushHexen, crushSlowdown};
 
 	if (arg >= 1 && arg <= 3)
 		return map[arg - 1];
@@ -141,7 +143,7 @@ int P_FindLineFromTag(int tag, int start)
 	return start;
 }
 
-const unsigned int P_ResetSectorTransferFlags(const unsigned int flags)
+unsigned int P_ResetSectorTransferFlags(const unsigned int flags)
 {
 	return (flags & ~SECF_TRANSFERMASK);
 }
@@ -181,7 +183,7 @@ void P_TransferSectorFlags(unsigned int* dest, unsigned int source)
 
 byte P_ArgToChange(byte arg)
 {
-	static const byte ChangeMap[8] = {0, 1, 5, 3, 7, 2, 6, 0};
+	static constexpr byte ChangeMap[8] = {0, 1, 5, 3, 7, 2, 6, 0};
 
 	return (arg < 8) ? ChangeMap[arg] : 0;
 }
@@ -215,10 +217,10 @@ int P_IsUnderDamage(AActor* actor)
 }
 
 /*
-* 
+*
 * P_IsFriendlyThing
 * @brief Helper function to determine if a particular thing is of friendly origin.
-* 
+*
 * @param actor Source actor
 * @param friendshiptest Thing to test friendliness
 */
@@ -580,7 +582,7 @@ static void P_InitAnimDefs ()
 	}
     catch (CRecoverableError &)
     {
-	    
+
     }
 }
 
@@ -764,9 +766,17 @@ bool P_CheckTag(line_t* line)
 	case 51:
 	case 124:
 	case 198:
+	case 2069:
+	case 2070:
+	case 2071:
+	case 2072:
+	case 2073:
+	case 2074:
 
 	case 48: // Scrolling walls
 	case 85:
+	case 2082:
+	case 2083:
 		return true; // zero tag allowed
 
 	default:
@@ -876,8 +886,8 @@ void P_InitPicAnims (void)
 
 			if (lastanim->numframes < 2)
 				Printf (PRINT_WARNING, "P_InitPicAnims: bad cycle from %s to %s",
-						 anim_p + 10 /* .startname */,
-						 anim_p + 1 /* .endname */);
+						 fmt::ptr(anim_p + 10) /* .startname */,
+						 fmt::ptr(anim_p + 1) /* .endname */);
 
 			lastanim->speedmin[0] = lastanim->speedmax[0] = lastanim->countdown =
 						/* .speed */
@@ -885,8 +895,6 @@ void P_InitPicAnims (void)
 						(anim_p[20] << 8) |
 						(anim_p[21] << 16) |
 						(anim_p[22] << 24);
-
-			lastanim->countdown--;
 
 			lastanim++;
 		}
@@ -1248,17 +1256,18 @@ fixed_t P_FindShortestTextureAround (sector_t *sec)
 	int minsize = MAXINT;
 	side_t *side;
 	int i;
+	int mintex = co_boomphys ? 1 : 0;
 
 	for (i = 0; i < sec->linecount; i++)
 	{
 		if (sec->lines[i]->flags & ML_TWOSIDED)
 		{
 			side = &sides[(sec->lines[i])->sidenum[0]];
-			if (side->bottomtexture >= 0 && textureheight[side->bottomtexture] < minsize)
+			if (side->bottomtexture >= mintex && textureheight[side->bottomtexture] < minsize)
 				minsize = textureheight[side->bottomtexture];
 
 			side = &sides[(sec->lines[i])->sidenum[1]];
-			if (side->bottomtexture >= 0 && textureheight[side->bottomtexture] < minsize)
+			if (side->bottomtexture >= mintex && textureheight[side->bottomtexture] < minsize)
 				minsize = textureheight[side->bottomtexture];
 		}
 	}
@@ -1282,17 +1291,18 @@ fixed_t P_FindShortestUpperAround (sector_t *sec)
 	int minsize = MAXINT;
 	side_t *side;
 	int i;
+	int mintex = co_boomphys ? 1 : 0;
 
 	for (i = 0; i < sec->linecount; i++)
 	{
 		if (sec->lines[i]->flags & ML_TWOSIDED)
 		{
 			side = &sides[(sec->lines[i])->sidenum[0]];
-			if (side->toptexture >= 0 && textureheight[side->toptexture] < minsize)
+			if (side->toptexture >= mintex && textureheight[side->toptexture] < minsize)
 				minsize = textureheight[side->toptexture];
 
 			side = &sides[(sec->lines[i])->sidenum[1]];
-			if (side->toptexture >= 0 && textureheight[side->toptexture] < minsize)
+			if (side->toptexture >= mintex && textureheight[side->toptexture] < minsize)
 				minsize = textureheight[side->toptexture];
 		}
 	}
@@ -1459,7 +1469,7 @@ int P_FindSectorFromTagOrLine(int tag, const line_t* line, int start)
 
 /*
 * @brief checks to see if a ZDoom-style door can be unlocked.
-* 
+*
 * @param player: Player to key check
 * @param lock: ZDoom lock type
 * All ZDoom lock types are supported but Odamex is missing
@@ -2272,9 +2282,11 @@ void P_UpdateSpecials (void)
 		}
 	}
 
-	// Update sky column offsets
-	sky1columnoffset += level.sky1ScrollDelta & 0xffffff;
-	sky2columnoffset += level.sky2ScrollDelta & 0xffffff;
+	sky2columnoffset += sky2scrollxdelta & 0xffffff;
+
+	#ifdef CLIENT_APP
+	R_UpdateSkies();
+	#endif
 }
 
 
