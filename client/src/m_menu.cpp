@@ -89,12 +89,19 @@ colorpreset_t D_ColorPreset (const char *colorpreset);
 
 #define SAVESTRINGSIZE	24
 
+enum class oldmenustring_t
+{
+	NONE,
+	SAVEGAME,
+	PLAYERNAME
+};
+
 // we are going to be entering a savegame string
-int 				genStringEnter;
-int					genStringLen;	// [RH] Max # of chars that can be entered
+oldmenustring_t		genStringEnter;
+size_t				genStringLen;	// [RH] Max # of chars that can be entered
 void	(*genStringEnd)(int slot);
 int 				saveSlot;		// which slot to save in
-int 				saveCharIndex;	// which char we're editing
+size_t 				saveCharIndex;	// which char we're editing
 // old save description before edit
 char				saveOldString[SAVESTRINGSIZE];
 
@@ -248,8 +255,6 @@ oldmenu_t MainDef =
 	97,64,
 	0
 };
-
-
 
 //
 // EPISODE SELECT
@@ -701,7 +706,7 @@ void M_DrawSave()
 		screen->DrawTextCleanMove (CR_RED, LoadDef.x, LoadDef.y+LINEHEIGHT*i, savegamestrings[i]);
 	}
 
-	if (genStringEnter)
+	if (genStringEnter != oldmenustring_t::NONE)
 	{
 		i = V_StringWidth(savegamestrings[saveSlot]);
 		screen->DrawTextCleanMove (CR_RED, LoadDef.x + i, LoadDef.y+LINEHEIGHT*saveSlot, "_");
@@ -734,7 +739,7 @@ void M_SaveSelect (int choice)
 	const tm *lt = localtime(&ti);
 
 	// we are going to be intercepting all chars
-	genStringEnter = 1;
+	genStringEnter = oldmenustring_t::SAVEGAME;
 	genStringEnd = M_DoSave;
 	genStringLen = SAVESTRINGSIZE-1;
 
@@ -1372,7 +1377,7 @@ static void M_PlayerSetupDrawer()
 	screen->DrawTextCleanMove (CR_RED, PSetupDef.x + 56, PSetupDef.y, savegamestrings[0]);
 
 	// Draw cursor for either of the above
-	if (genStringEnter)
+	if (genStringEnter != oldmenustring_t::NONE)
 		screen->DrawTextCleanMove(CR_RED, PSetupDef.x + V_StringWidth(savegamestrings[saveSlot]) + 56,
 							PSetupDef.y + ((saveSlot == 0) ? 0 : LINEHEIGHT), "_");
 
@@ -1659,7 +1664,7 @@ static void M_ChangeColorPreset (int choice)
 static void M_EditPlayerName (int choice)
 {
 	// we are going to be intercepting all chars
-	genStringEnter = 1;
+	genStringEnter = oldmenustring_t::PLAYERNAME;
 	genStringEnd = M_PlayerNameChanged;
 	genStringLen = MAXPLAYERNAME;
 
@@ -1876,7 +1881,7 @@ bool M_Responder (event_t* ev)
 
 	// Save Game string input
 	// [RH] and Player Name string input
-	if (genStringEnter)
+	if (genStringEnter != oldmenustring_t::NONE)
 	{
 		if (ch == OKEY_BACKSPACE)
 		{
@@ -1888,14 +1893,16 @@ bool M_Responder (event_t* ev)
 		}
 		else if (Key_IsCancelKey(ch))
 		{
-			genStringEnter = 0;
-			M_ClearMenus();
+			if (genStringEnter == oldmenustring_t::SAVEGAME)
+				M_ClearMenus();
+			genStringEnter = oldmenustring_t::NONE;
 			strcpy(&savegamestrings[saveSlot][0], saveOldString);
 		}
 		else if (Key_IsAcceptKey(ch))
 		{
-			genStringEnter = 0;
-			M_ClearMenus();
+			if (genStringEnter == oldmenustring_t::SAVEGAME)
+				M_ClearMenus();
+			genStringEnter = oldmenustring_t::NONE;
 			if (savegamestrings[saveSlot][0])
 				genStringEnd(saveSlot);	// [RH] Function to call when enter is pressed
 		}
