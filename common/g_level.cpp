@@ -525,7 +525,7 @@ OLumpName CalcMapName(int episode, int level)
 {
 	if (gameinfo.flags & GI_MAPxx)
 	{
-		return fmt::format("MAP{:2d}", level);
+		return fmt::format("MAP{:02d}", level);
 	}
 	else
 	{

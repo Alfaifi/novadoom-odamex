@@ -452,7 +452,7 @@ void ParseUMapInfoLump(int lump, const OLumpName& lumpname)
 				map++;
 				if (gamemode == commercial)
 				{
-					info.nextmap = fmt::format("MAP{:2d}", map);
+					info.nextmap = fmt::format("MAP{:02d}", map);
 				}
 				else
 				{

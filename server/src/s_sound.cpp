@@ -452,7 +452,7 @@ void S_ParseSndInfo()
 				{
 					// Hexen-style $MAP command
 					os.mustScanInt();
-					OLumpName mapname = fmt::format("MAP{:2d}", os.getTokenInt());
+					OLumpName mapname = fmt::format("MAP{:02d}", os.getTokenInt());
 					level_pwad_info_t& info = getLevelInfos().findByName(mapname);
 					os.mustScan();
 					if (info.mapname[0])
