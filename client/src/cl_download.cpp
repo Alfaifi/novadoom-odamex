@@ -320,8 +320,9 @@ static StringTokens GetDownloadDirs()
 
 	// Add all of the sources.
 	D_AddSearchDir(dirs, cl_waddownloaddir.cstring(), PATHLISTSEPCHAR);
+	dirs.push_back(M_GetDownloadDir());
 
-		// These folders should only work on PC versions
+	// These folders should only work on PC versions
 #ifndef GCONSOLE
 	D_AddSearchDir(dirs, Args.CheckValue("-waddir"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, getenv("DOOMWADDIR"), PATHLISTSEPCHAR);
@@ -329,7 +330,6 @@ static StringTokens GetDownloadDirs()
 #endif
 
 	D_AddSearchDir(dirs, waddirs.cstring(), PATHLISTSEPCHAR);
-	dirs.push_back(M_GetDownloadDir());
 
 #ifdef __SWITCH__
 	dirs.push_back("./wads");
