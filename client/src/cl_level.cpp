@@ -751,7 +751,7 @@ void G_WorldDone()
 	cluster_info_t& thiscluster = clusters.findByCluster(level.cluster);
 
 	// Sort out default options to pass to F_StartFinale
-	finale_options_t options = { 0, 0, 0, 0 };
+	finale_options_t options = { "", "", "", "" };
 	options.music = !level.intermusic.empty() ? level.intermusic.c_str() : thiscluster.messagemusic.c_str();
 
 	if (!level.interbackdrop.empty())
