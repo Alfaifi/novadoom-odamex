@@ -799,7 +799,8 @@ void MIType_Pages(OScanner& os, bool doEquals, void* data, unsigned int flags,
 	{
 		os.unScan();
 		static_cast<OLumpName*>(data)[1] = page;
-		static_cast<OLumpName*>(data)[2] = page;
+		if (flags)
+			static_cast<OLumpName*>(data)[2] = page;
 	}
 
 	SkipUnknownType(os);
