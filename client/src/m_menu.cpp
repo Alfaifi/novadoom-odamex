@@ -1343,6 +1343,33 @@ static forceinline void R_RenderFire(int x, int y)
 	fire_surface->unlock();
 }
 
+template<typename PIXEL_T>
+static forceinline void R_RenderFire(int x, int y)
+{
+	IWindowSurface* surface = I_GetPrimarySurface();
+	int surface_pitch = surface->getPitchInPixels();
+
+	fire_surface->lock();
+
+	for (int b = 0; b < fire_surface_height; b++)
+	{
+		PIXEL_T* to = (PIXEL_T*)surface->getBuffer() + y * surface_pitch + x;
+		const palindex_t* from = (palindex_t*)fire_surface->getBuffer() + b * fire_surface->getPitch();
+		y += CleanYfac;
+
+		for (int a = 0; a < fire_surface_width; a++, to += CleanXfac, from++)
+		{
+			for (int c = CleanYfac; c; c--)
+			{
+				for (int i = 0; i < CleanXfac; ++i)
+					*(to + surface_pitch * c + i) = R_FirePixel<PIXEL_T>(*from);
+			}
+		}
+	}
+
+	fire_surface->unlock();
+}
+
 static void M_PlayerSetupDrawer()
 {
 	const int x1 = (I_GetSurfaceWidth() / 2) - (160 * CleanXfac);
@@ -1459,6 +1486,16 @@ static void M_PlayerSetupDrawer()
 				else if (CleanXfac == 3) R_RenderFire<3, palindex_t>(x, y);
 				else if (CleanXfac == 4) R_RenderFire<4, palindex_t>(x, y);
 				else if (CleanXfac == 5) R_RenderFire<5, palindex_t>(x, y);
+				else if (CleanXfac == 6) R_RenderFire<6, palindex_t>(x, y);
+				else if (CleanXfac == 7) R_RenderFire<7, palindex_t>(x, y);
+				else if (CleanXfac == 8) R_RenderFire<8, palindex_t>(x, y);
+				else if (CleanXfac == 9) R_RenderFire<9, palindex_t>(x, y);
+				else if (CleanXfac == 10) R_RenderFire<10, palindex_t>(x, y);
+				else if (CleanXfac == 11) R_RenderFire<11, palindex_t>(x, y);
+				else if (CleanXfac == 12) R_RenderFire<12, palindex_t>(x, y);
+				else if (CleanXfac == 13) R_RenderFire<13, palindex_t>(x, y);
+				else if (CleanXfac == 14) R_RenderFire<14, palindex_t>(x, y);
+				else R_RenderFire<palindex_t>(x, y);
 			}
 			else
 			{
@@ -1468,6 +1505,16 @@ static void M_PlayerSetupDrawer()
 				else if (CleanXfac == 3) R_RenderFire<3, argb_t>(x, y);
 				else if (CleanXfac == 4) R_RenderFire<4, argb_t>(x, y);
 				else if (CleanXfac == 5) R_RenderFire<5, argb_t>(x, y);
+				else if (CleanXfac == 6) R_RenderFire<6, argb_t>(x, y);
+				else if (CleanXfac == 7) R_RenderFire<7, argb_t>(x, y);
+				else if (CleanXfac == 8) R_RenderFire<8, argb_t>(x, y);
+				else if (CleanXfac == 9) R_RenderFire<9, argb_t>(x, y);
+				else if (CleanXfac == 10) R_RenderFire<10, argb_t>(x, y);
+				else if (CleanXfac == 11) R_RenderFire<11, argb_t>(x, y);
+				else if (CleanXfac == 12) R_RenderFire<12, argb_t>(x, y);
+				else if (CleanXfac == 13) R_RenderFire<13, argb_t>(x, y);
+				else if (CleanXfac == 14) R_RenderFire<14, argb_t>(x, y);
+				else R_RenderFire<argb_t>(x, y);
 			}
 
 			fire_surface->unlock();
