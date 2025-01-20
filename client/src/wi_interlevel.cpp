@@ -240,6 +240,7 @@ int ValidateMapName(const OLumpName& mapname)
 		if (sscanf(mapname.c_str(), "MAP%d", &map) != 1)
 			return 0;
 		lumpname = fmt::format("MAP{:02d}", map);
+		epi = 1;
 	}
 	return mapname == lumpname;
 }
