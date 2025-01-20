@@ -1392,8 +1392,8 @@ void WI_loadData()
 		name = exitanim->backgroundlump;
 	else if (!winpic.empty())
 		name = winpic;
-	else if (currentlevel.exitpic[0] != '\0')
-		currentlevel.exitpic;
+	else if (!currentlevel.exitpic.empty())
+		name = currentlevel.exitpic;
 	else
 		name = "INTERPIC";
 
