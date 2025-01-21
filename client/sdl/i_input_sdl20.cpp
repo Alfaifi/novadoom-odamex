@@ -974,7 +974,8 @@ std::vector<IInputDeviceInfo> ISDL20InputSubsystem::getJoystickDevices() const
 		devices.push_back(IInputDeviceInfo());
 		IInputDeviceInfo& device_info = devices.back();
 		device_info.mId = i;
-		device_info.mDeviceName = fmt::format("SDL 2.0 joystick ({})", SDL_GameControllerNameForIndex(i));
+		const char* name = SDL_GameControllerNameForIndex(i);
+		device_info.mDeviceName = fmt::format("SDL 2.0 joystick ({})", name ? name : "unknown");
 	}
 
 	return devices;

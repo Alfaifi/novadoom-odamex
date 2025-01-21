@@ -507,7 +507,7 @@ static int WI_DrawName (const char *str, int x, int y)
 	::V_ColorMap = translationref_t(::Ranges + CR_GREY * 256);
 	while (*str)
 	{
-		int lump = W_CheckNumForName(fmt::format("FONTB{:2d}", toupper(*str) - 32));
+		int lump = W_CheckNumForName(fmt::format("FONTB{:02d}", toupper(*str) - 32));
 
 		if (lump != -1)
 		{
@@ -1392,8 +1392,8 @@ void WI_loadData()
 		name = exitanim->backgroundlump;
 	else if (!winpic.empty())
 		name = winpic;
-	else if (currentlevel.exitpic[0] != '\0')
-		currentlevel.exitpic;
+	else if (!currentlevel.exitpic.empty())
+		name = currentlevel.exitpic;
 	else
 		name = "INTERPIC";
 
