@@ -53,7 +53,7 @@ EXTERN_CVAR(waddirs);
 // ---------------
 
 typedef std::vector<scannedIWAD_t> scannedIWADs_t;
-typedef std::vector<scannedPWAD_t> scannedPWADs_t;
+typedef std::vector<std::pair<scannedPWAD_t, bool>> scannedPWADs_t;
 typedef std::vector<scannedPWAD_t*> scannedPWADPtrs_t;
 
 // display strings for options tab and their corresponding command line arguments
@@ -72,7 +72,7 @@ static scannedPWADs_t::iterator FindScanned(scannedPWADs_t& mut, scannedPWAD_t* 
 {
 	for (scannedPWADs_t::iterator it = mut.begin(); it != mut.end(); ++it)
 	{
-		if (&*it == pwad)
+		if (&it->first == pwad)
 		{
 			return it;
 		}
@@ -463,9 +463,9 @@ class BootWindow : public Fl_Window
 	void rescanPWADs()
 	{
 		m_PWADSelectBrowser->clear();
-		m_PWADs = M_ScanPWADs();
-		for (const auto& pwad : m_PWADs)
+		for (const auto& pwad : M_ScanPWADs())
 		{
+			m_PWADs.emplace_back(pwad, false);
 			m_PWADSelectBrowser->add(pwad.filename.c_str());
 		}
 		m_genWaddirs = ::waddirs.str();
@@ -478,12 +478,13 @@ class BootWindow : public Fl_Window
 	void filterPWADs()
 	{
 		m_PWADSelectBrowser->clear();
-		for (const auto& pwad : m_PWADs)
+		for (const auto& [pwad, checked] : m_PWADs)
 		{
 			if (m_searchPWADs->value()[0] == 0 ||
 				StdStringFind(pwad.filename, m_searchPWADs->value(), 0, m_searchPWADs->size(), true) != std::string::npos)
-				m_PWADSelectBrowser->add(pwad.filename.c_str(), std::find(m_selectedPWADs.begin(), m_selectedPWADs.end(), &pwad) != m_selectedPWADs.end());
+				m_PWADSelectBrowser->add(pwad.filename.c_str(), checked);
 		}
+		m_PWADSelectBrowser->redraw();
 	}
 
 	/**
@@ -496,14 +497,16 @@ class BootWindow : public Fl_Window
 		// Scan all PWADs in the selection browser to see if they're checked.
 		for (int i = 1; i <= boot->m_PWADSelectBrowser->nitems(); i++)
 		{
-			scannedPWAD_t* selected = &boot->m_PWADs[size_t(i) - 1];
+			auto& [pwad, selected] = boot->m_PWADs[size_t(i) - 1];
 			if (boot->m_PWADSelectBrowser->checked(i))
 			{
-				AddSelected(boot->m_selectedPWADs, selected);
+				selected = true;
+				AddSelected(boot->m_selectedPWADs, &pwad);
 			}
 			else
 			{
-				EraseSelected(boot->m_selectedPWADs, selected);
+				selected = false;
+				EraseSelected(boot->m_selectedPWADs, &pwad);
 			}
 		}
 
