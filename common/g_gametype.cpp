@@ -31,6 +31,8 @@
 #include "g_levelstate.h"
 #include "m_wdlstats.h"
 #include "svc_message.h"
+#include "v_textcolors.h"
+#include "s_sound.h"
 
 EXTERN_CVAR(g_gametypename)
 EXTERN_CVAR(g_lives)
@@ -818,8 +820,10 @@ void G_LivesCheckEndGame()
 			SV_BroadcastPrintfButPlayer(PRINT_HIGH, pr.players.front()->id,
 			                            "%s is the last player alive!\n",
 			                            pr.players.front()->userinfo.netname.c_str());
-			SV_MidPrint("You're the last player alive.\nGood luck!\n",
-				         pr.players.front()->id, 3);
+			SV_MidPrint(TEXTCOLOR_RED "!! LAST PLAYER ALIVE !!\n" TEXTCOLOR_WHITE
+				        "You're the" TEXTCOLOR_YELLOW " last resort" TEXTCOLOR_WHITE
+				        ".\nGood luck!\n", pr.players.front()->id, 5);
+			S_PlayerSound(pr.players.front(), NULL, CHAN_GAMEINFO, "misc/horde/boss", ATTN_NONE);
 		}
 		// [Acts 19 quiz] If new players join or a new map starts, we want to
 		// be able to display the hype message again.
