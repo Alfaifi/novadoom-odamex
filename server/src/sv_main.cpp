@@ -208,17 +208,17 @@ CVAR_FUNC_IMPL (sv_maxplayersperteam)
 	for (int i = 0; i < NUMTEAMS;i++)
 	{
 		int normalcount = 0;
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			bool spectator = it->spectator || !it->ingame();
-			if (it->userinfo.team == i && !spectator)
+			bool spectator = player.spectator || !player.ingame();
+			if (player.userinfo.team == i && player.ingame() && !spectator)
 			{
 				normalcount++;
 
 				if (normalcount > var)
 				{
-					SV_SetPlayerSpec(*it, true);
-					SV_PlayerPrintf(it->id, PRINT_HIGH, "Active player limit reduced. You are now a spectator!\n");
+					SV_SetPlayerSpec(player, true);
+					SV_PlayerPrintf(player.id, PRINT_HIGH, "Active player limit reduced. You are now a spectator!\n");
 				}
 			}
 		}
@@ -272,8 +272,8 @@ CVAR_FUNC_IMPL (rcon_password) // Remote console password.
 
 CVAR_FUNC_IMPL(sv_maxrate)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		it->client.rate = int(sv_maxrate);
+	for (auto& player : players)
+		player.client.rate = int(sv_maxrate);
 }
 
 CVAR_FUNC_IMPL(sv_sharekeys)
@@ -281,8 +281,8 @@ CVAR_FUNC_IMPL(sv_sharekeys)
 	if (var)
 	{
 		// Refresh it to everyone
-		for (Players::iterator it = players.begin(); it != players.end(); ++it) {
-			SV_UpdateShareKeys(*it);
+		for (auto& player : players) {
+			SV_UpdateShareKeys(player);
 		}
 	}
 }
@@ -456,9 +456,9 @@ END_COMMAND (exit)
 
 static void SendLevelState(SerializedLevelState sls)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t& cl = it->client;
+		client_t& cl = player.client;
 		MSG_WriteSVC(&cl.reliablebuf, SVC_LevelState(sls));
 	}
 }
@@ -533,10 +533,10 @@ Players::iterator SV_GetFreeClient(void)
 
 player_t &SV_FindPlayerByAddr(void)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (NET_CompareAdr(it->client.address, net_from))
-		   return *it;
+		if (NET_CompareAdr(player.client.address, net_from))
+		   return player;
 	}
 
 	return idplayer(0);
@@ -2153,11 +2153,11 @@ void SV_DrawScores()
 	PlayerPtrList sortedplayers;
 	PlayerPtrList sortedspectators;
 
-	for (Players::const_iterator it = players.begin(); it != players.end(); ++it)
-		if (!it->spectator && it->ingame())
-			sortedplayers.push_back(&*it);
+	for (const auto& player : players)
+		if (!player.spectator && player.ingame())
+			sortedplayers.push_back(&player);
 		else
-			sortedspectators.push_back(&*it);
+			sortedspectators.push_back(&player);
 
 	Printf_Bold("\n");
 
@@ -2197,19 +2197,18 @@ void SV_DrawScores()
             Printf_Bold("ID  Address          Name            Points Caps Frags Time");
             Printf_Bold("-----------------------------------------------------------");
 
-			for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+			for (const auto& player : sortedplayers)
 			{
-				const player_t* itplayer = *it;
-				if (itplayer->userinfo.team == team_num)
+				if (player->userinfo.team == team_num)
 				{
 					Printf_Bold("%-3d %-16s %-15s %-6d N/A  %-5d %-3d",
-							itplayer->id,
-							NET_AdrToString(itplayer->client.address),
-							itplayer->userinfo.netname.c_str(),
-							P_GetPointCount(itplayer),
+							player->id,
+							NET_AdrToString(player->client.address),
+							player->userinfo.netname.c_str(),
+							P_GetPointCount(player),
 							//itplayer->captures,
-					        P_GetFragCount(itplayer),
-							itplayer->GameTime / 60);
+					        P_GetFragCount(player),
+							player->GameTime / 60);
 				}
 			}
 		}
@@ -2251,19 +2250,18 @@ void SV_DrawScores()
             Printf_Bold("ID  Address          Name            Frags Deaths  K/D Time");
             Printf_Bold("-----------------------------------------------------------");
 
-			for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+			for (const auto& player : sortedplayers)
 			{
-				const player_t* itplayer = *it;
-				if (itplayer->userinfo.team == team_num)
+				if (player->userinfo.team == team_num)
 				{
 					Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-							itplayer->id,
-							NET_AdrToString(itplayer->client.address),
-							itplayer->userinfo.netname.c_str(),
-							P_GetFragCount(itplayer),
-							P_GetDeathCount(itplayer),
-							SV_CalculateFragDeathRatio(itplayer),
-							itplayer->GameTime / 60);
+							player->id,
+							NET_AdrToString(player->client.address),
+							player->userinfo.netname.c_str(),
+							P_GetFragCount(player),
+							P_GetDeathCount(player),
+							SV_CalculateFragDeathRatio(player),
+							player->GameTime / 60);
 				}
 			}
 		}
@@ -2294,17 +2292,16 @@ void SV_DrawScores()
         Printf_Bold("ID  Address          Name            Frags Deaths  K/D Time");
         Printf_Bold("-----------------------------------------------------------");
 
-		for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+		for (const auto& player : sortedplayers)
 		{
-			const player_t* itplayer = *it;
 			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-					itplayer->id,
-					NET_AdrToString(itplayer->client.address),
-					itplayer->userinfo.netname.c_str(),
-					P_GetFragCount(itplayer),
-					P_GetDeathCount(itplayer),
-					SV_CalculateFragDeathRatio(itplayer),
-					itplayer->GameTime / 60);
+					player->id,
+					NET_AdrToString(player->client.address),
+					player->userinfo.netname.c_str(),
+					P_GetFragCount(player),
+					P_GetDeathCount(player),
+					SV_CalculateFragDeathRatio(player),
+					player->GameTime / 60);
 		}
 
 	}
@@ -2319,17 +2316,16 @@ void SV_DrawScores()
         Printf_Bold("ID  Address          Name            Kills Deaths  K/D Time");
         Printf_Bold("-----------------------------------------------------------");
 
-		for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
+		for (const auto& player : sortedplayers)
 		{
-			const player_t* itplayer = *it;
 			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-					itplayer->id,
-					NET_AdrToString(itplayer->client.address),
-					itplayer->userinfo.netname.c_str(),
-					itplayer->killcount,
-					itplayer->deathcount,
-					SV_CalculateKillDeathRatio(itplayer),
-					itplayer->GameTime / 60);
+					player->id,
+					NET_AdrToString(player->client.address),
+					player->userinfo.netname.c_str(),
+					player->killcount,
+					player->deathcount,
+					SV_CalculateKillDeathRatio(player),
+					player->GameTime / 60);
 		}
 	}
 
@@ -2340,13 +2336,12 @@ void SV_DrawScores()
 
     	Printf_Bold("-------------------------------------------------SPECTATORS");
 
-		for (PlayerPtrList::const_iterator it = sortedspectators.begin(); it != sortedspectators.end(); ++it)
+		for (const auto& spec : sortedspectators)
 		{
-			const player_t* itplayer = *it;
 			Printf_Bold("%-3d %-16s %-15s\n",
-					itplayer->id,
-					NET_AdrToString(itplayer->client.address),
-					itplayer->userinfo.netname.c_str());
+					spec->id,
+					NET_AdrToString(spec->client.address),
+					spec->userinfo.netname.c_str());
 		}
 	}
 

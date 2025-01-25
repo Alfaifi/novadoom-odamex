@@ -473,12 +473,10 @@ static bool FindIWAD(OResFile& out)
 {
 	// Search for a pre-defined IWAD from the list above
 	std::vector<OString> filenames = W_GetIWADFilenames();
-	for (std::vector<OString>::const_iterator it = filenames.begin();
-	     it != filenames.end(); ++it)
+	for (const auto& filename : filenames)
 	{
 		// Construct a file.
 		OWantFile wantfile;
-		std::string filename = it->c_str();
 		if (!OWantFile::make(wantfile, filename, OFILE_WAD))
 		{
 			continue;

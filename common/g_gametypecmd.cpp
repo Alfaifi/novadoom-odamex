@@ -127,11 +127,9 @@ static StringList GametypeArgs(const GametypeParam (&params)[SIZE], size_t argc,
 	}
 
 	// Apply all the flags
-	std::string buffer;
-	for (CvarTable::const_iterator it = cvars.begin(); it != cvars.end(); ++it)
+	for (const auto& [cvar, def] : cvars)
 	{
-		buffer = fmt::sprintf("%s %d", it->first.c_str(), it->second);
-		ret.push_back(buffer);
+		ret.push_back(fmt::format("{} {}", cvar, def));
 	}
 
 	// We're done!

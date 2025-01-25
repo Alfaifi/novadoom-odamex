@@ -416,7 +416,7 @@ player_t		&displayplayer();
 player_t		&listenplayer();
 player_t		&idplayer(byte id);
 player_t		&nameplayer(const std::string &netname);
-bool			validplayer(player_t &ref);
+bool			validplayer(const player_t &ref);
 
 /**
  * @brief A collection of pointers to players, commonly called a "view".

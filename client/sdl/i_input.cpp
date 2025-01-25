@@ -268,10 +268,10 @@ int I_GetKeyFromName(const std::string& name)
 		return atoi(name.c_str() + 1);
 
 	// Otherwise, we scan the KeyNames[] array for a matching name
-	for (KeyNameTable::const_iterator it = key_names.begin(); it != key_names.end(); ++it)
+	for (const auto& [key, key_name] : key_names)
 	{
-		if (iequals(name, it->second))
-			return it->first;
+		if (iequals(name, key_name))
+			return key;
 	}
 	return 0;
 }
@@ -469,9 +469,9 @@ CVAR_FUNC_IMPL(use_joystick)
 CVAR_FUNC_IMPL(joy_active)
 {
 	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	for (const auto& device : devices)
 	{
-		if (it->mId == (int)var)
+		if (device.mId == (int)var)
 		{
 			I_OpenJoystick();
 			return;
@@ -502,10 +502,10 @@ size_t I_GetJoystickCount()
 std::string I_GetJoystickNameFromIndex(int index)
 {
 	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	for (const auto& device : devices)
 	{
-		if (it->mId == index)
-			return it->mDeviceName;
+		if (device.mId == index)
+			return device.mDeviceName;
 	}
 	return "";
 }
@@ -523,11 +523,11 @@ bool I_OpenJoystick()
 		// Verify that the joystick ID indicated by the joy_active CVAR
 		// is valid and if so, initialize that joystick
 		const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-		for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+		for (const auto& device : devices)
 		{
-			if (it->mId == joy_active.asInt())
+			if (device.mId == joy_active.asInt())
 			{
-				input_subsystem->initJoystick(it->mId);
+				input_subsystem->initJoystick(device.mId);
 				return true;
 			}
 		}
@@ -543,10 +543,10 @@ void I_CloseJoystick()
 	// Verify that the joystick ID indicated by the joy_active CVAR
 	// is valid and if so, shutdown that joystick
 	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	for (const auto& device : devices)
 	{
-		if (it->mId == joy_active.asInt())
-			input_subsystem->shutdownJoystick(it->mId);
+		if (device.mId == joy_active.asInt())
+			input_subsystem->shutdownJoystick(device.mId);
 	}
 
 	// Reset joy position values. Wouldn't want to get stuck in a turn or something. -- Hyper_Eye

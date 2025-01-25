@@ -1003,9 +1003,9 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 	MSG_WriteString (netbuffer, server_host.c_str());
 
 	int playersingame = 0;
-	for (Players::const_iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 			playersingame++;
 	}
 	MSG_WriteByte	(netbuffer, playersingame);
@@ -1029,10 +1029,10 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 	MSG_WriteBool	(netbuffer, (sv_gametype == GM_TEAMDM));
 	MSG_WriteBool	(netbuffer, (sv_gametype == GM_CTF));
 
-	for (Players::const_iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
 		// Notes: client just ignores this data but still expects to parse it
-		if (it->ingame())
+		if (player.ingame())
 		{
 			MSG_WriteString(netbuffer, ""); // player's netname
 			MSG_WriteShort(netbuffer, 0); // player's fragcount
@@ -1081,14 +1081,14 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 	MSG_WriteBool	(netbuffer, false);	// sv_cleanmaps -- removed
 	MSG_WriteBool	(netbuffer, false);	// sv_fragexitswitch
 
-	for (Players::const_iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 		{
-			MSG_WriteShort(netbuffer, it->killcount);
-			MSG_WriteShort(netbuffer, it->deathcount);
+			MSG_WriteShort(netbuffer, player.killcount);
+			MSG_WriteShort(netbuffer, player.deathcount);
 
-			int timeingame = (time(NULL) - it->JoinTime) / 60;
+			int timeingame = (time(NULL) - player.JoinTime) / 60;
 			if (timeingame < 0)
 				timeingame = 0;
 			MSG_WriteShort(netbuffer, timeingame);

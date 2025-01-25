@@ -1070,16 +1070,16 @@ odaproto::svc::CTFRefresh SVC_CTFRefresh(const TeamsView& teams, const bool full
 
 	msg.set_full(full);
 
-	for (TeamsView::const_iterator it = teams.begin(); it != teams.end(); ++it)
+	for (const auto& team : teams)
 	{
 		odaproto::svc::CTFRefresh_TeamInfo* info = msg.add_team_info();
 
-		info->set_points((*it)->Points);
+		info->set_points(team->Points);
 
 		if (full)
 		{
-			info->set_flag_state((*it)->FlagData.state);
-			info->set_flag_flagger((*it)->FlagData.flagger);
+			info->set_flag_state(team->FlagData.state);
+			info->set_flag_flagger(team->FlagData.flagger);
 		}
 	}
 
@@ -1379,9 +1379,9 @@ odaproto::svc::ExecuteACSSpecial SVC_ExecuteACSSpecial(const byte special,
 		msg.set_print(print);
 	}
 
-	for (std::vector<int>::const_iterator it = args.begin(); it != args.end(); ++it)
+	for (const auto& arg : args)
 	{
-		msg.add_args(*it);
+		msg.add_args(arg);
 	}
 
 	return msg;
@@ -1527,14 +1527,13 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status,
 		}
 
 		// Populate the dictionary.
-		for (OStringIndexer::Indexes::const_iterator it = indexer.indexes.begin();
-		     it != indexer.indexes.end(); ++it)
+		for (const auto& [string, idx] : indexer.indexes)
 		{
-			if (!indexer.shouldTransmit(it->second))
+			if (!indexer.shouldTransmit(idx))
 				continue;
 
 			typedef google::protobuf::MapPair<uint32_t, std::string> DictPair;
-			msg.mutable_dict()->insert(DictPair(it->second, it->first));
+			msg.mutable_dict()->insert(DictPair(idx, string));
 		}
 	}
 

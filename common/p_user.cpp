@@ -102,7 +102,7 @@ player_t &nameplayer(const std::string &netname)
 	return nullplayer;
 }
 
-bool validplayer(player_t &ref)
+bool validplayer(const player_t &ref)
 {
 	if (&ref == &nullplayer)
 		return false;

@@ -1087,10 +1087,10 @@ void DrawToasts()
 	int y = 0;
 
 	const float oldtrans = ::hud_transparency;
-	for (drawToasts_t::const_iterator it = g_Toasts.begin(); it != g_Toasts.end(); ++it)
+	for (const auto& toast : g_Toasts)
 	{
 		// Fade the toast out.
-		int tics = ::gametic - it->tic;
+		int tics = ::gametic - toast.tic;
 		if (tics < fadeOutTics)
 		{
 			::hud_transparency.ForceSet(1.0);
@@ -1109,11 +1109,11 @@ void DrawToasts()
 
 		// Right-hand side.
 		hud::DrawText(x, y + 1, hud_scale, hud::X_RIGHT, hud::Y_TOP, hud::X_RIGHT,
-		              hud::Y_TOP, it->right.c_str(), CR_GREY);
-		x += V_StringWidth(it->right.c_str()) + 1;
+		              hud::Y_TOP, toast.right.c_str(), CR_GREY);
+		x += V_StringWidth(toast.right.c_str()) + 1;
 
 		// Icon
-		const patch_t* icon = W_ResolvePatchHandle(it->icon);
+		const patch_t* icon = W_ResolvePatchHandle(toast.icon);
 		const double yoff =
 		    (static_cast<double>(TOAST_HEIGHT) - static_cast<double>(icon->height())) /
 		    2.0;
@@ -1124,7 +1124,7 @@ void DrawToasts()
 
 		// Left-hand side.
 		hud::DrawText(x, y + 1, hud_scale, hud::X_RIGHT, hud::Y_TOP, hud::X_RIGHT,
-		              hud::Y_TOP, it->left.c_str(), CR_GREY);
+		              hud::Y_TOP, toast.left.c_str(), CR_GREY);
 
 		y += TOAST_HEIGHT;
 	}

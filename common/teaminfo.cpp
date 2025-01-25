@@ -268,14 +268,13 @@ int TeamInfo::LivesPool()
 	int pool = 0;
 	PlayerResults pr = PlayerQuery().hasLives().execute();
 
-	for (PlayersView::const_iterator it = pr.players.begin(); it != pr.players.end();
-	     ++it)
+	for (const auto& player : pr.players)
 	{
-		team_t team = (*it)->userinfo.team;
+		team_t team = player->userinfo.team;
 		if (team != Team)
 			continue;
 
-		pool += (*it)->lives;
+		pool += player->lives;
 	}
 
 	return pool;

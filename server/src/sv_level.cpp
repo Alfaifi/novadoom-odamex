@@ -546,11 +546,11 @@ void G_ExitLevel (int position, int drawscores, bool resetinv)
 {
 	if (resetinv)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->ingame())
+			if (player.ingame())
 			{
-				it->doreborn = true;
+				player.doreborn = true;
 			}
 		}
 	}
@@ -576,11 +576,11 @@ void G_SecretExitLevel (int position, int drawscores, bool resetinv)
 {
 	if (resetinv)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->ingame())
+			if (player.ingame())
 			{
-				it->doreborn = true;
+				player.doreborn = true;
 			}
 		}
 	}
@@ -610,9 +610,9 @@ void G_DoCompleted()
 {
 	gameaction = ga_nothing;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		if (it->ingame())
-			G_PlayerFinishLevel(*it);
+	for (auto& player : players)
+		if (player.ingame())
+			G_PlayerFinishLevel(player);
 }
 
 extern void G_SerializeLevel(FArchive &arc, bool hubLoad);
@@ -668,13 +668,12 @@ void G_DoResetLevel(bool full_reset)
 	}
 
 	// Tell clients that a map reset is incoming.
-	Players::iterator it;
-	for (it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		client_t* cl = &(it->client);
+		client_t* cl = &(player.client);
 		MSG_WriteSVC(&cl->reliablebuf, odaproto::svc::ResetMap());
 	}
 
@@ -713,25 +712,25 @@ void G_DoResetLevel(bool full_reset)
 	iquehead = iquetail = 0;
 
 	// Clear player information.
-	for (it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
 		// Don't let players keep cards through a reset.
 		if (G_IsCoopGame())
-			P_ClearPlayerCards(*it);
+			P_ClearPlayerCards(player);
 
-		P_ClearPlayerPowerups(*it);
+		P_ClearPlayerPowerups(player);
 
 		if (full_reset)
 		{
-			P_ClearPlayerScores(*it, SCORES_CLEAR_ALL);
+			P_ClearPlayerScores(player, SCORES_CLEAR_ALL);
 
 			// [AM] Only touch ready state if warmup mode is enabled.
 			if (sv_warmup)
-				it->ready = false;
+				player.ready = false;
 		}
 		else
 		{
-			P_ClearPlayerScores(*it, SCORES_CLEAR_POINTS);
+			P_ClearPlayerScores(player, SCORES_CLEAR_POINTS);
 		}
 	}
 
@@ -752,32 +751,32 @@ void G_DoResetLevel(bool full_reset)
 	SV_UpdatePlayerQueuePositions(G_CanJoinGameStart, NULL);
 
 	// Force every ingame player to be reborn.
-	for (it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!it->ingame())
+		if (!player.ingame())
 			continue;
 
 		// Set the respawning machinery in motion
-		it->playerstate = full_reset ? PST_ENTER : PST_REBORN;
+		player.playerstate = full_reset ? PST_ENTER : PST_REBORN;
 
 		// Do this here, otherwise players won't be reborn until next tic.
 		// [AM] Also, forgetting to do this will result in ticcmds that rely on
 		//      a players subsector to be valid (like use) to crash the server.
-		G_DoReborn(*it);
+		G_DoReborn(player);
 	}
 
 	// Re-add type 10 and 14 sectors
-	for (std::list<sector_t*>::iterator iter = specialdoors.begin(); iter != specialdoors.end(); ++iter)
-		P_AddMovingCeiling(*iter);
+	for (const auto& sector : specialdoors)
+		P_AddMovingCeiling(sector);
 
 	// Send information about the newly reset map, but AFTER the reborns.
-	for (it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
 		// Player needs to actually be ingame
-		if (!it->ingame())
+		if (!player.ingame())
 			continue;
 
-		SV_ClientFullUpdate(*it);
+		SV_ClientFullUpdate(player);
 	}
 }
 
@@ -886,8 +885,8 @@ void G_DoLoadLevel (int position)
 	}
 
 	// For single-player servers.
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		it->joindelay = 0;
+	for (auto& player : players)
+		player.joindelay = 0;
 
 	// Nes - CTF Pre flag setup
 	if (sv_gametype == GM_CTF) {

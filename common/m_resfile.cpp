@@ -179,9 +179,9 @@ std::string M_ResFilesToString(const OResFiles& files)
 {
 	std::vector<std::string> strings;
 	strings.reserve(files.size());
-	for (OResFiles::const_iterator it = files.begin(); it != files.end(); ++it)
+	for (const auto& file : files)
 	{
-		strings.push_back(it->getBasename());
+		strings.push_back(file.getBasename());
 	}
 	return JoinStrings(strings, ", ");
 }
@@ -382,15 +382,11 @@ std::vector<scannedPWAD_t> M_ScanPWADs()
 	std::vector<scannedPWAD_t> rvo;
 	OHashTable<std::string, bool> found;
 
-	for (StringTokens::const_iterator dit = dirs.begin(); dit != dirs.end(); ++dit)
+	for (const auto& dir : dirs)
 	{
-		const std::string& dir = *dit;
-
 		const StringTokens files = M_PWADFilesScanDir(dir);
-		for (StringTokens::const_iterator fit = files.begin(); fit != files.end(); ++fit)
+		for (const auto& filename : files)
 		{
-			const std::string& filename = *fit;
-
 			// [AM] Don't include odamex.wad or IWADs.
 			if (iequals(filename, "odamex.wad"))
 				continue;
@@ -431,10 +427,10 @@ std::string M_GetCurrentWadHashes()
 {
 	std::string builder = "";
 
-	for (OResFiles::const_iterator it = ::wadfiles.begin(); it != ::wadfiles.end(); ++it)
+	for (const auto& file : ::wadfiles)
 	{
-		std::string base = it->getBasename().c_str();
-		std::string hash = it->getMD5().getHexCStr();
+		std::string base = file.getBasename();
+		std::string hash = file.getMD5().getHexStr();
 		std::string line = base + ',' + hash + '\n';
 
 		builder += line;
@@ -466,19 +462,18 @@ END_COMMAND(whereis)
 
 BEGIN_COMMAND(loaded)
 {
-	for (OResFiles::const_iterator it = ::wadfiles.begin(); it != ::wadfiles.end(); ++it)
+	for (const auto& file : ::wadfiles)
 	{
-		Printf("%s\n", it->getBasename().c_str());
-		Printf("  PATH: %s\n", it->getFullpath().c_str());
-		Printf("  MD5:  %s\n", it->getMD5().getHexCStr());
+		PrintFmt("{}\n", file.getBasename());
+		PrintFmt("  PATH: {}\n", file.getFullpath());
+		PrintFmt("  MD5:  {}\n", file.getMD5().getHexStr());
 	}
 
-	for (OResFiles::const_iterator it = ::patchfiles.begin(); it != ::patchfiles.end();
-	     ++it)
+	for (const auto& file : ::patchfiles)
 	{
-		Printf("%s\n", it->getBasename().c_str());
-		Printf("  PATH: %s\n", it->getFullpath().c_str());
-		Printf("  MD5:  %s\n", it->getMD5().getHexCStr());
+		PrintFmt("{}\n", file.getBasename());
+		PrintFmt("  PATH: {}\n", file.getFullpath());
+		PrintFmt("  MD5:  {}\n", file.getMD5().getHexStr());
 	}
 }
 END_COMMAND(loaded)
@@ -487,10 +482,9 @@ BEGIN_COMMAND(searchdirs)
 {
 	Printf("Search Directories:\n");
 	std::vector<std::string> dirs = M_FileSearchDirs();
-	for (std::vector<std::string>::const_iterator it = dirs.begin(); it != dirs.end();
-	     ++it)
+	for (const auto& dir : dirs)
 	{
-		Printf("  %s\n", it->c_str());
+		PrintFmt("  {}\n", dir);
 	}
 }
 END_COMMAND(searchdirs)

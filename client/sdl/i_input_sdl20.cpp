@@ -875,10 +875,10 @@ void ISDL20InputSubsystem::initKeyboard(int id)
 
 	const std::vector<IInputDeviceInfo> devices = getKeyboardDevices();
 	std::string device_name;
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	for (const auto& device : devices)
 	{
-		if (it->mId == id)
-			device_name = it->mDeviceName;
+		if (device.mId == id)
+			device_name = device.mDeviceName;
 	}
 
 	Printf(PRINT_HIGH, "I_InitInput: intializing %s\n", device_name.c_str());
@@ -930,10 +930,10 @@ void ISDL20InputSubsystem::initMouse(int id)
 
 	const std::vector<IInputDeviceInfo> devices = getMouseDevices();
 	std::string device_name;
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	for (const auto& device : devices)
 	{
-		if (it->mId == id)
-			device_name = it->mDeviceName;
+		if (device.mId == id)
+			device_name = device.mDeviceName;
 	}
 
 	Printf(PRINT_HIGH, "I_InitInput: intializing %s\n", device_name.c_str());
@@ -990,10 +990,10 @@ void ISDL20InputSubsystem::initJoystick(int id)
 
 	const std::vector<IInputDeviceInfo> devices = getJoystickDevices();
 	std::string device_name;
-	for (std::vector<IInputDeviceInfo>::const_iterator it = devices.begin(); it != devices.end(); ++it)
+	for (const auto& device : devices)
 	{
-		if (it->mId == id)
-			device_name = it->mDeviceName;
+		if (device.mId == id)
+			device_name = device.mDeviceName;
 	}
 
 	Printf(PRINT_HIGH, "I_InitInput: intializing %s\n", device_name.c_str());

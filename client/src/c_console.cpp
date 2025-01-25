@@ -633,8 +633,8 @@ void ConsoleHistory::movePositionDown()
 
 void ConsoleHistory::dump()
 {
-	for (ConsoleHistoryList::const_iterator it = history.begin(); it != history.end(); ++it)
-		Printf(PRINT_HIGH, "   %s\n", it->c_str());
+	for (const auto& it : history)
+		Printf(PRINT_HIGH, "   %s\n", it.c_str());
 }
 
 class ConsoleCompletions
@@ -678,10 +678,9 @@ class ConsoleCompletions
 		{
 			char compare = '\xFF';
 
-			std::vector<std::string>::const_iterator it = _completions.begin();
-			for (; it != _completions.end(); ++it)
+			for (const auto& comp : _completions)
 			{
-				if (index >= it->length())
+				if (index >= comp.length())
 				{
 					// End of string, this is an implicit failed match.
 					diff = true;
@@ -691,9 +690,9 @@ class ConsoleCompletions
 				if (compare == '\xFF')
 				{
 					// Set character to compare against.
-					compare = it->at(index);
+					compare = comp.at(index);
 				}
-				else if (compare != it->at(index))
+				else if (compare != comp.at(index))
 				{
 					// Found a different character.
 					diff = true;

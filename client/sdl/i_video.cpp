@@ -680,8 +680,8 @@ static bool I_IsModeSupported(uint8_t bpp, EWindowMode window_mode)
 {
 	const IVideoModeList* modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
 
-	for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
-		if (it->bpp == bpp && it->window_mode == window_mode)
+	for (const auto& mode : *modelist)
+		if (mode.bpp == bpp && mode.window_mode == window_mode)
 			return true;
 
 	return false;

@@ -2732,10 +2732,9 @@ static void CL_MaplistUpdate(const odaproto::svc::MaplistUpdate* msg)
 	OStringIndexer indexer = OStringIndexer::maplistFactory();
 
 	// Parse our dictionary first.
-	google::protobuf::Map<uint32_t, std::string>::const_iterator it;
-	for (it = msg->dict().begin(); it != msg->dict().end(); ++it)
+	for (const auto& [idx, str] : msg->dict())
 	{
-		indexer.setIndex(it->first, it->second);
+		indexer.setIndex(idx, str);
 	}
 
 	// Load our maps into the local cache.

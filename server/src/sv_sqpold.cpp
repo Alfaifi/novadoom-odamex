@@ -153,9 +153,9 @@ void SV_SendServerInfo()
 	MSG_WriteString(&ml_message, (char *)sv_hostname.cstring());
 
 	byte playersingame = 0;
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 			playersingame++;
 	}
 
@@ -177,16 +177,16 @@ void SV_SendServerInfo()
 	MSG_WriteBool(&ml_message, (sv_gametype == GM_TEAMDM));
 	MSG_WriteBool(&ml_message, (sv_gametype == GM_CTF));
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 		{
-			MSG_WriteString(&ml_message, it->userinfo.netname.c_str());
-			MSG_WriteShort(&ml_message, it->fragcount);
-			MSG_WriteLong(&ml_message, it->ping);
+			MSG_WriteString(&ml_message, player.userinfo.netname.c_str());
+			MSG_WriteShort(&ml_message, player.fragcount);
+			MSG_WriteLong(&ml_message, player.ping);
 
 			if (G_IsTeamGame())
-				MSG_WriteByte(&ml_message, it->userinfo.team);
+				MSG_WriteByte(&ml_message, player.userinfo.team);
 			else
 				MSG_WriteByte(&ml_message, TEAM_NONE);
 		}
@@ -240,14 +240,14 @@ void SV_SendServerInfo()
 	MSG_WriteBool(&ml_message, false);		// used to be sv_cleanmaps
 	MSG_WriteBool(&ml_message, (sv_fragexitswitch ? true : false));
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 		{
-			MSG_WriteShort(&ml_message, it->killcount);
-			MSG_WriteShort(&ml_message, it->deathcount);
+			MSG_WriteShort(&ml_message, player.killcount);
+			MSG_WriteShort(&ml_message, player.deathcount);
 
-			int timeingame = (time(NULL) - it->JoinTime)/60;
+			int timeingame = (time(NULL) - player.JoinTime)/60;
 			if (timeingame<0) timeingame=0;
 				MSG_WriteShort(&ml_message, timeingame);
 		}
@@ -258,11 +258,11 @@ void SV_SendServerInfo()
     MSG_WriteLong(&ml_message, (DWORD)0x01020304);
     MSG_WriteShort(&ml_message, sv_maxplayers.asInt());
 
-    for (Players::iterator it = players.begin();it != players.end();++it)
+    for (const auto& player : players)
     {
-        if (it->ingame())
+        if (player.ingame())
         {
-            MSG_WriteBool(&ml_message, (it->spectator ? true : false));
+            MSG_WriteBool(&ml_message, player.spectator);
         }
     }
 

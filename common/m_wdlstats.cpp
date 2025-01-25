@@ -232,12 +232,11 @@ static void RemoveWDLPlayerSpawn(const mapthing2_t* mthing)
 	bool found = false;
 	WDLPlayerSpawn w;
 
-	WDLPlayerSpawns::const_iterator it = ::wdlplayerspawns.begin();
-	for (; it != ::wdlplayerspawns.end(); ++it)
+	for (const auto& spawn : ::wdlplayerspawns)
 	{
-		if ((*it).x == mthing->x && (*it).y == mthing->y && (*it).z == mthing->z)
+		if (spawn.x == mthing->x && spawn.y == mthing->y && spawn.z == mthing->z)
 		{
-			w = (*it);
+			w = spawn;
 			found = true;
 			break;
 		}
@@ -253,11 +252,10 @@ static void RemoveWDLPlayerSpawn(const mapthing2_t* mthing)
 
 int GetItemSpawn(int x, int y, int z, WDLPowerups item)
 {
-	WDLItemSpawns::const_iterator it = ::wdlitemspawns.begin();
-	for (; it != ::wdlitemspawns.end(); ++it)
+	for (const auto& spawn : ::wdlitemspawns)
 	{
-		if ((*it).x == x && (*it).y == y && (*it).z == z)
-			return (*it).id;
+		if (spawn.x == x && spawn.y == y && spawn.z == z)
+			return spawn.id;
 	}
 	return 0;
 }
@@ -266,11 +264,10 @@ void M_LogWDLItemSpawn(AActor* target, WDLPowerups type)
 {
 	// [Blair] Add item spawn to the table.
 	// Don't add an overlapping item spawn, treat it as one.
-	WDLItemSpawns::const_iterator it = ::wdlitemspawns.begin();
-	for (; it != ::wdlitemspawns.end(); ++it)
+	for (const auto& spawn : ::wdlitemspawns)
 	{
-		if ((*it).x == target->x && (*it).y == target->y && (*it).z == target->z &&
-		    (*it).item == type)
+		if (spawn.x == target->x && spawn.y == target->y && spawn.z == target->z &&
+		    spawn.item == type)
 			return;
 	}
 
@@ -913,11 +910,10 @@ int M_GetPlayerSpawn(int x, int y)
 	if (!::wdlstate.recording)
 		return 0;
 
-	WDLPlayerSpawns::const_iterator it = ::wdlplayerspawns.begin();
-	for (; it != ::wdlplayerspawns.end(); ++it)
+	for (const auto& spawn : ::wdlplayerspawns)
 	{
-		if ((*it).x == x && (*it).y == y)
-			return (*it).id;
+		if (spawn.x == x && spawn.y == y)
+			return spawn.id;
 	}
 	return 0;
 }
@@ -1007,29 +1003,25 @@ void M_CommitWDLLog()
 
 	// Players
 	fprintf(fh, "players\n");
-	WDLPlayers::const_iterator pit = ::wdlplayers.begin();
-	for (; pit != ::wdlplayers.end(); ++pit)
-		fprintf(fh, "%d,%d,%d,%s\n", pit->id, pit->pid, pit->team, pit->netname.c_str());
+	for (const auto& pl : ::wdlplayers)
+		fprintf(fh, "%d,%d,%d,%s\n", pl.id, pl.pid, pl.team, pl.netname.c_str());
 
 	// ItemSpawns
 	fprintf(fh, "itemspawns\n");
-	WDLItemSpawns::const_iterator isit = ::wdlitemspawns.begin();
-	for (; isit != ::wdlitemspawns.end(); ++isit)
-		fprintf(fh, "%d,%d,%d,%d,%d\n", isit->id, isit->x, isit->y, isit->z, isit->item);
+	for (const auto& is : ::wdlitemspawns)
+		fprintf(fh, "%d,%d,%d,%d,%d\n", is.id, is.x, is.y, is.z, is.item);
 
 	// PlayerSpawns
 	fprintf(fh, "playerspawns\n");
-	WDLPlayerSpawns::const_iterator psit = ::wdlplayerspawns.begin();
-	for (; psit != ::wdlplayerspawns.end(); ++psit)
-		fprintf(fh, "%d,%d,%d,%d,%d\n", psit->id, psit->team, psit->x, psit->y, psit->z);
+	for (const auto& ps : ::wdlplayerspawns)
+		fprintf(fh, "%d,%d,%d,%d,%d\n", ps.id, ps.team, ps.x, ps.y, ps.z);
 
 	if (sv_gametype == GM_CTF)
 	{
 		// FlagLocation
 		fprintf(fh, "flaglocations\n");
-		WDLFlagLocations::const_iterator flit = ::wdlflaglocations.begin();
-		for (; flit != ::wdlflaglocations.end(); ++flit)
-			fprintf(fh, "%d,%d,%d,%d\n", flit->team, flit->x, flit->y, flit->z);
+		for (const auto& fl : ::wdlflaglocations)
+			fprintf(fh, "%d,%d,%d,%d\n", fl.team, fl.x, fl.y, fl.z);
 	}
 
 	// Wads
@@ -1038,14 +1030,13 @@ void M_CommitWDLLog()
 
 	// Events
 	fprintf(fh, "events\n");
-	WDLEventLog::const_iterator eit = ::wdlevents.begin();
-	for (; eit != ::wdlevents.end(); ++eit)
+	for (const auto& ev : ::wdlevents)
 	{
 		//          "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
-		fprintf(fh, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", eit->ev,
-		        eit->activator, eit->target, eit->gametic, eit->apos[0], eit->apos[1],
-		        eit->apos[2], eit->tpos[0], eit->tpos[1], eit->tpos[2], eit->arg0,
-		        eit->arg1, eit->arg2, eit->arg3);
+		fprintf(fh, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", ev.ev,
+		        ev.activator, ev.target, ev.gametic, ev.apos[0], ev.apos[1],
+		        ev.apos[2], ev.tpos[0], ev.tpos[1], ev.tpos[2], ev.arg0,
+		        ev.arg1, ev.arg2, ev.arg3);
 	}
 
 	fclose(fh);

@@ -227,10 +227,8 @@ void OKeyBindings::BindAKey(size_t argc, char** argv, const char* msg)
 	else
 	{
 		Printf(PRINT_HIGH, "%s\n", msg);
-		for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
+		for (const auto& [key, binding] : Binds)
 		{
-			int key = it->first;
-			const std::string& binding = it->second;
 			if (!binding.empty())
 				Printf(PRINT_HIGH, "%s = %s\n", I_GetKeyName(key).c_str(), C_QuoteString(binding).c_str());
 		}
@@ -425,10 +423,8 @@ void C_ReleaseKeys()
 
 void OKeyBindings::ArchiveBindings(FILE* f)
 {
-	for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
+	for (const auto& [key, binding] : Binds)
 	{
-		const int key = it->first;
-		const std::string& binding = it->second;
 		if (!binding.empty())
 			fprintf(f, "%s %s %s\n", command.c_str(), C_QuoteString(I_GetKeyName(key)).c_str(), C_QuoteString(binding).c_str());
 	}
@@ -440,10 +436,8 @@ int OKeyBindings::GetKeysForCommand(const char* cmd, int* first, int* second)
 	int c = 0;
 	*first = *second = 0;
 
-	for (BindingTable::const_iterator it = Binds.begin(); it != Binds.end(); ++it)
+	for (const auto& [key, binding] : Binds)
 	{
-		int key = it->first;
-		const std::string& binding = it->second;
 		if (!binding.empty() && stricmp(cmd, binding.c_str()) == 0)
 		{
 			c++;

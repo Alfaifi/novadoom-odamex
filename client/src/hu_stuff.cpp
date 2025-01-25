@@ -861,9 +861,8 @@ void drawHeader(player_t *player, int y)
 	else if (timer.size() > 5)
 		rw = V_StringWidth("00:00:00");
 
-	StringTokens::const_iterator it;
-	for (it = values.begin(); it != values.end(); ++it)
-		rw = std::max(V_StringWidth(it->c_str()), rw);
+	for (const auto& val : values)
+		rw = std::max(V_StringWidth(val.c_str()), rw);
 
 	for (size_t i = 0; i < values.size() && i < 3; i++)
 	{

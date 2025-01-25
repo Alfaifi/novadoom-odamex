@@ -805,11 +805,10 @@ void TeamLives(std::string& str, int& color, byte team)
 
 	PlayerResults results = PlayerQuery().hasLives().onTeam(static_cast<team_t>(team)).execute();
 	int lives = 0;
-	PlayersView::const_iterator it = results.players.begin();
 	for (const auto& player : results.players)
 		lives += player->lives;
 
-	str = fmt::sprintf("%d", lives);
+	str = fmt::format("{}", lives);
 }
 
 std::string TeamKD(int& color, byte team) {
@@ -1741,6 +1740,7 @@ void EATargets(int x, int y, const float scale,
 	for (size_t i = 0; i < Targets.size(); i++) {
 		for (size_t j = i + 1; j < Targets.size(); j++) {
 			if (Targets[j].Distance < Targets[i].Distance) {
+				player_t* PlayPtr = Targets[i].PlayPtr;
 				int Distance = Targets[i].Distance;
 				int Color = Targets[i].Color;
 				Targets[i].PlayPtr = Targets[j].PlayPtr;

@@ -113,10 +113,9 @@ bool Maplist::insert(const size_t &position, maplist_entry_t &maplist_entry) {
 			// loaded WAD files.  Add one to the beginning of wadfiles, since
 			// position 0 stores odamex.wad.
 			maplist_entry.wads.clear();
-			for (OResFiles::const_iterator it = ::wadfiles.begin() + 1;
-			     it != ::wadfiles.end(); ++it)
+			for (const auto& file : ::wadfiles)
 			{
-				maplist_entry.wads.push_back(it->getBasename());
+				maplist_entry.wads.push_back(file.getBasename());
 			}
 		}
 		else

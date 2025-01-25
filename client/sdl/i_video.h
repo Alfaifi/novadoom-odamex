@@ -125,7 +125,7 @@ public:
 	bool operator==(const IVideoMode& other) const
 	{
 		return width == other.width && height == other.height &&
-			bpp == other.bpp && 
+			bpp == other.bpp &&
 			window_mode == other.window_mode &&
 			vsync == other.vsync &&
 			stretch_mode == other.stretch_mode;
@@ -232,9 +232,9 @@ public:
 	virtual bool supports8bpp() const
 	{
 		const IVideoModeList* modelist = getSupportedVideoModes();
-		for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
+		for (const auto& mode : *modelist)
 		{
-			if (it->bpp == 8)
+			if (mode.bpp == 8)
 				return true;
 		}
 		return false;
@@ -243,9 +243,9 @@ public:
 	virtual bool supports32bpp() const
 	{
 		const IVideoModeList* modelist = getSupportedVideoModes();
-		for (IVideoModeList::const_iterator it = modelist->begin(); it != modelist->end(); ++it)
+		for (const auto& mode : *modelist)
 		{
-			if (it->bpp == 32)
+			if (mode.bpp == 32)
 				return true;
 		}
 		return false;

@@ -1516,10 +1516,10 @@ void AM_rotatePoint(mpoint_t& pt)
 void AM_drawLineCharacter(const std::vector<mline_t>& lineguy, fixed64_t scale,
                           angle_t angle, am_color_t color, fixed64_t x, fixed64_t y)
 {
-	for (std::vector<mline_t>::const_iterator it = lineguy.begin(); it != lineguy.end(); ++it)
+	for (const auto& mline : lineguy)
 	{
 		mline_t l;
-		M_SetVec2Fixed64(&l.a, it->a.x, it->a.y);
+		M_SetVec2Fixed64(&l.a, mline.a.x, mline.a.y);
 
 		if (scale)
 			M_ScaleVec2Fixed64(&l.a, &l.a, scale);
@@ -1530,7 +1530,7 @@ void AM_drawLineCharacter(const std::vector<mline_t>& lineguy, fixed64_t scale,
 		l.a.x += x;
 		l.a.y += y;
 
-		M_SetVec2Fixed64(&l.b, it->b.x, it->b.y);
+		M_SetVec2Fixed64(&l.b, mline.b.x, mline.b.y);
 
 		if (scale)
 			M_ScaleVec2Fixed64(&l.b, &l.b, scale);
