@@ -691,7 +691,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 {
 	ParseMapInfoHelper<std::string>(os, newStyleMapInfo);
 
-	char** text = static_cast<char**>(data);
+	std::string* text = static_cast<std::string*>(data);
 
 	if (newStyleMapInfo)
 	{
@@ -709,8 +709,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 			{
 				os.error("Unknown lookup string \"%s\".", os.getToken().c_str());
 			}
-			free(*text);
-			*text = strdup(s.c_str());
+			*text = s;
 		}
 		else
 		{
@@ -732,8 +731,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 				ctext.resize(ctext.length() - 1);
 			}
 
-			free(*text);
-			*text = strdup(ctext.c_str());
+			*text = ctext;
 		}
 	}
 	else
@@ -747,13 +745,11 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 				os.error("Unknown lookup string \"%s\".", os.getToken().c_str());
 			}
 
-			free(*text);
-			*text = strdup(s.c_str());
+			*text = s;
 		}
 		else
 		{
-			free(*text);
-			*text = strdup(os.getToken().c_str());
+			*text = os.getToken();
 		}
 	}
 }

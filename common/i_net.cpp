@@ -189,8 +189,7 @@ void init_upnp (void)
 	if (descXML)
 	{
 		parserootdesc (descXML, descXMLsize, &data);
-		free (descXML);
-		descXML = NULL;
+		M_Free(descXML);
 		GetUPNPUrls (&urls, &data, dev->descURL, 0);
 	}
 

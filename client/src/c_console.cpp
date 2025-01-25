@@ -2276,7 +2276,7 @@ void C_MidPrint(const char *msg, player_t *p, int msgtime)
 			MidLines = i;
 		}
 
-		free(newmsg);
+		M_Free(newmsg);
 	}
 	else
 		MidMsg = NULL;
@@ -2355,7 +2355,7 @@ void C_GMidPrint(const char* msg, int color, int msgtime)
 		}
 
 		GameColor = color;
-		free(newmsg);
+		M_Free(newmsg);
 	}
 	else
 	{

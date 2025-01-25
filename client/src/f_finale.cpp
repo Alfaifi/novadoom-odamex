@@ -74,7 +74,7 @@ enum finale_lump_t
 	FINALE_GRAPHIC,
 };
 
-const char* finaletext;
+std::string finaletext;
 OLumpName finalelump;
 finale_lump_t finalelumptype = FINALE_NONE;
 
@@ -199,7 +199,7 @@ void F_StartFinale(finale_options_t& options)
 		::finalelump = gameinfo.finaleFlat;
 	}
 
-	if (options.text)
+	if (!options.text.empty())
 	{
 		::finaletext = options.text;
 	}
@@ -368,7 +368,7 @@ void F_TextWrite ()
 
 	// draw some of the text onto the screen
 	int cx = gameinfo.textScreenX, cy = gameinfo.textScreenY;
-	const char* ch = finaletext;
+	const char* ch = finaletext.c_str();
 
 	if (finalecount < gameinfo.textScreenY + 1)
 		return;

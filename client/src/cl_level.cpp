@@ -770,11 +770,11 @@ void G_WorldDone()
 
 	if (secretexit)
 	{
-		options.text = (!level.intertextsecret.empty()) ? level.intertextsecret.c_str() : thiscluster.exittext;
+		options.text = (!level.intertextsecret.empty()) ? level.intertextsecret : thiscluster.exittext;
 	}
 	else
 	{
-		options.text = (!level.intertext.empty()) ? level.intertext.c_str() : thiscluster.exittext;
+		options.text = (!level.intertext.empty()) ? level.intertext : thiscluster.exittext;
 	}
 
 	if (!strnicmp(level.nextmap.c_str(), "EndGame", 7))
@@ -796,7 +796,7 @@ void G_WorldDone()
 		if (nextcluster.cluster != level.cluster && sv_gametype == GM_COOP) {
 			// Only start the finale if the next level's cluster is different
 			// than the current one and we're not in deathmatch.
-			if (nextcluster.entertext)
+			if (!nextcluster.entertext.empty())
 			{
 				// All of our options need to be from the next cluster.
 				options.music = nextcluster.messagemusic;
@@ -813,7 +813,7 @@ void G_WorldDone()
 				AM_Stop();
 				F_StartFinale(options);
 			}
-			else if (thiscluster.exittext)
+			else if (!thiscluster.exittext.empty())
 			{
 				AM_Stop();
 				if (thiscluster.flags & CLUSTER_EXITTEXTISLUMP)

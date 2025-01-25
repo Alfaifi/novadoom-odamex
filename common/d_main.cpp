@@ -211,8 +211,7 @@ static char *GetRegistryString(registry_value_t *reg_val)
 		if (RegQueryValueEx(key, reg_val->value, NULL, &valtype,
 		    (unsigned char *)result, &len) != ERROR_SUCCESS)
 		{
-			free(result);
-			result = NULL;
+			M_Free(result);
 		}
 	}
 
@@ -279,7 +278,7 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 			if (unstr == NULL)
 			{
-				free(val);
+				M_Free(val);
 			}
 			else
 			{
@@ -312,7 +311,7 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 				D_AddSearchDir(dirs, csubpath, separator);
 			}
 
-			free(install_path);
+			M_Free(install_path);
 		}
 	}
 
@@ -335,10 +334,10 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 				const char* csubpath = subpath;
 				D_AddSearchDir(dirs, csubpath, separator);
 
-				free(subpath);
+				M_FileExists(subpath);
 			}
 
-			free(install_path);
+			M_FileExists(install_path);
 		}
 	}
 

@@ -965,7 +965,7 @@ void G_WorldDone (void)
 	cluster_info_t& thiscluster = clusters.findByCluster(level.cluster);
 	if (!strnicmp (level.nextmap.c_str(), "EndGame", 7)) {
 //		F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis - fixme - what should happen on the server?
-		finaletext = thiscluster.exittext;
+		finaletext = thiscluster.exittext.c_str();
 	} else {
 		cluster_info_t& nextcluster = (secretexit) ?
 			clusters.findByCluster(levels.findByName(::level.secretmap).cluster) :
@@ -975,15 +975,15 @@ void G_WorldDone (void)
 		{
 			// Only start the finale if the next level's cluster is different
 			// than the current one and we're not in deathmatch.
-			if (nextcluster.entertext)
+			if (!nextcluster.entertext.empty())
 			{
 //				F_StartFinale (nextcluster->messagemusic, nextcluster->finaleflat, nextcluster->entertext); // denis - fixme
-				finaletext = nextcluster.entertext;
+				finaletext = nextcluster.entertext.c_str();
 			}
-			else if (thiscluster.exittext)
+			else if (!thiscluster.exittext.empty())
 			{
 //				F_StartFinale (thiscluster->messagemusic, thiscluster->finaleflat, thiscluster->exittext); // denis - fixme
-				finaletext = thiscluster.exittext;
+				finaletext = thiscluster.exittext.c_str();
 			}
 		}
 	}

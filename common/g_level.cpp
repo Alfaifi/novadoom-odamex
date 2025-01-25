@@ -233,15 +233,7 @@ cluster_info_t& ClusterInfos::at(size_t i)
 // Clear all cluster definitions
 void ClusterInfos::clear()
 {
-	// Free all strings.
-	for (auto& info : m_infos)
-	{
-		free(info.exittext);
-		info.exittext = nullptr;
-		free(info.entertext);
-		info.entertext = nullptr;
-	}
-	return m_infos.clear();
+	m_infos.clear();
 }
 
 // Add a new levelinfo and return it by reference
@@ -1083,7 +1075,7 @@ BEGIN_COMMAND(clusterinfo)
 	Printf(PRINT_HIGH, "Cluster: %d\n", info.cluster);
 	Printf(PRINT_HIGH, "Message Music: %s\n", info.messagemusic.c_str());
 	Printf(PRINT_HIGH, "Message Flat: %s\n", info.finaleflat.c_str());
-	if (info.exittext)
+	if (!info.exittext.empty())
 	{
 		Printf(PRINT_HIGH, "- = Exit Text = -\n%s\n- = = = -\n", info.exittext);
 	}
@@ -1091,7 +1083,7 @@ BEGIN_COMMAND(clusterinfo)
 	{
 		Printf(PRINT_HIGH, "Exit Text: None\n");
 	}
-	if (info.entertext)
+	if (!info.entertext.empty())
 	{
 		Printf(PRINT_HIGH, "- = Enter Text = -\n%s\n- = = = -\n", info.entertext);
 	}

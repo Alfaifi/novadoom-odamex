@@ -382,7 +382,7 @@ void STACK_ARGS VStrFormat(std::string& out, const char* fmt, va_list va)
 	}
 
 	out = buf;
-	free(buf);
+	M_Free(buf);
 }
 
 /**
