@@ -490,7 +490,7 @@ CVAR_FUNC_IMPL(joy_active)
 //
 // I_GetJoystickCount
 //
-int I_GetJoystickCount()
+size_t I_GetJoystickCount()
 {
 	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
 	return devices.size();

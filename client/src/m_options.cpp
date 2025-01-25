@@ -1768,12 +1768,11 @@ void M_OptDrawer (void)
 
 			case joyactive:
 			{
-				int         numjoy;
 				std::string joyname;
 
-				numjoy = I_GetJoystickCount();
+				size_t numjoy = I_GetJoystickCount();
 
-				if((int)item->a.cvar->value() > numjoy)
+				if((size_t)item->a.cvar->value() > numjoy)
 					item->a.cvar->Set(0.0);
 
 				if(!numjoy)
