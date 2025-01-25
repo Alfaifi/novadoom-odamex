@@ -1094,8 +1094,7 @@ odaproto::svc::CTFEvent SVC_CTFEvent(const flag_score_t event, const team_t targ
 	msg.set_event(event);
 	msg.set_target_team(target);
 
-	// [AM] FIXME: validplayer shouldn't need a const I don't think...
-	if (validplayer(const_cast<player_t&>(player)))
+	if (validplayer(player))
 	{
 		msg.set_player_team(player.userinfo.team);
 		msg.set_player_id(player.id);

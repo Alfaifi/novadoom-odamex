@@ -56,9 +56,6 @@
 #include "g_gametype.h"
 #include "p_hordespawn.h"
 #include "g_episode.h"
-
-// FIXME: Remove this as soon as the JoinString is gone from G_ChangeMap()
-#include "cmdlib.h"
 #include "g_skill.h"
 
 #define lioffset(x)		offsetof(level_pwad_info_t,x)
