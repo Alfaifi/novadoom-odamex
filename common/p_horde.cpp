@@ -133,10 +133,8 @@ class corpseCollector_t
  */
 static void ActivateMonsters(AActors& mobjs)
 {
-	for (AActors::iterator it = mobjs.begin(); it != mobjs.end(); ++it)
+	for (auto& mo : mobjs)
 	{
-		AActor* mo = *it;
-
 		// Add them health pool now, since the function to do this is
 		// in this TU anyway.
 		P_AddHealthPool(mo);
@@ -269,27 +267,27 @@ class HordeState
 		{
 			// Give all ingame players an extra life for beating the wave.
 			PlayersView ingame = PlayerQuery().execute().players;
-			for (PlayersView::iterator it = ingame.begin(); it != ingame.end(); ++it)
+			for (const auto& player : ingame)
 			{
 				// Dead players are reborn with a message.
-				if ((*it)->lives <= 0)
+				if (player->lives <= 0)
 				{
-					(*it)->playerstate = PST_REBORN;
+					player->playerstate = PST_REBORN;
 					SV_BroadcastPrintf("%s gets a new lease on life.\n",
-					                   (*it)->userinfo.netname.c_str());
+					                   player->userinfo.netname.c_str());
 
 					// Send a res sound directly to this player.
-					S_PlayerSound(*it, NULL, CHAN_INTERFACE, "misc/plraise",
+					S_PlayerSound(player, NULL, CHAN_INTERFACE, "misc/plraise",
 					              ATTN_NONE);
 				}
 				// Give everyone an extra life.
-				if ((*it)->lives < g_lives)
+				if (player->lives < g_lives)
 				{
-					(*it)->lives += 1;
-					MSG_WriteSVC(&(*it)->client.reliablebuf, SVC_PlayerInfo(**it));
+					player->lives += 1;
+					MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
 					MSG_BroadcastSVC(CLBUF_RELIABLE,
-					                 SVC_PlayerMembers(**it, SVC_PM_LIVES),
-					                 (*it)->id);
+					                 SVC_PlayerMembers(*player, SVC_PM_LIVES),
+					                 player->id);
 				}
 			}
 
@@ -298,12 +296,12 @@ class HordeState
 			// players a single life to start with.
 			PlayersView queued = SpecQuery().onlyInQueue().execute();
 			SV_UpdatePlayerQueuePositions(G_CanJoinGameStart, NULL);
-			for (PlayersView::iterator it = queued.begin(); it != queued.end(); ++it)
+			for (const auto& player : queued)
 			{
-				(*it)->lives = 1;
-				MSG_WriteSVC(&(*it)->client.reliablebuf, SVC_PlayerInfo(**it));
+				player->lives = 1;
+				MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
 				MSG_BroadcastSVC(CLBUF_RELIABLE,
-				                 SVC_PlayerMembers(**it, SVC_PM_LIVES), (*it)->id);
+				                 SVC_PlayerMembers(*player, SVC_PM_LIVES), player->id);
 			}
 		#endif
 		}

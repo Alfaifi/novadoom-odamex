@@ -149,10 +149,10 @@ public:
 private:
 	static constexpr int bytesize = 8 * sizeof(byte);
 	static constexpr int bytemask = bytesize - 1;
-	
+
 	// Hacky way of getting ceil() at compile-time
 	static constexpr size_t fieldsize = (MAXPLAYERS + bytemask) / bytesize;
-	
+
 	byte	bitfield[fieldsize];
 };
 
@@ -414,11 +414,28 @@ class AActor : public DThinker
 			return ptr;
 		}
 
+		operator const AActorPtr() const
+		{
+			return ptr;
+		}
+		operator const AActor*() const
+		{
+			return ptr;
+		}
+
 		AActor &operator *()
 		{
 			return *ptr;
 		}
 		AActor *operator ->()
+		{
+			return ptr;
+		}
+		const AActor &operator *() const
+		{
+			return *ptr;
+		}
+		const AActor *operator ->() const
 		{
 			return ptr;
 		}
@@ -595,7 +612,7 @@ public:
 	private:
 		void clear();
 		size_t getIndex(int bmx, int bmy);
-		
+
 		static constexpr size_t BLOCKSX = 3;
 		static constexpr size_t BLOCKSY = 3;
 

@@ -1741,7 +1741,6 @@ void EATargets(int x, int y, const float scale,
 	for (size_t i = 0; i < Targets.size(); i++) {
 		for (size_t j = i + 1; j < Targets.size(); j++) {
 			if (Targets[j].Distance < Targets[i].Distance) {
-				player_t* PlayPtr = Targets[i].PlayPtr;
 				int Distance = Targets[i].Distance;
 				int Color = Targets[i].Color;
 				Targets[i].PlayPtr = Targets[j].PlayPtr;

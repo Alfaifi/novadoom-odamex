@@ -116,11 +116,10 @@ void InitTeamInfo()
 void TeamInfo_ResetScores(bool fullreset)
 {
 	// Clear teamgame state.
-	Players::iterator it;
 	for (size_t i = 0; i < NUMTEAMS; i++)
 	{
-		for (it = players.begin(); it != players.end(); ++it)
-			it->flags[i] = false;
+		for (auto& player : players)
+			player.flags[i] = false;
 
 		TeamInfo* teamInfo = GetTeamInfo((team_t)i);
 		teamInfo->FlagData.flagger = 0;

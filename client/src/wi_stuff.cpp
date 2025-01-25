@@ -762,7 +762,7 @@ void WI_drawNoState()
 	WI_drawShowNextLoc();
 }
 
-int WI_fragSum (player_t &player)
+int WI_fragSum (const player_t &player)
 {
 	return player.fragcount;
 }
@@ -790,7 +790,7 @@ void WI_initNetgameStats()
 	cnt_secret_c.clear();
 	cnt_frags_c.clear();
 
-	for (auto& player : players)
+	for (const auto& player : players)
 	{
 		if (!(player.ingame()))
 			continue;

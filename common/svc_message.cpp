@@ -1505,24 +1505,22 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status,
 		// are already known on the receiving end.
 		OStringIndexer indexer = OStringIndexer::maplistFactory();
 
-		for (maplist_qrows_t::const_iterator it = maplist->begin(); it != maplist->end();
-		     ++it)
+		for (const auto& [_, entry] : *maplist)
 		{
 			// Create a row and add an indexed map to it.
 			odaproto::svc::MaplistUpdate::Row* row = msg.add_maplist();
-			const std::string& map = it->second->map;
+			const std::string& map = entry->map;
 			const uint32_t mapidx = indexer.getIndex(map);
 			row->set_map(mapidx);
 
-			const std::string& lastmap = it->second->lastmap;
+			const std::string& lastmap = entry->lastmap;
 			const uint32_t lastmapidx = indexer.getIndex(lastmap);
 			row->set_lastmap(lastmapidx);
 
-			for (std::vector<std::string>::iterator itr = it->second->wads.begin();
-			     itr != it->second->wads.end(); ++itr)
+			for (const auto& wad : entry->wads)
 			{
 				// Push an indexed WAD into the message.
-				std::string filename = D_CleanseFileName(*itr);
+				std::string filename = D_CleanseFileName(wad);
 				const uint32_t wadidx = indexer.getIndex(filename);
 				row->add_wads(wadidx);
 			}

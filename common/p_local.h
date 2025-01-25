@@ -98,7 +98,7 @@ weaponstate_t P_GetWeaponState(player_t* player);
 void P_FallingDamage (AActor *ent);
 void P_PlayerThink (player_t *player);
 void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS]);
-bool P_AreTeammates(player_t& a, player_t& b);
+bool P_AreTeammates(const player_t& a, const player_t& b);
 bool P_CanSpy(player_t &viewer, player_t &other, bool demo = false);
 
 //
@@ -182,11 +182,11 @@ typedef BOOL (*traverser_t) (intercept_t *in);
 
 subsector_t* P_PointInSubsector(fixed_t x, fixed_t y);
 fixed_t P_AproxDistance (fixed_t dx, fixed_t dy);
-fixed_t P_AproxDistance2 (fixed_t *pos_array, fixed_t x, fixed_t y);
-fixed_t P_AproxDistance2 (AActor *mo, fixed_t x, fixed_t y);
-fixed_t P_AproxDistance2 (AActor *a, AActor *b);
+fixed_t P_AproxDistance2 (const fixed_t *pos_array, fixed_t x, fixed_t y);
+fixed_t P_AproxDistance2 (const AActor *mo, fixed_t x, fixed_t y);
+fixed_t P_AproxDistance2 (const AActor *a, const AActor *b);
 
-bool P_ActorInFOV(AActor* origin, AActor* mo , float f, fixed_t dist);
+bool P_ActorInFOV(const AActor* origin, const AActor* mo , float f, fixed_t dist);
 AActor* P_RoughTargetSearch(AActor* mo, angle_t fov, int distance);
 
 int 	P_PointOnLineSide (fixed_t x, fixed_t y, const line_t *line);

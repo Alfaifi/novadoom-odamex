@@ -1955,9 +1955,9 @@ void P_SetupLevel (const char *lumpname, int position)
 
 	if (!savegamerestore)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			it->killcount = it->secretcount = it->itemcount = 0;
+			player.killcount = player.secretcount = player.itemcount = 0;
 		}
 	}
 
@@ -2087,15 +2087,15 @@ void P_SetupLevel (const char *lumpname, int position)
 
     if (serverside)
     {
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			SV_PreservePlayer(*it);
+			SV_PreservePlayer(player);
 
-			if (it->ingame())
+			if (player.ingame())
 			{
 				// if deathmatch, randomly spawn the active players
 				// denis - this function checks for deathmatch internally
-				G_DeathMatchSpawnPlayer(*it);
+				G_DeathMatchSpawnPlayer(player);
 			}
 		}
     }

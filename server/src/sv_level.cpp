@@ -343,12 +343,12 @@ void SV_CheckTeam(player_t &pl);
 //
 void G_DoNewGame()
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if(!(it->ingame()))
+		if(!(player.ingame()))
 			continue;
 
-		MSG_WriteSVC(&it->client.reliablebuf,
+		MSG_WriteSVC(&player.client.reliablebuf,
 		             SVC_LoadMap(::wadfiles, ::patchfiles, d_mapname.c_str(), 0));
 	}
 
@@ -375,17 +375,17 @@ void G_DoNewGame()
 	G_InitNew (d_mapname);
 	gameaction = ga_nothing;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
 		if (G_IsTeamGame())
-			SV_CheckTeam(*it);
+			SV_CheckTeam(player);
 		else
-			memcpy(it->userinfo.color, it->prefcolor, 4);
+			memcpy(player.userinfo.color, player.prefcolor, 4);
 
-		SV_ClientFullUpdate(*it);
+		SV_ClientFullUpdate(player);
 	}
 }
 
@@ -496,23 +496,23 @@ void G_InitNew(const char *mapname)
 		level.inttimeleft = 0;
 
 		// force players to be initialized upon first level load
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
 			// [SL] 2011-05-11 - Register the players in the reconciliation
 			// system for unlagging
-			Unlag::getInstance().registerPlayer(it->id);
+			Unlag::getInstance().registerPlayer(player.id);
 
-			if(!(it->ingame()))
+			if(!(player.ingame()))
 				continue;
 
 			// denis - dead players should have their stuff looted, otherwise they'd take their ammo into their afterlife!
-			if (it->playerstate == PST_DEAD)
-				G_PlayerReborn(*it);
+			if (player.playerstate == PST_DEAD)
+				G_PlayerReborn(player);
 
-			it->playerstate = PST_ENTER; // [BC]
+			player.playerstate = PST_ENTER; // [BC]
 
-			it->suicidedelay = 0;				// Ch0wW : Disallow suicide
-			it->joindelay = 0;
+			player.suicidedelay = 0;				// Ch0wW : Disallow suicide
+			player.joindelay = 0;
 		}
 	}
 

@@ -136,9 +136,9 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 		newStr += '\n';
 
 	// Only allow sending internal messages to RCON players that are PRINT_HIGH
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		client_t* cl = &(it->client);
+		client_t* cl = &(player.client);
 
 		// Only allow RCON messages that are PRINT_HIGH
 		if (cl->allow_rcon && (printlevel == PRINT_HIGH || printlevel == PRINT_WARNING ||

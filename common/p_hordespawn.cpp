@@ -161,11 +161,11 @@ static AActors SpawnMonsterGroup(hordeSpawn_t& spawn, const hordeRecipe_t& recip
 
 	// Remove unspawned actors - probably spawnblocked.
 	AActors ret;
-	for (AActors::iterator it = ok.begin(); it != ok.end(); ++it)
+	for (auto& mo : ok)
 	{
-		if ((*it) != NULL)
+		if (mo != nullptr)
 		{
-			ret.push_back(*it);
+			ret.push_back(mo);
 		}
 	}
 
@@ -225,11 +225,11 @@ bool P_HordeHasRequiredMonsterSpawns()
 	bool bossspawnfound = false;
 	bool monsterspawnfound = false;
 
-	for (hordeSpawns_t::iterator it = monsterSpawns.begin(); it != monsterSpawns.end(); it++)
+	for (const auto& spawn : monsterSpawns)
 	{
-		if (it->type == TTYPE_HORDE_BOSS)
+		if (spawn.type == TTYPE_HORDE_BOSS)
 			bossspawnfound = true;
-		if (it->type == TTYPE_HORDE_MONSTER)
+		if (spawn.type == TTYPE_HORDE_MONSTER)
 			monsterspawnfound = true;
 	}
 
@@ -434,18 +434,18 @@ AActors P_HordeSpawn(hordeSpawn_t& spawn, const hordeRecipe_t& recipe)
 	// Printf("Spawning %d of type %s\n", recipe.count, ::mobjinfo[recipe.type].name);
 
 	// Place monsters in spawn points in order of approx distance.
-	for (SpawnPointWeights::iterator it = weights.begin(); it != weights.end(); ++it)
+	for (const auto& weight : weights)
 	{
 		const int left = recipe.count - ok.size();
 		if (left < 1)
 			break;
 
-		if (it->dist > (1024 * FRACUNIT))
+		if (weight.dist > (1024 * FRACUNIT))
 			continue;
 
 		int groupIter = clamp(left, 1, maxGroupSize);
 
-		AActors okIter = SpawnMonsterGroup(*it->spawn, recipe, groupIter);
+		AActors okIter = SpawnMonsterGroup(*weight.spawn, recipe, groupIter);
 		ok.insert(ok.end(), okIter.begin(), okIter.end());
 	}
 
@@ -459,12 +459,11 @@ void P_HordeSpawnItem()
 {
 	// Find all empty points.
 	hordeSpawns_t emptys;
-	for (hordeSpawns_t::iterator it = ::itemSpawns.begin(); it != ::itemSpawns.end();
-	     ++it)
+	for (auto& spawn : ::itemSpawns)
 	{
-		if (it->mo->target == NULL)
+		if (spawn.mo->target == NULL)
 		{
-			emptys.push_back(*it);
+			emptys.push_back(spawn);
 		}
 	}
 
@@ -501,12 +500,11 @@ void P_HordeSpawnPowerup(const mobjtype_t pw)
 {
 	// Find all empty points.
 	hordeSpawns_t emptys;
-	for (hordeSpawns_t::iterator it = ::powerupSpawns.begin();
-	     it != ::powerupSpawns.end(); ++it)
+	for (auto& spawn : ::powerupSpawns)
 	{
-		if (it->mo->target == NULL)
+		if (spawn.mo->target == NULL)
 		{
-			emptys.push_back(*it);
+			emptys.push_back(spawn);
 		}
 	}
 

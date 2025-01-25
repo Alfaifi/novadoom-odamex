@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -251,12 +251,12 @@ class OZone
 	void dump()
 	{
 		size_t total = 0;
-		for (MemoryBlockTable::iterator it = m_heap.begin(); it != m_heap.end(); ++it)
+		for (const auto& [ptr, block] : m_heap)
 		{
-			total += it->second.size;
-			Printf("0x%p | size:%" "zu" " tag:%s user:0x%p %s:%d\n", (void*)it->first,
-			       it->second.size, TagStr(it->second.tag), (void*)it->second.user,
-			       it->second.fileLine.shortFile(), it->second.fileLine.line);
+			total += block.size;
+			Printf("0x%p | size:%" "zu" " tag:%s user:0x%p %s:%d\n", (void*)ptr,
+			       block.size, TagStr(block.tag), (void*)block.user,
+			       block.fileLine.shortFile(), block.fileLine.line);
 		}
 
 		std::string buf;
