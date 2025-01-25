@@ -825,7 +825,7 @@ void P_InitPicAnims (void)
 	if(anims)
 	{
 		M_Free(anims);
-		lastanim = 0;
+		lastanim = nullptr;
 		maxanims = 0;
 	}
 
