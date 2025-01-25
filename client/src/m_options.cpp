@@ -1239,8 +1239,7 @@ static void BuildModesList(int hiwidth, int hiheight)
 
 			if (mode_it != menumodelist.end())
 			{
-				int width = mode_it->first;
-				int height = mode_it->second;
+				auto [width, height] = *mode_it;
 				++mode_it;
 
 				if (width == hiwidth && height == hiheight)

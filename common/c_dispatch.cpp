@@ -830,10 +830,8 @@ static int DumpHash (BOOL aliases)
 {
 	int count = 0;
 
-	for (command_map_t::iterator i = Commands().begin(), e = Commands().end(); i != e; ++i)
+	for (const auto& [_, cmd] : Commands())
 	{
-		DConsoleCommand *cmd = i->second;
-
 		count++;
 		if (cmd->IsAlias())
 		{
@@ -854,10 +852,8 @@ void DConsoleAlias::Archive(FILE *f)
 
 void DConsoleAlias::C_ArchiveAliases (FILE *f)
 {
-	for (command_map_t::iterator i = Commands().begin(), e = Commands().end(); i != e; ++i)
+	for (const auto& [_, alias] : Commands())
 	{
-		DConsoleCommand *alias = i->second;
-
 		if (alias->IsAlias())
 			static_cast<DConsoleAlias *>(alias)->Archive (f);
 	}
@@ -865,10 +861,8 @@ void DConsoleAlias::C_ArchiveAliases (FILE *f)
 
 void DConsoleAlias::DestroyAll()
 {
-	for (command_map_t::iterator i = Commands().begin(), e = Commands().end(); i != e; ++i)
+	for (const auto& [_, alias] : Commands())
 	{
-		DConsoleCommand *alias = i->second;
-
 		if (alias->IsAlias())
 			delete alias;
 	}

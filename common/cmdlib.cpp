@@ -505,10 +505,7 @@ bool StrToTime(std::string str, time_t &tim) {
 		i = j;
 
 		// Push to tokens vector
-		token_t token;
-		token.first = num;
-		token.second = timeword;
-		tokens.push_back(token);
+		tokens.emplace_back(num, timeword);
 
 		// Skip whitespace and commas.
 		while ((str[i] == ' ' || str[i] == ',') && i < size) {
