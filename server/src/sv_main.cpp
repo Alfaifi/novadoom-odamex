@@ -549,10 +549,10 @@ player_t &SV_FindPlayerByAddr(void)
 //
 void SV_CheckTimeouts()
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (gametic - it->client.last_received == CLIENT_TIMEOUT * 35)
-		    SV_DropClient(*it);
+		if (gametic - player.client.last_received == CLIENT_TIMEOUT * 35)
+		    SV_DropClient(player);
 	}
 }
 
@@ -652,10 +652,7 @@ void SV_MidPrint(const char* msg, player_t* p, int msgtime)
 //
 void SV_Sound (AActor *mo, byte channel, const char *name, byte attenuation)
 {
-	int sfx_id;
-	client_t* cl;
-
-	sfx_id = S_FindSound (name);
+	const int sfx_id = S_FindSound (name);
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
@@ -663,10 +660,9 @@ void SV_Sound (AActor *mo, byte channel, const char *name, byte attenuation)
 		return;
 	}
 
-
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		cl = &(it->client);
+		client_t* cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_PlaySound(PlaySoundType(mo), channel, sfx_id,
 		                                             1.0f, attenuation));
@@ -676,9 +672,7 @@ void SV_Sound (AActor *mo, byte channel, const char *name, byte attenuation)
 void SV_Sound(player_t& pl, AActor* mo, const byte channel, const char* name,
               const byte attenuation)
 {
-	int sfx_id;
-
-	sfx_id = S_FindSound (name);
+	const int sfx_id = S_FindSound (name);
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
@@ -698,15 +692,12 @@ void SV_Sound(player_t& pl, AActor* mo, const byte channel, const char* name,
 //
 void UV_SoundAvoidPlayer (AActor *mo, byte channel, const char *name, byte attenuation)
 {
-	int        sfx_id;
-	client_t  *cl;
-
 	if (!mo || !mo->player)
 		return;
 
 	player_t &pl = *mo->player;
 
-	sfx_id = S_FindSound (name);
+	const int sfx_id = S_FindSound (name);
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
@@ -714,12 +705,12 @@ void UV_SoundAvoidPlayer (AActor *mo, byte channel, const char *name, byte atten
 		return;
 	}
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if(&pl == &*it)
+		if(&pl == &player)
 			continue;
 
-		cl = &(it->client);
+		client_t* cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_PlaySound(PlaySoundType(mo), channel, sfx_id,
 		                                             1.0f, attenuation));
@@ -732,11 +723,7 @@ void UV_SoundAvoidPlayer (AActor *mo, byte channel, const char *name, byte atten
 //
 void SV_SoundTeam (byte channel, const char* name, byte attenuation, int team)
 {
-	int sfx_id;
-
-	client_t* cl;
-
-	sfx_id = S_FindSound( name );
+	const int sfx_id = S_FindSound( name );
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
@@ -744,11 +731,11 @@ void SV_SoundTeam (byte channel, const char* name, byte attenuation, int team)
 		return;
 	}
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame() && it->userinfo.team == team)
+		if (player.ingame() && player.userinfo.team == team)
 		{
-			cl = &(it->client);
+			client_t* cl = &(player.client);
 
 			MSG_WriteSVC(&cl->reliablebuf, SVC_PlaySound(PlaySoundType(), channel, sfx_id,
 			                                             1.0f, attenuation));
@@ -758,10 +745,7 @@ void SV_SoundTeam (byte channel, const char* name, byte attenuation, int team)
 
 void SV_Sound (fixed_t x, fixed_t y, byte channel, const char *name, byte attenuation)
 {
-	int        sfx_id;
-	client_t  *cl;
-
-	sfx_id = S_FindSound (name);
+	const int sfx_id = S_FindSound (name);
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
@@ -769,12 +753,12 @@ void SV_Sound (fixed_t x, fixed_t y, byte channel, const char *name, byte attenu
 		return;
 	}
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		cl = &(it->client);
+		client_t* cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_PlaySound(PlaySoundType(x, y), channel, sfx_id,
 		                                             1.0f, attenuation));
@@ -1161,12 +1145,12 @@ void SV_SpawnMobj(AActor *mo)
 
 	P_SetMobjBaseline(*mo);
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
 		if (mo->player)
-			SV_AwarenessUpdate(*it, mo);
+			SV_AwarenessUpdate(player, mo);
 		else
-			it->to_spawn.push(mo->ptr());
+			player.to_spawn.push(mo->ptr());
 	}
 }
 
@@ -1196,10 +1180,8 @@ void SV_UpdateHiddenMobj(void)
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& pl : players)
 	{
-		player_t &pl = *it;
-
 		if (!pl.mo)
 			continue;
 
@@ -1241,8 +1223,8 @@ void SV_UpdateSector(client_t* cl, int sectornum)
 
 void SV_BroadcastSector(int sectornum)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
-		SV_UpdateSector(&(it->client), sectornum);
+	for (auto& player : players)
+		SV_UpdateSector(&(player.client), sectornum);
 }
 
 //
@@ -1565,9 +1547,9 @@ void SV_ServerSettingChange()
 		return;
 	}
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		SendServerSettings(*it);
+		SendServerSettings(player);
 	}
 }
 
@@ -1964,9 +1946,9 @@ void SV_DisconnectClient(player_t &who)
 		return;
 
 	// tell others clients about it
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		client_t &cl = it->client;
+		client_t &cl = player.client;
 		MSG_WriteSVC(&cl.reliablebuf, SVC_DisconnectClient(who));
 	}
 
@@ -2013,15 +1995,15 @@ void SV_DropClient2(player_t &who, const char* file, const int line)
 //
 void SV_SendDisconnectSignal()
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_Disconnect("Shutting down\n"));
-		SV_SendPacket(*it);
+		SV_SendPacket(player);
 
-		if (it->mo)
-			it->mo->Destroy();
+		if (player.mo)
+			player.mo->Destroy();
 	}
 
 	players.clear();
@@ -2034,13 +2016,13 @@ void SV_SendDisconnectSignal()
 void SV_SendReconnectSignal()
 {
 	// tell others clients about it
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		MSG_WriteSVC(&(it->client.reliablebuf), odaproto::svc::Reconnect());
-		SV_SendPacket(*it);
+		MSG_WriteSVC(&(player.client.reliablebuf), odaproto::svc::Reconnect());
+		SV_SendPacket(player);
 
-		if (it->mo)
-			it->mo->Destroy();
+		if (player.mo)
+			player.mo->Destroy();
 	}
 
 	players.clear();
@@ -2052,9 +2034,9 @@ void SV_SendReconnectSignal()
 //
 void SV_ExitLevel()
 {
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		MSG_WriteSVC(&(it->client.reliablebuf), odaproto::svc::ExitLevel());
+		MSG_WriteSVC(&(player.client.reliablebuf), odaproto::svc::ExitLevel());
 	}
 }
 
@@ -2765,14 +2747,14 @@ void SV_UpdateMobj(AActor* mo)
 	if (mo->player)
 		return;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		if (SV_IsPlayerAllowedToSee(*it, mo))
+		if (SV_IsPlayerAllowedToSee(player, mo))
 		{
-			client_t* cl = &(it->client);
+			client_t* cl = &(player.client);
 			MSG_WriteSVC(&cl->reliablebuf, SVC_UpdateMobj(*mo));
 		}
 	}
@@ -2781,14 +2763,14 @@ void SV_UpdateMobj(AActor* mo)
 // Update the given actors state immediately.
 void SV_UpdateMobjState(AActor* mo)
 {
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		if (SV_IsPlayerAllowedToSee(*it, mo))
+		if (SV_IsPlayerAllowedToSee(player, mo))
 		{
-			client_t* cl = &(it->client);
+			client_t* cl = &(player.client);
 			MSG_WriteSVC(&cl->reliablebuf, SVC_MobjState(mo));
 		}
 	}
@@ -2863,14 +2845,14 @@ void SV_ActorTarget(AActor *actor)
 	if (actor->player)
 		return;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
-		if(!SV_IsPlayerAllowedToSee(*it, actor))
+		if(!SV_IsPlayerAllowedToSee(player, actor))
 			continue;
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_UpdateMobj(*actor));
@@ -2882,12 +2864,12 @@ void SV_ActorTarget(AActor *actor)
 //
 void SV_ActorTracer(AActor *actor)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_UpdateMobj(*actor));
 	}
@@ -2948,9 +2930,9 @@ void SV_UpdateMonsterRespawnCount()
 	if (!G_IsCoopGame())
 		return;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		client_t* cl = &(it->client);
+		client_t* cl = &(player.client);
 		MSG_WriteSVC(&cl->reliablebuf, SVC_LevelLocals(::level, SVC_LL_MONSTER_RESPAWNS));
 	}
 }
@@ -2976,12 +2958,12 @@ void SV_UpdatePing(client_t* cl)
 	if (!P_AtInterval(101))
 		return;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		MSG_WriteSVC(&cl->reliablebuf, SVC_UpdatePing(*it));
+		MSG_WriteSVC(&cl->reliablebuf, SVC_UpdatePing(player));
 	}
 }
 
@@ -3024,9 +3006,9 @@ void SV_ClearClientsBPS(void)
 	if (!P_AtInterval(TICRATE))
 		return;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
 		cl->reliable_bps = 0;
 		cl->unreliable_bps = 0;
@@ -4072,8 +4054,8 @@ static void TimeCheck()
 	// [SL] 2011-10-25 - Send the clients the remaining time (measured in seconds)
 	if (P_AtInterval(1 * TICRATE)) // every second
 	{
-		for (Players::iterator it = players.begin(); it != players.end(); ++it)
-			MSG_WriteSVC(&it->client.netbuf, SVC_LevelLocals(level, SVC_LL_TIME));
+		for (auto& player : players)
+			MSG_WriteSVC(&player.client.netbuf, SVC_LevelLocals(level, SVC_LL_TIME));
 	}
 }
 
@@ -4085,9 +4067,9 @@ static void IntermissionTimeCheck()
 	// [ML] 2012-2-1 - Copy it for intermission fun
 	if (P_AtInterval(1 * TICRATE)) // every second
 	{
-		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		for (auto& player : players)
 		{
-			MSG_WriteSVC(&(it->client.netbuf), SVC_IntTimeLeft(level.inttimeleft));
+			MSG_WriteSVC(&(player.client.netbuf), SVC_IntTimeLeft(level.inttimeleft));
 		}
 	}
 }
@@ -4118,8 +4100,8 @@ void SV_GameTics (void)
 		break;
 	}
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-		SV_ProcessPlayerCmd(*it);
+	for (auto& player : players)
+		SV_ProcessPlayerCmd(player);
 }
 
 void SV_TouchSpecial(AActor *special, player_t *player)
@@ -4134,10 +4116,10 @@ void SV_TouchSpecial(AActor *special, player_t *player)
 
 void SV_PlayerTimes (void)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame())
-			(it->GameTime) += 1;
+		if (player.ingame())
+			(player.GameTime) += 1;
 	}
 }
 
@@ -4457,9 +4439,9 @@ void OnChangedSwitchTexture (line_t *line, int useAgain)
 	unsigned state = 0, time = 0;
 	P_GetButtonInfo(line, state, time);
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_Switch(*line, state, time));
 	}
@@ -4471,12 +4453,12 @@ void SV_OnActivatedLine(line_t* line, AActor* mo, const int side,
 	if (P_LineSpecialMovesSector(line->special))
 		return;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_ActivateLine(line, mo, side, activationType));
 	}
@@ -4498,9 +4480,9 @@ void SV_SendDamageMobj(AActor *target, int pain)
 	if (!target)
 		return;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_DamageMobj(target, pain));
 		if (!target->player)
@@ -4514,11 +4496,11 @@ void SV_SendKillMobj(AActor *source, AActor *target, AActor *inflictor,
 	if (!target)
 		return;
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
-		if (!SV_IsPlayerAllowedToSee(*it, target))
+		if (!SV_IsPlayerAllowedToSee(player, target))
 			continue;
 
 		MSG_WriteSVC(&cl->reliablebuf,
@@ -4531,11 +4513,11 @@ void SV_SendDestroyActor(AActor *mo)
 {
 	if (mo->netid && mo->type != MT_PUFF)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (mo->players_aware.get(it->id))
+			if (mo->players_aware.get(player.id))
 			{
-				client_t *cl = &(it->client);
+				client_t *cl = &(player.client);
 
 				// denis - todo - need a queue for destroyed (lost awareness)
 				// objects, as a flood of destroyed things could easily overflow a
@@ -4549,11 +4531,11 @@ void SV_SendDestroyActor(AActor *mo)
 // Missile exploded so tell clients about it
 void SV_ExplodeMissile(AActor *mo)
 {
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		client_t *cl = &(it->client);
+		client_t *cl = &(player.client);
 
-		if (!SV_IsPlayerAllowedToSee(*it, mo))
+		if (!SV_IsPlayerAllowedToSee(player, mo))
 			continue;
 
 		MSG_WriteSVC(&cl->reliablebuf, SVC_UpdateMobj(*mo));
@@ -4675,10 +4657,10 @@ void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t* disconnectPlayer
 	PlayersView queued;
 	PlayersView queueUpdates;
 
-	for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
+	for (auto& player : ::players)
 	{
-		if (it->QueuePosition > 0 && disconnectPlayer != &(*it))
-			queued.push_back(&(*it));
+		if (player.QueuePosition > 0 && disconnectPlayer != &(player))
+			queued.push_back(&(player));
 	}
 
 	std::sort(queued.begin(), queued.end(), CompareQueuePosition);
@@ -4722,11 +4704,11 @@ void SV_UpdatePlayerQueuePositions(JoinTest joinTest, player_t* disconnectPlayer
 
 void SV_SendPlayerQueuePositions(player_t* dest, bool initConnect)
 {
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (initConnect && it->QueuePosition == 0)
+		if (initConnect && player.QueuePosition == 0)
 			continue;
-		SV_SendPlayerQueuePosition(&(*it), dest);
+		SV_SendPlayerQueuePosition(&player, dest);
 	}
 }
 
@@ -4742,11 +4724,11 @@ bool CompareQueuePosition(const player_t* p1, const player_t* p2)
 
 void SV_ClearPlayerQueue()
 {
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-		it->QueuePosition = 0;
+	for (auto& player : players)
+		player.QueuePosition = 0;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-		SV_SendPlayerQueuePositions(&(*it), false);
+	for (auto& player : players)
+		SV_SendPlayerQueuePositions(&player, false);
 }
 
 void SV_SendExecuteLineSpecial(byte special, line_t* line, AActor* activator, int arg0,
@@ -4755,12 +4737,12 @@ void SV_SendExecuteLineSpecial(byte special, line_t* line, AActor* activator, in
 	if (P_LineSpecialMovesSector(special))
 		return;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
-		client_t* cl = &it->client;
+		client_t* cl = &player.client;
 
 		int args[5] = { arg0, arg1, arg2, arg3, arg4 };
 		MSG_WriteSVC(&cl->reliablebuf,
@@ -4775,16 +4757,16 @@ void SV_SendExecuteLineSpecial(byte special, line_t* line, AActor* activator, in
 void SV_ACSExecuteSpecial(byte special, AActor* activator, const char* print,
                           bool playerOnly, const std::vector<int>& args)
 {
-	player_s* sendPlayer = NULL;
-	if (playerOnly && activator != NULL && activator->player != NULL)
+	player_s* sendPlayer = nullptr;
+	if (playerOnly && activator != nullptr && activator->player != nullptr)
 		sendPlayer = activator->player;
 
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		if (!(it->ingame()) || (sendPlayer != NULL && sendPlayer != &(*it)))
+		if (!(player.ingame()) || (sendPlayer != nullptr && sendPlayer != &player))
 			continue;
 
-		client_t* cl = &it->client;
+		client_t* cl = &player.client;
 
 		MSG_WriteSVC(&cl->reliablebuf,
 		             SVC_ExecuteACSSpecial(special, activator, print, args));
