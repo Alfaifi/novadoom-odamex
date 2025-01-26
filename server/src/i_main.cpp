@@ -82,7 +82,7 @@ int ShutdownNow()
     return (WaitForSingleObject(hEvent, 1) == WAIT_OBJECT_0);
 }
 
-BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
+bool WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
 {
     SetEvent(hEvent);
     return TRUE;
@@ -107,10 +107,10 @@ int __cdecl main(int argc, char *argv[])
         // Disable QuickEdit mode as any text selection will cause all functions
         // that use stdout (printf etc) to block
         DWORD lpMode = ENABLE_EXTENDED_FLAGS;
-        
+
         if (!SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), lpMode))
             throw CDoomError("SetConsoleMode failed!\n");
-            
+
         // Fixes icon not showing in titlebar and alt-tab menu under windows 7
         HANDLE hIcon;
 

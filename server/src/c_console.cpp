@@ -115,7 +115,7 @@ static int PrintString(int printlevel, const std::string& str)
 	return sanitized_str.length();
 }
 
-extern BOOL gameisdead;
+extern bool gameisdead;
 
 size_t C_BasePrint(const int printlevel, const char* color_code, const std::string& str)
 {

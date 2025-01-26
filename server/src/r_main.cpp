@@ -105,7 +105,7 @@ int				lightscaleymul;
 int			extralight;
 
 // [RH] ignore extralight and fullbright
-BOOL		foggy;
+bool		foggy;
 
 fixed_t			freelookviewheight;
 
@@ -235,7 +235,7 @@ R_PointToAngle
 void R_RotatePoint(fixed_t x, fixed_t y, angle_t ang, fixed_t &tx, fixed_t &ty)
 {
 	int index = ang >> ANGLETOFINESHIFT;
-	
+
 	tx = FixedMul(x, finecosine[index]) - FixedMul(y, finesine[index]);
 	ty = FixedMul(x, finesine[index]) + FixedMul(y, finecosine[index]);
 }

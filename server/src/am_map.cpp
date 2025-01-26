@@ -42,32 +42,32 @@ bool AM_OverlayAutomapVisible()
 
 void AM_SetBaseColorDoom()
 {
-	
+
 }
 
 void AM_SetBaseColorRaven()
 {
-	
+
 }
 
 void AM_SetBaseColorStrife()
 {
-	
+
 }
 
 void AM_Start()
 {
-	
+
 }
 
-BOOL AM_Responder(event_t* ev)
+bool AM_Responder(event_t* ev)
 {
 	return false;
 }
 
 void AM_Drawer()
 {
-	
+
 }
 
 VERSION_CONTROL(am_map_cpp, "$Id$")

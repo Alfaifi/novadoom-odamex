@@ -105,7 +105,7 @@ size_t 				saveCharIndex;	// which char we're editing
 // old save description before edit
 char				saveOldString[SAVESTRINGSIZE];
 
-BOOL 				menuactive;
+bool 				menuactive;
 
 int                 repeatKey;
 int                 repeatCount;
