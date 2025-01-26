@@ -205,7 +205,7 @@ struct wi_animation_t
 	std::vector<wi_animationstate_t>* states;
 };
 
-static wi_animation_t* animation;
+static wi_animation_t animation;
 
 //
 // CODE
@@ -332,38 +332,33 @@ static void WI_updateAnimationStates(std::vector<wi_animationstate_t>& states)
 
 static void WI_updateAnimation(bool enteringcondition)
 {
-	if (!animation)
-	{
-		return;
-	}
-
-	animation->states = nullptr;
+	animation.states = nullptr;
 
 	if (!enteringcondition && exitanim)
 	{
-		animation->states = &animation->exiting_states;
+		animation.states = &animation.exiting_states;
 	}
 	else if (enteranim)
 	{
-		animation->states = &animation->entering_states;
+		animation.states = &animation.entering_states;
 	}
 
-	if (!animation->states)
+	if (!animation.states)
 		return;
 
-	WI_updateAnimationStates(*animation->states);
+	WI_updateAnimationStates(*animation.states);
 }
 
 static void WI_drawAnimation(void)
 {
-	if (!animation || !animation->states)
+	if (!animation.states)
 	{
 		return;
 	}
 
 	int scaled_x = (inter_width - 320) / 2;
 	DCanvas* canvas = anim_surface->getDefaultCanvas();
-	for (const auto& state : *animation->states)
+	for (const auto& state : *animation.states)
 	{
 		const interlevelframe_t& frame = state.frames.at(state.frame_index);
 		patch_t* patch = W_CachePatch(frame.imagelumpnum);
@@ -409,19 +404,14 @@ static void WI_initAnimationStates(std::vector<wi_animationstate_t>& out,
 
 static void WI_initAnimation(void)
 {
-	if (!animation)
-	{
-		return;
-	}
-
 	if (exitanim)
 	{
-		WI_initAnimationStates(animation->exiting_states, exitanim->layers, false);
+		WI_initAnimationStates(animation.exiting_states, exitanim->layers, false);
 	}
 
 	if (enteranim)
 	{
-		WI_initAnimationStates(animation->entering_states, enteranim->layers, true);
+		WI_initAnimationStates(animation.entering_states, enteranim->layers, true);
 	}
 
 	return;
@@ -1371,7 +1361,7 @@ void WI_loadData()
 	else if (W_CheckNumForName(wbs->winner ? "WINERPIC" : "LOSERPIC") != -1)
 		winpic = wbs->winner ? "WINERPIC" : "LOSERPIC";
 
-	animation = new wi_animation_t();
+	animation = wi_animation_t();
 
 	if (!winanim.empty())
 		exitanim = WI_GetInterlevel(winanim);
@@ -1527,8 +1517,6 @@ void WI_loadData()
 
 void WI_unloadData()
 {
-	delete animation;
-
 	for (int i = 0; i < 10; i++)
 		num[i].clear();
 
