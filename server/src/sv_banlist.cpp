@@ -310,7 +310,7 @@ bool Banlist::query(banlist_results_t &results)
 	results.reserve(this->banlist.size());
 	for (size_t i = 0; i < banlist.size(); i++)
 	{
-		results.push_back(banlist_result_t(i, &(this->banlist[i])));
+		results.emplace_back(i, &(this->banlist[i]));
 	}
 
 	return true;
@@ -340,7 +340,7 @@ bool Banlist::query(const std::string &query, banlist_results_t &results)
 		                             this->banlist[i].name.c_str());
 		if (f_ip || f_name)
 		{
-			results.push_back(banlist_result_t(i, &(this->banlist[i])));
+			results.emplace_back(i, &(this->banlist[i]));
 		}
 	}
 	return true;
@@ -358,7 +358,7 @@ bool Banlist::query_exception(exceptionlist_results_t &results)
 	results.reserve(this->exceptionlist.size());
 	for (size_t i = 0; i < exceptionlist.size(); i++)
 	{
-		results.push_back(exceptionlist_result_t(i, &(this->exceptionlist[i])));
+		results.emplace_back(i, &(this->exceptionlist[i]));
 	}
 
 	return true;
@@ -389,7 +389,7 @@ bool Banlist::query_exception(const std::string &query,
 		                             this->exceptionlist[i].name.c_str());
 		if (f_ip || f_name)
 		{
-			results.push_back(exceptionlist_result_t(i, &(this->exceptionlist[i])));
+			results.emplace_back(i, &(this->exceptionlist[i]));
 		}
 	}
 	return true;

@@ -189,28 +189,28 @@ void OInterpolation::ticGameInterpolation()
 
 				if (wallnum >= 0) // huh?!?
 				{
-					prev_linescrollingtex.push_back(
-						std::make_pair(std::make_pair(
+					prev_linescrollingtex.emplace_back(
+						std::make_pair(
 							sides[wallnum].textureoffset,
 							sides[wallnum].rowoffset),
-								wallnum));
+								wallnum);
 				}
 			}
 			else if (P_CeilingScrollType(type))
 			{
-				prev_sectorceilingscrollingflat.push_back(
-						std::make_pair(std::make_pair(
+				prev_sectorceilingscrollingflat.emplace_back(
+						std::make_pair(
 							sectors[affectee].ceiling_xoffs,
 							sectors[affectee].ceiling_yoffs),
-								affectee));
+								affectee);
 			}
 			else if (P_FloorScrollType(type))
 			{
-				prev_sectorfloorscrollingflat.push_back(
-						std::make_pair(std::make_pair(
+				prev_sectorfloorscrollingflat.emplace_back(
+						std::make_pair(
 							sectors[affectee].floor_xoffs,
 							sectors[affectee].floor_yoffs),
-								affectee));
+								affectee);
 			}
 		}
 

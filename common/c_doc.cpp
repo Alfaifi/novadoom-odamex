@@ -235,7 +235,7 @@ BEGIN_COMMAND(cvardoc)
 {
 	std::string buffer;
 	std::string path = M_GetWriteDir();
-	if (!M_IsPathSep(*(path.end() - 1)))
+	if (!M_IsPathSep(path.back()))
 	{
 		path += PATHSEP;
 	}

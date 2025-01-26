@@ -150,7 +150,7 @@ std::string M_GetWriteDir()
 {
 	// Our path is relative to the home directory.
 	std::string path = M_GetHomeDir();
-	if (!M_IsPathSep(*(path.end() - 1)))
+	if (!M_IsPathSep(path.back()))
 	{
 		path += PATHSEP;
 	}

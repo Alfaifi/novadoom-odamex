@@ -1055,7 +1055,7 @@ void D_DoomMain()
 		sv_allowredscreen = 1;
 
 		players.clear();
-		players.push_back(player_t());
+		players.emplace_back();
 		players.back().playerstate = PST_REBORN;
 		consoleplayer_id = displayplayer_id = players.back().id = 1;
 

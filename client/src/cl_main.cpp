@@ -1368,7 +1368,7 @@ player_t &CL_FindPlayer(size_t id)
 		if (players.size() >= MAXPLAYERS)
 			return *p;
 
-		players.push_back(player_s());
+		players.emplace_back();
 
 		p = &players.back();
 		p->id = id;

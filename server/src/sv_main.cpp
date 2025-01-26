@@ -515,7 +515,7 @@ Players::iterator SV_GetFreeClient(void)
 			free_player_ids.insert(i);
 	}
 
-	players.push_back(player_t());
+	players.emplace_back();
 	players.back().playerstate = PST_CONTACT;
 
 	// generate player id

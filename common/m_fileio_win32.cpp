@@ -151,7 +151,7 @@ std::string M_GetUserFileName(const std::string& file)
 
 	// Direct our path to our write directory.
 	std::string path = M_GetWriteDir();
-	if (!M_IsPathSep(*(path.end() - 1)))
+	if (!M_IsPathSep(path.back()))
 	{
 		path += PATHSEP;
 	}

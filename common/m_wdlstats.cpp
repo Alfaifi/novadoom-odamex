@@ -421,7 +421,7 @@ BEGIN_COMMAND(wdlstats)
 	::wdlstate.logdir = argv[1];
 
 	// Ensure our path ends with a slash.
-	if (*(::wdlstate.logdir.end() - 1) != PATHSEPCHAR)
+	if (::wdlstate.logdir.back() != PATHSEPCHAR)
 		::wdlstate.logdir += PATHSEPCHAR;
 
 	Printf(PRINT_HIGH,

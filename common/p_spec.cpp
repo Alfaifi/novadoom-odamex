@@ -270,7 +270,7 @@ void P_AddMovingCeiling(sector_t *sector)
 	}
 	else
 	{
-		movingsectors.push_back(movingsector_t());
+		movingsectors.emplace_back();
 		movesec = &(movingsectors.back());
 	}
 
@@ -305,7 +305,7 @@ void P_AddMovingFloor(sector_t *sector)
 	}
 	else
 	{
-		movingsectors.push_back(movingsector_t());
+		movingsectors.emplace_back();
 		movesec = &(movingsectors.back());
 	}
 

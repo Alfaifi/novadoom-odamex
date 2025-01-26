@@ -1969,7 +1969,7 @@ void G_DoPlayDemo(bool justStreamInput)
 		{
 			if (*demo_p++ && !justStreamInput)
 			{
-				players.push_back(player_t());
+				players.emplace_back();
 				player_t* player = &players.back();
 				player->playerstate = PST_REBORN;
 				player->id = (byte)i + 1;
