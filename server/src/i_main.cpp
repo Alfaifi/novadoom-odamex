@@ -82,7 +82,7 @@ int ShutdownNow()
     return (WaitForSingleObject(hEvent, 1) == WAIT_OBJECT_0);
 }
 
-bool WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
+int WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
 {
     SetEvent(hEvent);
     return TRUE;
