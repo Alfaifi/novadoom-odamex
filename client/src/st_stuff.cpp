@@ -1008,17 +1008,14 @@ void ST_drawWidgets(bool force_refresh)
 	w_faces.update(force_refresh);
 
 	for (int i = 0; i < 3; i++)
-	{
 		w_keyboxes[i].update(force_refresh);
-	}
 
 	if (!G_IsCoopGame())
-	{
 		w_frags.update(force_refresh);
-	}
 
-	w_lives.update(true, !G_IsLivesGame()); // Force refreshing to avoid tens
-	                                       // to be hidden by Doomguy's face
+	if (G_IsLivesGame())
+		w_lives.update(true); // Force refreshing to avoid tens
+		                      // to be hidden by Doomguy's face
 }
 
 
