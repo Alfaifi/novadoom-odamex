@@ -357,7 +357,7 @@ class HordeState
 	 */
 	bool forceWave(const std::string& name)
 	{
-		int defineID;
+		size_t defineID;
 		if (!P_HordeDefineNamed(defineID, name))
 			return false;
 

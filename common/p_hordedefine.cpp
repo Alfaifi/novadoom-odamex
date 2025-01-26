@@ -312,7 +312,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
  * @param name Partial name to search for.
  * @return True if the define was found, otherwise false.
  */
-bool P_HordeDefineNamed(int& out, const std::string& name)
+bool P_HordeDefineNamed(size_t& out, const std::string& name)
 {
 	for (size_t i = 0; i < ::WAVE_DEFINES.size(); i++)
 	{
