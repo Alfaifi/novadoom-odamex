@@ -1660,7 +1660,7 @@ struct MapInfoDataSetter<SkillInfo>
 			{ "instantreaction", &MIType_Bool, &ref.instant_reaction, true },
 			{ "acsreturn", &MIType_Int, &ref.ACS_return },
 			{ "name", &MIType_String, &ref.menu_name },
-			{ "picname", &MIType_String, &ref.pic_name },
+			{ "picname", &MIType_LumpName, &ref.pic_name },
 			// { "playerclassname", &???, &ref.menu_names_for_player_class } // todo - requires special MIType to work properly
 			{ "mustconfirm", &MIType_MustConfirm, &ref, true },
 			{ "key", &MIType_Char, &ref.shortcut },

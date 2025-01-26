@@ -678,7 +678,6 @@ void F_CastDrawer()
 // by cropping the 2 canvas positions to the screen.
 void F_BunnyScroll()
 {
-	char		name[10];
 	static int	laststage;
 
 	const patch_t* p1 = W_CachePatch("PFUB1");
@@ -791,7 +790,7 @@ void F_BunnyScroll()
 		laststage = stage;
 	}
 
-	snprintf (name, 6, "END%i", stage);
+	OLumpName name = fmt::format("END{}", stage);
 	screen->DrawPatchIndirect(W_CachePatch(name), (320-13*8)/2, (200-8*8)/2);
 }
 

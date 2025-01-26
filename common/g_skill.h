@@ -53,7 +53,7 @@ struct SkillInfo
 	bool instant_reaction;
 	int ACS_return;				// not implemented
 	std::string menu_name;
-	std::string pic_name;
+	OLumpName pic_name;
 	//SkillMenuNames menu_names_for_player_class;	// not implemented
 	bool must_confirm;
 	std::string must_confirm_text;
