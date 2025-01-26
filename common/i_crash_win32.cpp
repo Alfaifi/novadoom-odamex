@@ -99,7 +99,7 @@ void writeMinidump(EXCEPTION_POINTERS* exceptionPtrs)
 	MINIDUMP_EXCEPTION_INFORMATION mei;
 	mei.ThreadId = GetCurrentThreadId();
 	mei.ExceptionPointers = exceptionPtrs;
-	mei.ClientPointers = FALSE;
+	mei.ClientPointers = false;
 
 	// Do the actual dump.
 	pMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
