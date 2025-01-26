@@ -1359,6 +1359,7 @@ static int WI_CalcWidth (const char *str)
 
 void WI_loadData()
 {
+	exitanim = enteranim = nullptr;
 	LevelInfos& levels = getLevelInfos();
 	level_pwad_info_t& currentlevel = levels.findByName(wbs->current);
 	level_pwad_info_t& nextlevel = levels.findByName(wbs->next);
@@ -1526,7 +1527,6 @@ void WI_loadData()
 
 void WI_unloadData()
 {
-	exitanim = enteranim = nullptr;
 	delete animation;
 
 	for (int i = 0; i < 10; i++)
@@ -1548,7 +1548,7 @@ void WI_unloadData()
 	p.clear();
 
 	for (int i = 0; i < 4; i++)
-		faceclassic[i ].clear();
+		faceclassic[i].clear();
 }
 
 void WI_Drawer()
