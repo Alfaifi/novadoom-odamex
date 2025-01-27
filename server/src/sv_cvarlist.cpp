@@ -47,9 +47,6 @@ CVAR(			sv_motd, "Welcome to Odamex", "Message Of The Day to display to clients 
 CVAR(			sv_email, "email@domain.com", "Administrator email address",
 				CVARTYPE_STRING, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
 
-CVAR(			sv_waddownload,	"0", "Allow downloading of WAD files from this server",
-				CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
-
 CVAR(			sv_emptyreset, "0", "Reloads the current map when all players leave",
 				CVARTYPE_BOOL, CVAR_SERVERARCHIVE)
 
