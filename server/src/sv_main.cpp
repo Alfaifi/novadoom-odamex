@@ -4066,8 +4066,6 @@ void SV_ParseCommands(player_t &player)
 	 }
 }
 
-EXTERN_CVAR (sv_download_test)
-
 
 static void TimeCheck()
 {
