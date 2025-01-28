@@ -823,7 +823,7 @@ BOOL PIT_CheckOnmobjZ (AActor *thing)
 	// over / under thing
 	if (tmthing->z > thing->z + thing->height)
 		return true;
-	else if (tmthing->z + tmthing->height < thing->z)
+	else if (tmthing->z + tmthing->height <= thing->z)
 		return true;
 
 	// Don't clip the projectile unless it's not a teammate.
