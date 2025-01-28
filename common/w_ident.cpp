@@ -582,8 +582,7 @@ static constexpr identData_t identdata[] = {
     // IDDM1.WAD
     // ------------------------------------------------------------------------
     {
-        // 1/28/2025
-        "ID Deathmatch Pack #1",            // mIdName
+        "ID Deathmatch Pack #1 v1.3",       // mIdName
         "IDDM1.WAD",                        // mFilename
         "585C7750",                         // mCRC32Sum
         "CB92010B8EC05F8924AC966A8ED95B74", // mMd5Sum
@@ -592,8 +591,7 @@ static constexpr identData_t identdata[] = {
         PWAD_NO_WEIGHT                      // weight
     },
     {
-        // original release
-        "ID Deathmatch Pack #1",            // mIdName
+        "ID Deathmatch Pack #1 v1.1",       // mIdName
         "IDDM1.WAD",                        // mFilename
         "11fe5048",                         // mCRC32Sum
         "5670fd8fe8eb6910ec28f9e27969d84f", // mMd5Sum
