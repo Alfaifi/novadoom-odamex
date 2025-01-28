@@ -103,7 +103,6 @@ bool keysfound[NUMCARDS];		// Ch0wW : Found keys
 EXTERN_CVAR(sv_motd)
 EXTERN_CVAR(sv_hostname)
 EXTERN_CVAR(sv_email)
-EXTERN_CVAR(sv_waddownload)
 EXTERN_CVAR(sv_maxrate)
 EXTERN_CVAR(sv_emptyreset)
 EXTERN_CVAR(sv_emptyfreeze)
@@ -4065,8 +4064,6 @@ void SV_ParseCommands(player_t &player)
 		}
 	 }
 }
-
-EXTERN_CVAR (sv_download_test)
 
 
 static void TimeCheck()
