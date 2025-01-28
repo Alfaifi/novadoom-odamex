@@ -38,7 +38,7 @@ int ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NULL
 	{
 		if (sscanf(mapname.c_str(), "E%dM%d", &epi, &map) != 2)
 			return 0;
-		lumpname = fmt::format("E{}D{}", epi, map);
+		lumpname = fmt::format("E{}M{}", epi, map);
 	}
 	else
 	{

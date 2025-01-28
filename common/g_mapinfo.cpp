@@ -1319,7 +1319,7 @@ struct MapInfoDataSetter<level_pwad_info_t>
 			{ "enteranim", &MIType_LumpName, &ref.enteranim },
 			{ "exitanim", &MIType_LumpName, &ref.exitanim },
 			{ "translator", &MIType_EatNext },
-			{ "compat_shorttex", &MIType_CompatFlag, &ref.flags }, // todo: not implemented
+			{ "compat_shorttex", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_SHORTTEX },
 			{ "compat_limitpain", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_LIMITPAIN },
 			{ "compat_useblocking", &MIType_CompatFlag, &ref.flags }, // special lines block use (not implemented, default odamex behavior)
 		    { "compat_missileclip", &MIType_CompatFlag, &ref.flags }, // original height monsters when it comes to missiles (not implemented)
