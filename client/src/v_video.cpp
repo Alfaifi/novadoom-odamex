@@ -814,8 +814,8 @@ void V_DrawFPSTicker()
 
 	if (I_GetPrimarySurface()->getBitsPerPixel() == 8)
 	{
-		constexpr palindex_t oncolor = 255;
-		constexpr palindex_t offcolor = 0;
+		static constexpr palindex_t oncolor = 255;
+		static constexpr palindex_t offcolor = 0;
 
 		int n = 0;
 		for (n = 0; n < tics; n++)

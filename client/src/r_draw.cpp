@@ -221,14 +221,14 @@ byte redtable[MAXPLAYERS + 1][256];
 
 static void R_BuildFontTranslation(int color_num, argb_t start_color, argb_t end_color)
 {
-	constexpr palindex_t chexstart_index = 0x70;
-	constexpr palindex_t chexend_index = 0x7F;
-	constexpr palindex_t hacxstart_index = 0xC3;
-	constexpr palindex_t hacxmid1_index = 0xCF;
-	constexpr palindex_t hacxmid2_index = 0xF0;
-	constexpr palindex_t hacxend_index = 0xF2;
-	constexpr palindex_t start_index = 0xB0;
-	constexpr palindex_t end_index = 0xBF;
+	static constexpr palindex_t chexstart_index = 0x70;
+	static constexpr palindex_t chexend_index = 0x7F;
+	static constexpr palindex_t hacxstart_index = 0xC3;
+	static constexpr palindex_t hacxmid1_index = 0xCF;
+	static constexpr palindex_t hacxmid2_index = 0xF0;
+	static constexpr palindex_t hacxend_index = 0xF2;
+	static constexpr palindex_t start_index = 0xB0;
+	static constexpr palindex_t end_index = 0xBF;
 	const int index_range = end_index - start_index + 1;
 
 	palindex_t* dest = (palindex_t*)Ranges + color_num * 256;

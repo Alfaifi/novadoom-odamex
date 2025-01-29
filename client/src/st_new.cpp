@@ -487,9 +487,9 @@ static bool TeamHUDShowsRoundWins()
  */
 static void drawTeamGametype()
 {
-	constexpr int SCREEN_BORDER = 4;
-	constexpr int FLAG_ICON_HEIGHT = 18;
-	constexpr int LIVES_HEIGHT = 12;
+	static constexpr int SCREEN_BORDER = 4;
+	static constexpr int FLAG_ICON_HEIGHT = 18;
+	static constexpr int LIVES_HEIGHT = 12;
 
 	const player_t* plyr = &consoleplayer();
 	const int xscale = hud_scale ? CleanXfac : 1;
@@ -592,10 +592,10 @@ static void drawTeamGametype()
 
 static void drawHordeGametype()
 {
-	constexpr int SCREEN_BORDER = 4;
-	constexpr int ABOVE_AMMO = 24;
+	static constexpr int SCREEN_BORDER = 4;
+	static constexpr int ABOVE_AMMO = 24;
 	const int LINE_SPACING = V_LineHeight() + 1;
-	constexpr int BAR_BORDER = 5;
+	static constexpr int BAR_BORDER = 5;
 
 	const hordeInfo_t& info = P_HordeInfo();
 	const hordeDefine_t& define = G_HordeDefine(info.defineID);
@@ -696,7 +696,7 @@ void drawProtos()
 
 	for (Protos::const_iterator it = protos.begin(); it != protos.end(); ++it)
 	{
-		constexpr double scale = 0.75;
+		static constexpr double scale = 0.75;
 		const bool selected = proto_selected == (it - protos.begin());
 
 		if (selected)

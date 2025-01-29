@@ -416,7 +416,7 @@ void R_InitSkyDefs()
 			sky->type = skytype;
 			sky->usedefaultmid = false;
 
-			constexpr float_t ticratescale = 1.0 / TICRATE;
+			static constexpr float_t ticratescale = 1.0 / TICRATE;
 
 			sky->background.texnum  = tex;
 			sky->background.texture = skytexname;
@@ -723,7 +723,7 @@ void R_RenderSkyRange(visplane_t* pl)
 	if (pl->minx > pl->maxx)
 		return;
 
-	constexpr int columnmethod = 2;
+	static constexpr int columnmethod = 2;
 	int frontskytex, backskytex;
 	fixed_t front_offset = 0;
 	fixed_t back_offset = 0;

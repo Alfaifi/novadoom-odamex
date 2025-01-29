@@ -207,7 +207,7 @@ void ISDL20KeyboardInputDevice::disableTextEntry()
 //
 int ISDL20KeyboardInputDevice::getTextEventValue()
 {
-	constexpr size_t max_events = 32;
+	static constexpr size_t max_events = 32;
 	SDL_Event sdl_events[max_events];
 
 	SDL_PumpEvents();

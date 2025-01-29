@@ -228,8 +228,8 @@ extern argb_t translationRGB[MAXPLAYERS+1][16];
 
 inline argb_t shaderef_t::tlate(const translationref_t &translation, const byte c) const
 {
-	constexpr palindex_t range_start = 0x70;
-	constexpr palindex_t range_stop = 0x7F;
+	static constexpr palindex_t range_start = 0x70;
+	static constexpr palindex_t range_stop = 0x7F;
 
 	const int pid = translation.getPlayerID();
 

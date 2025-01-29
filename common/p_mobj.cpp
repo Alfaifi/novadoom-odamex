@@ -793,8 +793,8 @@ void AActor::RunThink ()
 
 void AActor::Serialize (FArchive &arc)
 {
-	constexpr DWORD TLATE_NONE = 0xFFFFFFFF;
-	constexpr DWORD TLATE_BOSS = 0xFFFFFFFE;
+	static constexpr DWORD TLATE_NONE = 0xFFFFFFFF;
+	static constexpr DWORD TLATE_BOSS = 0xFFFFFFFE;
 
 	Super::Serialize (arc);
 	if (arc.IsStoring ())
