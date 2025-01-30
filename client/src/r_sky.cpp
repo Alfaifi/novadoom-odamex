@@ -50,8 +50,6 @@ EXTERN_CVAR(r_skypalette)
 //
 // sky mapping
 //
-int 		skyflatnum;
-int 		sky1texture,    sky2texture;
 fixed_t		defaultskytexturemid;
 fixed_t		skyscale;
 int			skystretch;
@@ -59,8 +57,6 @@ fixed_t		skyheight;
 fixed_t		skyiscale;
 
 int			sky1shift,        sky2shift;
-fixed_t		sky2scrollxdelta;
-fixed_t		sky2columnoffset;
 
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
@@ -71,8 +67,6 @@ CVAR_FUNC_IMPL(r_stretchsky)
 {
 	R_InitSkyMap ();
 }
-
-OLumpName SKYFLATNAME = "F_SKY1";
 
 static tallpost_t* skyposts[MAXWIDTH];
 static byte transparentskybuffer[MAXWIDTH][512]; // holds foreground sky with transparency to blit to the screen
