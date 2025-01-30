@@ -1839,10 +1839,15 @@ void A_VileChase (AActor *actor)
 
 					info = corpsehit->info;
 
+					corpsehit->flags = (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
 					if (serverside)
 					{
-						level.respawned_monsters++;
-						SV_UpdateMonsterRespawnCount();
+						if (!(actor->flags & MF_FRIEND))
+						{
+							level.respawned_monsters++;
+							SV_UpdateMonsterRespawnCount();
+						}
 					}
 
 					P_SetMobjState (corpsehit,info->raisestate, true);
@@ -2464,10 +2469,15 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 
 					info = corpsehit->info;
 
+					corpsehit->flags = (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
 					if (serverside)
 					{
-						level.respawned_monsters++;
-						SV_UpdateMonsterRespawnCount();
+						if (!(actor->flags & MF_FRIEND))
+						{
+							level.respawned_monsters++;
+							SV_UpdateMonsterRespawnCount();
+						}
 					}
 
 					P_SetMobjState(corpsehit, info->raisestate, true);
@@ -3363,8 +3373,12 @@ void A_Spawn(AActor* mo)
 		newmobj = new AActor(mo->x, mo->y, (mo->state->misc2 << FRACBITS) + mo->z,
 			                    (mobjtype_t)(mo->state->misc1 - 1));
 
-		// newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
-		// // TODO !!!
+		newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+
+		if (mo->player && newmobj->flags & MF_FRIEND)
+		{
+			newmobj->friend_playerid = mo->player->id;
+		}
 	}
 }
 
