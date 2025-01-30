@@ -546,6 +546,8 @@ public:
 
 	unsigned char	rndindex;		// denis - because everything should have a random number generator, for prediction
 
+	byte friend_playerid; // playerid of the player who spawned this actor
+
 	// ThingIDs
 	static void ClearTIDHashes ();
 	void AddToHash ();

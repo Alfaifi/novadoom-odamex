@@ -296,6 +296,8 @@ typedef struct MapThing
 #define MTF_COOPERATIVE		0x0200	// Thing appears in cooperative games
 #define MTF_DEATHMATCH		0x0400	// Thing appears in deathmatch games
 
+#define MTF_FRIENDLY			0x2000
+
 // Custom MapThing Flags
 #define MTF_FILTER_COOPWPN  0x0800  // Weapon thing is filtered with g_thingfilter 1.
 									// (Hate this method but it works...)

@@ -252,7 +252,7 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
+      rndindex(0), netid(0), tid(0), friend_playerid(0), baseline_set(false), bmapnode(this)
 {
 	// Fly!!! fix it in P_RespawnSpecial
 	if ((unsigned int)itype >= NUMMOBJTYPES)
@@ -3063,6 +3063,9 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 	if (mthing->flags & MTF_AMBUSH)
 		mobj->flags |= MF_AMBUSH;
+
+	if (mthing->flags & MTF_FRIENDLY)
+		mobj->flags |= MF_FRIEND;
 
 	// [RH] Add ThingID to mobj and link it in with the others
 	mobj->tid = mthing->thingid;

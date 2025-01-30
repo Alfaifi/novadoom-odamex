@@ -1359,7 +1359,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
-	MF_SOLID|MF_SHOOTABLE|MF_DROPOFF|MF_PICKUP|MF_NOTDMATCH,		// flags
+	MF_SOLID|MF_SHOOTABLE|MF_DROPOFF|MF_PICKUP|MF_NOTDMATCH|MF_FRIEND,		// flags
 	MF2_SLIDE|MF2_PASSMOBJ|MF2_PUSHWALL,		// flags2	
 	S_NULL,		// raisestate
 	0x10000,
@@ -9089,7 +9089,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 		100,            // mass
 		0,              // damage
 		NULL,           // activesound
-		MF_SOLID|MF_SHOOTABLE|MF_DROPOFF|MF_PICKUP|MF_NOTDMATCH, // flags
+		MF_SOLID|MF_SHOOTABLE|MF_DROPOFF|MF_PICKUP|MF_NOTDMATCH|MF_FRIEND, // flags
 		MF2_SLIDE|MF2_PASSMOBJ|MF2_PUSHWALL,                     // flags2
 		S_NULL,         // raisestate
 		0x10000,

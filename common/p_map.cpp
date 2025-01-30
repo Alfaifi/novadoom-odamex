@@ -650,6 +650,12 @@ static BOOL PIT_CheckThing (AActor *thing)
 				return false;		// Hit same species as originator, explode, no damage
 		}
 
+		if (P_IsFriendlyThing(thing, tmthing->target))
+		{
+			// Friends never harm each other
+			return false;
+		}
+
 		if (!(thing->flags & MF_SHOOTABLE))
 			return !solid;		// didn't do any damage
 

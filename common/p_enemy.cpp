@@ -40,6 +40,7 @@
 #include "d_player.h"
 #include "p_setup.h"
 #include "d_dehacked.h"
+#include "g_gametype.h"
 #include "g_skill.h"
 #include "p_mapformat.h"
 
@@ -513,6 +514,34 @@ bool P_IsOnLift(const AActor* actor)
 	return false;
 }
 
+//=============================================================================
+//
+// P_HitFriend()
+//
+// killough 12/98
+// This function tries to prevent shooting at friends that get in the line of fire
+//
+//=============================================================================
+
+bool P_HitFriend(AActor* self)
+{
+	if (self->flags & MF_FRIEND && self->target != NULL)
+	{
+		angle_t angle =
+		    R_PointToAngle2(self->x, self->y, self->target->x, self->target->y);
+		fixed_t dist =
+		    P_AproxDistance(self->x - self->target->x, self->y - self->target->y);
+
+		P_AimLineAttack(self, angle, dist);
+
+		if (linetarget != NULL && linetarget != self->target)
+		{
+			return P_IsFriendlyThing(self, linetarget);
+		}
+	}
+	return false;
+}
+
 void P_NewChaseDir (AActor *actor)
 {
 	fixed_t 	deltax;
@@ -661,6 +690,53 @@ void P_NewChaseDir (AActor *actor)
 
 
 
+//============================================================================
+//
+// P_LookForEnemies
+//
+// Selects a live enemy monster
+//
+//============================================================================
+
+bool P_LookForEnemies(AActor* actor, bool allaround)
+{
+	AActor* other = P_RoughTargetSearch(actor, allaround ? 0 : INT2FIXED(90), 128);
+
+	if (other)
+	{
+		if (actor->goal && actor->target == actor->goal)
+			actor->reactiontime = 0;
+
+		actor->target = other->ptr();
+		return true;
+	}
+
+	if (!actor->target)
+	{
+		// [RH] use goal as target
+		if (actor->goal)
+		{
+			actor->target = actor->goal;
+			return true;
+		}
+		// Use last known enemy if no hatee sighted -- killough 2/15/98:
+		if (actor->lastenemy && actor->lastenemy->health > 0)
+		{
+			if (!P_IsFriendlyThing(actor, actor->lastenemy))
+			{
+				actor->target = actor->lastenemy;
+				actor->lastenemy = AActor::AActorPtr();
+				return true;
+			}
+			else
+			{
+				actor->lastenemy = AActor::AActorPtr();
+			}
+		}
+	}
+	return false;
+}
+
 //
 // P_LookForPlayers
 // If allaround is false, only look 180 degrees in front.
@@ -689,6 +765,11 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
 	sector_t* sector = actor->subsector->sector;
 	if (!sector)
 		return false;
+
+	if (actor->flags & MF_FRIEND)
+	{
+		return P_LookForEnemies(actor, allaround);
+	}
 
 	// Construct our table of ingame players
 	// [AM] TODO: Have the Players container handle this instead of having to
@@ -824,6 +905,135 @@ void A_KeenDie (AActor *actor)
 //
 
 //
+// P_NewRandomDir
+//
+// villsa [STRIFE] new function
+//
+// haleyjd: Almost identical to the tail-end of P_NewChaseDir, this function
+// finds a purely random direction for an object to walk. Called from
+// A_RandomWalk.
+//
+// Shockingly similar to the RandomWalk pointer in Eternity :)
+//
+void P_NewRandomDir(AActor* actor)
+{
+	int dir = 0;
+	int omovedir = opposite[actor->movedir]; // haleyjd 20110223: nerfed this...
+
+	// randomly determine direction of search
+	if (P_Random() & 1)
+	{
+		// Try all non-reversal directions forward, first
+		for (dir = 0; dir < DI_NODIR; dir++)
+		{
+			if (dir != omovedir)
+			{
+				actor->movedir = dir;
+				if (P_Random() & 1)
+				{
+					if (P_TryWalk(actor))
+						break;
+				}
+			}
+		}
+
+		// haleyjd 20110223: logic missing entirely:
+		// failed all non-reversal directions? try reversing
+		if (dir > DI_SOUTHEAST)
+		{
+			if (omovedir == DI_NODIR)
+			{
+				actor->movedir = DI_NODIR;
+				return;
+			}
+			actor->movedir = omovedir;
+			if (P_TryWalk(actor))
+				return;
+			else
+			{
+				actor->movedir = DI_NODIR;
+				return;
+			}
+		}
+	}
+	else
+	{
+		// Try directions one at a time in backward order
+		dir = DI_SOUTHEAST;
+		while (1)
+		{
+			// haleyjd 09/05/10: missing random code.
+			if (dir != omovedir)
+			{
+				actor->movedir = dir;
+
+				// villsa 09/06/10: un-inlined code
+				if (P_TryWalk(actor))
+					return;
+			}
+
+			// Ran out of non-reversal directions to try? Reverse.
+			if (--dir == -1)
+			{
+				if (omovedir == DI_NODIR)
+				{
+					actor->movedir = DI_NODIR;
+					return;
+				}
+				actor->movedir = omovedir;
+				// villsa 09/06/10: un-inlined code
+				if (P_TryWalk(actor))
+					return;
+				else
+				{
+					actor->movedir = DI_NODIR;
+					return;
+				}
+			} // end if(--dir == -1)
+		} // end while(1)
+	} // end else
+}
+
+//
+// A_RandomWalk
+//
+// [STRIFE] New function.
+// haleyjd 09/05/10: Action routine used to meander about.
+//
+void A_RandomWalk(AActor* actor)
+{
+	// Standing actors do not wander.
+	//if (actor->flags & MF_STAND)
+	//	return;
+
+	if (actor->reactiontime)
+		actor->reactiontime--; // count down reaction time
+	else
+	{
+		// turn to a new angle
+		if (actor->movedir < DI_NODIR)
+		{
+			int delta;
+
+			actor->angle &= (7 << 29);
+			delta = actor->angle - (actor->movedir << 29);
+
+			if (delta < 0)
+				actor->angle += ANG90 / 2;
+			else if (delta > 0)
+				actor->angle -= ANG90 / 2;
+		}
+
+		// try moving
+		if (--actor->movecount < 0 || !P_Move(actor))
+		{
+			P_NewRandomDir(actor);
+			actor->movecount += 5;
+		}
+	}
+}
+
+//
 // A_Look
 // Stay in state until a player is sighted.
 // [RH] Will also leave state to move to goal.
@@ -860,15 +1070,26 @@ void A_Look (AActor *actor)
 
 	if (targ && (targ->flags & MF_SHOOTABLE))
 	{
-		actor->target = targ->ptr();
-
-		if (actor->flags & MF_AMBUSH)
+		if (P_IsFriendlyThing(actor, targ))
 		{
-			if (P_CheckSight(actor, actor->target))
+			if (P_LookForPlayers(actor, false))
 				goto seeyou;
+
+			// Let the actor wander around aimlessly looking for a fight
+			A_RandomWalk(actor);
 		}
 		else
-			goto seeyou;
+		{
+			actor->target = targ->ptr();
+
+			if (actor->flags & MF_AMBUSH)
+			{
+				if (P_CheckSight(actor, actor->target))
+					goto seeyou;
+			}
+			else
+				goto seeyou;
+		}
 	}
 
 
@@ -957,9 +1178,63 @@ void A_Chase (AActor *actor)
 			actor->angle += ANG90/2;
 	}
 
-	// [RH] If the target is dead (and not a goal), stop chasing it.
-	if (actor->target && actor->target != actor->goal && actor->target->health <= 0)
+	// [RH] If the target is dead or a friend (and not a goal), stop chasing it.
+	if (actor->target && actor->target != actor->goal && actor->target->health <= 0 || P_IsFriendlyThing(actor, actor->target))
 		actor->target = AActor::AActorPtr();
+
+	// [RH] Friendly monsters will consider chasing whoever hurts a player if they
+	// don't already have a target.
+	if (actor->flags & MF_FRIEND && !actor->target)
+	{
+		player_t* player;
+
+		if (actor->friend_playerid != 0)
+		{
+			for (Players::iterator it = players.begin(); it != players.end(); ++it)
+			{
+				if (it->id == actor->friend_playerid)
+				{
+					player = &(*it);
+				}
+			}
+		}
+		else
+		{
+			if (!multiplayer)
+			{
+				player = &*players.begin();
+			}
+			else
+			{
+				for (Players::iterator it = players.begin(); it != players.end(); ++it)
+				{
+					if (it->ingame())
+					{
+						if (P_Random() < 80 && P_IsFriendlyThing(it->mo, actor))
+						{
+							player = &(*it);
+							break;
+						}
+					}
+				}
+
+				if (!player)
+				{
+					player = &*players.begin();
+				}
+			}
+		}
+
+		if (player->attacker && player->attacker->health > 0 &&
+		    player->attacker->flags & MF_SHOOTABLE && P_Random() < 80)
+		{
+			if (!(player->attacker->flags & MF_FRIEND) ||
+			    !P_IsFriendlyThing(player->attacker->self, actor))
+			{
+				actor->target = player->attacker->self;
+			}
+		}
+	}
 
 	if (!actor->target || !(actor->target->flags & MF_SHOOTABLE))
 	{
@@ -969,8 +1244,23 @@ void A_Chase (AActor *actor)
 
 		if (!actor->target)
 		{
-			P_SetMobjState (actor, actor->info->spawnstate, true); // denis - todo - this sometimes leads to a stack overflow due to infinite recursion: A_Chase->SetMobjState->A_Look->SetMobjState
-			return;
+			if (actor->flags & MF_FRIEND)
+			{
+				A_Look(actor);
+				if (!actor->target)
+				{
+					A_RandomWalk(actor);
+					return;
+				}
+			}
+			else
+			{
+				P_SetMobjState(actor, actor->info->spawnstate,
+				               true); // denis - todo - this sometimes leads to a stack
+				                      // overflow due to infinite recursion:
+				                      // A_Chase->SetMobjState->A_Look->SetMobjState
+				return;
+			}
 		}
 	}
 

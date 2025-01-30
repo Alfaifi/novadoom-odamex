@@ -221,31 +221,91 @@ int P_IsUnderDamage(AActor* actor)
 * P_IsFriendlyThing
 * @brief Helper function to determine if a particular thing is of friendly origin.
 *
-* @param actor Source actor
-* @param friendshiptest Thing to test friendliness
+* @param actor - Source actor
+* @param friendshiptest - Thing to test friendliness
 */
 bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest)
 {
+	if (!actor || !friendshiptest)
+	{
+		return false;
+	}
+
 	if (friendshiptest->flags & MF_FRIEND)
 	{
 		if (G_IsCoopGame())
 		{
+			if (actor->flags & MF_FRIEND)
+				return true;
+		}
+		else if (actor->player)
+		{
+			if (actor->player->id == friendshiptest->friend_playerid)
+			{
+				// Don't attack me, I love you!
+				return true;
+			}
+			else if (G_IsTeamGame())
+			{
+				PlayerResults results =
+				    PlayerQuery()
+				        .onTeam(static_cast<team_t>(actor->player->userinfo.team))
+				        .execute();
+
+				PlayersView::const_iterator it = results.players.begin();
+				for (; it != results.players.end(); ++it)
+				{
+					if ((*it)->id == friendshiptest->friend_playerid &&
+					    (*it)->userinfo.team == actor->player->userinfo.team)
+					{
+						// This is a teammate of the actor that
+						// owns this friendly. Don't target them.
+						return true;
+					}
+				}
+			}
+		}
+		else if (actor->friend_playerid == 0 || friendshiptest->friend_playerid == 0 ||
+		         actor->friend_playerid == friendshiptest->friend_playerid)
+		{
+			// Fellow friend (or general friend)
+			// Do not attack.
 			return true;
 		}
-		else if (actor->player && friendshiptest->target && friendshiptest->target->player &&
-		    actor->player->userinfo.team == friendshiptest->target->player->userinfo.team)
+		else if (G_IsTeamGame())
 		{
-			return true;
-		}
-		else
-		{
-			return false;
+			PlayersView ingame = PlayerQuery().execute().players;
+			team_t team = TEAM_NONE;
+
+			for (PlayersView::iterator it = ingame.begin(); it != ingame.end(); ++it)
+			{
+				if ((*it)->id == friendshiptest->friend_playerid)
+				{
+					team = static_cast<team_t>((*it)->userinfo.team);
+				}
+			}
+
+			if (team != TEAM_NONE)
+			{
+				PlayerResults results =
+				    PlayerQuery()
+				        .onTeam(team)
+				        .execute();
+
+				PlayersView::const_iterator it = results.players.begin();
+				for (; it != results.players.end(); ++it)
+				{
+					if ((*it)->id == actor->friend_playerid)
+					{
+						// This is a friendly belonging to the same team as this friendly.
+						// Don't target them.
+						return true;
+					}
+				}
+			}
 		}
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 //

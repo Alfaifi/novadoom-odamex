@@ -2374,7 +2374,8 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		    !(source->flags3 & MF3_DMGIGNORED) &&
 		    !(source->oflags & MFO_INFIGHTINVUL) &&
 		    (!target->threshold || target->flags3 & MF3_NOTHRESHOLD) &&
-		    !P_InfightingImmune(target, source))
+		    !P_InfightingImmune(target, source) &&
+				!P_IsFriendlyThing(target, source))
 		{
 			// if not intent on another player, chase after this one
 			// [AM] Infight invul monsters will never provoke attacks.

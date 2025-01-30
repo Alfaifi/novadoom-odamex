@@ -31,6 +31,7 @@
 
 #include "p_local.h"
 #include "r_data.h"
+#include "m_random.h"
 
 // State.
 #include "r_state.h"
@@ -1224,11 +1225,27 @@ static AActor* RoughBlockCheck(AActor* mo, int index, angle_t fov)
 			continue;
 		}
 		
-		// [Blair] Don't target friendlies
-		if (P_IsFriendlyThing(mo->target, link))
+		if (link->flags & MF_FRIEND)
 		{
-			link = link->snext;
-			continue;
+			// [Blair] Don't target friendlies
+			if (P_IsFriendlyThing(mo, link))
+			{
+				link = link->snext;
+				continue;
+			}
+			else if (link->target)
+			{
+				return link->target;
+			}
+		}
+
+		if (mo->target)
+		{
+			if (P_IsFriendlyThing(mo->target, link))
+			{
+				link = link->snext;
+				continue;
+			}
 		}
 
 		// [Blair] Don't target spectators
@@ -1239,7 +1256,7 @@ static AActor* RoughBlockCheck(AActor* mo, int index, angle_t fov)
 		}
 
 		// [Blair] Don't target teammates
-		if (mo->target->player && link->player &&
+		if (mo->target && mo->target->player && link->player &&
 			P_AreTeammates((player_t&)mo->target->player, (player_t&)link->player))
 		{
 			link = link->snext;
@@ -1258,6 +1275,19 @@ static AActor* RoughBlockCheck(AActor* mo, int index, angle_t fov)
 		{
 			link = link->snext;
 			continue;
+		}
+
+		// [MBF] If the monster is already engaged in a one-on-one attack
+		// with a healthy friend, don't attack around 60% the time.
+
+		if (link)
+		{
+			AActor* targ = link->target;
+			if (targ && targ->target == link && P_Random() > 100 &&
+			    P_IsFriendlyThing(mo, targ) && targ->health * 2 >= mobjinfo[targ->type].spawnhealth)
+			{
+				continue;
+			}
 		}
 
 		// all good! return it.
