@@ -2171,6 +2171,16 @@ void CL_SendSummonCheat(const char* summon)
 	MSG_WriteString(&net_buffer, summon);
 }
 
+//
+// CL_SendSummonFriendCheat
+//
+void CL_SendSummonFriendCheat(const char* summon)
+{
+	MSG_WriteMarker(&net_buffer, clc_cheat);
+	MSG_WriteByte(&net_buffer, 3);
+	MSG_WriteString(&net_buffer, summon);
+}
+
 
 void PickupMessage (AActor *toucher, const char *message)
 {

@@ -204,6 +204,30 @@ BEGIN_COMMAND(summon)
  }
 END_COMMAND(summon)
 
+BEGIN_COMMAND(summonfriend)
+{
+	if (!CHEAT_AreCheatsEnabled())
+		return;
+
+	if (argc < 2)
+		return;
+
+	const std::string mobname = C_ArgCombine(argc - 1, (const char**)(argv + 1));
+
+	if (!CHEAT_ValidSummonActor(mobname.c_str()))
+	{
+		Printf(PRINT_HIGH,
+		       "Invalid summon argument: %s. Please use `dumpactors` for a valid list of "
+		       "actor names.\n",
+		       mobname.c_str());
+		return;
+	}
+
+	CHEAT_Summon(&consoleplayer(), mobname.c_str(), true);
+	CL_SendSummonFriendCheat(mobname.c_str());
+}
+END_COMMAND(summonfriend)
+
 BEGIN_COMMAND(mdk)
 {
 	if (!CHEAT_AreCheatsEnabled())
@@ -511,10 +535,19 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 		}
 	}
 
+	std::string cheatname = "summon";
+
+	if (friendly)
+	{
+		entity->flags |= MF_FRIEND;
+		cheatname = "summonfriend";
+	}
+
 	if (multiplayer)
-		PrintFmt(PRINT_HIGH, "{} is a cheater: summon {}\n",
+		PrintFmt(PRINT_HIGH, "{} is a cheater: {} {}\n",
 		         player->userinfo.netname,
-		 sum);
+		         cheatname,
+		         sum);
 
 	return entity;
 }
