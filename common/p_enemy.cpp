@@ -700,7 +700,7 @@ void P_NewChaseDir (AActor *actor)
 
 bool P_LookForEnemies(AActor* actor, bool allaround)
 {
-	AActor* other = P_RoughTargetSearch(actor, allaround ? 0 : INT2FIXED(90), 128);
+	AActor* other = P_RoughTargetSearch(actor, allaround ? 0 : FixedToAngle(INT2FIXED(90)), 896);
 
 	if (other)
 	{
