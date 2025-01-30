@@ -541,6 +541,7 @@ AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
 	{
 		entity->flags |= MF_FRIEND;
 		cheatname = "summonfriend";
+		entity->friend_playerid = player->id;
 	}
 
 	if (multiplayer)
