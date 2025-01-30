@@ -45,12 +45,6 @@
 	#include <gctypes.h>
 #endif
 
-#ifdef _MSC_VER
-	#define FORMAT_PRINTF(index, first_arg)
-#else
-	#define FORMAT_PRINTF(index, first_arg) __attribute__ ((format(printf, index, first_arg)))
-#endif
-
 // [RH] Some windows includes already define this
 #if !defined(_WINDEF_) && !defined(__wtypes_h__) && !defined(GEKKO)
 typedef int BOOL;
