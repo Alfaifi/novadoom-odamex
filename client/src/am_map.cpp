@@ -191,8 +191,6 @@ static bool bigstate = false; // Bigmode
 
 static bool leveljuststarted = true; // kluge until AM_LevelInit() is called
 
-bool automapactive = false;
-
 // location of window on screen
 static v2int_t f;
 
@@ -312,16 +310,6 @@ int CXMTOF(fixed64_t x)
 int CYMTOF(fixed64_t y)
 {
 	return f_h - MTOF((y)-m_ll.y);
-}
-
-bool AM_ClassicAutomapVisible()
-{
-	return automapactive && !viewactive;
-}
-
-bool AM_OverlayAutomapVisible()
-{
-	return automapactive && viewactive;
 }
 
 //

@@ -24,40 +24,26 @@
 #include "odamex.h"
 #include "am_map.h"
 
-am_default_colors_t AutomapDefaultColors;
-am_colors_t AutomapDefaultCurrentColors;
 int am_cheating = 0;
-
-bool automapactive = false;
-
-bool AM_ClassicAutomapVisible()
-{
-	return automapactive && !viewactive;
-}
-
-bool AM_OverlayAutomapVisible()
-{
-	return automapactive && viewactive;
-}
 
 void AM_SetBaseColorDoom()
 {
-	
+
 }
 
 void AM_SetBaseColorRaven()
 {
-	
+
 }
 
 void AM_SetBaseColorStrife()
 {
-	
+
 }
 
 void AM_Start()
 {
-	
+
 }
 
 BOOL AM_Responder(event_t* ev)
@@ -67,7 +53,7 @@ BOOL AM_Responder(event_t* ev)
 
 void AM_Drawer()
 {
-	
+
 }
 
 VERSION_CONTROL(am_map_cpp, "$Id$")
