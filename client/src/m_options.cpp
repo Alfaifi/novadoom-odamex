@@ -2153,13 +2153,11 @@ void M_OptResponder (event_t *ev)
 
 		case joyactive:
 		{
-			int         numjoy;
+			size_t numjoy = I_GetJoystickCount();
 
-			numjoy = I_GetJoystickCount();
-
-			if ((int)item->a.cvar->value() > numjoy)
+			if ((size_t)item->a.cvar->value() > numjoy)
 				item->a.cvar->Set(0.0);
-			else if ((int)item->a.cvar->value() > 0)
+			else if ((size_t)item->a.cvar->value() > 0)
 				item->a.cvar->Set(item->a.cvar->value() - 1);
 		}
 		S_Sound(CHAN_INTERFACE, "plats/pt1_mid", 1, ATTN_NONE);
@@ -2284,13 +2282,11 @@ void M_OptResponder (event_t *ev)
 
 		case joyactive:
 		{
-			int         numjoy;
+			size_t numjoy = I_GetJoystickCount();
 
-			numjoy = I_GetJoystickCount();
-
-			if ((int)item->a.cvar->value() >= numjoy)
+			if ((size_t)item->a.cvar->value() >= numjoy)
 				item->a.cvar->Set(0.0);
-			else if ((int)item->a.cvar->value() < (numjoy - 1))
+			else if ((size_t)item->a.cvar->value() < (numjoy - 1))
 				item->a.cvar->Set(item->a.cvar->value() + 1);
 
 		}
