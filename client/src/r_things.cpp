@@ -268,7 +268,11 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 		else if (vis->statusflags & SF_BERSERK)
 		{
 			// draw a red palette on the vissprite
-			dcol.translation = translationref_t(&::redtable[id][0]);
+			// but only if the fist is out.
+			if (vis->mo && vis->mo->player && vis->mo->player->readyweapon == wp_fist)
+			{
+				dcol.translation = translationref_t(&::redtable[id][0]);
+			}
 		}
 		else if (vis->statusflags & SF_IRONFEET)
 		{
