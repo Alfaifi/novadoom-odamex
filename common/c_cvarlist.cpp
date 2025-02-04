@@ -339,10 +339,20 @@ CVAR_RANGE(sv_countdown, "5",
 					"sectors and lines",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
-	CVAR(			co_allowdropoff, "0", "Allow monsters can get pushed or thrusted off of ledges",
+	CVAR(			co_allowdropoff, "0", "Allow monsters can get pushed or thrusted off of ledges. Friends can also drop down from ledges with this.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
 
 	CVAR(			co_removesoullimit, "0", "Allows pain elementals to still spawn lost souls if more than 20 are present",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR(			co_pursuit, "0",
+					"Use MBF pursuit behavior -- monsters will change targets " \
+					"if their current target is out of sight and a new valid target is in sight.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR(			co_helpfriends, "0",
+					"Use MBF help_friends behavior -- monsters will help friends under "
+					"50% health. No effect unless using MBF pursuit behavior (co_pursuit).",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 

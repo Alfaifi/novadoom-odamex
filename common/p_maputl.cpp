@@ -1224,7 +1224,7 @@ static AActor* RoughBlockCheck(AActor* mo, int index, angle_t fov)
 			link = link->snext;
 			continue;
 		}
-		
+	
 		if (link->flags & MF_FRIEND)
 		{
 			// [Blair] Don't target friendlies

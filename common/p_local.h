@@ -64,6 +64,10 @@
 #define MELEERANGE		(64*FRACUNIT)
 #define MISSILERANGE	(32*64*FRACUNIT)
 
+// a couple of explicit constants for non-melee things that used to use MELEERANGE
+#define WAKEUPRANGE (64 * FRACUNIT)
+#define SNEAKRANGE (128 * FRACUNIT)
+
 #define WATER_SINK_FACTOR		3
 #define WATER_SINK_SMALL_FACTOR	4
 #define WATER_SINK_SPEED		(FRACUNIT/2)

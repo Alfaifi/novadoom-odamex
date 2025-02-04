@@ -2003,7 +2003,7 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 	}
 }
 
-static bool P_InfightingImmune(AActor* target, AActor* source)
+bool P_InfightingImmune(AActor* target, AActor* source)
 {
 	return // not default behaviour, and same group
 		mobjinfo[target->type].infighting_group != IG_DEFAULT &&
@@ -2054,7 +2054,8 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
     }
 
 	// [AM] Target is invulnerable to infighting from any non-player source.
-	if (source && source->player == NULL && target->oflags & MFO_INFIGHTINVUL)
+	// Except friendlies
+	if (source && target->oflags & MFO_INFIGHTINVUL && (source->player == NULL && !((source->flags ^ target->flags) & MF_FRIEND)))
 	{
 		return;
 	}

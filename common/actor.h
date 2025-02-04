@@ -548,6 +548,9 @@ public:
 
 	byte friend_playerid; // playerid of the player who spawned this actor
 
+	// killough 9/9/98: How long a monster pursues a target.
+	short pursuecount;
+
 	// ThingIDs
 	static void ClearTIDHashes ();
 	void AddToHash ();
