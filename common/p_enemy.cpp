@@ -709,10 +709,6 @@ void P_NewChaseDir (AActor *actor)
 	actor->movedir = DI_NODIR;	// can not move
 }
 
-static AActor* current_actor;
-static bool current_allaround;
-
-
 static bool P_IsVisible(AActor* actor, AActor* mo, bool allaround)
 {
 	if (!allaround)
@@ -723,42 +719,6 @@ static bool P_IsVisible(AActor* actor, AActor* mo, bool allaround)
 			return false;
 	}
 	return P_CheckSight(actor, mo);
-}
-
-static BOOL PIT_FindTarget(AActor* mo)
-{
-	AActor* actor = current_actor;
-
-	if (!((mo->flags ^ actor->flags) & MF_FRIEND) && // Invalid target
-	      mo->health > 0 && (mo->flags & MF_COUNTKILL || mo->type == MT_SKULL))
-		return true;
-
-	// If the monster is already engaged in a one-on-one attack
-	// with a healthy friend, don't attack around 60% the time
-	{
-		AActor* targ = mo->target;
-		if (targ && targ->target == mo->self && P_Random() > 100 &&
-		    ((mo->flags ^ actor->flags) & MF_FRIEND) &&
-		    targ->health * 2 >= targ->info->spawnhealth)
-			return true;
-	}
-
-	// Monster isn't itself
-	if (mo == actor)
-		return true;
-
-	// Monster isn't shootable
-	if (!(mo->flags & MF_SHOOTABLE))
-		return true;
-
-	// Can't see the monster
-	if (!P_IsVisible(actor, mo, current_allaround))
-		return true;
-
-	actor->lastenemy = actor->target; // Remember previous target
-	actor->target = mo->self;         // Found target
-
-	return false;
 }
 
 //
@@ -777,8 +737,6 @@ static bool P_HelpFriend(AActor* actor)
 	if (actor->health * 3 < actor->info->spawnhealth)
 		return false;
 
-	current_actor = actor;
-	current_allaround = true;
 
 	while ((it = iterator.Next()))
 	{
@@ -791,11 +749,21 @@ static bool P_HelpFriend(AActor* actor)
 					break;
 			}
 			else if (it->flags & MF_JUSTHIT && it->target &&
-			         it->target != actor->target && !PIT_FindTarget(it->target))
+			         it->target != actor->target)
 			{
-				// Ignore any attacking monsters, while searching for friend
-				actor->threshold = BASETHRESHOLD;
-				return true;
+				AActor* enemy = P_RoughTargetSearch(actor, FixedToAngle(INT2FIXED(90)),
+				                                    896, RoughMonsterCheck);
+
+				if (!enemy)
+				{
+					// Ignore any attacking monsters, while searching for friend
+					actor->threshold = BASETHRESHOLD;
+					return true;
+				}
+				else
+				{
+					actor->target = enemy->ptr();
+				}
 			}
 		}
 	}
@@ -829,48 +797,14 @@ bool P_LookForMonsters(AActor* actor, bool allaround)
 		actor->lastenemy = AActor::AActorPtr();
 	}
 
-	AActor* other;
-	TThinkerIterator<AActor> iterator;
+	// This is NOT MBF behavior
+	// But we want a smarter monster check for friendlies and hostiles attacking friendlies.
+	AActor* enemy = P_RoughTargetSearch(actor, FixedToAngle(INT2FIXED(180)), 896, RoughMonsterCheck);
 
-	int x = (actor->x - bmaporgx) >> MAPBLOCKSHIFT;
-	int y = (actor->y - bmaporgy) >> MAPBLOCKSHIFT;
-	int d;
-
-	current_actor = actor;
-	current_allaround = allaround;
-
-	// Search first in the immediate vicinity.
-
-	if (!P_BlockThingsIterator(x, y, PIT_FindTarget))
-		return true;
-
-	for (d = 1; d < 5; d++)
+	if (enemy)
 	{
-		int i = 1 - d;
-		do
-			if (!P_BlockThingsIterator(x + i, y - d, PIT_FindTarget) ||
-			    !P_BlockThingsIterator(x + i, y + d, PIT_FindTarget))
-				return true;
-		while (++i < d);
-
-		do
-			if (!P_BlockThingsIterator(x - d, y + i, PIT_FindTarget) ||
-			    !P_BlockThingsIterator(x + d, y + i, PIT_FindTarget))
-				return true;
-		while (--i + d >= 0);
-	}
-
-	{ // Random number of monsters, to prevent patterns from forming
-		int n = (P_Random() & 31) + 15;
-
-		while (other = iterator.Next())
-			if (--n < 0)
-			{
-				// Only a subset of the monsters were searched.
-				break;
-			}
-			else if (!PIT_FindTarget(other)) // If target sighted
-				return true;
+		actor->target = enemy->ptr();
+		return true;
 	}
 
 	if (!actor->target)
@@ -1041,8 +975,7 @@ static bool P_LookForTargets(AActor* actor, bool allaround)
 {
 	return actor->flags & MF_FRIEND
 	           ? P_LookForMonsters(actor, allaround) || P_LookForPlayers(actor, allaround)
-	           : P_LookForPlayers(actor, allaround) ||
-	                 P_LookForMonsters(actor, allaround);
+	           : P_LookForPlayers(actor, allaround)  || P_LookForMonsters(actor, allaround);
 }
 
 
@@ -1246,12 +1179,6 @@ void A_Look (AActor *actor)
 	{
 		actor->target = AActor::AActorPtr();
 		//return;
-	}
-
-	if (actor->flags & MF_FRIEND)
-	{
-		if (P_LookForTargets(actor, false))
-			goto seeyou;
 	}
 
 	if (targ && (targ->flags & MF_SHOOTABLE))
@@ -2773,7 +2700,7 @@ void A_FindTracer(AActor* actor)
 	fov = FixedToAngle(actor->state->args[0]);
 	dist = (actor->state->args[1]);
 
-	AActor* tracer = P_RoughTargetSearch(actor, fov, dist);
+	AActor* tracer = P_RoughTargetSearch(actor, fov, dist, RoughTracerCheck);
 
 	if (!tracer || tracer->health <= 0)
 		return;

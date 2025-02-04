@@ -228,7 +228,7 @@ bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest)
 {
 	if (!actor || !friendshiptest)
 	{
-		return false;
+		return true;
 	}
 
 	if (friendshiptest->flags & MF_FRIEND)
@@ -304,6 +304,11 @@ bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest)
 				}
 			}
 		}
+	}
+	else
+	{
+		if (!(actor->flags & MF_FRIEND))
+			return true;
 	}
 	return false;
 }

@@ -191,7 +191,10 @@ fixed_t P_AproxDistance2 (AActor *mo, fixed_t x, fixed_t y);
 fixed_t P_AproxDistance2 (AActor *a, AActor *b);
 
 bool P_ActorInFOV(AActor* origin, AActor* mo , float f, fixed_t dist);
-AActor* P_RoughTargetSearch(AActor* mo, angle_t fov, int distance);
+AActor* P_RoughTargetSearch(AActor* mo, angle_t fov, int distance,
+                            AActor* (*searchFunc)(AActor*, int, angle_t));
+AActor* RoughTracerCheck(AActor* mo, int index, angle_t fov);
+AActor* RoughMonsterCheck(AActor* mo, int index, angle_t fov);
 
 int 	P_PointOnLineSide (fixed_t x, fixed_t y, const line_t *line);
 int 	P_PointOnDivlineSide (fixed_t x, fixed_t y, const divline_t *line);
