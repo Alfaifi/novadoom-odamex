@@ -218,6 +218,9 @@ BOOL P_CheckMeleeRange (AActor *actor)
 	pl = actor->target;
 	dist = P_AproxDistance (pl->x-actor->x, pl->y-actor->y);
 
+	if (!((actor->flags ^ pl->flags) & MF_FRIEND) || P_IsFriendlyThing(pl, actor))
+		return false;
+
 	if (dist >= range - 20 * FRACUNIT + pl->info->radius)
 		return false;
 
@@ -1398,7 +1401,7 @@ void A_Chase (AActor *actor)
 			}
 		}
 
-		if (player->attacker && player->attacker->health > 0 &&
+		if (player && player->attacker && player->attacker->health > 0 &&
 		    player->attacker->flags & MF_SHOOTABLE && P_Random() < 80)
 		{
 			if (!(player->attacker->flags & MF_FRIEND) ||
