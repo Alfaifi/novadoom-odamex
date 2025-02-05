@@ -639,22 +639,18 @@ static BOOL PIT_CheckThing (AActor *thing)
 		if (tmthing->z+tmthing->height < thing->z)
 			return true;				// underneath
 
-		if (tmthing->target && P_ProjectileImmune(thing, tmthing->target))
-		{
-			// Don't hit same species as originator.
-			if (thing == tmthing->target)
-				return true;
+		if (tmthing->target && 
+				P_ProjectileImmune(thing, tmthing->target) &&
+				P_IsFriendlyThing(thing, tmthing->target))
+			{
+				// Don't hit same species as originator.
+				if (thing == tmthing->target)
+					return true;
 
-			// [RH] DeHackEd infighting is here.
-			if (!deh.Infight && !thing->player)
-				return false;		// Hit same species as originator, explode, no damage
-		}
-
-		if (P_IsFriendlyThing(thing, tmthing->target))
-		{
-			// Friends never harm each other
-			return false;
-		}
+				// [RH] DeHackEd infighting is here.
+				if (!deh.Infight && !thing->player)
+					return false; // Hit same species as originator, explode, no damage
+			}
 
 		if (!(thing->flags & MF_SHOOTABLE))
 			return !solid;		// didn't do any damage

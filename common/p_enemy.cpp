@@ -1429,7 +1429,7 @@ void A_Chase (AActor *actor)
 	// possibly choose another target
 	if (!actor->threshold)
 	{
-		if (!co_pursuit)
+		if (!(actor->flags & MF_FRIEND) || !co_pursuit)
 		{
 			if (multiplayer && !P_CheckSight(actor, actor->target) &&
 			    P_LookForPlayers(actor, true))
@@ -1926,96 +1926,8 @@ BOOL PIT_VileCheck (AActor *thing)
 //
 void A_VileChase (AActor *actor)
 {
-	if(!serverside)
-	{
-		// Return to normal attack.
-		A_Chase (actor);
-		return;
-	}
-
-	int 				xl;
-	int 				xh;
-	int 				yl;
-	int 				yh;
-
-	int 				bx;
-	int 				by;
-
-	mobjinfo_t* 		info;
-	AActor::AActorPtr 	temp;
-
-	if (actor->movedir != DI_NODIR)
-	{
-		// check for corpses to raise
-		viletryx = actor->x + actor->info->speed * xspeed[actor->movedir];
-		viletryy = actor->y + actor->info->speed * yspeed[actor->movedir];
-
-		xl = (viletryx - bmaporgx - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-		xh = (viletryx - bmaporgx + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-		yl = (viletryy - bmaporgy - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-		yh = (viletryy - bmaporgy + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-
-		vileobj = actor;
-
-		viletryradius = mobjinfo[MT_VILE].radius;
-
-		for (bx=xl ; bx<=xh ; bx++)
-		{
-			for (by=yl ; by<=yh ; by++)
-			{
-				// Call PIT_VileCheck to check
-				// whether object is a corpse
-				// that canbe raised.
-				if (!P_BlockThingsIterator(bx,by,PIT_VileCheck))
-				{
-					// got one!
-					temp = actor->target;
-					actor->target = corpsehit->ptr();
-					A_FaceTarget (actor);
-					actor->target = temp;
-
-					P_SetMobjState (actor, S_VILE_HEAL1, true);
-
-					if (!clientside)
-						SV_Sound(corpsehit, CHAN_BODY, "vile/raise", ATTN_IDLE);
-					else
-						S_Sound(corpsehit, CHAN_BODY, "vile/raise", 1, ATTN_IDLE);
-
-					info = corpsehit->info;
-
-					corpsehit->flags = (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
-
-					if (serverside)
-					{
-						if (!(actor->flags & MF_FRIEND))
-						{
-							level.respawned_monsters++;
-							SV_UpdateMonsterRespawnCount();
-						}
-					}
-
-					P_SetMobjState (corpsehit,info->raisestate, true);
-
-					// [Nes] - Classic demo compatability: Ghost monster bug.
-					if ((co_novileghosts)) {
-						corpsehit->height = P_ThingInfoHeight(info);	// [RH] Use real mobj height
-						corpsehit->radius = info->radius;	// [RH] Use real radius
-					} else {
-						corpsehit->height <<= 2;
-					}
-
-					corpsehit->flags = info->flags;
-					corpsehit->health = info->spawnhealth;
-					corpsehit->target = AActor::AActorPtr();
-
-					return;
-				}
-			}
-		}
-	}
-
-	// Return to normal attack.
-	A_Chase (actor);
+	if (!P_HealCorpse(actor, mobjinfo[MT_VILE].radius, S_VILE_HEAL1, 31)) //dsslop
+		A_Chase(actor); // Return to normal attack.
 }
 
 
@@ -2548,7 +2460,7 @@ void A_HealChase(AActor* actor)
 {
 	int state, sound;
 
-	if (!actor)
+	if (!actor || !serverside)
 		return;
 
 	state = actor->state->args[0];
@@ -2613,7 +2525,8 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 
 					info = corpsehit->info;
 
-					corpsehit->flags = (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+					corpsehit->flags =
+					    (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
 
 					if (serverside)
 					{
@@ -2638,8 +2551,8 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 						corpsehit->height <<= 2;
 					}
 
-					corpsehit->flags = info->flags;
 					corpsehit->health = info->spawnhealth;
+					corpsehit->lastenemy = AActor::AActorPtr();
 					corpsehit->target = AActor::AActorPtr();
 
 					return true;
