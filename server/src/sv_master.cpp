@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -46,7 +46,7 @@ public:
 	masterserver()
 	{
 	}
-	
+
 	masterserver(const masterserver &other)
 		: masterip(other.masterip), masteraddr(other.masteraddr)
 	{
@@ -106,7 +106,7 @@ void SV_InitMasters(void)
 {
 	static bool previous_sv_usemasters = (sv_usemasters == 0);
 
-	if (previous_sv_usemasters != sv_usemasters)
+	if (previous_sv_usemasters != sv_usemasters.asBool())
 	{
 		if (sv_usemasters)
 		{
@@ -124,7 +124,7 @@ void SV_InitMasters(void)
 		}
 	}
 
-	previous_sv_usemasters = (sv_usemasters != 0);
+	previous_sv_usemasters = sv_usemasters.asBool();
 }
 
 
@@ -152,7 +152,7 @@ bool SV_AddMaster(const char *masterip)
 			return false;
 		}
 	}
-	
+
 	if(m.masteraddr.ip[0] == 0 && m.masteraddr.ip[1] == 0 && m.masteraddr.ip[2] == 0 && m.masteraddr.ip[3] == 0)
 	{
 		Printf("Failed to resolve master server: %s, not added", m.masterip.c_str());

@@ -65,7 +65,7 @@ CVARS (console variables)
 #define CVAR_LATCH BIT(4)
 
 /**
- * Can unset this var from console. 
+ * Can unset this var from console.
  */
 #define CVAR_UNSETTABLE BIT(5)
 
@@ -144,7 +144,8 @@ public:
 
 	// return m_Value as an int, rounded to the nearest integer because
 	// casting truncates instead of rounding
-	int asInt() const { return static_cast<int>(m_Value >= 0.0f ? m_Value + 0.5f : m_Value - 0.5f); }
+	int asInt() const { return static_cast<int>(std::round(m_Value)); }
+	bool asBool() const { return m_Value != 0; }
 
 	inline void Callback (){ if (m_Callback) m_Callback (*this); }
 
