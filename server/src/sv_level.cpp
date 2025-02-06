@@ -104,6 +104,7 @@ bool isFast = false;
 //
 static OLumpName d_mapname;
 
+[[nodiscard]]
 OLumpName G_NextMap();
 
 void G_DeferedInitNew (const OLumpName& mapname)
@@ -195,6 +196,7 @@ bool isLastMap()
 }
 
 // Returns the next map, assuming there is no maplist.
+[[nodiscard]]
 OLumpName G_NextMap()
 {
 	OLumpName next = level.nextmap;
