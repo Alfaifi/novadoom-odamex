@@ -444,7 +444,7 @@ class DFireFlicker : public DLighting
 public:
 	DFireFlicker (sector_t *sector);
 	DFireFlicker (sector_t *sector, int upper, int lower);
-	void		RunThink ();
+	void RunThink() override;
 	int GetMaxLight() const { return m_MaxLight; }
 	int GetMinLight() const { return m_MinLight; }
 protected:
@@ -460,7 +460,7 @@ class DFlicker : public DLighting
 	DECLARE_SERIAL (DFlicker, DLighting)
 public:
 	DFlicker (sector_t *sector, int upper, int lower);
-	void		RunThink ();
+	void RunThink () override;
 	int GetMaxLight() const { return m_MaxLight; }
 	int GetMinLight() const { return m_MinLight; }
 protected:
@@ -477,7 +477,7 @@ class DLightFlash : public DLighting
 public:
 	DLightFlash (sector_t *sector);
 	DLightFlash (sector_t *sector, int min, int max);
-	void		RunThink ();
+	void RunThink() override;
 	int GetMaxLight() const { return m_MaxLight; }
 	int GetMinLight() const { return m_MinLight; }
 protected:
@@ -496,7 +496,7 @@ class DStrobe : public DLighting
 public:
 	DStrobe (sector_t *sector, int utics, int ltics, bool inSync);
 	DStrobe (sector_t *sector, int upper, int lower, int utics, int ltics);
-	void		RunThink ();
+	void RunThink() override;
 	int GetMaxLight() const { return m_MaxLight; }
 	int GetMinLight() const { return m_MinLight; }
 	int GetDarkTime() const { return m_DarkTime; }
@@ -518,7 +518,7 @@ class DGlow : public DLighting
 	DECLARE_SERIAL (DGlow, DLighting)
 public:
 	DGlow (sector_t *sector);
-	void		RunThink ();
+	void RunThink() override;
 protected:
 	int 		m_MinLight;
 	int 		m_MaxLight;
@@ -533,7 +533,7 @@ class DGlow2 : public DLighting
 	DECLARE_SERIAL (DGlow2, DLighting)
 public:
 	DGlow2 (sector_t *sector, int start, int end, int tics, bool oneshot);
-	void		RunThink ();
+	void RunThink() override;
 	int GetStart() const { return m_Start; }
 	int GetEnd() const { return m_End; }
 	int GetMaxTics() const { return m_MaxTics; }
@@ -555,7 +555,7 @@ class DPhased : public DLighting
 public:
 	DPhased (sector_t *sector);
 	DPhased (sector_t *sector, int baselevel, int phase);
-	void		RunThink ();
+	void RunThink() override;
 	byte GetBaseLevel() const { return m_BaseLevel; }
 	byte GetPhase() const { return m_Phase; }
 protected:
