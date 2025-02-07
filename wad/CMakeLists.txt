@@ -229,6 +229,7 @@ set(ODAWAD_SOURCES
   graphics/xhair6.gif
   graphics/xhair7.gif
   graphics/xhair8.gif
+  graphics/frndhrt.gif
   lumps/animated.lmp
   lumps/dscefd.lmp
   lumps/dscefm.lmp

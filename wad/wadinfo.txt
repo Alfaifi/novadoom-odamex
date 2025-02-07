@@ -309,6 +309,7 @@ DIG123	0	0
 DIG124	0	0
 DIG125	0	0
 DIG126	0	0
+FRNDHRT	0 0
 
 # List of Sprites
 [sprites]

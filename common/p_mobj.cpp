@@ -2348,6 +2348,12 @@ AActor* P_SpawnMissile (AActor *source, AActor *dest, mobjtype_t type)
 		th->effects = FX_YELLOWFOUNTAIN;
 		th->translation = translationref_t(&bosstable[0]);
 	}
+	else if (source->flags & MF_FRIEND)
+	{
+		th->oflags |= MFO_FULLBRIGHT;
+		th->translation = translationref_t(&friendtable[0]);
+		//th->effects = FX_FRIENDHEARTS;
+	}
 
     // fuzzy player
     if (dest_flags & MF_SHADOW)

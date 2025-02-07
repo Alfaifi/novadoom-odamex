@@ -502,6 +502,7 @@ bool P_CheckFov(AActor* t1, AActor* t2, angle_t fov);
 bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest);
 bool P_IsTeamMate(AActor* actor, AActor* player);
 bool P_IsVoodooDoll(const AActor* mo);
+void P_FriendlyEffects();
 
 
 //

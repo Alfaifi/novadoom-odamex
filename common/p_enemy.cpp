@@ -44,6 +44,7 @@
 #include "g_gametype.h"
 #include "g_skill.h"
 #include "p_mapformat.h"
+#include "c_effect.h"
 
 
 EXTERN_CVAR(sv_allowexit)
@@ -318,6 +319,52 @@ BOOL P_CheckMissileRange (AActor *actor)
 	return true;
 }
 
+/*
+ * P_SmartMove
+ *
+ * killough 9/12/98: Same as P_Move, except smarter
+ */
+
+bool P_SmartMove(AActor* actor)
+{
+	AActor* target = actor->target;
+	bool on_lift, under_damage = false;
+	int dropoff = 0;
+	bool tmp_monster_avoid_hazards = true; // co_monsteravoidhazards
+	bool staylift = true; // co_stayonlift
+
+	/* killough 9/12/98: Stay on a lift if target is on one */
+	on_lift = staylift && target && target->health > 0 &&
+	          target->subsector->sector->tag == actor->subsector->sector->tag &&
+	          P_IsOnLift(actor);
+
+	under_damage = tmp_monster_avoid_hazards && P_IsUnderDamage(actor); // e6y
+
+	// killough 10/98: allow dogs to drop off of taller ledges sometimes.
+	// dropoff==1 means always allow it, dropoff==2 means only up to 128 high,
+	// and only if the target is immediately on the other side of the line.
+
+	// allow all friends to jump down instead of just dogs
+
+	if (actor->flags & MF_FRIEND && target && P_AllowDropOff() &&
+	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
+	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
+	    P_Random() < 235)
+		dropoff = 2;
+
+	//if (!P_Move(actor, dropoff))
+		//return false;
+
+	// killough 9/9/98: avoid crushing ceilings or other damaging areas
+	if ((on_lift && P_Random() < 230 && // Stay on lift
+	     !P_IsOnLift(actor)) ||
+	    (tmp_monster_avoid_hazards && !under_damage && // e6y  // Get away from damage
+	     (under_damage = P_IsUnderDamage(actor)) &&
+	     (under_damage < 0 || P_Random() < 200)))
+		actor->movedir = DI_NODIR; // avoid the area (most of the time anyway)
+
+	return true;
+}
 
 //
 // P_Move
@@ -757,7 +804,7 @@ static bool P_HelpFriend(AActor* actor)
 				if (!enemy)
 				{
 					// Ignore any attacking monsters, while searching for friend
-					actor->threshold = BASETHRESHOLD;
+					//actor->threshold = BASETHRESHOLD;
 					return true;
 				}
 				else
@@ -2830,6 +2877,29 @@ void A_Stop(AActor* actor)
 	actor->momx = actor->momy = actor->momz = 0;
 }
 
+// P_FriendlyEffects
+void P_FriendlyEffects()
+{
+	TThinkerIterator<AActor> iterator;
+	AActor* other;
+
+	while ((other = iterator.Next()))
+	{
+		if (!other->player && 
+				other->flags & MF_FRIEND && 
+				validplayer(consoleplayer()) &&
+				consoleplayer().mo &&
+				P_IsFriendlyThing(consoleplayer().mo, other))
+		{
+			other->effects = FX_FRIENDHEARTS;
+		}
+		else
+		{
+			other->effects = 0;
+		}
+	}
+}
+
 // P_RemoveSoulLimit
 bool P_RemoveSoulLimit()
 {
@@ -2908,6 +2978,10 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 		return;														//   |
 	}																// phares
 	 */
+
+	/* killough 7/20/98: PEs shoot lost souls with the same friendliness */
+	other->flags = (other->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
 	// Check for movements.
 	if (!P_TryMove(other, x, y, false))
 	{
@@ -3007,7 +3081,7 @@ void A_Fall (AActor *actor)
 	// Remove any sort of boss effect on kill
 	// OFlags hack because of client issues
 	// Only remove the sparkling fountain, keep the transition
-	if (actor->type != MT_PLAYER && (actor->oflags & hordeBossModMask))
+	if (actor->type != MT_PLAYER && actor->effects)
 	{
 		actor->effects = 0;
 	}

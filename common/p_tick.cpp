@@ -87,7 +87,10 @@ void P_Ticker (void)
 	P_RespawnSpecials ();
 
 	if (clientside)
-		P_RunEffects ();	// [RH] Run particle effects
+	{
+		P_FriendlyEffects(); // Mark any new friendly monsters with an effect
+		P_RunEffects(); // [RH] Run particle effects
+	}
 
 	// for par times
 	level.time++;

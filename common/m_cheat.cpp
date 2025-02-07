@@ -35,6 +35,7 @@
 #include "g_skill.h"
 #include "p_local.h"
 #include "infomap.h"
+#include "c_effect.h"
 
 extern bool simulated_connection;
 EXTERN_CVAR(sv_allowcheats)
