@@ -2886,7 +2886,8 @@ void P_FriendlyEffects()
 	while ((other = iterator.Next()))
 	{
 		if (!other->player && 
-				other->flags & MF_FRIEND && 
+				other->flags & MF_FRIEND &&
+		    !(other->oflags & MFO_BOSSPOOL) &&
 				validplayer(consoleplayer()) &&
 				consoleplayer().mo &&
 				P_IsFriendlyThing(consoleplayer().mo, other))
