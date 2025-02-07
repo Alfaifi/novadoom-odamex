@@ -2350,14 +2350,12 @@ AActor* P_SpawnMissile (AActor *source, AActor *dest, mobjtype_t type)
 	}
 	else if (source->flags & MF_FRIEND)
 	{
-		th->oflags |= MFO_FULLBRIGHT;
 		th->translation = translationref_t(&friendtable[0]);
-		//th->effects = FX_FRIENDHEARTS;
 	}
 
     // fuzzy player
     if (dest_flags & MF_SHADOW)
-		an += P_RandomDiff()<<20;
+		an += P_RandomDiff(th)<<20;
 
     th->angle = an;
     an >>= ANGLETOFINESHIFT;
@@ -3065,7 +3063,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		mobj->health *= sv_monstershealth;
 
 	if (mobj->tics > 0)
-		mobj->tics = 1 + (P_Random () % mobj->tics);
+		mobj->tics = 1 + (P_Random(mobj) % mobj->tics);
 
 	if (i != MT_SPARK)
 		mobj->angle = ANG45 * (mthing->angle/45);

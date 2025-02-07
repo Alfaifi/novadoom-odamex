@@ -268,7 +268,7 @@ BOOL P_CheckMissileRange (AActor *actor)
 		       (actor->target->health > 0 &&
 		        (!(actor->target->player
 		              ? true
-		              : !(actor->target->flags & MF_JUSTHIT) && P_Random() > 128)));
+		              : !(actor->target->flags & MF_JUSTHIT) && P_Random(actor) > 128)));
 	}
 
 	 /* killough 7/18/98: friendly monsters don't attack other friendly
@@ -349,18 +349,18 @@ bool P_SmartMove(AActor* actor)
 	if (actor->flags & MF_FRIEND && target && P_AllowDropOff() &&
 	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
 	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
-	    P_Random() < 235)
+	    P_Random(actor) < 235)
 		dropoff = 2;
 
 	//if (!P_Move(actor, dropoff))
 		//return false;
 
 	// killough 9/9/98: avoid crushing ceilings or other damaging areas
-	if ((on_lift && P_Random() < 230 && // Stay on lift
+	if ((on_lift && P_Random(actor) < 230 && // Stay on lift
 	     !P_IsOnLift(actor)) ||
 	    (tmp_monster_avoid_hazards && !under_damage && // e6y  // Get away from damage
 	     (under_damage = P_IsUnderDamage(actor)) &&
-	     (under_damage < 0 || P_Random() < 200)))
+	     (under_damage < 0 || P_Random(actor) < 200)))
 		actor->movedir = DI_NODIR; // avoid the area (most of the time anyway)
 
 	return true;
@@ -792,7 +792,7 @@ static bool P_HelpFriend(AActor* actor)
 			// Possibly help a friend under 50% health
 			if (it->health * 2 >= it->info->spawnhealth)
 			{
-				if (P_Random() < 180)
+				if (P_Random(actor) < 180)
 					break;
 			}
 			else if (it->flags & MF_JUSTHIT && it->target &&
@@ -1074,7 +1074,7 @@ void P_NewRandomDir(AActor* actor)
 	int omovedir = opposite[actor->movedir]; // haleyjd 20110223: nerfed this...
 
 	// randomly determine direction of search
-	if (P_Random() & 1)
+	if (P_Random(actor) & 1)
 	{
 		// Try all non-reversal directions forward, first
 		for (dir = 0; dir < DI_NODIR; dir++)
@@ -1082,7 +1082,7 @@ void P_NewRandomDir(AActor* actor)
 			if (dir != omovedir)
 			{
 				actor->movedir = dir;
-				if (P_Random() & 1)
+				if (P_Random(actor) & 1)
 				{
 					if (P_TryWalk(actor))
 						break;
@@ -1360,7 +1360,7 @@ void A_Chase (AActor *actor)
 				{
 					if (it->ingame())
 					{
-						if (P_Random() < 80 && P_IsFriendlyThing(it->mo, actor))
+						if (P_Random(actor) < 80 && P_IsFriendlyThing(it->mo, actor))
 						{
 							player = &(*it);
 							break;
@@ -1376,7 +1376,7 @@ void A_Chase (AActor *actor)
 		}
 
 		if (player && player->attacker && player->attacker->health > 0 &&
-		    player->attacker->flags & MF_SHOOTABLE && P_Random() < 80)
+		    player->attacker->flags & MF_SHOOTABLE && P_Random(actor) < 80)
 		{
 			if (!(player->attacker->flags & MF_FRIEND) ||
 			    !P_IsFriendlyThing(player->attacker->self, actor))
@@ -2428,7 +2428,7 @@ void A_MonsterBulletAttack(AActor* actor)
 
 	for (i = 0; i < numbullets; i++)
 	{
-		damage = (P_Random() % damagemod + 1) * damagebase;
+		damage = (P_Random(actor) % damagemod + 1) * damagebase;
 		angle = (int)actor->angle + P_RandomHitscanAngle(hspread);
 		slope = aimslope + P_RandomHitscanSlope(vspread);
 
@@ -2467,7 +2467,7 @@ void A_MonsterMeleeAttack(AActor* actor)
 
 	S_Sound(actor, CHAN_WEAPON, SoundMap[hitsound], 1, ATTN_NORM);
 
-	damage = (P_Random() % damagemod + 1) * damagebase;
+	damage = (P_Random(actor) % damagemod + 1) * damagebase;
 	P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
 }
 
@@ -2885,10 +2885,11 @@ void P_FriendlyEffects()
 
 	while ((other = iterator.Next()))
 	{
-		if (!other->player && 
-				other->flags & MF_FRIEND &&
-		    !(other->oflags & MFO_BOSSPOOL) &&
-				validplayer(consoleplayer()) &&
+		if (other->player || !(other->flags & MF_FRIEND) || other->health <= 0 ||
+		    (other->oflags & MFO_BOSSPOOL))
+			continue;
+
+		if (validplayer(consoleplayer()) &&
 				consoleplayer().mo &&
 				P_IsFriendlyThing(consoleplayer().mo, other))
 		{

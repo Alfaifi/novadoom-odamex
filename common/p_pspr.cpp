@@ -869,7 +869,7 @@ void A_WeaponJump(AActor* mo)
 	if (!psp->state)
 		return;
 
-	if (P_Random() < psp->state->args[1])
+	if (P_Random(mo) < psp->state->args[1])
 		P_SetPspritePtr(player, psp, (statenum_t)psp->state->args[0]);
 }
 
@@ -1057,7 +1057,7 @@ void A_WeaponBulletAttack(AActor* mo)
 	for (i = 0; i < numbullets; i++)
 	{
 		int bangle = angle;
-		damage = (P_Random() % damagemod + 1) * damagebase;
+		damage = (P_Random(mo) % damagemod + 1) * damagebase;
 		bangle = angle + (int)player->mo->angle + P_RandomHitscanAngle(hspread);
 		slope = bulletslope + P_RandomHitscanSlope(vspread);
 
@@ -1101,15 +1101,15 @@ void A_WeaponMeleeAttack(AActor* mo)
 	if (range <= 0)
 		range = player->mo->info->meleerange;
 
-	damage = (P_Random() % damagemod + 1) * damagebase;
+	damage = (P_Random(mo) % damagemod + 1) * damagebase;
 	if (player->powers[pw_strength])
 		damage = (damage * zerkfactor) >> FRACBITS;
 
 	// slight randomization; weird vanillaism here. :P
 	angle = player->mo->angle;
 
-	t = P_Random();
-	angle += (t - P_Random()) << 18;
+	t = P_Random(mo);
+	angle += (t - P_Random(mo)) << 18;
 
 	// make autoaim prefer enemies
 	slope = P_AimLineAttack(player->mo, angle, range);

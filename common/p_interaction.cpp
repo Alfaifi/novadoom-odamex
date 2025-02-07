@@ -2117,8 +2117,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		// make fall forwards sometimes
 		if (damage < 40
 			&& damage > target->health
-			&& target->z - inflictor->z > 64 * FRACUNIT
-			&& (P_Random() & 1))
+			&& target->z - inflictor->z > 64 * FRACUNIT && (P_Random(target) & 1))
 		{
 			ang += ANG180;
 			thrust *= 4;
@@ -2346,7 +2345,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
   if (!(target->flags2 & MF2_DORMANT))
 	{
-		int pain = P_Random();
+		int pain = P_Random(target);
 
 		if (target->oflags & MFO_UNFLINCHING)
 		{

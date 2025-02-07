@@ -662,7 +662,7 @@ static BOOL PIT_CheckThing (AActor *thing)
 
 		if (tmthing->flags2 & MF2_RIP)
 		{
-			int damage = ((P_Random() & 3) + 2) * tmthing->info->damage;
+			int damage = ((P_Random(tmthing) & 3) + 2) * tmthing->info->damage;
 			if (!(thing->flags & MF_NOBLOOD))
 				P_SpawnBlood(tmthing->x, tmthing->y, tmthing->z, damage);
 			if (tmthing->info->ripsound)
