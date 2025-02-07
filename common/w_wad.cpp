@@ -691,11 +691,21 @@ int W_CheckNumForName(const OLumpName& name, int namespc)
 //
 int W_GetNumForName(const char* name, int namespc)
 {
+	if (name == NULL)
+	{
+		I_Error("W_GetNumForName: NULL name!\n");
+	}
+
+	if (std::string(name).empty())
+	{
+		I_Error("W_GetNumForName: empty name!\n");
+	}
+
 	int i = W_CheckNumForName(name, namespc);
 
 	if (i == -1)
 	{
-		I_Error("W_GetNumForName: %s not found!\n(checked in: %s)", name,
+		I_Error("W_GetNumForName: %s not found in namespace %d!\n(checked in: %s)", name, namespc,
 		        M_ResFilesToString(::wadfiles).c_str());
 	}
 
