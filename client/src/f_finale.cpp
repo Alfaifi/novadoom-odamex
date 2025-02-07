@@ -646,7 +646,7 @@ void F_CastDrawer()
 	cast_surface->getDefaultCanvas()->DrawPatch(background_patch, 0, 0);
 
 	// draw the current frame in the middle of the screen
-	const spritedef_t* sprdef = &sprites[castsprite];
+	const spritedef_t* sprdef = &sprites[caststate->sprite];
 	const spriteframe_t* sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
 
 	int scaled_x = (finale_width - 320) / 2;
