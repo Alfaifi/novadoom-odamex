@@ -455,7 +455,7 @@ void D_AdvanceDemo (void)
 //
 void D_DoAdvanceDemo (void)
 {
-	const char *pagename = NULL;
+	OLumpName pagename;
 
 	consoleplayer().playerstate = PST_LIVE;	// not reborn
 	advancedemo = false;
@@ -477,7 +477,7 @@ void D_DoAdvanceDemo (void)
             pagetic = gameinfo.titleTime * TICRATE;
 
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.titlePage.c_str();
+            pagename = gameinfo.titlePage;
 
             currentmusic = gameinfo.titleMusic.c_str();
 
@@ -491,7 +491,7 @@ void D_DoAdvanceDemo (void)
         case 2:
             pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.creditPages[0].c_str();
+            pagename = gameinfo.creditPages[0];
 
             break;
         case 3:
@@ -505,7 +505,7 @@ void D_DoAdvanceDemo (void)
             {
                 pagetic = gameinfo.titleTime * TICRATE;
 
-                pagename = gameinfo.titlePage.c_str();
+                pagename = gameinfo.titlePage;
                 currentmusic = gameinfo.titleMusic.c_str();
 
                 S_StartMusic(currentmusic.c_str());
@@ -513,7 +513,7 @@ void D_DoAdvanceDemo (void)
             else
             {
                 pagetic = gameinfo.pageTime * TICRATE;
-                pagename = gameinfo.creditPages[1].c_str();
+                pagename = gameinfo.creditPages[1];
             }
 
             break;
@@ -524,7 +524,7 @@ void D_DoAdvanceDemo (void)
         case 6:
             pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.creditPages[1].c_str();
+            pagename = gameinfo.creditPages[1];
 
             break;
         case 7:
@@ -534,7 +534,7 @@ void D_DoAdvanceDemo (void)
     }
 
     // [Russell] - Still need this toilet humor for now unfortunately
-	if (pagename)
+	if (!pagename.empty())
 	{
 		const patch_t* patch = W_CachePatch(pagename);
 
