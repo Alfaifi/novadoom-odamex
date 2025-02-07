@@ -467,7 +467,9 @@ void DPusher::Serialize (FArchive &arc)
 	else
 	{
 		arc >> m_Type;
-		arc.ReadObject((DObject*&)m_Source, DPusher::StaticType());
+		DObject* temp = nullptr;
+		arc.ReadObject(temp, DPusher::StaticType());
+		m_Source.init(static_cast<AActor*>(temp));
 		arc >> m_Xmag >> m_Ymag >> m_Magnitude >> m_Radius >> m_X >> m_Y >> m_Affectee;
 	}
 }
