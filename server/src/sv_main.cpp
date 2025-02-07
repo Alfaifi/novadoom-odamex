@@ -188,7 +188,7 @@ CVAR_FUNC_IMPL (sv_maxplayers)
 
 				MSG_WriteSVC(
 				    &it->client.reliablebuf,
-				    SVC_Print(PRINT_CHAT,
+				    SVC_Print(PRINT_HIGH,
 				              "Active player limit reduced. You are now a spectator!\n"));
 			}
 		}
@@ -201,13 +201,17 @@ CVAR_FUNC_IMPL (sv_maxplayers)
 // [AM] - Force extras on a team to become spectators.
 CVAR_FUNC_IMPL (sv_maxplayersperteam)
 {
+	// 0 is unlimited
+	if (!var)
+		return;
+
 	for (int i = 0; i < NUMTEAMS;i++)
 	{
 		int normalcount = 0;
 		for (Players::iterator it = players.begin();it != players.end();++it)
 		{
 			bool spectator = it->spectator || !it->ingame();
-			if (it->userinfo.team == i && it->ingame() && !spectator)
+			if (it->userinfo.team == i && !spectator)
 			{
 				normalcount++;
 
