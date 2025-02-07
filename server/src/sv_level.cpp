@@ -76,7 +76,6 @@ EXTERN_CVAR (sv_warmup)
 EXTERN_CVAR (sv_timelimit)
 EXTERN_CVAR (sv_teamsinplay)
 EXTERN_CVAR(g_resetinvonexit)
-EXTERN_CVAR(sv_mapliststayonwad)
 
 extern int mapchange;
 extern std::string forcedlastmap;

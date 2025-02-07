@@ -718,7 +718,7 @@ typedef vissprite_s vissprite_t;
 // Some sprites will only have one picture used
 // for all views: NNNNF0
 //
-struct spriteframe_s
+struct spriteframe_t
 {
     // If false use 0 for any position.
     // Note: as eight entries are available,
@@ -726,10 +726,10 @@ struct spriteframe_s
 	bool	rotate;
 
     // Lump to use for view angles 0-15.
-    short	lump[16];
+    int		lump[16];
 
     // Flip bit (1 = flip) to use for view angles 0-15.
-    byte	flip[16];
+    bool	flip[16];
 
 	// [RH] Move some data out of spritewidth, spriteoffset,
 	//		and spritetopoffset arrays.
@@ -737,18 +737,16 @@ struct spriteframe_s
 	fixed_t		topoffset[16];
 	fixed_t		offset[16];
 };
-typedef spriteframe_s spriteframe_t;
 
 //
 // A sprite definition:
 //	a number of animation frames.
 //
-struct spritedef_s
+struct spritedef_t
 {
 	int 			numframes;
 	spriteframe_t	*spriteframes;
 };
-typedef spritedef_s spritedef_t;
 
 //
 // The infamous visplane

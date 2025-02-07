@@ -99,8 +99,8 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, bool fli
 		{
 			if (sprtemp[frame].lump[r] == -1)
 			{
-				sprtemp[frame].lump[r] = static_cast<short>(lump);
-				sprtemp[frame].flip[r] = static_cast<byte>(flipped);
+				sprtemp[frame].lump[r] = lump;
+				sprtemp[frame].flip[r] = flipped;
 				sprtemp[frame].rotate = false;
 				sprtemp[frame].width[r] = SPRITE_NEEDS_INFO;
 			}
@@ -114,8 +114,8 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, bool fli
 	if (sprtemp[frame].lump[rotation] == -1)
 	{
 		// the lump is only used for one rotation
-		sprtemp[frame].lump[rotation] = static_cast<short>(lump);
-		sprtemp[frame].flip[rotation] = static_cast<byte>(flipped);
+		sprtemp[frame].lump[rotation] = lump;
+		sprtemp[frame].flip[rotation] = flipped;
 		sprtemp[frame].rotate = true;
 		sprtemp[frame].width[rotation] = SPRITE_NEEDS_INFO;
 	}

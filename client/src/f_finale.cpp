@@ -438,7 +438,6 @@ castinfo_t castorder[] = {
 
 static int 		castnum;
 static int 		casttics;
-static int		castsprite;
 static state_t*	caststate;
 static bool	 	castdeath;
 static int 		castframes;
@@ -476,7 +475,6 @@ void F_StartCast()
 	wipegamestate = GS_FORCEWIPE;
 	castnum = 0;
 	caststate = &states[mobjinfo[castorder[castnum].type].seestate];
-	castsprite = caststate->sprite;
 	casttics = caststate->tics;
 	castdeath = false;
 	finalestage = 2;
@@ -511,7 +509,6 @@ void F_CastTicker()
 			S_Sound (CHAN_VOICE, mobjinfo[castorder[castnum].type].seesound, 1, atten);
 		}
 		caststate = &states[mobjinfo[castorder[castnum].type].seestate];
-		castsprite = caststate->sprite;
 		castframes = 0;
 	}
 	else
@@ -570,18 +567,16 @@ void F_CastTicker()
 		// go into attack frame
 		castattacking = true;
 		if (castonmelee)
-			caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
+			caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
 		else
-			caststate=&states[mobjinfo[castorder[castnum].type].missilestate];
+			caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
 		castonmelee ^= 1;
 		if (caststate == &states[S_NULL])
 		{
 			if (castonmelee)
-				caststate=
-					&states[mobjinfo[castorder[castnum].type].meleestate];
+				caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
 			else
-				caststate=
-					&states[mobjinfo[castorder[castnum].type].missilestate];
+				caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
 		}
 	}
 
@@ -649,7 +644,7 @@ void F_CastDrawer()
 	cast_surface->getDefaultCanvas()->DrawPatch(background_patch, 0, 0);
 
 	// draw the current frame in the middle of the screen
-	const spritedef_t* sprdef = &sprites[castsprite];
+	const spritedef_t* sprdef = &sprites[caststate->sprite];
 	const spriteframe_t* sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
 
 	int scaled_x = (finale_width - 320) / 2;
