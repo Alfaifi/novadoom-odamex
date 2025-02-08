@@ -858,8 +858,7 @@ ISDL20InputSubsystem::~ISDL20InputSubsystem()
 std::vector<IInputDeviceInfo> ISDL20InputSubsystem::getKeyboardDevices() const
 {
 	std::vector<IInputDeviceInfo> devices;
-	devices.push_back(IInputDeviceInfo());
-	IInputDeviceInfo& device_info = devices.back();
+	IInputDeviceInfo& device_info = devices.emplace_back();
 	device_info.mId = 0;
 	device_info.mDeviceName = "SDL 2.0 keyboard";
 	return devices;

@@ -1207,8 +1207,7 @@ int S_FindSoundByLump(int lump)
 
 int S_AddSoundLump(const char *logicalname, int lump)
 {
-	S_sfx.emplace_back();
-	sfxinfo_t& new_sfx = S_sfx.back();
+	sfxinfo_t& new_sfx = S_sfx.emplace_back();
 
 	// logicalname MUST be < MAX_SNDNAME chars long
 	strcpy(new_sfx.name, logicalname);
