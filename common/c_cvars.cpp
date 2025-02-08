@@ -181,9 +181,7 @@ void cvar_t::ForceSet(const char* valstr)
 		if (numerical_value || integral_type || floating_type)
 		{
 			// generate m_String based on the clamped valf value
-			char tmp[32];
-			snprintf(tmp, 32, "%g", valf);
-			m_String = tmp;
+			m_String = fmt::format("{:g}", valf);
 		}
 		else
 		{

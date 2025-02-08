@@ -1950,11 +1950,9 @@ void G_DoPlayDemo(bool justStreamInput)
 
 		byte episode = *demo_p++;
 		byte map = *demo_p++;
-		char mapname[32];
-		if (gameinfo.flags & GI_MAPxx)
-			snprintf(mapname, 32, "MAP%02d", map);
-		else
-			snprintf(mapname, 32, "E%dM%d", episode, map);
+		const OLumpName mapname = gameinfo.flags & GI_MAPxx ?
+			fmt::format("MAP{:02d}", map) :
+			fmt::format("E{}M{}", episode, map);
 
 		int deathmatch = *demo_p++;
 		bool monstersrespawn = *demo_p++;

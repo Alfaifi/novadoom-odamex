@@ -1874,8 +1874,9 @@ static int PatchMisc(int dummy)
 
 static int PatchPars(int dummy)
 {
-	char *space, mapname[8], *moredata;
+	char *space, *moredata;
 	int result, par;
+	OLumpName mapname;
 #if defined _DEBUG
 	DPrintf("[Pars]\n");
 #endif
@@ -1912,13 +1913,13 @@ static int PatchPars(int dummy)
 		if (moredata)
 		{
 			// At least 3 items on this line, must be E?M? format
-			snprintf(mapname, 8, "E%cM%c", *Line2, *space);
+			mapname = fmt::format("E{:c}M{:c}", *Line2, *space);
 			par = atoi(moredata + 1);
 		}
 		else
 		{
 			// Only 2 items, must be MAP?? format
-			snprintf(mapname, 8, "MAP%02d", atoi(Line2) % 100);
+			mapname = fmt::format("MAP{:02d}", atoi(Line2) % 100);
 			par = atoi(space);
 		}
 
@@ -1927,7 +1928,7 @@ static int PatchPars(int dummy)
 
 		if (!info.exists())
 		{
-			DPrintf("No map %s\n", mapname);
+			DPrintf("No map %s\n", mapname.c_str());
 			continue;
 		}
 
@@ -1995,7 +1996,7 @@ static int PatchCodePtrs(int dummy)
 static int PatchMusic(int dummy)
 {
 	int result;
-	char keystring[128];
+	OString keystring;
 #if defined _DEBUG
 	DPrintf("[Music]\n");
 #endif
@@ -2003,7 +2004,7 @@ static int PatchMusic(int dummy)
 	{
 		const char* newname = skipwhite(Line2);
 
-		snprintf(keystring, ARRAY_LENGTH(keystring), "MUSIC_%s", Line1);
+		keystring = fmt::format("MUSIC_{}", Line1);
 		if (GStrings.hasString(keystring))
 		{
 			GStrings.setString(keystring, newname);

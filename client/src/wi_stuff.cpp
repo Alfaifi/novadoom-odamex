@@ -522,8 +522,7 @@ static int WI_DrawSmallName(const char* str, int x, int y)
 
 	while (*str)
 	{
-		char charname[9];
-		snprintf(charname, 9, "STCFN%.3d", HU_FONTSTART + (toupper(*str) - 32) - 1);
+		const OLumpName charname = fmt::format("STCFN{:03d}", HU_FONTSTART + (toupper(*str) - 32) - 1);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)
@@ -1328,8 +1327,7 @@ static int WI_CalcWidth (const char *str)
 
 	while (*str)
 	{
-		char charname[9];
-		snprintf (charname, 9, "FONTB%02u", toupper(*str) - 32);
+		const OLumpName charname = fmt::format("FONTB{:02u}", toupper(*str) - 32);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)

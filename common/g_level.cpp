@@ -461,7 +461,7 @@ BEGIN_COMMAND (map)
 {
 	if (argc > 1)
 	{
-		char mapname[32];
+		OLumpName mapname;
 
 		// [Dash|RD] -- We can make a safe assumption that the user might not specify
 		//              the whole lumpname for the level, and might opt for just the
@@ -474,9 +474,9 @@ BEGIN_COMMAND (map)
 			if ( argc == 2 )
 			{
 				if ((gameinfo.flags & GI_MAPxx))
-                    snprintf( mapname, 32, "MAP%02i", atoi( argv[1] ) );
+                    mapname = fmt::format("MAP{:02d}", atoi( argv[1] ) );
                 else
-                    snprintf( mapname, 32, "E%cM%c", argv[1][0], argv[1][1]);
+                    mapname = fmt::format("E{}M{}", argv[1][0], argv[1][1]);
 
 			}
 
@@ -501,7 +501,7 @@ BEGIN_COMMAND (map)
 			else
 			{
 				unnatural_level_progression = true;
-				uppercopy(mapname, argv[1]); // uppercase the mapname
+				mapname = argv[1];
 				G_DeferedInitNew(mapname);
 			}
 		}

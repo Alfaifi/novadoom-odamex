@@ -656,14 +656,11 @@ std::string NetdemoElapsed() {
 	timeelapsed -= minutes * 60;
 	uint8_t seconds = timeelapsed;
 
-	char str[12];
 	if (hours) {
-		snprintf(str, 12, "%02d:%02d:%02d", hours, minutes, seconds);
+		return fmt::format("{:02d}:{:02d}:{:02d}", hours, minutes, seconds);
 	} else {
-		snprintf(str, 12, "%02d:%02d", minutes, seconds);
+		return fmt::format("{:02d}:{:02d}", minutes, seconds);
 	}
-
-	return str;
 }
 
 // Return current map number/total maps in demo

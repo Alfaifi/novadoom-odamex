@@ -291,9 +291,7 @@ std::string I_GetKeyName(int key)
 	if (it != key_names.end() && !it->second.empty())
 		return it->second;
 
-	static char name[11];
-	snprintf(name, 11, "#%d", key);
-	return std::string(name);
+	return fmt::format("#{}", key);
 }
 
 

@@ -349,10 +349,9 @@ static void HU_InitCrosshair()
 
 	if (xhairnum)
 	{
-		char xhairname[16];
 		int xhair;
 
-		snprintf(xhairname, 16, "XHAIR%d", xhairnum);
+		const OLumpName xhairname = fmt::format("XHAIR{}", xhairnum);
 
 		if ((xhair = W_CheckNumForName(xhairname)) == -1)
 			xhair = W_CheckNumForName("XHAIR1");
@@ -1942,7 +1941,7 @@ static float HU_CalculateFragDeathRatio(const player_t* player)
 //
 void HU_ConsoleScores(player_t *player)
 {
-	char str[1024];
+	std::string str;
 
 	typedef std::list<const player_t*> PlayerPtrList;
 	PlayerPtrList sortedplayers;
@@ -1967,16 +1966,16 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("           CAPTURE THE FLAG\n");
 
 		if (sv_scorelimit)
-			snprintf(str, 1024, "Scorelimit: %-6d", sv_scorelimit.asInt());
+			str = fmt::format("Scorelimit: {:<6d}", sv_scorelimit.asInt());
 		else
-			snprintf(str, 1024, "Scorelimit: N/A   ");
+			str = "Scorelimit: N/A   ";
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
+			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
-			snprintf(str, 1024, "Timelimit: N/A");
+			str = "Timelimit: N/A";
 
 		Printf_Bold("%18s\n", str);
 
@@ -1998,7 +1997,7 @@ void HU_ConsoleScores(player_t *player)
 			{
 				if (itplayer->userinfo.team == team_num)
 				{
-					snprintf(str, 1024, "%-15s %-6d N/A  %-5d %4d\n",
+					str = fmt::format("{:<15s} {:<6d} N/A  {:<5d} {:4d}\n",
 							itplayer->userinfo.netname.c_str(),
 							itplayer->points,
 							//itplayer->captures,
@@ -2023,16 +2022,16 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("           TEAM DEATHMATCH\n");
 
 		if (sv_fraglimit)
-			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
-			snprintf(str, 1024, "Fraglimit: N/A    ");
+			str = "Fraglimit: N/A    ";
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
+			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
-			snprintf(str, 1024, "Timelimit: N/A");
+			str = "Timelimit: N/A";
 
 		Printf_Bold("%18s\n", str);
 
@@ -2054,7 +2053,7 @@ void HU_ConsoleScores(player_t *player)
 			{
 				if (itplayer->userinfo.team == team_num)
 				{
-					snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
+					str = fmt::format("{:<15s} {:<5d} {:<6d} {:2.1f} {:4d}\n",
 							itplayer->userinfo.netname.c_str(),
 							itplayer->fragcount,
 							itplayer->deathcount,
@@ -2079,16 +2078,16 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("              DEATHMATCH\n");
 
 		if (sv_fraglimit)
-			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
-			snprintf(str, 1024, "Fraglimit: N/A    ");
+			str = "Fraglimit: N/A    ";
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
+			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
-			snprintf(str, 1024, "Timelimit: N/A");
+			str = "Timelimit: N/A";
 
 		Printf_Bold("%18s\n", str);
 
@@ -2097,7 +2096,7 @@ void HU_ConsoleScores(player_t *player)
 
 		for (const auto& itplayer : sortedplayers)
 		{
-			snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
+			str = fmt::format("{:<15s} {:<5d} {:<6d} {:2.1} {:4d}\n",
 					itplayer->userinfo.netname.c_str(),
 					itplayer->fragcount,
 					itplayer->deathcount,
@@ -2127,7 +2126,7 @@ void HU_ConsoleScores(player_t *player)
 
 		for (const auto& itplayer : sortedplayers)
 		{
-			snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
+			str = fmt::format("{:<15s} {:<5d} {:<6d} {:2.1} {:4d}\n",
 					itplayer->userinfo.netname.c_str(),
 					itplayer->killcount,
 					itplayer->deathcount,
@@ -2150,7 +2149,7 @@ void HU_ConsoleScores(player_t *player)
 
 		for (const auto& itplayer : sortedspectators)
 		{
-			snprintf(str, 1024, "%-15s\n", itplayer->userinfo.netname.c_str());
+			str = fmt::format("{:<15s}\n", itplayer->userinfo.netname.c_str());
 			if (itplayer == player)
 				Printf_Bold("%s", str);
 			else

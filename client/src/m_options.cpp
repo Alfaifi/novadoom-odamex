@@ -1111,9 +1111,7 @@ static void M_SetVideoMode(uint16_t width, uint16_t height)
 	old_width = I_GetVideoWidth();
 	old_height = I_GetVideoHeight();
 
-	char command[30];
-	snprintf(command, 30, "vid_setmode %d %d", width, height);
-	AddCommandString(command);
+	AddCommandString(fmt::format("vid_setmode {} {}", width, height));
 
 	SetModesMenu(width, height);
 }
@@ -1349,10 +1347,7 @@ EXTERN_CVAR(ui_dimcolor)
 // [Russell] - Modified to send new colours
 static void M_SendUINewColor (int red, int green, int blue)
 {
-	char command[24];
-
-	snprintf (command, 24, "ui_dimcolor \"%02x %02x %02x\"", red, green, blue);
-	AddCommandString (command);
+	AddCommandString(fmt::format("ui_dimcolor \"{:02} {:02x} {:02}\"", red, green, blue));
 }
 
 static void M_SlideUIRed(int val)

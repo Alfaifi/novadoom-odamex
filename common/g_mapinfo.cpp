@@ -479,13 +479,12 @@ void MIType_MapName(OScanner& os, bool newStyleMapInfo, void* data, unsigned int
 	}
 	else // Must be map lump
 	{
-		char map_name[9];
-		strncpy(map_name, os.getToken().c_str(), 8);
+		OLumpName map_name = os.getToken();
 
-		if (IsNum(map_name))
+		if (IsNum(map_name.c_str()))
 		{
-			const int map = std::atoi(map_name);
-			snprintf(map_name, 9, "MAP%02d", map);
+			const int map = std::atoi(map_name.c_str());
+			map_name = fmt::format("MAP{:02d}", map);
 		}
 
 		*static_cast<OLumpName*>(data) = map_name;
@@ -1775,15 +1774,12 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 			uint32_t& levelflags = defaultinfo.flags;
 			os.mustScan();
 
-			char map_name[9];
-			strncpy(map_name, os.getToken().c_str(), 8);
+			OLumpName map_name = os.getToken();
 
-			if (IsNum(map_name))
+			if (IsNum(map_name.c_str()))
 			{
-				// MAPNAME is a number, assume a Hexen wad
-				const int map = std::atoi(map_name);
-
-				snprintf(map_name, 9, "MAP%02d", map);
+				const int map = std::atoi(map_name.c_str());
+				map_name = fmt::format("MAP{:02d}", map);
 				HexenHack = true;
 				// Hexen levels are automatically nointermission
 				// and even lighting and no auto sound sequences
