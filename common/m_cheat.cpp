@@ -71,7 +71,7 @@ bool CHEAT_AutoMap(cheatseq_t* cheat)
 
 bool CHEAT_ChangeLevel(cheatseq_t* cheat)
 {
-	char buf[16];
+	std::string buf;
 
 	// What were you trying to achieve?
 	if (multiplayer)
@@ -79,10 +79,11 @@ bool CHEAT_ChangeLevel(cheatseq_t* cheat)
 
 	// [ML] Chex mode: always set the episode number to 1.
 	// FIXME: This is probably a horrible hack, it sure looks like one at least
+	// And why is there only a newline for non-chex?
 	if (gamemode == retail_chex)
-		snprintf(buf, sizeof(buf), "map 1%c", cheat->Args[1]);
+		buf = fmt::format("map 1{}", cheat->Args[1]);
 	else
-		snprintf(buf, sizeof(buf), "map %c%c\n", cheat->Args[0], cheat->Args[1]);
+		buf = fmt::format("map {}{}\n", cheat->Args[0], cheat->Args[1]);
 
 	AddCommandString(buf);
 	return true;
@@ -258,8 +259,7 @@ extern void A_PainDie(AActor*);
 
 void CHEAT_DoCheat(player_t* player, int cheat, bool silentmsg)
 {
-	const char* msg = "";
-	char msgbuild[32];
+	std::string msg;
 
 	if (player->health <= 0 || !player)
 		return;
@@ -409,9 +409,7 @@ void CHEAT_DoCheat(player_t* player, int cheat, bool silentmsg)
 		}
 		// killough 3/22/98: make more intelligent about plural
 		// Ty 03/27/98 - string(s) *not* externalized
-		snprintf(msgbuild, 32, "%d Monster%s Killed", killcount,
-		         killcount == 1 ? "" : "s");
-		msg = msgbuild;
+		msg = fmt::format("{} Monster{} Killed", killcount, killcount == 1 ? "" : "s");
 	}
 	break;
 
@@ -449,13 +447,12 @@ void CHEAT_DoCheat(player_t* player, int cheat, bool silentmsg)
 	{
 		if (player == &consoleplayer())
 		{
-			if (msg != NULL)
-				Printf("%s\n", msg);
+			PrintFmt("{}\n", msg);
 		}
 
 #ifdef SERVER_APP
 		SV_BroadcastPrintfButPlayer(PRINT_HIGH, player->id, "%s is a cheater: %s\n",
-		                            player->userinfo.netname.c_str(), msg);
+		                            player->userinfo.netname.c_str(), msg.c_str());
 #endif
 	}
 }

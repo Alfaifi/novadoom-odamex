@@ -1897,7 +1897,6 @@ void SV_ConnectClient2(player_t& player)
 std::string SV_BuildKillsDeathsStatusString(player_t& player)
 {
 	std::string status;
-	char temp_str[100];
 
 	if (player.playerstate == PST_DOWNLOAD)
 		status = "downloading";
@@ -1907,28 +1906,23 @@ std::string SV_BuildKillsDeathsStatusString(player_t& player)
 	{
 		if (G_IsTeamGame())
 		{
-			snprintf(temp_str, 100, "%s TEAM, ", GetTeamInfo(player.userinfo.team)->ColorStringUpper.c_str());
-			status += temp_str;
+			status += fmt::format("{} TEAM", GetTeamInfo(player.userinfo.team)->ColorStringUpper);
 		}
 
 		// Points (CTF).
 		if (sv_gametype == GM_CTF)
 		{
-			snprintf(temp_str, 100, "%d POINTS, ", player.points);
-			status += temp_str;
+			status += fmt::format("{} POINTS", player.points);
 		}
 
 		// Frags (DM/TDM/CTF) or Kills (Coop).
 		if (G_IsCoopGame())
-			snprintf(temp_str, 100, "%d KILLS, ", player.killcount);
+			status += fmt::format("{} KILLS, ", player.killcount);
 		else
-			snprintf(temp_str, 100, "%d FRAGS, ", player.fragcount);
-
-		status += temp_str;
+			status += fmt::format("{} FRAGS, ", player.fragcount);
 
 		// Deaths.
-		snprintf(temp_str, 100, "%d DEATHS", player.deathcount);
-		status += temp_str;
+		status += fmt::format("{} DEATHS", player.deathcount);
 	}
 	return status;
 }
@@ -2129,7 +2123,7 @@ static float SV_CalculateFragDeathRatio(const player_t* player)
 //
 void SV_DrawScores()
 {
-	char str[1024];
+	std::string str;
 
 	typedef std::list<const player_t*> PlayerPtrList;
 	PlayerPtrList sortedplayers;
@@ -2152,16 +2146,16 @@ void SV_DrawScores()
         Printf_Bold("-----------------------------------------------------------");
 
 		if (sv_scorelimit)
-			snprintf(str, 1024, "Scorelimit: %-6d", sv_scorelimit.asInt());
+			str = fmt::format("Scorelimit: {:<6d}", sv_scorelimit.asInt());
 		else
-			snprintf(str, 1024, "Scorelimit: N/A   ");
+			str = fmt::format("Scorelimit: N/A   ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
+			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
-			snprintf(str, 1024, "Timelimit: N/A");
+			str = fmt::format("Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2205,16 +2199,16 @@ void SV_DrawScores()
         Printf_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
-			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
-			snprintf(str, 1024, "Fraglimit: N/A    ");
+			str = fmt::format("Fraglimit: N/A    ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
+			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
-			snprintf(str, 1024, "Timelimit: N/A");
+			str = fmt::format("Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2258,16 +2252,16 @@ void SV_DrawScores()
         Printf_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
-			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
-			snprintf(str, 1024, "Fraglimit: N/A    ");
+			str = fmt::format("Fraglimit: N/A    ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
+			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
-			snprintf(str, 1024, "Timelimit: N/A");
+			str = fmt::format("Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -4294,42 +4288,40 @@ BEGIN_COMMAND (playerinfo)
 		return;
 	}
 
-	char ip[16];
-	snprintf(ip, 16, "%d.%d.%d.%d",
+	const std::string ip = fmt::format("{:d}.{:d}.{:d}.{:d}",
 			player->client.address.ip[0], player->client.address.ip[1],
 			player->client.address.ip[2], player->client.address.ip[3]);
 
-	char color[8];
-	snprintf(color, 8, "#%02X%02X%02X",
+	const std::string color = fmt::format("#{:02X}{:02X}{:02X}",
 			player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
 
-	const char* team = GetTeamInfo(player->userinfo.team)->ColorStringUpper.c_str();
+	const std::string& team = GetTeamInfo(player->userinfo.team)->ColorStringUpper;
 
-	Printf("---------------[player info]----------- \n");
-	Printf(" IP Address       - %s \n",		ip);
-	Printf(" userinfo.netname - %s \n",		player->userinfo.netname.c_str());
+	PrintFmt("---------------[player info]----------- \n");
+	PrintFmt(" IP Address       - {:s} \n",		ip);
+	PrintFmt(" userinfo.netname - {:s} \n",		player->userinfo.netname);
 	if (sv_gametype == GM_CTF || sv_gametype == GM_TEAMDM) {
-		Printf(" userinfo.team    - %s \n", team);
+		PrintFmt(" userinfo.team    - {:s} \n", team);
 	}
-	Printf(" userinfo.aimdist - %d \n",		player->userinfo.aimdist >> FRACBITS);
-	Printf(" userinfo.color   - %s \n",		color);
-	Printf(" userinfo.gender  - %d \n",		player->userinfo.gender);
-	Printf(" time             - %d \n",		player->GameTime);
-	Printf(" spectator        - %d \n",		player->spectator);
+	PrintFmt(" userinfo.aimdist - {:d} \n",		player->userinfo.aimdist >> FRACBITS);
+	PrintFmt(" userinfo.color   - {:s} \n",		color);
+	PrintFmt(" userinfo.gender  - {:d} \n",		player->userinfo.gender);
+	PrintFmt(" time             - {:d} \n",		player->GameTime);
+	PrintFmt(" spectator        - {:d} \n",		player->spectator);
 	if (G_IsCoopGame())
 	{
-		Printf(" kills - %d  deaths - %d\n", player->killcount, player->deathcount);
+		PrintFmt(" kills - {:d}  deaths - {:d}\n", player->killcount, player->deathcount);
 	}
 	else
 	{
-		Printf(" frags - %d  deaths - %d  points - %d\n", player->fragcount,
+		PrintFmt(" frags - {:d}  deaths - {:d}  points - %d\n", player->fragcount,
 		       player->deathcount, player->points);
 	}
 	if (g_lives)
 	{
-		Printf(" lives - %d  wins - %d\n", player->lives, player->roundwins);
+		PrintFmt(" lives - {:d}  wins - {:d}\n", player->lives, player->roundwins);
 	}
-	Printf("--------------------------------------- \n");
+	PrintFmt("--------------------------------------- \n");
 }
 END_COMMAND (playerinfo)
 

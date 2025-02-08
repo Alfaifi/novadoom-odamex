@@ -219,16 +219,13 @@ void init_upnp (void)
 
 void upnp_add_redir (const char * addr, int port)
 {
-	char port_str[16];
-	int r;
-
 	if (!sv_upnp || !is_upnp_ok)
 		return;
 
 	if (urls.controlURL == NULL)
 		return;
 
-	snprintf(port_str, 16, "%d", port);
+	const std::string port_str = fmt::format("{}", port);
 
 	// Set a description if none exists
 	if (!sv_upnp_description.cstring()[0])
@@ -240,19 +237,19 @@ void upnp_add_redir (const char * addr, int port)
 		sv_upnp_description.Set(desc.str().c_str());
 	}
 
-	r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
-			port_str, port_str, addr, sv_upnp_description.cstring(), "UDP", NULL, 0);
+	const int r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
+		port_str.c_str(), port_str.c_str(), addr, sv_upnp_description.cstring(), "UDP", NULL, 0);
 
 	if (r != 0)
 	{
-		Printf(PRINT_HIGH, "UPnP: AddPortMapping failed: %d\n", r);
+		PrintFmt(PRINT_HIGH, "UPnP: AddPortMapping failed: {}\n", r);
 
 		is_upnp_ok = false;
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "UPnP: Port mapping added to router: %s",
-			sv_upnp_description.cstring());
+		PrintFmt(PRINT_HIGH, "UPnP: Port mapping added to router: {}",
+			sv_upnp_description.str());
 
 		is_upnp_ok = true;
 	}
@@ -260,22 +257,19 @@ void upnp_add_redir (const char * addr, int port)
 
 void upnp_rem_redir (int port)
 {
-	char port_str[16];
-	int r;
-
 	if (!is_upnp_ok)
 		return;
 
 	if(urls.controlURL == NULL)
 		return;
 
-	snprintf(port_str, 16, "%d", port);
-	r = UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype,
-		port_str, "UDP", 0);
+	const std::string port_str = fmt::format("{}", port);
+	const int r = UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype,
+		port_str.c_str(), "UDP", 0);
 
 	if (r != 0)
 	{
-		Printf(PRINT_HIGH, "UPnP: DeletePortMapping failed: %d\n", r);
+		PrintFmt(PRINT_HIGH, "UPnP: DeletePortMapping failed: {}\n", r);
 		is_upnp_ok = false;
 	}
 	else

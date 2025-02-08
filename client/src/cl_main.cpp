@@ -815,7 +815,7 @@ BEGIN_COMMAND (playerinfo)
 
 		if (!validplayer(p))
 		{
-			Printf ("Bad player number\n");
+			PrintFmt("Bad player number\n");
 			return;
 		}
 		else
@@ -824,28 +824,27 @@ BEGIN_COMMAND (playerinfo)
 
 	if (!validplayer(*player))
 	{
-		Printf ("Not a valid player\n");
+		PrintFmt("Not a valid player\n");
 		return;
 	}
 
-	char color[8];
-	snprintf(color, 8, "#%02X%02X%02X",
-			player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
+	const std::string color = fmt::format("#{:02X}{:02X}{:02X}",
+		player->userinfo.color[1], player->userinfo.color[2], player->userinfo.color[3]);
 
-	Printf (PRINT_HIGH, "---------------[player info]----------- \n");
-	Printf(PRINT_HIGH, " userinfo.netname - %s \n",		player->userinfo.netname.c_str());
+	PrintFmt(PRINT_HIGH, "---------------[player info]----------- \n");
+	PrintFmt(PRINT_HIGH, " userinfo.netname - {:s} \n",		player->userinfo.netname);
 
 	if (sv_gametype == GM_CTF || sv_gametype == GM_TEAMDM) {
 		Printf(PRINT_HIGH, " userinfo.team    - %s \n",
 		       GetTeamInfo(player->userinfo.team)->ColorizedTeamName().c_str());
 	}
-	Printf(PRINT_HIGH, " userinfo.aimdist - %d \n",		player->userinfo.aimdist >> FRACBITS);
-	Printf(PRINT_HIGH, " userinfo.color   - %s \n",		color);
-	Printf(PRINT_HIGH, " userinfo.gender  - %d \n",		player->userinfo.gender);
-	Printf(PRINT_HIGH, " time             - %d \n",		player->GameTime);
-	Printf(PRINT_HIGH, " spectator        - %d \n",		player->spectator);
-	Printf(PRINT_HIGH, " downloader       - %d \n",		player->playerstate == PST_DOWNLOAD);
-	Printf (PRINT_HIGH, "--------------------------------------- \n");
+	PrintFmt(PRINT_HIGH, " userinfo.aimdist - {:d} \n",		player->userinfo.aimdist >> FRACBITS);
+	PrintFmt(PRINT_HIGH, " userinfo.color   - {:s} \n",		color);
+	PrintFmt(PRINT_HIGH, " userinfo.gender  - {:d} \n",		player->userinfo.gender);
+	PrintFmt(PRINT_HIGH, " time             - {:d} \n",		player->GameTime);
+	PrintFmt(PRINT_HIGH, " spectator        - {:d} \n",		player->spectator);
+	PrintFmt(PRINT_HIGH, " downloader       - {:d} \n",		player->playerstate == PST_DOWNLOAD);
+	PrintFmt(PRINT_HIGH, "--------------------------------------- \n");
 }
 END_COMMAND (playerinfo)
 

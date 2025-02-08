@@ -1934,7 +1934,7 @@ static int PatchPars(int dummy)
 
 		info.partime = par;
 #if defined _DEBUG
-		DPrintf("Par for %s changed to %d\n", mapname, par);
+		DPrintf("Par for %s changed to %d\n", mapname.c_str(), par);
 #endif
 	}
 	return result;
