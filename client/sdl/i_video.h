@@ -318,7 +318,7 @@ public:
 
 	inline uint8_t* getBuffer()
 	{
-		return const_cast<uint8_t*>(static_cast<const IWindowSurface&>(*this).getBuffer());
+		return const_cast<uint8_t*>(std::as_const(*this).getBuffer());
 	}
 
 	inline const uint8_t* getBuffer(uint16_t x, uint16_t y) const
@@ -328,7 +328,7 @@ public:
 
 	inline uint8_t* getBuffer(uint16_t x, uint16_t y)
 	{
-		return const_cast<uint8_t*>(static_cast<const IWindowSurface&>(*this).getBuffer(x, y));
+		return const_cast<uint8_t*>(std::as_const(*this).getBuffer(x, y));
 	}
 
 	inline uint16_t getWidth() const
@@ -424,7 +424,7 @@ public:
 
 	virtual IWindowSurface* getWindowSurface()
 	{
-		return const_cast<IWindowSurface*>(static_cast<const IWindowSurfaceManager&>(*this).getWindowSurface());
+		return const_cast<IWindowSurface*>(std::as_const(*this).getWindowSurface());
 	}
 
 	virtual void lockSurface() { }
@@ -492,7 +492,7 @@ public:
 
 	virtual IWindowSurface* getPrimarySurface()
 	{
-		return const_cast<IWindowSurface*>(static_cast<const IWindow&>(*this).getPrimarySurface());
+		return const_cast<IWindowSurface*>(std::as_const(*this).getPrimarySurface());
 	}
 
 	virtual uint16_t getWidth() const
@@ -635,7 +635,7 @@ public:
 
 	virtual IWindow* getWindow()
 	{
-		return const_cast<IWindow*>(static_cast<const IVideoSubsystem&>(*this).getWindow());
+		return const_cast<IWindow*>(std::as_const(*this).getWindow());
 	}
 
 	virtual int getMonitorCount() const
