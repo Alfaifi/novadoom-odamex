@@ -431,17 +431,17 @@ void G_DoCompleted (void)
 	AM_Stop();
 
 	wminfo.epsd = level.cluster - 1;		// Only used for DOOM I.
-	strncpy (wminfo.lname0, level.info->pname.c_str(), 8);
-	strncpy (wminfo.current, level.mapname.c_str(), 8);
+	wminfo.lname0 = level.info->pname;
+	wminfo.current = level.mapname;
 
 	if (sv_gametype != GM_COOP && !(level.flags & LEVEL_CHANGEMAPCHEAT))
 	{
-		strncpy (wminfo.next, level.mapname.c_str(), 8);
-		strncpy (wminfo.lname1, level.info->pname.c_str(), 8);
+		wminfo.next = level.mapname;
+		wminfo.lname1 = level.info->pname;
 	}
 	else
 	{
-		wminfo.next[0] = 0;
+		wminfo.next.clear();
 
 		if (!level.endpic.empty() && level.flags & LEVEL_NOINTERMISSION)
 		{
@@ -450,20 +450,20 @@ void G_DoCompleted (void)
 		}
 		if (secretexit)
 		{
-			if (W_CheckNumForName (level.secretmap.c_str()) != -1)
+			if (W_CheckNumForName (level.secretmap) != -1)
 			{
-				strncpy(wminfo.next, level.secretmap.c_str(), 8);
-				strncpy(wminfo.lname1, getLevelInfos().findByName(level.secretmap).pname.c_str(), 8);
+				wminfo.next, level.secretmap;
+				wminfo.lname1, getLevelInfos().findByName(level.secretmap).pname;
 			}
 			else
 			{
 				secretexit = false;
 			}
 		}
-		if (!wminfo.next[0])
+		if (wminfo.next.empty())
 		{
-			strncpy(wminfo.next, level.nextmap.c_str(), 8);
-			strncpy(wminfo.lname1, getLevelInfos().findByName(level.nextmap).pname.c_str(), 8);
+			wminfo.next, level.nextmap;
+			wminfo.lname1, getLevelInfos().findByName(level.nextmap).pname;
 		}
 	}
 
@@ -613,10 +613,10 @@ void G_DoLoadLevel (int position)
 	// [SL] 2012-03-19 - Add sky2 back
 	// [EB] 9/6/2024 - remove sky1 (now using SKYDEFS), sky2 left for hexen style non doublesky sky2
 	// MIA TODO: remove this except for sky2 stuff (for non doublesky use of sky2)
-	sky1texture = R_TextureNumForName(level.skypic.c_str());
+	sky1texture = R_TextureNumForName(level.skypic);
 	if (!level.skypic2.empty() && !(level.flags & LEVEL_DOUBLESKY))
 	{
-		sky2texture = R_TextureNumForName(level.skypic2.c_str());
+		sky2texture = R_TextureNumForName(level.skypic2);
 		sky2scrollxdelta = level.sky2ScrollDelta;
 	}
 	else
@@ -753,7 +753,7 @@ void G_WorldDone()
 
 	// Sort out default options to pass to F_StartFinale
 	finale_options_t options = { "", "", "", "" };
-	options.music = !level.intermusic.empty() ? level.intermusic.c_str() : thiscluster.messagemusic.c_str();
+	options.music = !level.intermusic.empty() ? level.intermusic : thiscluster.messagemusic;
 
 	if (!level.interbackdrop.empty())
 	{

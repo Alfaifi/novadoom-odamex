@@ -798,7 +798,7 @@ static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, in
 
 	if (sfx_id == -1)
 	{
-		DPrintf("Unknown sound %s\n", soundname.c_str());
+		DPrintf("Unknown sound %s\n", soundname);
 		return;
 	}
 
@@ -1108,7 +1108,7 @@ void S_ChangeMusic(std::string musicname, int looping)
 		int lumpnum;
 		if ((lumpnum = W_CheckNumForName (musicname.c_str())) == -1)
 		{
-			Printf (PRINT_HIGH, "Music lump \"%s\" not found\n", musicname.c_str());
+			Printf (PRINT_HIGH, "Music lump \"%s\" not found\n", musicname);
 			return;
 		}
 

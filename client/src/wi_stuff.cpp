@@ -1152,7 +1152,7 @@ void WI_updateStats()
 				else
 					S_ChangeMusic(gameinfo.intermissionMusic.c_str(), true);
 				// background
-				const char* bg_lump = enteranim == nullptr ? enterpic.c_str() : enteranim->backgroundlump.c_str();
+				const OLumpName& bg_lump = enteranim == nullptr ? enterpic : enteranim->backgroundlump;
 				const patch_t* bg_patch = W_CachePatch(bg_lump);
 
 				inter_width = bg_patch->width();
@@ -1400,9 +1400,9 @@ void WI_loadData()
 
 	for (int i = 0, j; i < 2; i++)
 	{
-		char *lname = (i == 0 ? wbs->lname0 : wbs->lname1);
+		const OLumpName& lname = (i == 0 ? wbs->lname0 : wbs->lname1);
 
-		if (lname)
+		if (!lname.empty())
 			j = W_CheckNumForName (lname);
 		else
 			j = -1;
@@ -1507,7 +1507,7 @@ void WI_loadData()
 	for (int i = 0; i < 4; i++)
 	{
 		name = fmt::format("STPB{}", i);
-		faceclassic[i] = W_CachePatchHandle(name.c_str(), PU_STATIC);
+		faceclassic[i] = W_CachePatchHandle(name, PU_STATIC);
 	}
 }
 

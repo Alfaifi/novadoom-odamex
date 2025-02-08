@@ -48,7 +48,7 @@ void STACK_ARGS SV_BroadcastPrintf(int printlevel, const char* format, ...)
 	VStrFormat(str, format, va);
 	va_end(va);
 
-	Printf(printlevel, "%s", str.c_str());
+	Printf(printlevel, "%s", str);
 }
 
 FORMAT_PRINTF(1, 2)
@@ -64,7 +64,7 @@ void STACK_ARGS SV_BroadcastPrintf(const char* format, ...)
 	VStrFormat(str, format, va);
 	va_end(va);
 
-	Printf(PRINT_HIGH, "%s", str.c_str());
+	Printf(PRINT_HIGH, "%s", str);
 }
 
 void D_SendServerInfoChange(const cvar_t *cvar, const char *value) {}

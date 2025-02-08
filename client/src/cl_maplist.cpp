@@ -389,14 +389,14 @@ void CMD_MaplistCallback(const maplist_qrows_t &result) {
 			flag = '+';
 		}
 		Printf(PRINT_HIGH, "%c%lu. %s %s%s\n", flag, index + 1,
-			   JoinStrings(wads, " ").c_str(), map.c_str(),
+			   JoinStrings(wads, " "), map,
 			   lastmap.empty() ? "" : fmt::sprintf(" lastmap=%s", lastmap));
 	}
 }
 
 // Clientside maplist query errback.
 void CMD_MaplistErrback(const std::string &error) {
-	Printf(PRINT_HIGH, "%s\n", error.c_str());
+	Printf(PRINT_HIGH, "%s\n", error);
 }
 
 // Clientside maplist query.

@@ -324,7 +324,7 @@ sky_t* R_GetSky(const OLumpName& name, bool create)
 		return nullptr;
 	}
 
-	int32_t tex = R_TextureNumForName(name.c_str());
+	int32_t tex = R_TextureNumForName(name);
 	if (tex < 0) return nullptr;
 
 	OLumpName skytexname;
@@ -334,7 +334,7 @@ sky_t* R_GetSky(const OLumpName& name, bool create)
 	sky->background.scrolly = INT2FIXED(0);
 	if (level.flags & LEVEL_DOUBLESKY)
 	{
-		sky->background.texnum = R_TextureNumForName(level.skypic2.c_str());
+		sky->background.texnum = R_TextureNumForName(level.skypic2);
 		sky->background.texture = level.skypic2;
 		sky->background.scrollx = level.sky2ScrollDelta & 0xffffff;
 		sky->foreground.scrollx = level.sky1ScrollDelta & 0xffffff;
@@ -393,7 +393,7 @@ void R_InitSkyDefs()
 			if(skytype < skytype_t::NORMAL || skytype > skytype_t::DOUBLESKY) return jsonlumpresult_t::PARSEERROR;
 
 			OLumpName skytexname = skytex.asString();
-			int32_t tex = R_TextureNumForName(skytexname.c_str());
+			int32_t tex = R_TextureNumForName(skytexname);
 			if(tex < 0) return jsonlumpresult_t::PARSEERROR;
 
 			if(!mid.isNumeric()
@@ -448,7 +448,7 @@ void R_InitSkyDefs()
 				const Json::Value& forescaley  = foreelem["scaley"];
 
 				OLumpName foreskytexname = foreskytex.asString();
-				int32_t foretex = R_TextureNumForName(foreskytexname.c_str());
+				int32_t foretex = R_TextureNumForName(foreskytexname);
 				if(foretex < 0) return jsonlumpresult_t::PARSEERROR;
 
 				if(!foremid.isNumeric()
@@ -482,7 +482,7 @@ void R_InitSkyDefs()
 			const Json::Value& skyelem = flatentry["sky"];
 
 			OLumpName flatname = flatelem.asString();
-			int32_t flatnum = R_FlatNumForName(flatname.c_str());
+			int32_t flatnum = R_FlatNumForName(flatname);
 			if(flatnum < 0 || flatnum >= ::numflats) return jsonlumpresult_t::PARSEERROR;
 
 			OLumpName skyname = skyelem.asString();

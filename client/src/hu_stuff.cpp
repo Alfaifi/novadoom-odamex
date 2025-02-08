@@ -1998,7 +1998,7 @@ void HU_ConsoleScores(player_t *player)
 				if (itplayer->userinfo.team == team_num)
 				{
 					str = fmt::format("{:<15s} {:<6d} N/A  {:<5d} {:4d}\n",
-							itplayer->userinfo.netname.c_str(),
+							itplayer->userinfo.netname,
 							itplayer->points,
 							//itplayer->captures,
 							itplayer->fragcount,
@@ -2054,7 +2054,7 @@ void HU_ConsoleScores(player_t *player)
 				if (itplayer->userinfo.team == team_num)
 				{
 					str = fmt::format("{:<15s} {:<5d} {:<6d} {:2.1f} {:4d}\n",
-							itplayer->userinfo.netname.c_str(),
+							itplayer->userinfo.netname,
 							itplayer->fragcount,
 							itplayer->deathcount,
 							HU_CalculateFragDeathRatio(itplayer),
@@ -2097,7 +2097,7 @@ void HU_ConsoleScores(player_t *player)
 		for (const auto& itplayer : sortedplayers)
 		{
 			str = fmt::format("{:<15s} {:<5d} {:<6d} {:2.1} {:4d}\n",
-					itplayer->userinfo.netname.c_str(),
+					itplayer->userinfo.netname,
 					itplayer->fragcount,
 					itplayer->deathcount,
 					HU_CalculateFragDeathRatio(itplayer),
@@ -2127,7 +2127,7 @@ void HU_ConsoleScores(player_t *player)
 		for (const auto& itplayer : sortedplayers)
 		{
 			str = fmt::format("{:<15s} {:<5d} {:<6d} {:2.1} {:4d}\n",
-					itplayer->userinfo.netname.c_str(),
+					itplayer->userinfo.netname,
 					itplayer->killcount,
 					itplayer->deathcount,
 					HU_CalculateKillDeathRatio(itplayer),
@@ -2149,7 +2149,7 @@ void HU_ConsoleScores(player_t *player)
 
 		for (const auto& itplayer : sortedspectators)
 		{
-			str = fmt::format("{:<15s}\n", itplayer->userinfo.netname.c_str());
+			str = fmt::format("{:<15s}\n", itplayer->userinfo.netname);
 			if (itplayer == player)
 				Printf_Bold("%s", str);
 			else

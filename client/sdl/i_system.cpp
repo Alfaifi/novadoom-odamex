@@ -444,8 +444,7 @@ void I_Endoom()
 	// Hack to stop crash with disk icon
 	in_endoom = true;
 
-	unsigned char* endoom_data = (unsigned char*)W_CacheLumpName(gameinfo.endoom.c_str(),
-		PU_STATIC);
+	unsigned char* endoom_data = (unsigned char*)W_CacheLumpName(gameinfo.endoom, PU_STATIC);
 
 	// Set up text mode screen
 
@@ -1017,7 +1016,7 @@ BEGIN_COMMAND(debug_userfilename)
 	}
 
 	std::string userfile = M_GetUserFileName(argv[1]);
-	Printf("Resolved to: %s\n", userfile.c_str());
+	PrintFmt("Resolved to: {:s}\n", userfile);
 }
 END_COMMAND(debug_userfilename)
 

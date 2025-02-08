@@ -1544,7 +1544,7 @@ void G_ScreenShot(const char* filename)
 //
 char savename[256];
 
-void G_LoadGame (char* name)
+void G_LoadGame (const char* name)
 {
 	strcpy (savename, name);
 	gameaction = ga_loadgame;
@@ -1690,9 +1690,9 @@ void G_BuildSaveName(std::string &name, int slot)
 #ifdef _XBOX
 	std::string path = xbox_GetSavePath(name, slot);
 #else
-	std::string path = M_GetUserFileName(name.c_str());
+	std::string path = M_GetUserFileName(name);
 #endif
-	name = fmt::sprintf("%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
+	name = fmt::sprintf("%s" PATHSEP "odasv%d.ods", path, slot);
 }
 
 void G_DoSaveGame()
@@ -1717,7 +1717,7 @@ void G_DoSaveGame()
 	xbox_WriteSaveMeta(name.substr(0, name.rfind(PATHSEPCHAR)), description);
 #endif
 
-	Printf (PRINT_HIGH, "Saving game to '%s'...\n", name.c_str());
+	Printf (PRINT_HIGH, "Saving game to '%s'...\n", name);
 
 	fwrite (description, SAVESTRINGSIZE, 1, stdfile);
 	fwrite (SAVESIG, 16, 1, stdfile);
@@ -1898,7 +1898,7 @@ void G_DoPlayDemo(bool justStreamInput)
 	gameaction = ga_nothing;
 	int bytelen;
 
-	int demolump = W_CheckNumForName(defdemoname.c_str());
+	int demolump = W_CheckNumForName(defdemoname);
 	if (demolump != -1)
 	{
 		demobuffer = demo_p = (byte*)W_CacheLumpNum(demolump, PU_STATIC);
@@ -1910,7 +1910,7 @@ void G_DoPlayDemo(bool justStreamInput)
 		std::string found = M_FindUserFileName(::defdemoname, ".lmp");
 		if (found.empty())
 		{
-			Printf(PRINT_WARNING, "Could not find demo %s\n", ::defdemoname.c_str());
+			Printf(PRINT_WARNING, "Could not find demo %s\n", ::defdemoname);
 			gameaction = ga_fullconsole;
 			return;
 		}
@@ -1941,7 +1941,7 @@ void G_DoPlayDemo(bool justStreamInput)
 		demo_p[0] == DOOM_1_9p_DEMO ||
 		demo_p[0] == DOOM_1_9_1_DEMO)
 	{
-		Printf(PRINT_HIGH, "Playing DOOM demo %s\n", defdemoname.c_str());
+		Printf(PRINT_HIGH, "Playing DOOM demo %s\n", defdemoname);
 
 		demostartgametic = gametic;
 		demoversion = *demo_p++ == DOOM_1_9_1_DEMO ? LMP_DOOM_1_9_1 : LMP_DOOM_1_9;

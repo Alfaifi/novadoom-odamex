@@ -93,7 +93,7 @@ bool VoteState::get(vote_state_t &vote_state) {
 //////// CALLBACKS & ERRBACKS ////////
 
 void CMD_MapVoteErrback(const std::string &error) {
-	Printf(PRINT_HIGH, "callvote failed: %s\n", error.c_str());
+	Printf(PRINT_HIGH, "callvote failed: %s\n", error);
 }
 
 void CMD_MapVoteCallback(const maplist_qrows_t &result) {
@@ -118,7 +118,7 @@ void CMD_MapVoteCallback(const maplist_qrows_t &result) {
 }
 
 void CMD_RandmapVoteErrback(const std::string &error) {
-	Printf(PRINT_HIGH, "callvote failed: %s\n", error.c_str());
+	Printf(PRINT_HIGH, "callvote failed: %s\n", error);
 }
 
 void CMD_RandmapVoteCallback(const maplist_qrows_t &result) {
@@ -169,7 +169,7 @@ BEGIN_COMMAND(callvote) {
 
 		if (votecmd == VOTE_NONE) {
 			// We passed an argument but it wasn't a valid vote type.
-			Printf(PRINT_HIGH, "callvote failed: Invalid vote \"%s\".\n", votecmd_s.c_str());
+			Printf(PRINT_HIGH, "callvote failed: Invalid vote \"%s\".\n", votecmd_s);
 			return;
 		}
 	}

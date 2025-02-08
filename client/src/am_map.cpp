@@ -492,7 +492,7 @@ void AM_initVariables()
 	ST_Responder(&st_notify);
 }
 
-am_color_t AM_GetColorFromString(const argb_t* palette_colors, const char* colorstring)
+am_color_t AM_GetColorFromString(const argb_t* palette_colors, const std::string& colorstring)
 {
 	am_color_t c;
 	c.rgb = V_GetColorFromString(colorstring);
@@ -646,43 +646,43 @@ void AM_initColors(const bool overlayed)
 	else
 	{
 		gameinfo.currentAutomapColors.Background =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.Background.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.Background);
 		gameinfo.currentAutomapColors.YourColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.YourColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.YourColor);
 		gameinfo.currentAutomapColors.AlmostBackground =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.AlmostBackground.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.AlmostBackground);
 		gameinfo.currentAutomapColors.SecretWallColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.SecretWallColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.SecretWallColor);
 		gameinfo.currentAutomapColors.WallColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.WallColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.WallColor);
 		gameinfo.currentAutomapColors.TSWallColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.TSWallColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.TSWallColor);
 		gameinfo.currentAutomapColors.FDWallColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.FDWallColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.FDWallColor);
 		gameinfo.currentAutomapColors.LockedColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.LockedColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.LockedColor);
 		gameinfo.currentAutomapColors.CDWallColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.CDWallColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.CDWallColor);
 		gameinfo.currentAutomapColors.ThingColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor);
 		gameinfo.currentAutomapColors.ThingColor_Item =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Item.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Item);
 		gameinfo.currentAutomapColors.ThingColor_CountItem =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_CountItem.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_CountItem);
 		gameinfo.currentAutomapColors.ThingColor_Monster =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Monster.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Monster);
 		gameinfo.currentAutomapColors.ThingColor_NoCountMonster =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_NoCountMonster.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_NoCountMonster);
 		gameinfo.currentAutomapColors.ThingColor_Friend =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Friend.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Friend);
 		gameinfo.currentAutomapColors.ThingColor_Projectile =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Projectile.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.ThingColor_Projectile);
 		gameinfo.currentAutomapColors.GridColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.GridColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.GridColor);
 		gameinfo.currentAutomapColors.XHairColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.XHairColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.XHairColor);
 		gameinfo.currentAutomapColors.NotSeenColor =
-			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.NotSeenColor.c_str());
+			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.NotSeenColor);
 	}
 }
 
@@ -824,7 +824,7 @@ BOOL AM_Responder(event_t* ev)
 		{
 			// check for am_pan* and ignore in follow mode
 			const std::string defbind = AutomapBindings.Binds[ev->data1];
-			if (!strnicmp(defbind.c_str(), "+am_pan", 7))
+			if (iequals(defbind, "+am_pan"))
 				return false;
 		}
 
@@ -832,7 +832,7 @@ BOOL AM_Responder(event_t* ev)
 		{
 			const std::string defbind = Bindings.Binds[ev->data1];
 			// Check for automap, in order not to be stuck
-			if (!strnicmp(defbind.c_str(), "togglemap", 9))
+			if (iequals(defbind, "togglemap"))
 				return false;
 		}
 
@@ -844,7 +844,7 @@ BOOL AM_Responder(event_t* ev)
 			const std::string defbind = Bindings.Binds[ev->data1];
 
 			// Check for automap, in order not to be stuck
-			if (!strnicmp(defbind.c_str(), "togglemap", 9))
+			if (iequals(defbind, "togglemap"))
 				return false;
 
 			return (defbind[0] != '+'); // Let G_Responder handle button releases

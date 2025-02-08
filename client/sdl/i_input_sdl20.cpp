@@ -881,7 +881,7 @@ void ISDL20InputSubsystem::initKeyboard(int id)
 			device_name = device.mDeviceName;
 	}
 
-	Printf(PRINT_HIGH, "I_InitInput: intializing %s\n", device_name.c_str());
+	PrintFmt(PRINT_HIGH, "I_InitInput: intializing {:s}\n", device_name);
 
 	setKeyboardInputDevice(new ISDL20KeyboardInputDevice(id));
 	registerInputDevice(getKeyboardInputDevice());
@@ -936,7 +936,7 @@ void ISDL20InputSubsystem::initMouse(int id)
 			device_name = device.mDeviceName;
 	}
 
-	Printf(PRINT_HIGH, "I_InitInput: intializing %s\n", device_name.c_str());
+	PrintFmt(PRINT_HIGH, "I_InitInput: intializing {:s}\n", device_name);
 
 	setMouseInputDevice(new ISDL20MouseInputDevice(id));
 	assert(getMouseInputDevice() != NULL);
@@ -996,7 +996,7 @@ void ISDL20InputSubsystem::initJoystick(int id)
 			device_name = device.mDeviceName;
 	}
 
-	Printf(PRINT_HIGH, "I_InitInput: intializing %s\n", device_name.c_str());
+	PrintFmt(PRINT_HIGH, "I_InitInput: intializing {:s}\n", device_name);
 
 	setJoystickInputDevice(new ISDL20JoystickInputDevice(id));
 	registerInputDevice(getJoystickInputDevice());

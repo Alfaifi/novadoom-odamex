@@ -158,7 +158,7 @@ void NetDemo::cleanUp()
 void NetDemo::error(const std::string &message)
 {
 	cleanUp();
-	Printf(PRINT_HIGH, "%s\n", message.c_str());
+	Printf(PRINT_HIGH, "%s\n", message);
 }
 
 /**
@@ -175,7 +175,7 @@ void NetDemo::fatalError(const std::string &message)
 	gameaction = ga_nothing;
 	gamestate = GS_FULLCONSOLE;
 
-	Printf(PRINT_HIGH, "%s\n", message.c_str());
+	Printf(PRINT_HIGH, "%s\n", message);
 }
 
 //
@@ -440,7 +440,7 @@ bool NetDemo::startRecording(const std::string &filename)
 	if (!demofp)
 	{
 		//error("Unable to create netdemo file " + filename + ".");
-		I_Warning("Unable to create netdemo file %s", filename.c_str());
+		I_Warning("Unable to create netdemo file %s", filename);
 		return false;
 	}
 
@@ -455,7 +455,7 @@ bool NetDemo::startRecording(const std::string &filename)
 
 	state = NetDemo::st_recording;
 	header.starting_gametic = gametic;
-	Printf(PRINT_HIGH, "Recording netdemo %s.\n", filename.c_str());
+	Printf(PRINT_HIGH, "Recording netdemo %s.\n", filename);
 
 	if (connected)
 	{
@@ -584,7 +584,7 @@ bool NetDemo::startPlaying(const std::string &filename)
 	fseek(demofp, NetDemo::HEADER_SIZE, SEEK_SET);
 	state = NetDemo::st_playing;
 
-	Printf(PRINT_HIGH, "Playing netdemo %s.\n", filename.c_str());
+	Printf(PRINT_HIGH, "Playing netdemo %s.\n", filename);
 
 	return true;
 }
@@ -1642,7 +1642,7 @@ void NetDemo::readSnapshotData(std::vector<byte>& buf)
 
 	G_LoadWad(newwadfiles, newpatchfiles);
 
-	G_InitNew(mapname.c_str());
+	G_InitNew(mapname);
 	displayplayer_id = consoleplayer_id = 1;
 	savegamerestore = false;
 

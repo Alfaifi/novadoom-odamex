@@ -188,7 +188,7 @@ void ST_initNew()
 
 	for (size_t i = 0; i < NUMMODS; i++)
 	{
-		::ToastIcon[i] = W_CachePatchHandle(fmt::sprintf("ODAMOD%lu", i).c_str(), PU_STATIC);
+		::ToastIcon[i] = W_CachePatchHandle(fmt::sprintf("ODAMOD%lu", i), PU_STATIC);
 	}
 }
 
@@ -652,7 +652,7 @@ static void drawHordeGametype()
 		}
 		buf = fmt::sprintf("Min HP: %d\nAlive HP: %d\nMax HP: %d\nSpawn: %s",
 		                   define.minTotalHealth(), info.alive(), define.maxTotalHealth(),
-		                   buf2.c_str());
+		                   buf2);
 		hud::DrawText(SCREEN_BORDER, 64, ::hud_scale, hud::X_LEFT, hud::Y_BOTTOM,
 		              hud::X_LEFT, hud::Y_BOTTOM, buf.c_str(), CR_GREY);
 
@@ -1238,7 +1238,7 @@ static std::string WinToColorString(const WinInfo& win)
 		else
 		{
 			buf = fmt::sprintf(TEXTCOLOR_GREEN "%s" TEXTCOLOR_NORMAL,
-			                   pl.userinfo.netname.c_str());
+			                   pl.userinfo.netname);
 		}
 		return buf;
 	}
@@ -1251,8 +1251,8 @@ static std::string WinToColorString(const WinInfo& win)
 		}
 		else
 		{
-			buf = fmt::sprintf("%s%s" TEXTCOLOR_NORMAL, tm.TextColor.c_str(),
-			                   tm.ColorString.c_str());
+			buf = fmt::sprintf("%s%s" TEXTCOLOR_NORMAL, tm.TextColor,
+			                   tm.ColorString);
 		}
 		return buf;
 	}
@@ -1321,7 +1321,7 @@ static void LevelStateHorde(levelStateLines_t& lines)
 		}
 
 		lines.subtitle[0] = fmt::sprintf("\"" TEXTCOLOR_YELLOW "%s" TEXTCOLOR_GREY "\"",
-		                                 define.name.c_str());
+		                                 define.name);
 
 		lines.subtitle[1] = fmt::sprintf("Difficulty: %s", define.difficulty(true));
 
@@ -1340,7 +1340,7 @@ static void LevelStateHorde(levelStateLines_t& lines)
 		if (!weapList.empty())
 		{
 			lines.subtitle[3] = fmt::sprintf(TEXTCOLOR_GREY "Weapons: " TEXTCOLOR_GREEN "%s",
-			          JoinStrings(weapList, " ").c_str());
+			          JoinStrings(weapList, " "));
 		}
 
 		tics = ::level.time - info.waveTime;
@@ -1380,7 +1380,7 @@ void LevelStateHUD()
 				lines.subtitle[0] = fmt::sprintf(
 				          "Press " TEXTCOLOR_GOLD "%s" TEXTCOLOR_NORMAL
 				          " when ready to play",
-				          ::Bindings.GetKeynameFromCommand("ready").c_str());
+				          ::Bindings.GetKeynameFromCommand("ready"));
 			}
 		}
 		else
@@ -1392,7 +1392,7 @@ void LevelStateHUD()
 	}
 	case LevelState::WARMUP_COUNTDOWN:
 	case LevelState::WARMUP_FORCED_COUNTDOWN: {
-		lines.title = fmt::sprintf("%s", G_GametypeName().c_str());
+		lines.title = fmt::sprintf("%s", G_GametypeName());
 		lines.subtitle[0] = fmt::sprintf("Match begins in " TEXTCOLOR_GREEN "%d",
 		                                 ::levelstate.getCountdown());
 		break;
@@ -1471,10 +1471,10 @@ void LevelStateHUD()
 			lines.subtitle[0] = fmt::sprintf("Tied at the end of the round");
 		else if (win.type == WinInfo::WIN_PLAYER)
 			lines.subtitle[0] = fmt::sprintf("%s wins the round",
-			                                 WinToColorString(win).c_str());
+			                                 WinToColorString(win));
 		else if (win.type == WinInfo::WIN_TEAM)
 			lines.subtitle[0] = fmt::sprintf("%s team wins the round",
-			                                 WinToColorString(win).c_str());
+			                                 WinToColorString(win));
 		else if (G_IsCoopGame() || G_IsHordeMode())
 			lines.subtitle[0] = fmt::sprintf("Next attempt in " TEXTCOLOR_GREEN "%d",
 			                                 ::levelstate.getCountdown());
@@ -1499,9 +1499,9 @@ void LevelStateHUD()
 		if (win.type == WinInfo::WIN_DRAW)
 			lines.subtitle[0] = fmt::sprintf("The game ends in a tie");
 		else if (win.type == WinInfo::WIN_PLAYER)
-			lines.subtitle[0] = fmt::sprintf("%s wins!", WinToColorString(win).c_str());
+			lines.subtitle[0] = fmt::sprintf("%s wins!", WinToColorString(win));
 		else if (win.type == WinInfo::WIN_TEAM)
-			lines.subtitle[0] = fmt::sprintf("%s team wins!", WinToColorString(win).c_str());
+			lines.subtitle[0] = fmt::sprintf("%s team wins!", WinToColorString(win));
 		else
 			lines.subtitle[0] = fmt::sprintf("Intermission in " TEXTCOLOR_GREEN "%d",
 			                                 ::levelstate.getCountdown());

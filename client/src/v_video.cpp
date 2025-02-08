@@ -321,9 +321,9 @@ BEGIN_COMMAND(vid_listmodes)
 	for (const auto& mode : *I_GetVideoCapabilities()->getSupportedVideoModes())
 	{
 		if (mode == I_GetWindow()->getVideoMode())
-			Printf_Bold("%s\n", I_GetVideoModeString(mode).c_str());
+			Printf_Bold("%s\n", I_GetVideoModeString(mode));
 		else
-			Printf(PRINT_HIGH, "%s\n", I_GetVideoModeString(mode).c_str());
+			Printf(PRINT_HIGH, "%s\n", I_GetVideoModeString(mode));
 	}
 }
 END_COMMAND(vid_listmodes)
@@ -358,7 +358,7 @@ BEGIN_COMMAND(vid_currentmode)
 
 	const IVideoMode& mode = I_GetWindow()->getVideoMode();
 	Printf(PRINT_HIGH, "%s %s surface\n",
-			I_GetVideoModeString(mode).c_str(), pixel_string.c_str());
+			I_GetVideoModeString(mode), pixel_string);
 }
 END_COMMAND(vid_currentmode)
 
@@ -506,7 +506,7 @@ void V_Init()
 
 		V_DoSetResolution();
 
-		Printf(PRINT_HIGH, "V_Init: using %s video driver.\n", I_GetVideoDriverName().c_str());
+		Printf(PRINT_HIGH, "V_Init: using %s video driver.\n", I_GetVideoDriverName());
 	}
 
 	if (!I_VideoInitialized())

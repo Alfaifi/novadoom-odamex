@@ -672,11 +672,11 @@ typedef struct wbstartstruct_s
 {
 	int			epsd;	// episode # (0-2)
 
-	char		current[9];	// [RH] Name of map just finished
-	char		next[9];	// next level, [RH] actual map name
+	OLumpName	current;	// [RH] Name of map just finished
+	OLumpName	next;	// next level, [RH] actual map name
 
-	char		lname0[9];
-	char		lname1[9];
+	OLumpName	lname0;
+	OLumpName	lname1;
 
 	int			maxkills;
 	int			maxitems;

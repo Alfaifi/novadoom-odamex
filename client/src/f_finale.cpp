@@ -806,7 +806,7 @@ void F_BunnyScroll()
 // the screen and may be too wide for the
 // viewport. It will be cropped in that case.
 //
-void F_DrawEndPic(const char* page)
+void F_DrawEndPic(const OLumpName& page)
 {
 	IWindowSurface* primary_surface = I_GetPrimarySurface();
 	primary_surface->clear(); // ensure black background in matted modes
@@ -854,19 +854,19 @@ void F_Drawer (void)
 				default:
 				case '1':
 				{
-					const char* page = !level.endpic.empty() ? level.endpic.c_str() : gameinfo.finalePage[0].c_str();
+					const OLumpName& page = !level.endpic.empty() ? level.endpic : gameinfo.finalePage[0];
 
 					F_DrawEndPic(page);
 					break;
 				}
 				case '2':
-			        F_DrawEndPic(gameinfo.finalePage[1].c_str());
+			        F_DrawEndPic(gameinfo.finalePage[1]);
 					break;
 				case '3':
 					F_BunnyScroll ();
 					break;
 				case '4':
-			        F_DrawEndPic(gameinfo.finalePage[2].c_str());
+			        F_DrawEndPic(gameinfo.finalePage[2]);
 					break;
 			}
 			break;

@@ -210,7 +210,7 @@ static int V_SavePNG(const std::string& filename, IWindowSurface* surface)
 
 	if (fp == NULL)
 	{
-		Printf(PRINT_WARNING, "I_SavePNG: Could not open %s for writing\n", filename.c_str());
+		Printf(PRINT_WARNING, "I_SavePNG: Could not open %s for writing\n", filename);
 		return -1;
 	}
 
@@ -410,7 +410,7 @@ void V_ScreenShot(std::string filename)
 		return;
 	}
 
-	Printf(PRINT_HIGH, "Screenshot taken: %s.%s\n", filename.c_str(), extension.c_str());
+	Printf(PRINT_HIGH, "Screenshot taken: %s.%s\n", filename, extension);
 }
 
 

@@ -762,7 +762,7 @@ BEGIN_COMMAND (connect)
 		}
 		else
 		{
-			Printf("Could not resolve host %s\n", target.c_str());
+			Printf("Could not resolve host %s\n", target);
 			memset(&serveraddr, 0, sizeof(serveraddr));
 		}
 	}
@@ -798,7 +798,7 @@ BEGIN_COMMAND (players)
 	// Print them, ordered by player id.
 	Printf("PLAYERS IN GAME:\n");
 	for (const auto& [id, name] : mplayers) {
-		Printf("%3d. %s\n", id, name.c_str());
+		Printf("%3d. %s\n", id, name);
 	}
 	Printf("%lu %s\n", mplayers.size(), mplayers.size() == 1 ? "PLAYER" : "PLAYERS");
 }
@@ -835,8 +835,8 @@ BEGIN_COMMAND (playerinfo)
 	PrintFmt(PRINT_HIGH, " userinfo.netname - {:s} \n",		player->userinfo.netname);
 
 	if (sv_gametype == GM_CTF || sv_gametype == GM_TEAMDM) {
-		Printf(PRINT_HIGH, " userinfo.team    - %s \n",
-		       GetTeamInfo(player->userinfo.team)->ColorizedTeamName().c_str());
+		PrintFmt(PRINT_HIGH, " userinfo.team    - {:s} \n",
+		       GetTeamInfo(player->userinfo.team)->ColorizedTeamName());
 	}
 	PrintFmt(PRINT_HIGH, " userinfo.aimdist - {:d} \n",		player->userinfo.aimdist >> FRACBITS);
 	PrintFmt(PRINT_HIGH, " userinfo.color   - {:s} \n",		color);
@@ -954,7 +954,7 @@ END_COMMAND (rcon_logout)
 BEGIN_COMMAND (playerteam)
 {
 	if (G_IsTeamGame())
-		Printf("Your are in the %s team.\n", V_GetTeamColor(consoleplayer().userinfo.team).c_str());
+		Printf("Your are in the %s team.\n", V_GetTeamColor(consoleplayer().userinfo.team));
 	else
 		Printf("You need to play a team-based gamemode in order to use this command.\n");
 }
@@ -1080,7 +1080,7 @@ BEGIN_COMMAND (spy)
 {
 	if (argc <= 1) {
 		if (spyplayername.length() > 0) {
-			Printf(PRINT_HIGH, "Unfollowing player '%s'.\n", spyplayername.c_str());
+			Printf(PRINT_HIGH, "Unfollowing player '%s'.\n", spyplayername);
 
 			// revert to not spying:
 			displayplayer_id = consoleplayer_id;
@@ -1095,7 +1095,7 @@ BEGIN_COMMAND (spy)
 		spyplayername = argv[1];
 
 		Printf(PRINT_HIGH, "Following player '%s'. Use 'spy' with no player name to unfollow.\n",
-			   spyplayername.c_str());
+			   spyplayername);
 	}
 
 	CL_CheckDisplayPlayer();
@@ -1142,7 +1142,7 @@ std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemon
 {
 	const std::string expanded_filename(M_ExpandTokens(filename));
 	std::string newfilename(expanded_filename);
-	newfilename = M_GetUserFileName(newfilename.c_str());
+	newfilename = M_GetUserFileName(newfilename);
 
 	// keep trying to find a filename that doesn't yet exist
 	if (!M_FindFreeName(newfilename, "odd"))
@@ -1159,7 +1159,7 @@ void CL_NetDemoPlay(const std::string& filename)
 	std::string found = M_FindUserFileName(filename, ".odd");
 	if (found.empty())
 	{
-		Printf(PRINT_WARNING, "Could not find demo %s.\n", filename.c_str());
+		Printf(PRINT_WARNING, "Could not find demo %s.\n", filename);
 		return;
 	}
 
@@ -1252,7 +1252,7 @@ BEGIN_COMMAND(netdemostats)
 	int curtime = netdemo.calculateTimeElapsed();
 	int totaltime = netdemo.calculateTotalTime();
 
-	Printf(PRINT_HIGH, "\n%s\n", netdemo.getFileName().c_str());
+	Printf(PRINT_HIGH, "\n%s\n", netdemo.getFileName());
 	Printf(PRINT_HIGH, "============================================\n");
 	Printf(PRINT_HIGH, "Total time: %i seconds\n", totaltime);
 	Printf(PRINT_HIGH, "Current position: %i seconds (%i%%)\n",
@@ -1492,7 +1492,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 		Printf(PRINT_WARNING,
 		       "Unable to find \"%s\". Downloading is disabled on your client.  Go to "
 		       "Options > Network Options to enable downloading.\n",
-		       missing_file.getBasename().c_str());
+		       missing_file.getBasename());
 		CL_QuitNetGame(NQ_DISCONNECT);
 		return;
 	}
@@ -1502,7 +1502,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 		// Playing a netdemo and unable to download from the server
 		Printf(PRINT_WARNING,
 		       "Unable to find \"%s\".  Cannot download while playing a netdemo.\n",
-		       missing_file.getBasename().c_str());
+		       missing_file.getBasename());
 		CL_QuitNetGame(NQ_DISCONNECT);
 		return;
 	}
@@ -1512,7 +1512,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 		// Nobody has any download sites configured.
 		Printf("Unable to find \"%s\".  Both your client and the server have no "
 		       "download sites configured.\n",
-		       missing_file.getBasename().c_str());
+		       missing_file.getBasename());
 		CL_QuitNetGame(NQ_DISCONNECT);
 		return;
 	}
@@ -1533,7 +1533,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 
 	// Disconnect from the server before we start the download.
 	Printf(PRINT_HIGH, "Need to download \"%s\", disconnecting from server...\n",
-	       missing_file.getBasename().c_str());
+	       missing_file.getBasename());
 	CL_QuitNetGame(NQ_SILENT);
 
 	// Start the download.
@@ -1563,7 +1563,7 @@ bool CL_PrepareConnect()
 	byte server_wads = MSG_ReadByte();
 
 	Printf("Found server at %s.\n\n", NET_AdrToString(::serveraddr));
-	Printf("> Hostname: %s\n", server_host.c_str());
+	Printf("> Hostname: %s\n", server_host);
 
 	std::vector<std::string> newwadnames;
 	newwadnames.reserve(server_wads);
@@ -1597,13 +1597,13 @@ bool CL_PrepareConnect()
 		{
 			Printf(PRINT_WARNING,
 			       "Could not construct wanted file \"%s\" that server requested.\n",
-			       newwadnames.at(i).c_str());
+			       newwadnames.at(i));
 			CL_QuitNetGame(NQ_ABORT);
 			return false;
 		}
 
-		Printf("> %s\n   %s\n", file.getBasename().c_str(),
-		       file.getWantedMD5().getHexCStr());
+		Printf("> %s\n   %s\n", file.getBasename(),
+		       file.getWantedMD5().getHexStr());
 	}
 
 	// Download website - needed for HTTP downloading to work.
@@ -1623,7 +1623,7 @@ bool CL_PrepareConnect()
 		}
 	}
 
-	Printf("> Map: %s\n", server_map.c_str());
+	Printf("> Map: %s\n", server_map);
 
 	version = MSG_ReadShort();
 	if(version > VERSION)
@@ -1673,7 +1673,7 @@ bool CL_PrepareConnect()
 		std::string msg = VersionMessage(::gameversion, GAMEVER, NULL);
 		if (!msg.empty())
 		{
-			Printf(PRINT_WARNING, "%s", msg.c_str());
+			Printf(PRINT_WARNING, "%s", msg);
 			CL_QuitNetGame(NQ_ABORT);
 			return false;
 		}
@@ -1682,7 +1682,7 @@ bool CL_PrepareConnect()
 	{
 		// [AM] Not worth sorting out what version it actually is.
 		std::string msg = VersionMessage(MAKEVER(0, 3, 0), GAMEVER, NULL);
-		Printf(PRINT_WARNING, "%s", msg.c_str());
+		Printf(PRINT_WARNING, "%s", msg);
 		CL_QuitNetGame(NQ_ABORT);
 		return false;
 	}
@@ -1700,12 +1700,12 @@ bool CL_PrepareConnect()
 		{
 			Printf(PRINT_WARNING,
 			       "Could not construct wanted file \"%s\" that server requested.\n",
-			       filename.c_str());
+			       filename);
 			CL_QuitNetGame(NQ_ABORT);
 			return false;
 		}
 
-		Printf("> %s\n", file.getBasename().c_str());
+		Printf("> %s\n", file.getBasename());
 	}
 
 	// TODO: Allow deh/bex file downloads
@@ -2035,7 +2035,7 @@ void CL_ParseCommands()
 
 			if (!protos.empty())
 			{
-				Printf(PRINT_WARNING, "CL_ParseCommands: %s\n", err.c_str());
+				Printf(PRINT_WARNING, "CL_ParseCommands: %s\n", err);
 
 				for (Protos::const_iterator it = protos.begin(); it != protos.end(); ++it)
 				{
@@ -2043,13 +2043,13 @@ void CL_ParseCommands()
 					ptrdiff_t idx = it - protos.begin() + 1;
 					std::string svc = SVCName(it->header);
 					size_t siz = it->size;
-					Printf(PRINT_WARNING, "%c %2zd [%s] %zub\n", latest, idx, svc.c_str(),
+					Printf(PRINT_WARNING, "%c %2zd [%s] %zub\n", latest, idx, svc,
 					       siz);
 				}
 			}
 			else
 			{
-				Printf(PRINT_WARNING, "CL_ParseCommands: %s\n", err.c_str());
+				Printf(PRINT_WARNING, "CL_ParseCommands: %s\n", err);
 			}
 
 			CL_QuitNetGame(NQ_PROTO);
@@ -2430,7 +2430,7 @@ void CL_SimulateWorld()
 			reason = "invalid world_index";
 
 		Printf(PRINT_HIGH, "Gametic %i, world_index %i, Resynching world index (%s).\n",
-			gametic, world_index, reason.c_str());
+			gametic, world_index, reason);
 		#endif // _WORLD_INDEX_DEBUG_
 
 		CL_ResyncWorldIndex();

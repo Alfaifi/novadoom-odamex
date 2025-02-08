@@ -276,11 +276,11 @@ std::string HelpText()
 		if (queuePos > 0)
 		{
 			return fmt::sprintf("%s - " TEXTCOLOR_GREEN "%d%s" TEXTCOLOR_NORMAL " in line",
-			                    joinmsg.c_str(), queuePos, ordinal(queuePos));
+			                    joinmsg, queuePos, ordinal(queuePos));
 		}
 
 		return fmt::sprintf("%s - Press " TEXTCOLOR_GOLD "%s" TEXTCOLOR_NORMAL " to queue",
-		                    joinmsg.c_str(), ::Bindings.GetKeynameFromCommand("+use").c_str());
+		                    joinmsg, ::Bindings.GetKeynameFromCommand("+use"));
 	}
 
 	if (G_CanShowJoinTimer())
@@ -288,12 +288,12 @@ std::string HelpText()
 		return fmt::sprintf(
 		          "Press " TEXTCOLOR_GOLD "%s" TEXTCOLOR_NORMAL
 		          " to join - " TEXTCOLOR_GREEN "%d" TEXTCOLOR_NORMAL " secs left",
-		          ::Bindings.GetKeynameFromCommand("+use").c_str(),
+		          ::Bindings.GetKeynameFromCommand("+use"),
 		          ::levelstate.getJoinTimeLeft());
 	}
 
 	return fmt::sprintf("Press " TEXTCOLOR_GOLD "%s" TEXTCOLOR_NORMAL " to join",
-	                    ::Bindings.GetKeynameFromCommand("+use").c_str());
+	                    ::Bindings.GetKeynameFromCommand("+use"));
 }
 
 /**
@@ -314,7 +314,7 @@ std::string SpyPlayerName()
 		color = GetTeamInfo(plyr.userinfo.team)->TextColor.c_str();
 	}
 
-	return fmt::sprintf("%s%s", color, plyr.userinfo.netname.c_str());
+	return fmt::sprintf("%s%s", color, plyr.userinfo.netname);
 }
 
 /**
@@ -560,29 +560,29 @@ std::string PersonalScore()
 		{
 			if (g_winlimit)
 			{
-				str = fmt::sprintf("%s%d/%d", plyr_team.TextColor.c_str(),
+				str = fmt::sprintf("%s%d/%d", plyr_team.TextColor,
 				                   plyr_team.RoundWins, g_winlimit.asInt());
 			}
 			else
 			{
-				str = fmt::sprintf("%s%d", plyr_team.TextColor.c_str(), plyr.roundwins);
+				str = fmt::sprintf("%s%d", plyr_team.TextColor, plyr.roundwins);
 			}
 		}
 		else
 		{
 			if (G_UsesFraglimit() && sv_fraglimit > 0)
 			{
-				str = fmt::sprintf("%s%d/%d", plyr_team.TextColor.c_str(), plyr_team.Points,
+				str = fmt::sprintf("%s%d/%d", plyr_team.TextColor, plyr_team.Points,
 				                   sv_fraglimit.asInt());
 			}
 			else if (!G_UsesFraglimit() && sv_scorelimit > 0)
 			{
-				str = fmt::sprintf("%s%d/%d", plyr_team.TextColor.c_str(), plyr_team.Points,
+				str = fmt::sprintf("%s%d/%d", plyr_team.TextColor, plyr_team.Points,
 				                   sv_scorelimit.asInt());
 			}
 			else
 			{
-				str = fmt::sprintf("%s%d", plyr_team.TextColor.c_str(), plyr.fragcount);
+				str = fmt::sprintf("%s%d", plyr_team.TextColor, plyr.fragcount);
 			}
 		}
 	}
@@ -1788,7 +1788,7 @@ void EATargets(int x, int y, const float scale,
 					color = TEXTCOLOR_LIGHTBLUE;
 
 				nameplate = fmt::sprintf("%s %s%d",
-				          Targets[i].PlayPtr->userinfo.netname.c_str(), color, health);
+				          Targets[i].PlayPtr->userinfo.netname, color, health);
 			}
 			else
 			{

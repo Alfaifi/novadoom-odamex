@@ -324,7 +324,7 @@ void D_Display()
 	// draw pause pic
 	if (paused && !menuactive)
 	{
-		const patch_t* pause = W_CachePatch(gameinfo.pauseSign.c_str());
+		const patch_t* pause = W_CachePatch(gameinfo.pauseSign);
 
 		// todo: properly center "PAUSED" graphic for Heretic
 		const int y = AM_ClassicAutomapVisible() ? 4 : viewwindowy + 4;
@@ -370,7 +370,7 @@ void D_DoomLoop()
 		}
 		catch (CRecoverableError &error)
 		{
-			Printf(PRINT_ERROR, "\nERROR: %s\n", error.GetMsg().c_str());
+			Printf(PRINT_ERROR, "\nERROR: %s\n", error.GetMsg());
 
 			// [AM] In case an error is caused by a console command.
 			C_ClearCommand();

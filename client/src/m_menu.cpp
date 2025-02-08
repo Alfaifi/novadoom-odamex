@@ -670,7 +670,7 @@ void M_LoadSelect (int choice)
 	std::string name;
 
 	G_BuildSaveName (name, choice);
-	G_LoadGame ((char *)name.c_str());
+	G_LoadGame(name.c_str());
 	gamestate = gamestate == GS_FULLCONSOLE ? GS_HIDECONSOLE : gamestate;
 	M_ClearMenus ();
 	if (quickSaveSlot == -2)
@@ -1081,7 +1081,7 @@ void M_StartGame(int choice)
     }
     else
     {
-        G_DeferedInitNew (EpisodeMaps[epi].c_str());
+        G_DeferedInitNew (EpisodeMaps[epi]);
     }
 
     M_ClearMenus ();
@@ -1146,7 +1146,7 @@ void M_Expansion(int choice)
 //
 void M_DrawReadThis1()
 {
-	const patch_t *p = W_CachePatch(gameinfo.infoPage[0].c_str());
+	const patch_t *p = W_CachePatch(gameinfo.infoPage[0]);
 	screen->DrawPatchFullScreen(p, false);
 }
 
@@ -1155,7 +1155,7 @@ void M_DrawReadThis1()
 //
 void M_DrawReadThis2()
 {
-	const patch_t *p = W_CachePatch(gameinfo.infoPage[1].c_str());
+	const patch_t *p = W_CachePatch(gameinfo.infoPage[1]);
 	screen->DrawPatchFullScreen(p, false);
 }
 
@@ -1164,7 +1164,7 @@ void M_DrawReadThis2()
 //
 void M_DrawReadThis3()
 {
-	const patch_t *p = W_CachePatch(gameinfo.infoPage[2].c_str());
+	const patch_t *p = W_CachePatch(gameinfo.infoPage[2]);
 	screen->DrawPatchFullScreen(p, false);
 }
 

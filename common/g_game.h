@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -18,7 +18,7 @@
 //
 // DESCRIPTION:
 //   Duh.
-// 
+//
 //-----------------------------------------------------------------------------
 
 
@@ -37,7 +37,7 @@ void G_DeferedPlayDemo(const char* demo, bool bIsSingleDemo = false);
 
 // Can be called by the startup code or M_Responder,
 // calls P_SetupLevel or W_EnterWorld.
-void G_LoadGame(char* name);
+void G_LoadGame(const char* name);
 
 void G_DoLoadGame(void);
 
