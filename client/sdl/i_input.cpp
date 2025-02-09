@@ -900,13 +900,15 @@ void IInputSubsystem::gatherEvents()
 void IInputSubsystem::gatherMouseEvents()
 {
 	event_t mouseEvent;
-	if (mMouseInputDevice != NULL)
+	if (mMouseInputDevice != nullptr)
+	{
 		mMouseInputDevice->gatherEvents();
 
-	while (mMouseInputDevice->hasEvent())
-	{
-		mMouseInputDevice->getEvent(&mouseEvent);
-		mEvents.push(mouseEvent);
+		while (mMouseInputDevice->hasEvent())
+		{
+			mMouseInputDevice->getEvent(&mouseEvent);
+			mEvents.push(mouseEvent);
+		}
 	}
 }
 

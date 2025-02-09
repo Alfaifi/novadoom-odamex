@@ -452,8 +452,8 @@ void G_DoCompleted (void)
 		{
 			if (W_CheckNumForName (level.secretmap) != -1)
 			{
-				wminfo.next, level.secretmap;
-				wminfo.lname1, getLevelInfos().findByName(level.secretmap).pname;
+				wminfo.next = level.secretmap;
+				wminfo.lname1 = getLevelInfos().findByName(level.secretmap).pname;
 			}
 			else
 			{
@@ -462,8 +462,8 @@ void G_DoCompleted (void)
 		}
 		if (wminfo.next.empty())
 		{
-			wminfo.next, level.nextmap;
-			wminfo.lname1, getLevelInfos().findByName(level.nextmap).pname;
+			wminfo.next = level.nextmap;
+			wminfo.lname1 = getLevelInfos().findByName(level.nextmap).pname;
 		}
 	}
 
