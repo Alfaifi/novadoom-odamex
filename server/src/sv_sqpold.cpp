@@ -150,7 +150,7 @@ void SV_SendServerInfo()
 	if(MSG_BytesLeft() == 4)
 		MSG_WriteLong(&ml_message, MSG_ReadLong());
 
-	MSG_WriteString(&ml_message, (char *)sv_hostname.cstring());
+	MSG_WriteString(&ml_message, sv_hostname.cstring());
 
 	byte playersingame = 0;
 	for (const auto& player : players)
@@ -216,7 +216,7 @@ void SV_SendServerInfo()
 	MSG_WriteShort(&ml_message, VERSION);
 
 //bond===========================
-	MSG_WriteString(&ml_message, (char *)sv_email.cstring());
+	MSG_WriteString(&ml_message, sv_email.cstring());
 
 	int timeleft = (int)(sv_timelimit - level.time/(TICRATE*60));
 	if (timeleft<0) timeleft=0;

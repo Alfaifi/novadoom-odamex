@@ -761,7 +761,7 @@ void MSG_WriteFloat(buf_t *b, float Float)
 
     StringStream << Float;
 
-	MSG_WriteString(b, (char *)StringStream.str().c_str());
+	MSG_WriteString(b, StringStream.str().c_str());
 }
 
 //

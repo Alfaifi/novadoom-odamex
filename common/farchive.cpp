@@ -843,7 +843,7 @@ FArchive &FArchive::ReadObject (DObject* &obj, TypeInfo *wanttype)
 		{
 			I_Error ("Object reference too high (%u; max is %u)\n", index, m_ObjectCount);
 		}
-		obj = (DObject *)m_ObjectMap[index].object;
+		obj = const_cast<DObject*>(m_ObjectMap[index].object);
 		break;
 
 	case NEW_PLYR_CLS_OBJ:

@@ -1064,7 +1064,7 @@ void DACSThinker::Serialize (FArchive &arc)
 			if (RunningScripts[i])
 				arc << RunningScripts[i] << (WORD)i;
 		}
-		arc << (DLevelScript *)NULL;
+		arc << static_cast<DLevelScript*>(nullptr);
 	}
 	else
 	{
@@ -1352,7 +1352,7 @@ void DLevelScript::Serialize (FArchive &arc)
 
 		// [AM] We don't want player activators to be saved
 		if (arc.IsReset() && P_ThinkerIsPlayerType(activator))
-			arc << (AActor*)NULL;
+			arc << static_cast<AActor*>(nullptr);
 		else
 			arc << activator;
 

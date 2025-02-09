@@ -1878,7 +1878,7 @@ void CL_TryToConnect(DWORD server_token)
 		constexpr int rate = 0xFFFF;
 		MSG_WriteLong(&net_buffer, rate);
 
-        MSG_WriteString(&net_buffer, (char *)connectpasshash.c_str());
+        MSG_WriteString(&net_buffer, connectpasshash.c_str());
 
 		NET_SendPacket(net_buffer, serveraddr);
 		SZ_Clear(&net_buffer);
