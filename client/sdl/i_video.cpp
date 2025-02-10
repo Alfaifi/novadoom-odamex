@@ -679,12 +679,7 @@ std::string I_GetVideoModeString(const IVideoMode& mode)
 static bool I_IsModeSupported(uint8_t bpp, EWindowMode window_mode)
 {
 	const IVideoModeList* modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
-
-	for (const auto& mode : *modelist)
-		if (mode.bpp == bpp && mode.window_mode == window_mode)
-			return true;
-
-	return false;
+	return std::any_of(modelist->cbegin(), modelist->cend(), [bpp, window_mode](const auto& mode){ mode.bpp == bpp && mode.window_mode == window_mode });
 }
 
 

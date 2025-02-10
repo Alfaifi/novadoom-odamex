@@ -3764,7 +3764,7 @@ void DLevelScript::RunScript ()
 			}
 			else
 			{
-				STACK(1) = (int)var->value();
+				STACK(1) = var->asInt();
 			}
 		}
 		break;

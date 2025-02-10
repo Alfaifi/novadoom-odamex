@@ -614,7 +614,7 @@ void R_SetViewSize(int blocks)
 
 CVAR_FUNC_IMPL(screenblocks)
 {
-	R_SetViewSize((int)var);
+	R_SetViewSize(var.asInt());
 }
 
 

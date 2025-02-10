@@ -634,7 +634,7 @@ void ConsoleHistory::movePositionDown()
 void ConsoleHistory::dump()
 {
 	for (const auto& it : history)
-		Printf(PRINT_HIGH, "   %s\n", it.c_str());
+		Printf(PRINT_HIGH, "   %s\n", it);
 }
 
 class ConsoleCompletions

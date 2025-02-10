@@ -469,7 +469,7 @@ CVAR_FUNC_IMPL(joy_active)
 	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
 	for (const auto& device : devices)
 	{
-		if (device.mId == (int)var)
+		if (device.mId == var.asInt())
 		{
 			I_OpenJoystick();
 			return;

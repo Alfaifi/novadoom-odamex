@@ -1002,12 +1002,7 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 	// get sv_hostname and write it
 	MSG_WriteString (netbuffer, server_host.c_str());
 
-	int playersingame = 0;
-	for (const auto& player : players)
-	{
-		if (player.ingame())
-			playersingame++;
-	}
+	int playersingame = std::count_if(players.cbegin(), players.cend(), [](const auto& player){ return player.ingame(); });
 	MSG_WriteByte	(netbuffer, playersingame);
 	MSG_WriteByte	(netbuffer, 0);				// sv_maxclients
 	MSG_WriteString	(netbuffer, level.mapname.c_str());
