@@ -1602,7 +1602,7 @@ void C_ToggleConsole()
 	}
 	else
 	{
-		if (ConBottom == static_cast<unsigned int>(I_GetSurfaceHeight()))
+		if (ConBottom == I_GetSurfaceHeight())
 			ConsoleState = c_risefull;
 		else
 			ConsoleState = c_rising;
