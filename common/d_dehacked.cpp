@@ -2310,7 +2310,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 		if (fh == NULL)
 		{
 			Printf(PRINT_WARNING, "Could not open DeHackEd patch \"%s\"\n",
-			       patchfile->getBasename().c_str());
+			       patchfile->getBasename());
 			return false;
 		}
 
@@ -2353,7 +2353,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 			if (patchfile)
 			{
 				Printf(PRINT_WARNING, "\"%s\" is not a DeHackEd patch file\n",
-				       patchfile->getBasename().c_str());
+				       patchfile->getBasename());
 			}
 			else
 			{
@@ -2423,7 +2423,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 
 	if (patchfile)
 	{
-		Printf("adding %s\n", patchfile->getFullpath().c_str());
+		Printf("adding %s\n", patchfile->getFullpath());
 	}
 	else
 	{

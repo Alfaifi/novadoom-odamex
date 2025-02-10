@@ -995,7 +995,7 @@ BEGIN_COMMAND(logfile)
 
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		Printf("Log file %s closed on %s\n", ::LOG_FILE.c_str(), asctime(timeinfo));
+		Printf("Log file %s closed on %s\n", ::LOG_FILE, asctime(timeinfo));
 		::LOG.close();
 	}
 
@@ -1004,7 +1004,7 @@ BEGIN_COMMAND(logfile)
 
 	if (!::LOG.is_open())
 	{
-		Printf(PRINT_HIGH, "Unable to create logfile: %s\n", ::LOG_FILE.c_str());
+		Printf(PRINT_HIGH, "Unable to create logfile: %s\n", ::LOG_FILE);
 	}
 	else
 	{
@@ -1012,7 +1012,7 @@ BEGIN_COMMAND(logfile)
 		timeinfo = localtime(&rawtime);
 		::LOG.flush();
 		::LOG << std::endl;
-		Printf(PRINT_HIGH, "Logging in file %s started %s\n", ::LOG_FILE.c_str(),
+		Printf(PRINT_HIGH, "Logging in file %s started %s\n", ::LOG_FILE,
 		       asctime(timeinfo));
 	}
 }
@@ -1026,7 +1026,7 @@ BEGIN_COMMAND (stoplog)
 	if (LOG.is_open()) {
 		time (&rawtime);
     	timeinfo = localtime (&rawtime);
-		Printf (PRINT_HIGH, "Logging to file %s stopped %s\n", LOG_FILE.c_str(), asctime (timeinfo));
+		Printf (PRINT_HIGH, "Logging to file %s stopped %s\n", LOG_FILE, asctime (timeinfo));
 		LOG.close();
 	}
 }
@@ -1060,7 +1060,7 @@ END_COMMAND (puke)
 BEGIN_COMMAND (error)
 {
 	std::string text = C_ArgCombine(argc - 1, (const char **)(argv + 1));
-	I_Error (text.c_str());
+	I_Error (text);
 }
 END_COMMAND (error)
 

@@ -263,10 +263,10 @@ class OZone
 		Printf("  allocation count: %" "zu" "\n", m_heap.size());
 
 		StrFormatBytes(buf, total);
-		Printf("  allocs size: %s\n", buf.c_str());
+		Printf("  allocs size: %s\n", buf);
 
 		StrFormatBytes(buf, m_heap.size() * sizeof(MemoryBlockInfo));
-		Printf("  blocks size: %s\n", buf.c_str());
+		Printf("  blocks size: %s\n", buf);
 	}
 } g_zone;
 

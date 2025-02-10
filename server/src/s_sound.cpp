@@ -442,7 +442,7 @@ void S_ParseSndInfo()
 					}
 					else
 					{
-						os.warning("Unknown ambient type (%s)\n", os.getToken().c_str());
+						os.warning("Unknown ambient type (%s)\n", os.getToken());
 					}
 
 					os.mustScanFloat();
@@ -484,7 +484,7 @@ void S_ParseSndInfo()
 						{
 							os.warning("Definition of random sound '%s' refers to itself "
 							           "recursively.\n",
-							           os.getToken().c_str());
+							           os.getToken());
 							continue;
 						}
 
@@ -502,7 +502,7 @@ void S_ParseSndInfo()
 				}
 				else
 				{
-					os.warning("Unknown SNDINFO command %s\n", os.getToken().c_str());
+					os.warning("Unknown SNDINFO command %s\n", os.getToken());
 					while (os.scan())
 						if (os.crossed())
 						{

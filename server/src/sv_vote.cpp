@@ -1053,7 +1053,7 @@ void SV_Callvote(player_t &player)
 	for (int i = 0; i < argc; i++)
 	{
 		arguments[i] = std::string(MSG_ReadString());
-		DPrintf("SV_Callvote: arguments[%d] = \"%s\"\n", i, arguments[i].c_str());
+		DPrintf("SV_Callvote: arguments[%d] = \"%s\"\n", i, arguments[i]);
 	}
 
 	if (!(votecmd > VOTE_NONE && votecmd < VOTE_MAX))

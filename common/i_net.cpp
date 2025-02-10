@@ -330,7 +330,7 @@ void BindToLocalPort (SOCKET s, u_short wanted)
     {
         sv_upnp_internalip.Set(ip.c_str());
 
-        Printf(PRINT_HIGH, "UPnP: Internal IP address is: %s\n", ip.c_str());
+        Printf(PRINT_HIGH, "UPnP: Internal IP address is: %s\n", ip);
 
         upnp_add_redir(ip.c_str(), next - 1);
     }
@@ -543,7 +543,7 @@ std::string NET_GetLocalAddress (void)
         addr.s_addr = *(u_long *)ent->h_addr_list[0];
 
 		std::string ipstr = inet_ntoa(addr);
-		Printf(PRINT_HIGH, "Bound to IP: %s\n", ipstr.c_str());
+		Printf(PRINT_HIGH, "Bound to IP: %s\n", ipstr);
 		return ipstr;
     }
 	else
@@ -623,7 +623,7 @@ void MSG_WriteSVC(buf_t* b, const google::protobuf::Message& msg)
 		Printf(
 		    PRINT_WARNING,
 		    "WARNING: Could not serialize message \"%s\".  This is most likely a bug.\n",
-		    msg.GetDescriptor()->full_name().c_str());
+		    msg.GetDescriptor()->full_name());
 		return;
 	}
 
@@ -638,14 +638,14 @@ void MSG_WriteSVC(buf_t* b, const google::protobuf::Message& msg)
 		Printf(PRINT_WARNING,
 		       "WARNING: Could not find svc header for message \"%s\".  This is most "
 		       "likely a bug.\n",
-		       msg.GetDescriptor()->full_name().c_str());
+		       msg.GetDescriptor()->full_name());
 		return;
 	}
 
 #if 0
 	Printf("%s (%d)\n, %s\n",
 		::svc_info[header].getName(), msg.ByteSize(),
-		msg.ShortDebugString().c_str());
+		msg.ShortDebugString());
 #endif
 
 	b->WriteByte(header);
@@ -672,7 +672,7 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message& ms
 		Printf(
 		    PRINT_WARNING,
 		    "WARNING: Could not serialize message \"%s\".  This is most likely a bug.\n",
-		    msg.GetDescriptor()->full_name().c_str());
+		    msg.GetDescriptor()->full_name());
 		return;
 	}
 
@@ -682,7 +682,7 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message& ms
 		Printf(PRINT_WARNING,
 		       "WARNING: Could not find svc header for message \"%s\".  This is most "
 		       "likely a bug.\n",
-		       msg.GetDescriptor()->full_name().c_str());
+		       msg.GetDescriptor()->full_name());
 		return;
 	}
 

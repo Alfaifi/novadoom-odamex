@@ -451,8 +451,8 @@ BEGIN_COMMAND(whereis)
 	if (M_ResolveWantedFile(res, want))
 	{
 		Printf("basename: %s\nfullpath: %s\nCRC32: %s\nMD5: %s\n",
-		       res.getBasename().c_str(), res.getFullpath().c_str(),
-		       W_CRC32(res.getFullpath()).getHexCStr(), res.getMD5().getHexCStr());
+		       res.getBasename(), res.getFullpath(),
+		       W_CRC32(res.getFullpath()).getHexStr(), res.getMD5().getHexStr());
 		return;
 	}
 

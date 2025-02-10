@@ -336,7 +336,7 @@ BEGIN_COMMAND(version)
 		}
 		else
 		{
-			PrintFmt("{}", it->second.c_str());
+			PrintFmt("{}", it->second);
 		}
 	}
 }

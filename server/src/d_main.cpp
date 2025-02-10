@@ -116,7 +116,7 @@ void D_DoomLoop (void)
 		}
 		catch (CRecoverableError &error)
 		{
-			Printf ("ERROR: %s\n", error.GetMsg().c_str());
+			Printf ("ERROR: %s\n", error.GetMsg());
 			Printf ("sleeping for 10 seconds before map reload...");
 
 			// denis - drop clients
@@ -199,7 +199,7 @@ void STACK_ARGS D_Shutdown()
 
 	// stop sound effects and music
 	S_Stop();
-	
+
 	DThinker::DestroyAllThinkers();
 
 	D_UndoDehPatch();
@@ -214,7 +214,7 @@ void STACK_ARGS D_Shutdown()
 
 	// [AM] Level is now invalid due to torching zone memory.
 	g_ValidLevel = false;
-	
+
 	// [AM] All of our dyncolormaps are freed, tidy up so we
 	//      don't follow wild pointers.
 	NormalLight.next = NULL;
@@ -251,7 +251,7 @@ void D_DoomMain()
 	// Always log by default
 	if (!LOG.is_open())
 		C_DoCommand("logfile");
-	
+
 	OWantFiles newwadfiles, newpatchfiles;
 
 	const char* iwad_filename_cstr = Args.CheckValue("-iwad");
@@ -376,7 +376,7 @@ void D_DoomMain()
 		startmap = Args.GetArg(p + 1);
 		((char*)Args.GetArg(p))[0] = '-';
 	}
-	
+
 	level.mapname = startmap;
 
 	G_ChangeMap();

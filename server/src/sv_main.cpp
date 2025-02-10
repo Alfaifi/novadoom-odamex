@@ -325,7 +325,7 @@ BEGIN_COMMAND (kick) {
 	std::string reason;
 
 	if (!CMD_KickCheck(arguments, error, pid, reason)) {
-		Printf("Kick: %s.\n", error.c_str());
+		Printf("Kick: %s.\n", error);
 		return;
 	}
 
@@ -393,11 +393,11 @@ void SV_InvalidateClient(player_t &player, const std::string& reason)
 {
 	if (&(player.client) == NULL)
 	{
-		Printf("Player with NULL client fails security check (%s), client cannot be safely dropped.\n", reason.c_str());
+		Printf("Player with NULL client fails security check (%s), client cannot be safely dropped.\n", reason);
 		return;
 	}
 
-	Printf("%s fails security check (%s), dropping client.\n", NET_AdrToString(player.client.address), reason.c_str());
+	Printf("%s fails security check (%s), dropping client.\n", NET_AdrToString(player.client.address), reason);
 	SV_PlayerPrintf(PRINT_ERROR, player.id,
 	                "The server closed your connection for the following reason: %s.\n",
 	                reason.c_str());
@@ -910,7 +910,7 @@ bool SV_SetupUserInfo(player_t &player)
 					test_netname = new_netname + strnum;
 
 				// Check to see if the enumerated name is taken.
-				player_t& test = nameplayer(test_netname.c_str());
+				player_t& test = nameplayer(test_netname);
 				if (!validplayer(test))
 					break;
 
@@ -955,8 +955,8 @@ bool SV_SetupUserInfo(player_t &player)
 		if (player.mo && player.userinfo.team && player.ingame() && !player.spectator &&
 		    !G_IsLevelState(LevelState::WARMUP))
 		{
-			M_HandleWDLNameChange(team, old_netname.c_str(),
-			                      player.userinfo.netname.c_str(), player.id);
+			M_HandleWDLNameChange(team, old_netname,
+			                      player.userinfo.netname, player.id);
 		}
 	}
 
@@ -1623,7 +1623,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 
 		// GhostlyDeath -- And we tell the server
 		Printf("%s disconnected (version mismatch %s).\n", NET_AdrToString(::net_from),
-		       VersionStr.c_str());
+		       VersionStr);
 	}
 
 	return AllowConnect;
@@ -2180,7 +2180,7 @@ void SV_DrawScores()
 					Printf_Bold("%-3d %-16s %-15s %-6d N/A  %-5d %-3d",
 							player->id,
 							NET_AdrToString(player->client.address),
-							player->userinfo.netname.c_str(),
+							player->userinfo.netname,
 							P_GetPointCount(player),
 							//itplayer->captures,
 					        P_GetFragCount(player),
@@ -2233,7 +2233,7 @@ void SV_DrawScores()
 					Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
 							player->id,
 							NET_AdrToString(player->client.address),
-							player->userinfo.netname.c_str(),
+							player->userinfo.netname,
 							P_GetFragCount(player),
 							P_GetDeathCount(player),
 							SV_CalculateFragDeathRatio(player),
@@ -2273,7 +2273,7 @@ void SV_DrawScores()
 			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
 					player->id,
 					NET_AdrToString(player->client.address),
-					player->userinfo.netname.c_str(),
+					player->userinfo.netname,
 					P_GetFragCount(player),
 					P_GetDeathCount(player),
 					SV_CalculateFragDeathRatio(player),
@@ -2297,7 +2297,7 @@ void SV_DrawScores()
 			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
 					player->id,
 					NET_AdrToString(player->client.address),
-					player->userinfo.netname.c_str(),
+					player->userinfo.netname,
 					player->killcount,
 					player->deathcount,
 					SV_CalculateKillDeathRatio(player),
@@ -2317,7 +2317,7 @@ void SV_DrawScores()
 			Printf_Bold("%-3d %-16s %-15s\n",
 					spec->id,
 					NET_AdrToString(spec->client.address),
-					spec->userinfo.netname.c_str());
+					spec->userinfo.netname);
 		}
 	}
 
@@ -2519,9 +2519,9 @@ void SVC_TeamSay(player_t &player, const char* message)
 void SVC_SpecSay(player_t &player, const char* message)
 {
 	if (strnicmp(message, "/me ", 4) == 0)
-		Printf(PRINT_TEAMCHAT, "<SPEC> * %s %s\n", player.userinfo.netname.c_str(), &message[4]);
+		Printf(PRINT_TEAMCHAT, "<SPEC> * %s %s\n", player.userinfo.netname, &message[4]);
 	else
-		Printf(PRINT_TEAMCHAT, "<SPEC> %s: %s\n", player.userinfo.netname.c_str(), message);
+		Printf(PRINT_TEAMCHAT, "<SPEC> %s: %s\n", player.userinfo.netname, message);
 
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
@@ -2547,9 +2547,9 @@ void SVC_SpecSay(player_t &player, const char* message)
 void SVC_Say(player_t &player, const char* message)
 {
 	if (strnicmp(message, "/me ", 4) == 0)
-		Printf(PRINT_CHAT, "<CHAT> * %s %s\n", player.userinfo.netname.c_str(), &message[4]);
+		Printf(PRINT_CHAT, "<CHAT> * %s %s\n", player.userinfo.netname, &message[4]);
 	else
-		Printf(PRINT_CHAT, "<CHAT> %s: %s\n", player.userinfo.netname.c_str(), message);
+		Printf(PRINT_CHAT, "<CHAT> %s: %s\n", player.userinfo.netname, message);
 
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
@@ -2572,10 +2572,10 @@ void SVC_PrivMsg(player_t &player, player_t &dplayer, const char* message)
 {
 	if (strnicmp(message, "/me ", 4) == 0)
 		Printf(PRINT_CHAT, "<PRIVMSG> * %s (to %s) %s\n",
-				player.userinfo.netname.c_str(), dplayer.userinfo.netname.c_str(), &message[4]);
+				player.userinfo.netname, dplayer.userinfo.netname, &message[4]);
 	else
 		Printf(PRINT_CHAT, "<PRIVMSG> %s (to %s): %s\n",
-				player.userinfo.netname.c_str(), dplayer.userinfo.netname.c_str(), message);
+				player.userinfo.netname, dplayer.userinfo.netname, message);
 
 	MSG_WriteSVC(&dplayer.client.reliablebuf, SVC_Say(true, player.id, message));
 
@@ -3587,7 +3587,7 @@ BEGIN_COMMAND (forcespec) {
 	size_t pid;
 
 	if (!CMD_ForcespecCheck(arguments, error, pid)) {
-		Printf("forcespec: %s\n", error.c_str());
+		Printf("forcespec: %s\n", error);
 		return;
 	}
 
@@ -3760,7 +3760,7 @@ void SV_RConLogout (player_t &player)
 
 	if (cl->allow_rcon)
 	{
-		Printf("RCON logout from %s - %s", player.userinfo.netname.c_str(), NET_AdrToString(cl->address));
+		Printf("RCON logout from %s - %s", player.userinfo.netname, NET_AdrToString(cl->address));
 		cl->allow_rcon = false;
 	}
 }
@@ -3784,11 +3784,11 @@ void SV_RConPassword (player_t &player)
 	if (!password.empty() && MD5SUM(password + cl->digest) == challenge)
 	{
 		cl->allow_rcon = true;
-		Printf(PRINT_HIGH, "RCON login from %s - %s", player.userinfo.netname.c_str(), NET_AdrToString(cl->address));
+		Printf(PRINT_HIGH, "RCON login from %s - %s", player.userinfo.netname, NET_AdrToString(cl->address));
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "RCON login failure from %s - %s", player.userinfo.netname.c_str(), NET_AdrToString(cl->address));
+		Printf(PRINT_HIGH, "RCON login failure from %s - %s", player.userinfo.netname, NET_AdrToString(cl->address));
 		MSG_WriteSVC(&cl->reliablebuf, SVC_Print(PRINT_HIGH, "Bad password\n"));
 	}
 }
@@ -3953,7 +3953,7 @@ void SV_ParseCommands(player_t &player)
 				if (player.client.allow_rcon)
 				{
 					Printf(PRINT_HIGH, "RCON command from %s - %s -> %s",
-							player.userinfo.netname.c_str(), NET_AdrToString(net_from), str.c_str());
+							player.userinfo.netname, NET_AdrToString(net_from), str);
 					AddCommandString(str);
 				}
 			}
@@ -4350,7 +4350,7 @@ BEGIN_COMMAND(playerlist)
 
 		std::string strMain, strScore;
 		strMain = fmt::sprintf("(%02d): %s %s - %s - time:%d - ping:%d", it->id,
-		                       it->userinfo.netname.c_str(), it->spectator ? "(SPEC)" : "",
+		                       it->userinfo.netname, it->spectator ? "(SPEC)" : "",
 		                       NET_AdrToString(it->client.address), it->GameTime, it->ping);
 
 		if (G_IsCoopGame())
@@ -4408,7 +4408,7 @@ BEGIN_COMMAND(playerlist)
 			}
 		}
 
-		Printf("%s%s\n", strMain.c_str(), strScore.c_str());
+		Printf("%s%s\n", strMain, strScore);
 		anybody = true;
 	}
 

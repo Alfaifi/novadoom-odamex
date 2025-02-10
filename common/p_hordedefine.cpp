@@ -337,7 +337,7 @@ static void PrintDefines(const std::vector<hordeDefine_t>::const_iterator& begin
 	for (; it != end; ++it)
 	{
 		const ptrdiff_t idx = it - ::WAVE_DEFINES.begin();
-		Printf("%zd: %s (Group HP: %d)\n", idx, it->name.c_str(), it->maxGroupHealth);
+		Printf("%zd: %s (Group HP: %d)\n", idx, it->name, it->maxGroupHealth);
 	}
 }
 

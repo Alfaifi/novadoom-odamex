@@ -938,7 +938,7 @@ const TypeInfo *FArchive::ReadClass ()
 		}
 	}
 	if(typeName.length())
-		I_Error ("Unknown class '%s'\n", typeName.c_str());
+		I_Error ("Unknown class '%s'\n", typeName);
 	else
 		I_Error ("Unknown class\n");
 	return NULL;

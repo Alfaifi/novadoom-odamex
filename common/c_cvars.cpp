@@ -728,11 +728,11 @@ BEGIN_COMMAND (get)
 		// [Russell] - Don't make the user feel inadequate, tell
 		// them its either enabled, disabled or its other value
 		Printf(PRINT_HIGH, "\"%s\" is %s%s.\n",
-				var->name(), C_GetValueString(var).c_str(), control.c_str());
+				var->name(), C_GetValueString(var), control);
 
 		if (var->flags() & CVAR_LATCH && var->flags() & CVAR_MODIFIED)
 			Printf(PRINT_HIGH, "\"%s\" will be changed to %s.\n",
-					var->name(), C_GetLatchedValueString(var).c_str());
+					var->name(), C_GetLatchedValueString(var));
 	}
 	else
 	{
@@ -772,11 +772,11 @@ BEGIN_COMMAND (toggle)
 		// [Russell] - Don't make the user feel inadequate, tell
 		// them its either enabled, disabled or its other value
 		Printf(PRINT_HIGH, "\"%s\" is %s.\n",
-				var->name(), C_GetValueString(var).c_str());
+				var->name(), C_GetValueString(var));
 
 		if (var->flags() & CVAR_LATCH && var->flags() & CVAR_MODIFIED)
 			Printf(PRINT_HIGH, "\"%s\" will be changed to %s.\n",
-					var->name(), C_GetLatchedValueString(var).c_str());
+					var->name(), C_GetLatchedValueString(var));
 	}
 }
 END_COMMAND (toggle)

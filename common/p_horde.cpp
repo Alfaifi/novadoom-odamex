@@ -1010,21 +1010,21 @@ BEGIN_COMMAND(hordeinfo)
 
 	const hordeDefine_t& define = G_HordeDefine(::g_HordeDirector.getDefineID());
 
-	Printf("[Define: %s]\n", define.name.c_str());
-	Printf("Weapons: %s\n", JoinStrings(define.weaponStrings(NULL), " ").c_str());
+	Printf("[Define: %s]\n", define.name);
+	Printf("Weapons: %s\n", JoinStrings(define.weaponStrings(NULL), " "));
 	Printf("Min Group Health: %d\n", define.minGroupHealth);
 	Printf("Max Group Health: %d (Difficulty: %s)\n", define.maxGroupHealth,
 	       define.difficulty(false));
 	Printf("Min Total Health: %d = waveMaxGroup:%d * g_horde_mintotalhp:%s * "
 	       "skillLevel:%0.2f\n",
-	       define.minTotalHealth(), define.maxGroupHealth, ::g_horde_mintotalhp.cstring(),
+	       define.minTotalHealth(), define.maxGroupHealth, ::g_horde_mintotalhp.str(),
 	       skillScaler);
 	Printf("Max Total Health: %d = waveMaxGroup:%d * g_horde_maxtotalhp:%s * "
 	       "skillLevel:%0.2f\n",
-	       define.maxTotalHealth(), define.maxGroupHealth, ::g_horde_maxtotalhp.cstring(),
+	       define.maxTotalHealth(), define.maxGroupHealth, ::g_horde_maxtotalhp.str(),
 	       skillScaler);
 	Printf("Goal Health: %d = waveMaxGroup:%d * g_horde_goalhp:%s * skillLevel:%0.2f\n",
-	       define.goalHealth(), define.maxGroupHealth, ::g_horde_goalhp.cstring(),
+	       define.goalHealth(), define.maxGroupHealth, ::g_horde_goalhp.str(),
 	       skillScaler);
 
 	const char* stateStr = NULL;

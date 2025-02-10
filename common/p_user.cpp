@@ -950,7 +950,7 @@ void P_PlayerThink (player_t *player)
 	if (!player->mo && clientside && multiplayer)
 	{
 		DPrintf("Warning: P_PlayerThink called for player %s without a valid Actor.\n",
-				player->userinfo.netname.c_str());
+				player->userinfo.netname);
 		return;
 	}
 	else if (!player->mo)
@@ -1224,7 +1224,7 @@ BEGIN_COMMAND(cheat_players)
 			if (mo->player)
 			{
 				Printf("%.3u: %s\n", mo->player->id,
-				       mo->player->userinfo.netname.c_str());
+				       mo->player->userinfo.netname);
 			}
 			else
 			{

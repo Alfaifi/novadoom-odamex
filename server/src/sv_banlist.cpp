@@ -846,7 +846,7 @@ BEGIN_COMMAND(banlist)
 			buffer << ")";
 		}
 
-		Printf(PRINT_HIGH, "%s", buffer.str().c_str());
+		Printf(PRINT_HIGH, "%s", buffer.str());
 	}
 }
 END_COMMAND(banlist)
@@ -877,7 +877,7 @@ BEGIN_COMMAND(savebanlist)
 
 	Json::Value json_bans(Json::arrayValue);
 	if (banlist.json(json_bans) && M_WriteJSON(banfile.c_str(), json_bans, true))
-		Printf(PRINT_HIGH, "savebanlist: banlist saved to %s.\n", banfile.c_str());
+		Printf(PRINT_HIGH, "savebanlist: banlist saved to %s.\n", banfile);
 	else
 		Printf(PRINT_HIGH, "savebanlist: could not save banlist.\n");
 }
@@ -892,7 +892,7 @@ BEGIN_COMMAND(loadbanlist)
 		banfile = sv_banfile.cstring();
 
 	Json::Value json_bans;
-	if (!M_ReadJSON(json_bans, banfile.c_str()))
+	if (!M_ReadJSON(json_bans, banfile))
 	{
 		Printf(PRINT_HIGH, "loadbanlist: could not load banlist.\n");
 		return;
@@ -907,9 +907,9 @@ BEGIN_COMMAND(loadbanlist)
 	size_t jsonsize = json_bans.size();
 
 	if (bansize == jsonsize)
-		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans from %s.\n", bansize, banfile.c_str());
+		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans from %s.\n", bansize, banfile);
 	else
-		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans and skipped %lu invalid entries from %s.", bansize, jsonsize - bansize, banfile.c_str());
+		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans and skipped %lu invalid entries from %s.", bansize, jsonsize - bansize, banfile);
 }
 END_COMMAND(loadbanlist)
 
@@ -940,7 +940,7 @@ BEGIN_COMMAND(exceptionlist)
 			buffer << " (" << exception->name << ")";
 		}
 
-		Printf(PRINT_HIGH, "%s", buffer.str().c_str());
+		Printf(PRINT_HIGH, "%s", buffer.str());
 	}
 }
 END_COMMAND(exceptionlist)
