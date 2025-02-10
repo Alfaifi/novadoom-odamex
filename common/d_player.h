@@ -116,7 +116,7 @@ class player_s
 public:
 	void Serialize (FArchive &arc);
 
-	bool ingame() const
+	[[nodiscard]] bool ingame() const
 	{
 		return playerstate == PST_LIVE ||
 				playerstate == PST_DEAD ||
@@ -390,7 +390,7 @@ public:
 
 	struct ticcmd_t netcmds[BACKUPTICS];
 
-	int GetPlayerNumber() const
+	[[nodiscard]] int GetPlayerNumber() const
 	{
 		return id - 1;
 	}

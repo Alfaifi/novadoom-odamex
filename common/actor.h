@@ -138,7 +138,7 @@ public:
 		bitfield[bytenum] &= ~(1 << bitnum);
 	}
 
-	bool get(byte id) const
+	[[nodiscard]] bool get(byte id) const
 	{
 		int bytenum = id >> 3;
 		int bitnum = id & bytemask;
@@ -567,10 +567,10 @@ public:
 	static void ClearTIDHashes ();
 	void AddToHash ();
 	void RemoveFromHash ();
-	AActor *FindByTID (int tid) const;
-	static AActor *FindByTID (const AActor *first, int tid);
-	AActor *FindGoal (int tid, int kind) const;
-	static AActor *FindGoal (const AActor *first, int tid, int kind);
+	[[nodiscard]] AActor *FindByTID (int tid) const;
+	[[nodiscard]] static AActor *FindByTID (const AActor *first, int tid);
+	[[nodiscard]] AActor *FindGoal (int tid, int kind) const;
+	[[nodiscard]] static AActor *FindGoal (const AActor *first, int tid, int kind);
 
 	uint32_t		netid;          // every object has its own netid
 	short			tid;			// thing identifier

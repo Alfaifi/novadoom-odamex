@@ -148,7 +148,7 @@ public:
 
 	void join(const ConsoleLine& other);
 	ConsoleLine split(size_t max_width);
-	bool expired() const;
+	[[nodiscard]] bool expired() const;
 
 	std::string		text;
 	std::string		color_code;
@@ -559,7 +559,7 @@ public:
 	void resetPosition();
 
 	void addString(const std::string& str);
-	const std::string& getString() const;
+	[[nodiscard]] const std::string& getString() const;
 
 	void movePositionUp();
 	void movePositionDown();
@@ -650,7 +650,7 @@ class ConsoleCompletions
 			_maxlen = completion.length();
 	}
 
-	const std::string& at(size_t index) const
+	[[nodiscard]] const std::string& at(size_t index) const
 	{
 		return _completions.at(index);
 	}
@@ -661,7 +661,7 @@ class ConsoleCompletions
 		_maxlen = 0;
 	}
 
-	bool empty() const
+	[[nodiscard]] bool empty() const
 	{
 		return _completions.empty();
 	}
@@ -669,7 +669,7 @@ class ConsoleCompletions
 	//
 	// Get longest common substring of completions.
 	//
-	std::string getCommon() const
+	[[nodiscard]] std::string getCommon() const
 	{
 		bool diff = false;
 		std::string common;
@@ -711,12 +711,12 @@ class ConsoleCompletions
 		return common;
 	}
 
-	size_t getMaxLen() const
+	[[nodiscard]] size_t getMaxLen() const
 	{
 		return _maxlen;
 	}
 
-	size_t size() const
+	[[nodiscard]] size_t size() const
 	{
 		return _completions.size();
 	}

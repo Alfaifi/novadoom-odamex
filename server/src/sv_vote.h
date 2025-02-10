@@ -56,12 +56,12 @@ public:
 		return this->votestring;
 	}
 	vote_result_t check();
-	size_t count_yes() const;
-	size_t count_no() const;
-	size_t count_abs() const;
-	size_t calc_yes(const bool noabs = false) const;
-	size_t calc_no() const;
-	vote_state_t serialize() const;
+	[[nodiscard]] size_t count_yes() const;
+	[[nodiscard]] size_t count_no() const;
+	[[nodiscard]] size_t count_abs() const;
+	[[nodiscard]] size_t calc_yes(const bool noabs = false) const;
+	[[nodiscard]] size_t calc_no() const;
+	[[nodiscard]] vote_state_t serialize() const;
 	void ev_disconnect(player_t &player);
 	bool ev_tic();
 	bool init(const std::vector<std::string> &args, const player_t &player);

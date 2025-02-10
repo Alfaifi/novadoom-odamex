@@ -1356,7 +1356,7 @@ void NetDemo::readSnapshot(const netdemo_index_entry_t *snap)
 //
 //   Returns the total length of the demo in seconds
 //
-int NetDemo::calculateTotalTime()
+int NetDemo::calculateTotalTime() const
 {
 	if (!isPlaying() && !isPaused())
 		return 0;
@@ -1370,7 +1370,7 @@ int NetDemo::calculateTotalTime()
 //
 //   Returns the number of seconds since the demo started playing
 //
-int NetDemo::calculateTimeElapsed()
+int NetDemo::calculateTimeElapsed() const
 {
 	if (!isPlaying() && !isPaused())
 		return 0;
@@ -1384,7 +1384,7 @@ int NetDemo::calculateTimeElapsed()
 	return elapsed;
 }
 
-const std::vector<int> NetDemo::getMapChangeTimes()
+const std::vector<int> NetDemo::getMapChangeTimes() const
 {
 	std::vector<int> times;
 
