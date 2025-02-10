@@ -232,13 +232,13 @@ public:
 	virtual bool supports8bpp() const
 	{
 		const IVideoModeList* modelist = getSupportedVideoModes();
-		return std::any_of(modelist->cbegin(), modelist->cend(), [](const auto& mode){ mode.bpp == 8 });
+		return std::any_of(modelist->cbegin(), modelist->cend(), [](const auto& mode){ return mode.bpp == 8; });
 	}
 
 	virtual bool supports32bpp() const
 	{
 		const IVideoModeList* modelist = getSupportedVideoModes();
-		return std::any_of(modelist->cbegin(), modelist->cend(), [](const auto& mode){ mode.bpp == 32 });
+		return std::any_of(modelist->cbegin(), modelist->cend(), [](const auto& mode){ return mode.bpp == 32; });
 	}
 
 	virtual const IVideoMode& getNativeMode() const = 0;
