@@ -376,7 +376,7 @@ bool G_LoadWad(const OWantFiles& newwadfiles, const OWantFiles& newpatchfiles,
 		}
         else
         {
-            Printf_Bold("map %s not found, loading start map instead", mapname);
+            PrintFmt_Bold("map {} not found, loading start map instead", mapname);
 			G_DeferedInitNew(startmap);
         }
 	}

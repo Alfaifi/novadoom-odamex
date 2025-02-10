@@ -792,7 +792,7 @@ void G_DoLoadLevel (int position)
 	G_InitLevelLocals ();
 
 	if (firstmapinit) {
-		Printf_Bold ("--- %s: \"%s\" ---\n", level.mapname.c_str(), level.level_name);
+		PrintFmt_Bold ("--- {}: \"{}\" ---\n", level.mapname, level.level_name);
 		firstmapinit = false;
 	}
 

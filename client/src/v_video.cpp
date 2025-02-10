@@ -321,9 +321,9 @@ BEGIN_COMMAND(vid_listmodes)
 	for (const auto& mode : *I_GetVideoCapabilities()->getSupportedVideoModes())
 	{
 		if (mode == I_GetWindow()->getVideoMode())
-			Printf_Bold("%s\n", I_GetVideoModeString(mode));
+			PrintFmt_Bold("{}\n", I_GetVideoModeString(mode));
 		else
-			Printf(PRINT_HIGH, "%s\n", I_GetVideoModeString(mode));
+			PrintFmt(PRINT_HIGH, "{}\n", I_GetVideoModeString(mode));
 	}
 }
 END_COMMAND(vid_listmodes)

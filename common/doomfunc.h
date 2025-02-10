@@ -40,9 +40,9 @@ size_t Printf(const int printlevel, const fmt::string_view format, const ARGS&..
 }
 
 template <typename... ARGS>
-size_t Printf_Bold(const fmt::string_view format, const ARGS&... args)
+size_t PrintFmt_Bold(const fmt::string_view format, const ARGS&... args)
 {
-	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_BOLD, fmt::sprintf(format, args...));
+	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_BOLD, fmt::format(format, args...));
 }
 
 template <typename... ARGS>

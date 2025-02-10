@@ -390,9 +390,9 @@ static void D_PrintIWADIdentity()
     	                   "\36\36\36\36\36\36\36\36\36\36\36\36\37\n");
 
 		if (gamemode == undetermined)
-			Printf_Bold("Game mode indeterminate, no standard wad found.\n\n");
+			PrintFmt_Bold("Game mode indeterminate, no standard wad found.\n\n");
 		else
-			Printf_Bold("%s\n\n", D_GetTitleString());
+			PrintFmt_Bold("{}\n\n", D_GetTitleString());
 	}
 	else
 	{
@@ -708,9 +708,9 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 			resolved_wads.erase(resolved_wads.begin());
 			if (W_IsIWADDeprecated(next_iwad))
 			{
-				Printf_Bold("WARNING: IWAD %s is outdated. Please update it to the "
-				            "latest version.\n",
-				            next_iwad.getBasename());
+				PrintFmt_Bold("WARNING: IWAD {} is outdated. Please update it to the "
+				              "latest version.\n",
+				              next_iwad.getBasename());
 			}
 		}
 	}

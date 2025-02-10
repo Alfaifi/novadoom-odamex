@@ -2135,56 +2135,56 @@ void SV_DrawScores()
 		else
 			sortedspectators.push_back(&player);
 
-	Printf_Bold("\n");
+	PrintFmt_Bold("\n");
 
 	if (sv_gametype == GM_CTF)
 	{
 		compare_player_points comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                    CAPTURE THE FLAG");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                    CAPTURE THE FLAG");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		if (sv_scorelimit)
 			str = fmt::format("Scorelimit: {:<6d}", sv_scorelimit.asInt());
 		else
 			str = fmt::format("Scorelimit: N/A   ");
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = fmt::format("Timelimit: N/A");
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
 		for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
 		{
 			if (team_num == TEAM_BLUE)
-                Printf_Bold("--------------------------------------------------BLUE TEAM");
+                PrintFmt_Bold("--------------------------------------------------BLUE TEAM");
 			else if (team_num == TEAM_RED)
-                Printf_Bold("---------------------------------------------------RED TEAM");
+                PrintFmt_Bold("---------------------------------------------------RED TEAM");
 			else if (team_num == TEAM_GREEN)
-				Printf_Bold("-------------------------------------------------GREEN TEAM");
+				PrintFmt_Bold("-------------------------------------------------GREEN TEAM");
 			else		// shouldn't happen
-                Printf_Bold("-----------------------------------------------UNKNOWN TEAM");
+                PrintFmt_Bold("-----------------------------------------------UNKNOWN TEAM");
 
-            Printf_Bold("ID  Address          Name            Points Caps Frags Time");
-            Printf_Bold("-----------------------------------------------------------");
+            PrintFmt_Bold("ID  Address          Name            Points Caps Frags Time");
+            PrintFmt_Bold("-----------------------------------------------------------");
 
 			for (const auto& player : sortedplayers)
 			{
 				if (player->userinfo.team == team_num)
 				{
-					Printf_Bold("%-3d %-16s %-15s %-6d N/A  %-5d %-3d",
-							player->id,
-							NET_AdrToString(player->client.address),
-							player->userinfo.netname,
-							P_GetPointCount(player),
-							//itplayer->captures,
-					        P_GetFragCount(player),
-							player->GameTime / 60);
+					PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<6d} N/A  {:<5d} {:<3d}",
+					              player->id,
+					              NET_AdrToString(player->client.address),
+					              player->userinfo.netname,
+					              P_GetPointCount(player),
+					              //itplayer->captures,
+					              P_GetFragCount(player),
+					              player->GameTime / 60);
 				}
 			}
 		}
@@ -2195,49 +2195,49 @@ void SV_DrawScores()
 		compare_player_frags comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                     TEAM DEATHMATCH");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                     TEAM DEATHMATCH");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
 			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
 			str = fmt::format("Fraglimit: N/A    ");
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = fmt::format("Timelimit: N/A");
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
 		for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
 		{
 			if (team_num == TEAM_BLUE)
-                Printf_Bold("--------------------------------------------------BLUE TEAM");
+                PrintFmt_Bold("--------------------------------------------------BLUE TEAM");
 			else if (team_num == TEAM_RED)
-                Printf_Bold("---------------------------------------------------RED TEAM");
+                PrintFmt_Bold("---------------------------------------------------RED TEAM");
 			else if (team_num == TEAM_GREEN)
-				Printf_Bold("-------------------------------------------------GREEN TEAM");
+				PrintFmt_Bold("-------------------------------------------------GREEN TEAM");
 			else		// shouldn't happen
-                Printf_Bold("-----------------------------------------------UNKNOWN TEAM");
+                PrintFmt_Bold("-----------------------------------------------UNKNOWN TEAM");
 
-            Printf_Bold("ID  Address          Name            Frags Deaths  K/D Time");
-            Printf_Bold("-----------------------------------------------------------");
+            PrintFmt_Bold("ID  Address          Name            Frags Deaths  K/D Time");
+            PrintFmt_Bold("-----------------------------------------------------------");
 
 			for (const auto& player : sortedplayers)
 			{
 				if (player->userinfo.team == team_num)
 				{
-					Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-							player->id,
-							NET_AdrToString(player->client.address),
-							player->userinfo.netname,
-							P_GetFragCount(player),
-							P_GetDeathCount(player),
-							SV_CalculateFragDeathRatio(player),
-							player->GameTime / 60);
+					PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<5d} {:<6d} {:2.1f} {:<3d}",
+					              player->id,
+					              NET_AdrToString(player->client.address),
+					              player->userinfo.netname,
+					              P_GetFragCount(player),
+					              P_GetDeathCount(player),
+					              SV_CalculateFragDeathRatio(player),
+					              player->GameTime / 60);
 				}
 			}
 		}
@@ -2248,36 +2248,36 @@ void SV_DrawScores()
 		compare_player_frags comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                        DEATHMATCH");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                        DEATHMATCH");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
 			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
 			str = fmt::format("Fraglimit: N/A    ");
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = fmt::format("Timelimit: N/A");
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
-        Printf_Bold("ID  Address          Name            Frags Deaths  K/D Time");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("ID  Address          Name            Frags Deaths  K/D Time");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		for (const auto& player : sortedplayers)
 		{
-			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-					player->id,
-					NET_AdrToString(player->client.address),
-					player->userinfo.netname,
-					P_GetFragCount(player),
-					P_GetDeathCount(player),
-					SV_CalculateFragDeathRatio(player),
-					player->GameTime / 60);
+			PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<5d} {:<6d} {:2.1f} {:<3d}",
+			              player->id,
+			              NET_AdrToString(player->client.address),
+			              player->userinfo.netname,
+			              P_GetFragCount(player),
+			              P_GetDeathCount(player),
+			              SV_CalculateFragDeathRatio(player),
+			              player->GameTime / 60);
 		}
 
 	}
@@ -2287,21 +2287,21 @@ void SV_DrawScores()
 		compare_player_kills comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                       COOPERATIVE");
-        Printf_Bold("-----------------------------------------------------------");
-        Printf_Bold("ID  Address          Name            Kills Deaths  K/D Time");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                       COOPERATIVE");
+        PrintFmt_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("ID  Address          Name            Kills Deaths  K/D Time");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		for (const auto& player : sortedplayers)
 		{
-			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-					player->id,
-					NET_AdrToString(player->client.address),
-					player->userinfo.netname,
-					player->killcount,
-					player->deathcount,
-					SV_CalculateKillDeathRatio(player),
-					player->GameTime / 60);
+			PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<5d} {:<6d} {:2.1f} {:<3d}",
+			              player->id,
+			              NET_AdrToString(player->client.address),
+			              player->userinfo.netname,
+			              player->killcount,
+			              player->deathcount,
+			              SV_CalculateKillDeathRatio(player),
+			              player->GameTime / 60);
 		}
 	}
 
@@ -2310,18 +2310,18 @@ void SV_DrawScores()
 		compare_player_names comparison_functor;
 		sortedspectators.sort(comparison_functor);
 
-    	Printf_Bold("-------------------------------------------------SPECTATORS");
+    	PrintFmt_Bold("-------------------------------------------------SPECTATORS");
 
 		for (const auto& spec : sortedspectators)
 		{
-			Printf_Bold("%-3d %-16s %-15s\n",
-					spec->id,
-					NET_AdrToString(spec->client.address),
-					spec->userinfo.netname);
+			PrintFmt_Bold("{:<3d} {:<16s} {:<15s}\n",
+			              spec->id,
+			              NET_AdrToString(spec->client.address),
+			              spec->userinfo.netname);
 		}
 	}
 
-	Printf_Bold("\n");
+	PrintFmt_Bold("\n");
 }
 
 BEGIN_COMMAND (showscores)
