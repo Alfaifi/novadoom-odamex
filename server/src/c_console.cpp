@@ -126,9 +126,9 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 	std::string newStr = str;
 
 	// denis - 0x07 is a system beep, which can DoS the console (lol)
-	for (size_t i = 0; i < newStr.length(); i++)
-		if (newStr[i] == 0x07)
-			newStr[i] = '.';
+	for (auto& c : newStr)
+		if (c == 0x07)
+			c = '.';
 
 	newStr = std::string(TimeStamp()) + " " + newStr;
 

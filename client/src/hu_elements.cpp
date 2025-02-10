@@ -115,20 +115,20 @@ static bool cmpQueue(const player_t* arg1, const player_t* arg2)
 }
 
 // Returns true if a player is ingame.
-bool ingamePlayer(player_t* player)
+bool ingamePlayer(const player_t* player)
 {
 	return (player->ingame() && player->spectator == false);
 }
 
 // Returns true if a player is ingame and on a specific team
-bool inTeamPlayer(player_t* player, const byte team)
+bool inTeamPlayer(const player_t* player, const byte team)
 {
 	return (player->ingame() && player->userinfo.team == team &&
 	        player->spectator == false);
 }
 
 // Returns true if a player is a spectator
-bool spectatingPlayer(player_t* player)
+bool spectatingPlayer(const player_t* player)
 {
 	return (!player->ingame() || player->spectator == true);
 }
@@ -705,27 +705,15 @@ std::string PlayersSplit() {
 // Returns the number of players on a team
 int CountTeamPlayers(byte team)
 {
-	int count = 0;
-	std::vector<player_t*> sortPlayers = sortedPlayers();
-	for (size_t i = 0; i < sortPlayers.size(); i++)
-	{
-		if (inTeamPlayer(sortPlayers[i], team))
-			count++;
-	}
-	return count;
+	const PlayersView& sortPlayers = sortedPlayers();
+	return std::count_if(sortPlayers.cbegin(), sortPlayers.cend(), [team](const auto& player) { return inTeamPlayer(player, team); });
 }
 
 // Returns the number of spectators on a team
 int CountSpectators()
 {
-	int count = 0;
-	std::vector<player_t*> sortPlayers = sortedPlayers();
-	for (size_t i = 0; i < sortPlayers.size(); i++)
-	{
-		if (spectatingPlayer(sortPlayers[i]))
-			count++;
-	}
-	return count;
+	const PlayersView& sortPlayers = sortedPlayers();
+	return std::count_if(sortPlayers.cbegin(), sortPlayers.cend(), [](const auto& player) { return spectatingPlayer(player); });
 }
 
 std::string TeamPlayers(int& color, byte team)
@@ -755,8 +743,7 @@ std::string TeamFrags(int& color, byte team)
 	color = V_GetTextColor(GetTeamInfo((team_t)team)->TextColor.c_str());
 
 	int fragcount = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
-		player_t* player = sortedPlayers()[i];
+	for (const auto& player : sortedPlayers()) {
 		if (inTeamPlayer(player, team)) {
 			fragcount += player->fragcount;
 		}
@@ -818,8 +805,7 @@ std::string TeamKD(int& color, byte team) {
 
 	int killcount = 0;
 	unsigned int deathcount = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
-		player_t* player = sortedPlayers()[i];
+	for (const auto& player : sortedPlayers()) {
 		if (inTeamPlayer(player, team)) {
 			killcount += player->fragcount;
 			deathcount += player->deathcount;
@@ -846,8 +832,7 @@ std::string TeamPing(int& color, byte team) {
 	}
 
 	unsigned int ping = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
-		player_t* player = sortedPlayers()[i];
+	for (const auto& player : sortedPlayers()) {
 		if (inTeamPlayer(player, team)) {
 			ping += player->ping;
 		}
@@ -961,9 +946,8 @@ void EleBar(const int x, const int y, const int w, const float scale,
 		drawX = x;
 	}
 
-	for (size_t i = 0; i < lineHandles.size(); i++)
+	for (const auto& patch : lineHandles)
 	{
-		patch_t* patch = lineHandles.at(i);
 		hud::DrawTranslatedPatch(drawX, y, scale, x_align, y_align, x_origin, y_origin,
 		                         patch, ::Ranges + color * 256);
 
@@ -987,13 +971,12 @@ void EAPlayerColors(int x, int y,
                     const short padding, const short limit)
 {
 	byte drawn = 0;
-	for (size_t i = 0; i < sortedPlayers().size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
 			break;
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player))
 		{
 			argb_t playercolor = CL_GetPlayerColor(player);
@@ -1015,13 +998,12 @@ void EATeamPlayerColors(int x, int y,
                         const byte team)
 {
 	byte drawn = 0;
-	for (size_t i = 0; i < sortedPlayers().size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
 			break;
 
-		player_t* player = sortedPlayers()[i];
 		if (inTeamPlayer(player, team))
 		{
 			argb_t playercolor = CL_GetPlayerColor(player);
@@ -1040,13 +1022,13 @@ void EAPlayerNames(int x, int y, const float scale,
                    const short padding, const short limit,
                    const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player)) {
 			int color = CR_GREY;
 			if (player->id == displayplayer().id)
@@ -1094,13 +1076,13 @@ void EATeamPlayerNames(int x, int y, const float scale,
                        const short padding, const short limit,
                        const byte team, const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (inTeamPlayer(player, team)) {
 			int color = CR_GREY;
 			if (G_IsTeamGame())
@@ -1127,13 +1109,12 @@ void EASpectatorNames(int x, int y, const float scale,
                       const bool force_opaque) {
 	byte drawn = 0;
 	std::vector<player_t*> sortPlayers = sortedPlayers();
-	for (size_t i = 0; i < sortPlayers.size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
 			break;
 
-		player_t* player = sortPlayers[i];
 		if (spectatingPlayer(player)) {
 			if (skip <= 0) {
 				int color = CR_GREY;
@@ -1177,7 +1158,7 @@ void EAPlayerRoundWins(int x, int y, const float scale, const x_align_t x_align,
                        const bool force_opaque)
 {
 	byte drawn = 0;
-	for (size_t i = 0; i < sortedPlayers().size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
@@ -1185,7 +1166,6 @@ void EAPlayerRoundWins(int x, int y, const float scale, const x_align_t x_align,
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player))
 		{
 			std::string buffer = fmt::sprintf("%d", player->roundwins);
@@ -1205,7 +1185,7 @@ void EAPlayerLives(int x, int y, const float scale, const x_align_t x_align,
                    const bool force_opaque)
 {
 	byte drawn = 0;
-	for (size_t i = 0; i < sortedPlayers().size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
@@ -1213,7 +1193,6 @@ void EAPlayerLives(int x, int y, const float scale, const x_align_t x_align,
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player))
 		{
 			std::string buffer = fmt::sprintf("%d", player->lives);
@@ -1233,7 +1212,7 @@ void EATeamPlayerLives(int x, int y, const float scale, const x_align_t x_align,
                        const byte team, const bool force_opaque)
 {
 	byte drawn = 0;
-	for (size_t i = 0; i < sortedPlayers().size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
@@ -1241,7 +1220,6 @@ void EATeamPlayerLives(int x, int y, const float scale, const x_align_t x_align,
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (inTeamPlayer(player, team))
 		{
 			std::string buffer = fmt::sprintf("%d", player->lives);
@@ -1262,13 +1240,12 @@ void EAPlayerFrags(int x, int y, const float scale,
                    const bool force_opaque) {
 	byte drawn = 0;
 
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
-
-		player_t* player = sortedPlayers()[i];
 
 		if (ingamePlayer(player)) {
 			std::ostringstream buffer;
@@ -1291,13 +1268,12 @@ void EATeamPlayerFrags(int x, int y, const float scale,
 	byte drawn = 0;
 	int frags = 0;
 
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
-
-		player_t* player = sortedPlayers()[i];
 
 		if (G_IsRoundsGame() && G_IsLivesGame())
 		{
@@ -1328,7 +1304,7 @@ void EAPlayerDamage(int x, int y, const float scale, const x_align_t x_align,
                     const bool force_opaque)
 {
 	byte drawn = 0;
-	for (size_t i = 0; i < sortedPlayers().size(); i++)
+	for (const auto& player : sortedPlayers())
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
@@ -1336,7 +1312,6 @@ void EAPlayerDamage(int x, int y, const float scale, const x_align_t x_align,
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player))
 		{
 			std::ostringstream buffer;
@@ -1357,13 +1332,13 @@ void EAPlayerKills(int x, int y, const float scale,
                    const short padding, const short limit,
                    const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player)) {
 			std::ostringstream buffer;
 			buffer << player->killcount;
@@ -1384,12 +1359,12 @@ void EAPlayerDeaths(int x, int y, const float scale,
                     const bool force_opaque) {
 	byte drawn = 0;
 	int deaths = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
-		player_t* player = sortedPlayers()[i];
 
 		if (G_IsRoundsGame() && !G_IsDuelGame())
 		{
@@ -1422,13 +1397,12 @@ void EATeamPlayerPoints(int x, int y, const float scale,
 	byte drawn = 0;
 	int points = 0;
 
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
-
-		player_t* player = sortedPlayers()[i];
 
 		if (G_IsRoundsGame())
 		{
@@ -1460,13 +1434,13 @@ void EAPlayerKD(int x, int y, const float scale,
                 const short padding, const short limit,
                 const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player)) {
 			std::ostringstream buffer;
 			buffer.precision(2);
@@ -1496,13 +1470,13 @@ void EATeamPlayerKD(int x, int y, const float scale,
                     const short padding, const short limit,
                     const byte team, const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (inTeamPlayer(player, team)) {
 			std::ostringstream buffer;
 			buffer.precision(2);
@@ -1531,13 +1505,13 @@ void EAPlayerTimes(int x, int y, const float scale,
                    const short padding, const short limit,
                    const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player)) {
 			std::ostringstream buffer;
 			buffer << player->GameTime / 60;
@@ -1558,13 +1532,13 @@ void EATeamPlayerTimes(int x, int y, const float scale,
                        const short padding, const short limit,
                        const byte team, const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (inTeamPlayer(player, team)) {
 			std::ostringstream buffer;
 			buffer << player->GameTime / 60;
@@ -1584,13 +1558,13 @@ void EAPlayerPings(int x, int y, const float scale,
                    const short padding, const short limit,
                    const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (ingamePlayer(player)) {
 			std::ostringstream buffer;
 			buffer << player->ping;
@@ -1611,13 +1585,13 @@ void EATeamPlayerPings(int x, int y, const float scale,
                        const short padding, const short limit,
                        const byte team, const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (inTeamPlayer(player, team)) {
 			std::ostringstream buffer;
 			buffer << player->ping;
@@ -1639,13 +1613,13 @@ void EASpectatorPings(int x, int y, const float scale,
                       const short padding, short skip, const short limit,
                       const bool force_opaque) {
 	byte drawn = 0;
-	for (size_t i = 0;i < sortedPlayers().size();i++) {
+	for (const auto& player : sortedPlayers())
+	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit) {
 			break;
 		}
 
-		player_t* player = sortedPlayers()[i];
 		if (spectatingPlayer(player)) {
 			if (skip <= 0) {
 				std::ostringstream buffer;
@@ -1752,7 +1726,7 @@ void EATargets(int x, int y, const float scale,
 
 	// [AM] New ElementArray drawing function
 	byte drawn = 0;
-	for (size_t i = 0; i < Targets.size(); i++)
+	for (const auto& target : Targets)
 	{
 		// Make sure we're not overrunning our limit.
 		if (limit != 0 && drawn >= limit)
@@ -1760,20 +1734,20 @@ void EATargets(int x, int y, const float scale,
 			break;
 		}
 
-		if (Targets[i].PlayPtr == &(consoleplayer()))
+		if (target.PlayPtr == &(consoleplayer()))
 		{
 			// You're looking at yourself.
 			hud::DrawText(x, y, scale, x_align, y_align, x_origin, y_origin, "You",
-			              Targets[i].Color);
+			              target.Color);
 		}
 		else
 		{
 			// Figure out if we should be showing this player's health.
 			std::string nameplate;
 			if (netdemoplaying || (::hud_targethealth_debug &&
-			                       P_AreTeammates(*Targets[i].PlayPtr, consoleplayer())))
+			                       P_AreTeammates(*target.PlayPtr, consoleplayer())))
 			{
-				int health = Targets[i].PlayPtr->health;
+				int health = target.PlayPtr->health;
 
 				const char* color;
 				if (health < 25)
@@ -1788,14 +1762,14 @@ void EATargets(int x, int y, const float scale,
 					color = TEXTCOLOR_LIGHTBLUE;
 
 				nameplate = fmt::sprintf("%s %s%d",
-				          Targets[i].PlayPtr->userinfo.netname, color, health);
+				          target.PlayPtr->userinfo.netname, color, health);
 			}
 			else
 			{
-				nameplate = Targets[i].PlayPtr->userinfo.netname;
+				nameplate = target.PlayPtr->userinfo.netname;
 			}
 			hud::DrawText(x, y, scale, x_align, y_align, x_origin, y_origin,
-			              nameplate.c_str(), Targets[i].Color);
+			              nameplate.c_str(), target.Color);
 		}
 
 		y += 7 + padding;

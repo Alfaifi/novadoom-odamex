@@ -1511,11 +1511,11 @@ void G_DoReborn (player_t &player)
 	}
 
 	// try to spawn at one of the other players' spots
-	for (size_t i = 0; i < playerstarts.size(); i++)
+	for (auto& playerstart : playerstarts)
 	{
-		if (G_CheckSpot (player, &playerstarts[i]) )
+		if (G_CheckSpot (player, &playerstart) )
 		{
-			P_SpawnPlayer (player, &playerstarts[i]);
+			P_SpawnPlayer (player, &playerstart);
 			return;
 		}
 	}

@@ -1309,10 +1309,10 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 	// denis - 0x07 is a system beep, which can DoS the console (lol)
 	// ToDo: there may be more characters not allowed on a consoleprint,
 	// maybe restrict a few ASCII stuff later on ?
-	for (size_t i = 0; i < newStr.length(); i++)
+	for (auto& c : newStr)
 	{
-		if (newStr[i] == 0x07)
-			newStr[i] = '.';
+		if (c == 0x07)
+			c = '.';
 	}
 
 	// Prevents writing a whole lot of new lines to the log file
@@ -1321,10 +1321,10 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 		std::string logStr = newStr;
 
 		// [Nes] - Horizontal line won't show up as-is in the logfile.
-		for (size_t i = 0; i < logStr.length(); i++)
+		for (auto& c : logStr)
 		{
-			if (logStr[i] == '\35' || logStr[i] == '\36' || logStr[i] == '\37')
-				logStr[i] = '=';
+			if (c == '\35' || c == '\36' || c == '\37')
+				c = '=';
 		}
 
 		// Up the row buffer for the console.

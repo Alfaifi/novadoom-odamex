@@ -278,9 +278,9 @@ std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString
 
 	// Fix up parameters.
 	dir = M_CleanPath(dir);
-	for (size_t i = 0; i < files.size(); i++)
+	for (auto& file : files)
 	{
-		files[i] = StdStringToUpper(files[i]);
+		file = StdStringToUpper(file);
 	}
 
 	struct dirent** namelist = 0;

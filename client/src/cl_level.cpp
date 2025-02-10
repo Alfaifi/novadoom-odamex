@@ -75,14 +75,6 @@ EXTERN_CVAR(g_resetinvonexit)
 // Start time for timing demos
 dtime_t starttime;
 
-// ACS variables with world scope
-int ACS_WorldVars[NUM_WORLDVARS];
-ACSWorldGlobalArray ACS_WorldArrays[NUM_WORLDVARS];
-
-// ACS variables with global scope
-int ACS_GlobalVars[NUM_GLOBALVARS];
-ACSWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
-
 // [AM] Stores the reset snapshot
 FLZOMemFile	*reset_snapshot = NULL;
 
@@ -289,12 +281,12 @@ void G_InitNew (const char *mapname)
 	if (!savegamerestore)
 	{
 		M_ClearRandom ();
-		memset (ACS_WorldVars, 0, sizeof(ACS_WorldVars));
-		memset (ACS_GlobalVars, 0, sizeof(ACS_GlobalVars));
-		for (int i = 0; i < NUM_GLOBALVARS; i++)
-			ACS_GlobalArrays[i].clear();
-		for (int i = 0; i < NUM_WORLDVARS; i++)
-			ACS_WorldArrays[i].clear();
+		ACS_WorldVars.fill(0);
+		ACS_GlobalVars.fill(0);
+		for (auto& globalarr : ACS_GlobalArrays)
+			globalarr.clear();
+		for (auto& worldarr : ACS_WorldArrays)
+			worldarr.clear();
 		level.time = 0;
 		level.inttimeleft = 0;
 	}
@@ -512,9 +504,9 @@ void G_DoCompleted (void)
 					G_PlayerFinishLevel(player); // take away cards and stuff
 
 			if (nextcluster.flags & CLUSTER_HUB) {
-				memset (ACS_WorldVars, 0, sizeof(ACS_WorldVars));
-				for (int i = 0; i < NUM_WORLDVARS; i++)
-					ACS_WorldArrays[i].clear();
+				ACS_WorldVars.fill(0);
+				for (auto& worldarr : ACS_WorldArrays)
+					worldarr.clear();
 				P_RemoveDefereds ();
 				G_ClearSnapshots ();
 			}
@@ -565,7 +557,6 @@ extern gamestate_t 	wipegamestate;
 void G_DoLoadLevel (int position)
 {
 	static int lastposition = 0;
-	size_t i;
 
 	if (position == -1)
 		position = lastposition;
@@ -693,10 +684,10 @@ void G_DoLoadLevel (int position)
 		for (int iTeam = 0; iTeam < NUMTEAMS; iTeam++)
 		{
 			TeamInfo* teamInfo = GetTeamInfo((team_t)iTeam);
-			for (size_t n = 0; n < teamInfo->Starts.size(); n++)
+			for (auto& teamstart : teamInfo->Starts)
 			{
-				if (G_CheckSpot(consoleplayer(), &teamInfo->Starts[n]))
-					P_SpawnPlayer(consoleplayer(), &teamInfo->Starts[n]);
+				if (G_CheckSpot(consoleplayer(), &teamstart))
+					P_SpawnPlayer(consoleplayer(), &teamstart);
 			}
 		}
 	}
@@ -707,7 +698,7 @@ void G_DoLoadLevel (int position)
 
 	// clear cmd building stuff // denis - todo - could we get rid of this?
 	Impulse = 0;
-	for (i = 0; i < NUM_ACTIONS; i++)
+	for (size_t i = 0; i < NUM_ACTIONS; i++)
 		if (i != ACTION_MLOOK && i != ACTION_KLOOK)
 			Actions[i] = 0;
 	joyforward = joystrafe = joyturn = joylook = 0;

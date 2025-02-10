@@ -277,10 +277,9 @@ static void ParseDefine(OScanner& os)
 
 	// Add ammo for the weapons in order of their definition.
 	std::set<ammotype_t> ammoAdded;
-	for (size_t i = 0; i < define.weapons.size(); i++)
+	for (const auto& weap : define.weapons)
 	{
 		// Is the weapon valid?
-		const weapontype_t& weap = define.weapons.at(i);
 		if (weap < wp_fist || weap >= NUMWEAPONS)
 		{
 			continue;

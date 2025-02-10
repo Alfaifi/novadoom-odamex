@@ -1169,8 +1169,8 @@ static struct AmbientSound {
 void S_HashSounds()
 {
 	// Mark all buckets as empty
-	for (unsigned i = 0; i < S_sfx.size(); i++)
-		S_sfx[i].index = ~0;
+	for (auto& sfx : S_sfx)
+		sfx.index = ~0;
 
 	// Now set up the chains
 	for (unsigned i = 0; i < S_sfx.size(); i++)
@@ -1571,9 +1571,9 @@ END_COMMAND (snd_soundlist)
 
 BEGIN_COMMAND (snd_soundlinks)
 {
-	for (unsigned i = 0; i < S_sfx.size(); i++)
-		if (S_sfx[i].link != static_cast<int>(sfxinfo_t::NO_LINK))
-			Printf(PRINT_HIGH, "%s -> %s\n", S_sfx[i].name, S_sfx[S_sfx[i].link].name);
+	for (const auto& sfx : S_sfx)
+		if (sfx.link != static_cast<int>(sfxinfo_t::NO_LINK))
+			Printf(PRINT_HIGH, "%s -> %s\n", sfx.name, S_sfx[sfx.link].name);
 }
 END_COMMAND (snd_soundlinks)
 

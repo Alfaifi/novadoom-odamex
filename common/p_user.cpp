@@ -319,15 +319,15 @@ PlayersView SpecQuery::execute()
 {
 	PlayersView rvo;
 
-	for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
+	for (auto& player : ::players)
 	{
-		if (!it->ingame() || !it->spectator)
+		if (!player.ingame() || !player.spectator)
 			continue;
 
-		if (m_onlyInQueue && it->QueuePosition == 0)
+		if (m_onlyInQueue && player.QueuePosition == 0)
 			continue;
 
-		rvo.push_back(&*it);
+		rvo.push_back(&player);
 	}
 
 	return rvo;
