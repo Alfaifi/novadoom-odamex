@@ -24,6 +24,7 @@
 
 #include "c_vote.h"
 #include "d_player.h"
+#include <map>
 
 class Vote
 {

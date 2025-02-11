@@ -42,9 +42,6 @@
 
 #include "szp.h"
 
-// STL
-#include <map>
-
 //
 // NOTES: AActor
 //
