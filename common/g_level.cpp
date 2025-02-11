@@ -559,8 +559,8 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 
 		G_AirControlChanged();
 
-		for (int i = 0; i < NUM_MAPVARS; i++)
-			arc << level.vars[i];
+		for (const auto& var : level.vars)
+			arc << var;
 
 		if (!arc.IsReset())
 			arc << playernum;
@@ -577,8 +577,8 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 
 		G_AirControlChanged();
 
-		for (int i = 0; i < NUM_MAPVARS; i++)
-			arc >> level.vars[i];
+		for (auto& var : level.vars)
+			arc >> var;
 
 		if (!arc.IsReset())
 		{

@@ -42,7 +42,7 @@ public:
 	bool check(const std::string &input) const;
 	void set(const netadr_t &address);
 	bool set(const std::string &input);
-	std::string string(void);
+	std::string string() const;
 };
 
 struct Ban

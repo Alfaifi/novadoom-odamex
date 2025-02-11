@@ -545,14 +545,13 @@ bool ST_Responder (event_t *ev)
 	// if a user keypress...
 	else if (ev->type == ev_keydown && ev->data3)
 	{
-		cheatseq_t* cheats = DoomCheats;
-		for (int i = 0; i < static_cast<int>(COUNT_CHEATS(DoomCheats)); i++, cheats++)
+		for (auto& cheat : DoomCheats)
 		{
-			if (CHEAT_AddKey(cheats, (byte)ev->data1, &eat))
+			if (CHEAT_AddKey(&cheat, (byte)ev->data1, &eat))
 			{
-				if (cheats->DontCheck || CHEAT_AreCheatsEnabled())
+				if (cheat.DontCheck || CHEAT_AreCheatsEnabled())
 				{
-					eat |= cheats->Handler(cheats);
+					eat |= cheat.Handler(&cheat);
 				}
 			}
 		}

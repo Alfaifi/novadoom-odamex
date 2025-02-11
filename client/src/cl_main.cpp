@@ -1346,9 +1346,9 @@ void CL_SendUserInfo(void)
 	MSG_WriteBool	(&net_buffer, true);	// [SL] deprecated "cl_unlag" CVAR
 	MSG_WriteBool	(&net_buffer, coninfo->predict_weapons);
 	MSG_WriteByte	(&net_buffer, (char)coninfo->switchweapon);
-	for (size_t i = 0; i < NUMWEAPONS; i++)
+	for (const auto& pref : coninfo->weapon_prefs)
 	{
-		MSG_WriteByte (&net_buffer, coninfo->weapon_prefs[i]);
+		MSG_WriteByte (&net_buffer, pref);
 	}
 
 	CL_RebuildAllPlayerTranslations();	// Refresh Player Translations AFTER sending the new status to the server.

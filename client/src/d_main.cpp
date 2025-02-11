@@ -798,15 +798,7 @@ void D_DoomMain()
 		    "-connect", "-file",     "-playdemo", "-timedemo", "-warp",
 		};
 
-		bool shouldSkip = false;
-		for (size_t i = 0; i < ARRAY_LENGTH(skipParams); i++)
-		{
-			if (::Args.CheckValue(skipParams[i]))
-			{
-				shouldSkip = true;
-				break;
-			}
-		}
+		bool shouldSkip = std::any_of(std::begin(skipParams), std::end(skipParams), [](const auto& param){ return ::Args.CheckValue(param); });
 
 		// Skip boot window if we pass a single argument that isn't the
 		// start of a standard parameter - it must be a path.

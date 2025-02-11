@@ -1369,8 +1369,8 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 
 void C_FlushDisplay()
 {
-	for (int i = 0; i < NUMNOTIFIES; i++)
-		NotifyStrings[i].timeout = 0;
+	for (auto& notify : NotifyStrings)
+		notify.timeout = 0;
 }
 
 void C_Ticker()
@@ -1453,20 +1453,20 @@ static void C_DrawNotifyText()
 		return;
 
 	int ypos = 0;
-	for (int i = 0; i < NUMNOTIFIES; i++)
+	for (const auto& notify : NotifyStrings)
 	{
-		if (NotifyStrings[i].timeout > gametic)
+		if (notify.timeout > gametic)
 		{
-			if (!show_messages && NotifyStrings[i].printlevel != 128)
+			if (!show_messages && notify.printlevel != 128)
 				continue;
 
 			int color;
-			if (NotifyStrings[i].printlevel >= PRINTLEVELS)
+			if (notify.printlevel >= PRINTLEVELS)
 				color = CR_RED;
 			else
-				color = PrintColors[NotifyStrings[i].printlevel];
+				color = PrintColors[notify.printlevel];
 
-			screen->DrawTextStretched(color, 0, ypos, NotifyStrings[i].text,
+			screen->DrawTextStretched(color, 0, ypos, notify.text,
 						V_TextScaleXAmount(), V_TextScaleYAmount());
 			ypos += 8 * V_TextScaleYAmount();
 		}

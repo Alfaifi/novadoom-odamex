@@ -300,12 +300,12 @@ bool NetDemo::writeSnapshotIndex()
 
 
 
-	for (size_t i = 0; i < snapshot_index.size(); i++)
+	for (const auto& [ticnum, offset] : snapshot_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
-		entry.ticnum = LELONG(snapshot_index[i].ticnum);
-		entry.offset = LELONG(snapshot_index[i].offset);
+		entry.ticnum = LELONG(ticnum);
+		entry.offset = LELONG(offset);
 
 		size_t cnt = 0;
 		cnt += sizeof(entry.ticnum) *
@@ -360,12 +360,12 @@ bool NetDemo::writeMapIndex()
 {
 	fseek(demofp, header.map_index_offset, SEEK_SET);
 
-	for (size_t i = 0; i < map_index.size(); i++)
+	for (const auto& [ticnum, offset] : map_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
-		entry.ticnum = LELONG(map_index[i].ticnum);
-		entry.offset = LELONG(map_index[i].offset);
+		entry.ticnum = LELONG(ticnum);
+		entry.offset = LELONG(offset);
 
 		size_t cnt = 0;
 		cnt += sizeof(entry.ticnum) *
@@ -1383,9 +1383,9 @@ const std::vector<int> NetDemo::getMapChangeTimes()
 {
 	std::vector<int> times;
 
-	for (size_t i = 0; i < map_index.size(); i++)
+	for (const auto& [ticnum, _] : map_index)
 	{
-		int start_time = (map_index[i].ticnum - header.starting_gametic) / TICRATE;
+		int start_time = (ticnum - header.starting_gametic) / TICRATE;
 		times.push_back(start_time);
 	}
 
@@ -1450,10 +1450,10 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 	}
 
 	arc << (byte)patchfiles.size();
-	for (size_t i = 0; i < patchfiles.size(); i++)
+	for (const auto& file : patchfiles)
 	{
-		arc << D_CleanseFileName(::patchfiles[i].getBasename()).c_str();
-		arc << ::patchfiles[i].getMD5().getHexCStr();
+		arc << D_CleanseFileName(file.getBasename()).c_str();
+		arc << file.getMD5().getHexCStr();
 	}
 
 	// write map info

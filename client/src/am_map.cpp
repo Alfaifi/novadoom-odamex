@@ -698,8 +698,8 @@ void AM_loadPics()
 
 void AM_unloadPics()
 {
-	for (int i = 0; i < 10; i++)
-		marknums[i].clear();
+	for (auto& marknum : marknums)
+		marknum.clear();
 }
 
 void AM_clearMarks()

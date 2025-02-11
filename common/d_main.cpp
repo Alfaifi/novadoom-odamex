@@ -261,15 +261,13 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	// Doom 95
 	{
-		unsigned int i;
-
-		for (i = 0; i < ARRAY_LENGTH(uninstall_values); ++i)
+		for (auto& uninstallval : uninstall_values)
 		{
 			char* val;
 			char* path;
 			char* unstr;
 
-			val = GetRegistryString(&uninstall_values[i]);
+			val = GetRegistryString(&uninstallval);
 
 			if (val == NULL)
 				continue;
@@ -292,23 +290,15 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	// Doom Collectors Edition
 	{
-		char* install_path;
-		char* subpath;
-		unsigned int i;
-
-		install_path = GetRegistryString(&collectors_edition_value);
+		char* install_path = GetRegistryString(&collectors_edition_value);
 
 		if (install_path != NULL)
 		{
-			for (i = 0; i < ARRAY_LENGTH(collectors_edition_subdirs); ++i)
+			for (const auto& dir : collectors_edition_subdirs)
 			{
-				subpath = static_cast<char*>(malloc(strlen(install_path)
-				                             + strlen(collectors_edition_subdirs[i])
-				                             + 5));
-				sprintf(subpath, "%s\\%s", install_path, collectors_edition_subdirs[i]);
+				const std::string subpath = fmt::format("{}\\{}", install_path, dir);
 
-				const char* csubpath = subpath;
-				D_AddSearchDir(dirs, csubpath, separator);
+				D_AddSearchDir(dirs, subpath.c_str(), separator);
 			}
 
 			M_Free(install_path);
@@ -317,22 +307,15 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	// Doom on Steam
 	{
-		char* install_path;
-		char* subpath;
-		size_t i;
-
-		install_path = GetRegistryString(&steam_install_location);
+		char* install_path = GetRegistryString(&steam_install_location);
 
 		if (install_path != NULL)
 		{
-			for (i = 0; i < ARRAY_LENGTH(steam_install_subdirs); ++i)
+			for (const auto& dir : steam_install_subdirs)
 			{
-				subpath = static_cast<char*>(malloc(strlen(install_path)
-				                             + strlen(steam_install_subdirs[i]) + 5));
-				sprintf(subpath, "%s\\%s", install_path, steam_install_subdirs[i]);
+				const std::string subpath = fmt::format("{}\\{}", install_path, dir);
 
-				const char* csubpath = subpath;
-				D_AddSearchDir(dirs, csubpath, separator);
+				D_AddSearchDir(dirs, subpath.c_str(), separator);
 
 				M_FileExists(subpath);
 			}
