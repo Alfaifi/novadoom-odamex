@@ -85,13 +85,6 @@ void daemon_init();
 
 void D_DoomLoop (void);
 
-extern gameinfo_t SharewareGameInfo;
-extern gameinfo_t RegisteredGameInfo;
-extern gameinfo_t RetailGameInfo;
-extern gameinfo_t CommercialGameInfo;
-extern gameinfo_t RetailBFGGameInfo;
-extern gameinfo_t CommercialBFGGameInfo;
-
 extern BOOL gameisdead;
 extern DThinker ThinkerCap;
 extern dyncolormap_t NormalLight;
