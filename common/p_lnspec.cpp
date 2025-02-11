@@ -432,7 +432,7 @@ FUNC(LS_NOP)
 
 FUNC(LS_NOTIMP)
 {
-	Printf(PRINT_HIGH, "Line special not implemented yet.");
+	PrintFmt(PRINT_HIGH, "Line special not implemented yet.\n");
 	return false;
 }
 
@@ -1435,8 +1435,8 @@ FUNC(LS_Scroll_Wall)
 {
 	if (arg4)
 	{
-		Printf(PRINT_HIGH,
-		       "Warning: Odamex can only scroll entire sidedefs (special 52)");
+		PrintFmt(PRINT_HIGH,
+		       "Warning: Odamex can only scroll entire sidedefs (special 52)\n");
 	}
 	if (arg0)
 	{
@@ -1458,8 +1458,8 @@ FUNC(LS_Line_SetTextureOffset)
 {
 	if (arg4 & 7)
 	{
-		Printf(PRINT_HIGH,
-		       "Warning: Odamex can only offset entire sidedefs (special 53)");
+		PrintFmt(PRINT_HIGH,
+		       "Warning: Odamex can only offset entire sidedefs (special 53)\n");
 	}
 	if (arg0 && arg3 <= 1)
 	{
