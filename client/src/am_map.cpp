@@ -185,7 +185,6 @@ std::vector<mline_t> thinrectangle_guy;
 
 am_default_colors_t AutomapDefaultColors;
 am_colors_t AutomapDefaultCurrentColors;
-int am_cheating = 0;
 static bool grid = false;
 static bool bigstate = false; // Bigmode
 

@@ -95,7 +95,7 @@ typedef struct
 	mpoint_t a, b;
 } mline_t;
 
-extern int am_cheating;
+inline int am_cheating;
 inline bool automapactive = false;
 
 // Called by main loop.

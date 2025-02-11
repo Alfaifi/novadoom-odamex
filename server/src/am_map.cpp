@@ -24,8 +24,6 @@
 #include "odamex.h"
 #include "am_map.h"
 
-int am_cheating = 0;
-
 void AM_SetBaseColorDoom()
 {
 
