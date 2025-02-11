@@ -57,6 +57,17 @@ size_t DPrintf(const fmt::string_view format, const ARGS&... args)
 }
 
 template <typename... ARGS>
+size_t DPrintFmt(const fmt::string_view format, const ARGS&... args)
+{
+	if (::developer || ::devparm)
+	{
+		return C_BasePrint(PRINT_WARNING, TEXTCOLOR_NORMAL, fmt::format(format, args...));
+	}
+
+	return 0;
+}
+
+template <typename... ARGS>
 size_t PrintFmt(const fmt::string_view format, const ARGS&... args)
 {
 	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_NORMAL, fmt::format(format, args...));

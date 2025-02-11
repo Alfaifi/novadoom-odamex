@@ -1928,13 +1928,13 @@ static int PatchPars(int dummy)
 
 		if (!info.exists())
 		{
-			DPrintf("No map %s\n", mapname.c_str());
+			DPrintFmt("No map {}\n", mapname);
 			continue;
 		}
 
 		info.partime = par;
 #if defined _DEBUG
-		DPrintf("Par for %s changed to %d\n", mapname.c_str(), par);
+		DPrintFmt("Par for {} changed to {}\n", mapname, par);
 #endif
 	}
 	return result;
