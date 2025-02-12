@@ -954,7 +954,7 @@ void P_PlayerThink (player_t *player)
 		return;
 	}
 	else if (!player->mo)
-		I_Error ("No player %d start\n", player->id);
+		I_Error("No player {} start\n", player->id);
 
 	player->xviewshift = 0;		// [RH] Make sure view is in right place
 	player->prevviewz = player->viewz;

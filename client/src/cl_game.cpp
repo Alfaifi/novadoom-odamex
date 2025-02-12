@@ -1595,7 +1595,7 @@ void G_DoLoadGame (void)
 	FLZOFile savefile (stdfile, FFile::EReading);
 
 	if (!savefile.IsOpen ())
-		I_Error ("Savegame '%s' is corrupt\n", savename);
+		I_Error ("Savegame '{}' is corrupt\n", savename);
 
 	Printf (PRINT_HIGH, "Loading savegame '%s'...\n", savename);
 

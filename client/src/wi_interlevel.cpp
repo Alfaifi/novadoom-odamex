@@ -197,7 +197,7 @@ interlevel_t* WI_GetInterlevel(const OLumpName& lumpname)
 	jsonlumpresult_t result =  M_ParseJSONLump(lumpname, "interlevel", { 1, 0, 0 }, ParseInterlevel);
 	if (result != jsonlumpresult_t::SUCCESS)
 	{
-		I_Error("R_GetInterlevel: Interlevel JSON error in lump %s: %s", lumpname.c_str(), M_JSONLumpResultToString(result));
+		I_Error("R_GetInterlevel: Interlevel JSON error in lump {}: {}", lumpname, M_JSONLumpResultToString(result));
 		return nullptr;
 	}
 

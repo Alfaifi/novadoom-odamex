@@ -94,7 +94,7 @@ class OScanner
 	template <typename... ARGS>
 	void error(const fmt::string_view format, const ARGS&... args) const
 	{
-		I_Error("Parse Error: %s:%d: %s", m_config.lumpName.c_str(), m_lineNumber,
+		I_Error("Parse Error: {}:{}: {}", m_config.lumpName, m_lineNumber,
 		        fmt::sprintf(format, args...));
 	}
 };

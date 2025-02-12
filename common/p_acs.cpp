@@ -1029,7 +1029,7 @@ DACSThinker::DACSThinker ()
 {
 	if (ActiveThinker)
 	{
-		I_Error ("Only one ACSThinker is allowed to exist at a time.\nCheck your code.");
+		I_Error("Only one ACSThinker is allowed to exist at a time.\nCheck your code.");
 	}
 	else
 	{

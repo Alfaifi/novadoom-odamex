@@ -184,7 +184,7 @@ void P_LoadSegsHelper(int side, short angle, int linedef, seg_t *li)
 	li->angle = (angle)<<16;
 
 	if(linedef < 0 || linedef >= numlines)
-		I_Error("P_LoadSegsHelper: invalid linedef %d", linedef);
+		I_Error("P_LoadSegsHelper: invalid linedef {}", linedef);
 
 	ldef = &lines[linedef];
 	li->linedef = ldef;
@@ -252,14 +252,14 @@ void P_LoadSegs (int lump, bool isdeepbsp = false)
 			v = LELONG(ml->v1);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v1 = &vertexes[v];
 
 			v = LELONG(ml->v2);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v2 = &vertexes[v];
 
@@ -273,14 +273,14 @@ void P_LoadSegs (int lump, bool isdeepbsp = false)
 			v = LESHORT(ml->v1);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v1 = &vertexes[v];
 
 			v = LESHORT(ml->v2);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v2 = &vertexes[v];
 
@@ -1087,14 +1087,14 @@ void P_LoadLineDefs (const int lump)
 		unsigned short v = LESHORT(mld->v1);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs: invalid vertex {}", v);
 		else
 			ld->v1 = &vertexes[v];
 
 		v = LESHORT(mld->v2);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs: invalid vertex {}", v);
 		else
 			ld->v2 = &vertexes[v];
 
@@ -1142,14 +1142,14 @@ void P_LoadLineDefs2 (int lump)
 		unsigned short v = LESHORT(mld->v1);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs2: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs2: invalid vertex {}", v);
 		else
 			ld->v1 = &vertexes[v];
 
 		v = LESHORT(mld->v2);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs2: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs2: invalid vertex {}", v);
 		else
 			ld->v2 = &vertexes[v];
 
@@ -1740,7 +1740,7 @@ void P_GroupLines (void)
 	for (i = 0; i < numsubsectors; i++)
 	{
 		if (subsectors[i].firstline >= (unsigned int)numsegs)
-			I_Error("subsector[%d].firstline exceeds numsegs (%u)", i, numsegs);
+			I_Error("subsector[{}].firstline exceeds numsegs (%u)", i, numsegs);
 		subsectors[i].sector = segs[subsectors[i].firstline].sidedef->sector;
 	}
 
@@ -1786,7 +1786,7 @@ void P_GroupLines (void)
 			}
 		}
 		if (linebuffer - sector->lines != sector->linecount)
-			I_Error ("P_GroupLines: miscounted");
+			I_Error("P_GroupLines: miscounted");
 
 		// set the soundorg to the middle of the bounding box
 		sector->soundorg[0] = (bbox.Right()+bbox.Left())/2;

@@ -261,7 +261,7 @@ void DSeqNode::Serialize (FArchive &arc)
 			}
 		}
 		if (i == NumSequences)
-			I_Error ("Unknown sound sequence '%s'\n", seqName.c_str());
+			I_Error("Unknown sound sequence '{}'\n", seqName);
 
 		ChangeData (seqOffset, delayTics, volume, S_FindSound (soundName.c_str()));
 	}

@@ -177,7 +177,7 @@ void R_ConvertPatch(patch_t* newpatch, patch_t* rawpatch, const unsigned int lum
 
 			if (length < 0)
 			{
-				I_Error("%s: Patch %s appears to be corrupted.", __FUNCTION__,
+				I_Error("{}: Patch {} appears to be corrupted.", __FUNCTION__,
 				        W_LumpName(lump));
 			}
 
@@ -996,7 +996,7 @@ int R_FlatNumForName (const char* name)
 		strncpy (namet, name, 8);
 		namet[8] = 0;
 
-		I_Error ("R_FlatNumForName: %s not found", namet);
+		I_Error("R_FlatNumForName: {} not found", namet);
 	}
 
 	return i - firstflat;

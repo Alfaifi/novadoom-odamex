@@ -813,7 +813,7 @@ PixelFormat ISDL20Window::buildSurfacePixelFormat(uint8_t bpp)
     else if (bpp == 32 && native_bpp == 32)
         return *getPixelFormat();
     else
-        I_Error("Invalid video surface conversion from %i-bit to %i-bit", bpp, native_bpp);
+        I_Error("Invalid video surface conversion from {}-bit to {}-bit", bpp, native_bpp);
     return PixelFormat();   // shush warnings regarding no return value
 }
 

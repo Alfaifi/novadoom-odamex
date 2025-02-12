@@ -1972,7 +1972,7 @@ void G_ParseMapInfo()
 		break;
 	case none:
 	default:
-		I_Error("%s: This IWAD is unknown to Odamex", __FUNCTION__);
+		I_Error("{}: This IWAD is unknown to Odamex", __FUNCTION__);
 		break;
 	}
 

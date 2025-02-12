@@ -2469,7 +2469,7 @@ void D_PostProcessDeh()
 		{
 			if (states[i].args[j] != 0)
 			{
-				I_Error("Action %s on state %d expects no more than %d nonzero args (%d "
+				I_Error("Action {} on state {} expects no more than {} nonzero args ({} "
 				        "found). Check your dehacked.",
 				        bexptr_match->name, i, bexptr_match->argcount, j + 1);
 			}
