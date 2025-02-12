@@ -107,8 +107,11 @@ struct SkillInfo
 	{}
 };
 
-extern SkillInfo SkillInfos[MAX_SKILLS];
-extern byte skillnum;
-extern byte defaultskillmenu;
+inline SkillInfo SkillInfos[MAX_SKILLS];
+inline byte skillnum;
+inline byte defaultskillmenu;
 
-const SkillInfo& G_GetCurrentSkill();
+inline const SkillInfo& G_GetCurrentSkill()
+{
+	return SkillInfos[sv_skill.asInt() - 1];
+}
