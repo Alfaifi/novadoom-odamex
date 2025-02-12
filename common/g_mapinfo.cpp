@@ -156,7 +156,7 @@ void MustGetStringName(OScanner& os, const char* name)
 	os.mustScan();
 	if (os.compareTokenNoCase(name) == false)
 	{
-		os.error("Expected '%s', got '%s'.", name, os.getToken());
+		os.error("Expected '{}', got '{}'.", name, os.getToken());
 	}
 }
 
@@ -243,7 +243,7 @@ void MIType_BoolString(OScanner& os, bool doEquals, void* data, unsigned int fla
 	else if (os.compareTokenNoCase("false"))
 		*static_cast<bool*>(data) = false;
 	else
-		os.error("Expected \"true\" or \"false\" in boolean statement, got \"%s\"",
+		os.error("Expected \"true\" or \"false\" in boolean statement, got \"{}\"",
 		         os.getToken());
 }
 
@@ -528,7 +528,7 @@ void MIType_$LumpName(OScanner& os, bool newStyleMapInfo, void* data, unsigned i
 		const OString& s = GStrings(StdStringToUpper(os.getToken()).c_str() + 1);
 		if (s.empty())
 		{
-			os.error("Unknown lookup string \"%s\".", os.getToken());
+			os.error("Unknown lookup string \"{}\".", os.getToken());
 		}
 		*static_cast<OLumpName*>(data) = s;
 	}
@@ -553,7 +553,7 @@ void MIType_MusicLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 		const OString& s = GStrings(StdStringToUpper(musicname.c_str() + 1));
 		if (s.empty())
 		{
-			os.error("Unknown lookup string \"%s\".", os.getToken());
+			os.error("Unknown lookup string \"{}\".", os.getToken());
 		}
 
 		// Music lumps in the stringtable do not begin
@@ -706,7 +706,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 			const OString& s = GStrings(StdStringToUpper(os.getToken()));
 			if (s.empty())
 			{
-				os.error("Unknown lookup string \"%s\".", os.getToken());
+				os.error("Unknown lookup string \"{}\".", os.getToken());
 			}
 			*text = s;
 		}
@@ -741,7 +741,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 			const OString& s = GStrings(StdStringToUpper(os.getToken()));
 			if (s.empty())
 			{
-				os.error("Unknown lookup string \"%s\".", os.getToken());
+				os.error("Unknown lookup string \"{}\".", os.getToken());
 			}
 
 			*text = s;
@@ -1453,7 +1453,7 @@ void ParseMapInfoLower(OScanner& os, MapInfoDataSetter<T>& mapInfoDataSetter)
 				// able to parse all types even if we can't
 				// do anything with them.
 				//
-				os.error("Unknown MAPINFO token \"%s\"", os.getToken());
+				os.error("Unknown MAPINFO token \"{}\"", os.getToken());
 			}
 
 			// New MAPINFO is capable of skipping past unknown
@@ -1914,7 +1914,7 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 		}
 		else
 		{
-			os.error("Unimplemented top-level type \"%s\"", os.getToken());
+			os.error("Unimplemented top-level type \"{}\"", os.getToken());
 		}
 	}
 }
