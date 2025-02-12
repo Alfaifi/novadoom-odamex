@@ -2635,7 +2635,7 @@ BEGIN_COMMAND(playstate)
 		PrintState(index);
 
 		// Mark as visited.
-		visited.insert(std::pair<int, bool>(index, true));
+		visited.emplace(index, true);
 
 		// Next state.
 		index = ::states[index].nextstate;

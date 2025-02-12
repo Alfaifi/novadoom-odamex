@@ -26,11 +26,11 @@
 #include "i_system.h"
 #include "m_jsonlump.h"
 #include "oscanner.h"
+#include "hashtable.h"
 
 #include <memory>
-#include <unordered_map>
 
-static std::unordered_map<OLumpName, std::unique_ptr<interlevel_t>> interlevelstorage;
+static OHashTable<OLumpName, std::unique_ptr<interlevel_t>> interlevelstorage;
 
 template<typename T>
 jsonlumpresult_t WI_ParseInterlevelArray(const Json::Value& array, std::vector<T>& output,
