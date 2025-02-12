@@ -1307,7 +1307,7 @@ void S_ParseSndInfo()
 					const int index = os.getTokenInt();
 					if (index < 0 || index > 255)
 					{
-						os.warning("Bad ambient index (%d)\n", index);
+						os.warning("Bad ambient index ({})\n", index);
 						ambient = &dummy;
 					}
 					else
@@ -1372,7 +1372,7 @@ void S_ParseSndInfo()
 					}
 					else
 					{
-						os.warning("Unknown ambient type (%s)\n", os.getToken().c_str());
+						os.warning("Unknown ambient type ({})\n", os.getToken());
 					}
 
 					os.mustScanFloat();
@@ -1414,8 +1414,8 @@ void S_ParseSndInfo()
 
 						if (owner == sfxto)
 						{
-							os.warning("Definition of random sound '%s' refers to itself "
-							       "recursively.\n", os.getToken().c_str());
+							os.warning("Definition of random sound '{}' refers to itself "
+							       "recursively.\n", os.getToken());
 							continue;
 						}
 
@@ -1433,7 +1433,7 @@ void S_ParseSndInfo()
 				}
 				else
 				{
-					os.warning("Unknown SNDINFO command %s\n", os.getToken().c_str());
+					os.warning("Unknown SNDINFO command {}\n", os.getToken());
 					while (os.scan())
 						if (os.crossed())
 						{

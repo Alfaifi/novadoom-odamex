@@ -1094,7 +1094,7 @@ void MIType_AutomapBase(OScanner& os, bool newStyleMapInfo, void* data, unsigned
 	else if (os.compareTokenNoCase("strife"))
 		AM_SetBaseColorStrife();
 	else
-		os.warning("base expected \"doom\", \"heretic\", or \"strife\"; got %s", os.getToken());
+		os.warning("base expected \"doom\", \"heretic\", or \"strife\"; got {}", os.getToken());
 }
 
 //
@@ -1103,7 +1103,7 @@ bool ScanAndCompareString(OScanner& os, std::string cmp)
 	os.scan();
 	if (!os.compareToken(cmp.c_str()))
 	{
-		os.warning("Expected \"%s\", got \"%s\". Aborting parsing", cmp, os.getToken());
+		os.warning("Expected \"{}\", got \"{}\". Aborting parsing", cmp, os.getToken());
 		return false;
 	}
 
@@ -1116,7 +1116,7 @@ bool ScanAndSetRealNum(OScanner& os, fixed64_t& num)
 	os.scan();
 	if (!IsRealNum(os.getToken().c_str()))
 	{
-		os.warning("Expected number, got \"%s\". Aborting parsing", os.getToken());
+		os.warning("Expected number, got \"{}\". Aborting parsing", os.getToken());
 		return false;
 	}
 	num = FLOAT2FIXED64(os.getTokenFloat());
@@ -1176,7 +1176,7 @@ void MIType_MapArrows(OScanner& os, bool newStyleMapInfo, void* data, unsigned i
 	std::string maparrow = os.getToken();
 
 	if (!InterpretLines(maparrow, gameinfo.mapArrow))
-		os.warning("Map arrow lump \"%s\" could not be found", maparrow);
+		os.warning("Map arrow lump \"{}\" could not be found", maparrow);
 
 	os.scan();
 	if (os.compareToken(","))
@@ -1185,7 +1185,7 @@ void MIType_MapArrows(OScanner& os, bool newStyleMapInfo, void* data, unsigned i
 		maparrow = os.getToken();
 
 		if (!InterpretLines(maparrow, gameinfo.mapArrowCheat))
-			os.warning("Map arrow lump \"%s\" could not be found", maparrow);
+			os.warning("Map arrow lump \"{}\" could not be found", maparrow);
 	}
 	else
 	{

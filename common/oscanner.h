@@ -88,7 +88,7 @@ class OScanner
 	void warning(const fmt::string_view format, const ARGS&... args) const
 	{
 		PrintFmt(PRINT_WARNING, "Parse Warning: {}:{}: {}\n", m_config.lumpName,
-		       m_lineNumber, fmt::sprintf(format, args...));
+		       m_lineNumber, fmt::format(format, args...));
 	}
 
 	template <typename... ARGS>
