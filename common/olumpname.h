@@ -75,6 +75,10 @@ class OLumpName
 	friend struct std::hash<OLumpName>;
 };
 
+[[nodiscard]] bool operator==(const OLumpName& lhs, const OLumpName& rhs);
+[[nodiscard]] bool operator==(const OLumpName& lhs, const char* rhs);
+[[nodiscard]] bool operator==(const OLumpName& lhs, const std::string& rhs);
+
 template <>
 struct hashfunc<OLumpName>
 {

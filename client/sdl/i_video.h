@@ -122,6 +122,7 @@ public:
 	bool isFullScreen() const
 	{	return window_mode != WINDOW_Windowed;	}
 
+	[[nodiscard]]
 	bool operator==(const IVideoMode& other) const
 	{
 		return width == other.width && height == other.height &&

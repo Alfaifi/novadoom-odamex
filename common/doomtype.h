@@ -547,7 +547,7 @@ public:
 
 	argb_t tlate(const translationref_t &translation, const byte c) const;
 
-	bool operator==(const shaderef_t &other) const;
+	[[nodiscard]] bool operator==(const shaderef_t &other) const;
 };
 
 forceinline bool shaderef_t::isValid() const

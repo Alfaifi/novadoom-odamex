@@ -100,6 +100,7 @@ struct WDLPlayerSpawn
 	team_t team;
 };
 
+[[nodiscard]]
 bool operator==(const WDLPlayerSpawn& lhs, const WDLPlayerSpawn& rhs)
 {
 	return lhs.id == rhs.id && lhs.team == rhs.team && lhs.x == rhs.x && lhs.y == rhs.y &&

@@ -39,22 +39,10 @@ public:
 	virtual ~Vote() { };
 	const char* name;
 	const cvar_t* cvar;
-	unsigned int get_countdown() const
-	{
-		return this->countdown;
-	}
-	std::string get_error() const
-	{
-		return this->error;
-	}
-	vote_result_t get_result() const
-	{
-		return this->result;
-	}
-	std::string get_votestring() const
-	{
-		return this->votestring;
-	}
+	[[nodiscard]] unsigned int get_countdown() const { return this->countdown; }
+	[[nodiscard]] std::string get_error() const { return this->error; }
+	[[nodiscard]] vote_result_t get_result() const { return this->result; }
+	[[nodiscard]] std::string get_votestring() const { return this->votestring; }
 	vote_result_t check();
 	[[nodiscard]] size_t count_yes() const;
 	[[nodiscard]] size_t count_no() const;

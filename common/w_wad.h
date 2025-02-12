@@ -99,7 +99,8 @@ struct lumpHandle_t
 	{
 		return id == 0;
 	}
-	bool operator==(const lumpHandle_t& other)
+	[[nodiscard]]
+	bool operator==(const lumpHandle_t& other) const
 	{
 		return id == other.id;
 	}

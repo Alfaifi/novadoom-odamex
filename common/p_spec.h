@@ -669,7 +669,7 @@ public:
 	DPlat(sector_t *sector);
 	DPlat(sector_t *sector, DPlat::EPlatType type, fixed_t height, int speed, int delay, fixed_t lip);
 	DPlat(sector_t* sector, int target, int delay, int speed, int trigger); // [Blair] Boom Generic Plat type
-	DPlat* Clone(sector_t* sec) const override;
+	[[nodiscard]] DPlat* Clone(sector_t* sec) const override;
 	friend void P_SetPlatDestroy(DPlat *plat);
 
 	void PlayPlatSound ();
@@ -746,7 +746,7 @@ public:
 	DPillar ();
 	DPillar(sector_t* sector, EPillar type, fixed_t speed, fixed_t height,
 	        fixed_t height2, int crush, bool hexencrush);
-	DPillar* Clone(sector_t* sec) const override;
+	[[nodiscard]] DPillar* Clone(sector_t* sec) const override;
 	friend void P_SetPillarDestroy(DPillar *pillar);
 	friend bool EV_DoZDoomPillar(DPillar::EPillar type, line_t* line, int tag,
 	                             fixed_t speed, fixed_t floordist, fixed_t ceilingdist,
@@ -844,7 +844,7 @@ public:
 	// ZDoom Compatible DDoor
 	DDoor(sector_t* sec, line_t* ln, EVlDoor type, fixed_t speed, int topwait,
 	      byte lighttag, int topcountdown);
-	DDoor* Clone(sector_t* sec) const override;
+	[[nodiscard]] DDoor* Clone(sector_t* sec) const override;
 
 	friend void P_SetDoorDestroy(DDoor *door);
 
@@ -966,7 +966,7 @@ public:
 	DCeiling (sector_t* sec, line_t* line, int speed,
 	         int target, int crush, int change, int direction, int model);
 	DCeiling(sector_t* sec, line_t* line, int silent, int speed);
-	DCeiling* Clone(sector_t* sec) const override;
+	[[nodiscard]] DCeiling* Clone(sector_t* sec) const override;
 	friend void P_SetCeilingDestroy(DCeiling *ceiling);
 
 	void RunThink () override;
@@ -1104,7 +1104,7 @@ public:
 	DFloor(sector_t* sec, DFloor::EFloor floortype, line_t* line, fixed_t speed,
 	               fixed_t height, int crush, int change, bool hexencrush,
 	               bool hereticlower);
-	DFloor* Clone(sector_t* sec) const override;
+	[[nodiscard]] DFloor* Clone(sector_t* sec) const override;
 	friend void P_SetFloorDestroy(DFloor *floor);
 	friend BOOL EV_DoGenFloor(line_t* line);
 	friend BOOL EV_DoGenStairs(line_t* line);
@@ -1196,7 +1196,7 @@ public:
 	};
 
 	DElevator (sector_t *sec);
-	DElevator* Clone(sector_t* sec) const override;
+	[[nodiscard]] DElevator* Clone(sector_t* sec) const override;
 	friend void P_SetElevatorDestroy(DElevator *elevator);
 
 	void RunThink () override;

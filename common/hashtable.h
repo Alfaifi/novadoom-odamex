@@ -254,6 +254,7 @@ public:
 			return ConstThisClass(mBucketNum, mHashTable);
 		}
 
+		[[nodiscard]]
 		bool operator== (const ThisClass& other) const
 		{
 			return mBucketNum == other.mBucketNum && mHashTable == other.mHashTable;

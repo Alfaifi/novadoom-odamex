@@ -395,6 +395,7 @@ class HordeState
 	/**
 	 * @brief Serialize horde data into POD struct.
 	 */
+	[[nodiscard]]
 	hordeInfo_t serialize() const
 	{
 		hordeInfo_t info;
