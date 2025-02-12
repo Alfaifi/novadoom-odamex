@@ -95,7 +95,7 @@ void SV_TeamPrintf(int level, int who, const fmt::string_view format, const ARGS
 		return;
 
 	std::string string = fmt::sprintf(format, args...);
-	Printf(level, "{}", string);  // print to the console
+	PrintFmt(level, "{}", string);  // print to the console
 
 	const team_t& team = idplayer(who).userinfo.team;
 
