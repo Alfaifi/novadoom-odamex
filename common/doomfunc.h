@@ -94,12 +94,12 @@ size_t PrintFmt(const int printlevel, const fmt::string_view format, const ARGS&
  * @param args printf-style arguments.
  */
 template <typename... ARGS>
-void SV_BroadcastPrintf(int printlevel, const fmt::string_view format, const ARGS&... args)
+void SV_BroadcastPrintFmt(int printlevel, const fmt::string_view format, const ARGS&... args)
 {
 	if (!serverside)
 		return;
 
-	std::string string = fmt::sprintf(format, args...);
+	std::string string = fmt::format(format, args...);
 	C_BasePrint(printlevel, TEXTCOLOR_NORMAL, string);
 
 	#ifdef SERVER_APP
@@ -120,16 +120,16 @@ void SV_BroadcastPrintf(int printlevel, const fmt::string_view format, const ARG
  * @param args printf-style arguments.
  */
 template <typename... ARGS>
-void SV_BroadcastPrintf(const fmt::string_view format, const ARGS&... args)
+void SV_BroadcastPrintFmt(const fmt::string_view format, const ARGS&... args)
 {
-	SV_BroadcastPrintf(PRINT_NORCON, format, args...);
+	SV_BroadcastPrintFmt(PRINT_NORCON, format, args...);
 }
 
 #ifdef SERVER_APP
 template <typename... ARGS>
-void SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const fmt::string_view format, const ARGS&... args)
+void SV_BroadcastPrintFmtButPlayer(int printlevel, int player_id, const fmt::string_view format, const ARGS&... args)
 {
-	std::string string = fmt::sprintf(format, args...);
+	std::string string = fmt::format(format, args...);
 	C_BasePrint(printlevel, TEXTCOLOR_NORMAL, string); // print to the console
 
 	// Hacky code to display messages as normal ones to clients

@@ -2968,8 +2968,8 @@ BOOL CheckIfExitIsGood (AActor *self)
 			tstr = fmt::sprintf("%02d:%02d.%02d", tspan.minutes, tspan.seconds, tspan.csecs);
 		}
 
-		SV_BroadcastPrintf("%s exited the level in %s.\n",
-		                   self->player->userinfo.netname.c_str(), tstr.c_str());
+		SV_BroadcastPrintFmt("{} exited the level in {}.\n",
+		                     self->player->userinfo.netname, tstr);
 	}
 
 	M_CommitWDLLog();
