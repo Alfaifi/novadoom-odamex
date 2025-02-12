@@ -713,7 +713,7 @@ bool ISDL12Window::setMode(const IVideoMode& video_mode)
 	SDL_Surface* sdl_surface = SDL_SetVideoMode(video_mode.width, video_mode.height, video_mode.bpp, flags);
 	if (sdl_surface == NULL)
 	{
-		I_FatalError("I_SetVideoMode: unable to set video mode %ux%ux%u (%s): %s\n",
+		I_FatalError("I_SetVideoMode: unable to set video mode {}x{}x{} ({}): {}\n",
 				video_mode.width, video_mode.height, video_mode.bpp, is_windowed ? "windowed" : "fullscreen",
 				SDL_GetError());
 		return false;
@@ -797,7 +797,7 @@ ISDL12VideoSubsystem::ISDL12VideoSubsystem() : IVideoSubsystem()
 
 	if (SDLVersion->major != SDL_MAJOR_VERSION || SDLVersion->minor != SDL_MINOR_VERSION)
 	{
-		I_FatalError("SDL version conflict (%d.%d.%d vs %d.%d.%d dll)\n",
+		I_FatalError("SDL version conflict ({}.{}.{} vs {}.{}.{} dll)\n",
 			SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
 			SDLVersion->major, SDLVersion->minor, SDLVersion->patch);
 		return;

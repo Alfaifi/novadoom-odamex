@@ -435,7 +435,7 @@ void I_LoadSound (sfxinfo_struct *sfx)
 
 	if (!sfx->data)
 	{
-		DPrintf ("loading sound \"%s\" (%d)\n", sfx->name, sfx->lumpnum);
+		DPrintFmt("loading sound \"{}\" ({})\n", sfx->name, sfx->lumpnum);
 		getsfx (sfx);
 	}
 }

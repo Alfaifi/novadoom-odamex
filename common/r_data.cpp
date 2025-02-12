@@ -663,7 +663,7 @@ void R_InitTextures (void)
 		Z_Free (maptex2);
 
 	if (errors)
-		I_FatalError ("%d errors in R_InitTextures.", errors);
+		I_FatalError ("{} errors in R_InitTextures.", errors);
 
 	// [RH] Setup hash chains. Go from back to front so that if
 	//		duplicates are found, the first one gets used instead

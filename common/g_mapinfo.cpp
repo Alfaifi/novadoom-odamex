@@ -1993,14 +1993,14 @@ void G_ParseMapInfo()
 	}
 
 	if (episodenum == 0)
-		I_FatalError("%s: You cannot use clearepisodes in a MAPINFO if you do not define any "
+		I_FatalError("{}: You cannot use clearepisodes in a MAPINFO if you do not define any "
 		             "new episodes after it.", __FUNCTION__);
 
 	if (defaultskillmenu > skillnum - 1)
 		defaultskillmenu = skillnum - 1;
 
 	if (skillnum == 0)
-		I_FatalError("%s: You cannot use clearskills in a MAPINFO if you do not define any "
+		I_FatalError("{}: You cannot use clearskills in a MAPINFO if you do not define any "
 					"new skills after it.", __FUNCTION__);
 
 	// mark levels as secrets -- for ID24 intermissions

@@ -1197,7 +1197,7 @@ void InitNetCommon(void)
 
    BindToLocalPort (inet_socket, localport);
    if (ioctlsocket(inet_socket, FIONBIO, &_true) == -1)
-       I_FatalError ("UDPsocket: ioctl FIONBIO: %s", strerror(errno));
+       I_FatalError ("UDPsocket: ioctl FIONBIO: {}", strerror(errno));
 
 	// enter message information into message info structs
 	InitNetMessageFormats();

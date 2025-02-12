@@ -78,7 +78,7 @@ static void I_AddSDL20VideoModes(IVideoModeList* modelist, int bpp)
 	int display_mode_count = SDL_GetNumDisplayModes(display_index);
 	if (display_mode_count < 1)
 	{
-		I_FatalError("SDL_GetNumDisplayModes failed: %s", SDL_GetError());
+		I_FatalError("SDL_GetNumDisplayModes failed: {}", SDL_GetError());
 		return;
 	}
 
@@ -86,7 +86,7 @@ static void I_AddSDL20VideoModes(IVideoModeList* modelist, int bpp)
 	{
 		if (SDL_GetDisplayMode(display_index, i, &mode) != 0)
 		{
-			I_FatalError("SDL_GetDisplayMode failed: %s", SDL_GetError());
+			I_FatalError("SDL_GetDisplayMode failed: {}", SDL_GetError());
 			return;
 		}
 
@@ -128,7 +128,7 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() :
 	SDL_DisplayMode sdl_display_mode;
 	if (SDL_GetDesktopDisplayMode(display_index, &sdl_display_mode) != 0)
 	{
-		I_FatalError("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
+		I_FatalError("SDL_GetDesktopDisplayMode failed: {}", SDL_GetError());
 		return;
 	}
 
@@ -240,7 +240,7 @@ ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager(
 
 	mSDLRenderer = createRenderer(vsync);
 	if (mSDLRenderer == NULL)
-		I_FatalError("I_InitVideo: unable to create SDL2 renderer: %s\n", SDL_GetError());
+		I_FatalError("I_InitVideo: unable to create SDL2 renderer: {}\n", SDL_GetError());
 
 	const IVideoMode& native_mode = I_GetVideoCapabilities()->getNativeMode();
 	if (vid_widescreen.asInt() == 0 && vid_pillarbox && (3 * native_mode.width > 4 * native_mode.height))
@@ -282,7 +282,7 @@ ISDL20TextureWindowSurfaceManager::ISDL20TextureWindowSurfaceManager(
 				mWidth, mHeight);
 
 	if (mSDLTexture == NULL)
-		I_FatalError("I_InitVideo: unable to create SDL2 texture: %s\n", SDL_GetError());
+		I_FatalError("I_InitVideo: unable to create SDL2 texture: {}\n", SDL_GetError());
 
 	mSurface = new IWindowSurface(width, height, &mFormat);
     if (mSurface->getBitsPerPixel() ==8)
@@ -416,7 +416,7 @@ ISDL20Window::ISDL20Window(uint16_t width, uint16_t height, uint8_t bpp, EWindow
 			window_flags);
 
 	if (mSDLWindow == NULL)
-		I_FatalError("I_InitVideo: unable to create window: %s\n", SDL_GetError());
+		I_FatalError("I_InitVideo: unable to create window: {}\n", SDL_GetError());
 
 	SDL_SetWindowMinimumSize(mSDLWindow, 320, 200);
 
@@ -968,7 +968,7 @@ ISDL20VideoSubsystem::ISDL20VideoSubsystem() : IVideoSubsystem()
 
 	if (linked.major != compiled.major || linked.minor != compiled.minor)
 	{
-		I_FatalError("SDL version conflict (%d.%d.%d vs %d.%d.%d dll)\n",
+		I_FatalError("SDL version conflict ({}.{}.{} vs {}.{}.{} dll)\n",
 			compiled.major, compiled.minor, compiled.patch,
 			linked.major, linked.minor, linked.patch);
 		return;
@@ -976,7 +976,7 @@ ISDL20VideoSubsystem::ISDL20VideoSubsystem() : IVideoSubsystem()
 
 	if (linked.patch != compiled.patch)
 	{
-		Printf(PRINT_WARNING, "SDL version warning (%d.%d.%d vs %d.%d.%d dll)\n",
+		PrintFmt(PRINT_WARNING, "SDL version warning ({}.{}.{} vs {}.{}.{} dll)\n",
 			compiled.major, compiled.minor, compiled.patch,
 			linked.major, linked.minor, linked.patch);
 	}
