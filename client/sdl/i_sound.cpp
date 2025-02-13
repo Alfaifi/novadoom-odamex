@@ -157,9 +157,6 @@ static void WriteWAV(char* filename, byte* data, uint32_t length, int samplerate
 static void ExpandSoundData(byte* data, int samplerate, int bits, int length,
                             Mix_Chunk* destination)
 {
-	if (length <= 0)
-		return;
-
 	Sint16* expanded = reinterpret_cast<Sint16*>(destination->abuf);
 	size_t samplecount = length / (bits / 8);
 
@@ -309,6 +306,9 @@ static void getsfx(sfxinfo_struct *sfx)
     // [Russell] - Ignore doom's sound format length info
     // if the lump is longer than the value, fixes exec.wad's ssg
     length = (sfx->length - 8 > length) ? sfx->length - 8 : length;
+
+	if (length <= 0)
+		return;
 
     Uint32 expanded_length = (uint32_t)((((uint64_t)length) * mixer_freq) / samplerate);
 
