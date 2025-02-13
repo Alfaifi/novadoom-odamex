@@ -122,45 +122,6 @@ std::string M_GetWriteDir()
 #endif
 }
 
-std::string M_GetUserFileName(const std::string& file)
-{
-#if defined(_XBOX)
-	std::string path = "T:";
-
-	path += PATHSEP;
-	path += file;
-
-	return M_CleanPath(path);
-#else
-	// Is absolute path?  If so, stop here.
-	if (!PathIsRelative(file.c_str()))
-	{
-		return file;
-	}
-
-	// Is this an explicitly relative path?  If so, stop here.
-	size_t fileLen = file.length();
-	if (fileLen >= 2 && file[0] == '.' && M_IsPathSep(file[1]))
-	{
-		return file;
-	}
-	else if (fileLen >= 3 && file[0] == '.' && file[1] == '.' && M_IsPathSep(file[2]))
-	{
-		return file;
-	}
-
-	// Direct our path to our write directory.
-	std::string path = M_GetWriteDir();
-	if (!M_IsPathSep(*(path.end() - 1)))
-	{
-		path += PATHSEP;
-	}
-	path += file;
-
-	return path;
-#endif
-}
-
 std::string M_BaseFileSearchDir(std::string dir, const std::string& name,
                                 const std::vector<std::string>& exts,
                                 const OMD5Hash& hash)

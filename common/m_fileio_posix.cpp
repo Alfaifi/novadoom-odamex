@@ -177,37 +177,6 @@ std::string M_GetWriteDir()
 	return path;
 }
 
-std::string M_GetUserFileName(const std::string& file)
-{
-
-#ifdef __SWITCH__
-		std::string path = file;
-#else
-	// Is absolute path?  If so, stop here.
-	size_t fileLen = file.length();
-	if (fileLen >= 1 && M_IsPathSep(file[0]))
-	{
-		return file;
-	}
-
-	// Is this an explicitly relative path?  If so, stop here.
-	if (fileLen >= 2 && file[0] == '.' && M_IsPathSep(file[1]))
-	{
-		return file;
-	}
-	else if (fileLen >= 3 && file[0] == '.' && file[1] == '.' && M_IsPathSep(file[2]))
-	{
-		return file;
-	}
-
-	// Our path is relative to the write directory.
-	std::string path = M_GetWriteDir();
-	path += PATHSEP;
-	path += file;
-#endif
-	return M_CleanPath(path);
-}
-
 std::string M_BaseFileSearchDir(std::string dir, const std::string& name,
                                 const std::vector<std::string>& exts,
                                 const OMD5Hash& hash)
