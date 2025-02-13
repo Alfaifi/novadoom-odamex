@@ -157,6 +157,9 @@ static void WriteWAV(char* filename, byte* data, uint32_t length, int samplerate
 static void ExpandSoundData(byte* data, int samplerate, int bits, int length,
                             Mix_Chunk* destination)
 {
+	if (length <= 0)
+		return;
+
 	Sint16* expanded = reinterpret_cast<Sint16*>(destination->abuf);
 	size_t samplecount = length / (bits / 8);
 
