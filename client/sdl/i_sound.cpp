@@ -29,6 +29,7 @@
 #include "i_sdl.h"
 #include <SDL_mixer.h>
 #include <stdlib.h>
+#include <nonstd/scope.hpp>
 
 #include "z_zone.h"
 
@@ -270,6 +271,7 @@ static void getsfx(sfxinfo_struct *sfx)
 		return;
 
     Uint8* data = (Uint8*)W_CacheLumpNum(sfx->lumpnum, PU_STATIC);
+	auto guard = nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
 
     // [Russell] - ICKY QUICKY HACKY SPACKY *I HATE THIS SOUND MANAGEMENT SYSTEM!*
     // get the lump size, shouldn't this be filled in elsewhere?
@@ -324,8 +326,6 @@ static void getsfx(sfxinfo_struct *sfx)
 
     ExpandSoundData((byte*)data + 8, samplerate, 8, length, chunk);
     sfx->data = chunk;
-
-    Z_ChangeTag(data, PU_CACHE);
 }
 
 //
