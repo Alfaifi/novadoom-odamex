@@ -539,13 +539,13 @@ private:
 			// add key and value pair
 			mElements[bucketnum].order = mNextOrder++;
 			mElements[bucketnum].pair.first = key;
-			mElements[bucketnum].pair.second = std::forward<VT>(value);
+			mElements[bucketnum].pair.second = std::move(value);
 			mUsed++;
 		}
 		else
 		{
 			// key already exists so just update the value
-			mElements[bucketnum].pair.second = std::forward<VT>(value);
+			mElements[bucketnum].pair.second = std::move(value);
 		}
 
 		return bucketnum;
