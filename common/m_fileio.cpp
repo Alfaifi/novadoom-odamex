@@ -427,4 +427,94 @@ std::string M_GetUserFileName(const std::string& file)
 #endif
 }
 
+std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString> files)
+{
+	std::vector<std::string> rvo;
+
+	// Fix up parameters.
+	fs::path path(M_CleanPath(dir));
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		files[i] = StdStringToUpper(files[i]);
+	}
+
+	try
+	{
+		for (const auto& entry : fs::directory_iterator(path))
+		{
+			// Skip directories.
+			if (entry.is_directory())
+				continue;
+
+			// Find the file.
+			std::string check = StdStringToUpper(entry.path().filename().string());
+			std::vector<OString>::iterator it =
+		    	std::find(files.begin(), files.end(), check);
+
+			if (it == files.end())
+				continue;
+
+			rvo.push_back(check);
+		}
+	}
+	catch (const fs::filesystem_error& e)
+	{
+		// TODO: actually handle this error
+		PrintFmt(PRINT_HIGH, "{}: Filesystem error: {}\n", __FUNCTION__, e.what());
+	}
+
+	return rvo;
+}
+
+// Scan for PWADs and DEH and BEX files
+std::vector<std::string> M_PWADFilesScanDir(std::string dir)
+{
+	std::vector<std::string> rvo;
+
+	// Fix up parameters.
+	fs::path path(M_CleanPath(dir));
+
+	try
+	{
+		for (const auto& entry : fs::directory_iterator(path))
+		{
+			// Skip directories.
+			if (entry.is_directory())
+				continue;
+
+			// Only return files with correct extensions
+			const std::string check = entry.path().extension().string();
+			if (iequals(check, ".WAD") || iequals(check, ".DEH") || iequals(check, ".BEX"))
+			{
+				rvo.push_back(entry.path().filename().string());
+			}
+		}
+	}
+	catch (const fs::filesystem_error& e)
+	{
+		// TODO: actually handle this error
+		PrintFmt(PRINT_HIGH, "{}: Filesystem error: {}\n", __FUNCTION__, e.what());
+	}
+
+	return rvo;
+}
+
+bool M_GetAbsPath(const std::string& path, std::string& out)
+{
+#ifdef __SWITCH__
+	out = path;
+	return true;
+#else
+	try
+	{
+		out = fs::absolute(path).string();
+		return true;
+	}
+	catch (const fs::filesystem_error& e)
+	{
+		return false;
+	}
+#endif
+}
+
 VERSION_CONTROL(m_fileio_cpp, "$Id$")
