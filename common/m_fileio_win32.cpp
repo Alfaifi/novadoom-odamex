@@ -32,7 +32,6 @@
 
 #include "m_fileio.h"
 
-
 #include "win32inc.h"
 #include <shlobj.h>
 #include <shlwapi.h>
@@ -40,7 +39,6 @@
 #include "cmdlib.h"
 #include "i_system.h"
 #include "m_ostring.h"
-#include "w_wad.h"
 
 std::string M_GetBinaryDir()
 {
@@ -120,77 +118,6 @@ std::string M_GetWriteDir()
 	//      depends on where you launch it from, which is not great.
 	return M_CleanPath(M_GetBinaryDir());
 #endif
-}
-
-std::string M_BaseFileSearchDir(std::string dir, const std::string& name,
-                                const std::vector<std::string>& exts,
-                                const OMD5Hash& hash)
-{
-	dir = M_CleanPath(dir);
-	std::vector<OString> cmp_files;
-	for (std::vector<std::string>::const_iterator it = exts.begin(); it != exts.end();
-	     ++it)
-	{
-		if (!hash.empty())
-		{
-			// Filenames with supplied hashes always match first.
-			cmp_files.push_back(
-			    StdStringToUpper(name + "." + hash.getHexStr().substr(0, 6) + *it));
-		}
-		cmp_files.push_back(StdStringToUpper(name + *it));
-	}
-
-	// denis - list files in the directory of interest, case-desensitize
-	// then see if wanted wad is listed
-	std::string all_ext = dir + PATHSEP "*";
-	// all_ext += ext;
-
-	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = FindFirstFile(all_ext.c_str(), &FindFileData);
-
-	if (hFind == INVALID_HANDLE_VALUE)
-		return "";
-
-	std::string found;
-	std::vector<OString>::iterator found_it = cmp_files.end();
-	do
-	{
-		if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			continue;
-
-		// Not only find a match, but check if it is a better match than we
-		// found previously.
-		OString check = StdStringToUpper(FindFileData.cFileName);
-		std::vector<OString>::iterator this_it =
-		    std::find(cmp_files.begin(), cmp_files.end(), check);
-		if (this_it < found_it)
-		{
-			const std::string local_file(dir + PATHSEP + FindFileData.cFileName);
-			const OMD5Hash local_hash = W_MD5(local_file);
-
-			if (hash.empty() || hash == local_hash)
-			{
-				// Found a match.
-				found = FindFileData.cFileName;
-				found_it = this_it;
-				if (found_it == cmp_files.begin())
-				{
-					// Found the best possible match, we're done.
-					break;
-				}
-			}
-			else if (!hash.empty())
-			{
-				Printf(PRINT_WARNING, "WAD at %s does not match required copy\n",
-				       local_file.c_str());
-				Printf(PRINT_WARNING, "Local MD5: %s\n", local_hash.getHexCStr());
-				Printf(PRINT_WARNING, "Required MD5: %s\n\n", hash.getHexCStr());
-			}
-		}
-	} while (FindNextFile(hFind, &FindFileData));
-
-	FindClose(hFind);
-	return found;
 }
 
 #endif

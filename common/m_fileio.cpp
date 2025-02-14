@@ -34,6 +34,7 @@
 
 #include "m_fileio.h"
 
+#include "w_wad.h"
 #include "z_zone.h"
 
 #include <filesystem>
@@ -427,6 +428,74 @@ std::string M_GetUserFileName(const std::string& file)
 #endif
 }
 
+std::string M_BaseFileSearchDir(std::string dir, const std::string& name,
+                                const std::vector<std::string>& exts,
+                                const OMD5Hash& hash)
+{
+	fs::path path(M_CleanPath(dir));
+	std::vector<OString> cmp_files;
+	for (const auto& ext : exts)
+	{
+		if (!hash.empty())
+		{
+			// Filenames with supplied hashes always match first.
+			cmp_files.push_back(
+			    StdStringToUpper(name + "." + hash.getHexStr().substr(0, 6) + ext));
+		}
+		cmp_files.push_back(StdStringToUpper(name + ext));
+	}
+
+	// denis - list files in the directory of interest, case-desensitize
+	// then see if wanted wad is listed
+
+	std::string found;
+	std::vector<OString>::iterator found_it = cmp_files.end();
+	try {
+		for (const auto& entry : fs::directory_iterator(path))
+		{
+			if (entry.is_directory())
+				continue;
+
+			// Not only find a match, but check if it is a better match than we
+			// found previously.
+			fs::path filename = entry.path().filename();
+			OString check = StdStringToUpper(filename.string());
+			std::vector<OString>::iterator this_it =
+			    std::find(cmp_files.begin(), cmp_files.end(), check);
+			if (this_it < found_it)
+			{
+				const std::string local_file = (path / filename).string();
+				const OMD5Hash local_hash = W_MD5(local_file);
+
+				if (hash.empty() || hash == local_hash)
+				{
+					// Found a match.
+					found = filename.string();
+					found_it = this_it;
+					if (found_it == cmp_files.begin())
+					{
+						// Found the best possible match, we're done.
+						break;
+					}
+				}
+				else if (!hash.empty())
+				{
+					PrintFmt(PRINT_WARNING, "WAD at {} does not match required copy\n", local_file);
+					PrintFmt(PRINT_WARNING, "Local MD5: {}\n", local_hash.getHexStr());
+					PrintFmt(PRINT_WARNING, "Required MD5: {}\n\n", hash.getHexStr());
+				}
+			}
+		}
+	}
+	catch (const fs::filesystem_error& e)
+	{
+		// Probably called on a directory that doesn't exist (e.g. Steam Final Doom directory).
+		PrintFmt(PRINT_HIGH, "{}: {}\n", __FUNCTION__, e.what());
+	}
+
+	return found;
+}
+
 std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString> files)
 {
 	std::vector<std::string> rvo;
@@ -459,8 +528,8 @@ std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString
 	}
 	catch (const fs::filesystem_error& e)
 	{
-		// TODO: actually handle this error
-		PrintFmt(PRINT_HIGH, "{}: Filesystem error: {}\n", __FUNCTION__, e.what());
+		// Probably called on a directory that doesn't exist (e.g. Steam Final Doom directory).
+		PrintFmt(PRINT_HIGH, "{}: {}\n", __FUNCTION__, e.what());
 	}
 
 	return rvo;
@@ -492,8 +561,8 @@ std::vector<std::string> M_PWADFilesScanDir(std::string dir)
 	}
 	catch (const fs::filesystem_error& e)
 	{
-		// TODO: actually handle this error
-		PrintFmt(PRINT_HIGH, "{}: Filesystem error: {}\n", __FUNCTION__, e.what());
+		// Probably called on a directory that doesn't exist (e.g. Steam Final Doom directory).
+		PrintFmt(PRINT_HIGH, "{}: {}\n", __FUNCTION__, e.what());
 	}
 
 	return rvo;
@@ -512,6 +581,7 @@ bool M_GetAbsPath(const std::string& path, std::string& out)
 	}
 	catch (const fs::filesystem_error& e)
 	{
+		PrintFmt(PRINT_HIGH, "{}: {}\n", __FUNCTION__, e.what());
 		return false;
 	}
 #endif

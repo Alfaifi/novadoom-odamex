@@ -149,12 +149,7 @@ std::string M_GetUserDir()
 std::string M_GetWriteDir()
 {
 	// Our path is relative to the home directory.
-	std::string path = M_GetHomeDir();
-	if (!M_IsPathSep(*(path.end() - 1)))
-	{
-		path += PATHSEP;
-	}
-	path += ".odamex";
+	std::string path = M_GetUserDir();
 
 	// Create the directory.
 	struct stat info;
@@ -175,71 +170,6 @@ std::string M_GetWriteDir()
 	}
 
 	return path;
-}
-
-std::string M_BaseFileSearchDir(std::string dir, const std::string& name,
-                                const std::vector<std::string>& exts,
-                                const OMD5Hash& hash)
-{
-	dir = M_CleanPath(dir);
-	std::vector<OString> cmp_files;
-	for (std::vector<std::string>::const_iterator it = exts.begin(); it != exts.end();
-	     ++it)
-	{
-		if (!hash.empty())
-		{
-			// Filenames with supplied hashes always match first.
-			cmp_files.push_back(
-			    StdStringToUpper(name + "." + hash.getHexStr().substr(0, 6) + *it));
-		}
-		cmp_files.push_back(StdStringToUpper(name + *it));
-	}
-
-	// denis - list files in the directory of interest, case-desensitize
-	// then see if wanted wad is listed
-	struct dirent** namelist = 0;
-	int n = scandir(dir.c_str(), &namelist, 0, alphasort);
-
-	std::string found;
-	std::vector<OString>::iterator found_it = cmp_files.end();
-	for (int i = 0; i < n && namelist[i]; i++)
-	{
-		const std::string d_name = namelist[i]->d_name;
-		M_Free(namelist[i]);
-
-		if (found_it == cmp_files.begin())
-			continue;
-
-		if (d_name == "." || d_name == "..")
-			continue;
-
-		const std::string check = StdStringToUpper(d_name);
-		std::vector<OString>::iterator this_it =
-		    std::find(cmp_files.begin(), cmp_files.end(), check);
-		if (this_it < found_it)
-		{
-			const std::string local_file(dir + PATHSEP + d_name);
-			const OMD5Hash local_hash(W_MD5(local_file));
-
-			if (hash.empty() || hash == local_hash)
-			{
-				// Found a match.
-				found = d_name;
-				found_it = this_it;
-				continue;
-			}
-			else if (!hash.empty())
-			{
-				Printf(PRINT_WARNING, "WAD at %s does not match required copy\n",
-				       local_file.c_str());
-				Printf(PRINT_WARNING, "Local MD5: %s\n", local_hash.getHexCStr());
-				Printf(PRINT_WARNING, "Required MD5: %s\n\n", hash.getHexCStr());
-			}
-		}
-	}
-
-	M_Free(namelist);
-	return found;
 }
 
 #endif
