@@ -986,57 +986,57 @@ void M_CommitWDLLog()
 	}
 
 	// Header (metadata)
-	fprintf(fh, "version=%d\n", WDLSTATS_VERSION);
-	fprintf(fh, "time=%s\n", iso8601buf);
-	fprintf(fh, "levelnum=%d\n", ::level.levelnum);
-	fprintf(fh, "levelname=%s\n", ::level.level_name);
-	fprintf(fh, "levelhash=%.16llx%.16llx\n", reconsthash1, reconsthash2);
-	fprintf(fh, "gametype=%s\n", ::sv_gametype.cstring());
-	fprintf(fh, "lives=%s\n", ::g_lives.cstring());
-	fprintf(fh, "attackdefend=%s\n", ::g_sides.cstring());
-	fprintf(fh, "duration=%d\n", ::gametic - ::wdlstate.begintic);
-	fprintf(fh, "endgametic=%d\n", ::gametic);
-	fprintf(fh, "round=%d\n", ::levelstate.getRound());
-	fprintf(fh, "winresult=%d\n", ::levelstate.getWinInfo().type);
-	fprintf(fh, "winid=%d\n", ::levelstate.getWinInfo().id);
-	fprintf(fh, "hostname=%s\n", ::sv_hostname.cstring());
+	fmt::print(fh, "version={}\n", WDLSTATS_VERSION);
+	fmt::print(fh, "time={}\n", iso8601buf);
+	fmt::print(fh, "levelnum={}\n", ::level.levelnum);
+	fmt::print(fh, "levelname={}\n", ::level.level_name);
+	fmt::fprintf(fh, "levelhash=%.16llx%.16llx\n", reconsthash1, reconsthash2);
+	fmt::print(fh, "gametype={}\n", ::sv_gametype.str());
+	fmt::print(fh, "lives={}\n", ::g_lives.str());
+	fmt::print(fh, "attackdefend={}\n", ::g_sides.str());
+	fmt::print(fh, "duration={}\n", ::gametic - ::wdlstate.begintic);
+	fmt::print(fh, "endgametic={}\n", ::gametic);
+	fmt::print(fh, "round={}\n", ::levelstate.getRound());
+	fmt::print(fh, "winresult={}\n", static_cast<int>(::levelstate.getWinInfo().type));
+	fmt::print(fh, "winid={}\n", ::levelstate.getWinInfo().id);
+	fmt::print(fh, "hostname={}\n", ::sv_hostname.str());
 
 	// Players
-	fprintf(fh, "players\n");
+	fmt::print(fh, "players\n");
 	for (const auto& pl : ::wdlplayers)
-		fprintf(fh, "%d,%d,%d,%s\n", pl.id, pl.pid, pl.team, pl.netname.c_str());
+		fmt::print(fh, "{},{},{},{}\n", pl.id, pl.pid, static_cast<int>(pl.team), pl.netname);
 
 	// ItemSpawns
-	fprintf(fh, "itemspawns\n");
+	fmt::print(fh, "itemspawns\n");
 	for (const auto& is : ::wdlitemspawns)
-		fprintf(fh, "%d,%d,%d,%d,%d\n", is.id, is.x, is.y, is.z, is.item);
+		fmt::print(fh, "{},{},{},{},{}\n", is.id, is.x, is.y, is.z, static_cast<int>(is.item));
 
 	// PlayerSpawns
-	fprintf(fh, "playerspawns\n");
+	fmt::print(fh, "playerspawns\n");
 	for (const auto& ps : ::wdlplayerspawns)
-		fprintf(fh, "%d,%d,%d,%d,%d\n", ps.id, ps.team, ps.x, ps.y, ps.z);
+		fmt::print(fh, "{},{},{},{},{}\n", ps.id, static_cast<int>(ps.team), ps.x, ps.y, ps.z);
 
 	if (sv_gametype == GM_CTF)
 	{
 		// FlagLocation
-		fprintf(fh, "flaglocations\n");
+		fmt::print(fh, "flaglocations\n");
 		for (const auto& fl : ::wdlflaglocations)
-			fprintf(fh, "%d,%d,%d,%d\n", fl.team, fl.x, fl.y, fl.z);
+			fmt::print(fh, "{},{},{},{}\n", static_cast<int>(fl.team), fl.x, fl.y, fl.z);
 	}
 
 	// Wads
-	fprintf(fh, "wads\n");
-	fprintf(fh, "%s", M_GetCurrentWadHashes().c_str());
+	fmt::print(fh, "wads\n");
+	fmt::print(fh, "{}", M_GetCurrentWadHashes());
 
 	// Events
-	fprintf(fh, "events\n");
+	fmt::print(fh, "events\n");
 	for (const auto& ev : ::wdlevents)
 	{
-		//          "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
-		fprintf(fh, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", ev.ev,
-		        ev.activator, ev.target, ev.gametic, ev.apos[0], ev.apos[1],
-		        ev.apos[2], ev.tpos[0], ev.tpos[1], ev.tpos[2], ev.arg0,
-		        ev.arg1, ev.arg2, ev.arg3);
+		//             "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
+		fmt::print(fh, "{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n", ev.ev,
+		           ev.activator, ev.target, ev.gametic, ev.apos[0], ev.apos[1],
+		           ev.apos[2], ev.tpos[0], ev.tpos[1], ev.tpos[2], ev.arg0,
+		           ev.arg1, ev.arg2, ev.arg3);
 	}
 
 	fclose(fh);

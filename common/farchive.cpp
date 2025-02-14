@@ -121,7 +121,7 @@ void FLZOFile::PostOpen()
 		size_t readlen = fread(sig, 4, 1, m_File);
 		if ( readlen < 1 )
 		{
-			printf("FLZOFile::PostOpen(): failed to read m_File\n");
+			fmt::print("FLZOFile::PostOpen(): failed to read m_File\n");
 		}
 		if (sig[0] != LZOSig[0] || sig[1] != LZOSig[1] || sig[2] != LZOSig[2] || sig[3] != LZOSig[3])
 		{
@@ -134,7 +134,7 @@ void FLZOFile::PostOpen()
 			readlen = fread(sizes, sizeof(DWORD), 2, m_File);
 			if ( readlen < 1 )
 			{
-				printf("FLZOFile::PostOpen(): failed to read m_File\n");
+				fmt::print("FLZOFile::PostOpen(): failed to read m_File\n");
 			}
 			SWAP_DWORD(sizes[0]);
 			SWAP_DWORD(sizes[1]);
@@ -145,7 +145,7 @@ void FLZOFile::PostOpen()
 			readlen = fread(m_Buffer + 8, len, 1, m_File);
 			if ( readlen < 1 )
 			{
-				printf("FLZOFile::PostOpen(): failed to read m_File\n");
+				fmt::print("FLZOFile::PostOpen(): failed to read m_File\n");
 			}
 
 			SWAP_DWORD(sizes[0]);

@@ -581,8 +581,8 @@ bool P_LoadXNOD(int lump)
 		if (err != Z_STREAM_END)
 			I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression!");
 
-		fprintf(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio %.3f\n",
-				(float)zstream->total_out/zstream->total_in);
+		fmt::print(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio {:.3f}\n",
+		           (float)zstream->total_out/zstream->total_in);
 
 		len = zstream->total_out;
 

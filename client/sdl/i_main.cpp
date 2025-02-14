@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
 			fclose(fh);
 #else
-			printf("Odamex %s\n", NiceVersion());
+			fmt::print("Odamex {}\n", NiceVersion());
 #endif
 			exit(EXIT_SUCCESS);
 		}

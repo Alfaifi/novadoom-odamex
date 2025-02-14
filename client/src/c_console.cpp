@@ -1212,7 +1212,7 @@ static size_t C_PrintStringStdOut(const char* str)
 	std::string sanitized_str(str);
 	StripColorCodes(sanitized_str);
 
-	printf("%s", sanitized_str.c_str());
+	fmt::print("{}", sanitized_str);
 	fflush(stdout);
 
 	return sanitized_str.length();
