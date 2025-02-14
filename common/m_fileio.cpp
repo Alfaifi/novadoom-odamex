@@ -300,6 +300,7 @@ void M_ExtractFilePath(const std::string& filename, std::string &dest)
 // Extract the extension of a file, returns false if it can't find
 // extension seperator, true if succeeded, the extension is returned in
 // dest
+// Extension includes the .
 bool M_ExtractFileExtension(const std::string& filename, std::string &dest)
 {
 	if (filename.empty())
