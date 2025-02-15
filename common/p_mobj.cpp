@@ -461,6 +461,13 @@ void AActor::Destroy ()
 	Super::Destroy ();
 }
 
+void P_CheckTouchy(AActor* mo)
+{
+	/* killough 11/98: touchy objects explode on impact */
+	if (mo->flags & MF_TOUCHY && mo->oflags & MFO_ARMED && mo->health > 0)
+		P_DamageMobj(mo, NULL, NULL, mo->health);
+}
+
 //
 // P_CalculateMinMom
 //
@@ -551,10 +558,10 @@ void P_MoveActor(AActor *mo)
 	}
 	if ((mo->z != mo->floorz) || mo->momz || BlockingMobj)
 	{
-	    // Handle Z momentum and gravity
+		// Handle Z momentum and gravity
 		if (P_AllowPassover() && (mo->flags2 & MF2_PASSMOBJ))
 		{
-		    if (!(onmo = P_CheckOnmobj(mo)))
+			if (!(onmo = P_CheckOnmobj(mo)))
 			{
 				P_ZMovement(mo);
 				if (mo->player && mo->flags2 & MF2_ONMOBJ)
@@ -564,11 +571,11 @@ void P_MoveActor(AActor *mo)
 			}
 			else
 			{
-			    if (mo->player)
+				if (mo->player)
 				{
 					minmom = P_CalculateMinMom(mo);
 
-					if (mo->momz < minmom && !(mo->flags2&MF2_FLY))
+					if (mo->momz < minmom && !(mo->flags2 & MF2_FLY))
 						PlayerLandedOnThing(mo, onmo);
 				}
 				if (onmo->z + onmo->height - mo->z <= 24 * FRACUNIT)
@@ -577,22 +584,23 @@ void P_MoveActor(AActor *mo)
 					{
 						mo->player->viewheight -= onmo->z + onmo->height - mo->z;
 						mo->player->deltaviewheight =
-							(VIEWHEIGHT - mo->player->viewheight)>>3;
+						    (VIEWHEIGHT - mo->player->viewheight) >> 3;
 					}
 					mo->z = onmo->z + onmo->height;
 				}
 
 				mo->flags2 |= MF2_ONMOBJ;
 				mo->momz = 0;
+				P_CheckTouchy(onmo);
 			}
 		}
-	    else
-	    {
-            P_ZMovement(mo);
-	    }
+		else
+		{
+			P_ZMovement(mo);
+		}
 
-        if (mo->ObjectFlags & OF_MassDestruction)
-            return;		// actor was destroyed
+		if (mo->ObjectFlags & OF_MassDestruction)
+			return; // actor was destroyed
 	}
 	else if (!(mo->momx | mo->momy) && !sentient(mo))
 	{                            // non-sentient objects at rest
@@ -601,9 +609,7 @@ void P_MoveActor(AActor *mo)
 		// killough 9/12/98: objects fall off ledges if they are hanging off
 		// slightly push off of ledge if hanging more than halfway off
 		// [RH] Be more restrictive to avoid pushing monsters/players down steps
-		if (!(mo->flags & MF_NOGRAVITY) &&
-		    (mo->z > mo->dropoffz) &&
-		    P_AllowDropOff())
+		if (!(mo->flags & MF_NOGRAVITY) && (mo->z > mo->dropoffz) && P_AllowDropOff())
 		{
 			P_ApplyTorque(mo); // Apply torque
 		}
@@ -1808,13 +1814,6 @@ void P_ApplyBouncyPhysics(AActor *mo)
 
 		return;
 	}
-}
-
-void P_CheckTouchy(AActor* mo)
-{
-	/* killough 11/98: touchy objects explode on impact */
-	if (mo->flags & MF_TOUCHY && mo->oflags & MFO_ARMED && mo->health > 0)
-		P_DamageMobj(mo, NULL, NULL, mo->health);
 }
 
 //
