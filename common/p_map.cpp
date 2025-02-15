@@ -1280,29 +1280,28 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 		 */
 		if (!(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)))
 		{
-			if (!(P_AllowDropOff() && dropoff) && tmfloorz - tmdropoffz > 24 * FRACUNIT &&
-			    !(thing->flags2 & MF2_BLASTED))
-			{ // Can't move over a dropoff unless it's been blasted
+			if ((!P_AllowDropOff() && !dropoff) && tmfloorz - tmdropoffz > 24 * FRACUNIT)
+			{
 				return false;
 			}
-			//else
-			//{
-			//	if (dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
-			//	                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
-			//	                  !thing->target || thing->target->z > tmdropoffz)))
-			//	{
-			//		if (!co_monkeys || !P_IsMBFCompatMode()
-			//		        ? tmfloorz - tmdropoffz > 24 * FRACUNIT
-			//		        : thing->floorz - tmfloorz > 24 * FRACUNIT ||
-			//		          thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
-			//			return false;
-			//	}
-			//	else
-			//	{ /* dropoff allowed -- check for whether it fell more than 24 */
-			//		felldown = !(thing->flags & MF_NOGRAVITY) &&
-			//		           thing->z - tmfloorz > 24 * FRACUNIT;
-			//	}
-			//}
+			else
+			{
+				if (!dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
+				                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
+				                  !thing->target || thing->target->z > tmdropoffz)))
+				{
+					if (!co_monkeys || !P_IsMBFCompatMode()
+					        ? tmfloorz - tmdropoffz > 24 * FRACUNIT
+					        : thing->floorz - tmfloorz > 24 * FRACUNIT ||
+					          thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
+						return false;
+				}
+				else
+				{ /* dropoff allowed -- check for whether it fell more than 24 */
+					felldown = !(thing->flags & MF_NOGRAVITY) &&
+					           thing->z - tmfloorz > 24 * FRACUNIT;
+				}
+			}
 		}
 
 		if (thing->flags & MF_BOUNCES && // killough 8/13/98

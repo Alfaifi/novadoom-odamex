@@ -381,6 +381,11 @@ CVAR_RANGE(sv_countdown, "5",
 					"Use MBF comp_staylift behavior -- monsters will try to stay on lifts.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
+	CVAR(			co_dogjumping, "0",
+					"Use MBF dog__jumping behavior -- friendly monsters will drop off high ledges "
+					"if the target is immediately on the other side.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
 
 
 	// ZDoom-compatibility changes

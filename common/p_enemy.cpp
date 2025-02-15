@@ -61,6 +61,7 @@ EXTERN_CVAR(co_monsterbacking)
 EXTERN_CVAR(co_monsterfriction)
 EXTERN_CVAR(co_avoidhazards)
 EXTERN_CVAR(co_staylift)
+EXTERN_CVAR(co_dogjumping)
 EXTERN_CVAR(co_removesoullimit)
 
 enum dirtype_t
@@ -471,7 +472,7 @@ bool P_SmartMove(AActor* actor)
 
 	// allow all friends to jump down instead of just dogs
 
-	if (actor->flags & MF_FRIEND && target && P_AllowDropOff() &&
+	if (actor->flags & MF_FRIEND && target && co_dogjumping && P_AllowDropOff() &&
 	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
 	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
 	    P_Random(actor) < 235)
@@ -1547,7 +1548,7 @@ void A_Chase (AActor *actor)
 	// possibly choose another target
 	if (!actor->threshold)
 	{
-		if (!(actor->flags & MF_FRIEND) || !co_pursuit)
+		if (!(actor->flags & MF_FRIEND) && !co_pursuit)
 		{
 			if (multiplayer && !P_CheckSight(actor, actor->target) &&
 			    P_LookForPlayers(actor, true))
