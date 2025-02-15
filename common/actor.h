@@ -42,6 +42,8 @@
 
 #include "szp.h"
 
+#include "teamdef.h"
+
 // STL
 #include <map>
 
@@ -203,9 +205,9 @@ enum mobjflag_t
 	// If 0x4 0x8 or 0xc, use a translation table for player colormaps
 	MF_TRANSLATION = 0xc000000,
 
-	MF_TOUCHY  = BIT(28), // MBF - UNUSED FOR NOW
-	MF_BOUNCES = BIT(29), // MBF - PARTIAL IMPLEMENTATION
-	MF_FRIEND  = BIT(30), // MBF - UNUSED FOR NOW
+	MF_TOUCHY  = BIT(28), // MBF
+	MF_BOUNCES = BIT(29), // MBF
+	MF_FRIEND  = BIT(30), // MBF
 
 	// --- mobj.flags2 ---
 	// Heretic flags
@@ -284,6 +286,7 @@ enum mobjflag_t
 	MFO_FULLBRIGHT		= BIT(8),	// monster is fullbright
 	MFO_SPECTATOR		= BIT(9),	// GhostlyDeath -- thing is/was a spectator and can't be seen!
 	MFO_FALLING			= BIT(10),	// [INTERNAL] for falling
+	MFO_ARMED				= BIT(11),	// [INTERNAL] for TOUCHY (object is armed)
 };
 
 //
@@ -548,8 +551,13 @@ public:
 
 	byte friend_playerid; // playerid of the player who spawned this actor
 
+	team_t friend_teamid; // team of the player who spawned this actor
+
 	// killough 9/9/98: How long a monster pursues a target.
 	short pursuecount;
+
+	// killough 9/8/98: monster strafing
+	short strafecount;
 
 	// ThingIDs
 	static void ClearTIDHashes ();

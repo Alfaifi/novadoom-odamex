@@ -32,6 +32,7 @@
 
 #include "p_local.h"
 #include "p_lnspec.h"
+#include "p_boomfspec.h"
 #include "c_effect.h"
 #include "p_mobj.h"
 #include "svc_message.h"
@@ -68,7 +69,8 @@ static int		ls_y;	// Lost Soul position for Lost Soul checks		// phares
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-BOOL 			floatok;
+int				floatok;
+int				felldown;
 
 fixed_t 		tmfloorz;
 fixed_t 		tmceilingz;
@@ -102,6 +104,7 @@ EXTERN_CVAR (co_blockmapfix)
 EXTERN_CVAR (co_boomsectortouch)
 EXTERN_CVAR (sv_friendlyfire)
 EXTERN_CVAR (sv_unblockplayers)
+EXTERN_CVAR (co_monkeys)
 
 CVAR_FUNC_IMPL (sv_gravity)
 {
@@ -605,6 +608,32 @@ static BOOL PIT_CheckThing (AActor *thing)
 
 	if (P_AllowPassover())
 		BlockingMobj = thing;
+
+	 /* killough 11/98:
+	 *
+	 * TOUCHY flag, for mines or other objects which die on contact with solids.
+	 * If a solid object of a different type comes in contact with a touchy
+	 * thing, and the touchy thing is not the sole one moving relative to fixed
+	 * surroundings such as walls, then the touchy thing dies immediately.
+	 */
+
+	if (thing->flags & MF_TOUCHY &&               // touchy object
+	    tmthing->flags & MF_SOLID &&              // solid object touches it
+	    thing->health > 0 &&                      // touchy object is alive
+	    (thing->oflags & MFO_ARMED ||             // Thing is an armed mine
+	     sentient(thing)) &&                      // ... or a sentient thing
+	    (thing->type != tmthing->type ||          // only different species
+	     thing->type == MT_PLAYER) &&           // ... or different players
+	    thing->z + thing->height >= tmthing->z && // touches vertically
+	    tmthing->z + tmthing->height >= thing->z &&
+	    (thing->type ^ MT_PAIN) |         // PEs and lost souls
+	        (tmthing->type ^ MT_SKULL) && // are considered same
+	    (thing->type ^ MT_SKULL) |        // (but Barons & Knights
+	        (tmthing->type ^ MT_PAIN))    // are intentionally not)
+	{
+		P_DamageMobj(thing, NULL, NULL, thing->health); // kill object
+		return true;
+	}
 
 	if (P_AllowPassover() && (tmthing->flags2 & MF2_PASSMOBJ))
 	{
@@ -1155,13 +1184,13 @@ void P_CheckPushLines(AActor *thing)
 // crossing special lines unless MF_TELEPORT is set.
 //
 BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
-				bool dropoff, // killough 3/15/98: allow dropoff as option
+				int dropoff, // killough 3/15/98: allow dropoff as option
 				bool onfloor) // [RH] Let P_TryMove keep the thing on the floor
 {
 	fixed_t		testz = thing->z;
 	sector_t*	oldsec = thing->subsector->sector;	// [RH] for sector actions
 
-	floatok = false;
+	felldown = floatok = false;
 
 	if (onfloor)
 		testz = P_FloorHeight(x, y, thing->floorsector);
@@ -1243,18 +1272,41 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 			}
 		}
 
-		// killough 3/15/98: Allow certain objects to drop off
-		if (!(P_AllowDropOff() && dropoff) &&
-			!(thing->flags & (MF_DROPOFF|MF_FLOAT|MF_MISSILE)) &&
-			  tmfloorz - tmdropoffz > 24*FRACUNIT &&
-			!(thing->flags2 & MF2_BLASTED))
-		{ // Can't move over a dropoff unless it's been blasted
-			return false;
+		 /* killough 3/15/98: Allow certain objects to drop off
+		 * killough 7/24/98, 8/1/98:
+		 * Prevent monsters from getting stuck hanging off ledges
+		 * killough 10/98: Allow dropoffs in controlled circumstances
+		 * killough 11/98: Improve symmetry of clipping on stairs
+		 */
+		if (!(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)))
+		{
+			if (!(P_AllowDropOff() && dropoff) && tmfloorz - tmdropoffz > 24 * FRACUNIT &&
+			    !(thing->flags2 & MF2_BLASTED))
+			{ // Can't move over a dropoff unless it's been blasted
+				return false;
+			}
+			//else
+			//{
+			//	if (!dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
+			//	                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
+			//	                  !thing->target || thing->target->z > tmdropoffz)))
+			//	{
+			//		if (!co_monkeys || !P_IsMBFCompatMode()
+			//		        ? tmfloorz - tmdropoffz > 24 * FRACUNIT
+			//		        : thing->floorz - tmfloorz > 24 * FRACUNIT ||
+			//		          thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
+			//			return false;
+			//	}
+			//	else
+			//	{ /* dropoff allowed -- check for whether it fell more than 24 */
+			//		felldown = !(thing->flags & MF_NOGRAVITY) &&
+			//		           thing->z - tmfloorz > 24 * FRACUNIT;
+			//	}
+			//}
 		}
 
-		bool sentient = thing->health > 0 && thing->info->seestate;
 		if (thing->flags & MF_BOUNCES && // killough 8/13/98
-		    !(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) && !sentient &&
+		    !(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) && !sentient(thing) &&
 		    tmfloorz - thing->z > 16 * FRACUNIT)
 			return false; // too big a step up for bouncers under gravity
 
@@ -1425,7 +1477,7 @@ void P_ApplyTorque (AActor *mo)
 	int flags = mo->oflags;	//Remember the current state, for gear-change
 
 	tmthing = mo;
-	++validcount; // prevents checking same line twice
+	validcount++; // prevents checking same line twice
 
 	for (bx = xl ; bx <= xh ; bx++)
 		for (by = yl ; by <= yh ; by++)
@@ -1497,6 +1549,10 @@ BOOL P_ThingHeightClip (AActor* thing)
 			thing->oflags |= MFO_NOSNAPZ;
 		}
 		thing->z = newz;
+
+		/* killough 11/98: Possibly upset balance of objects hanging off ledges */
+		if (thing->oflags & MFO_FALLING && thing->gear >= MAXGEAR)
+			thing->gear = 0;
 	}
 	else
 	{
@@ -3201,6 +3257,13 @@ BOOL PIT_ChangeSector (AActor *thing)
 
 		// keep checking
 		return true;
+	}
+
+	/* killough 11/98: kill touchy things immediately */
+	if (thing->flags & MF_TOUCHY && (thing->oflags & MFO_ARMED || sentient(thing)))
+	{
+		P_DamageMobj(thing, NULL, NULL, thing->health); // kill object
+		return true;                                    // keep checking
 	}
 
 	if (! (thing->flags & MF_SHOOTABLE) )

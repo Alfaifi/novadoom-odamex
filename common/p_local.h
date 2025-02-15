@@ -236,7 +236,8 @@ angle_t P_PointToAngle(fixed_t xo, fixed_t yo, fixed_t x, fixed_t y);
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-extern BOOL				floatok;
+extern int				floatok;
+extern int				felldown;
 extern fixed_t			tmfloorz;
 extern fixed_t			tmceilingz;
 extern msecnode_t		*sector_list;		// phares 3/16/98
@@ -257,7 +258,7 @@ bool	P_CheckPosition (AActor *thing, fixed_t x, fixed_t y);
 AActor	*P_CheckOnmobj (AActor *thing);
 void	P_FakeZMovement (AActor *mo);
 bool	P_CheckSlopeWalk (AActor *actor, fixed_t &xmove, fixed_t &ymove);
-BOOL	P_TryMove (AActor* thing, fixed_t x, fixed_t y, bool dropoff, bool onfloor = false);
+BOOL	P_TryMove (AActor* thing, fixed_t x, fixed_t y, int dropoff, bool onfloor = false);
 BOOL	P_TeleportMove (AActor* thing, fixed_t x, fixed_t y, fixed_t z, BOOL telefrag);	// [RH] Added z and telefrag parameters
 void	P_SlideMove (AActor* mo);
 bool	P_CheckSight (const AActor* t1, const AActor* t2);

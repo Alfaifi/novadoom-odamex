@@ -345,14 +345,36 @@ CVAR_RANGE(sv_countdown, "5",
 	CVAR(			co_removesoullimit, "0", "Allows pain elementals to still spawn lost souls if more than 20 are present",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
+	// MBF-compatibility changes
+	//------------------------------
+
 	CVAR(			co_pursuit, "0",
-					"Use MBF pursuit behavior -- monsters will change targets " \
+					"Use MBF pursuit behavior -- monsters will change targets " 
 					"if their current target is out of sight and a new valid target is in sight.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 	CVAR(			co_helpfriends, "0",
-					"Use MBF help_friends behavior -- monsters will help friends under "
-					"50% health. No effect unless using MBF pursuit behavior (co_pursuit).",
+					"Use MBF help_friends behavior -- monsters will help friends under 50% health.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR(			co_monsterbacking, "0",
+					"Use MBF monster_backing behavior -- monsters can strafe or retreat.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR_RANGE(co_distfriend, "128",
+					"Use MBF distfriend behavior -- friendlies will try to maintain this distance in mapblocks.",
+					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 2048.0f)
+
+	CVAR(			co_avoidhazards, "0",
+					"Use MBF monster_avoid_hazards behavior -- monsters will avoid damaging sectors and crushers.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR(			co_monkeys, "0",
+					"Use MBF monkeys behavior -- monsters will step up or down to 24 units.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR(			co_staylift, "0",
+					"Use MBF comp_staylift behavior -- monsters will try to stay on lifts.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 

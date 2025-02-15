@@ -29,6 +29,7 @@
 #include <math.h>
 #include "m_random.h"
 #include "m_alloc.h"
+#include "m_bbox.h"
 #include "i_system.h"
 #include "p_local.h"
 #include "p_lnspec.h"
@@ -44,6 +45,7 @@
 #include "g_gametype.h"
 #include "g_skill.h"
 #include "p_mapformat.h"
+#include "p_boomfspec.h"
 #include "c_effect.h"
 
 
@@ -54,6 +56,10 @@ EXTERN_CVAR(co_novileghosts)
 EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(co_pursuit)
 EXTERN_CVAR(co_helpfriends)
+EXTERN_CVAR(co_distfriend)
+EXTERN_CVAR(co_monsterbacking)
+EXTERN_CVAR(co_avoidhazards)
+EXTERN_CVAR(co_staylift)
 EXTERN_CVAR(co_removesoullimit)
 
 enum dirtype_t
@@ -99,12 +105,6 @@ void A_Fall (AActor *actor);
 void SV_UpdateMonsterRespawnCount();
 void SV_UpdateMobj(AActor* mo);
 void SV_Sound(AActor* mo, byte channel, const char* name, byte attenuation);
-
-// killough 8/8/98: distance friends tend to move towards players
-constexpr int distfriend = 128;
-
-// killough 9/8/98: whether monsters are allowed to strafe or retreat
-constexpr int monster_backing = 0;
 
 extern bool isFast;
 
@@ -319,53 +319,6 @@ BOOL P_CheckMissileRange (AActor *actor)
 	return true;
 }
 
-/*
- * P_SmartMove
- *
- * killough 9/12/98: Same as P_Move, except smarter
- */
-
-bool P_SmartMove(AActor* actor)
-{
-	AActor* target = actor->target;
-	bool on_lift, under_damage = false;
-	int dropoff = 0;
-	bool tmp_monster_avoid_hazards = true; // co_monsteravoidhazards
-	bool staylift = true; // co_stayonlift
-
-	/* killough 9/12/98: Stay on a lift if target is on one */
-	on_lift = staylift && target && target->health > 0 &&
-	          target->subsector->sector->tag == actor->subsector->sector->tag &&
-	          P_IsOnLift(actor);
-
-	under_damage = tmp_monster_avoid_hazards && P_IsUnderDamage(actor); // e6y
-
-	// killough 10/98: allow dogs to drop off of taller ledges sometimes.
-	// dropoff==1 means always allow it, dropoff==2 means only up to 128 high,
-	// and only if the target is immediately on the other side of the line.
-
-	// allow all friends to jump down instead of just dogs
-
-	if (actor->flags & MF_FRIEND && target && P_AllowDropOff() &&
-	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
-	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
-	    P_Random(actor) < 235)
-		dropoff = 2;
-
-	//if (!P_Move(actor, dropoff))
-		//return false;
-
-	// killough 9/9/98: avoid crushing ceilings or other damaging areas
-	if ((on_lift && P_Random(actor) < 230 && // Stay on lift
-	     !P_IsOnLift(actor)) ||
-	    (tmp_monster_avoid_hazards && !under_damage && // e6y  // Get away from damage
-	     (under_damage = P_IsUnderDamage(actor)) &&
-	     (under_damage < 0 || P_Random(actor) < 200)))
-		actor->movedir = DI_NODIR; // avoid the area (most of the time anyway)
-
-	return true;
-}
-
 //
 // P_Move
 // Move in the current direction,
@@ -373,7 +326,7 @@ bool P_SmartMove(AActor* actor)
 //
 extern	std::vector<line_t*> spechit;
 
-BOOL P_Move (AActor *actor)
+BOOL P_Move (AActor *actor, int dropoff = 0)
 {
 	fixed_t tryx, tryy, deltax, deltay, origx, origy;
 	BOOL try_ok;
@@ -430,8 +383,7 @@ BOOL P_Move (AActor *actor)
 	tryx = (origx = actor->x) + (deltax = speed * xspeed[actor->movedir]);
 	tryy = (origy = actor->y) + (deltay = speed * yspeed[actor->movedir]);
 
-	// killough 3/15/98: don't jump over dropoffs:
-	try_ok = P_TryMove (actor, tryx, tryy, false);
+	try_ok = P_TryMove(actor, tryx, tryy, dropoff);
 
 	if (try_ok && friction > ORIG_FRICTION)
 	{
@@ -467,6 +419,7 @@ BOOL P_Move (AActor *actor)
 			return false;
 
 		actor->movedir = DI_NODIR;
+
 		good = false;
 		while (!spechit.empty())
 		{
@@ -487,12 +440,56 @@ BOOL P_Move (AActor *actor)
 		actor->flags &= ~MF_INFLOAT;
 	}
 
-	if (!co_zdoomphys && !(actor->flags & MF_FLOAT))
+	if (!(actor->flags & MF_FLOAT) && !felldown && !co_zdoomphys)
 		actor->z = actor->floorz;
 
 	return true;
 }
 
+/*
+ * P_SmartMove
+ *
+ * killough 9/12/98: Same as P_Move, except smarter
+ */
+
+bool P_SmartMove(AActor* actor)
+{
+	AActor* target = actor->target;
+	bool on_lift, under_damage = false;
+	int dropoff = 0;
+
+	/* killough 9/12/98: Stay on a lift if target is on one */
+	on_lift = co_staylift && target && target->health > 0 &&
+	          target->subsector->sector->tag == actor->subsector->sector->tag &&
+	          P_IsOnLift(actor);
+
+	under_damage = co_avoidhazards && P_IsUnderDamage(actor); // e6y
+
+	// killough 10/98: allow dogs to drop off of taller ledges sometimes.
+	// dropoff==1 means always allow it, dropoff==2 means only up to 128 high,
+	// and only if the target is immediately on the other side of the line.
+
+	// allow all friends to jump down instead of just dogs
+
+	if (actor->flags & MF_FRIEND && target && P_AllowDropOff() &&
+	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
+	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
+	    P_Random(actor) < 235)
+		dropoff = 2;
+
+	if (!P_Move(actor, dropoff))
+		return false;
+
+	// killough 9/9/98: avoid crushing ceilings or other damaging areas
+	if ((on_lift && P_Random(actor) < 230 && // Stay on lift
+	     !P_IsOnLift(actor)) ||
+	    (co_avoidhazards && !under_damage && // e6y  // Get away from damage
+	     (under_damage = P_IsUnderDamage(actor)) &&
+	     (under_damage < 0 || P_Random(actor) < 200)))
+		actor->movedir = DI_NODIR; // avoid the area (most of the time anyway)
+
+	return true;
+}
 
 //
 // TryWalk
@@ -507,7 +504,7 @@ BOOL P_Move (AActor *actor)
 //
 BOOL P_TryWalk (AActor *actor)
 {
-	if (!P_Move (actor))
+	if (!P_SmartMove (actor))
 	{
 		return false;
 	}
@@ -582,6 +579,22 @@ bool P_IsOnLift(const AActor* actor)
 	return false;
 }
 
+//
+// A_FaceTarget
+//
+void A_FaceTarget(AActor* actor)
+{
+	if (!actor->target)
+		return;
+
+	actor->flags &= ~MF_AMBUSH;
+
+	actor->angle = P_PointToAngle(actor->x, actor->y, actor->target->x, actor->target->y);
+
+	if (actor->target->flags & MF_SHADOW)
+		actor->angle += P_RandomDiff(actor) << 21;
+}
+
 //=============================================================================
 //
 // P_HitFriend()
@@ -610,61 +623,100 @@ bool P_HitFriend(AActor* self)
 	return false;
 }
 
-void P_NewChaseDir (AActor *actor)
+static fixed_t dropoff_deltax, dropoff_deltay, floorz;
+extern fixed_t tmbbox[4];
+
+static BOOL PIT_AvoidDropoff(line_t* line)
 {
-	fixed_t 	deltax;
-	fixed_t 	deltay;
-
-	dirtype_t	d[3];
-
-	int			tdir;
-	dirtype_t	olddir;
-
-	dirtype_t	turnaround;
-
-	if (!actor->target)
-		I_Error ("P_NewChaseDir: called with no target");
-
-	olddir = (dirtype_t)actor->movedir;
-	turnaround = opposite[olddir];
-
-	deltax = actor->target->x - actor->x;
-	deltay = actor->target->y - actor->y;
-
-	if (monster_backing)
+	if (line->backsector && // Ignore one-sided linedefs
+	    tmbbox[BOXRIGHT] > line->bbox[BOXLEFT] &&
+	    tmbbox[BOXLEFT] < line->bbox[BOXRIGHT] &&
+	    tmbbox[BOXTOP] > line->bbox[BOXBOTTOM] && // Linedef must be contacted
+	    tmbbox[BOXBOTTOM] < line->bbox[BOXTOP] && P_BoxOnLineSide(tmbbox, line) == -1)
 	{
-		fixed_t dist = P_AproxDistance(deltax, deltay);
-		if (actor->flags & actor->target->flags & MF_FRIEND &&
-		    distfriend << FRACBITS > dist && !P_IsOnLift(actor) &&
-		    !P_IsUnderDamage(actor))
-		{
-			deltax = -deltax, deltay = -deltay;
-		}
-		else if (actor->target->health > 0 &&
-		         (actor->flags ^ actor->target->flags) & MF_FRIEND)
-		{ // Live enemy target
-			if (actor->info->missilestate && actor->type != MT_SKULL &&
-			    ((!actor->target->info->missilestate &&
-			      dist < actor->target->info->meleerange * 2) ||
-			     (actor->target->player &&
-			      dist < actor->target->player->mo->info->meleerange * 3 &&
-			      weaponinfo[actor->target->player->readyweapon].flags & WPF_FLEEMELEE)))
-			{ // Back away from melee attacker
-				deltax = -deltax, deltay = -deltay;
-			}
-		}
+		fixed_t front = line->frontsector->floorheight;
+		fixed_t back = line->backsector->floorheight;
+		angle_t angle;
+
+		// The monster must contact one of the two floors,
+		// and the other must be a tall dropoff (more than 24).
+
+		if (back == floorz && front < floorz - FRACUNIT * 24)
+			angle = R_PointToAngle2(0, 0, line->dx, line->dy); // front side dropoff
+		else if (front == floorz && back < floorz - FRACUNIT * 24)
+			angle = R_PointToAngle2(line->dx, line->dy, 0, 0); // back side dropoff
+		else
+			return true;
+
+		// Move away from dropoff at a standard speed.
+		// Multiple contacted linedefs are cumulative (e.g. hanging over corner)
+		dropoff_deltax -= finesine[angle >> ANGLETOFINESHIFT] * 32;
+		dropoff_deltay += finecosine[angle >> ANGLETOFINESHIFT] * 32;
 	}
+	return true;
+}
 
-	if (deltax>10*FRACUNIT)
-		d[1]= DI_EAST;
-	else if (deltax<-10*FRACUNIT)
-		d[1]= DI_WEST;
+//
+// Driver for above
+//
+
+static fixed_t P_AvoidDropoff(AActor* actor)
+{
+	tmbbox[BOXTOP] = actor->y + actor->radius;
+	tmbbox[BOXBOTTOM] = actor->y - actor->radius;
+	tmbbox[BOXRIGHT] = actor->x + actor->radius;
+	tmbbox[BOXLEFT] = actor->x - actor->radius;
+
+	int yh = tmbbox[BOXTOP] - bmaporgy;
+	int yl = tmbbox[BOXBOTTOM] - bmaporgy;
+	int xh = tmbbox[BOXRIGHT] - bmaporgx;
+	int xl = tmbbox[BOXLEFT] - bmaporgx;
+	int bx, by;
+
+	floorz = actor->z; // remember floor height
+
+	dropoff_deltax = dropoff_deltay = 0;
+
+	// check lines
+
+	validcount++;
+	for (bx = xl; bx <= xh; bx++)
+		for (by = yl; by <= yh; by++)
+			P_BlockLinesIterator(bx, by, PIT_AvoidDropoff); // all contacted lines
+
+	return dropoff_deltax | dropoff_deltay; // Non-zero if movement prescribed
+}
+
+//
+// P_DoNewChaseDir
+//
+// killough 9/8/98:
+//
+// Most of P_NewChaseDir(), except for what
+// determines the new direction to take
+// 
+// Uses the new ZDoom chase code
+//
+
+static void P_DoNewChaseDir(AActor* actor, fixed_t deltax, fixed_t deltay)
+{
+	dirtype_t d[3];
+
+	int tdir;
+	dirtype_t olddir = (dirtype_t)actor->movedir;
+
+	dirtype_t turnaround = turnaround = opposite[olddir];
+
+	if (deltax > 10 * FRACUNIT)	
+		d[1] = DI_EAST;
+	else if (deltax < -10 * FRACUNIT)
+		d[1] = DI_WEST;
 	else
-		d[1]=DI_NODIR;
+		d[1] = DI_NODIR;
 
-	if (deltay<-10*FRACUNIT)
-		d[2]= DI_SOUTH;
-	else if (deltay>10*FRACUNIT)
+	if (deltay < -10 * FRACUNIT)
+		d[2] = DI_SOUTH;
+	else if (deltay > 10 * FRACUNIT)
 		d[2] = DI_NORTH;
 	else
 		d[2] = DI_NODIR;
@@ -672,13 +724,13 @@ void P_NewChaseDir (AActor *actor)
 	// try direct route
 	if (d[1] != DI_NODIR && d[2] != DI_NODIR)
 	{
-		actor->movedir = diags[((deltay<0)<<1) + (deltax>0)];
+		actor->movedir = diags[((deltay < 0) << 1) + (deltax > 0)];
 		if (actor->movedir != turnaround && P_TryWalk(actor))
 			return;
 	}
 
 	// try other directions
-	if (P_Random (actor) > 200 || abs(deltay) > abs(deltax))
+	if (P_Random(actor) > 200 || abs(deltay) > abs(deltax))
 	{
 		tdir = d[1];
 		d[1] = d[2];
@@ -693,7 +745,7 @@ void P_NewChaseDir (AActor *actor)
 	if (d[1] != DI_NODIR)
 	{
 		actor->movedir = d[1];
-		if (P_TryWalk (actor))
+		if (P_TryWalk(actor))
 		{
 			// either moved forward or attacked
 			return;
@@ -704,7 +756,7 @@ void P_NewChaseDir (AActor *actor)
 	{
 		actor->movedir = d[2];
 
-		if (P_TryWalk (actor))
+		if (P_TryWalk(actor))
 			return;
 	}
 
@@ -714,12 +766,12 @@ void P_NewChaseDir (AActor *actor)
 	{
 		actor->movedir = olddir;
 
-		if (P_TryWalk (actor))
+		if (P_TryWalk(actor))
 			return;
 	}
 
 	// randomly determine direction of search
-	if (P_Random (actor) & 1)
+	if (P_Random(actor) & 1)
 	{
 		for (tdir = DI_EAST; tdir <= DI_SOUTHEAST; tdir++)
 		{
@@ -727,20 +779,20 @@ void P_NewChaseDir (AActor *actor)
 			{
 				actor->movedir = tdir;
 
-				if ( P_TryWalk(actor) )
+				if (P_TryWalk(actor))
 					return;
 			}
 		}
 	}
 	else
 	{
-		for (tdir = DI_SOUTHEAST; tdir != (DI_EAST-1); tdir--)
+		for (tdir = DI_SOUTHEAST; tdir != (DI_EAST - 1); tdir--)
 		{
 			if (tdir != turnaround)
 			{
 				actor->movedir = tdir;
 
-				if ( P_TryWalk(actor) )
+				if (P_TryWalk(actor))
 					return;
 			}
 		}
@@ -748,12 +800,81 @@ void P_NewChaseDir (AActor *actor)
 
 	if (turnaround != DI_NODIR)
 	{
-		actor->movedir =turnaround;
-		if ( P_TryWalk(actor) )
+		actor->movedir = turnaround;
+		if (P_TryWalk(actor))
 			return;
 	}
 
-	actor->movedir = DI_NODIR;	// can not move
+	actor->movedir = DI_NODIR; // can not move
+}
+
+void P_NewChaseDir (AActor *actor)
+{
+	if (!actor->target)
+		I_Error ("P_NewChaseDir: called with no target");
+
+	fixed_t deltax = actor->target->x - actor->x;
+	fixed_t deltay = actor->target->y - actor->y;
+
+	// killough 8/8/98: sometimes move away from target, keeping distance
+	//
+	// 1) Stay a certain distance away from a friend, to avoid being in their way
+	// 2) Take advantage over an enemy without missiles, by keeping distance
+
+	actor->strafecount = 0;
+
+	if (P_IsMBFCompatMode())
+	{
+		if (actor->floorz - actor->dropoffz > FRACUNIT * 24 &&
+		    actor->z <= actor->floorz && !(actor->flags & (MF_DROPOFF | MF_FLOAT)) &&
+		    !P_AllowDropOff() && P_AvoidDropoff(actor)) /* Move away from dropoff */
+		{
+			P_DoNewChaseDir(actor, dropoff_deltax, dropoff_deltay);
+
+			// If moving away from dropoff, set movecount to 1 so that
+			// small steps are taken to get monster away from dropoff.
+
+			actor->movecount = 1;
+			return;
+		}
+		else
+		{
+			fixed_t dist = P_AproxDistance(deltax, deltay);
+
+			if (actor->flags & actor->target->flags & MF_FRIEND &&
+			    P_IsFriendlyThing(actor, actor->target) &&
+			    co_distfriend.asInt() << FRACBITS > dist && !P_IsOnLift(actor) &&
+			    !P_IsUnderDamage(actor))
+			{
+				deltax = -deltax, deltay = -deltay;
+			}
+			else if (actor->target->health > 0 &&
+			         (actor->flags ^ actor->target->flags) & MF_FRIEND)
+			{ // Live enemy target
+				if (co_monsterbacking &&
+						actor->info->missilestate && 
+						actor->type != MT_SKULL &&
+				    ((!actor->target->info->missilestate &&
+				      dist < actor->target->info->meleerange * 2) ||
+				     (actor->target->player &&
+				      dist < actor->target->player->mo->info->meleerange * 3 &&
+				      weaponinfo[actor->target->player->readyweapon].flags &
+				          WPF_FLEEMELEE)))
+				{ // Back away from melee attacker
+					actor->strafecount = P_Random(actor) & 15;
+					deltax = -deltax, deltay = -deltay;
+				}
+			}
+		}
+	}
+
+	P_DoNewChaseDir(actor, deltax, deltay);
+
+	// If strafing, set movecount to strafecount so that old Doom
+	// logic still works the same, except in the strafing part
+
+	if (actor->strafecount)
+		actor->movecount = actor->strafecount;
 }
 
 static bool P_IsVisible(AActor* actor, AActor* mo, bool allaround)
@@ -1178,7 +1299,7 @@ void A_RandomWalk(AActor* actor)
 		}
 
 		// try moving
-		if (--actor->movecount < 0 || !P_Move(actor))
+		if (--actor->movecount < 0 || !P_SmartMove(actor))
 		{
 			P_NewRandomDir(actor);
 			actor->movecount += 5;
@@ -1315,8 +1436,13 @@ void A_Chase (AActor *actor)
 			actor->threshold--;
 	}
 
-	// turn towards movement direction if not there yet
-	if (actor->movedir < 8)
+	/* turn towards movement direction if not there yet
+	 * killough 9/7/98: keep facing towards target if strafing or backing out
+	 */
+
+	if (actor->strafecount)
+		A_FaceTarget(actor);
+	else if (actor->movedir < 8)
 	{
 		actor->angle &= (angle_t)(7<<29);
 		delta = actor->angle - (actor->movedir << 29);
@@ -1330,61 +1456,6 @@ void A_Chase (AActor *actor)
 	// [RH] If the target is dead or a friend (and not a goal), stop chasing it.
 	if (actor->target && actor->target != actor->goal && actor->target->health <= 0)
 		actor->target = AActor::AActorPtr();
-
-	// [RH] Friendly monsters will consider chasing whoever hurts a player if they
-	// don't already have a target.
-	if (actor->flags & MF_FRIEND && !actor->target)
-	{
-		player_t* player;
-
-		if (actor->friend_playerid != 0)
-		{
-			for (Players::iterator it = players.begin(); it != players.end(); ++it)
-			{
-				if (it->id == actor->friend_playerid && !it->spectator && it->health > 0)
-				{
-					player = &(*it);
-					break;
-				}
-			}
-		}
-		else
-		{
-			if (!multiplayer)
-			{
-				player = &*players.begin();
-			}
-			else
-			{
-				for (Players::iterator it = players.begin(); it != players.end(); ++it)
-				{
-					if (it->ingame())
-					{
-						if (P_Random(actor) < 80 && P_IsFriendlyThing(it->mo, actor))
-						{
-							player = &(*it);
-							break;
-						}
-					}
-				}
-
-				if (!player)
-				{
-					player = &*players.begin();
-				}
-			}
-		}
-
-		if (player && player->attacker && player->attacker->health > 0 &&
-		    player->attacker->flags & MF_SHOOTABLE && P_Random(actor) < 80)
-		{
-			if (!(player->attacker->flags & MF_FRIEND) ||
-			    !P_IsFriendlyThing(player->attacker->self, actor))
-			{
-				actor->target = player->attacker->self;
-			}
-		}
-	}
 
 	if (!actor->target || !(actor->target->flags & MF_SHOOTABLE))
 	{
@@ -1523,8 +1594,11 @@ void A_Chase (AActor *actor)
 		}
 	}
 
+	if (actor->strafecount)
+		actor->strafecount--;
+
 	// chase towards player
-	if (--actor->movecount < 0 || !P_Move (actor))
+	if (--actor->movecount < 0 || !P_SmartMove (actor))
 	{
 		P_NewChaseDir (actor);
 	}
@@ -1534,26 +1608,6 @@ void A_Chase (AActor *actor)
 	{
 		S_Sound (actor, CHAN_VOICE, actor->info->activesound, 1, ATTN_IDLE);
 	}
-}
-
-
-//
-// A_FaceTarget
-//
-void A_FaceTarget (AActor *actor)
-{
-	if (!actor->target)
-		return;
-
-	actor->flags &= ~MF_AMBUSH;
-
-	actor->angle = P_PointToAngle (actor->x,
-									actor->y,
-									actor->target->x,
-									actor->target->y);
-
-	if (actor->target->flags & MF_SHADOW)
-		actor->angle += P_RandomDiff(actor)<<21;
 }
 
 //

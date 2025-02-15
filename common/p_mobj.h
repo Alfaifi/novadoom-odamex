@@ -121,6 +121,10 @@ inline static fixed_t DegToSlope(fixed_t a)
 		return AngleToSlope(-(int)FixedToAngle(-a));
 }
 
+// killough 11/98:
+// Whether an object is "sentient" or not. Used for environmental influences.
+#define sentient(actor) ((actor)->health > 0 && (actor)->info->seestate)
+
 extern NetIDHandler ServerNetID;
 
 // All oflag mods that are sent to horde bosses.

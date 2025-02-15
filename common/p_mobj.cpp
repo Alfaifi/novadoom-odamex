@@ -133,7 +133,8 @@ AActor::AActor()
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), friend_playerid(0), pursuecount(0), baseline_set(false), bmapnode(this)
+      rndindex(0), netid(0), tid(0), friend_playerid(0), friend_teamid(TEAM_NONE), pursuecount(0), strafecount(0),
+      baseline_set(false), bmapnode(this)
 {
 	memset(args, 0, sizeof(args));
 	memset(&baseline, 0, sizeof(baseline));
@@ -160,7 +161,10 @@ AActor::AActor(const AActor& other)
       onground(other.onground), touching_sectorlist(other.touching_sectorlist),
       deadtic(other.deadtic), oldframe(other.oldframe), rndindex(other.rndindex),
       netid(other.netid), tid(other.tid), 
-      friend_playerid(other.friend_playerid), pursuecount(other.pursuecount), baseline_set(false), bmapnode(other.bmapnode)
+      friend_playerid(other.friend_playerid),
+      friend_teamid(other.friend_teamid), pursuecount(other.pursuecount),
+      strafecount(other.strafecount),
+      baseline_set(false), bmapnode(other.bmapnode)
 {
 	memcpy(args, other.args, sizeof(args));
 	memcpy(&baseline, &other.baseline, sizeof(baseline));
@@ -169,26 +173,26 @@ AActor::AActor(const AActor& other)
 
 AActor &AActor::operator= (const AActor &other)
 {
-	x = other.x;
+    x = other.x;
     y = other.y;
     z = other.z;
-	prevx = other.prevx;
-	prevy = other.prevy;
-	prevz = other.prevz;
+    prevx = other.prevx;
+    prevy = other.prevy;
+    prevz = other.prevz;
     snext = other.snext;
     sprev = other.sprev;
     angle = other.angle;
-	prevangle = other.prevangle;
+    prevangle = other.prevangle;
     sprite = other.sprite;
     frame = other.frame;
     pitch = other.pitch;
-	prevpitch = other.prevpitch;
+    prevpitch = other.prevpitch;
     effects = other.effects;
     subsector = other.subsector;
     floorz = other.floorz;
     ceilingz = other.ceilingz;
-	dropoffz = other.dropoffz;
-	floorsector = other.floorsector;
+    dropoffz = other.dropoffz;
+    floorsector = other.floorsector;
     radius = other.radius;
     height = other.height;
     momx = other.momx;
@@ -202,9 +206,9 @@ AActor &AActor::operator= (const AActor &other)
     damage = other.damage;
     flags = other.flags;
     flags2 = other.flags2;
-	flags3 = other.flags3;
-	oflags = other.oflags;
-	statusflags = other.statusflags;
+    flags3 = other.flags3;
+    oflags = other.oflags;
+    statusflags = other.statusflags;
     special1 = other.special1;
     special2 = other.special2;
     health = other.health;
@@ -220,23 +224,26 @@ AActor &AActor::operator= (const AActor &other)
     translation = other.translation;
     translucency = other.translucency;
     waterlevel = other.waterlevel;
-	gear = other.gear;
+    gear = other.gear;
     onground = other.onground;
     touching_sectorlist = other.touching_sectorlist;
     deadtic = other.deadtic;
     oldframe = other.oldframe;
     rndindex = other.rndindex;
     friend_playerid = other.friend_playerid;
+    friend_teamid = other.friend_teamid;
     pursuecount = other.pursuecount;
+    strafecount = other.strafecount;
     netid = other.netid;
     tid = other.tid;
     special = other.special;
-    memcpy(args, other.args, sizeof(args));
-	bmapnode = other.bmapnode;
-	memcpy(&baseline, &other.baseline, sizeof(baseline));
-	baseline_set = other.baseline_set;
 
-	return *this;
+    memcpy(args, other.args, sizeof(args));
+    bmapnode = other.bmapnode;
+    memcpy(&baseline, &other.baseline, sizeof(baseline));
+    baseline_set = other.baseline_set;
+
+    return *this;
 }
 
 //
@@ -255,7 +262,8 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), friend_playerid(0), pursuecount(0), baseline_set(false), bmapnode(this)
+      rndindex(0), netid(0), tid(0), friend_playerid(0), friend_teamid(TEAM_NONE), pursuecount(0), strafecount(0),
+      baseline_set(false), bmapnode(this)
 {
 	// Fly!!! fix it in P_RespawnSpecial
 	if ((unsigned int)itype >= NUMMOBJTYPES)
@@ -585,6 +593,25 @@ void P_MoveActor(AActor *mo)
         if (mo->ObjectFlags & OF_MassDestruction)
             return;		// actor was destroyed
 	}
+	else if (!(mo->momx | mo->momy) && !sentient(mo))
+	{                            // non-sentient objects at rest
+		mo->oflags |= MFO_ARMED; // arm a mine which has come to rest
+
+		// killough 9/12/98: objects fall off ledges if they are hanging off
+		// slightly push off of ledge if hanging more than halfway off
+		// [RH] Be more restrictive to avoid pushing monsters/players down steps
+		if (!(mo->flags & MF_NOGRAVITY) &&
+		    (mo->z > mo->dropoffz) &&
+		    P_AllowDropOff())
+		{
+			P_ApplyTorque(mo); // Apply torque
+		}
+		else
+		{
+			mo->oflags &= ~MFO_FALLING;
+			mo->gear = 0; // Reset torque
+		}
+	}
 
 	if (mo->subsector)
 	{
@@ -622,21 +649,6 @@ void P_MoveActor(AActor *mo)
 
 		if (!mo->player && map_format.actor_in_special_sector(mo))
 			return;
-	}
-
-	// killough 9/12/98: objects fall off ledges if they are hanging off
-	// slightly push off of ledge if hanging more than halfway off
-	// [RH] Be more restrictive to avoid pushing monsters/players down steps
-	if (!(mo->flags & MF_NOGRAVITY) && !(mo->flags2 & MF2_FLOATBOB) && (mo->z > mo->dropoffz) &&
-		 (mo->health <= 0 || (mo->flags & MF_COUNTKILL && mo->z - mo->dropoffz > 24*FRACUNIT)) &&
-	    P_AllowDropOff())
-	{
-		P_ApplyTorque(mo);   // Apply torque
-	}
-	else
-	{
-		mo->oflags &= ~MFO_FALLING;
-		mo->gear = 0;           // Reset torque
 	}
 }
 
@@ -1249,7 +1261,8 @@ static void P_ApplyXYFriction(AActor* mo)
   // killough 8/11/98: add bouncers
 	// killough 9/15/98: add objects falling off ledges
 	// killough 11/98: only include bouncers hanging off ledges
-	if (((mo->flags & MF_BOUNCES && mo->z > mo->dropoffz) || mo->flags & MF_CORPSE) &&
+	if (((mo->flags & MF_BOUNCES && mo->z > mo->dropoffz) || mo->flags & MF_CORPSE ||
+	     mo->oflags & MFO_FALLING) &&
 	    (mo->momx > FRACUNIT / 4 || mo->momx < -FRACUNIT / 4 || mo->momy > FRACUNIT / 4 ||
 	     mo->momy < -FRACUNIT / 4) &&
 	    mo->floorz != mo->subsector->sector->floorheight)
@@ -1258,7 +1271,7 @@ static void P_ApplyXYFriction(AActor* mo)
 	// keep corpses sliding if halfway off a step with some momentum
 	if ((mo->flags & MF_CORPSE) && (abs(mo->momx) > FRACUNIT/4 || abs(mo->momy) > FRACUNIT/4))
 	{
-		if (mo->floorz > P_FloorHeight(mo))
+		if (mo->floorz != P_FloorHeight(mo))
 			return;
 	}
 
@@ -1761,6 +1774,13 @@ void P_ApplyBouncyPhysics(AActor *mo)
 	}
 }
 
+void P_CheckTouchy(AActor* mo)
+{
+	/* killough 11/98: touchy objects explode on impact */
+	if (mo->flags & MF_TOUCHY && mo->oflags & MFO_ARMED && mo->health > 0)
+		P_DamageMobj(mo, NULL, NULL, mo->health);
+}
+
 //
 // P_ZMovement
 //
@@ -1776,6 +1796,7 @@ void P_ZMovement(AActor *mo)
 	if (mo->flags & MF_BOUNCES && mo->momz)
 	{
 		P_ApplyBouncyPhysics(mo);
+		P_CheckTouchy(mo);
 		return;
 	}
 
@@ -1787,6 +1808,9 @@ void P_ZMovement(AActor *mo)
 		P_ApplyGravity(mo, P_CalculateActorGravityZDoom(mo));
 
 	mo->z += mo->momz;
+
+	if (mo->momz < 0)
+		P_CheckTouchy(mo);
 
 	if (mo->flags & MF_FLOAT)
 		P_AdjustMonsterFloat(mo);
@@ -2848,21 +2872,53 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		return;
 	}
 
-	// Filter mapthings based on the gamemode
-	if (!multiplayer && g_thingfilter != -1 && !G_GetCurrentSkill().spawn_multi)
+	if (map_format.getZDoom())
 	{
-		if (!(mthing->flags & MTF_SINGLE))
-			return;
+		// Filter mapthings based on the gamemode
+		if (!multiplayer && g_thingfilter != -1 && !G_GetCurrentSkill().spawn_multi)
+		{
+			if (!(mthing->flags & MTF_SINGLE))
+				return;
+		}
+		else if (sv_gametype == GM_DM || sv_gametype == GM_TEAMDM)
+		{
+			if (!(mthing->flags & MTF_DEATHMATCH))
+				return;
+		}
+		else if (G_IsCoopGame())
+		{
+			if (g_thingfilter == 1)
+				mthing->flags |= MTF_FILTER_COOPWPN;
+			else if (!(mthing->flags & MTF_COOPERATIVE) || g_thingfilter == 2)
+				return;
+		}
 	}
-	else if (sv_gametype == GM_DM || sv_gametype == GM_TEAMDM)
+	else
 	{
-		if (!(mthing->flags & MTF_DEATHMATCH))
-			return;
-	}
-	else if (G_IsCoopGame())
-	{
-		if (!(mthing->flags & MTF_COOPERATIVE))
-			return;
+		if (mthing->flags & BTF_NOTSINGLE)
+		{
+			if (G_IsCoopGame() && multiplayer)
+			{
+				if (g_thingfilter == 1)
+					mthing->flags |= MTF_FILTER_COOPWPN;
+				else if (g_thingfilter == 2)
+					return;
+			}
+			else if (!multiplayer && g_thingfilter != -1)
+				return;
+		}
+		else if (mthing->flags & BTF_NOTDEATHMATCH)
+		{
+			if (sv_gametype == GM_DM || sv_gametype == GM_TEAMDM)
+				return;
+		}
+		else if (mthing->flags & BTF_NOTCOOPERATIVE)
+		{
+			if (G_IsCoopGame() && multiplayer)
+			{
+				return;
+			}
+		}
 	}
 
 	if (g_thingfilter == 3 && P_IsPickupableThing(mthing->type))
@@ -3071,8 +3127,16 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	if (mthing->flags & MTF_AMBUSH)
 		mobj->flags |= MF_AMBUSH;
 
-	if (mthing->flags & MTF_FRIENDLY)
-		mobj->flags |= MF_FRIEND;
+	if (map_format.getZDoom())
+	{
+		if (mthing->flags & MTF_FRIENDLY)
+			mobj->flags |= MF_FRIEND;
+	}
+	else
+	{
+		if (mthing->flags & MTF_FRIEND)
+			mobj->flags |= MF_FRIEND;
+	}
 
 	// [RH] Add ThingID to mobj and link it in with the others
 	mobj->tid = mthing->thingid;

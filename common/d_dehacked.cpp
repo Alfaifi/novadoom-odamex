@@ -1337,23 +1337,6 @@ static int PatchThing(int thingy)
 					    TRANSLUC50; // Correct value should be 0.66 (BOOM)...
 				}
 
-				// Unsupported flags have to be announced for developers...
-				if (value[0] & MF_TOUCHY)
-				{
-					DPrintf("[DEH Bits] Unsupported MBF flag TOUCHY.\n");
-					value[0] &= ~MF_TOUCHY;
-				}
-
-				if (value[0] & MF_BOUNCES)
-					DPrintf("[DEH Bits] MBF flag BOUNCES is partially supported. Use "
-					        "it at your own risk!\n");
-
-				if (value[0] & MF_FRIEND)
-				{
-					DPrintf("[DEH Bits] Unsupported MBF flag FRIEND.\n");
-					value[0] &= ~MF_FRIEND;
-				}
-
 				info->flags = value[0];
 			}
 			if (vchanged[1])

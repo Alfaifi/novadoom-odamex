@@ -6783,7 +6783,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	100,		// mass
 	0,		// damage
 	"dog/active",	// activesound
-	MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL|MF_FRIEND,   // flags
+	MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,   // flags
 	MF2_MCROSS|MF2_PASSMOBJ|MF2_PUSHWALL, // flags2
 	S_DOGS_RAISE1,	// raisestate
 	0x10000,	// translucency
