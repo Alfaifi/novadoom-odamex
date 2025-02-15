@@ -6823,7 +6823,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	100,		// mass
 	4,		// damage
 	NULL,		// activesound
-	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY, // flags [AM] MF_BOUNCES not implemented
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,
 	MF2_PCROSS|MF2_IMPACT, // flags2
 	S_NULL,		// raisestate
 	FRACUNIT,	// translucency
@@ -6863,7 +6863,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	100,		// mass
 	4,		// damage
 	NULL,		// activesound
-	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY, // flags [AM] MF_BOUNCES not implemented
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,
 	MF2_PCROSS|MF2_IMPACT, // flags2
 	S_NULL,		// raisestate
 	FRACUNIT,	// translucency

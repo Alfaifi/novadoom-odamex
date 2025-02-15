@@ -50,6 +50,7 @@
 #ifdef CLIENT_APP
 #include "hu_speedometer.h"
 #endif
+#include <p_boomfspec.h>
 
 void SV_UpdateMobj(AActor* mo);
 void SV_UpdateMobjState(AActor* mo);
@@ -1383,6 +1384,41 @@ void P_XYMovement(AActor *mo)
 				if (!P_ExplodeMissileAgainstWall(mo))
 					return;
 			}
+			else if (!(mo->flags & MF_MISSILE) && P_IsMBFCompatMode())
+			{
+				if (mo->flags & MF_BOUNCES ||
+				    (!mo->player && BlockingLine && mo->z <= mo->floorz &&
+				     P_GetFriction(mo, NULL) > ORIG_FRICTION))
+				{
+					if (BlockingLine)
+					{
+						fixed_t r = ((BlockingLine->dx >> FRACBITS) * mo->momx +
+						             (BlockingLine->dy >> FRACBITS) * mo->momy) /
+						            ((BlockingLine->dx >> FRACBITS) *
+						                 (BlockingLine->dx >> FRACBITS) +
+						             (BlockingLine->dy >> FRACBITS) *
+						                 (BlockingLine->dy >> FRACBITS));
+						fixed_t x = FixedMul(r, BlockingLine->dx);
+						fixed_t y = FixedMul(r, BlockingLine->dy);
+
+						// reflect momentum away from wall
+
+						mo->momx = x * 2 - mo->momx;
+						mo->momy = y * 2 - mo->momy;
+
+						// if under gravity, slow down in
+						// direction perpendicular to wall.
+
+						if (!(mo->flags & MF_NOGRAVITY))
+						{
+							mo->momx = (mo->momx + x) / 2;
+							mo->momy = (mo->momy + y) / 2;
+						}
+					}
+					else
+						mo->momx = mo->momy = 0;
+				}
+			}
 			else
 			{
 				mo->momx = mo->momy = 0;
@@ -1731,6 +1767,10 @@ void P_ApplyBouncyPhysics(AActor *mo)
 					if (abs(mo->momz) <= mo->info->mass * (GRAVITY * 4 / 256))
 						mo->momz = 0;
 				}
+
+				/* killough 11/98: touchy objects explode on impact */
+				if (mo->flags & MF_TOUCHY && mo->oflags & MFO_ARMED && mo->health > 0)
+					P_DamageMobj(mo, NULL, NULL, mo->health);
 				return;
 			}
 		}

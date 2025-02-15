@@ -588,7 +588,7 @@ static BOOL PIT_CheckThing (AActor *thing)
 	if (thing == tmthing)
 		return true;
 
-	if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE)) )
+	if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE|MF_TOUCHY)) )
 		return true;	// can't hit thing
 
 	// GhostlyDeath -- Spectators go through everything!
@@ -609,6 +609,13 @@ static BOOL PIT_CheckThing (AActor *thing)
 	if (P_AllowPassover())
 		BlockingMobj = thing;
 
+	if (P_AllowPassover() && (tmthing->flags2 & MF2_PASSMOBJ))
+	{
+		// check if a mobj passed over/under another object
+		if (tmthing->z >= thing->z + thing->height || tmthing->z + tmthing->height <= thing->z)
+			return true;
+	}
+
 	 /* killough 11/98:
 	 *
 	 * TOUCHY flag, for mines or other objects which die on contact with solids.
@@ -623,7 +630,7 @@ static BOOL PIT_CheckThing (AActor *thing)
 	    (thing->oflags & MFO_ARMED ||             // Thing is an armed mine
 	     sentient(thing)) &&                      // ... or a sentient thing
 	    (thing->type != tmthing->type ||          // only different species
-	     thing->type == MT_PLAYER) &&           // ... or different players
+	     thing->type == MT_PLAYER) &&             // ... or different players
 	    thing->z + thing->height >= tmthing->z && // touches vertically
 	    tmthing->z + tmthing->height >= thing->z &&
 	    (thing->type ^ MT_PAIN) |         // PEs and lost souls
@@ -633,13 +640,6 @@ static BOOL PIT_CheckThing (AActor *thing)
 	{
 		P_DamageMobj(thing, NULL, NULL, thing->health); // kill object
 		return true;
-	}
-
-	if (P_AllowPassover() && (tmthing->flags2 & MF2_PASSMOBJ))
-	{
-		// check if a mobj passed over/under another object
-		if (tmthing->z >= thing->z + thing->height || tmthing->z + tmthing->height <= thing->z)
-			return true;
 	}
 
 	// check for skulls slamming into things
