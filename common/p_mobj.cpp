@@ -1767,10 +1767,6 @@ void P_ApplyBouncyPhysics(AActor *mo)
 					if (abs(mo->momz) <= mo->info->mass * (GRAVITY * 4 / 256))
 						mo->momz = 0;
 				}
-
-				/* killough 11/98: touchy objects explode on impact */
-				if (mo->flags & MF_TOUCHY && mo->oflags & MFO_ARMED && mo->health > 0)
-					P_DamageMobj(mo, NULL, NULL, mo->health);
 				return;
 			}
 		}
