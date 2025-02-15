@@ -4,9 +4,11 @@ WORKDIR odamex
 
 COPY . .
 
+ENV TZ=US \
+    DEBIAN_FRONTEND=noninteractive
+
 # Packages - first the majority of them, then cmake
 RUN set -x && \
-    DEBIAN_FRONTEND=noninteractive \
     apt update && \
     apt install -y ninja-build libsdl2-dev libsdl2-mixer-dev \
         libpng-dev libcurl4-openssl-dev libwxgtk3.0-gtk3-dev deutex \
