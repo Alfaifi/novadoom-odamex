@@ -926,7 +926,7 @@ static bool P_HelpFriend(AActor* actor)
 				if (!enemy)
 				{
 					// Ignore any attacking monsters, while searching for friend
-					//actor->threshold = BASETHRESHOLD;
+					actor->threshold = BASETHRESHOLD;
 					return true;
 				}
 				else

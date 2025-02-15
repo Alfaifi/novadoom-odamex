@@ -897,8 +897,8 @@ static int PatchThing(int thingy)
 	    {28, 0, "UNUSED2"}, // BOOM compatibility
 	    {29, 0, "UNUSED3"}, // BOOM compatibility
 	    {30, 0, "UNUSED4"}, // BOOM compatibility
-	    {28, 0, "TOUCHY"},  // UNUSED FOR NOW
-	    {29, 0, "BOUNCES"}, // UNUSED FOR NOW
+	    {28, 0, "TOUCHY"},
+	    {29, 0, "BOUNCES"},
 	    {30, 0, "FRIEND"},
 	    {31, 0, "TRANSLUCENT"}, // BOOM compatibility
 	    {30, 0, "STEALTH"},
