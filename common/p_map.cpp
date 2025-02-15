@@ -1287,7 +1287,7 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 			}
 			//else
 			//{
-			//	if (!dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
+			//	if (dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
 			//	                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
 			//	                  !thing->target || thing->target->z > tmdropoffz)))
 			//	{

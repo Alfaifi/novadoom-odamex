@@ -68,6 +68,7 @@
 
 #include "p_boomfspec.h"
 #include "p_zdoomhexspec.h"
+#include "p_mobj.h"
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
@@ -2953,14 +2954,31 @@ DPusher *tmpusher; // pusher structure for blockmap searches
 
 BOOL PIT_PushThing (AActor *thing)
 {
-	if (thing->player &&
-		!(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
+	if (!P_IsMBFCompatMode() ?
+			thing->player && !(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)) :
+			(sentient(thing) || thing->flags & MF_SHOOTABLE) &&
+			!(thing->flags & MF_NOCLIP))
 	{
 		int sx = tmpusher->m_X;
 		int sy = tmpusher->m_Y;
 		int dist = P_AproxDistance (thing->x - sx,thing->y - sy);
 		int speed = (tmpusher->m_Magnitude -
 					((dist>>FRACBITS)>>1))<<(FRACBITS-PUSH_FACTOR-1);
+
+		// killough 10/98: make magnitude decrease with square
+		// of distance, making it more in line with real nature,
+		// so long as it's still in range with original formula.
+		//
+		// Removes angular distortion, and makes effort required
+		// to stay close to source, grow increasingly hard as you
+		// get closer, as expected. Still, it doesn't consider z :(
+
+		if (speed > 0 && P_IsMBFCompatMode())
+		{
+			int x = (thing->x - sx) >> FRACBITS;
+			int y = (thing->y - sy) >> FRACBITS;
+			speed = (int)(((uint64_t)tmpusher->m_Magnitude << 23) / (x * x + y * y + 1));
+		}
 
 		// If speed <= 0, you're outside the effective radius. You also have
 		// to be able to see the push/pull source point.

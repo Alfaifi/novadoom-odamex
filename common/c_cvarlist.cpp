@@ -361,6 +361,10 @@ CVAR_RANGE(sv_countdown, "5",
 					"Use MBF monster_backing behavior -- monsters can strafe or retreat.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
+	CVAR(			co_monsterfriction, "0",
+					"Use MBF monster_friction behavior -- monster movement is affected by ice and sludge.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
 	CVAR_RANGE(co_distfriend, "128",
 					"Use MBF distfriend behavior -- friendlies will try to maintain this distance in mapblocks.",
 					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 2048.0f)

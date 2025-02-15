@@ -58,6 +58,7 @@ EXTERN_CVAR(co_pursuit)
 EXTERN_CVAR(co_helpfriends)
 EXTERN_CVAR(co_distfriend)
 EXTERN_CVAR(co_monsterbacking)
+EXTERN_CVAR(co_monsterfriction)
 EXTERN_CVAR(co_avoidhazards)
 EXTERN_CVAR(co_staylift)
 EXTERN_CVAR(co_removesoullimit)
@@ -370,15 +371,14 @@ BOOL P_Move (AActor *actor, int dropoff = 0)
 		speed = speed + (speed / 2);
 	}
 
-#if 0	// [RH] I'm not so sure this is such a good idea
 	// killough 10/98: make monsters get affected by ice and sludge too:
-	movefactor = P_GetMoveFactor (actor, &friction);
+	if (co_monsterfriction)
+		movefactor = P_GetMoveFactor (actor, &friction);
 
 	if (friction < ORIG_FRICTION &&		// sludge
 		!(speed = ((ORIG_FRICTION_FACTOR - (ORIG_FRICTION_FACTOR-movefactor)/2)
 		   * speed) / ORIG_FRICTION_FACTOR))
 		speed = 1;	// always give the monster a little bit of speed
-#endif
 
 	tryx = (origx = actor->x) + (deltax = speed * xspeed[actor->movedir]);
 	tryy = (origy = actor->y) + (deltay = speed * yspeed[actor->movedir]);
