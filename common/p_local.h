@@ -504,6 +504,7 @@ bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest);
 bool P_IsTeamMate(AActor* actor, AActor* player);
 bool P_IsVoodooDoll(const AActor* mo);
 void P_FriendlyEffects();
+void P_GiveFriendlyOwnerInfo(AActor* friendly, AActor* origin);
 
 
 //

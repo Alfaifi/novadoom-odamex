@@ -1717,12 +1717,22 @@ void A_CPosRefire (AActor *actor)
 	// keep firing unless target got out of sight
 	A_FaceTarget (actor);
 
+	bool stop = false;
+
 	if (P_Random (actor) < 40)
 		return;
+
+	/* killough 12/98: Stop firing if a friend has gotten in the way */
+	if (P_HitFriend(actor))
+		stop = true;
+
+	if (actor->target && P_IsFriendlyThing(actor, actor->target))
+		stop = true;
 
 	if (!actor->target
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
+		|| stop
         )
 	{
 		P_SetMobjState (actor, actor->info->seestate, true);
@@ -1735,12 +1745,22 @@ void A_SpidRefire (AActor *actor)
 	// keep firing unless target got out of sight
 	A_FaceTarget (actor);
 
+	bool stop = false;
+
 	if (P_Random (actor) < 10)
 		return;
+
+	/* killough 12/98: Stop firing if a friend has gotten in the way */
+	if (P_HitFriend(actor))
+		stop = true;
+
+	if (actor->target && P_IsFriendlyThing(actor, actor->target))
+		stop = true;
 
 	if (!actor->target
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
+		|| stop
         )
 	{
 		P_SetMobjState (actor, actor->info->seestate, true);
@@ -1827,6 +1847,14 @@ void A_CyberAttack (AActor *actor)
 	}
 }
 
+void P_GiveFriendlyOwnerInfo(AActor* friendly, AActor* origin)
+{
+	if (origin->player && friendly->flags & MF_FRIEND)
+	{
+		friendly->friend_playerid = origin->player->id;
+		friendly->friend_teamid = origin->player->userinfo.team;
+	}
+}
 
 void A_BruisAttack (AActor *actor)
 {
@@ -2394,8 +2422,9 @@ void A_SpawnObject(AActor* actor)
 		}
 	}
 
-	// [XA] don't bother with the dont-inherit-friendliness hack
-	// that exists in A_Spawn, 'cause WTF is that about anyway?
+	mo->flags = (mo->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
+	P_GiveFriendlyOwnerInfo(mo, actor);
 }
 
 //
@@ -2630,6 +2659,8 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 
 					corpsehit->flags =
 					    (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
+					P_GiveFriendlyOwnerInfo(corpsehit, actor);
 
 					if (serverside)
 					{
@@ -3040,6 +3071,8 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 	/* killough 7/20/98: PEs shoot lost souls with the same friendliness */
 	other->flags = (other->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
 
+	P_GiveFriendlyOwnerInfo(other, actor);
+
 	// Check for movements.
 	if (!P_TryMove(other, x, y, false))
 	{
@@ -3414,6 +3447,10 @@ void A_BrainSpit (AActor *mo)
 		newmobj->target = targ->ptr();
 		newmobj->reactiontime =
 			((targ->y - mo->y)/newmobj->momy) / newmobj->state->tics;
+		// killough 7/18/98: brain friendliness is transferred
+		newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+
+		P_GiveFriendlyOwnerInfo(newmobj, mo);
 	}
 
 	S_Sound (mo, CHAN_WEAPON, "brain/spit", 1, ATTN_NONE);
@@ -3484,7 +3521,13 @@ void A_SpawnFly (AActor *mo)
 		type = MT_BRUISER;
 
 	newmobj = new AActor (targ->x, targ->y, targ->z, type);
-	if (P_LookForPlayers (newmobj, true))
+
+	/* killough 7/18/98: brain friendliness is transferred */
+	newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+
+	P_GiveFriendlyOwnerInfo(newmobj, mo);
+
+	if (P_LookForTargets (newmobj, true))
 		P_SetMobjState (newmobj, newmobj->info->seestate, true);
 
 	// telefrag anything in this spot
@@ -3564,10 +3607,7 @@ void A_Spawn(AActor* mo)
 
 		newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
 
-		if (mo->player && newmobj->flags & MF_FRIEND)
-		{
-			newmobj->friend_playerid = mo->player->id;
-		}
+		P_GiveFriendlyOwnerInfo(newmobj, mo);
 	}
 }
 

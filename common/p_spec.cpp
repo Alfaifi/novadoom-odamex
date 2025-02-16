@@ -248,21 +248,9 @@ bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest)
 			}
 			else if (G_IsTeamGame())
 			{
-				PlayerResults results =
-				    PlayerQuery()
-				        .onTeam(static_cast<team_t>(actor->player->userinfo.team))
-				        .execute();
-
-				PlayersView::const_iterator it = results.players.begin();
-				for (; it != results.players.end(); ++it)
+				if (actor->player->userinfo.team == friendshiptest->friend_teamid)
 				{
-					if ((*it)->id == friendshiptest->friend_playerid &&
-					    (*it)->userinfo.team == actor->player->userinfo.team)
-					{
-						// This is a teammate of the actor that
-						// owns this friendly. Don't target them.
-						return true;
-					}
+				   return true;
 				}
 			}
 		}
@@ -275,34 +263,11 @@ bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest)
 		}
 		else if (G_IsTeamGame())
 		{
-			PlayersView ingame = PlayerQuery().execute().players;
-			team_t team = TEAM_NONE;
-
-			for (PlayersView::iterator it = ingame.begin(); it != ingame.end(); ++it)
+			if (actor->friend_teamid == friendshiptest->friend_teamid)
 			{
-				if ((*it)->id == friendshiptest->friend_playerid)
-				{
-					team = static_cast<team_t>((*it)->userinfo.team);
-				}
-			}
-
-			if (team != TEAM_NONE)
-			{
-				PlayerResults results =
-				    PlayerQuery()
-				        .onTeam(team)
-				        .execute();
-
-				PlayersView::const_iterator it = results.players.begin();
-				for (; it != results.players.end(); ++it)
-				{
-					if ((*it)->id == actor->friend_playerid)
-					{
-						// This is a friendly belonging to the same team as this friendly.
-						// Don't target them.
-						return true;
-					}
-				}
+				// Friendly is of the same team as this friendly.
+				// Don't attack
+				return true;
 			}
 		}
 	}
