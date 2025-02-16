@@ -1573,7 +1573,8 @@ void A_Chase (AActor *actor)
 			// look for new target, unless conditions are met
 			if (!(actor->target &&                     // have a target
 			      actor->target->health > 0 &&         // and the target is alive
-			        !P_IsFriendlyThing(actor, actor->target) && // and the target is not friendly
+			        (!P_IsFriendlyThing(actor, actor->target) || 
+			         !(actor->flags & MF_FRIEND)) &&   // and the target is not friendly
 			        P_CheckSight(actor, actor->target) // and we can see it
 			     ) &&
 			    P_LookForTargets(actor, true))

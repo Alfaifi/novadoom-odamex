@@ -1120,6 +1120,40 @@ static void P_WindThrustActor(AActor* mo)
 	}
 }
 
+static void P_WallBouncy(AActor* mo)
+{
+	if (mo->flags & MF_BOUNCES ||
+	    (!mo->player && BlockingLine &&
+	     mo->z <= mo->floorz && P_GetFriction(mo, NULL) > ORIG_FRICTION))
+	{
+		if (BlockingLine)
+		{
+			fixed_t r = ((BlockingLine->dx >> FRACBITS) * mo->momx +
+			             (BlockingLine->dy >> FRACBITS) * mo->momy) /
+			            ((BlockingLine->dx >> FRACBITS) * (BlockingLine->dx >> FRACBITS) +
+			             (BlockingLine->dy >> FRACBITS) * (BlockingLine->dy >> FRACBITS));
+			fixed_t x = FixedMul(r, BlockingLine->dx);
+			fixed_t y = FixedMul(r, BlockingLine->dy);
+
+			// reflect momentum away from wall
+
+			mo->momx = x * 2 - mo->momx;
+			mo->momy = y * 2 - mo->momy;
+
+			// if under gravity, slow down in
+			// direction perpendicular to wall.
+
+			if (!(mo->flags & MF_NOGRAVITY))
+			{
+				mo->momx = (mo->momx + x) / 2;
+				mo->momy = (mo->momy + y) / 2;
+			}
+		}
+		else
+			mo->momx = mo->momy = 0;
+	}
+}
+
 
 //
 // P_LostSoulReset
@@ -1390,40 +1424,9 @@ void P_XYMovement(AActor *mo)
 				if (!P_ExplodeMissileAgainstWall(mo))
 					return;
 			}
-			else if (!(mo->flags & MF_MISSILE) && P_IsMBFCompatMode())
+			else if (!(mo->flags & (MF_MISSILE | MF_SKULLFLY)) && P_IsMBFCompatMode())
 			{
-				if (mo->flags & MF_BOUNCES ||
-				    (!mo->player && BlockingLine && mo->z <= mo->floorz &&
-				     P_GetFriction(mo, NULL) > ORIG_FRICTION))
-				{
-					if (BlockingLine)
-					{
-						fixed_t r = ((BlockingLine->dx >> FRACBITS) * mo->momx +
-						             (BlockingLine->dy >> FRACBITS) * mo->momy) /
-						            ((BlockingLine->dx >> FRACBITS) *
-						                 (BlockingLine->dx >> FRACBITS) +
-						             (BlockingLine->dy >> FRACBITS) *
-						                 (BlockingLine->dy >> FRACBITS));
-						fixed_t x = FixedMul(r, BlockingLine->dx);
-						fixed_t y = FixedMul(r, BlockingLine->dy);
-
-						// reflect momentum away from wall
-
-						mo->momx = x * 2 - mo->momx;
-						mo->momy = y * 2 - mo->momy;
-
-						// if under gravity, slow down in
-						// direction perpendicular to wall.
-
-						if (!(mo->flags & MF_NOGRAVITY))
-						{
-							mo->momx = (mo->momx + x) / 2;
-							mo->momy = (mo->momy + y) / 2;
-						}
-					}
-					else
-						mo->momx = mo->momy = 0;
-				}
+				P_WallBouncy(mo);
 			}
 			else
 			{
