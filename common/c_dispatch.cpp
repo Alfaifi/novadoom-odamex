@@ -155,7 +155,7 @@ static int ListActionCommands (void)
 
 unsigned int MakeKey (const char *s)
 {
-	register unsigned int v = 0;
+	unsigned int v = 0;
 
 	if (*s)
 		v = tolower(*s++);
@@ -810,6 +810,22 @@ std::string C_QuoteString(const std::string &argstr)
 	return buffer.str();
 }
 
+// Take a string of inputted WADs and escape them indvidually
+// and add a space before loading them into the system.
+std::string C_EscapeWadList(const std::vector<std::string> wadlist)
+{
+	std::string wadstr;
+	for (size_t i = 0; i < wadlist.size(); i++)
+	{
+		if (i != 0)
+		{
+			wadstr += " ";
+		}
+		wadstr += C_QuoteString(wadlist.at(i));
+	}
+	return wadstr;
+}
+
 static int DumpHash (BOOL aliases)
 {
 	int count = 0;
@@ -955,7 +971,7 @@ void C_ExecCmdLineParams (bool onlyset, bool onlylogfile)
 	if (onlylogfile && !didlogfile) AddCommandString("version");
 }
 
-BEGIN_COMMAND (dumpactors)
+BEGIN_COMMAND (actorlist)
 {
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
@@ -965,7 +981,7 @@ BEGIN_COMMAND (dumpactors)
 		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
 	}
 }
-END_COMMAND (dumpactors)
+END_COMMAND(actorlist)
 
 BEGIN_COMMAND(logfile)
 {

@@ -67,6 +67,7 @@ extern bool predicting, step_mode;
 
 static player_t nullplayer;		// used to indicate 'player not found' when searching
 EXTERN_CVAR (sv_allowmovebob)
+EXTERN_CVAR (sv_showplayerpowerups)
 EXTERN_CVAR (cl_movebob)
 
 player_t &idplayer(byte id)
@@ -86,7 +87,7 @@ player_t &idplayer(byte id)
 
 /**
  * Find player by netname.  Note that this search is case-insensitive.
- * 
+ *
  * @param  netname Name of player to look for.
  * @return         Player reference of found player, or nullplayer.
  */
@@ -114,7 +115,7 @@ bool validplayer(player_t &ref)
 
 /**
  * @brief Clear all cards from a player.
- * 
+ *
  * @param p Player to clear.
 */
 void P_ClearPlayerCards(player_t& p)
@@ -136,7 +137,7 @@ void P_ClearPlayerPowerups(player_t& p)
 
 /**
  * @brief Clear all scores from a player.
- * 
+ *
  * @param p Player to clear.
  * @param wins True if a player's wins should be cleared as well - should
  *             usually be True unless it's a reset across rounds.
@@ -188,7 +189,6 @@ static bool cmpWins(player_t* a, const player_t* b)
 PlayerResults PlayerQuery::execute()
 {
 	PlayerResults results;
-	int maxscore = 0;
 
 	// Construct a base result set from all ingame players, possibly filtered.
 	for (Players::iterator it = ::players.begin(); it != players.end(); ++it)
@@ -436,6 +436,8 @@ void P_CalcHeight (player_t *player)
 		if (player->viewz > player->mo->ceilingz-4*FRACUNIT)
 			player->viewz = player->mo->ceilingz-4*FRACUNIT;
 
+		if (player->prevviewz == 1) // don't interp first frame
+			player->prevviewz = player->viewz;
 		return;
 	}
 
@@ -480,6 +482,9 @@ void P_CalcHeight (player_t *player)
 		player->viewz = player->mo->ceilingz-4*FRACUNIT;
 	if (player->viewz < player->mo->floorz + 4*FRACUNIT)
 		player->viewz = player->mo->floorz + 4*FRACUNIT;
+
+	if (player->prevviewz == 1) // don't interp first frame
+		player->prevviewz = player->viewz;
 }
 
 //
@@ -882,6 +887,57 @@ bool P_CanSpy(player_t &viewer, player_t &other, bool demo)
 
 void SV_SendPlayerInfo(player_t &);
 
+void P_SetPlayerInvulnBleed(player_t* player, int powers[NUMPOWERS])
+{
+	if (sv_showplayerpowerups)
+	{
+		// Don't show blood if the player is invuln
+		if (powers[pw_invulnerability])
+			player->mo->flags |= MF_NOBLOOD;
+		else
+			player->mo->flags &= ~MF_NOBLOOD;
+	}
+}
+
+void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
+{
+	if (powers[pw_strength])
+		player->mo->statusflags |= SF_BERSERK;
+	else
+		player->mo->statusflags &= ~SF_BERSERK;
+
+	if (powers[pw_invulnerability] > 4 * 32 ||
+		        powers[pw_invulnerability] & 8)
+		player->mo->statusflags |= SF_INVULN;
+	else
+		player->mo->statusflags &= ~SF_INVULN;
+
+	if (powers[pw_invisibility] > 4 * 32 ||
+			powers[pw_invisibility] & 8)
+		player->mo->statusflags |= SF_INVIS;
+	else
+		player->mo->statusflags &= ~SF_INVIS;
+
+	if (powers[pw_infrared] > 4 * 32 ||
+			powers[pw_infrared] & 8)
+		player->mo->statusflags |= SF_INFRARED;
+	else
+		player->mo->statusflags &= ~SF_INFRARED;
+
+	if (powers[pw_ironfeet] > 4 * 32 ||
+			powers[pw_ironfeet] & 8)
+		player->mo->statusflags |= SF_IRONFEET;
+	else
+		player->mo->statusflags &= ~SF_IRONFEET;
+
+		if (powers[pw_allmap])
+		player->mo->statusflags |= SF_ALLMAP;
+	else
+		player->mo->statusflags &= ~SF_ALLMAP;
+
+	P_SetPlayerInvulnBleed(player, powers);
+}
+
 //
 // P_PlayerThink
 //
@@ -1021,6 +1077,9 @@ void P_PlayerThink (player_t *player)
 	if (player->powers[pw_ironfeet])
 		player->powers[pw_ironfeet]--;
 
+	// For offline/chase cam
+	P_SetPlayerPowerupStatuses(player, player->powers);
+
 	if (player->damagecount)
 		player->damagecount--;
 
@@ -1064,9 +1123,9 @@ void P_PlayerThink (player_t *player)
 	// Handle air supply
 	if (player->mo->waterlevel < 3 || player->powers[pw_ironfeet] || player->cheats & CF_GODMODE)
 	{
-		player->air_finished = level.time + 10*TICRATE;
+		player->air_finished = level.time + level.airsupply * TICRATE;
 	}
-	else if (player->air_finished <= level.time && !(level.time & 31))
+	else if (level.airsupply != 0 && player->air_finished <= level.time && !(level.time & 31))
 	{
 		P_DamageMobj (player->mo, NULL, NULL, 2 + 2*((level.time-player->air_finished)/TICRATE), MOD_WATER, DMG_NO_ARMOR);
 	}
@@ -1083,6 +1142,28 @@ void P_PlayerThink (player_t *player)
 }
 
 #define CASE_STR(str) case str : return #str
+
+fixed_t P_TickWeaponBobX()
+{
+	// Update bob - this happens once per gametic
+	player_t& player = displayplayer();
+	const float bob_amount =
+		((clientside && sv_allowmovebob) || (clientside && serverside)) ? cl_movebob
+		: 1.0f;
+
+	return P_CalculateWeaponBobX(&player, bob_amount);
+}
+
+fixed_t P_TickWeaponBobY()
+{
+	// Update bob - this happens once per gametic
+	player_t& player = displayplayer();
+		const float bob_amount =
+		((clientside && sv_allowmovebob) || (clientside && serverside)) ? cl_movebob
+		: 1.0f;
+
+	return P_CalculateWeaponBobY(&player, bob_amount);
+}
 
 const char* PlayerState(size_t state)
 {
@@ -1194,6 +1275,7 @@ void player_s::Serialize (FArchive &arc)
 			<< secretcount
 			<< damagecount
 			<< bonuscount
+			<< didsecret
 			<< points
 			/*<< attacker->netid*/
 			<< extralight
@@ -1247,6 +1329,7 @@ void player_s::Serialize (FArchive &arc)
 			>> secretcount
 			>> damagecount
 			>> bonuscount
+			>> didsecret
 			>> points
 			/*>> attacker->netid*/
 			>> extralight
@@ -1364,8 +1447,6 @@ player_s::player_s() :
 
 player_s &player_s::operator =(const player_s &other)
 {
-	size_t i;
-
 	id = other.id;
 	playerstate = other.playerstate;
 	mo = other.mo;

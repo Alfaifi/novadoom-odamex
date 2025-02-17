@@ -47,7 +47,7 @@ extern int	InactiveParticles;
 extern particle_t *Particles;
 extern TArray<WORD>     ParticlesInSubsec;
 
-const WORD NO_PARTICLE = 0xffff;
+constexpr WORD NO_PARTICLE = 0xffff;
 
 #ifdef _MSC_VER
 __inline particle_t *NewParticle()
@@ -90,3 +90,5 @@ void R_SortVisSprites();
 void R_AddSprites(sector_t *sec, int lightlevel, int fakeside);
 void R_ClearSprites();
 void R_DrawMasked();
+fixed_t P_CalculateWeaponBobX(player_t* player, float scale_amount);
+fixed_t P_CalculateWeaponBobY(player_t* player, float scale_amount);

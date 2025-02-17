@@ -61,7 +61,8 @@ const std::vector<std::pair<std::string, std::string> > OPTIONS_LIST = {
 	{"No Monsters", "-nomonsters"},
 	{"Fast Monsters", "-fast"},
 	{"Respawn Monsters", "-respawn"},
-	{"Pistol Start", "-pistolstart"}
+	{"Pistol Start", "-pistolstart"},
+	{"Spawn Multiplayer Things", "-coop-things"}
 };
 
 /**
@@ -106,8 +107,8 @@ static void EraseSelected(scannedPWADPtrs_t& mut, scannedPWAD_t* pwad)
 const scannedIWAD_t* g_SelectedIWAD;
 scannedWADs_t g_SelectedWADs;
 
-const int WINDOW_WIDTH = 425;
-const int WINDOW_HEIGHT = 240;
+constexpr int WINDOW_WIDTH = 425;
+constexpr int WINDOW_HEIGHT = 240;
 
 class BootWindow : public Fl_Window
 {
@@ -177,7 +178,7 @@ class BootWindow : public Fl_Window
 				m_tabPWADs->end();
 			} // Fl_Group* tabPWADs
 			{
-				Fl_Group* tabGameOptions = 
+				Fl_Group* tabGameOptions =
 					new Fl_Group(0, 25, 425, 175, "Game Options");
 				{
 					Fl_Box* o = new Fl_Box(
@@ -313,7 +314,7 @@ class BootWindow : public Fl_Window
 		BootWindow* boot = static_cast<BootWindow*>(data);
 
 		const int val = boot->m_PWADOrderBrowser->value() - 1;
-		if (val <= 0 || val >= boot->m_selectedPWADs.size())
+		if (val <= 0 || val >= static_cast<int>(boot->m_selectedPWADs.size()))
 			return;
 
 		std::iter_swap(boot->m_selectedPWADs.begin() + val,
@@ -327,7 +328,7 @@ class BootWindow : public Fl_Window
 		BootWindow* boot = static_cast<BootWindow*>(data);
 
 		const int val = boot->m_PWADOrderBrowser->value() - 1;
-		if (val < 0 || val >= boot->m_selectedPWADs.size() - 1)
+		if (val < 0 || val >= static_cast<int>(boot->m_selectedPWADs.size() - 1))
 			return;
 
 		std::iter_swap(boot->m_selectedPWADs.begin() + val,
@@ -395,7 +396,7 @@ class BootWindow : public Fl_Window
 		BootWindow* boot = static_cast<BootWindow*>(data);
 
 		const int val = boot->m_WADDirList->value() - 1;
-		if (val <= 0 || val >= boot->m_WADDirs.size())
+		if (val <= 0 || val >= static_cast<int>(boot->m_WADDirs.size()))
 			return;
 
 		std::iter_swap(boot->m_WADDirs.begin() + val, boot->m_WADDirs.begin() + val - 1);
@@ -409,7 +410,7 @@ class BootWindow : public Fl_Window
 		BootWindow* boot = static_cast<BootWindow*>(data);
 
 		const int val = boot->m_WADDirList->value() - 1;
-		if (val < 0 || val >= boot->m_WADDirs.size() - 1)
+		if (val < 0 || val >= static_cast<int>(boot->m_WADDirs.size() - 1))
 			return;
 
 		std::iter_swap(boot->m_WADDirs.begin() + val, boot->m_WADDirs.begin() + val + 1);
@@ -426,7 +427,7 @@ class BootWindow : public Fl_Window
 		BootWindow* boot = static_cast<BootWindow*>(data);
 
 		const int val = boot->m_WADDirList->value() - 1;
-		if (val < 0 || val >= boot->m_WADDirs.size())
+		if (val < 0 || val >= static_cast<int>(boot->m_WADDirs.size()))
 			return;
 
 		boot->m_WADDirs.erase(boot->m_WADDirs.begin() + val);
@@ -517,7 +518,14 @@ class BootWindow : public Fl_Window
 	{
 		// IWADs
 		const size_t value = static_cast<size_t>(m_IWADBrowser->value());
-		g_SelectedWADs.iwad = m_IWADs[value - 1].path;
+		scannedIWAD_t iwad = m_IWADs[value - 1];
+		g_SelectedWADs.iwad = iwad.path;
+
+		if (iwad.id != NULL && iwad.id->mIdName == "CHEX QUEST")
+		{
+			g_SelectedWADs.options.push_back("-deh");
+			g_SelectedWADs.options.push_back("chex.deh");
+		}
 
 		// PWADs
 		for (const auto& pwad : m_selectedPWADs)
@@ -583,12 +591,20 @@ scannedWADs_t GUI_BootWindow()
 	// deforms the window.
 	Fl::keyboard_screen_scaling(0);
 
+	// find arguments for fltk
+	DArgs fltkargs = DArgs();
+	fltkargs.AppendArg(::Args.GetArg(0));
+	const char* rawargs = ::Args.CheckValue("-fltk");
+	if (rawargs != nullptr)
+		for (auto& arg : TokenizeString(rawargs, " "))
+			fltkargs.AppendArg(arg.c_str());
+
 	BootWindow* win = MakeBootWindow();
 	win->initWADDirs();
 	win->updateWADDirBrowser();
 	win->rescanIWADs();
 	win->position((Fl::w() - win->w()) / 2, (Fl::h() - win->h()) / 2);
-	win->show(::Args.NumArgs(), (char**)::Args.GetArgv().data());
+	win->show(fltkargs.NumArgs(), (char**)fltkargs.GetArgv().data());
 
 	// Blocks until the boot window has been closed.
 	Fl::run();

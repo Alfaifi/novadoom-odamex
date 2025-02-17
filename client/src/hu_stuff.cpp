@@ -130,7 +130,7 @@ static void ShoveChatStr(std::string str, byte who);
 static std::string input_text;
 static chatmode_t chatmode;
 
-static const int DefaultTeamHeight = 56;
+static constexpr int DefaultTeamHeight = 56;
 
 chatmode_t HU_ChatMode()
 {
@@ -184,15 +184,13 @@ cvar_t *chat_macros[10] =
 	&chatmacro9
 };
 
-static const int HiResolutionWidth = 480;
+static constexpr int HiResolutionWidth = 480;
 
 //
 // HU_Init
 //
 void HU_Init()
 {
-	char buffer[12];
-
 	HU_UnsetChatMode();
 	input_text.clear();
 
@@ -280,7 +278,7 @@ BOOL HU_Responder(event_t *ev)
 	}
 	else
 	{
-		altdown = false;	
+		altdown = false;
 	}
 
 	if ((gamestate != GS_LEVEL && gamestate != GS_INTERMISSION) || ev->type != ev_keydown)
@@ -354,7 +352,7 @@ static void HU_InitCrosshair()
 		char xhairname[16];
 		int xhair;
 
-		sprintf(xhairname, "XHAIR%d", xhairnum);
+		snprintf(xhairname, 16, "XHAIR%d", xhairnum);
 
 		if ((xhair = W_CheckNumForName(xhairname)) == -1)
 			xhair = W_CheckNumForName("XHAIR1");
@@ -395,7 +393,7 @@ static void HU_DrawCrosshair()
 
 	if (hud_crosshair && crosshair_lump)
 	{
-		static const byte crosshair_color = 0xB0;
+		static constexpr byte crosshair_color = 0xB0;
 		if (hud_crosshairhealth)
 		{
 			if (camera->health > 75)
@@ -491,7 +489,7 @@ static void HU_DrawChatPrompt()
 	// figure out if the text is wider than the screen->
 	// if so, only draw the right-most portion of it.
 	int i;
-	for (i = input_text.length() - 1; i >= 0 && x < I_GetSurfaceWidth(); i--)
+	for (i = static_cast<int>(input_text.length()) - 1; i >= 0 && x < I_GetSurfaceWidth(); i--)
 	{
 		int c = toupper(input_text[i] & 0x7f) - HU_FONTSTART;
 		if (c < 0 || c >= HU_FONTSIZE)
@@ -697,7 +695,7 @@ static int GetLongestTeamWidth()
 	for (int i = 0; i < sv_teamsinplay; i++)
 	{
 		std::string name = TeamName(color, i);
-		int length = name.length();
+		int length = static_cast<int>(name.length());
 		if (length > longest)
 		{
 			longest = length;
@@ -737,7 +735,7 @@ void drawHeader(player_t *player, int y)
 
 	for (size_t i = 0; i < 2 && hostname[i].width > 0; i++)
 	{
-		hud::DrawText(0, y + 8 * (i + 1), hud_scalescoreboard,
+		hud::DrawText(0, y + 8 * (static_cast<int>(i) + 1), hud_scalescoreboard,
 					  hud::X_CENTER, hud::Y_MIDDLE,
 					  hud::X_CENTER, hud::Y_TOP,
 					  hostname[i].string, CR_GREY, true);
@@ -755,10 +753,10 @@ void drawHeader(player_t *player, int y)
 	              hud::ClientsSplit().c_str(), CR_GREEN, true);
 
 	int yOffset = 0;
-	if (G_IsTeamGame()) 
+	if (G_IsTeamGame())
 	{
 		int xOffset = GetLongestTeamWidth();
-		
+
 		for (int i = 0; i < sv_teamsinplay; i++)
 		{
 			// Display wins for round-based gamemodes, otherwise points.
@@ -778,18 +776,18 @@ void drawHeader(player_t *player, int y)
 			std::string points;
 			if (g_rounds)
 			{
-				StrFormat(points, "%d", GetTeamInfo((team_t)i)->RoundWins);
+				points = fmt::sprintf("%d", GetTeamInfo((team_t)i)->RoundWins);
 			}
 			else
 			{
-				StrFormat(points, "%d", GetTeamInfo((team_t)i)->Points);
+				points = fmt::sprintf("%d", GetTeamInfo((team_t)i)->Points);
 			}
 
 			hud::DrawText(-236 + xOffset, y + yOffset, hud_scalescoreboard, hud::X_CENTER,
 			              hud::Y_MIDDLE, hud::X_LEFT, hud::Y_TOP, points.c_str(),
 			              CR_GREEN, true);
 		}
-	} 
+	}
 	else
 	{
 		hud::DrawText(-236, y + 8, hud_scalescoreboard,
@@ -828,7 +826,7 @@ void drawHeader(player_t *player, int y)
 	// Winlimit.
 	if (g_winlimit > 0.0 && G_UsesWinlimit())
 	{
-		StrFormat(str, "%d", g_winlimit.asInt());
+		str = fmt::sprintf("%d", g_winlimit.asInt());
 		names.push_back("WIN LIMIT: ");
 		values.push_back(str);
 	}
@@ -836,7 +834,7 @@ void drawHeader(player_t *player, int y)
 	// Roundlimit.
 	if (g_roundlimit > 0.0 && G_UsesRoundlimit())
 	{
-		StrFormat(str, "%d", g_roundlimit.asInt());
+		str = fmt::sprintf("%d", g_roundlimit.asInt());
 		names.push_back("ROUND LIMIT: ");
 		values.push_back(str);
 	}
@@ -844,7 +842,7 @@ void drawHeader(player_t *player, int y)
 	// Scorelimit.
 	if (sv_scorelimit > 0.0 && G_UsesScorelimit())
 	{
-		StrFormat(str, "%d", sv_scorelimit.asInt());
+		str = fmt::sprintf("%d", sv_scorelimit.asInt());
 		names.push_back("SCORE LIMIT: ");
 		values.push_back(str);
 	}
@@ -852,7 +850,7 @@ void drawHeader(player_t *player, int y)
 	// Fraglimit
 	if (sv_fraglimit > 0.0 && G_UsesFraglimit())
 	{
-		StrFormat(str, "%d", sv_fraglimit.asInt());
+		str = fmt::sprintf("%d", sv_fraglimit.asInt());
 		names.push_back("FRAG LIMIT: ");
 		values.push_back(str);
 	}
@@ -869,7 +867,7 @@ void drawHeader(player_t *player, int y)
 
 	for (size_t i = 0; i < values.size() && i < 3; i++)
 	{
-		int yoff = i * 8;
+		int yoff = static_cast<int>(i) * 8;
 		hud::DrawText(236 - rw, y + yoff, hud_scalescoreboard, hud::X_CENTER,
 		              hud::Y_MIDDLE, hud::X_RIGHT, hud::Y_TOP, names.at(i).c_str(),
 		              CR_GREY, true);
@@ -1362,13 +1360,13 @@ void Scoreboard(player_t *player)
 			height += extraQuadRows / 2 * DefaultTeamHeight;
 			height += extraQuadRows * 16;
 		}
-	} 
+	}
 	else
 	{
 		height = 92;
 
 		// Normal scoreboard was designed for 4 players. If there are more, increase the height.
-		int inGamePlayers = P_NumPlayersInGame();
+		int inGamePlayers = static_cast<int>(P_NumPlayersInGame());
 		if (inGamePlayers > 4)
 			extra_player_rows += inGamePlayers - 4;
 	}
@@ -1403,7 +1401,7 @@ void Scoreboard(player_t *player)
 			teams++;
 		y += 31 + (teams * 8);
 		hud::drawTeamScores(player, y, extra_player_rows);
-	} 
+	}
 	else
 	{
 		y += 31;
@@ -1793,7 +1791,7 @@ void LowScoreboard(player_t *player)
 		height = 72;
 
 		// Normal scoreboard was designed for 4 players.  If there are more, increase the height.
-		int players = P_NumPlayersInGame();
+		int players = static_cast<int>(P_NumPlayersInGame());
 		if (players > 4)
 			extra_player_rows += players - 4;
 	}
@@ -1836,8 +1834,8 @@ void LowScoreboard(player_t *player)
 void HU_DrawScores(player_t *player)
 {
 	if (hud::XSize(hud_scalescoreboard) >= HiResolutionWidth)
-		hud::Scoreboard(player); 
-	else 
+		hud::Scoreboard(player);
+	else
 		hud::LowScoreboard(player);
 }
 
@@ -1917,7 +1915,7 @@ static float HU_CalculateFragDeathRatio(const player_t* player)
 	int deaths = 0;
 
 	if (G_IsRoundsGame() && !G_IsDuelGame())
-	{	
+	{
 		frags = player->totalpoints;
 		deaths = player->totaldeaths;
 	}
@@ -1951,8 +1949,6 @@ void HU_ConsoleScores(player_t *player)
 	PlayerPtrList sortedplayers;
 	PlayerPtrList sortedspectators;
 
-	int points, deaths;
-
 	for (Players::const_iterator it = players.begin(); it != players.end(); ++it)
 		if (it->ingame() && !it->spectator)
 			sortedplayers.push_back(&*it);
@@ -1972,16 +1968,16 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("           CAPTURE THE FLAG\n");
 
 		if (sv_scorelimit)
-			sprintf(str, "Scorelimit: %-6d", sv_scorelimit.asInt());
+			snprintf(str, 1024, "Scorelimit: %-6d", sv_scorelimit.asInt());
 		else
-			sprintf(str, "Scorelimit: N/A   ");
+			snprintf(str, 1024, "Scorelimit: N/A   ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
+			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
 		else
-			sprintf(str, "Timelimit: N/A");
+			snprintf(str, 1024, "Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2004,13 +2000,7 @@ void HU_ConsoleScores(player_t *player)
 				const player_t* itplayer = *it;
 				if (itplayer->userinfo.team == team_num)
 				{
-
-					if (G_IsRoundsGame())
-					{
-						points = itplayer->totalpoints;
-					}
-
-					sprintf(str, "%-15s %-6d N/A  %-5d %4d\n",
+					snprintf(str, 1024, "%-15s %-6d N/A  %-5d %4d\n",
 							itplayer->userinfo.netname.c_str(),
 							itplayer->points,
 							//itplayer->captures,
@@ -2035,16 +2025,16 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("           TEAM DEATHMATCH\n");
 
 		if (sv_fraglimit)
-			sprintf(str, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
 		else
-			sprintf(str, "Fraglimit: N/A    ");
+			snprintf(str, 1024, "Fraglimit: N/A    ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
+			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
 		else
-			sprintf(str, "Timelimit: N/A");
+			snprintf(str, 1024, "Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2067,7 +2057,7 @@ void HU_ConsoleScores(player_t *player)
 				const player_t* itplayer = *it;
 				if (itplayer->userinfo.team == team_num)
 				{
-					sprintf(str, "%-15s %-5d %-6d %2.1f %4d\n",
+					snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
 							itplayer->userinfo.netname.c_str(),
 							itplayer->fragcount,
 							itplayer->deathcount,
@@ -2092,16 +2082,16 @@ void HU_ConsoleScores(player_t *player)
 		Printf_Bold("              DEATHMATCH\n");
 
 		if (sv_fraglimit)
-			sprintf(str, "Fraglimit: %-7d", sv_fraglimit.asInt());
+			snprintf(str, 1024, "Fraglimit: %-7d", sv_fraglimit.asInt());
 		else
-			sprintf(str, "Fraglimit: N/A    ");
+			snprintf(str, 1024, "Fraglimit: N/A    ");
 
 		Printf_Bold("%s  ", str);
 
 		if (sv_timelimit)
-			sprintf(str, "Timelimit: %-7d", sv_timelimit.asInt());
+			snprintf(str, 1024, "Timelimit: %-7d", sv_timelimit.asInt());
 		else
-			sprintf(str, "Timelimit: N/A");
+			snprintf(str, 1024, "Timelimit: N/A");
 
 		Printf_Bold("%18s\n", str);
 
@@ -2111,7 +2101,7 @@ void HU_ConsoleScores(player_t *player)
 		for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
 		{
 			const player_t* itplayer = *it;
-			sprintf(str, "%-15s %-5d %-6d %2.1f %4d\n",
+			snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
 					itplayer->userinfo.netname.c_str(),
 					itplayer->fragcount,
 					itplayer->deathcount,
@@ -2142,7 +2132,7 @@ void HU_ConsoleScores(player_t *player)
 		for (PlayerPtrList::const_iterator it = sortedplayers.begin(); it != sortedplayers.end(); ++it)
 		{
 			const player_t* itplayer = *it;
-			sprintf(str,"%-15s %-5d %-6d %2.1f %4d\n",
+			snprintf(str, 1024, "%-15s %-5d %-6d %2.1f %4d\n",
 					itplayer->userinfo.netname.c_str(),
 					itplayer->killcount,
 					itplayer->deathcount,
@@ -2166,7 +2156,7 @@ void HU_ConsoleScores(player_t *player)
 		for (PlayerPtrList::const_iterator it = sortedspectators.begin(); it != sortedspectators.end(); ++it)
 		{
 			const player_t* itplayer = *it;
-			sprintf(str, "%-15s\n", itplayer->userinfo.netname.c_str());
+			snprintf(str, 1024, "%-15s\n", itplayer->userinfo.netname.c_str());
 			if (itplayer == player)
 				Printf_Bold("%s", str);
 			else

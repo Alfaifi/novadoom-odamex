@@ -232,6 +232,21 @@ void MIType_Bool(OScanner& os, bool newStyleMapInfo, void* data, unsigned int fl
 	*static_cast<bool*>(data) = flags;
 }
 
+// Sets the inputted data as a bool from a string
+void MIType_BoolString(OScanner& os, bool doEquals, void* data, unsigned int flags,
+                 unsigned int flags2)
+{
+	ParseMapInfoHelper<std::string>(os, doEquals);
+
+	if (os.compareTokenNoCase("true"))
+		*static_cast<bool*>(data) = true;
+	else if (os.compareTokenNoCase("false"))
+		*static_cast<bool*>(data) = false;
+	else
+		os.error("Expected \"true\" or \"false\" in boolean statement, got \"%s\"",
+		         os.getToken().c_str());
+}
+
 // Sets the inputted data as a bool (that is, if flags != 0, set to true; else false)
 void MIType_MustConfirm(OScanner& os, bool newStyleMapInfo, void* data, unsigned int flags,
                  unsigned int flags2)
@@ -245,7 +260,7 @@ void MIType_MustConfirm(OScanner& os, bool newStyleMapInfo, void* data, unsigned
 		if (os.compareTokenNoCase("="))
 		{
 			info.must_confirm_text.clear();
-			
+
 			do
 			{
 				os.mustScan();
@@ -294,6 +309,7 @@ void MIType_MustConfirm(OScanner& os, bool newStyleMapInfo, void* data, unsigned
 			os.unScan();
 		}
 	}
+	StringTable::replaceEscapes(info.must_confirm_text);
 }
 
 // Sets the inputted data as a char
@@ -469,7 +485,7 @@ void MIType_MapName(OScanner& os, bool newStyleMapInfo, void* data, unsigned int
 		if (IsNum(map_name))
 		{
 			const int map = std::atoi(map_name);
-			sprintf(map_name, "MAP%02d", map);
+			snprintf(map_name, 9, "MAP%02d", map);
 		}
 
 		*static_cast<OLumpName*>(data) = map_name;
@@ -493,11 +509,11 @@ void MIType_InterLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 	const std::string tok = os.getToken();
 	if (!tok.empty() && tok.at(0) == '$')
 	{
-		os.mustScan();
-		// Intermission scripts are not supported.
+		// intermission script lump
+		*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->second = tok.substr(1);
 		return;
 	}
-	*static_cast<OLumpName*>(data) = tok;
+	*static_cast<std::pair<OLumpName*, OLumpName*>*>(data)->first = tok;
 }
 
 // Sets the inputted data as an OLumpName, checking LANGUAGE for the actual OLumpName
@@ -543,8 +559,7 @@ void MIType_MusicLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 
 		// Music lumps in the stringtable do not begin
 		// with a D_, so we must add it.
-		char lumpname[9];
-		snprintf(lumpname, ARRAY_LENGTH(lumpname), "D_%s", s.c_str());
+		OLumpName lumpname = fmt::format("D_{}", s);
 		if (W_CheckNumForName(lumpname) != -1)
 		{
 			*static_cast<OLumpName*>(data) = lumpname;
@@ -552,11 +567,21 @@ void MIType_MusicLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 	}
 	else
 	{
-		if (W_CheckNumForName(musicname.c_str()) != -1)
+		if (W_CheckNumForName(musicname) != -1)
 		{
 			*static_cast<OLumpName*>(data) = musicname;
 		}
 	}
+}
+
+// Sets inputted data as a sound name
+void MIType_SoundName(OScanner& os, bool doEquals, void* data, unsigned int flags,
+                      unsigned int flags2)
+{
+	ParseMapInfoHelper<std::string>(os, doEquals);
+	const std::string soundname = os.getToken();
+
+	strncpy(static_cast<char*>(data), soundname.c_str(), MAX_SNDNAME);
 }
 
 // Sets the sky texture with an OLumpName
@@ -733,6 +758,81 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 	}
 }
 
+// Sets the credit pages from a gameinfo lump
+void MIType_Pages(OScanner& os, bool doEquals, void* data, unsigned int flags,
+                        unsigned int flags2)
+{
+	ParseMapInfoHelper<OLumpName>(os, doEquals);
+
+	const std::string page = os.getToken();
+	static_cast<OLumpName*>(data)[0] = page;
+
+	os.scan();
+	if (os.compareToken(","))
+	{
+		os.mustScan();
+		if (os.isQuotedString())
+			static_cast<OLumpName*>(data)[1] = os.getToken();
+		else
+			os.error("Trailing comma in Page definition; expected lump name");
+
+		// Do a third page if finalePage/infoPage instead of creditPages
+		if (flags)
+		{
+			os.scan();
+			if (os.compareToken(","))
+			{
+				os.mustScan();
+				if (os.isQuotedString())
+					static_cast<OLumpName*>(data)[2] = os.getToken();
+				else
+					os.error("Trailing comma in Page definition; expected lump name");
+			}
+			else
+			{
+				os.unScan();
+				static_cast<OLumpName*>(data)[2] = page;
+			}
+		}
+	}
+	else
+	{
+		os.unScan();
+		static_cast<OLumpName*>(data)[1] = page;
+		if (flags)
+			static_cast<OLumpName*>(data)[2] = page;
+	}
+
+	SkipUnknownType(os);
+}
+
+// Sets multiple lumpnames in a vector
+void MIType_$VectorLumpName(OScanner& os, bool doEquals, void* data, unsigned int flags,
+                            unsigned int flags2)
+{
+	ParseMapInfoHelper<OLumpName>(os, doEquals);
+
+	const std::string page = os.getToken();
+	static_cast<std::vector<OLumpName>*>(data)->push_back(page);
+
+	while (os.scan())
+	{
+		if (os.compareToken(","))
+		{
+			os.mustScan();
+			if (os.isQuotedString())
+				static_cast<OLumpName*>(data)[1] = os.getToken();
+			else
+				os.error("Unexpected trailing comma; expected lump name");
+		}
+		else
+		{
+			os.unScan();
+			break;
+		}
+	}
+}
+
 // Sets the inputted data as a std::string
 void MIType_SpawnFilter(OScanner& os, bool newStyleMapInfo, void* data, unsigned int flags,
                    unsigned int flags2)
@@ -742,8 +842,22 @@ void MIType_SpawnFilter(OScanner& os, bool newStyleMapInfo, void* data, unsigned
 	if (IsNum(os.getToken().c_str()))
 	{
 		const int num = os.getTokenInt();
-		if (num > 0)
-			*static_cast<int*>(data) |= (1 << (num - 1));
+		switch (num)
+		{
+			case 1:
+			case 2:
+				*static_cast<int*>(data) |= 1;
+				break;
+			case 3:
+				*static_cast<int*>(data) |= 2;
+				break;
+			case 4:
+			case 5:
+				*static_cast<int*>(data) |= 4;
+				break;
+			default:
+				return;
+		}
 	}
 	else
 	{
@@ -770,7 +884,7 @@ void MIType_Map07Special(OScanner& os, bool newStyleMapInfo, void* data, unsigne
 	// mancubus
 	bossactionvector.push_back(bossaction_t());
 	std::vector<bossaction_t>::iterator it = (bossactionvector.end() - 1);
-	
+
 	it->type = MT_FATSO;
 	it->special = 23;
 	it->tag = 666;
@@ -778,7 +892,7 @@ void MIType_Map07Special(OScanner& os, bool newStyleMapInfo, void* data, unsigne
 	// arachnotron
 	bossactionvector.push_back(bossaction_t());
 	it = (bossactionvector.end() - 1);
-	
+
 	it->type = MT_BABY;
 	it->special = 30;
 	it->tag = 667;
@@ -910,6 +1024,74 @@ void MIType_SpecialAction_KillMonsters(OScanner& os, bool newStyleMapInfo, void*
 	// todo
 }
 
+// border around smaller screen sizes
+void MIType_Border(OScanner& os, bool doEquals, void* data,
+                                       unsigned int flags, unsigned int flags2)
+{
+	if (doEquals)
+		MustGetStringName(os, "=");
+
+	os.mustScan(); // can be string or int
+
+	if (IsNum(os.getToken().c_str()))
+	{
+		gameborder_t& border = gameinfo.border;
+
+		border.offset = os.getTokenInt();
+
+		os.mustScanInt();
+		border.offset = os.getTokenInt();
+
+		os.mustScan(); border.tl = os.getToken();
+		os.mustScan(); border.t  = os.getToken();
+		os.mustScan(); border.tr = os.getToken();
+		os.mustScan(); border.l  = os.getToken();
+		os.mustScan(); border.r  = os.getToken();
+		os.mustScan(); border.bl = os.getToken();
+		os.mustScan(); border.b  = os.getToken();
+		os.mustScan(); border.br = os.getToken();
+	}
+	else
+	{
+		if (os.compareTokenNoCase("doomborder"))
+		{
+			static const gameborder_t DoomBorder =
+			{
+				8, 8,
+				"brdr_tl", "brdr_t", "brdr_tr",
+				"brdr_l",			 "brdr_r",
+				"brdr_bl", "brdr_b", "brdr_br"
+			};
+
+			gameinfo.border = DoomBorder;
+		}
+		else if (os.compareTokenNoCase("hereticborder"))
+		{
+			static const gameborder_t HereticBorder =
+			{
+				4, 16,
+				"bordtl", "bordt", "bordtr",
+				"bordl",           "bordr",
+				"bordbl", "bordb", "bordbr"
+			};
+
+			gameinfo.border = HereticBorder;
+		}
+		else if (os.compareTokenNoCase("strifeborder"))
+		{
+			static const gameborder_t StrifeBorder =
+			{
+				8, 8,
+				"brdr_tl", "brdr_t", "brdr_tr",
+				"brdr_l",			 "brdr_r",
+				"brdr_bl", "brdr_b", "brdr_br"
+			};
+
+			gameinfo.border = StrifeBorder;
+		}
+	}
+}
+
 //
 void MIType_AutomapBase(OScanner& os, bool newStyleMapInfo, void* data, unsigned int flags,
                         unsigned int flags2)
@@ -940,7 +1122,7 @@ bool ScanAndCompareString(OScanner& os, std::string cmp)
 }
 
 //
-bool ScanAndSetRealNum(OScanner& os, fixed_t& num)
+bool ScanAndSetRealNum(OScanner& os, fixed64_t& num)
 {
 	os.scan();
 	if (!IsRealNum(os.getToken().c_str()))
@@ -948,8 +1130,8 @@ bool ScanAndSetRealNum(OScanner& os, fixed_t& num)
 		os.warning("Expected number, got \"%s\". Aborting parsing", os.getToken().c_str());
 		return false;
 	}
-	num = FLOAT2FIXED(os.getTokenFloat());
-	
+	num = FLOAT2FIXED64(os.getTokenFloat());
+
 	return true;
 }
 
@@ -964,17 +1146,17 @@ bool InterpretLines(const std::string& name, std::vector<mline_t>& lines)
 		const char* buffer = static_cast<char*>(W_CacheLumpNum(lump, PU_STATIC));
 
 		const OScannerConfig config = {
-		    name.c_str(), // lumpName
-		    false,        // semiComments
-		    true,         // cComments
+		    name,  // lumpName
+		    false, // semiComments
+		    true,  // cComments
 		};
 		OScanner os = OScanner::openBuffer(config, buffer, buffer + W_LumpLength(lump));
-		
+
 		while (os.scan())
 		{
 			os.unScan();
 			mline_t ml;
-			
+
 			if (!ScanAndCompareString(os, "(")) break;
 			if (!ScanAndSetRealNum(os, ml.a.x)) break;
 			if (!ScanAndCompareString(os, ",")) break;
@@ -1068,94 +1250,87 @@ struct MapInfoDataSetter
 	}
 };
 
-// macro to make up for lack of initializer lists in C++98
-#define ENTRY1(x1) mapInfoDataContainer.push_back(MapInfoData(x1));
-#define ENTRY2(x1, x2) mapInfoDataContainer.push_back(MapInfoData(x1, x2));
-#define ENTRY3(x1, x2, x3) mapInfoDataContainer.push_back(MapInfoData(x1, x2, x3));
-#define ENTRY4(x1, x2, x3, x4) \
-	mapInfoDataContainer.push_back(MapInfoData(x1, x2, x3, x4));
-#define ENTRY5(x1, x2, x3, x4, x5) \
-	mapInfoDataContainer.push_back(MapInfoData(x1, x2, x3, x4, x5));
-
 // level_pwad_info_t
 template <>
 struct MapInfoDataSetter<level_pwad_info_t>
 {
 	MapInfoDataContainer mapInfoDataContainer;
+	std::pair<OLumpName*, OLumpName*> enterpicscript;
+	std::pair<OLumpName*, OLumpName*> exitpicscript;
 
-	MapInfoDataSetter(level_pwad_info_t& ref)
+	MapInfoDataSetter(level_pwad_info_t& ref) :
+	enterpicscript(&ref.enterpic, &ref.enterscript),
+	exitpicscript(&ref.exitpic, &ref.exitscript)
 	{
-		mapInfoDataContainer.reserve(
-		    70); // [DE] some random number, i'm not counting all these
-
-		ENTRY3("levelnum", &MIType_Int, &ref.levelnum)
-		ENTRY3("next", &MIType_MapName, &ref.nextmap)
-		ENTRY3("secretnext", &MIType_MapName, &ref.secretmap)
-		ENTRY3("secret", &MIType_MapName, &ref.secretmap)
-		ENTRY3("cluster", &MIType_Cluster, &ref.cluster)
-		ENTRY4("sky1", &MIType_Sky, &ref, 1)
-		ENTRY4("sky2", &MIType_Sky, &ref, 2)
-		ENTRY3("fade", &MIType_Color, &ref.fadeto_color)
-		ENTRY3("outsidefog", &MIType_Color, &ref.outsidefog_color)
-		ENTRY3("titlepatch", &MIType_LumpName, &ref.pname)
-		ENTRY3("par", &MIType_Int, &ref.partime)
-		ENTRY3("music", &MIType_MusicLumpName, &ref.music)
-		ENTRY4("nointermission", &MIType_SetFlag, &ref.flags, LEVEL_NOINTERMISSION)
-		ENTRY4("doublesky", &MIType_SetFlag, &ref.flags, LEVEL_DOUBLESKY)
-		ENTRY4("nosoundclipping", &MIType_SetFlag, &ref.flags, LEVEL_NOSOUNDCLIPPING)
-		ENTRY4("allowmonstertelefrags", &MIType_SetFlag, &ref.flags,
-		       LEVEL_MONSTERSTELEFRAG)
-		ENTRY3("map07special", &MIType_Map07Special, &ref.bossactions)
-		ENTRY3("baronspecial", &MIType_BaronSpecial, &ref.bossactions)
-		ENTRY3("cyberdemonspecial", &MIType_CyberdemonSpecial, &ref.bossactions)
-		ENTRY3("spidermastermindspecial", &MIType_SpiderMastermindSpecial, &ref.bossactions)
-		ENTRY3("specialaction_exitlevel", &MIType_SpecialAction_ExitLevel, &ref.bossactions)
-		ENTRY3("specialaction_opendoor", &MIType_SpecialAction_OpenDoor, &ref.bossactions)
-		ENTRY3("specialaction_lowerfloor", &MIType_SpecialAction_LowerFloor, &ref.bossactions)
-		ENTRY1("lightning")
-		ENTRY3("fadetable", &MIType_LumpName, &ref.fadetable)
-		ENTRY4("evenlighting", &MIType_SetFlag, &ref.flags, LEVEL_EVENLIGHTING)
-		ENTRY4("noautosequences", &MIType_SetFlag, &ref.flags, LEVEL_SNDSEQTOTALCTRL)
-		ENTRY4("forcenoskystretch", &MIType_SetFlag, &ref.flags, LEVEL_FORCENOSKYSTRETCH)
-		ENTRY5("allowfreelook", &MIType_SCFlags, &ref.flags, LEVEL_FREELOOK_YES,
-		       ~LEVEL_FREELOOK_NO)
-		ENTRY5("nofreelook", &MIType_SCFlags, &ref.flags, LEVEL_FREELOOK_NO,
-		       ~LEVEL_FREELOOK_YES)
-		ENTRY5("allowjump", &MIType_SCFlags, &ref.flags, LEVEL_JUMP_YES, ~LEVEL_JUMP_NO)
-		ENTRY5("nojump", &MIType_SCFlags, &ref.flags, LEVEL_JUMP_NO, ~LEVEL_JUMP_YES)
-		ENTRY2("cdtrack", &MIType_EatNext)
-		ENTRY2("cd_start_track", &MIType_EatNext)
-		ENTRY2("cd_end1_track", &MIType_EatNext)
-		ENTRY2("cd_end2_track", &MIType_EatNext)
-		ENTRY2("cd_end3_track", &MIType_EatNext)
-		ENTRY2("cd_intermission_track", &MIType_EatNext)
-		ENTRY2("cd_title_track", &MIType_EatNext)
-		ENTRY2("warptrans", &MIType_EatNext)
-		ENTRY3("gravity", &MIType_Float, &ref.gravity)
-		ENTRY3("aircontrol", &MIType_Float, &ref.aircontrol)
-		ENTRY4("islobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL)
-		ENTRY4("lobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL)
-		ENTRY1("nocrouch")
-		ENTRY2("intermusic", &MIType_EatNext)
-		ENTRY3("par", &MIType_Int, &ref.partime)
-		ENTRY2("sucktime", &MIType_EatNext)
-		ENTRY3("enterpic", &MIType_InterLumpName,
-		       &ref.enterpic) // todo: add intermission script support
-		ENTRY3("exitpic", &MIType_InterLumpName,
-		       &ref.exitpic) // todo: add intermission script support
-		ENTRY2("interpic", &MIType_EatNext)
-		ENTRY2("translator", &MIType_EatNext)
-		ENTRY3("compat_shorttex", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY3("compat_limitpain", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY3("compat_useblocking", &MIType_CompatFlag, &ref.flags) // special lines block use (not implemented, default odamex behavior)
-		ENTRY3("compat_missileclip", &MIType_CompatFlag, &ref.flags) // original height monsters when it comes to missiles (not implemented)
-		ENTRY4("compat_dropoff", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_DROPOFF)
-		ENTRY3("compat_trace", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY3("compat_boomscroll", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY3("compat_sectorsounds", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY4("compat_nopassover", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_NOPASSOVER)
-		ENTRY3("compat_invisibility", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY3("author", &MIType_String, &ref.author)
+		mapInfoDataContainer = {
+			{ "levelnum", &MIType_Int, &ref.levelnum },
+	        { "next", &MIType_MapName, &ref.nextmap },
+	        { "secretnext", &MIType_MapName, &ref.secretmap },
+			{ "secret", &MIType_MapName, &ref.secretmap },
+			{ "cluster", &MIType_Cluster, &ref.cluster },
+			{ "sky1", &MIType_Sky, &ref, 1 },
+			{ "sky2", &MIType_Sky, &ref, 2 },
+			{ "fade", &MIType_Color, &ref.fadeto_color },
+			{ "outsidefog", &MIType_Color, &ref.outsidefog_color },
+			{ "titlepatch", &MIType_LumpName, &ref.pname },
+			{ "music", &MIType_MusicLumpName, &ref.music },
+			{ "nointermission", &MIType_SetFlag, &ref.flags, LEVEL_NOINTERMISSION },
+			{ "doublesky", &MIType_SetFlag, &ref.flags, LEVEL_DOUBLESKY },
+			{ "nosoundclipping", &MIType_SetFlag, &ref.flags, LEVEL_NOSOUNDCLIPPING },
+			{ "allowmonstertelefrags", &MIType_SetFlag, &ref.flags,
+		       LEVEL_MONSTERSTELEFRAG },
+			{ "map07special", &MIType_Map07Special, &ref.bossactions },
+			{ "baronspecial", &MIType_BaronSpecial, &ref.bossactions },
+			{ "cyberdemonspecial", &MIType_CyberdemonSpecial, &ref.bossactions },
+			{ "spidermastermindspecial", &MIType_SpiderMastermindSpecial, &ref.bossactions },
+			{ "specialaction_exitlevel", &MIType_SpecialAction_ExitLevel, &ref.bossactions },
+			{ "specialaction_opendoor", &MIType_SpecialAction_OpenDoor, &ref.bossactions },
+			{ "specialaction_lowerfloor", &MIType_SpecialAction_LowerFloor, &ref.bossactions },
+			{ "lightning" },
+			{ "fadetable", &MIType_LumpName, &ref.fadetable },
+			{ "evenlighting", &MIType_SetFlag, &ref.flags, LEVEL_EVENLIGHTING },
+			{ "noautosequences", &MIType_SetFlag, &ref.flags, LEVEL_SNDSEQTOTALCTRL },
+			{ "forcenoskystretch", &MIType_SetFlag, &ref.flags, LEVEL_FORCENOSKYSTRETCH },
+			{ "allowfreelook", &MIType_SCFlags, &ref.flags, LEVEL_FREELOOK_YES,
+		       ~LEVEL_FREELOOK_NO },
+			{ "nofreelook", &MIType_SCFlags, &ref.flags, LEVEL_FREELOOK_NO,
+		       ~LEVEL_FREELOOK_YES },
+			{ "allowjump", &MIType_SCFlags, &ref.flags, LEVEL_JUMP_YES, ~LEVEL_JUMP_NO },
+			{ "nojump", &MIType_SCFlags, &ref.flags, LEVEL_JUMP_NO, ~LEVEL_JUMP_YES },
+			{ "cdtrack", &MIType_EatNext },
+			{ "cd_start_track", &MIType_EatNext },
+			{ "cd_end1_track", &MIType_EatNext },
+			{ "cd_end2_track", &MIType_EatNext },
+			{ "cd_end3_track", &MIType_EatNext },
+			{ "cd_intermission_track", &MIType_EatNext },
+			{ "cd_title_track", &MIType_EatNext },
+			{ "warptrans", &MIType_EatNext },
+			{ "gravity", &MIType_Float, &ref.gravity },
+			{ "aircontrol", &MIType_Float, &ref.aircontrol },
+			{ "airsupply", &MIType_Int, &ref.airsupply },
+			{ "islobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL },
+			{ "lobby", &MIType_SetFlag, &ref.flags, LEVEL_LOBBYSPECIAL },
+			{ "nocrouch" },
+			{ "intermusic", &MIType_LumpName, &ref.zintermusic },
+			{ "par", &MIType_Int, &ref.partime },
+			{ "sucktime", &MIType_EatNext },
+			{ "enterpic", &MIType_InterLumpName, &enterpicscript },
+			{ "exitpic", &MIType_InterLumpName, &exitpicscript },
+			{ "enteranim", &MIType_LumpName, &ref.enteranim },
+			{ "exitanim", &MIType_LumpName, &ref.exitanim },
+			{ "translator", &MIType_EatNext },
+			{ "compat_shorttex", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_SHORTTEX },
+			{ "compat_limitpain", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_LIMITPAIN },
+			{ "compat_useblocking", &MIType_CompatFlag, &ref.flags }, // special lines block use (not implemented, default odamex behavior)
+		    { "compat_missileclip", &MIType_CompatFlag, &ref.flags }, // original height monsters when it comes to missiles (not implemented)
+			{ "compat_dropoff", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_DROPOFF },
+			{ "compat_trace", &MIType_CompatFlag, &ref.flags }, // todo: not implemented
+			{ "compat_boomscroll", &MIType_CompatFlag, &ref.flags }, // todo: not implemented
+			{ "compat_sectorsounds", &MIType_CompatFlag, &ref.flags }, // todo: not implemented
+			{ "compat_nopassover", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_NOPASSOVER },
+			{ "compat_invisibility", &MIType_CompatFlag, &ref.flags},  // todo: not implemented
+			{ "author", &MIType_String, &ref.author }
+		};
 	}
 };
 
@@ -1183,26 +1358,47 @@ struct MapInfoDataSetter<cluster_info_t>
 template <>
 struct MapInfoDataSetter<gameinfo_t>
 {
-	MapInfoDataContainer mapInfoDataContainer = {
-	    { "advisorytime", &MIType_Float, &gameinfo.advisoryTime },
-	    //{ "chatsound" },
-	    { "pagetime", &MIType_Float, &gameinfo.pageTime },
-	    { "finaleflat", &MIType_LumpName, &gameinfo.finaleFlat },
-	    { "finalemusic", &MIType_$LumpName, &gameinfo.finaleMusic },
-	    { "titlemusic", &MIType_$LumpName, &gameinfo.titleMusic },
-	    { "titlepage", &MIType_LumpName, &gameinfo.titlePage },
-	    { "titletime", &MIType_Float, &gameinfo.titleTime },
-	    { "maparrow", &MIType_MapArrows },
-	    { "cheatkey", &MIType_MapKey, &gameinfo.cheatKey },
-	    { "easykey", &MIType_MapKey, &gameinfo.easyKey }
-	};
+	MapInfoDataContainer mapInfoDataContainer;
+
+	MapInfoDataSetter()
+	{
+		mapInfoDataContainer = {
+			{ "advisorytime", &MIType_Int, &gameinfo.advisoryTime },
+			{ "border", &MIType_Border },
+			{ "borderflat", &MIType_LumpName, &gameinfo.borderFlat },
+			{ "chatsound", &MIType_SoundName, &gameinfo.chatSound },
+			{ "creditpage", &MIType_Pages, &gameinfo.creditPages },
+			{ "intermissioncounter", &MIType_BoolString, &gameinfo.intermissionCounter },
+			{ "intermissionmusic", &MIType_MusicLumpName, &gameinfo.intermissionMusic },
+			{ "noloopfinalemusic", &MIType_BoolString, &gameinfo.noLoopFinaleMusic },
+			{ "pagetime", &MIType_Int, &gameinfo.pageTime },
+			{ "quitsound", &MIType_SoundName, &gameinfo.quitSound },
+			{ "finaleflat", &MIType_LumpName, &gameinfo.finaleFlat },
+			{ "finalemusic", &MIType_MusicLumpName, &gameinfo.finaleMusic },
+			{ "finalepage", &MIType_Pages, &gameinfo.finalePage, 1 },
+			{ "infopage", &MIType_Pages, &gameinfo.infoPage, 1 },
+			{ "telefogheight", &MIType_Int, &gameinfo.telefogHeight },
+			{ "titlemusic", &MIType_MusicLumpName, &gameinfo.titleMusic },
+			{ "titlepage", &MIType_LumpName, &gameinfo.titlePage },
+			{ "titletime", &MIType_Int, &gameinfo.titleTime },
+			{ "defkickback", &MIType_Int, &gameinfo.defKickback },
+			{ "endoom", &MIType_LumpName, &gameinfo.endoom },
+			{ "pausesign", &MIType_LumpName, &gameinfo.pauseSign },
+			{ "gibfactor", &MIType_Float, &gameinfo.gibFactor },
+			{ "textscreenx", &MIType_Int, &gameinfo.textScreenX },
+			{ "textscreeny", &MIType_Int, &gameinfo.textScreenY },
+			{ "maparrow", &MIType_MapArrows },
+			{ "cheatkey", &MIType_MapKey, &gameinfo.cheatKey },
+			{ "easykey", &MIType_MapKey, &gameinfo.easyKey }
+		};
+	}
 };
 
 //
 // Parse a MAPINFO block
 //
 // NULL pointers can be passed if the block is unimplemented.  However, if
-// the block you want to stub out is compatible with o ld MAPINFO, you need
+// the block you want to stub out is compatible with old MAPINFO, you need
 // to parse the block anyway, even if you throw away the values.  This is
 // done by passing in a strings pointer, and leaving the others NULL.
 //
@@ -1284,6 +1480,7 @@ void ParseEpisodeInfo(OScanner& os)
 	int new_mapinfo = false; // is int instead of bool for template purposes
 	OLumpName map;
 	std::string pic;
+	std::string name;
 	bool picisgfx = false;
 	bool remove = false;
 	char key = 0;
@@ -1337,7 +1534,7 @@ void ParseEpisodeInfo(OScanner& os)
 			ParseMapInfoHelper<std::string>(os, new_mapinfo);
 
 			if (picisgfx == false)
-				pic = os.getToken();
+				name = os.getToken();
 		}
 		else if (os.compareTokenNoCase("lookup"))
 		{
@@ -1431,7 +1628,8 @@ void ParseEpisodeInfo(OScanner& os)
 				i = episodenum++;
 		}
 
-		EpisodeInfos[i].name = pic;
+		EpisodeInfos[i].pic_name = pic;
+		EpisodeInfos[i].menu_name = name;
 		EpisodeInfos[i].key = static_cast<char>(tolower(key));
 		EpisodeInfos[i].fulltext = !picisgfx;
 		EpisodeInfos[i].noskillmenu = noskillmenu;
@@ -1530,6 +1728,7 @@ struct MapInfoDataSetter<automap_dummy>
 // also makes use of it.
 void G_MapNameToLevelNum(level_pwad_info_t& info)
 {
+	// TODO: allow for ExMy style map definitions using numbers with greater than 1 digit as allowed by UMAPINFO
 	if (info.mapname[0] == 'E' && info.mapname[2] == 'M')
 	{
 		// Convert a char into its equivalent integer.
@@ -1556,7 +1755,7 @@ void G_MapNameToLevelNum(level_pwad_info_t& info)
 namespace
 {
 
-void ParseMapInfoLump(int lump, const char* lumpname)
+void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 {
 	LevelInfos& levels = getLevelInfos();
 	ClusterInfos& clusters = getClusterInfos();
@@ -1594,8 +1793,7 @@ void ParseMapInfoLump(int lump, const char* lumpname)
 				// MAPNAME is a number, assume a Hexen wad
 				const int map = std::atoi(map_name);
 
-				sprintf(map_name, "MAP%02d", map);
-				SKYFLATNAME[5] = 0;
+				snprintf(map_name, 9, "MAP%02d", map);
 				HexenHack = true;
 				// Hexen levels are automatically nointermission
 				// and even lighting and no auto sound sequences
@@ -1603,7 +1801,7 @@ void ParseMapInfoLump(int lump, const char* lumpname)
 				    LEVEL_NOINTERMISSION | LEVEL_EVENLIGHTING | LEVEL_SNDSEQTOTALCTRL;
 			}
 
-			// Build upon already defined levels, that way we don't miss any defaults 
+			// Build upon already defined levels, that way we don't miss any defaults
 			bool levelExists = levels.findByName(map_name).exists();
 
 			// Find the level.
@@ -1640,6 +1838,7 @@ void ParseMapInfoLump(int lump, const char* lumpname)
 			{
 				info.level_name = os.getToken();
 			}
+			info.pname.clear();
 
 			MapInfoDataSetter<level_pwad_info_t> setter(info);
 			ParseMapInfoLower<level_pwad_info_t>(os, setter);
@@ -1758,6 +1957,12 @@ void G_ParseMapInfo()
 	case doom:
 	case retail_freedoom:
 		baseinfoname = "_D1NFO";
+		if (gamemode == shareware)
+		{
+			lump = W_GetNumForName(baseinfoname);
+			ParseMapInfoLump(lump, baseinfoname);
+			baseinfoname = "_D1SWNFO";
+		}
 		break;
 	case doom2:
 	case commercial_freedoom:
@@ -1811,4 +2016,14 @@ void G_ParseMapInfo()
 	if (skillnum == 0)
 		I_FatalError("%s: You cannot use clearskills in a MAPINFO if you do not define any "
 					"new skills after it.", __FUNCTION__);
+
+	// mark levels as secrets -- for ID24 intermissions
+	LevelInfos& levels = getLevelInfos();
+	size_t numlevels = levels.size();
+	for (size_t i = 0; i < numlevels; i++)
+	{
+		level_pwad_info_t& level = levels.at(i);
+		level_pwad_info_t& secretlevel = levels.findByName(level.secretmap);
+		secretlevel.flags |= LEVEL_SECRET;
+	}
 }

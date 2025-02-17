@@ -163,7 +163,7 @@ JoinResult G_CanJoinGameStart()
 	if (G_IsTeamGame() && sv_maxplayersperteam)
 	{
 		int teamplayers = sv_maxplayersperteam * sv_teamsinplay;
-		if (P_NumPlayersInGame() >= teamplayers)
+		if (static_cast<int>(P_NumPlayersInGame()) >= teamplayers)
 			return JOIN_GAMEFULL;
 	}
 
@@ -277,7 +277,7 @@ bool G_IsLevelState(LevelState::States state)
  */
 bool G_IsDefendingTeam(team_t team)
 {
-	return g_sides == false || ::levelstate.getDefendingTeam() == team;
+	return !g_sides || ::levelstate.getDefendingTeam() == team;
 }
 
 /**
@@ -343,7 +343,7 @@ bool G_IsTeamGame()
  */
 bool G_IsRoundsGame()
 {
-	if (g_rounds == false)
+	if (!g_rounds)
 	{
 		// Not turned on.
 		return false;

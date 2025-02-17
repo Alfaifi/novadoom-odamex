@@ -179,7 +179,7 @@ static const char* steam_install_subdirs[] =
 	"steamapps\\common\\ultimate doom\\base\\plutonia",
 	"steamapps\\common\\ultimate doom\\base\\tnt",
 	"steamapps\\common\\ultimate doom\\rerelease",
-	
+
 };
 
 
@@ -334,7 +334,7 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 				const char* csubpath = subpath;
 				D_AddSearchDir(dirs, csubpath, separator);
-				
+
 				free(subpath);
 			}
 
@@ -355,7 +355,7 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	const char separator = ':';
 
-	#if defined(INSTALL_PREFIX) && defined(INSTALL_DATADIR) 
+	#if defined(INSTALL_PREFIX) && defined(INSTALL_DATADIR)
 	D_AddSearchDir(dirs, INSTALL_PREFIX "/" INSTALL_DATADIR "/odamex", separator);
 	D_AddSearchDir(dirs, INSTALL_PREFIX "/" INSTALL_DATADIR "/games/odamex", separator);
 	#endif
@@ -376,19 +376,6 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 //
 std::string D_GetTitleString()
 {
-	if (gamemission == pack_tnt)
-		return "DOOM 2: TNT - Evilution";
-	if (gamemission == pack_plut)
-		return "DOOM 2: Plutonia Experiment";
-	if (gamemission == chex)
-		return "Chex Quest";
-	if (gamemission == retail_freedoom)
-		return "Ultimate FreeDoom";
-	if (gamemission == commercial_freedoom)
-		return "FreeDoom";
-	if (gamemission == commercial_hacx)
-		return "HACX";
-
 	return gameinfo.titleString;
 }
 
@@ -412,8 +399,8 @@ static void D_PrintIWADIdentity()
 	{
 		if (gamemode == undetermined)
 			Printf(PRINT_HIGH, "Game mode indeterminate, no standard wad found.\n");
-		else 
-			Printf(PRINT_HIGH, "%s\n", D_GetTitleString().c_str()); 
+		else
+			Printf(PRINT_HIGH, "%s\n", D_GetTitleString().c_str());
 	}
 }
 
@@ -428,7 +415,7 @@ void D_LoadResolvedPatches()
 	for (OResFiles::const_iterator it = ::patchfiles.begin(); it != ::patchfiles.end();
 	     ++it)
 	{
-		if (it->getBasename() == "CHEX.DEH")
+		if (StdStringToUpper(it->getBasename()) == "CHEX.DEH")
 		{
 			chexLoaded = true;
 		}
@@ -513,7 +500,7 @@ static bool FindIWAD(OResFile& out)
 /**
  * @brief Load files that are assumed to be resolved, in the correct order,
  *        and complete.
- * 
+ *
  * @param newwadfiles New set of WAD files.
  * @param newpatchfiles New set of patch files.
 */
@@ -560,7 +547,7 @@ static void LoadResolvedFiles(const OResFiles& newwadfiles,
 /**
  * @brief Print a warning that occurrs when the user has an IWAD that's a
  *        different version than the one we want.
- * 
+ *
  * @param wanted The IWAD that we wanted.
  * @return True if we emitted an commercial IWAD warning.
  */
@@ -763,11 +750,11 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 /**
  * @brief Check to see if the list of WAD files and patches matches the
  *        currently loaded files.
- * 
+ *
  * @detail Note that this relies on the hashes being equal, so if you want
  *         resources to not be reloaded, ensure the hashes are equal by the
  *         time they reach this spot.
- * 
+ *
  * @param newwadfiles WAD files to check.
  * @param newpatchfiles Patch files to check.
  * @return True if everything checks out.
@@ -847,7 +834,7 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 		D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
 		// get skill / episode / map from parms
-		strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+		startmap = (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1";
 
 		D_Init();
 	}
@@ -872,7 +859,7 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 			LoadResolvedFiles(oldwadfiles, oldpatchfiles);
 
 			// get skill / episode / map from parms
-			strcpy(startmap, (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1");
+			startmap = (gameinfo.flags & GI_MAPxx) ? "MAP01" : "E1M1";
 
 			D_Init();
 		}
@@ -971,19 +958,19 @@ public:
 		mTask(task)
 	{ }
 
-	virtual ~UncappedTaskScheduler() { }
+	~UncappedTaskScheduler() override { }
 
-	virtual void run()
+	void run() override
 	{
 		mTask();
 	}
 
-	virtual dtime_t getNextTime() const
+	dtime_t getNextTime() const override
 	{
 		return I_GetTime();
 	}
 
-	virtual float getRemainder() const
+	float getRemainder() const override
 	{
 		return 0.0f;
 	}
@@ -1003,9 +990,9 @@ public:
 	{
 	}
 
-	virtual ~CappedTaskScheduler() { }
+	~CappedTaskScheduler() override { }
 
-	virtual void run()
+	void run() override
 	{
 		mFrameStartTime = I_GetTime();
 		mAccumulator += mFrameStartTime - mPreviousFrameStartTime;
@@ -1020,12 +1007,12 @@ public:
 		}
 	}
 
-	virtual dtime_t getNextTime() const
+	dtime_t getNextTime() const override
 	{
 		return mFrameStartTime + mFrameDuration - mAccumulator;
 	}
 
-	virtual float getRemainder() const
+	float getRemainder() const override
 	{
 		// mAccumulator can be greater than mFrameDuration so only get the
 		// time remaining until the next frame
@@ -1115,11 +1102,10 @@ void D_RunTics(void (*sim_func)(), void(*display_func)())
 #ifdef CLIENT_APP
 	// Use linear interpolation for rendering entities if the display
 	// framerate is not synced with the simulation frequency.
-	// Ch0wW : if you experience a spinning effect while trying to pause the frame, 
+	// Ch0wW : if you experience a spinning effect while trying to pause the frame,
 	// don't forget to add your condition here.
 	if ((maxfps == TICRATE && capfps)
-		|| timingdemo || paused || step_mode
-		|| ((menuactive || ConsoleState == c_down || ConsoleState == c_falling) && !network_game && !demoplayback))
+		|| timingdemo || step_mode)
 		render_lerp_amount = FRACUNIT;
 	else
 		render_lerp_amount = simulation_scheduler->getRemainder() * FRACUNIT;
@@ -1131,16 +1117,16 @@ void D_RunTics(void (*sim_func)(), void(*display_func)())
 		return;
 
 	// Sleep until the next scheduled task.
-	dtime_t simulation_wake_time = simulation_scheduler->getNextTime();
-	dtime_t display_wake_time = display_scheduler->getNextTime();
-	dtime_t wake_time = std::min<dtime_t>(simulation_wake_time, display_wake_time);
+	const dtime_t simulation_wake_time = simulation_scheduler->getNextTime();
+	const dtime_t display_wake_time = display_scheduler->getNextTime();
+	const dtime_t wake_time = std::min<dtime_t>(simulation_wake_time, display_wake_time);
 
-	const dtime_t max_sleep_amount = 1000LL * 1000LL;	// 1ms
+	constexpr dtime_t max_sleep_amount = 1000LL * 1000LL;	// 1ms
 
 	// Sleep in 1ms increments until the next scheduled task
 	for (dtime_t now = I_GetTime(); wake_time > now; now = I_GetTime())
 	{
-		dtime_t sleep_amount = std::min<dtime_t>(max_sleep_amount, wake_time - now);
+		const dtime_t sleep_amount = std::min<dtime_t>(max_sleep_amount, wake_time - now);
 		I_Sleep(sleep_amount);
 	}
 }

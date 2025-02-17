@@ -29,7 +29,7 @@
 
 #include "nonstd/scope.hpp"
 
-#include "i_sdl.h" 
+#include "i_sdl.h"
 #include <stdlib.h>
 
 #ifdef OSX
@@ -89,7 +89,9 @@
 #include "i_system.h"
 #include "c_dispatch.h"
 #include "cl_main.h"
+#include "gi.h"
 #include "m_fileio.h"
+#include "txt_main.h"
 
 #ifdef _XBOX
 	#include "i_xbox.h"
@@ -125,7 +127,7 @@ size_t def_heapsize = 16;
 #else
 size_t def_heapsize = 128;
 #endif
-const size_t min_heapsize = 8;
+constexpr size_t min_heapsize = 8;
 
 // The size we got back from I_ZoneBase in megabytes
 size_t got_heapsize = 0;
@@ -275,7 +277,7 @@ dtime_t I_GetTime()
 #else
 	// [SL] use SDL_GetTicks, but account for the fact that after
 	// 49 days, it wraps around since it returns a 32-bit int
-	static const uint64_t mask = 0xFFFFFFFFLL;
+	static constexpr uint64_t mask = 0xFFFFFFFFLL;
 	static uint64_t last_time = 0LL;
 	uint64_t current_time = SDL_GetTicks();
 
@@ -395,7 +397,7 @@ void SetLanguageIDs()
 	{
 		char slang[4] = {'\0', '\0', '\0', '\0'};
 		strncpy(slang, langid, ARRAY_LENGTH(slang) - 1);
-		uint32_t lang = MAKE_ID(slang[0], slang[1], slang[2], slang[3]);
+		const uint32_t lang = MAKE_ID(slang[0], slang[1], slang[2], slang[3]);
 		LanguageIDs[0] = lang;
 		LanguageIDs[1] = lang;
 		LanguageIDs[2] = lang;
@@ -406,13 +408,13 @@ void SetLanguageIDs()
 //
 // I_Init
 //
-void I_Init (void)
+void I_Init()
 {
 	I_InitSound ();
 	I_InitHardware ();
 }
 
-void I_FinishClockCalibration ()
+void I_FinishClockCalibration()
 {
 }
 
@@ -420,55 +422,64 @@ void I_FinishClockCalibration ()
 // Displays the text mode ending screen after the game quits
 //
 
-void I_Endoom(void)
+void I_Endoom()
 {
 #ifndef GCONSOLE // I will return to this -- Hyper_Eye
-	unsigned char *endoom_data;
-	unsigned char *screendata;
+
+	if (!r_showendoom || Args.CheckParm ("-novideo"))
+		return;
+
+	int lump = -1;
+	int count = 0;
 	int y;
 	int indent;
+	while (count < 2 && (lump = W_FindLump("ENDOOM", lump)) != -1)
+	{
+		count++;
+	}
 
-    if (!r_showendoom || Args.CheckParm ("-novideo"))
-        return;
+	if (r_showendoom == 2 && count <= 1)
+		return;
 
-    // Hack to stop crash with disk icon
-    in_endoom = true;
+	// Hack to stop crash with disk icon
+	in_endoom = true;
 
-	endoom_data = (unsigned char *)W_CacheLumpName("ENDOOM", PU_STATIC);
+	unsigned char* endoom_data = (unsigned char*)W_CacheLumpName(gameinfo.endoom.c_str(),
+		PU_STATIC);
 
 	// Set up text mode screen
 
 	TXT_Init();
 
 	I_SetWindowCaption(D_GetTitleString());
-    I_SetWindowIcon();
+	I_SetWindowIcon();
 
 	// Write the data to the screen memory
 
-	screendata = TXT_GetScreenData();
+	unsigned char* screendata = TXT_GetScreenData();
 
-    if(NULL != screendata)
-    {
-        indent = (ENDOOM_W - TXT_SCREEN_W) / 2;
+	if(NULL != screendata)
+	{
+		indent = (ENDOOM_W - TXT_SCREEN_W) / 2;
 
-        for (y=0; y<TXT_SCREEN_H; ++y)
-        {
-            memcpy(screendata + (y * TXT_SCREEN_W * 2),
-                    endoom_data + (y * ENDOOM_W + indent) * 2,
-                    TXT_SCREEN_W * 2);
-        }
+		for (y=0; y<TXT_SCREEN_H; ++y)
+		{
+			memcpy(screendata + (y * TXT_SCREEN_W * 2),
+			endoom_data + (y * ENDOOM_W + indent) * 2,
+			TXT_SCREEN_W * 2);
+		}
 
-        // Wait for a keypress
-        while (true)
-        {
-            TXT_UpdateScreen();
+		// Wait for a keypress
+		while (true)
+		{
+			TXT_UpdateScreen();
 
-            if (TXT_GetChar() > 0)
-                break;
+			if (TXT_GetChar() > 0)
+				break;
 
-            TXT_Sleep(0);
-        }
-    }
+			TXT_Sleep(0);
+		}
+	}
 
 	// Shut down text mode screen
 
@@ -542,7 +553,7 @@ void I_BaseError(const std::string& errortext)
 	abort();
 }
 
-NORETURN void I_BaseFatalError(const std::string& errortext)
+[[noreturn]] void I_BaseFatalError(const std::string& errortext)
 {
 	std::string messagetext;
 
@@ -676,7 +687,7 @@ std::string I_GetClipboardText()
 		if (!bytes_left)
 		{
 			XDestroyWindow(dis, WindowEvents);
-			DPrintf("I_GetClipboardText: Len was: %d", len);
+			DPrintf("I_GetClipboardText: Len was: %lu", len);
 			XUnlockDisplay(dis);
 			XCloseDisplay(dis);
 			return "";

@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -32,9 +32,14 @@ enum gender_t
 	GENDER_MALE,
 	GENDER_FEMALE,
 	GENDER_NEUTER,
-	
+
 	NUMGENDER
 };
+
+inline auto format_as(gender_t eGender)
+{
+	return fmt::underlying(eGender);
+}
 
 enum colorpreset_t	// Acts 19 quiz the order must match m_menu.cpp.
 {
@@ -74,7 +79,19 @@ struct UserInfo
 	weaponswitch_t	switchweapon;
 	byte			weapon_prefs[NUMWEAPONS];
 
-	static const byte weapon_prefs_default[NUMWEAPONS];
+	// The default preference ordering when the player runs out of one type of ammo.
+	// Vanilla Doom compatible.
+	static constexpr byte weapon_prefs_default[NUMWEAPONS] = {
+		0, // wp_fist
+		4, // wp_pistol
+		5, // wp_shotgun
+		6, // wp_chaingun
+		1, // wp_missile
+		8, // wp_plasma
+		2, // wp_bfg
+		3, // wp_chainsaw
+		7  // wp_supershotgun
+	};
 
 	UserInfo() : team(TEAM_NONE), aimdist(0),
 	             predict_weapons(true),

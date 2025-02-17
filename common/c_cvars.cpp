@@ -153,7 +153,7 @@ void cvar_t::ForceSet(const char* valstr)
 	// [SL] 2013-04-16 - Latched CVARs do not change values until the next map.
 	// Servers and single-player games should abide by this behavior but
 	// multiplayer clients should just do what the server tells them.
-	if (m_Flags & CVAR_LATCH && serverside && 
+	if (m_Flags & CVAR_LATCH && serverside &&
 		(gamestate == GS_LEVEL || gamestate == GS_INTERMISSION))
 	{
 		m_Flags |= CVAR_MODIFIED;
@@ -182,7 +182,7 @@ void cvar_t::ForceSet(const char* valstr)
 		{
 			// generate m_String based on the clamped valf value
 			char tmp[32];
-			sprintf(tmp, "%g", valf);
+			snprintf(tmp, 32, "%g", valf);
 			m_String = tmp;
 		}
 		else
@@ -212,7 +212,7 @@ void cvar_t::ForceSet(const char* valstr)
 void cvar_t::ForceSet(float val)
 {
 	char string[32];
-	sprintf(string, "%g", val);
+	snprintf(string, 32, "%g", val);
 	ForceSet(string);
 }
 
@@ -331,19 +331,40 @@ void cvar_t::FilterCompactCVars (TArray<cvar_t *> &cvars, DWORD filter)
 	}
 }
 
-void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, bool compact)
+// Uses snprintf's return value (number of chars written) to advance
+// a pointer of an array of chars to write out a packed byte array
+// of cvars, subtracting the base array size from the total after
+// each advancement.
+void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool compact)
 {
+	if (array_size <= 0)
+		return;
+
 	cvar_t *cvar = ad.GetCVars();
 	byte *ptr = *demo_p;
+	int chars;
 
 	if (compact)
 	{
 		TArray<cvar_t *> cvars;
-		ptr += sprintf ((char *)ptr, "\\\\%ux", (unsigned int)filter);
+		chars = snprintf((char*)ptr, array_size, "\\\\%ux", (unsigned int)filter);
+
+		ptr += chars;
+		array_size -= chars;
+
 		FilterCompactCVars (cvars, filter);
 		while (cvars.Pop (cvar))
 		{
-			ptr += sprintf ((char *)ptr, "\\%s", cvar->cstring());
+			if (array_size <= 0)
+			{
+				Printf(PRINT_WARNING, "Warning: Saved Cvars exceed %lu bytes, no more cvars will be written.\n", array_size);
+				return;
+			}
+
+			chars = snprintf ((char *)ptr, array_size, "\\%s", cvar->cstring());
+
+			ptr += chars;
+			array_size -= chars;
 		}
 	}
 	else
@@ -353,8 +374,19 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, bool compact)
 		{
 			if (cvar->m_Flags & filter)
 			{
-				ptr += sprintf ((char *)ptr, "\\%s\\%s",
+				if (array_size <= 0)
+				{
+					Printf(PRINT_WARNING, "Saved Cvars exceed %lu bytes, no more "
+					       "cvars will be written.\n",
+					       array_size);
+					return;
+				}
+
+				chars = snprintf((char*)ptr, array_size, "\\%s\\%s",
 								cvar->name(), cvar->cstring());
+
+				ptr += chars;
+				array_size -= chars;
 			}
 			cvar = cvar->m_Next;
 		}
@@ -599,7 +631,7 @@ static std::string C_GetValueString(const cvar_t* var)
 	if (atof(var->cstring()) == 0.0f)
 		return "disabled";
 	else
-		return "enabled";	
+		return "enabled";
 }
 
 static std::string C_GetLatchedValueString(const cvar_t* var)
@@ -612,9 +644,7 @@ static std::string C_GetLatchedValueString(const cvar_t* var)
 
 	if (var->flags() & CVAR_NOENABLEDISABLE)
 	{
-		std::string str = "";
-		StrFormat(str, "\"%s\"", var->latched());
-		return str;
+		return fmt::sprintf("\"%s\"", var->latched());
 	}
 
 	if (atof(var->latched()) == 0.0f)

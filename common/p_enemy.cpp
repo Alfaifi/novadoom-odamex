@@ -96,10 +96,10 @@ void SV_UpdateMobj(AActor* mo);
 void SV_Sound(AActor* mo, byte channel, const char* name, byte attenuation);
 
 // killough 8/8/98: distance friends tend to move towards players
-const int distfriend = 128;
+constexpr int distfriend = 128;
 
 // killough 9/8/98: whether monsters are allowed to strafe or retreat
-const int monster_backing = 0;
+constexpr int monster_backing = 0;
 
 extern bool isFast;
 
@@ -378,14 +378,20 @@ BOOL P_Move (AActor *actor)
 		// open any specials
 		if (actor->flags & MF_FLOAT && floatok)
 		{
+			fixed_t savedz = actor->z;
 			// must adjust height
 			if (actor->z < tmfloorz)
 				actor->z += FLOATSPEED;
 			else
 				actor->z -= FLOATSPEED;
 
-			actor->flags |= MF_INFLOAT;
-			return true;
+			// [RH] Check to make sure there's nothing in the way of the float
+			if (P_TestMobjZ(actor))
+			{
+				actor->flags |= MF_INFLOAT;
+				return true;
+			}
+			actor->z = savedz;
 		}
 
 		if (spechit.empty())
@@ -899,7 +905,7 @@ void A_Look (AActor *actor)
 
 		if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
 			S_Sound(CHAN_VOICE, sound, 1, ATTN_NORM);
-		else 
+		else
 			S_Sound (actor, CHAN_VOICE, sound, 1, ATTN_NORM);
 	}
 
@@ -1894,6 +1900,11 @@ void A_SpawnObject(AActor* actor)
 	vel_y = actor->state->args[6];
 	vel_z = actor->state->args[7];
 
+	if (!CheckIfDehActorDefined((mobjtype_t)type))
+	{
+		I_Error("A_SpawnObject: Attempted to spawn undefined object type.");
+	}
+
 	// calculate position offsets
 	an = actor->angle + (unsigned int)(((int64_t)angle << 16) / 360);
 	fan = an >> ANGLETOFINESHIFT;
@@ -1957,6 +1968,11 @@ void A_MonsterProjectile(AActor* actor)
 	spawnofs_xy = actor->state->args[3];
 	spawnofs_z = actor->state->args[4];
 
+	if (!CheckIfDehActorDefined((mobjtype_t)type))
+	{
+		I_Error("A_MonsterProjectile: Attempted to spawn undefined projectile type.");
+	}
+
 	A_FaceTarget(actor);
 	mo = P_SpawnMissile(actor, actor->target, (mobjtype_t)type);
 	if (!mo)
@@ -1970,7 +1986,7 @@ void A_MonsterProjectile(AActor* actor)
 
 	// adjust pitch (approximated, using Doom's ye olde
 	// finetangent table; same method as monster aim)
-	mo->momz += FixedMul(mo->info->speed, pitch);
+	mo->momz += FixedMul(mo->info->speed, DegToSlope(pitch));
 
 	// adjust position
 	an = (actor->angle - ANG90) >> ANGLETOFINESHIFT;
@@ -2099,14 +2115,14 @@ void A_HealChase(AActor* actor)
 	state = actor->state->args[0];
 	sound = actor->state->args[1];
 
-	if (!P_HealCorpse(actor, actor->info->radius, state, sound))	
+	if (!P_HealCorpse(actor, actor->info->radius, state, sound))
 		A_Chase(actor);
 }
 
 //
 // P_HealCorpse
 // A generic corpse resurrection codepointer.
-// 
+//
 bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 {
 	// don't attempt to resurrect clientside
@@ -2457,6 +2473,15 @@ void A_Stop(AActor* actor)
 	actor->momx = actor->momy = actor->momz = 0;
 }
 
+// P_RemoveSoulLimit
+bool P_RemoveSoulLimit()
+{
+	if (level.flags & LEVEL_COMPAT_LIMITPAIN)
+		return false;
+
+	return co_removesoullimit;
+}
+
 //
 // A_PainShootSkull
 // Spawn a lost soul and launch it at the target
@@ -2489,7 +2514,7 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 	// if there are already 20 skulls on the level,
 	// don't spit another one
 	// co_removesoullimit removes the standard limit
-	if (count > 20 && !co_removesoullimit)
+	if (count > 20 && !P_RemoveSoulLimit())
 		return;
 	// multiplayer retains a hard limit of 128
 	if (multiplayer && count > 128)
@@ -2593,7 +2618,7 @@ void A_Scream (AActor *actor)
 
 	if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
 		S_Sound(CHAN_VOICE, sound, 1, ATTN_NORM);
-	else 
+	else
 	    S_Sound (actor, CHAN_VOICE, sound, 1, ATTN_NORM);
 }
 
@@ -2679,8 +2704,6 @@ void A_Explode (AActor *thing)
 	P_RadiusAttack (thing, thing->target, damage, distance, hurtSource, mod);
 }
 
-#define SPEED(a)		((a)*(FRACUNIT/8))
-
 //
 // A_BossDeath
 // Possibly trigger special effects if on a boss level
@@ -2701,7 +2724,7 @@ void A_BossDeath(AActor *actor)
 	if (!level.bossactions.empty())
 	{
 		std::vector<bossaction_t>::iterator ba = level.bossactions.begin();
-		
+
 		// see if the BossAction applies to this type
 		for (; ba != level.bossactions.end(); ++ba)
 		{
@@ -2731,7 +2754,7 @@ void A_BossDeath(AActor *actor)
 			if (ba->type == actor->type)
 			{
 				line_t ld;
-				
+
 				if (map_format.getZDoom())
 				{
 					maplinedef_t mld;
@@ -3015,7 +3038,7 @@ void A_PlayerScream (AActor *mo)
 	} else {
 		// [RH] More variety in death sounds
 		//sprintf (nametemp, "*death%d", (M_Random ()&3) + 1); // denis - do not use randomness source!
-		sprintf (nametemp, "*death1");
+		snprintf (nametemp, 128, "*death1");
 		sound = nametemp;
 	}
 
@@ -3087,7 +3110,7 @@ void A_PlaySound(AActor* mo)
 
 	int sndmap = mo->state->misc1;
 
-	if (sndmap >= ARRAY_LENGTH(SoundMap))
+	if (sndmap >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
 	{
 		DPrintf("Warning: Sound ID is beyond the array of the Sound Map!\n");
 		sndmap = 0;
