@@ -30,6 +30,7 @@
 #include "m_bbox.h"
 
 #include "p_local.h"
+#include "p_mobj.h"
 #include "r_data.h"
 #include "m_random.h"
 
@@ -1221,6 +1222,13 @@ AActor* RoughMonsterCheck(AActor* mo, int index, angle_t fov)
 
 		// skip yourself
 		if (link == mo)
+		{
+			link = link->snext;
+			continue;
+		}
+
+		// skip barrels and other shootable but not alive things
+		if (!sentient(link))
 		{
 			link = link->snext;
 			continue;
