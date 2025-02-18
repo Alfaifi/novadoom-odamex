@@ -931,9 +931,13 @@ static void AddCommandLineOptionFiles(OWantFiles& out, const std::string& option
 	DArgs files = Args.GatherFiles(option.c_str());
 	for (size_t i = 0; i < files.NumArgs(); i++)
 	{
-		OWantFile file;
-		OWantFile::make(file, files.GetArg(i), type);
-		out.push_back(file);
+		const char* fileArg = files.GetArg(i);
+		if (!std::string(fileArg).empty())
+		{
+			OWantFile file;
+			OWantFile::make(file, fileArg, type);
+			out.push_back(file);
+		}
 	}
 
 	files.FlushArgs();

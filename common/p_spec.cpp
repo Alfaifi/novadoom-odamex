@@ -467,7 +467,10 @@ void DPusher::Serialize (FArchive &arc)
 	else
 	{
 		arc >> m_Type;
-		arc.ReadObject((DObject*&)m_Source, DPusher::StaticType());
+		// [CMB] copy ctr and assignment operator to m_Source was previously causing an unlinking issue resulting in a nullptr
+		DObject* temp = nullptr;
+		arc.ReadObject(temp, DPusher::StaticType());
+		m_Source = temp ? static_cast<AActor*>(temp)->ptr() : AActor::AActorPtr();
 		arc >> m_Xmag >> m_Ymag >> m_Magnitude >> m_Radius >> m_X >> m_Y >> m_Affectee;
 	}
 }
