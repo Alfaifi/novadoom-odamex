@@ -2107,8 +2107,8 @@ BOOL PTR_AimTraverse (intercept_t* in)
 		!sv_friendlyfire)
 		return true;
 
-	// Don't aim at friendlies
-	if (shootthing->flags & MF_FRIEND && P_IsFriendlyThing(th, shootthing) &&
+	// Don't aim at friendlies if you're a player
+	if (shootthing->player && th->flags & MF_FRIEND && P_IsFriendlyThing(shootthing, th) &&
 	    !sv_friendlymonsterfire)
 		return true;
 
