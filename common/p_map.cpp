@@ -552,7 +552,7 @@ bool P_ShouldClipFriendly(AActor* projectile, AActor* monster)
 		}
 		else
 		{
-			return true; // Enemy monster
+			return false; // Friendly monster
 		}
 	}
 	else
@@ -2330,6 +2330,9 @@ BOOL PTR_ShootTraverse (intercept_t* in)
 		if (P_AreTeammates(*shootthing->player, *th->player) && !sv_friendlyfire)
 			spawnblood = false;
 	}
+
+	if (th->flags & MF_FRIEND && P_IsFriendlyThing(th, shootthing) && !sv_friendlymonsterfire)
+		spawnblood = false;
 
 	if (spawnblood)
 		P_SpawnBlood(x, y, z, la_damage);
