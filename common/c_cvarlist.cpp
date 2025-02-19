@@ -44,6 +44,11 @@ CVAR(				sv_friendlyfire, "1", "When set, players can injure others on the same 
 					"it is ignored in deathmatch",
 					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
 
+CVAR(				sv_friendlymonsterfire, "1",
+					"When set, players and other friendly monsters can injure friendly monsters on the same team, "
+					"it is ignored in deathmatch",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
 CVAR_RANGE(			sv_scorelimit, "5", "Game ends when team score is reached in Teamplay/CTF",
 					CVARTYPE_BYTE, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 255.0f)
 
@@ -176,6 +181,10 @@ CVAR_RANGE(			sv_spawndelaytime, "0.0", "Force a player to wait a period (in sec
 					CVARTYPE_FLOAT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 32768.0f)
 
 CVAR(				sv_unblockplayers, "0", "Allows players to walk through other players, and player projectiles to pass through teammates.",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_LATCH | CVAR_SERVERINFO)
+
+CVAR(				sv_unblockfriendly, "0", "Allows players and friendly monsters to walk through other friendly monsters, and player and friendly"
+						" projectiles to pass thru players and other friendlies.",
 					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_LATCH | CVAR_SERVERINFO)
 
 CVAR(				sv_hostname, "Untitled Odamex Server", "Server name to appear on masters, clients and launchers",
@@ -370,7 +379,7 @@ CVAR_RANGE(sv_countdown, "5",
 					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 2048.0f)
 
 	CVAR(			co_avoidhazards, "0",
-					"Use MBF monster_avoid_hazards behavior -- monsters will avoid damaging sectors and crushers.",
+					"Use MBF monster_avoid_hazards behavior -- monsters will avoid some damaging sectors and crushers.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 	CVAR(			co_monkeys, "0",

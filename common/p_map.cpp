@@ -54,8 +54,6 @@
 
 bool P_ShouldClipPlayer(AActor* projectile, AActor* player);
 
-EXTERN_CVAR(sv_unblockplayers)
-
 fixed_t 		tmbbox[4];
 static AActor  *tmthing;
 static int 		tmflags;
@@ -103,7 +101,9 @@ EXTERN_CVAR (co_zdoomphys)
 EXTERN_CVAR (co_blockmapfix)
 EXTERN_CVAR (co_boomsectortouch)
 EXTERN_CVAR (sv_friendlyfire)
+EXTERN_CVAR (sv_friendlymonsterfire)
 EXTERN_CVAR (sv_unblockplayers)
+EXTERN_CVAR (sv_unblockfriendly)
 EXTERN_CVAR (co_monkeys)
 
 CVAR_FUNC_IMPL (sv_gravity)
@@ -134,8 +134,13 @@ BOOL PIT_StompThing (AActor *thing)
 	if (tmthing->player && tmthing->player->spectator)
 		return true;
 
-	// Unblocked players shouldn't telefrag friendlies.  Thanks Amateur Spammer!
+	// Unblocked players shouldn't telefrag other players.  Thanks Amateur Spammer!
 	if (tmthing->player && thing->player && sv_unblockplayers)
+		return true;
+
+	// Unblocked friendlies shouldn't telefrag anyone.
+	if (tmthing && thing && thing->flags & MF_FRIEND && P_IsFriendlyThing(thing, tmthing) &&
+	    sv_unblockfriendly)
 		return true;
 
 	// don't clip against self
@@ -527,6 +532,36 @@ BOOL PIT_CheckLine (line_t *ld)
 }
 
 /*
+ * @brief Determines if a projectile should clip a friendly monster.
+ *
+ * @param projectile (suspected) projectile actor
+ * @param player (suspected) player actor
+ * @return true if the player should be clipped.
+ */
+bool P_ShouldClipFriendly(AActor* projectile, AActor* monster)
+{
+	if (!sv_unblockfriendly)
+	{
+		return true; // Clip all friendlies all the time.
+	}
+	else if (projectile->target && projectile->target->flags & MF_FRIEND && P_IsFriendlyThing(projectile->target, monster))
+	{
+		if (sv_friendlymonsterfire)
+		{
+			return true; // Always clip if friendly monster fire is on.
+		}
+		else
+		{
+			return true; // Enemy monster
+		}
+	}
+	else
+	{
+		return true; // Not a friendly.
+	}
+}
+
+/*
  * @brief Determines if a projectile should clip a player.
  *
  * @param projectile (suspected) projectile actor
@@ -597,6 +632,10 @@ static BOOL PIT_CheckThing (AActor *thing)
 		return true;
 
 	if (tmthing->player && thing->player && sv_unblockplayers)
+		return true;
+
+	if (tmthing && thing && thing->flags & MF_FRIEND &&
+	    P_IsFriendlyThing(thing, tmthing) && sv_unblockfriendly)
 		return true;
 
 	fixed_t blockdist = thing->radius + tmthing->radius;
@@ -687,6 +726,10 @@ static BOOL PIT_CheckThing (AActor *thing)
 
 		// Don't clip the projectile unless it's not a teammate.
 		if (!P_ShouldClipPlayer(tmthing, thing))
+			return true;
+
+		// Don't clip the projectile unless it's not a friendly.
+		if (!P_ShouldClipFriendly(tmthing, thing))
 			return true;
 
 		if (tmthing->flags2 & MF2_RIP)
@@ -850,6 +893,11 @@ BOOL PIT_CheckOnmobjZ (AActor *thing)
 
 	// Don't clip against a player
 	if (tmthing->player && thing->player && sv_unblockplayers)
+		return true;
+
+	// Don't clip against friendlies
+	if (tmthing && thing && thing->flags & MF_FRIEND &&
+	    P_IsFriendlyThing(thing, tmthing) && sv_unblockfriendly)
 		return true;
 
 	// over / under thing
@@ -2057,6 +2105,11 @@ BOOL PTR_AimTraverse (intercept_t* in)
 		shootthing->player && th->player &&
 		shootthing->player->userinfo.team == th->player->userinfo.team &&
 		!sv_friendlyfire)
+		return true;
+
+	// Don't aim at friendlies
+	if (shootthing->flags & MF_FRIEND && P_IsFriendlyThing(th, shootthing) &&
+	    !sv_friendlymonsterfire)
 		return true;
 
 	// check angles to see if the thing can be aimed at

@@ -57,6 +57,7 @@ EXTERN_CVAR(sv_monsterdamage)
 EXTERN_CVAR(sv_fraglimit)
 EXTERN_CVAR(sv_fragexitswitch) // [ML] 04/4/06: Added compromise for older exit method
 EXTERN_CVAR(sv_friendlyfire)
+EXTERN_CVAR(sv_friendlymonsterfire)
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
@@ -2055,10 +2056,19 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
     }
 
 	// [AM] Target is invulnerable to infighting from any non-player source.
-	// Unless it is friendly
+	// Unless it is friendly (and thus hostile to bosses)
 	if (source && target->oflags & MFO_INFIGHTINVUL && (source->player == NULL && P_IsFriendlyThing(source, target)))
 	{
 		return;
+	}
+
+	// No damage with sv_friendlymonsterfire
+	if (!sv_friendlymonsterfire && source && target != source && mod != MOD_TELEFRAG)
+	{
+		if (source->flags & MF_FRIEND && P_IsFriendlyThing(source, target))
+		{
+			return;
+		}
 	}
 
 	MeansOfDeath = mod;
