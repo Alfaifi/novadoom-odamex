@@ -116,13 +116,10 @@ function CopyFilesX86 {
     New-Item -Force -ItemType "directory" -Path "${X86Dir}\redist"
 
     Copy-Item -Force -Path `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libFLAC-8.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libmodplug-1.dll", `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libmpg123-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libogg-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libopus-0.dll", `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libvorbis-0.dll", `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libvorbisfile-3.dll", `
+        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libopusfile-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\odamex.exe", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\SDL2_mixer.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\SDL2.dll", `
