@@ -249,14 +249,6 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 	}
 	int id = vis->mo && vis->mo->player ? vis->mo->player->id : 0;
 
-  // Show friendly tint and effect
-	if (vis->mo && consoleplayer().mo && !vis->mo->player &&
-	    P_IsFriendlyThing(vis->mo, consoleplayer().mo))
-	{
-		translated = true;
-		dcol.translation = translationref_t(&::friendtable[0]);
-	}
-
 	// Add powerup colormaps
 	// invis overrides all
 	if (vis->statusflags & SF_INVIS)

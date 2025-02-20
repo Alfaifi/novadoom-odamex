@@ -2972,19 +2972,26 @@ void P_FriendlyEffects()
 
 	while ((other = iterator.Next()))
 	{
+		if (other->health <= 0)
+		{
+			other->effects = 0;
+			continue;
+		}
+
 		if (other->player || !(other->flags & MF_FRIEND) || other->health <= 0 ||
 		    (other->oflags & MFO_BOSSPOOL))
 			continue;
 
-		if (validplayer(consoleplayer()) &&
-				consoleplayer().mo &&
-				P_IsFriendlyThing(consoleplayer().mo, other))
+		if (validplayer(displayplayer()) && displayplayer().mo &&
+		    P_IsFriendlyThing(displayplayer().mo, other))
 		{
 			other->effects = FX_FRIENDHEARTS;
+			other->translation = translationref_t(&friendtable[0]);
 		}
 		else
 		{
 			other->effects = 0;
+			other->translation = 0;
 		}
 	}
 }
