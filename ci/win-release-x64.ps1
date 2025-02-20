@@ -116,13 +116,10 @@ function CopyFilesX64 {
     New-Item -Force -ItemType "directory" -Path "${X64Dir}\redist"
 
     Copy-Item -Force -Path `
-        "${CurrentDir}\BuildX64\client\RelWithDebInfo\libFLAC-8.dll", `
         "${CurrentDir}\BuildX64\client\RelWithDebInfo\libmodplug-1.dll", `
-        "${CurrentDir}\BuildX64\client\RelWithDebInfo\libmpg123-0.dll", `
         "${CurrentDir}\BuildX64\client\RelWithDebInfo\libogg-0.dll", `
         "${CurrentDir}\BuildX64\client\RelWithDebInfo\libopus-0.dll", `
-        "${CurrentDir}\BuildX64\client\RelWithDebInfo\libvorbis-0.dll", `
-        "${CurrentDir}\BuildX64\client\RelWithDebInfo\libvorbisfile-3.dll", `
+        "${CurrentDir}\BuildX64\client\RelWithDebInfo\libopusfile-0.dll", `
         "${CurrentDir}\BuildX64\client\RelWithDebInfo\odamex.exe", `
         "${CurrentDir}\BuildX64\client\RelWithDebInfo\SDL2_mixer.dll", `
         "${CurrentDir}\BuildX64\client\RelWithDebInfo\SDL2.dll", `
