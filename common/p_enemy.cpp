@@ -198,7 +198,7 @@ static bool P_CheckRange(AActor* actor, fixed_t range)
 	AActor* pl = actor->target;
 
 	return // killough 7/18/98: friendly monsters don't attack other friends
-	    pl && !(P_IsFriendlyThing(actor, pl)) &&
+	    pl && !(actor->flags & pl->flags & MF_FRIEND && P_IsFriendlyThing(actor, pl)) &&
 	    P_AproxDistance(pl->x - actor->x, pl->y - actor->y) < range &&
 	    P_CheckSight(actor, actor->target) &&
 	        pl->z <= actor->z + actor->height && actor->z <= pl->z + pl->height;
@@ -221,7 +221,7 @@ BOOL P_CheckMeleeRange (AActor *actor)
 	pl = actor->target;
 	dist = P_AproxDistance (pl->x-actor->x, pl->y-actor->y);
 
-	if (!((actor->flags ^ pl->flags) & MF_FRIEND) || P_IsFriendlyThing(pl, actor))
+	if (actor->flags & pl->flags & MF_FRIEND && P_IsFriendlyThing(actor, pl))
 		return false;
 
 	if (dist >= range - 20 * FRACUNIT + pl->info->radius)
@@ -276,7 +276,7 @@ BOOL P_CheckMissileRange (AActor *actor)
 	 /* killough 7/18/98: friendly monsters don't attack other friendly
 	 * monsters or players (except when attacked, and then only once)
 	 */
-	if (P_IsFriendlyThing(actor, actor->target))
+	if (actor->flags & MF_FRIEND && P_IsFriendlyThing(actor, actor->target))
 		return false;
 
 	if (actor->reactiontime)
@@ -1723,10 +1723,8 @@ void A_CPosRefire (AActor *actor)
 		return;
 
 	/* killough 12/98: Stop firing if a friend has gotten in the way */
-	if (P_HitFriend(actor))
-		stop = true;
-
-	if (actor->target && P_IsFriendlyThing(actor, actor->target))
+	if (actor->flags & MF_FRIEND && P_IsFriendlyThing(actor, actor->target) &&
+			P_HitFriend(actor))
 		stop = true;
 
 	if (!actor->target
@@ -1751,10 +1749,8 @@ void A_SpidRefire (AActor *actor)
 		return;
 
 	/* killough 12/98: Stop firing if a friend has gotten in the way */
-	if (P_HitFriend(actor))
-		stop = true;
-
-	if (actor->target && P_IsFriendlyThing(actor, actor->target))
+	if (actor->flags & MF_FRIEND && P_IsFriendlyThing(actor, actor->target) &&
+	    P_HitFriend(actor))
 		stop = true;
 
 	if (!actor->target

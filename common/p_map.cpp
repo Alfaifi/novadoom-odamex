@@ -709,8 +709,8 @@ static BOOL PIT_CheckThing (AActor *thing)
 
 		// Check with projectiles owner if we can explode
 		if (tmthing->target && 
-				P_ProjectileImmune(thing, tmthing->target) &&
-				P_IsFriendlyThing(thing, tmthing->target))
+				P_ProjectileImmune(thing, tmthing->target))
+				//  && P_IsFriendlyThing(thing, tmthing->target)
 			{
 				// Don't hit same species as originator, but only if friendly to the owner.
 				if (thing == tmthing->target)
