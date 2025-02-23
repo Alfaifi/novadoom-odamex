@@ -22,7 +22,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#pragma once
+
 #include "m_ostring.h"
 
 inline const OString D_DEVSTR = "D_DEVSTR";
