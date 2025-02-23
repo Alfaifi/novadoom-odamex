@@ -1723,8 +1723,7 @@ void A_CPosRefire (AActor *actor)
 		return;
 
 	/* killough 12/98: Stop firing if a friend has gotten in the way */
-	if (actor->flags & MF_FRIEND && P_IsFriendlyThing(actor, actor->target) &&
-			P_HitFriend(actor))
+	if (actor->flags & MF_FRIEND &&	P_HitFriend(actor))
 		stop = true;
 
 	if (!actor->target
@@ -1749,8 +1748,7 @@ void A_SpidRefire (AActor *actor)
 		return;
 
 	/* killough 12/98: Stop firing if a friend has gotten in the way */
-	if (actor->flags & MF_FRIEND && P_IsFriendlyThing(actor, actor->target) &&
-	    P_HitFriend(actor))
+	if (actor->flags & MF_FRIEND && P_HitFriend(actor))
 		stop = true;
 
 	if (!actor->target
