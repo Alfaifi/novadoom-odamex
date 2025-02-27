@@ -795,7 +795,7 @@ std::string C_QuoteString(const std::string &argstr)
 {
 	std::ostringstream buffer;
 	buffer << "\"";
-	for (const auto& c : argstr)
+	for (const auto c : argstr)
 	{
 		if (ValidEscape(c))
 		{

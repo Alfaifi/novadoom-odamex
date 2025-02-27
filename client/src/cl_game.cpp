@@ -1747,7 +1747,7 @@ void G_DoSaveGame()
 		arc << ACS_WorldVars[i];
 		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
 		arc << worldarr.size();
-		for (const auto& [key, val] : worldarr)
+		for (const auto [key, val] : worldarr)
 		{
 			arc << key;
 			arc << val;
@@ -1759,7 +1759,7 @@ void G_DoSaveGame()
 		arc << ACS_GlobalVars[i];
 		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
 		arc << globalarr.size();
-		for (const auto& [key, val] : globalarr)
+		for (const auto [key, val] : globalarr)
 		{
 			arc << key;
 			arc << val;

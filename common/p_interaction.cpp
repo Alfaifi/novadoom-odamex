@@ -621,7 +621,7 @@ static void P_GiveCarePack(player_t* player)
 	// Players who are extremely low on ammo for a weapon they are holding
 	// always get ammo for that weapon.
 	const hordeDefine_t::ammos_t& ammos = P_HordeAmmos();
-	for (const auto& ammo : ammos)
+	for (const auto ammo : ammos)
 	{
 		if (blocks < 1)
 		{
@@ -656,7 +656,7 @@ static void P_GiveCarePack(player_t* player)
 	if (blocks >= 1)
 	{
 		const hordeDefine_t::weapons_t& weapons = P_HordeWeapons();
-		for (const auto& weapon : weapons)
+		for (const auto weapon : weapons)
 		{
 			// No weapon is a special case that means give the player
 			// berserk strength (without the health).

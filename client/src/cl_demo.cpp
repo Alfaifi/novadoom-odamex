@@ -300,7 +300,7 @@ bool NetDemo::writeSnapshotIndex()
 
 
 
-	for (const auto& [ticnum, offset] : snapshot_index)
+	for (const auto [ticnum, offset] : snapshot_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
@@ -360,7 +360,7 @@ bool NetDemo::writeMapIndex()
 {
 	fseek(demofp, header.map_index_offset, SEEK_SET);
 
-	for (const auto& [ticnum, offset] : map_index)
+	for (const auto [ticnum, offset] : map_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
@@ -1383,7 +1383,7 @@ const std::vector<int> NetDemo::getMapChangeTimes()
 {
 	std::vector<int> times;
 
-	for (const auto& [ticnum, _] : map_index)
+	for (const auto [ticnum, _] : map_index)
 	{
 		int start_time = (ticnum - header.starting_gametic) / TICRATE;
 		times.push_back(start_time);
@@ -1480,7 +1480,7 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_WorldVars[i];
 		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
 		arc << worldarr.size();
-		for (const auto& [key, val] : worldarr)
+		for (const auto [key, val] : worldarr)
 		{
 			arc << key;
 			arc << val;
@@ -1493,7 +1493,7 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_GlobalVars[i];
 		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
 		arc << globalarr.size();
-		for (const auto& [key, val] : globalarr)
+		for (const auto [key, val] : globalarr)
 		{
 			arc << key;
 			arc << val;

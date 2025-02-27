@@ -721,7 +721,7 @@ size_t Vote::count_yes() const
 	int count = 0;
 
 	// Count the for votes.
-	for (const auto& [_, vote_result] : this->tally)
+	for (const auto [_, vote_result] : this->tally)
 	{
 		if (vote_result == VOTE_YES)
 		{
@@ -768,7 +768,7 @@ size_t Vote::count_no() const
 	int count = 0;
 
 	// Count the against votes.
-	for (const auto& [_, vote_result] : this->tally)
+	for (const auto [_, vote_result] : this->tally)
 	{
 		if (vote_result == VOTE_NO)
 		{

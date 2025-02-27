@@ -614,7 +614,7 @@ std::string &TrimString(std::string &s)
 // Ensure that a string only has valid viewable ASCII in it.
 bool ValidString(const std::string& s)
 {
-	for (const auto& c : s)
+	for (const auto c : s)
 	{
 		if (c < ' ' || c > '~')
 			return false;
@@ -627,7 +627,7 @@ bool IsHexString(const std::string& str, const size_t len)
 	if (str.length() != len)
 		return false;
 
-	for (const auto& c : str)
+	for (const auto c : str)
 	{
 		if (c >= '0' && c <= '9')
 			continue;
