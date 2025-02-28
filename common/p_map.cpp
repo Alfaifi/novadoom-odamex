@@ -710,9 +710,8 @@ static BOOL PIT_CheckThing (AActor *thing)
 		// Check with projectiles owner if we can explode
 		if (tmthing->target && 
 				P_ProjectileImmune(thing, tmthing->target))
-				//  && P_IsFriendlyThing(thing, tmthing->target)
 			{
-				// Don't hit same species as originator, but only if friendly to the owner.
+				// Don't hit same species as originator
 				if (thing == tmthing->target)
 					return true;
 
@@ -1326,9 +1325,14 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 		 * killough 10/98: Allow dropoffs in controlled circumstances
 		 * killough 11/98: Improve symmetry of clipping on stairs
 		 */
+		// killough 3/15/98: Allow certain objects to drop off
 		if (!(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)))
 		{
-			if ((!P_AllowDropOff() && !dropoff) && tmfloorz - tmdropoffz > 24 * FRACUNIT)
+			// Allowing blasting off ledges without allowing dropoff is a Hexen thing
+			// But this doesn't seem to break any demos
+			if (!(P_AllowDropOff() && dropoff) && 
+					tmfloorz - tmdropoffz > 24 * FRACUNIT && 
+					!(thing->flags2 & MF2_BLASTED))
 			{
 				return false;
 			}
@@ -1341,7 +1345,7 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 					if (!co_monkeys || !P_IsMBFCompatMode()
 					        ? tmfloorz - tmdropoffz > 24 * FRACUNIT
 					        : thing->floorz - tmfloorz > 24 * FRACUNIT ||
-					          thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
+					              thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
 						return false;
 				}
 				else
