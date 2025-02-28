@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -652,7 +652,7 @@ void Unlag::debugReconciliation(byte shooter_id)
 
 			if (deltaangle < 3 * FRACUNIT)
 			{
-				DPrintf("Unlag (%03d): would have hit player %d at gametic %d (%" PRIuSIZE " tics ago)\n",
+				DPrintf("Unlag (%03d): would have hit player %d at gametic %d (%" "zu" " tics ago)\n",
 						gametic & 0xFF, player_history[i].player->id, (gametic - static_cast<int>(n)) & 0xFF, n);
 			}
 		}

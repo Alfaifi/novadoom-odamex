@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -102,7 +102,7 @@ bool isFast = false;
 //
 static OLumpName d_mapname;
 
-void G_DeferedInitNew (const char *mapname)
+void G_DeferedInitNew (const OLumpName& mapname)
 {
 	G_CleanupDemo();
 	d_mapname = mapname;
@@ -405,6 +405,27 @@ void G_DoCompleted (void)
 	if (!(level.flags & LEVEL_CHANGEMAPCHEAT))
 	{
 		getLevelInfos().findByName(level.mapname).flags |= LEVEL_VISITED;
+		if(level.flags & LEVEL_SECRET)
+		{
+			for (auto& player : players)
+				player.didsecret = true;
+		}
+	}
+
+	const WinInfo& win = levelstate.getWinInfo();
+	switch (win.type)
+	{
+		case WinInfo::WIN_EVERYBODY:
+			wminfo.winner = true;
+			break;
+		case WinInfo::WIN_TEAM:
+			wminfo.winner = consoleplayer().userinfo.team == win.id;
+			break;
+		case WinInfo::WIN_PLAYER:
+			wminfo.winner = consoleplayer_id == win.id;
+			break;
+		default:
+			wminfo.winner = false;
 	}
 
 	AM_Stop();
@@ -469,6 +490,8 @@ void G_DoCompleted (void)
 		if(&*it == &consoleplayer())
 			wminfo.pnum = static_cast<unsigned int>(i);
 	}
+
+	wminfo.didsecret = consoleplayer().didsecret;
 
 	// [RH] If we're in a hub and staying within that hub, take a snapshot
 	//		of the level. If we're traveling to a new hub, take stuff from
@@ -578,28 +601,32 @@ void G_DoLoadLevel (int position)
 	//	setting one.
 	skyflatnum = R_FlatNumForName(SKYFLATNAME);
 
+	R_SetDefaultSky(level.skypic);
+
+	R_InitSkiesForLevel();
+
 	// DOOM determines the sky texture to be used
 	// depending on the current episode, and the game version.
 	// [RH] Fetch sky parameters from level_locals_t.
 	// [ML] 5/11/06 - remove sky2 remenants
 	// [SL] 2012-03-19 - Add sky2 back
-	sky1texture = R_TextureNumForName (level.skypic.c_str());
-	sky1scrolldelta = level.sky1ScrollDelta;
-	sky1columnoffset = 0;
-	sky2columnoffset = 0;
-	if (!level.skypic2.empty())
+	// [EB] 9/6/2024 - remove sky1 (now using SKYDEFS), sky2 left for hexen style non doublesky sky2
+	// MIA TODO: remove this except for sky2 stuff (for non doublesky use of sky2)
+	sky1texture = R_TextureNumForName(level.skypic.c_str());
+	if (!level.skypic2.empty() && !(level.flags & LEVEL_DOUBLESKY))
 	{
 		sky2texture = R_TextureNumForName(level.skypic2.c_str());
-		sky2scrolldelta = level.sky2ScrollDelta;
+		sky2scrollxdelta = level.sky2ScrollDelta;
 	}
 	else
 	{
 		sky2texture = 0;
-		sky2scrolldelta = 0;
+		sky2scrollxdelta = 0;
 	}
+	sky2columnoffset = 0;
 
 	// [RH] Set up details about sky rendering
-	R_InitSkyMap ();
+	R_InitSkyMap();
 
 	for (Players::iterator it = players.begin();it != players.end();++it)
 	{
@@ -724,20 +751,20 @@ void G_WorldDone()
 	cluster_info_t& thiscluster = clusters.findByCluster(level.cluster);
 
 	// Sort out default options to pass to F_StartFinale
-	finale_options_t options = { 0, 0, 0, 0 };
+	finale_options_t options = { "", "", "", "" };
 	options.music = !level.intermusic.empty() ? level.intermusic.c_str() : thiscluster.messagemusic.c_str();
 
 	if (!level.interbackdrop.empty())
 	{
-		options.flat = level.interbackdrop.c_str();
+		options.flat = level.interbackdrop;
 	}
 	else if (!thiscluster.finalepic.empty())
 	{
-		options.pic = &thiscluster.finalepic[0];
+		options.pic = thiscluster.finalepic;
 	}
 	else
 	{
-		options.flat = &thiscluster.finaleflat[0];
+		options.flat = thiscluster.finaleflat;
 	}
 
 	if (secretexit)
@@ -771,14 +798,14 @@ void G_WorldDone()
 			if (nextcluster.entertext)
 			{
 				// All of our options need to be from the next cluster.
-				options.music = nextcluster.messagemusic.c_str();
+				options.music = nextcluster.messagemusic;
 				if (!nextcluster.finalepic.empty())
 				{
-					options.pic = &nextcluster.finalepic[0];
+					options.pic = nextcluster.finalepic;
 				}
 				else
 				{
-					options.flat = &nextcluster.finaleflat[0];
+					options.flat = nextcluster.finaleflat;
 				}
 				options.text = nextcluster.entertext;
 

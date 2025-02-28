@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -29,6 +29,7 @@
 
 #include "actor.h"
 #include "c_effect.h"
+#include "gi.h"
 #include "m_random.h"
 #include "p_hordedefine.h"
 #include "p_local.h"
@@ -95,7 +96,7 @@ static AActor::AActorPtr SpawnMonster(hordeSpawn_t& spawn, const hordeRecipe_t& 
 			// Spawn a teleport fog if it's not an ambush.
 			if ((spawn.mo->flags & MF_AMBUSH) == 0)
 			{
-				AActor* tele = new AActor(spawn.mo->x, spawn.mo->y, spawn.mo->z, MT_TFOG);
+				AActor* tele = new AActor(spawn.mo->x, spawn.mo->y, spawn.mo->z + INT2FIXED(gameinfo.telefogHeight), MT_TFOG);
 				SV_SpawnMobj(tele);
 				S_NetSound(tele, CHAN_VOICE, "misc/teleport", ATTN_NORM);
 			}
@@ -170,7 +171,7 @@ static AActors SpawnMonsterGroup(hordeSpawn_t& spawn, const hordeRecipe_t& recip
 
 	if (static_cast<int>(ret.size()) < count)
 	{
-		DPrintf("Partial spawn %" PRIuSIZE "/%d of type %s at a %s spawn (%f, %f).\n",
+		DPrintf("Partial spawn %" "zu" "/%d of type %s at a %s spawn (%f, %f).\n",
 		        ret.size(), count, name, HordeThingStr(spawn.type),
 		        FIXED2FLOAT(spawn.mo->x), FIXED2FLOAT(spawn.mo->y));
 	}

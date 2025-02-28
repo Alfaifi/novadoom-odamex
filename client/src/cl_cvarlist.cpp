@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -346,7 +346,9 @@ CVAR(cl_downloadsites,
      "https://static.allfearthesentinel.com/wads/ https://doomshack.org/wads/ "
      "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
      "http://files.funcrusher.net/wads/ https://doomshack.org/uploads/ "
-     "https://doom.dogsoft.net/getwad.php?search=",
+     "https://doom.dogsoft.net/getwad.php?search= https://doomshack.org/wadlist.php "
+     "https://wads.firestick.games/ https://euroboros.net/zandronum/wads/ "
+     "https://static.audrealms.org/wads/ https://downloadbox.captainpollutiontv.de/DooM/WADSEEKER/",
      "A list of websites to download WAD files from.  These websites are used if the "
      "server doesn't provide any websites to download files from, or the file can't be "
      "found on any of their sites.  The list of sites is separated by spaces.  These "
@@ -366,8 +368,8 @@ CVAR(				cl_predictweapons, "1", "Draw weapon effects immediately",
 CVAR(				cl_netgraph, "0", "Show a graph of network related statistics",
 					CVARTYPE_BOOL, CVAR_NULL)
 
-CVAR(				cl_serverdownload, "1", "Enable or disable downloading game files and resources from the server" \
-											"(requires downloading enabled on server)",
+CVAR(				cl_serverdownload, "1", "Enable or disable downloading game files and resources from the internet " \
+											"(see cl_downloadsites for more information)",
 					CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR(				cl_forcedownload, "0", "Forces the client to download the last WAD file when connecting " \

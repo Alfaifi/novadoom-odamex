@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -376,19 +376,6 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 //
 std::string D_GetTitleString()
 {
-	if (gamemission == pack_tnt)
-		return "DOOM 2: TNT - Evilution";
-	if (gamemission == pack_plut)
-		return "DOOM 2: Plutonia Experiment";
-	if (gamemission == chex)
-		return "Chex Quest";
-	if (gamemission == retail_freedoom)
-		return "Ultimate FreeDoom";
-	if (gamemission == commercial_freedoom)
-		return "FreeDoom";
-	if (gamemission == commercial_hacx)
-		return "HACX";
-
 	return gameinfo.titleString;
 }
 
@@ -971,19 +958,19 @@ public:
 		mTask(task)
 	{ }
 
-	virtual ~UncappedTaskScheduler() { }
+	~UncappedTaskScheduler() override { }
 
-	virtual void run()
+	void run() override
 	{
 		mTask();
 	}
 
-	virtual dtime_t getNextTime() const
+	dtime_t getNextTime() const override
 	{
 		return I_GetTime();
 	}
 
-	virtual float getRemainder() const
+	float getRemainder() const override
 	{
 		return 0.0f;
 	}
@@ -1003,9 +990,9 @@ public:
 	{
 	}
 
-	virtual ~CappedTaskScheduler() { }
+	~CappedTaskScheduler() override { }
 
-	virtual void run()
+	void run() override
 	{
 		mFrameStartTime = I_GetTime();
 		mAccumulator += mFrameStartTime - mPreviousFrameStartTime;
@@ -1020,12 +1007,12 @@ public:
 		}
 	}
 
-	virtual dtime_t getNextTime() const
+	dtime_t getNextTime() const override
 	{
 		return mFrameStartTime + mFrameDuration - mAccumulator;
 	}
 
-	virtual float getRemainder() const
+	float getRemainder() const override
 	{
 		// mAccumulator can be greater than mFrameDuration so only get the
 		// time remaining until the next frame
@@ -1130,16 +1117,16 @@ void D_RunTics(void (*sim_func)(), void(*display_func)())
 		return;
 
 	// Sleep until the next scheduled task.
-	dtime_t simulation_wake_time = simulation_scheduler->getNextTime();
-	dtime_t display_wake_time = display_scheduler->getNextTime();
-	dtime_t wake_time = std::min<dtime_t>(simulation_wake_time, display_wake_time);
+	const dtime_t simulation_wake_time = simulation_scheduler->getNextTime();
+	const dtime_t display_wake_time = display_scheduler->getNextTime();
+	const dtime_t wake_time = std::min<dtime_t>(simulation_wake_time, display_wake_time);
 
-	const dtime_t max_sleep_amount = 1000LL * 1000LL;	// 1ms
+	constexpr dtime_t max_sleep_amount = 1000LL * 1000LL;	// 1ms
 
 	// Sleep in 1ms increments until the next scheduled task
 	for (dtime_t now = I_GetTime(); wake_time > now; now = I_GetTime())
 	{
-		dtime_t sleep_amount = std::min<dtime_t>(max_sleep_amount, wake_time - now);
+		const dtime_t sleep_amount = std::min<dtime_t>(max_sleep_amount, wake_time - now);
 		I_Sleep(sleep_amount);
 	}
 }

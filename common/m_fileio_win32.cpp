@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -72,8 +72,7 @@ std::string M_GetHomeDir(const std::string& user)
 	}
 
 	// Now that we have the Documents folder, just go up one.
-	std::string path;
-	StrFormat(path, "%s\\..", folderPath);
+	std::string path = fmt::sprintf("%s\\..", folderPath);
 	return M_CleanPath(path);
 }
 
@@ -90,9 +89,7 @@ std::string M_GetUserDir()
 		I_FatalError("Could not get user's personal folder.\n");
 	}
 
-	std::string path;
-	StrFormat(path, "%s\\My Games\\Odamex", folderPath);
-	return path;
+	return fmt::sprintf("%s\\My Games\\Odamex", folderPath);
 #endif
 }
 

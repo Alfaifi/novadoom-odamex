@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -133,7 +133,7 @@ class MidiMusicSystem : public MusicSystem
 	virtual void allSoundOff() = 0;
 
   protected:
-	static const int NUM_CHANNELS = 16;
+	static constexpr int NUM_CHANNELS = 16;
 	bool m_useResetDelay;
 
 	void _InitFallback();

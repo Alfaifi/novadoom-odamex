@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -402,7 +402,7 @@ const char *ParseString2(const char *data);
 // Takes a string of random wads and patches, which is sorted through and
 // trampolined to the implementation of G_LoadWad.
 //
-bool G_LoadWadString(const std::string& str, const std::string& lastmap, const std::string& mapname)
+bool G_LoadWadString(const std::string& str, const std::string& mapname, const std::string& lastmap)
 {
 	const std::vector<std::string>& wad_exts = M_FileTypeExts(OFILE_WAD);
 	const std::vector<std::string>& deh_exts = M_FileTypeExts(OFILE_DEH);
@@ -521,23 +521,16 @@ BEGIN_COMMAND (map)
 }
 END_COMMAND (map)
 
-char *CalcMapName(int episode, int level)
+OLumpName CalcMapName(int episode, int level)
 {
-	static char lumpname[9];
-
 	if (gameinfo.flags & GI_MAPxx)
 	{
-		snprintf (lumpname, 9, "MAP%02d", level);
+		return fmt::format("MAP{:02d}", level);
 	}
 	else
 	{
-		lumpname[0] = 'E';
-		lumpname[1] = '0' + episode;
-		lumpname[2] = 'M';
-		lumpname[3] = '0' + level;
-		lumpname[4] = 0;
+		return fmt::format("E{}M{}", episode, level);
 	}
-	return lumpname;
 }
 
 void G_AirControlChanged()
@@ -817,6 +810,7 @@ void G_InitLevelLocals()
 	{
 		::level.aircontrol = static_cast<fixed_t>(info.aircontrol * 65536.f);
 	}
+	::level.airsupply = info.airsupply;
 
 	::level.partime = info.partime;
 	::level.cluster = info.cluster;
@@ -833,7 +827,7 @@ void G_InitLevelLocals()
 		if (info.mapname[0] == 'E' && info.mapname[2] == 'M')
 		{
 			std::string search;
-			StrFormat(search, "E%cM%c: ", info.mapname[1], info.mapname[3]);
+			search = fmt::sprintf("E%cM%c: ", info.mapname[1], info.mapname[3]);
 
 			const std::size_t pos = info.level_name.find(search);
 
@@ -845,7 +839,7 @@ void G_InitLevelLocals()
 		else if (strstr(info.mapname.c_str(), "MAP") == &info.mapname[0])
 		{
 			std::string search;
-			StrFormat(search, "%u: ", info.levelnum);
+			search = fmt::sprintf("%u: ", info.levelnum);
 
 			const std::size_t pos = info.level_name.find(search);
 
@@ -915,13 +909,18 @@ void G_InitLevelLocals()
 	}
 
 	::level.exitpic = info.exitpic;
+	::level.exitscript = info.exitscript;
+	::level.exitanim = info.exitanim;
 	::level.enterpic = info.enterpic;
+	::level.enterscript = info.enterscript;
+	::level.enteranim = info.enteranim;
 	::level.endpic = info.endpic;
 
 	::level.intertext = info.intertext;
 	::level.intertextsecret = info.intertextsecret;
 	::level.interbackdrop = info.interbackdrop;
 	::level.intermusic = info.intermusic;
+	::level.zintermusic = info.zintermusic;
 
 	::level.bossactions = info.bossactions;
 	::level.label = info.label;
@@ -960,7 +959,7 @@ BEGIN_COMMAND(mapinfo)
 	LevelInfos& levels = getLevelInfos();
 	if (stricmp(argv[1], "size") == 0)
 	{
-		Printf(PRINT_HIGH, "%" PRIuSIZE " maps found\n", levels.size());
+		Printf(PRINT_HIGH, "%zu maps found\n", levels.size());
 		return;
 	}
 

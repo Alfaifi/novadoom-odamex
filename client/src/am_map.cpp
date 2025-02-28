@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -703,12 +703,9 @@ void AM_initColors(const bool overlayed)
 //
 void AM_loadPics()
 {
-	char namebuf[9];
-
 	for (int i = 0; i < 10; i++)
 	{
-		snprintf(namebuf, 9, "AMMNUM%d", i);
-		marknums[i] = W_CachePatchHandle(namebuf, PU_STATIC);
+		marknums[i] = W_CachePatchHandle(fmt::format("AMMNUM{}", i), PU_STATIC);
 	}
 }
 
@@ -1248,7 +1245,7 @@ void AM_drawGrid(am_color_t color)
 	centerp.x = FixedDiv64(m_ur.x + m_ll.x, INT2FIXED64(2));
 	centerp.y = FixedDiv64(m_ur.y + m_ll.y, INT2FIXED64(2));
 
-	const fixed64_t w = INT2FIXED64(MAPBLOCKUNITS);
+	constexpr fixed64_t w = INT2FIXED(MAPBLOCKUNITS);
 	const fixed64_t minimum_x = centerp.x - half_dist;
 	const fixed64_t maximum_x = centerp.x + half_dist;
 	const fixed64_t minimum_y = centerp.y - half_dist;
@@ -1841,8 +1838,8 @@ void AM_drawMarks()
 
 			//      w = LESHORT(marknums[i]->width);
 			//      h = LESHORT(marknums[i]->height);
-			const int w = 5; // because something's wrong with the wad, i guess
-			const int h = 6; // because something's wrong with the wad, i guess
+			constexpr int w = 5; // because something's wrong with the wad, i guess
+			constexpr int h = 6; // because something's wrong with the wad, i guess
 
 			if (fx >= f.x && fx <= f_w - w && fy >= f.y && fy <= f_h - h)
 			{
@@ -1951,12 +1948,12 @@ void AM_Drawer()
 			{
 				if (G_IsHordeMode())
 				{
-					StrFormat(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d",
+					line = fmt::sprintf(TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d",
 				        level.killed_monsters);
 				}
 				else
 				{
-					StrFormat(line, TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d",
+					line = fmt::sprintf(TEXTCOLOR_RED "MONSTERS:" TEXTCOLOR_NORMAL " %d / %d",
 				        level.killed_monsters,
 				        (level.total_monsters + level.respawned_monsters));
 				}
@@ -1984,9 +1981,9 @@ void AM_Drawer()
 
 			if (am_showitems && !G_IsHordeMode())
 			{
-				StrFormat(line, TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d",
-				        level.found_items,
-				        level.total_items);
+				line = fmt::sprintf(TEXTCOLOR_RED "ITEMS:" TEXTCOLOR_NORMAL " %d / %d",
+				                    level.found_items,
+				                    level.total_items);
 
 				int x, y;
 				const int text_width = V_StringWidth(line.c_str()) * CleanXfac;
@@ -2007,8 +2004,8 @@ void AM_Drawer()
 
 			if (am_showsecrets && !G_IsHordeMode())
 			{
-				StrFormat(line, TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d",
-				        level.found_secrets, level.total_secrets);
+				line = fmt::sprintf(TEXTCOLOR_RED "SECRETS:" TEXTCOLOR_NORMAL " %d / %d",
+				                    level.found_secrets, level.total_secrets);
 				int x, y;
 				const int text_width = V_StringWidth(line.c_str()) * CleanXfac;
 
@@ -2120,8 +2117,7 @@ void AM_Drawer()
 
 		if (am_showtime)
 		{
-			StrFormat(line, " %02d:%02d:%02d", time / 3600, (time % 3600) / 60,
-			        time % 60); // Time
+			line = fmt::sprintf(" %02d:%02d:%02d", time / 3600, (time % 3600) / 60, time % 60); // Time
 
 			int x, y;
 			const int text_width = V_StringWidth(line.c_str()) * CleanXfac;

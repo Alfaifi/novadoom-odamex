@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -142,6 +142,17 @@ const std::vector<std::string> DArgs::GetArgList (size_t start) const
 	}
 
 	return out;
+}
+
+std::vector<const char*> DArgs::GetArgv() const
+{
+	std::vector<const char*> rvo;
+	rvo.reserve(args.size());
+	for (auto& arg : args)
+	{
+		rvo.push_back(arg.c_str());
+	}
+	return rvo;
 }
 
 size_t DArgs::NumArgs () const
@@ -394,7 +405,7 @@ void M_FindResponseFile (void)
 			delete[] file;
 		
 			// DISPLAY ARGS
-			Printf("%" PRIuSIZE " command-line args:\n", Args.NumArgs());
+			Printf("%zu command-line args:\n", Args.NumArgs());
 			for (size_t k = 1; k < Args.NumArgs (); k++)
 				Printf (PRINT_HIGH,"%s\n", Args.GetArg (k));
 
