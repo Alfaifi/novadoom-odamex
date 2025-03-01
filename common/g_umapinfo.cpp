@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ int ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NULL
 	{
 		if (sscanf(mapname.c_str(), "E%dM%d", &epi, &map) != 2)
 			return 0;
-		lumpname = fmt::format("E{}D{}", epi, map);
+		lumpname = fmt::format("E{}M{}", epi, map);
 	}
 	else
 	{
