@@ -1,10 +1,10 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 //  wall, wrapping around. A 1024 columns equal 360 degrees.
 //  The default sky map is 256 columns and repeats 4 times
 //  on a 320 screen?
-//  
+//
 //-----------------------------------------------------------------------------
 
 
@@ -31,10 +31,10 @@
 
 // [ML] 5/11/06 - Remove sky2
 int 		skyflatnum;
-int 		sky1texture, sky2texture;
+int 		sky2texture;
 
-fixed_t		sky1scrolldelta,	sky2scrolldelta;
-fixed_t		sky1columnoffset,	sky2columnoffset;
+fixed_t		sky2scrollxdelta;
+fixed_t		sky2columnoffset;
 
 OLumpName SKYFLATNAME = "F_SKY1";
 

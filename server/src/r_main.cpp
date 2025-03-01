@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -44,6 +44,8 @@ extern dyncolormap_t NormalLight;
 // [Russell] - Doesn't get used serverside
 byte *translationtables;
 byte bosstable[256];
+byte greentable[MAXPLAYERS + 1][256];
+byte redtable[MAXPLAYERS + 1][256];
 
 fixed_t			FocalLengthX;
 fixed_t			FocalLengthY;

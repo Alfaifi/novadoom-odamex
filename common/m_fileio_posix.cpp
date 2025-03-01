@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -340,9 +340,7 @@ bool M_GetAbsPath(const std::string& path, std::string& out)
 {
 
 #ifdef __SWITCH__
-	std::string res;
-	StrFormat(res, "%s", path.c_str());
-	out = res;
+	out = fmt::sprintf("%s", path.c_str());
 	return true;
 #else
 	char buffer[PATH_MAX];

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -1105,7 +1105,7 @@ public:
 				 float r2, float g2, float b2, float a2,
 				 float time, AActor *who);
 	~DFlashFader ();
-	virtual void RunThink ();
+	void RunThink () override;
 	virtual void DestroyedPointer(DObject *obj);
 	AActor *WhoFor() { return ForWho; }
 	void Cancel ();
@@ -1215,7 +1215,7 @@ public:
 	DPlaneWatcher (AActor *it, line_t *line, int lineSide, bool ceiling,
 		int tag, int height, int special,
 		int arg0, int arg1, int arg2, int arg3, int arg4);
-	virtual void RunThink ();
+	void RunThink () override;
 	virtual void DestroyedPointer(DObject *obj);
 private:
 	sector_t *Sector;
@@ -2191,7 +2191,19 @@ void DLevelScript::RunScript ()
 			break;
 		}
 
-		pcd = NEXTBYTE;
+		if (fmt == ACS_LittleEnhanced)
+		{
+			pcd = getbyte(pc);
+			if (pcd >= 240)
+			{
+				pcd = 240 + ((pcd - 240) << 8) + getbyte(pc);
+			}
+		}
+		else
+		{
+			pcd = NEXTWORD;
+		}
+
 		switch (pcd)
 		{
 		default:

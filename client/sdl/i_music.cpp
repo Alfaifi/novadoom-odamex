@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -150,7 +150,7 @@ void I_ResetMidiVolume()
 		MMRESULT result = midiOutGetDevCaps(device, &caps, sizeof(caps));
 
 		// Set the midi device's volume
-		static const DWORD volume = 0xFFFFFFFF;		// maximum volume
+		static constexpr DWORD volume = 0xFFFFFFFF;		// maximum volume
 		if (result == MMSYSERR_NOERROR && (caps.dwSupport & MIDICAPS_VOLUME))
 			midiOutSetVolume((HMIDIOUT)device, volume);
 	}
@@ -262,12 +262,12 @@ static MusicSystemType I_SelectMusicSystem(byte *data, size_t length)
 	return MS_SDLMIXER;
 }
 
-void I_PlaySong(byte* data, size_t length, bool loop)
+void I_PlaySong(const OByteSpan data, const bool loop)
 {
 	if (!musicsystem)
 		return;
 
-	MusicSystemType newtype = I_SelectMusicSystem(data, length);
+	MusicSystemType newtype = I_SelectMusicSystem(data.data(), data.size());
 	if (newtype != current_musicsystem_type)
 	{
 		if (musicsystem)
@@ -278,7 +278,7 @@ void I_PlaySong(byte* data, size_t length, bool loop)
 		I_InitMusic(newtype);
 	}
 
-	musicsystem->startSong(data, length, loop);
+	musicsystem->startSong(data.data(), data.size(), loop);
 
 	// Hack for problems with Windows Vista/7 & SDL_Mixer
 	// See comment for I_ResetMidiVolume().

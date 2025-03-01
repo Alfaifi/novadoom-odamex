@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -277,7 +277,7 @@ bool G_IsLevelState(LevelState::States state)
  */
 bool G_IsDefendingTeam(team_t team)
 {
-	return g_sides == false || ::levelstate.getDefendingTeam() == team;
+	return !g_sides || ::levelstate.getDefendingTeam() == team;
 }
 
 /**
@@ -343,7 +343,7 @@ bool G_IsTeamGame()
  */
 bool G_IsRoundsGame()
 {
-	if (g_rounds == false)
+	if (!g_rounds)
 	{
 		// Not turned on.
 		return false;

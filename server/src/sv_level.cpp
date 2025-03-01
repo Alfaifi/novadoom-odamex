@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -71,13 +71,11 @@ EXTERN_CVAR (sv_startmapscript)
 EXTERN_CVAR (sv_curpwad)
 EXTERN_CVAR (sv_curmap)
 EXTERN_CVAR (sv_nextmap)
-EXTERN_CVAR (sv_loopepisode)
 EXTERN_CVAR (sv_intermissionlimit)
 EXTERN_CVAR (sv_warmup)
 EXTERN_CVAR (sv_timelimit)
 EXTERN_CVAR (sv_teamsinplay)
 EXTERN_CVAR(g_resetinvonexit)
-EXTERN_CVAR(sv_mapliststayonwad)
 
 extern int mapchange;
 extern std::string forcedlastmap;
@@ -109,13 +107,11 @@ bool isFast = false;
 //
 static OLumpName d_mapname;
 
-std::string G_NextMap();
+OLumpName G_NextMap();
 
-void G_DeferedInitNew (const char* mapname)
+void G_DeferedInitNew (const OLumpName& mapname)
 {
-	const std::string mapnamestr = mapname;
-
-	if (iequals(mapnamestr.substr(0, 7).c_str(), "EndGame"))
+	if (mapname.substr(0, 7).c_str() == "EndGame")
 	{
 		if (mapname[7] == '1' ||
 			mapname[7] == '2' ||
@@ -188,7 +184,7 @@ BEGIN_COMMAND (wad) // denis - changes wads
 	}
 
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
-	G_LoadWadString(wadstr, lastmap);
+	G_LoadWadString(wadstr, "", lastmap);
 }
 END_COMMAND (wad)
 
@@ -198,54 +194,37 @@ EXTERN_CVAR(sv_shufflemaplist)
 
 bool isLastMap()
 {
-	if (level.nextmap == "" || level.mapname == forcedlastmap)
-		return true;
-
-	std::string next = level.nextmap.c_str();
-	if (iequals(next.substr(0, 7), "EndGame") ||
-			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
-	{
-		if (sv_loopepisode || gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-				((gamemode == registered && level.cluster == 3) ||
-				 ((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4)))
-			return true;
-	}
-
-	return false;
+	return level.nextmap == "" || level.mapname == forcedlastmap;
 }
 
 // Returns the next map, assuming there is no maplist.
-std::string G_NextMap()
+OLumpName G_NextMap()
 {
-	std::string next = level.nextmap.c_str();
+	OLumpName next = level.nextmap;
 
-	if (gamestate == GS_STARTUP || next.empty())
+	if (gamestate == GS_STARTUP || (sv_gametype != GM_COOP && forcedlastmap.empty()) || next.empty())
 	{
-		// [ML] 1/25/10: if next is empty, stay on same level
-		next = level.mapname.c_str();
+		// if not coop, and lastmap is not specified, stay on same level
+		// [ML] 1/25/10: OR if next is empty
+		next = level.mapname;
 	}
 	else if (secretexit && W_CheckNumForName(level.secretmap.c_str()) != -1)
 	{
 		// if we hit a secret exit switch, go there instead.
-		next = level.secretmap.c_str();
+		next = level.secretmap;
 	}
 
 	// NES - exiting a Doom 1 episode moves to the next episode,
 	// rather than always going back to E1M1
 	if (level.nextmap == "" || level.mapname == forcedlastmap ||
-			iequals(next.substr(0, 7), "EndGame") ||
+			iequals(next.substr(0, 7).c_str(), "EndGame") ||
 			(gamemode == retail_chex && iequals(level.nextmap.c_str(), "E1M6")))
 	{
 		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
-			(!sv_loopepisode && (level.nextmap == "" || level.mapname == forcedlastmap)) ||
-			(!sv_loopepisode && ((gamemode == registered && level.cluster == 3) ||
+			(((gamemode == registered && level.cluster == 3) ||
 			((gameinfo.flags & GI_MENUHACK_RETAIL) && level.cluster == 4))))
 		{
 			next = CalcMapName(1, 1);
-		}
-		else if (sv_loopepisode)
-		{
-			next = CalcMapName(level.cluster, 1);
 		}
 		else
 		{
@@ -263,7 +242,7 @@ void G_ChangeMap()
 	// Skip the maplist to go to the desired level in case of a lobby map.
 	if (level.flags & LEVEL_LOBBYSPECIAL && level.nextmap[0])
 	{
-		G_DeferedInitNew(level.nextmap.c_str());
+		G_DeferedInitNew(level.nextmap);
 	}
 	else
 	{
@@ -277,11 +256,10 @@ void G_ChangeMap()
 		else
 		{
 			size_t next_index;
-			if ((sv_mapliststayonwad && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
+			if ((!forcedlastmap.empty() && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
 			{
 				// We don't have a maplist, so grab the next 'natural' map lump.
-				std::string next = G_NextMap();
-				G_DeferedInitNew((char*)next.c_str());
+				G_DeferedInitNew(G_NextMap());
 			}
 			else
 			{
@@ -289,7 +267,7 @@ void G_ChangeMap()
 				Maplist::instance().get_map_by_index(next_index, maplist_entry);
 
 				std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-				G_LoadWadString(wadstr, maplist_entry.lastmap, maplist_entry.map);
+				G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
 
 				// Set the new map as the current map
 				Maplist::instance().set_index(next_index);
@@ -315,7 +293,7 @@ void G_ChangeMap(size_t index) {
 	}
 
 	std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-	G_LoadWadString(wadstr, maplist_entry.lastmap, maplist_entry.map);
+	G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
 
 	// Set the new map as the current map
 	Maplist::instance().set_index(index);
@@ -849,7 +827,6 @@ void G_DoLoadLevel (int position)
 	// [RH] Fetch sky parameters from level_locals_t.
 	// [ML] 5/11/06 - remove sky2 remenants
 	// [SL] 2012-03-19 - Add sky2 back
-	sky1texture = R_TextureNumForName(level.skypic);
 	if (!level.skypic2.empty())
 		sky2texture = R_TextureNumForName(level.skypic2);
 	else

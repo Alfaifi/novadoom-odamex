@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -400,8 +400,7 @@ static void PrintDefines(const std::vector<hordeDefine_t>::const_iterator& begin
 	for (; it != end; ++it)
 	{
 		const ptrdiff_t idx = it - ::WAVE_DEFINES.begin();
-		Printf("%" PRIdSIZE ": %s (Group HP: %d)\n", idx, it->name.c_str(),
-		       it->maxGroupHealth);
+		Printf("%zd: %s (Group HP: %d)\n", idx, it->name.c_str(), it->maxGroupHealth);
 	}
 }
 
@@ -442,7 +441,7 @@ BEGIN_COMMAND(hordedefine)
 						const size_t start = static_cast<size_t>(section_offset);
 						const size_t end =
 						    MIN<size_t>(section_offset + section_choice, section_limit);
-						Printf("[Wave %d/%d - Start:%" PRIuSIZE " End:%" PRIuSIZE "]\n",
+						Printf("[Wave %d/%d - Start:%" "zu" " End:%" "zu" "]\n",
 						       current, total, start, end);
 						PrintDefines(::WAVE_DEFINES.begin() + start,
 						             ::WAVE_DEFINES.begin() + end + 1);

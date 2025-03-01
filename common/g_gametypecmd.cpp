@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -130,7 +130,7 @@ static StringList GametypeArgs(const GametypeParam (&params)[SIZE], size_t argc,
 	std::string buffer;
 	for (CvarTable::const_iterator it = cvars.begin(); it != cvars.end(); ++it)
 	{
-		StrFormat(buffer, "%s %d", it->first.c_str(), it->second);
+		buffer = fmt::sprintf("%s %d", it->first.c_str(), it->second);
 		ret.push_back(buffer);
 	}
 

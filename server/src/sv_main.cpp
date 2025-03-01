@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -75,7 +75,7 @@
 
 #include "server.pb.h"
 
-extern void G_DeferedInitNew (const char *mapname);
+extern void G_DeferedInitNew (const OLumpName& mapname);
 extern level_locals_t level;
 
 // Unnatural Level Progression.  True if we've used 'map' or another command
@@ -103,7 +103,6 @@ bool keysfound[NUMCARDS];		// Ch0wW : Found keys
 EXTERN_CVAR(sv_motd)
 EXTERN_CVAR(sv_hostname)
 EXTERN_CVAR(sv_email)
-EXTERN_CVAR(sv_waddownload)
 EXTERN_CVAR(sv_maxrate)
 EXTERN_CVAR(sv_emptyreset)
 EXTERN_CVAR(sv_emptyfreeze)
@@ -189,7 +188,7 @@ CVAR_FUNC_IMPL (sv_maxplayers)
 
 				MSG_WriteSVC(
 				    &it->client.reliablebuf,
-				    SVC_Print(PRINT_CHAT,
+				    SVC_Print(PRINT_HIGH,
 				              "Active player limit reduced. You are now a spectator!\n"));
 			}
 		}
@@ -202,13 +201,17 @@ CVAR_FUNC_IMPL (sv_maxplayers)
 // [AM] - Force extras on a team to become spectators.
 CVAR_FUNC_IMPL (sv_maxplayersperteam)
 {
+	// 0 is unlimited
+	if (!var)
+		return;
+
 	for (int i = 0; i < NUMTEAMS;i++)
 	{
 		int normalcount = 0;
 		for (Players::iterator it = players.begin();it != players.end();++it)
 		{
 			bool spectator = it->spectator || !it->ingame();
-			if (it->userinfo.team == i && it->ingame() && !spectator)
+			if (it->userinfo.team == i && !spectator)
 			{
 				normalcount++;
 
@@ -1585,7 +1588,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 		GameVer = MSG_ReadLong();
 		BREAKVER(GameVer, cl_major, cl_minor, cl_patch);
 
-		StrFormat(VersionStr, "%d.%d.%d", cl_major, cl_minor, cl_patch);
+		VersionStr = fmt::sprintf("%d.%d.%d", cl_major, cl_minor, cl_patch);
 
 		cl->packedversion = GameVer;
 
@@ -1621,8 +1624,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 		if (msg.empty())
 		{
 			// Failsafe.
-			StrFormat(
-			    msg,
+			msg = fmt::sprintf(
 			    "Your version of Odamex does not match the server %s.\nFor updates, "
 			    "visit https://odamex.net/\n",
 			    DOTVERSIONSTR);
@@ -1672,7 +1674,7 @@ static void SV_DisconnectOldClient()
 	if (msg.empty())
 	{
 		// Failsafe.
-		StrFormat(msg,
+		msg = fmt::sprintf(
 		          "Your version of Odamex does not match the server %s.\nFor updates, "
 		          "visit https://odamex.net/\n",
 		          DOTVERSIONSTR);
@@ -2836,7 +2838,7 @@ void SV_UpdateGametype(player_t& pl)
 {
 	if (G_IsHordeMode())
 	{
-		static hordeInfo_t lastInfo = {HS_STARTING, -1, -1, -1, 0, 0, -1, -1, -1, -1, -1};
+		static hordeInfo_t lastInfo = {HS_STARTING, -1, -1, -1, 0, -1, -1, -1, -1, -1};
 		static int ticsent;
 
 		// If the hordeinfo has changed since last tic, save and send it.
@@ -3881,6 +3883,24 @@ void SV_Cheat(player_t &player)
 		}
 
 	}
+	else if (cheatType == 2)
+	{
+		const char* wantsummon = MSG_ReadString();
+
+		if (!CHEAT_AreCheatsEnabled())
+			return;
+
+		AActor* actor = CHEAT_Summon(&player, wantsummon, false);
+
+		if (actor == NULL)
+			return;
+
+		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		{
+			client_t* cl = &it->client;
+			SV_SendMobjToClient(actor, cl);
+		}
+	}
 }
 
 void SV_WantWad(player_t &player)
@@ -4048,8 +4068,6 @@ void SV_ParseCommands(player_t &player)
 		}
 	 }
 }
-
-EXTERN_CVAR (sv_download_test)
 
 
 static void TimeCheck()
@@ -4244,7 +4262,7 @@ void SV_RunTics()
 		else
 		{
 			// [AM] Make a copy of mapname for safety's sake.
-			OLumpName mapname = ::level.mapname.c_str();
+			OLumpName mapname = ::level.mapname;
 			G_InitNew(mapname);
 		}
 	}
@@ -4362,22 +4380,21 @@ BEGIN_COMMAND(playerlist)
 		}
 
 		std::string strMain, strScore;
-		StrFormat(strMain, "(%02d): %s %s - %s - time:%d - ping:%d", it->id,
-		          it->userinfo.netname.c_str(), it->spectator ? "(SPEC)" : "",
-		          NET_AdrToString(it->client.address), it->GameTime, it->ping);
+		strMain = fmt::sprintf("(%02d): %s %s - %s - time:%d - ping:%d", it->id,
+		                       it->userinfo.netname.c_str(), it->spectator ? "(SPEC)" : "",
+		                       NET_AdrToString(it->client.address), it->GameTime, it->ping);
 
 		if (G_IsCoopGame())
 		{
 			if (G_IsLivesGame())
 			{
 				// Kills and Lives
-				StrFormat(strScore, " - kills:%d - lives:%d", it->killcount, it->lives);
+				strScore = fmt::sprintf(" - kills:%d - lives:%d", it->killcount, it->lives);
 			}
 			else
 			{
 				// Kills and Deaths
-				StrFormat(strScore, " - kills:%d - deaths:%d", it->killcount,
-				          it->deathcount);
+				strScore = fmt::sprintf(" - kills:%d - deaths:%d", it->killcount, it->deathcount);
 			}
 		}
 		else if (sv_gametype == GM_DM)
@@ -4385,13 +4402,13 @@ BEGIN_COMMAND(playerlist)
 			if (G_IsLivesGame())
 			{
 				// Wins, Lives, and Frags
-				StrFormat(strScore, " - wins:%d - lives:%d - frags:%d", it->roundwins,
+				strScore = fmt::sprintf(" - wins:%d - lives:%d - frags:%d", it->roundwins,
 				          it->lives, frags);
 			}
 			else
 			{
 				// Frags, Deaths
-				StrFormat(strScore, " - frags:%d - deaths:%d", frags, deaths);
+				strScore = fmt::sprintf(" - frags:%d - deaths:%d", frags, deaths);
 			}
 		}
 		else if (sv_gametype == GM_TEAMDM)
@@ -4399,12 +4416,12 @@ BEGIN_COMMAND(playerlist)
 			if (G_IsLivesGame())
 			{
 				// Frags and Lives
-				StrFormat(strScore, " - frags:%d - lives:%d", frags, it->lives);
+				strScore = fmt::sprintf(" - frags:%d - lives:%d", frags, it->lives);
 			}
 			else
 			{
 				// Frags
-				StrFormat(strScore, " - frags:%d", frags);
+				strScore = fmt::sprintf(" - frags:%d", frags);
 			}
 		}
 		else if (sv_gametype == GM_CTF)
@@ -4412,13 +4429,13 @@ BEGIN_COMMAND(playerlist)
 			if (G_IsLivesGame())
 			{
 				// Points and Lives
-				StrFormat(strScore, " - points:%d - lives:%d", points, it->lives);
+				strScore = fmt::sprintf(" - points:%d - lives:%d", points, it->lives);
 			}
 			else
 			{
 				// Points and Frags
 				// Special case here: frags will only be from the current round, not global.
-				StrFormat(strScore, " - points:%d - frags:%d", points, it->fragcount);
+				strScore = fmt::sprintf(" - points:%d - frags:%d", points, it->fragcount);
 			}
 		}
 

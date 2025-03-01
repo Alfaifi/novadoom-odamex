@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -72,23 +72,6 @@ void STACK_ARGS call_terms (void)
 {
 	while (!TermFuncs.empty())
 		TermFuncs.top().first(), TermFuncs.pop();
-}
-
-int PrintString(int printlevel, char const* str)
-{
-	std::string sanitized_str(str);
-	StripColorCodes(sanitized_str);
-
-	printf("%s", sanitized_str.c_str());
-	fflush(stdout);
-
-	if (LOG.is_open())
-	{
-		LOG << sanitized_str;
-		LOG.flush();
-	}
-
-	return sanitized_str.length();
 }
 
 #ifdef _WIN32

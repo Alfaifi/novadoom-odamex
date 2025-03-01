@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -193,11 +193,11 @@ static void CL_Disconnect(const odaproto::svc::Disconnect* msg)
 	std::string buffer;
 	if (!msg->message().empty())
 	{
-		StrFormat(buffer, "Disconnected from server: %s", msg->message().c_str());
+		buffer = fmt::sprintf("Disconnected from server: %s", msg->message().c_str());
 	}
 	else
 	{
-		StrFormat(buffer, "Disconnected from server\n");
+		buffer = fmt::sprintf("Disconnected from server\n");
 	}
 
 	Printf("%s", msg->message().c_str());
@@ -272,6 +272,8 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo* msg)
 		}
 	}
 
+	P_SetPlayerPowerupStatuses(&p, p.powers);
+
 	if (!p.spectator)
 		p.cheats = msg->player().cheats();
 
@@ -299,9 +301,18 @@ static void CL_MovePlayer(const odaproto::svc::MovePlayer* msg)
 	fixed_t momy = msg->actor().mom().y();
 	fixed_t momz = msg->actor().mom().z();
 
-	int invisibility = 0;
-	if (msg->player().powers_size() >= pw_invisibility)
-		invisibility = msg->player().powers().Get(pw_invisibility);
+	// Restore the players' powers
+	for (int i = 0; i < NUMPOWERS; i++)
+	{
+		if (i < msg->player().powers_size())
+		{
+			p->powers[i] = msg->player().powers(i);
+		}
+		else
+		{
+			p->powers[i] = 0;
+		}
+	}
 
 	if (!validplayer(*p) || !p->mo)
 		return;
@@ -313,12 +324,10 @@ static void CL_MovePlayer(const odaproto::svc::MovePlayer* msg)
 	if (p->spectator && (p != &consoleplayer()))
 		p->spectator = 0;
 
-	// [Russell] - hack, read and set invisibility flag
-	p->powers[pw_invisibility] = invisibility;
-	if (p->powers[pw_invisibility])
-		p->mo->flags |= MF_SHADOW;
-	else
-		p->mo->flags &= ~MF_SHADOW;
+	// Set powerup statuses (online games)
+	// in here too because PlayerThink doesn't run against other players online
+	// the players don't think, man
+	P_SetPlayerPowerupStatuses(p, p->powers);
 
 	// This is a very bright frame. Looks cool :)
 	if (frame == PLAYER_FULLBRIGHTFRAME)
@@ -954,6 +963,7 @@ static void CL_UserInfo(const odaproto::svc::UserInfo* msg)
 	p->GameTime = msg->join_time();
 
 	R_BuildPlayerTranslation(p->id, CL_GetPlayerColor(p));
+	R_RebuildPlayerTintTables(p->id);
 
 	// [SL] 2012-04-30 - Were we looking through a teammate's POV who changed
 	// to the other team?
@@ -1116,7 +1126,7 @@ static void CL_SpawnPlayer(const odaproto::svc::SpawnPlayer* msg)
 	p->viewz = z + VIEWHEIGHT;
 
 	// spawn a teleport fog
-	// tfog = new AActor (x, y, z, MT_TFOG);
+	// tfog = new AActor (x, y, z + gameinfo.telefogHeight, MT_TFOG);
 
 	// setup gun psprite
 	P_SetupPsprites(p);
@@ -1196,7 +1206,7 @@ static void CL_DamagePlayer(const odaproto::svc::DamagePlayer* msg)
 			p->health = 1;
 			p->mo->health = 1;
 		}
-		else 
+		else
 			p->health = 0;
 	}
 
@@ -1992,8 +2002,8 @@ static void CL_SecretEvent(const odaproto::svc::SecretEvent* msg)
 		return;
 
 	std::string buf;
-	StrFormat(buf, "%s%s %sfound a secret!\n", TEXTCOLOR_YELLOW,
-	          player.userinfo.netname.c_str(), TEXTCOLOR_NORMAL);
+	buf = fmt::sprintf("%s%s %sfound a secret!\n", TEXTCOLOR_YELLOW,
+	                   player.userinfo.netname.c_str(), TEXTCOLOR_NORMAL);
 	Printf("%s", buf.c_str());
 
 	if (::hud_revealsecrets == 1)
@@ -2198,6 +2208,8 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 	for (int i = 0; i < NUMPOWERS; i++)
 		player.powers[i] = powerups[i];
 
+	P_SetPlayerPowerupStatuses(&player, powerups);
+
 	if (!player.spectator)
 		player.cheats = cheats;
 }
@@ -2260,7 +2272,7 @@ static void CL_ResetMap(const odaproto::svc::ResetMap* msg)
 	P_DestroyScrollerThinkers();
 
 	P_DestroyLightThinkers();
-	
+
 	// You don't get to keep cards.  This isn't communicated anywhere else.
 	if (sv_gametype == GM_COOP)
 		P_ClearPlayerCards(consoleplayer());
@@ -2733,9 +2745,11 @@ static void CL_MaplistUpdate(const odaproto::svc::MaplistUpdate* msg)
 	{
 		const odaproto::svc::MaplistUpdate::Row& row = msg->maplist().Get(i);
 		const std::string& map = indexer.getString(row.map());
+		const std::string& lastmap = indexer.getString(row.lastmap());
 
 		maplist_entry_t maplist_entry;
 		maplist_entry.map = map;
+		maplist_entry.lastmap = lastmap;
 		for (int j = 0; j < row.wads_size(); j++)
 		{
 			const std::string& wad = indexer.getString(row.wads().Get(j));
@@ -2963,8 +2977,7 @@ parseError_e CL_ParseCommand()
 	}
 
 	// Delete pointer on scope exit.
-	// [AM] Should be unique_ptr as of C++11.
-	std::auto_ptr<google::protobuf::Message> autoMSG(msg);
+	std::unique_ptr<google::protobuf::Message> autoMSG(msg);
 
 	// Run the proper message function.
 	switch (cmd)

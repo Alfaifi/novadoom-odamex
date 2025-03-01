@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -96,10 +96,10 @@ void SV_UpdateMobj(AActor* mo);
 void SV_Sound(AActor* mo, byte channel, const char* name, byte attenuation);
 
 // killough 8/8/98: distance friends tend to move towards players
-const int distfriend = 128;
+constexpr int distfriend = 128;
 
 // killough 9/8/98: whether monsters are allowed to strafe or retreat
-const int monster_backing = 0;
+constexpr int monster_backing = 0;
 
 extern bool isFast;
 
@@ -378,14 +378,20 @@ BOOL P_Move (AActor *actor)
 		// open any specials
 		if (actor->flags & MF_FLOAT && floatok)
 		{
+			fixed_t savedz = actor->z;
 			// must adjust height
 			if (actor->z < tmfloorz)
 				actor->z += FLOATSPEED;
 			else
 				actor->z -= FLOATSPEED;
 
-			actor->flags |= MF_INFLOAT;
-			return true;
+			// [RH] Check to make sure there's nothing in the way of the float
+			if (P_TestMobjZ(actor))
+			{
+				actor->flags |= MF_INFLOAT;
+				return true;
+			}
+			actor->z = savedz;
 		}
 
 		if (spechit.empty())

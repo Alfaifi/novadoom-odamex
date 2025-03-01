@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -76,7 +76,7 @@ static void CompressPacket(buf_t& send, const size_t reserved, client_t* cl)
 	}
 
 	send.ptr()[PACKET_FLAG_INDEX] |= method;
-	DPrintf("CompressPacket %x %lu\n", method, send.size());
+	DPrintf("CompressPacket %x " "zu" "\n", method, send.size());
 }
 
 #ifdef SIMULATE_LATENCY
