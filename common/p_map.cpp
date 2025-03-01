@@ -546,7 +546,7 @@ bool P_ShouldClipFriendly(AActor* projectile, AActor* monster)
 	}
 	else if (projectile->target && projectile->target->flags & MF_FRIEND && P_IsFriendlyThing(projectile->target, monster))
 	{
-		if (sv_friendlymonsterfire)
+		if (sv_friendlymonsterfire && !P_ProjectileImmune(monster, projectile->target))
 		{
 			return true; // Always clip if friendly monster fire is on.
 		}
@@ -601,7 +601,7 @@ bool P_ShouldClipPlayer(AActor* projectile, AActor* player)
 // PIT_CheckThing
 //
 
-static bool P_ProjectileImmune(AActor* target, AActor* source)
+bool P_ProjectileImmune(AActor* target, AActor* source)
 {
 	return ( // PG_GROUPLESS means no immunity, even to own species
 	           mobjinfo[target->type].projectile_group != PG_GROUPLESS ||
@@ -708,17 +708,26 @@ static BOOL PIT_CheckThing (AActor *thing)
 			return true;				// underneath
 
 		// Check with projectiles owner if we can explode
-		if (tmthing->target && 
-				P_ProjectileImmune(thing, tmthing->target))
+		if (tmthing->target && P_ProjectileImmune(thing, tmthing->target))
+		{
+			// Don't hit same species as originator
+			if (thing == tmthing->target)
+				return true;
+
+			if (!thing->player)
 			{
-				// Don't hit same species as originator
-				if (thing == tmthing->target)
+				// Run friendly clip check early if same species
+				if ((thing->flags & tmthing->target->flags & MF_FRIEND) &&
+				    !P_ShouldClipFriendly(tmthing, thing))
 					return true;
 
 				// [RH] DeHackEd infighting is here.
-				if (!deh.Infight && !thing->player)
+				if (!deh.Infight && 
+						(!((thing->flags ^ tmthing->target->flags) & MF_FRIEND) ||
+						(thing->flags & tmthing->target->flags & MF_FRIEND && P_IsFriendlyThing(thing, tmthing->target))))
 					return false; // Hit same species as originator, explode, no damage
 			}
+		}
 
 		if (!(thing->flags & MF_SHOOTABLE))
 			return !solid;		// didn't do any damage

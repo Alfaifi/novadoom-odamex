@@ -505,6 +505,7 @@ bool P_IsTeamMate(AActor* actor, AActor* player);
 bool P_IsVoodooDoll(const AActor* mo);
 void P_FriendlyEffects();
 void P_GiveFriendlyOwnerInfo(AActor* friendly, AActor* origin);
+bool P_ProjectileImmune(AActor* target, AActor* source);
 
 
 //
