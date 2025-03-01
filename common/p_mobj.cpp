@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -2372,10 +2372,11 @@ AActor* P_SpawnMissile (AActor *source, AActor *dest, mobjtype_t type)
 // P_SpawnPlayerMissile
 // Tries to aim at a nearby monster
 //
-void P_SpawnPlayerMissile (AActor *source, mobjtype_t type)
+AActor* P_SpawnPlayerMissile (AActor *source, mobjtype_t type)
 {
+	AActor* th = AActor::AActorPtr();
 	if(!serverside)
-		return;
+		return th;
 
 	fixed_t slope;
 	fixed_t pitchslope = finetangent[FINEANGLES/4 - (source->pitch>>ANGLETOFINESHIFT)];
@@ -2403,7 +2404,7 @@ void P_SpawnPlayerMissile (AActor *source, mobjtype_t type)
 		slope = pitchslope;
 	}
 
-	AActor *th = new AActor (source->x, source->y, source->z + 4*8*FRACUNIT, type);
+	th = new AActor (source->x, source->y, source->z + 4*8*FRACUNIT, type);
 
 	if (th->info->seesound)
 		S_Sound (th, CHAN_VOICE, th->info->seesound, 1, ATTN_NORM);
@@ -2434,6 +2435,8 @@ void P_SpawnPlayerMissile (AActor *source, mobjtype_t type)
 	}
 
 	P_CheckMissileSpawn (th);
+
+	return th;
 }
 
 

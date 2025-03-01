@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -122,7 +122,7 @@ bool	P_SetMobjState (AActor* mobj, statenum_t state, bool cl_update = false);
 
 void	P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage);
 AActor* P_SpawnMissile (AActor* source, AActor* dest, mobjtype_t type);
-void	P_SpawnPlayerMissile (AActor* source, mobjtype_t type);
+AActor* P_SpawnPlayerMissile(AActor* source, mobjtype_t type);
 void P_SpawnMBF21PlayerMissile(AActor* source, mobjtype_t type, fixed_t angle,
                                fixed_t pitch, fixed_t xyofs, fixed_t zofs);
 bool P_CheckSwitchWeapon(player_t* player, weapontype_t weapon);

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -971,7 +971,7 @@ void C_ExecCmdLineParams (bool onlyset, bool onlylogfile)
 	if (onlylogfile && !didlogfile) AddCommandString("version");
 }
 
-BEGIN_COMMAND (dumpactors)
+BEGIN_COMMAND (actorlist)
 {
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
@@ -981,7 +981,7 @@ BEGIN_COMMAND (dumpactors)
 		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
 	}
 }
-END_COMMAND (dumpactors)
+END_COMMAND(actorlist)
 
 BEGIN_COMMAND(logfile)
 {
