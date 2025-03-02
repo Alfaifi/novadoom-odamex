@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom 1.22).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -441,10 +441,13 @@ public:
 
 typedef OHashTable<int, int> ACSWorldGlobalArray;
 
-extern int ACS_WorldVars[NUM_WORLDVARS];
-extern int ACS_GlobalVars[NUM_GLOBALVARS];
-extern ACSWorldGlobalArray ACS_WorldArrays[NUM_WORLDVARS];
-extern ACSWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
+// ACS variables with world scope
+inline std::array<int, NUM_WORLDVARS> ACS_WorldVars;
+inline std::array<ACSWorldGlobalArray, NUM_WORLDVARS> ACS_WorldArrays;
+
+// ACS variables with global scope
+inline std::array<int, NUM_GLOBALVARS> ACS_GlobalVars;
+inline std::array<ACSWorldGlobalArray, NUM_GLOBALVARS> ACS_GlobalArrays;
 
 extern BOOL savegamerestore;
 

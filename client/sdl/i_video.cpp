@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -679,12 +679,7 @@ std::string I_GetVideoModeString(const IVideoMode& mode)
 static bool I_IsModeSupported(uint8_t bpp, EWindowMode window_mode)
 {
 	const IVideoModeList* modelist = I_GetVideoCapabilities()->getSupportedVideoModes();
-
-	for (const auto& mode : *modelist)
-		if (mode.bpp == bpp && mode.window_mode == window_mode)
-			return true;
-
-	return false;
+	return std::any_of(modelist->cbegin(), modelist->cend(), [bpp, window_mode](const auto& mode){ return mode.bpp == bpp && mode.window_mode == window_mode; });
 }
 
 

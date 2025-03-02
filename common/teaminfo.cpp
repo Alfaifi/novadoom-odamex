@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -247,19 +247,19 @@ TeamsView TeamQuery::execute()
 std::string V_GetTeamColor(team_t ateam)
 {
 	TeamInfo* team = GetTeamInfo(ateam);
-	return fmt::sprintf("%s%s%s", team->TextColor.c_str(), team->ColorStringUpper.c_str(),
+	return fmt::sprintf("%s%s%s", team->TextColor, team->ColorStringUpper,
 	                    TEXTCOLOR_NORMAL);
 }
 
 std::string V_GetTeamColor(UserInfo userinfo)
 {
 	TeamInfo* team = GetTeamInfo(userinfo.team);
-	return fmt::sprintf("%s%s%s", team->TextColor.c_str(), team->ColorStringUpper.c_str(), TEXTCOLOR_NORMAL);
+	return fmt::sprintf("%s%s%s", team->TextColor, team->ColorStringUpper, TEXTCOLOR_NORMAL);
 }
 
 const std::string TeamInfo::ColorizedTeamName()
 {
-	return fmt::sprintf("%s%s%s", TextColor.c_str(), ColorStringUpper.c_str(),
+	return fmt::sprintf("%s%s%s", TextColor, ColorStringUpper,
 	                    TEXTCOLOR_NORMAL);
 }
 

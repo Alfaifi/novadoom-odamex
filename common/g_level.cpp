@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -162,7 +162,7 @@ level_pwad_info_t& LevelInfos::findByNum(int levelnum)
 {
 	for (auto& info : m_infos)
 	{
-		if (info.levelnum == levelnum && W_CheckNumForName(info.mapname.c_str()) != -1)
+		if (info.levelnum == levelnum && W_CheckNumForName(info.mapname) != -1)
 		{
 			return info;
 		}
@@ -363,25 +363,25 @@ bool G_LoadWad(const OWantFiles& newwadfiles, const OWantFiles& newpatchfiles,
 		D_DoomWadReboot(newwadfiles, newpatchfiles);
 		if (!missingfiles.empty())
 		{
-			G_DeferedInitNew(startmap.c_str());
+			G_DeferedInitNew(startmap);
 			return false;
 		}
 	}
 
 	if (mapname.length())
 	{
-		if (W_CheckNumForName(mapname.c_str()) != -1)
+		if (W_CheckNumForName(mapname) != -1)
 		{
-			G_DeferedInitNew(mapname.c_str());
+			G_DeferedInitNew(mapname);
 		}
         else
         {
-            Printf_Bold("map %s not found, loading start map instead", mapname.c_str());
-			G_DeferedInitNew(startmap.c_str());
+            PrintFmt_Bold("map {} not found, loading start map instead", mapname);
+			G_DeferedInitNew(startmap);
         }
 	}
 	else
-		G_DeferedInitNew(startmap.c_str());
+		G_DeferedInitNew(startmap);
 
 	return true;
 }
@@ -508,7 +508,7 @@ BEGIN_COMMAND (map)
 	}
 	else
 	{
-		Printf (PRINT_HIGH, "The current map is %s: \"%s\"\n", level.mapname.c_str(), level.level_name);
+		PrintFmt(PRINT_HIGH, "The current map is {}: \"{}\"\n", level.mapname, level.level_name);
 	}
 }
 END_COMMAND (map)
@@ -559,8 +559,8 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 
 		G_AirControlChanged();
 
-		for (int i = 0; i < NUM_MAPVARS; i++)
-			arc << level.vars[i];
+		for (const auto& var : level.vars)
+			arc << var;
 
 		if (!arc.IsReset())
 			arc << playernum;
@@ -577,8 +577,8 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 
 		G_AirControlChanged();
 
-		for (int i = 0; i < NUM_MAPVARS; i++)
-			arc >> level.vars[i];
+		for (auto& var : level.vars)
+			arc >> var;
 
 		if (!arc.IsReset())
 		{
@@ -869,9 +869,9 @@ void G_InitLevelLocals()
 	::level.secretmap = info.secretmap;
 	::level.music = info.music;
 	::level.skypic = info.skypic;
-	if (!::level.skypic2[0])
+	if (::level.skypic2.empty())
 	{
-		::level.skypic2 =::level.skypic.c_str();
+		::level.skypic2 = ::level.skypic;
 	}
 	::level.sky1ScrollDelta = info.sky1ScrollDelta;
 	::level.sky2ScrollDelta = info.sky2ScrollDelta;
@@ -1000,15 +1000,15 @@ BEGIN_COMMAND(mapinfo)
 
 	level_pwad_info_t& info = *infoptr;
 
-	Printf(PRINT_HIGH, "Map Name: %s\n", info.mapname.c_str());
-	Printf(PRINT_HIGH, "Level Number: %d\n", info.levelnum);
-	Printf(PRINT_HIGH, "Level Name: %s\n", info.level_name.c_str());
-	Printf(PRINT_HIGH, "Intermission Graphic: %s\n", info.pname.c_str());
-	Printf(PRINT_HIGH, "Next Map: %s\n", info.nextmap.c_str());
-	Printf(PRINT_HIGH, "Secret Map: %s\n", info.secretmap.c_str());
-	Printf(PRINT_HIGH, "Par Time: %d\n", info.partime);
-	Printf(PRINT_HIGH, "Sky: %s\n", info.skypic.c_str());
-	Printf(PRINT_HIGH, "Music: %s\n", info.music.c_str());
+	PrintFmt(PRINT_HIGH, "Map Name: {}\n", info.mapname);
+	PrintFmt(PRINT_HIGH, "Level Number: {}\n", info.levelnum);
+	PrintFmt(PRINT_HIGH, "Level Name: {}\n", info.level_name);
+	PrintFmt(PRINT_HIGH, "Intermission Graphic: {}\n", info.pname);
+	PrintFmt(PRINT_HIGH, "Next Map: {}\n", info.nextmap);
+	PrintFmt(PRINT_HIGH, "Secret Map: {}\n", info.secretmap);
+	PrintFmt(PRINT_HIGH, "Par Time: %d\n", info.partime);
+	PrintFmt(PRINT_HIGH, "Sky: {}\n", info.skypic);
+	PrintFmt(PRINT_HIGH, "Music: {}\n", info.music);
 
 	// Stringify the set level flags.
 	std::string flags;
@@ -1043,7 +1043,7 @@ BEGIN_COMMAND(mapinfo)
 
 	if (flags.length() > 0)
 	{
-		Printf(PRINT_HIGH, "Flags:%s\n", flags.c_str());
+		Printf(PRINT_HIGH, "Flags:%s\n", flags);
 	}
 	else
 	{
@@ -1072,9 +1072,9 @@ BEGIN_COMMAND(clusterinfo)
 		return;
 	}
 
-	Printf(PRINT_HIGH, "Cluster: %d\n", info.cluster);
-	Printf(PRINT_HIGH, "Message Music: %s\n", info.messagemusic.c_str());
-	Printf(PRINT_HIGH, "Message Flat: %s\n", info.finaleflat.c_str());
+	PrintFmt(PRINT_HIGH, "Cluster: {}\n", info.cluster);
+	PrintFmt(PRINT_HIGH, "Message Music: {}\n", info.messagemusic);
+	PrintFmt(PRINT_HIGH, "Message Flat: {}\n", info.finaleflat);
 	if (!info.exittext.empty())
 	{
 		Printf(PRINT_HIGH, "- = Exit Text = -\n%s\n- = = = -\n", info.exittext);
@@ -1099,7 +1099,7 @@ BEGIN_COMMAND(clusterinfo)
 
 	if (flags.length() > 0)
 	{
-		Printf(PRINT_HIGH, "Flags:%s\n", flags.c_str());
+		Printf(PRINT_HIGH, "Flags:%s\n", flags);
 	}
 	else
 	{

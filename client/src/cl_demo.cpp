@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -300,12 +300,12 @@ bool NetDemo::writeSnapshotIndex()
 
 
 
-	for (size_t i = 0; i < snapshot_index.size(); i++)
+	for (const auto [ticnum, offset] : snapshot_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
-		entry.ticnum = LELONG(snapshot_index[i].ticnum);
-		entry.offset = LELONG(snapshot_index[i].offset);
+		entry.ticnum = LELONG(ticnum);
+		entry.offset = LELONG(offset);
 
 		size_t cnt = 0;
 		cnt += sizeof(entry.ticnum) *
@@ -360,12 +360,12 @@ bool NetDemo::writeMapIndex()
 {
 	fseek(demofp, header.map_index_offset, SEEK_SET);
 
-	for (size_t i = 0; i < map_index.size(); i++)
+	for (const auto [ticnum, offset] : map_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
-		entry.ticnum = LELONG(map_index[i].ticnum);
-		entry.offset = LELONG(map_index[i].offset);
+		entry.ticnum = LELONG(ticnum);
+		entry.offset = LELONG(offset);
 
 		size_t cnt = 0;
 		cnt += sizeof(entry.ticnum) *
@@ -1002,12 +1002,7 @@ void NetDemo::writeLauncherSequence(buf_t *netbuffer)
 	// get sv_hostname and write it
 	MSG_WriteString (netbuffer, server_host.c_str());
 
-	int playersingame = 0;
-	for (const auto& player : players)
-	{
-		if (player.ingame())
-			playersingame++;
-	}
+	int playersingame = std::count_if(players.cbegin(), players.cend(), [](const auto& player){ return player.ingame(); });
 	MSG_WriteByte	(netbuffer, playersingame);
 	MSG_WriteByte	(netbuffer, 0);				// sv_maxclients
 	MSG_WriteString	(netbuffer, level.mapname.c_str());
@@ -1388,9 +1383,9 @@ const std::vector<int> NetDemo::getMapChangeTimes() const
 {
 	std::vector<int> times;
 
-	for (size_t i = 0; i < map_index.size(); i++)
+	for (const auto [ticnum, _] : map_index)
 	{
-		int start_time = (map_index[i].ticnum - header.starting_gametic) / TICRATE;
+		int start_time = (ticnum - header.starting_gametic) / TICRATE;
 		times.push_back(start_time);
 	}
 
@@ -1455,10 +1450,10 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 	}
 
 	arc << (byte)patchfiles.size();
-	for (size_t i = 0; i < patchfiles.size(); i++)
+	for (const auto& file : patchfiles)
 	{
-		arc << D_CleanseFileName(::patchfiles[i].getBasename()).c_str();
-		arc << ::patchfiles[i].getMD5().getHexCStr();
+		arc << D_CleanseFileName(file.getBasename()).c_str();
+		arc << file.getMD5().getHexCStr();
 	}
 
 	// write map info
@@ -1485,7 +1480,7 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_WorldVars[i];
 		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
 		arc << worldarr.size();
-		for (const auto& [key, val] : worldarr)
+		for (const auto [key, val] : worldarr)
 		{
 			arc << key;
 			arc << val;
@@ -1498,7 +1493,7 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_GlobalVars[i];
 		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
 		arc << globalarr.size();
-		for (const auto& [key, val] : globalarr)
+		for (const auto [key, val] : globalarr)
 		{
 			arc << key;
 			arc << val;

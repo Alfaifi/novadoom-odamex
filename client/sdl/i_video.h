@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -233,23 +233,13 @@ public:
 	virtual bool supports8bpp() const
 	{
 		const IVideoModeList* modelist = getSupportedVideoModes();
-		for (const auto& mode : *modelist)
-		{
-			if (mode.bpp == 8)
-				return true;
-		}
-		return false;
+		return std::any_of(modelist->cbegin(), modelist->cend(), [](const auto& mode){ return mode.bpp == 8; });
 	}
 
 	virtual bool supports32bpp() const
 	{
 		const IVideoModeList* modelist = getSupportedVideoModes();
-		for (const auto& mode : *modelist)
-		{
-			if (mode.bpp == 32)
-				return true;
-		}
-		return false;
+		return std::any_of(modelist->cbegin(), modelist->cend(), [](const auto& mode){ return mode.bpp == 32; });
 	}
 
 	virtual const IVideoMode& getNativeMode() const = 0;

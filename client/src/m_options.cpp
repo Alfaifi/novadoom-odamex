@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom 1.22).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -798,17 +798,17 @@ int dummy = 0;
 
 CVAR_FUNC_IMPL (ui_transred)
 {
-    M_SlideUIRed((int)var);
+    M_SlideUIRed(var.asInt());
 }
 
 CVAR_FUNC_IMPL (ui_transgreen)
 {
-    M_SlideUIGreen((int)var);
+    M_SlideUIGreen(var.asInt());
 }
 
 CVAR_FUNC_IMPL (ui_transblue)
 {
-    M_SlideUIBlue((int)var);
+    M_SlideUIBlue(var.asInt());
 }
 
 static value_t Endoom[] = {{0.0, "Off"}, {1.0, "On"}, {2.0, "PWAD Only"}};

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -1962,36 +1962,36 @@ void HU_ConsoleScores(player_t *player)
 		compare_player_points comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-		Printf_Bold("\n--------------------------------------\n");
-		Printf_Bold("           CAPTURE THE FLAG\n");
+		PrintFmt_Bold("\n--------------------------------------\n");
+		PrintFmt_Bold("           CAPTURE THE FLAG\n");
 
 		if (sv_scorelimit)
 			str = fmt::format("Scorelimit: {:<6d}", sv_scorelimit.asInt());
 		else
 			str = "Scorelimit: N/A   ";
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = "Timelimit: N/A";
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("%18s\n", str);
 
 		for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
 		{
 			if (team_num == TEAM_BLUE)
-				Printf_Bold("\n-----------------------------BLUE TEAM\n");
+				PrintFmt_Bold("\n-----------------------------BLUE TEAM\n");
 			else if (team_num == TEAM_RED)
-				Printf_Bold("\n------------------------------RED TEAM\n");
+				PrintFmt_Bold("\n------------------------------RED TEAM\n");
 			else if (team_num == TEAM_GREEN)
-				Printf_Bold("\n----------------------------GREEN TEAM\n");
+				PrintFmt_Bold("\n----------------------------GREEN TEAM\n");
 			else		// shouldn't happen
-				Printf_Bold("\n--------------------------UNKNOWN TEAM\n");
+				PrintFmt_Bold("\n--------------------------UNKNOWN TEAM\n");
 
-			Printf_Bold("Name            Points Caps Frags Time\n");
-			Printf_Bold("--------------------------------------\n");
+			PrintFmt_Bold("Name            Points Caps Frags Time\n");
+			PrintFmt_Bold("--------------------------------------\n");
 
 			for (const auto& itplayer : sortedplayers)
 			{
@@ -2005,9 +2005,9 @@ void HU_ConsoleScores(player_t *player)
 							itplayer->GameTime / 60);
 
 					if (itplayer == player)
-						Printf_Bold("%s", str);
+						PrintFmt_Bold("{}", str);
 					else
-						Printf("%s", str);
+						PrintFmt("{}", str);
 				}
 			}
 		}
@@ -2018,36 +2018,36 @@ void HU_ConsoleScores(player_t *player)
 		compare_player_frags comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-		Printf_Bold("\n--------------------------------------\n");
-		Printf_Bold("           TEAM DEATHMATCH\n");
+		PrintFmt_Bold("\n--------------------------------------\n");
+		PrintFmt_Bold("           TEAM DEATHMATCH\n");
 
 		if (sv_fraglimit)
 			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
 			str = "Fraglimit: N/A    ";
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = "Timelimit: N/A";
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
 		for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
 		{
 			if (team_num == TEAM_BLUE)
-				Printf_Bold("\n-----------------------------BLUE TEAM\n");
+				PrintFmt_Bold("\n-----------------------------BLUE TEAM\n");
 			else if (team_num == TEAM_RED)
-				Printf_Bold("\n------------------------------RED TEAM\n");
+				PrintFmt_Bold("\n------------------------------RED TEAM\n");
 			else if (team_num == TEAM_GREEN)
-				Printf_Bold("\n----------------------------GREEN TEAM\n");
+				PrintFmt_Bold("\n----------------------------GREEN TEAM\n");
 			else		// shouldn't happen
-				Printf_Bold("\n--------------------------UNKNOWN TEAM\n");
+				PrintFmt_Bold("\n--------------------------UNKNOWN TEAM\n");
 
-			Printf_Bold("Name            Frags Deaths  K/D Time\n");
-			Printf_Bold("--------------------------------------\n");
+			PrintFmt_Bold("Name            Frags Deaths  K/D Time\n");
+			PrintFmt_Bold("--------------------------------------\n");
 
 			for (const auto& itplayer : sortedplayers)
 			{
@@ -2061,9 +2061,9 @@ void HU_ConsoleScores(player_t *player)
 							itplayer->GameTime / 60);
 
 					if (itplayer == player)
-						Printf_Bold("%s", str);
+						PrintFmt_Bold("{}", str);
 					else
-						Printf("%s", str);
+						PrintFmt("{}", str);
 				}
 			}
 		}
@@ -2074,25 +2074,25 @@ void HU_ConsoleScores(player_t *player)
 		compare_player_frags comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-		Printf_Bold("\n--------------------------------------\n");
-		Printf_Bold("              DEATHMATCH\n");
+		PrintFmt_Bold("\n--------------------------------------\n");
+		PrintFmt_Bold("              DEATHMATCH\n");
 
 		if (sv_fraglimit)
 			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
 			str = "Fraglimit: N/A    ";
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = "Timelimit: N/A";
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
-		Printf_Bold("Name            Frags Deaths  K/D Time\n");
-		Printf_Bold("--------------------------------------\n");
+		PrintFmt_Bold("Name            Frags Deaths  K/D Time\n");
+		PrintFmt_Bold("--------------------------------------\n");
 
 		for (const auto& itplayer : sortedplayers)
 		{
@@ -2104,9 +2104,9 @@ void HU_ConsoleScores(player_t *player)
 					itplayer->GameTime / 60);
 
 			if (itplayer == player)
-				Printf_Bold("%s", str);
+				PrintFmt_Bold("{}", str);
 			else
-				Printf("%s", str);
+				PrintFmt("{}", str);
 		}
 
 	}
@@ -2116,13 +2116,13 @@ void HU_ConsoleScores(player_t *player)
 		compare_player_kills comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-		Printf_Bold("\n--------------------------------------\n");
+		PrintFmt_Bold("\n--------------------------------------\n");
 		if (sv_gametype == GM_COOP)
-			Printf_Bold("             COOPERATIVE\n");
+			PrintFmt_Bold("             COOPERATIVE\n");
 		else
-			Printf_Bold("                HORDE\n");
-		Printf_Bold("Name            Kills Deaths  K/D Time\n");
-		Printf_Bold("--------------------------------------\n");
+			PrintFmt_Bold("                HORDE\n");
+		PrintFmt_Bold("Name            Kills Deaths  K/D Time\n");
+		PrintFmt_Bold("--------------------------------------\n");
 
 		for (const auto& itplayer : sortedplayers)
 		{
@@ -2134,9 +2134,9 @@ void HU_ConsoleScores(player_t *player)
 					itplayer->GameTime / 60);
 
 			if (itplayer == player)
-				Printf_Bold("%s", str);
+				PrintFmt_Bold("{}", str);
 			else
-				Printf("%s", str);
+				PrintFmt("{}", str);
 		}
 	}
 
@@ -2145,15 +2145,15 @@ void HU_ConsoleScores(player_t *player)
 		compare_player_names comparison_functor;
 		sortedspectators.sort(comparison_functor);
 
-		Printf_Bold("\n----------------------------SPECTATORS\n");
+		PrintFmt_Bold("\n----------------------------SPECTATORS\n");
 
 		for (const auto& itplayer : sortedspectators)
 		{
 			str = fmt::format("{:<15s}\n", itplayer->userinfo.netname);
 			if (itplayer == player)
-				Printf_Bold("%s", str);
+				PrintFmt_Bold("{}", str);
 			else
-				Printf("%s", str);
+				PrintFmt("{}", str);
 		}
 	}
 

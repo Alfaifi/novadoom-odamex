@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -40,9 +40,9 @@ size_t Printf(const int printlevel, const fmt::string_view format, const ARGS&..
 }
 
 template <typename... ARGS>
-size_t Printf_Bold(const fmt::string_view format, const ARGS&... args)
+size_t PrintFmt_Bold(const fmt::string_view format, const ARGS&... args)
 {
-	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_BOLD, fmt::sprintf(format, args...));
+	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_BOLD, fmt::format(format, args...));
 }
 
 template <typename... ARGS>
@@ -51,6 +51,17 @@ size_t DPrintf(const fmt::string_view format, const ARGS&... args)
 	if (::developer || ::devparm)
 	{
 		return C_BasePrint(PRINT_WARNING, TEXTCOLOR_NORMAL, fmt::sprintf(format, args...));
+	}
+
+	return 0;
+}
+
+template <typename... ARGS>
+size_t DPrintFmt(const fmt::string_view format, const ARGS&... args)
+{
+	if (::developer || ::devparm)
+	{
+		return C_BasePrint(PRINT_WARNING, TEXTCOLOR_NORMAL, fmt::format(format, args...));
 	}
 
 	return 0;

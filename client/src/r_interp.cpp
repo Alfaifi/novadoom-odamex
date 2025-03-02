@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2024 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -232,15 +232,15 @@ void OInterpolation::ticGameInterpolation()
 // Functions that assist with the interpolation of certain game objects
 void OInterpolation::interpolateCeilings(fixed_t amount)
 {
-	for (const auto& [old_value, secnum] : prev_ceilingheight)
+	for (const auto [old_value, secnum] : prev_ceilingheight)
 	{
 		sector_t* sector = &sectors[secnum];
 
-		fixed_t cur_value = P_CeilingHeight(sector);
+		const fixed_t cur_value = P_CeilingHeight(sector);
 
 		saved_ceilingheight.emplace_back(cur_value, secnum);
 
-		fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
+		const fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
 		P_SetCeilingHeight(sector, new_value);
 	}
 
@@ -248,15 +248,15 @@ void OInterpolation::interpolateCeilings(fixed_t amount)
 	{
 		const sector_t* sector = &sectors[secnum];
 
-		fixed_t cur_x = sector->ceiling_xoffs;
-		fixed_t cur_y = sector->ceiling_yoffs;
+		const fixed_t cur_x = sector->ceiling_xoffs;
+		const fixed_t cur_y = sector->ceiling_yoffs;
 
 		auto [old_x, old_y] = offs;
 
 		saved_sectorceilingscrollingflat.emplace_back(std::make_pair(cur_x, cur_y), secnum);
 
-		fixed_t new_x = old_x + FixedMul(cur_x - old_x, amount);
-		fixed_t new_y = old_y + FixedMul(cur_y - old_y, amount);
+		const fixed_t new_x = old_x + FixedMul(cur_x - old_x, amount);
+		const fixed_t new_y = old_y + FixedMul(cur_y - old_y, amount);
 
 		sectors[secnum].ceiling_xoffs = new_x;
 		sectors[secnum].ceiling_yoffs = new_y;
@@ -265,15 +265,15 @@ void OInterpolation::interpolateCeilings(fixed_t amount)
 
 void OInterpolation::interpolateFloors(fixed_t amount)
 {
-	for (const auto& [old_value, secnum] : prev_floorheight)
+	for (const auto [old_value, secnum] : prev_floorheight)
 	{
 		sector_t* sector = &sectors[secnum];
 
-		fixed_t cur_value = P_FloorHeight(sector);
+		const fixed_t cur_value = P_FloorHeight(sector);
 
 		saved_floorheight.emplace_back(cur_value, secnum);
 
-		fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
+		const fixed_t new_value = old_value + FixedMul(cur_value - old_value, amount);
 		P_SetFloorHeight(sector, new_value);
 	}
 
@@ -283,13 +283,13 @@ void OInterpolation::interpolateFloors(fixed_t amount)
 
 		auto [old_x, old_y] = offs;
 
-		fixed_t cur_x = sector->floor_xoffs;
-		fixed_t cur_y = sector->floor_yoffs;
+		const fixed_t cur_x = sector->floor_xoffs;
+		const fixed_t cur_y = sector->floor_yoffs;
 
 		saved_sectorfloorscrollingflat.emplace_back(std::make_pair(cur_x, cur_y), secnum);
 
-		fixed_t new_x = old_x + FixedMul(cur_x - old_x, amount);
-		fixed_t new_y = old_y + FixedMul(cur_y - old_y, amount);
+		const fixed_t new_x = old_x + FixedMul(cur_x - old_x, amount);
+		const fixed_t new_y = old_y + FixedMul(cur_y - old_y, amount);
 
 		sectors[secnum].floor_xoffs = new_x;
 		sectors[secnum].floor_yoffs = new_y;
@@ -304,13 +304,13 @@ void OInterpolation::interpolateWalls(fixed_t amount)
 
 		auto [old_x, old_y] = offs;
 
-		fixed_t cur_x = side->textureoffset;
-		fixed_t cur_y = side->rowoffset;
+		const fixed_t cur_x = side->textureoffset;
+		const fixed_t cur_y = side->rowoffset;
 
 		saved_linescrollingtex.emplace_back(std::make_pair(cur_x, cur_y), sidenum);
 
-		fixed_t new_x = old_x + FixedMul(cur_x - old_x, amount);
-		fixed_t new_y = old_y + FixedMul(cur_y - old_y, amount);
+		const fixed_t new_x = old_x + FixedMul(cur_x - old_x, amount);
+		const fixed_t new_y = old_y + FixedMul(cur_y - old_y, amount);
 
 		sides[sidenum].textureoffset = new_x;
 		sides[sidenum].rowoffset = new_y;
@@ -320,7 +320,7 @@ void OInterpolation::interpolateWalls(fixed_t amount)
 void OInterpolation::interpolateSkies(fixed_t amount)
 {
 	// Perform interp for any scrolling skies
-	fixed_t newsky2offset = prev_sky2offset +
+	const fixed_t newsky2offset = prev_sky2offset +
 	                    FixedMul(amount, sky2columnoffset - prev_sky2offset);
 
 	saved_sky2offset = sky2columnoffset;
@@ -382,7 +382,7 @@ void OInterpolation::beginGameInterpolation(fixed_t amount)
 void OInterpolation::restoreCeilings(void)
 {
 	// Ceiling heights
-	for (const auto& [height, secnum] : saved_ceilingheight)
+	for (const auto [height, secnum] : saved_ceilingheight)
 	{
 		sector_t* sector = &sectors[secnum];
 		P_SetCeilingHeight(sector, height);

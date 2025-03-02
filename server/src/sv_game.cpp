@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -597,11 +597,11 @@ void G_DoReborn (player_t &player)
 	}
 
 	// try to spawn at one of the other players' spots
-	for (size_t i = 0; i < playerstarts.size(); i++)
+	for (auto& playerstart : playerstarts)
 	{
-		if (G_CheckSpot (player, &playerstarts[i]) )
+		if (G_CheckSpot (player, &playerstart) )
 		{
-			P_SpawnPlayer (player, &playerstarts[i]);
+			P_SpawnPlayer (player, &playerstart);
 			return;
 		}
 	}

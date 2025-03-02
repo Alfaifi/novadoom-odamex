@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -156,7 +156,7 @@ void MustGetStringName(OScanner& os, const char* name)
 	os.mustScan();
 	if (os.compareTokenNoCase(name) == false)
 	{
-		os.error("Expected '%s', got '%s'.", name, os.getToken().c_str());
+		os.error("Expected '%s', got '%s'.", name, os.getToken());
 	}
 }
 
@@ -244,7 +244,7 @@ void MIType_BoolString(OScanner& os, bool doEquals, void* data, unsigned int fla
 		*static_cast<bool*>(data) = false;
 	else
 		os.error("Expected \"true\" or \"false\" in boolean statement, got \"%s\"",
-		         os.getToken().c_str());
+		         os.getToken());
 }
 
 // Sets the inputted data as a bool (that is, if flags != 0, set to true; else false)
@@ -528,7 +528,7 @@ void MIType_$LumpName(OScanner& os, bool newStyleMapInfo, void* data, unsigned i
 		const OString& s = GStrings(StdStringToUpper(os.getToken()).c_str() + 1);
 		if (s.empty())
 		{
-			os.error("Unknown lookup string \"%s\".", os.getToken().c_str());
+			os.error("Unknown lookup string \"%s\".", os.getToken());
 		}
 		*static_cast<OLumpName*>(data) = s;
 	}
@@ -553,7 +553,7 @@ void MIType_MusicLumpName(OScanner& os, bool newStyleMapInfo, void* data, unsign
 		const OString& s = GStrings(StdStringToUpper(musicname.c_str() + 1));
 		if (s.empty())
 		{
-			os.error("Unknown lookup string \"%s\".", os.getToken().c_str());
+			os.error("Unknown lookup string \"%s\".", os.getToken());
 		}
 
 		// Music lumps in the stringtable do not begin
@@ -706,7 +706,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 			const OString& s = GStrings(StdStringToUpper(os.getToken()));
 			if (s.empty())
 			{
-				os.error("Unknown lookup string \"%s\".", os.getToken().c_str());
+				os.error("Unknown lookup string \"%s\".", os.getToken());
 			}
 			*text = s;
 		}
@@ -741,7 +741,7 @@ void MIType_ClusterString(OScanner& os, bool newStyleMapInfo, void* data, unsign
 			const OString& s = GStrings(StdStringToUpper(os.getToken()));
 			if (s.empty())
 			{
-				os.error("Unknown lookup string \"%s\".", os.getToken().c_str());
+				os.error("Unknown lookup string \"%s\".", os.getToken());
 			}
 
 			*text = s;
@@ -1094,7 +1094,7 @@ void MIType_AutomapBase(OScanner& os, bool newStyleMapInfo, void* data, unsigned
 	else if (os.compareTokenNoCase("strife"))
 		AM_SetBaseColorStrife();
 	else
-		os.warning("base expected \"doom\", \"heretic\", or \"strife\"; got %s", os.getToken().c_str());
+		os.warning("base expected \"doom\", \"heretic\", or \"strife\"; got %s", os.getToken());
 }
 
 //
@@ -1103,7 +1103,7 @@ bool ScanAndCompareString(OScanner& os, std::string cmp)
 	os.scan();
 	if (!os.compareToken(cmp.c_str()))
 	{
-		os.warning("Expected \"%s\", got \"%s\". Aborting parsing", cmp.c_str(), os.getToken().c_str());
+		os.warning("Expected \"%s\", got \"%s\". Aborting parsing", cmp, os.getToken());
 		return false;
 	}
 
@@ -1116,7 +1116,7 @@ bool ScanAndSetRealNum(OScanner& os, fixed64_t& num)
 	os.scan();
 	if (!IsRealNum(os.getToken().c_str()))
 	{
-		os.warning("Expected number, got \"%s\". Aborting parsing", os.getToken().c_str());
+		os.warning("Expected number, got \"%s\". Aborting parsing", os.getToken());
 		return false;
 	}
 	num = FLOAT2FIXED64(os.getTokenFloat());
@@ -1176,7 +1176,7 @@ void MIType_MapArrows(OScanner& os, bool newStyleMapInfo, void* data, unsigned i
 	std::string maparrow = os.getToken();
 
 	if (!InterpretLines(maparrow, gameinfo.mapArrow))
-		os.warning("Map arrow lump \"%s\" could not be found", maparrow.c_str());
+		os.warning("Map arrow lump \"%s\" could not be found", maparrow);
 
 	os.scan();
 	if (os.compareToken(","))
@@ -1185,7 +1185,7 @@ void MIType_MapArrows(OScanner& os, bool newStyleMapInfo, void* data, unsigned i
 		maparrow = os.getToken();
 
 		if (!InterpretLines(maparrow, gameinfo.mapArrowCheat))
-			os.warning("Map arrow lump \"%s\" could not be found", maparrow.c_str());
+			os.warning("Map arrow lump \"%s\" could not be found", maparrow);
 	}
 	else
 	{
@@ -1453,7 +1453,7 @@ void ParseMapInfoLower(OScanner& os, MapInfoDataSetter<T>& mapInfoDataSetter)
 				// able to parse all types even if we can't
 				// do anything with them.
 				//
-				os.error("Unknown MAPINFO token \"%s\"", os.getToken().c_str());
+				os.error("Unknown MAPINFO token \"%s\"", os.getToken());
 			}
 
 			// New MAPINFO is capable of skipping past unknown
@@ -1468,7 +1468,7 @@ void ParseEpisodeInfo(OScanner& os)
 {
 	int new_mapinfo = false; // is int instead of bool for template purposes
 	OLumpName map;
-	std::string pic;
+	OLumpName pic;
 	std::string name;
 	bool picisgfx = false;
 	bool remove = false;
@@ -1574,7 +1574,7 @@ void ParseEpisodeInfo(OScanner& os)
 			break;
 	}
 
-	if (remove || (optional && W_CheckNumForName(map.c_str()) == -1) ||
+	if (remove || (optional && W_CheckNumForName(map) == -1) ||
 	    (extended && W_CheckNumForName("EXTENDED") == -1))
 	{
 		// If the remove property is given for an episode, remove it.
@@ -1605,7 +1605,7 @@ void ParseEpisodeInfo(OScanner& os)
 	{
 		if (pic.empty())
 		{
-			pic = map.c_str();
+			pic = map;
 			picisgfx = false;
 		}
 
@@ -1914,7 +1914,7 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 		}
 		else
 		{
-			os.error("Unimplemented top-level type \"%s\"", os.getToken().c_str());
+			os.error("Unimplemented top-level type \"%s\"", os.getToken());
 		}
 	}
 }

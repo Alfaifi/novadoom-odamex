@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -95,7 +95,7 @@ void SV_SendDamageMobj(AActor *target, int pain);
 // Tells clients to remove an actor from the world as it doesn't exist anymore
 void SV_SendDestroyActor(AActor *mo);
 
-bool M_ReadJSON(Json::Value &json, const char *filename);
+bool M_ReadJSON(Json::Value &json, const std::string& filename);
 bool M_WriteJSON(const char *filename, Json::Value &value, bool styled);
 
 // [AM] Coinflip

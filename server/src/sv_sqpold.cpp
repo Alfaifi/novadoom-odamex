@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -139,8 +139,6 @@ bool SV_IsValidToken(DWORD token)
 // TODO: Clean up and reinvent.
 void SV_SendServerInfo()
 {
-	size_t i;
-
 	SZ_Clear(&ml_message);
 
 	MSG_WriteLong(&ml_message, MSG_CHALLENGE);
@@ -169,7 +167,7 @@ void SV_SendServerInfo()
 
 	MSG_WriteByte(&ml_message, numwads - 1);
 
-	for (i = 1; i < numwads; ++i)
+	for (size_t i = 1; i < numwads; ++i)
 		MSG_WriteString(&ml_message, wadfiles[i].getBasename().c_str());
 
 	MSG_WriteBool(&ml_message, (sv_gametype == GM_DM || sv_gametype == GM_TEAMDM));
@@ -192,7 +190,7 @@ void SV_SendServerInfo()
 		}
 	}
 
-	for (i = 1; i < numwads; ++i)
+	for (size_t i = 1; i < numwads; ++i)
 		MSG_WriteString(&ml_message, ::wadfiles[i].getMD5().getHexCStr());
 
 	// [AM] Used to be sv_website - sv_downloadsites can have multiple sites.
@@ -274,10 +272,10 @@ void SV_SendServerInfo()
 
     MSG_WriteByte(&ml_message, patchfiles.size());
 
-	for (size_t i = 0; i < patchfiles.size(); ++i)
+	for (const auto& file : patchfiles)
 	{
 		MSG_WriteString(&ml_message,
-		                D_CleanseFileName(patchfiles[i].getBasename()).c_str());
+		                D_CleanseFileName(file.getBasename()).c_str());
 	}
 
 	NET_SendPacket(ml_message, net_from);

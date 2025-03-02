@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -51,7 +51,7 @@ class szp
 
 	// this should never be used
 	// spawn from other pointers, or use init()
-	szp &operator =(T *other) {};
+	szp &operator=(T *other) = delete;
 
 	// utility function to remove oneself from the linked list
 	void inline unlink()

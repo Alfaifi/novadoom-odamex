@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -210,9 +210,6 @@ void S_StopMusic()
 //
 // =============================== [RH]
 
-std::vector<sfxinfo_t> S_sfx; // [RH] This is no longer defined in sounds.c
-std::map<int, std::vector<int> > S_rnd;
-
 static struct AmbientSound {
 	unsigned	type;		// type of ambient sound
 	int			periodmin;	// # of tics between repeats
@@ -231,8 +228,8 @@ static struct AmbientSound {
 void S_HashSounds()
 {
 	// Mark all buckets as empty
-	for (unsigned i = 0; i < S_sfx.size(); i++)
-		S_sfx[i].index = ~0;
+	for (auto& sfx : S_sfx)
+		sfx.index = ~0;
 
 	// Now set up the chains
 	for (unsigned i = 0; i < S_sfx.size(); i++)
@@ -442,7 +439,7 @@ void S_ParseSndInfo()
 					}
 					else
 					{
-						os.warning("Unknown ambient type (%s)\n", os.getToken().c_str());
+						os.warning("Unknown ambient type (%s)\n", os.getToken());
 					}
 
 					os.mustScanFloat();
@@ -484,7 +481,7 @@ void S_ParseSndInfo()
 						{
 							os.warning("Definition of random sound '%s' refers to itself "
 							           "recursively.\n",
-							           os.getToken().c_str());
+							           os.getToken());
 							continue;
 						}
 
@@ -502,7 +499,7 @@ void S_ParseSndInfo()
 				}
 				else
 				{
-					os.warning("Unknown SNDINFO command %s\n", os.getToken().c_str());
+					os.warning("Unknown SNDINFO command %s\n", os.getToken());
 					while (os.scan())
 						if (os.crossed())
 						{

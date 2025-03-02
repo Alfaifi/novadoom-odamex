@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 // Copyright (C) 2012 by Alex Mayfield.
 //
 // This program is free software; you can redistribute it and/or
@@ -156,7 +156,7 @@ bool IPRange::set(const std::string &input)
 }
 
 // Return the range as a string, with stars representing masked octets.
-std::string IPRange::string()
+std::string IPRange::string() const
 {
 	std::ostringstream buffer;
 
@@ -451,25 +451,25 @@ bool Banlist::json(Json::Value &json_bans)
 	std::string expire;
 	tm* tmp;
 
-	for (size_t i = 0; i < banlist.size(); i++)
+	for (const auto& ban : this->banlist)
 	{
 		Json::Value json_ban(Json::objectValue);
-		json_ban["range"] = this->banlist[i].range.string();
+		json_ban["range"] = ban.range.string();
 		// Expire time is optional.
-		if (this->banlist[i].expire != 0)
+		if (ban.expire != 0)
 		{
-			tmp = gmtime(&this->banlist[i].expire);
+			tmp = gmtime(&ban.expire);
 			if (StrFormatISOTime(expire, tmp))
 			{
 				json_ban["expire"] = expire;
 			}
 		}
 		// Name is optional.
-		if (!this->banlist[i].name.empty())
-			json_ban["name"] = this->banlist[i].name;
+		if (!ban.name.empty())
+			json_ban["name"] = ban.name;
 		// Reason is optional.
-		if (!this->banlist[i].reason.empty())
-			json_ban["reason"] = this->banlist[i].reason;
+		if (!ban.reason.empty())
+			json_ban["reason"] = ban.reason;
 		json_bans.append(json_ban);
 	}
 
@@ -491,21 +491,20 @@ bool Banlist::json_replace(const Json::Value &json_bans)
 	if (json_bans.isNull() || json_bans.empty())
 		return true;
 
-	Json::ValueConstIterator it;
-	for (it = json_bans.begin(); it != json_bans.end(); ++it)
+	for (const auto& json_ban : json_bans)
 	{
 		Ban ban;
 		Json::Value value;
 
 		// Range
-		value = (*it).get("range", Json::Value::null);
+		value = json_ban.get("range", Json::Value::null);
 		if (value.isNull())
 			continue;
 		else
-			ban.range.set((*it).get("range", false).asString());
+			ban.range.set(json_ban.get("range", false).asString());
 
 		// Expire time
-		value = (*it).get("expire", Json::Value::null);
+		value = json_ban.get("expire", Json::Value::null);
 		if (!value.isNull())
 		{
 			if (StrParseISOTime(value.asString(), &tmp))
@@ -513,12 +512,12 @@ bool Banlist::json_replace(const Json::Value &json_bans)
 		}
 
 		// Name
-		value = (*it).get("name", Json::Value::null);
+		value = json_ban.get("name", Json::Value::null);
 		if (!value.isNull())
 			ban.name = value.asString();
 
 		// Reason
-		value = (*it).get("reason", Json::Value::null);
+		value = json_ban.get("reason", Json::Value::null);
 		if (!value.isNull())
 			ban.reason = value.asString();
 
@@ -846,7 +845,7 @@ BEGIN_COMMAND(banlist)
 			buffer << ")";
 		}
 
-		Printf(PRINT_HIGH, "%s", buffer.str().c_str());
+		Printf(PRINT_HIGH, "%s", buffer.str());
 	}
 }
 END_COMMAND(banlist)
@@ -877,7 +876,7 @@ BEGIN_COMMAND(savebanlist)
 
 	Json::Value json_bans(Json::arrayValue);
 	if (banlist.json(json_bans) && M_WriteJSON(banfile.c_str(), json_bans, true))
-		Printf(PRINT_HIGH, "savebanlist: banlist saved to %s.\n", banfile.c_str());
+		Printf(PRINT_HIGH, "savebanlist: banlist saved to %s.\n", banfile);
 	else
 		Printf(PRINT_HIGH, "savebanlist: could not save banlist.\n");
 }
@@ -892,7 +891,7 @@ BEGIN_COMMAND(loadbanlist)
 		banfile = sv_banfile.cstring();
 
 	Json::Value json_bans;
-	if (!M_ReadJSON(json_bans, banfile.c_str()))
+	if (!M_ReadJSON(json_bans, banfile))
 	{
 		Printf(PRINT_HIGH, "loadbanlist: could not load banlist.\n");
 		return;
@@ -907,9 +906,9 @@ BEGIN_COMMAND(loadbanlist)
 	size_t jsonsize = json_bans.size();
 
 	if (bansize == jsonsize)
-		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans from %s.\n", bansize, banfile.c_str());
+		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans from %s.\n", bansize, banfile);
 	else
-		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans and skipped %lu invalid entries from %s.", bansize, jsonsize - bansize, banfile.c_str());
+		Printf(PRINT_HIGH, "loadbanlist: loaded %lu bans and skipped %lu invalid entries from %s.", bansize, jsonsize - bansize, banfile);
 }
 END_COMMAND(loadbanlist)
 
@@ -940,7 +939,7 @@ BEGIN_COMMAND(exceptionlist)
 			buffer << " (" << exception->name << ")";
 		}
 
-		Printf(PRINT_HIGH, "%s", buffer.str().c_str());
+		Printf(PRINT_HIGH, "%s", buffer.str());
 	}
 }
 END_COMMAND(exceptionlist)

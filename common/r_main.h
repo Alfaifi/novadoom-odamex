@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -40,8 +40,8 @@ extern int viewheightarray[MAXWIDTH];
 //
 // POV related.
 //
-extern fixed_t			viewcos;
-extern fixed_t			viewsin;
+inline fixed_t			viewcos;
+inline fixed_t			viewsin;
 
 extern int				viewwidth;
 extern int				viewheight;
@@ -51,21 +51,23 @@ extern int				viewwindowy;
 extern bool				r_fakingunderwater;
 extern bool				r_underwater;
 
-extern int				centerx;
-extern int				centery;
+inline int				centerx;
+inline int				centery;
 
-extern fixed_t			centerxfrac;
-extern fixed_t			centeryfrac;
-extern fixed_t			yaspectmul;
+inline fixed_t			centerxfrac;
+inline fixed_t			centeryfrac;
+inline fixed_t			yaspectmul;
 
 extern shaderef_t		basecolormap;	// [RH] Colormap for sector currently being drawn
 
-extern int				validcount;
+// increment every time a check is made
+inline int				validcount = 1;
 
-extern int				linecount;
-extern int				loopcount;
+// just for profiling purposes
+inline int				linecount;
+inline int				loopcount;
 
-extern fixed_t			render_lerp_amount;
+inline fixed_t			render_lerp_amount;
 
 // [SL] Current color blending values (including palette effects)
 extern fargb_t blend_color;
@@ -96,8 +98,10 @@ extern int				scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
 extern int				scalelightfixed[MAXLIGHTSCALE];
 extern int				zlight[LIGHTLEVELS][MAXLIGHTZ];
 
-extern int				extralight;
-extern BOOL				foggy;
+// bumped light from gun blasts
+inline int				extralight;
+// [RH] ignore extralight and fullbright
+inline bool				foggy;
 extern int				fixedlightlev;
 extern shaderef_t		fixedcolormap;
 

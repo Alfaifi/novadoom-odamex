@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -798,15 +798,7 @@ void D_DoomMain()
 		    "-connect", "-file",     "-playdemo", "-timedemo", "-warp",
 		};
 
-		bool shouldSkip = false;
-		for (size_t i = 0; i < ARRAY_LENGTH(skipParams); i++)
-		{
-			if (::Args.CheckValue(skipParams[i]))
-			{
-				shouldSkip = true;
-				break;
-			}
-		}
+		bool shouldSkip = std::any_of(std::begin(skipParams), std::end(skipParams), [](const auto& param){ return ::Args.CheckValue(param); });
 
 		// Skip boot window if we pass a single argument that isn't the
 		// start of a standard parameter - it must be a path.
@@ -842,19 +834,19 @@ void D_DoomMain()
 	{
 		const std::vector<std::string>& wad_exts = M_FileTypeExts(OFILE_WAD);
 		const std::vector<std::string>& deh_exts = M_FileTypeExts(OFILE_DEH);
-		for (size_t i = 0; i < pwads.size(); i++)
+		for (const auto& pwad : pwads)
 		{
 			OWantFile file;
-			OWantFile::make(file, pwads[i], OFILE_UNKNOWN);
+			OWantFile::make(file, pwad, OFILE_UNKNOWN);
 			const std::string extension = StdStringToUpper(file.getExt());
 			if (std::find(deh_exts.begin(), deh_exts.end(), extension) != deh_exts.end())
 			{
-				OWantFile::make(file, pwads[i], OFILE_DEH);
+				OWantFile::make(file, pwad, OFILE_DEH);
 				newpatchfiles.push_back(file);
 			}
 			if (std::find(wad_exts.begin(), wad_exts.end(), extension) != wad_exts.end())
 			{
-				OWantFile::make(file, pwads[i], OFILE_WAD);
+				OWantFile::make(file, pwad, OFILE_WAD);
 				newwadfiles.push_back(file);
 			}
 		}
@@ -1033,10 +1025,10 @@ void D_DoomMain()
 
 	// --- initialization complete ---
 
-	Printf_Bold("\n\35\36\36\36\36 Odamex Client Initialized \36\36\36\36\37\n");
+	PrintFmt_Bold("\n\35\36\36\36\36 Odamex Client Initialized \36\36\36\36\37\n");
 	if (gamestate != GS_CONNECTING)
-		Printf(PRINT_HIGH, "Type connect <address> or use the Odamex Launcher to connect to a game.\n");
-    Printf(PRINT_HIGH, "\n");
+		PrintFmt(PRINT_HIGH, "Type connect <address> or use the Odamex Launcher to connect to a game.\n");
+    PrintFmt(PRINT_HIGH, "\n");
 
 	// Play a demo, start a map, or show the title screen
 	if (singledemo)

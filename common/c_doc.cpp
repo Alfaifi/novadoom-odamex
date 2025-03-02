@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -46,7 +46,7 @@ typedef std::vector<cvar_t*> CvarView;
  * @param out Output buffer to write to.
  * @param title Title to put in the title tag.
  */
-static void HTMLHeader(std::string& out, const char* title)
+static void HTMLHeader(std::string& out, const std::string& title)
 {
 	std::string buf;
 	const char* HEADER =
@@ -160,7 +160,7 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 		if (!cvar.getDefault().empty())
 		{
 			std::string buf;
-			buf = fmt::sprintf("Default: \"%s\"", cvar.getDefault().c_str());
+			buf = fmt::sprintf("Default: \"%s\"", cvar.getDefault());
 			info.push_back(buf);
 		}
 		break;
@@ -194,7 +194,7 @@ static void HTMLCvarRow(std::string& out, const cvar_t& cvar)
 	                  "<p><small><em>%s</em></small></p>"
 	                  "<p>%s</p>"
 	                  "</dd>";
-	out = fmt::sprintf(ROW, cvar.name(), flagstr.c_str(), cvar.helptext());
+	out = fmt::sprintf(ROW, cvar.name(), flagstr, cvar.helptext());
 }
 
 /**
@@ -250,14 +250,14 @@ BEGIN_COMMAND(cvardoc)
 	FILE* fh = fopen(path.c_str(), "wt+");
 	if (fh == NULL)
 	{
-		Printf("error: Could not open \"%s\" for writing.\n", path.c_str());
+		Printf("error: Could not open \"%s\" for writing.\n", path);
 		return;
 	}
 
 	// First the header.
 	std::string title;
 	title = fmt::sprintf("%s %s Console Variables", CS_STRING, DOTVERSIONSTR);
-	HTMLHeader(buffer, title.c_str());
+	HTMLHeader(buffer, title);
 	fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
 
 	// Then the title and initial paragraph.
@@ -272,7 +272,7 @@ BEGIN_COMMAND(cvardoc)
 	    "number with a decimal point in it, like 3.14."
 	    "</p>";
 
-	buffer = fmt::sprintf(PREAMBLE, title.c_str(), NiceVersion());
+	buffer = fmt::sprintf(PREAMBLE, title, NiceVersion());
 	fwrite(buffer.data(), sizeof(char), buffer.size(), fh);
 
 	// Initial tag for cvars.
@@ -297,6 +297,6 @@ BEGIN_COMMAND(cvardoc)
 	fclose(fh);
 
 	// Success!
-	Printf("Wrote %ld bytes to \"%s\"\n", bytes, path.c_str());
+	Printf("Wrote %ld bytes to \"%s\"\n", bytes, path);
 }
 END_COMMAND(cvardoc)

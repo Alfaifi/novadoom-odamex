@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -266,14 +266,13 @@ hordeSpawn_t* P_HordeSpawnPoint(const hordeRecipe_t& recipe)
 	float totalScore = 0.0f;
 
 	SpawnPointWeights weights;
-	for (hordeSpawns_t::iterator sit = monsterSpawns.begin(); sit != monsterSpawns.end();
-	     ++sit)
+	for (auto& spawn : monsterSpawns)
 	{
 		mobjinfo_t& info = ::mobjinfo[recipe.type];
 		const bool isFlying = info.flags & (MF_NOGRAVITY | MF_FLOAT);
 
-		if (recipe.isBoss && sit->type != TTYPE_HORDE_BOSS &&
-		    sit->type != TTYPE_HORDE_SMALLBOSS)
+		if (recipe.isBoss && spawn.type != TTYPE_HORDE_BOSS &&
+		    spawn.type != TTYPE_HORDE_SMALLBOSS)
 		{
 			// Bosses cannot spawn at non-boss spawns.
 			continue;
@@ -291,7 +290,7 @@ hordeSpawn_t* P_HordeSpawnPoint(const hordeRecipe_t& recipe)
 		const bool fitsNormal = FitRadHeight(info, 64, 128);
 		const bool fitsSmall = FitRadHeight(info, 32, 64);
 
-		switch (sit->type)
+		switch (spawn.type)
 		{
 		case TTYPE_HORDE_MONSTER:
 			// Normal spawns can't spawn monsters that are too big.
@@ -337,20 +336,20 @@ hordeSpawn_t* P_HordeSpawnPoint(const hordeRecipe_t& recipe)
 		}
 
 		SpawnPointWeight weight;
-		weight.spawn = &*sit;
+		weight.spawn = &spawn;
 
 		// [AM] During development we used to have a complicated spawn system
 		//      that spawned near players, but this resulted in it being
 		//      easy to exploit.
 
 		float score = 1.0f;
-		if (sit->type == TTYPE_HORDE_FLYING)
+		if (spawn.type == TTYPE_HORDE_FLYING)
 		{
 			// Preferring flying spawns frees up ground-level spawns for
 			// ground-level monsters.
 			score = 1.25f;
 		}
-		else if (sit->type == TTYPE_HORDE_SMALLSNIPER || sit->type == TTYPE_HORDE_SNIPER)
+		else if (spawn.type == TTYPE_HORDE_SMALLSNIPER || spawn.type == TTYPE_HORDE_SNIPER)
 		{
 			// Sniper spawns can be annoying to clear, allow a breather.
 			score = 0.75f;

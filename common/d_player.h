@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -335,10 +335,10 @@ public:
 			memset(&address, 0, sizeof(netadr_t));
 			version = 0;
 			packedversion = 0;
-			for (size_t i = 0; i < ARRAY_LENGTH(oldpackets); i++)
+			for (auto& [sequence, data] : oldpackets)
 			{
-				oldpackets[i].sequence = -1;
-				oldpackets[i].data.resize(MAX_UDP_PACKET);
+				sequence = -1;
+				data.resize(MAX_UDP_PACKET);
 			}
 			sequence = 0;
 			last_sequence = 0;
@@ -455,10 +455,8 @@ struct PlayerResults
 
 	PlayerResults() : count(0), total(0)
 	{
-		for (size_t i = 0; i < ARRAY_LENGTH(teamCount); i++)
-			teamCount[i] = 0;
-		for (size_t i = 0; i < ARRAY_LENGTH(teamTotal); i++)
-			teamTotal[i] = 0;
+		ArrayInit(teamCount, 0);
+		ArrayInit(teamTotal, 0);
 	}
 };
 

@@ -5,7 +5,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -91,13 +91,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 //
 std::list<movingsector_t>::iterator P_FindMovingSector(sector_t *sector)
 {
-	std::list<movingsector_t>::iterator itr;
-	for (itr = movingsectors.begin(); itr != movingsectors.end(); ++itr)
-		if (sector == itr->sector)
-			return itr;
-
-	// not found
-	return movingsectors.end();
+	return std::find_if(movingsectors.begin(), movingsectors.end(), [sector](const auto& it){ return it.sector == sector; });
 }
 
 fixed_t P_ArgsToFixed(fixed_t arg_i, fixed_t arg_f)
@@ -467,7 +461,9 @@ void DPusher::Serialize (FArchive &arc)
 	else
 	{
 		arc >> m_Type;
-		arc.ReadObject((DObject*&)*m_Source, DPusher::StaticType());
+		DObject* temp = nullptr;
+		arc.ReadObject(temp, DPusher::StaticType());
+		m_Source = temp ? static_cast<AActor*>(temp)->ptr() : AActor::AActorPtr();
 		arc >> m_Xmag >> m_Ymag >> m_Magnitude >> m_Radius >> m_X >> m_Y >> m_Affectee;
 	}
 }

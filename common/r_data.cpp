@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -178,7 +178,7 @@ void R_ConvertPatch(patch_t* newpatch, patch_t* rawpatch, const unsigned int lum
 			if (length < 0)
 			{
 				I_Error("%s: Patch %s appears to be corrupted.", __FUNCTION__,
-				        W_LumpName(lump).c_str());
+				        W_LumpName(lump));
 			}
 
 			// copy the pixels in the post
@@ -806,7 +806,7 @@ void R_ReinitColormap()
 	if (fakecmaps == NULL)
 		return;
 
-	std::string name = fakecmaps[0].name.c_str();
+	OLumpName name = fakecmaps[0].name;
 	if (name.empty())
 		name = "COLORMAP";
 

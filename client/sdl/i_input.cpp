@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -469,7 +469,7 @@ CVAR_FUNC_IMPL(joy_active)
 	const std::vector<IInputDeviceInfo> devices = input_subsystem->getJoystickDevices();
 	for (const auto& device : devices)
 	{
-		if (device.mId == (int)var)
+		if (device.mId == var.asInt())
 		{
 			I_OpenJoystick();
 			return;

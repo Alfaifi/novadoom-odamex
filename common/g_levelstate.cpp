@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -615,7 +615,7 @@ void LevelState::printRoundStart() const
 	else if (def != TEAM_NONE)
 	{
 		TeamInfo& teaminfo = *GetTeamInfo(def);
-		right = fmt::sprintf("%s is on defense", teaminfo.ColorizedTeamName().c_str());
+		right = fmt::sprintf("%s is on defense", teaminfo.ColorizedTeamName());
 	}
 
 	if (!right.empty())

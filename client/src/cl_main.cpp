@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -890,15 +890,15 @@ BEGIN_COMMAND (serverinfo)
     Printf ("\n%*s - Value\n", static_cast<int>(MaxFieldLength), "Name");
 
     // Data
-	for (size_t i = 0; i < server_cvars.size(); i++)
+	for (const auto& varname : server_cvars)
 	{
 		cvar_t *dummy;
-		Cvar = cvar_t::FindCVar(server_cvars[i].c_str(), &dummy);
+		Cvar = cvar_t::FindCVar(varname.c_str(), &dummy);
 
 		Printf( "%*s - %s\n",
 				static_cast<int>(MaxFieldLength),
 				Cvar->name(),
-				Cvar->cstring());
+				Cvar->str());
 	}
 
     Printf ("\n");
@@ -1346,9 +1346,9 @@ void CL_SendUserInfo(void)
 	MSG_WriteBool	(&net_buffer, true);	// [SL] deprecated "cl_unlag" CVAR
 	MSG_WriteBool	(&net_buffer, coninfo->predict_weapons);
 	MSG_WriteByte	(&net_buffer, (char)coninfo->switchweapon);
-	for (size_t i = 0; i < NUMWEAPONS; i++)
+	for (const auto& pref : coninfo->weapon_prefs)
 	{
-		MSG_WriteByte (&net_buffer, coninfo->weapon_prefs[i]);
+		MSG_WriteByte (&net_buffer, pref);
 	}
 
 	CL_RebuildAllPlayerTranslations();	// Refresh Player Translations AFTER sending the new status to the server.
@@ -2278,10 +2278,8 @@ void CL_SimulateSectors()
 	CL_RemoveCompletedMovingSectors();
 
 	// Move sectors
-	std::map<unsigned short, SectorSnapshotManager>::iterator itr;
-	for (itr = sector_snaps.begin(); itr != sector_snaps.end(); ++itr)
+	for (const auto& [sectornum, snapmanager] : sector_snaps)
 	{
-		unsigned short sectornum = itr->first;
 		if (sectornum >= numsectors)
 			continue;
 
@@ -2293,7 +2291,7 @@ void CL_SimulateSectors()
 
 		// Fetch the snapshot for this world_index and run the sector's
 		// thinkers to play any sector sounds
-		SectorSnapshot snap = itr->second.getSnapshot(world_index);
+		SectorSnapshot snap = snapmanager.getSnapshot(world_index);
 		if (snap.isValid())
 		{
 			snap.toSector(sector);

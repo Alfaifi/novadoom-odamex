@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -634,7 +634,7 @@ void ConsoleHistory::movePositionDown()
 void ConsoleHistory::dump()
 {
 	for (const auto& it : history)
-		Printf(PRINT_HIGH, "   %s\n", it.c_str());
+		Printf(PRINT_HIGH, "   %s\n", it);
 }
 
 class ConsoleCompletions
@@ -1309,10 +1309,10 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 	// denis - 0x07 is a system beep, which can DoS the console (lol)
 	// ToDo: there may be more characters not allowed on a consoleprint,
 	// maybe restrict a few ASCII stuff later on ?
-	for (size_t i = 0; i < newStr.length(); i++)
+	for (auto& c : newStr)
 	{
-		if (newStr[i] == 0x07)
-			newStr[i] = '.';
+		if (c == 0x07)
+			c = '.';
 	}
 
 	// Prevents writing a whole lot of new lines to the log file
@@ -1321,10 +1321,10 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 		std::string logStr = newStr;
 
 		// [Nes] - Horizontal line won't show up as-is in the logfile.
-		for (size_t i = 0; i < logStr.length(); i++)
+		for (auto& c : logStr)
 		{
-			if (logStr[i] == '\35' || logStr[i] == '\36' || logStr[i] == '\37')
-				logStr[i] = '=';
+			if (c == '\35' || c == '\36' || c == '\37')
+				c = '=';
 		}
 
 		// Up the row buffer for the console.
@@ -1369,8 +1369,8 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 
 void C_FlushDisplay()
 {
-	for (int i = 0; i < NUMNOTIFIES; i++)
-		NotifyStrings[i].timeout = 0;
+	for (auto& notify : NotifyStrings)
+		notify.timeout = 0;
 }
 
 void C_Ticker()
@@ -1453,20 +1453,20 @@ static void C_DrawNotifyText()
 		return;
 
 	int ypos = 0;
-	for (int i = 0; i < NUMNOTIFIES; i++)
+	for (const auto& notify : NotifyStrings)
 	{
-		if (NotifyStrings[i].timeout > gametic)
+		if (notify.timeout > gametic)
 		{
-			if (!show_messages && NotifyStrings[i].printlevel != 128)
+			if (!show_messages && notify.printlevel != 128)
 				continue;
 
 			int color;
-			if (NotifyStrings[i].printlevel >= PRINTLEVELS)
+			if (notify.printlevel >= PRINTLEVELS)
 				color = CR_RED;
 			else
-				color = PrintColors[NotifyStrings[i].printlevel];
+				color = PrintColors[notify.printlevel];
 
-			screen->DrawTextStretched(color, 0, ypos, NotifyStrings[i].text,
+			screen->DrawTextStretched(color, 0, ypos, notify.text,
 						V_TextScaleXAmount(), V_TextScaleYAmount());
 			ypos += 8 * V_TextScaleYAmount();
 		}
@@ -1602,7 +1602,7 @@ void C_ToggleConsole()
 	}
 	else
 	{
-		if (ConBottom == static_cast<unsigned int>(I_GetSurfaceHeight()))
+		if (ConBottom == I_GetSurfaceHeight())
 			ConsoleState = c_risefull;
 		else
 			ConsoleState = c_rising;

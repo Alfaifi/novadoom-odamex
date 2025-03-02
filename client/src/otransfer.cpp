@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -56,9 +56,9 @@ static size_t curlHeader(char* buffer, size_t size, size_t nitems, void* userdat
 	if (pos == 0)
 	{
 		// Found Content-Type, see if it's the correct one.
-		for (size_t i = 0; i < ARRAY_LENGTH(WANTED_TYPES); i++)
+		for (const auto& wantedtype : WANTED_TYPES)
 		{
-			size_t pos2 = str.find(WANTED_TYPES[i]);
+			size_t pos2 = str.find(wantedtype);
 			if (pos2 == 0)
 			{
 				// Ding, right answer.

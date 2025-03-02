@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -194,13 +194,13 @@ BEGIN_COMMAND(summon)
 
 	const std::string mobname = C_ArgCombine(argc - 1, (const char**)(argv + 1));
 
-	if (!CHEAT_ValidSummonActor(mobname.c_str()))
+	if (!CHEAT_ValidSummonActor(mobname))
 	{
-		Printf(PRINT_HIGH, "Invalid summon argument: %s. Please use `dumpactors` for a valid list of actor names.\n", mobname.c_str());
+		Printf(PRINT_HIGH, "Invalid summon argument: %s. Please use `dumpactors` for a valid list of actor names.\n", mobname);
 		return;
 	}
 
-	CHEAT_Summon(&consoleplayer(), mobname.c_str(), false);
+	CHEAT_Summon(&consoleplayer(), mobname, false);
 	CL_SendSummonCheat(mobname.c_str());
  }
 END_COMMAND(summon)
@@ -457,7 +457,7 @@ void CHEAT_DoCheat(player_t* player, int cheat, bool silentmsg)
 	}
 }
 
-bool CHEAT_ValidSummonActor(const char* summon) {
+bool CHEAT_ValidSummonActor(const std::string& summon) {
 	std::string mobname = "";
 
 	mobjtype_t mobjtype = P_INameToMobj(summon);
@@ -470,7 +470,7 @@ bool CHEAT_ValidSummonActor(const char* summon) {
 	return true;
 }
 
-AActor* CHEAT_Summon(player_s* player, const char* sum, bool friendly)
+AActor* CHEAT_Summon(player_s* player, const std::string& sum, bool friendly)
 {
 	AActor* entity = AActor::AActorPtr();
 	AActor* source = player->mo;
@@ -523,7 +523,7 @@ void CHEAT_GiveTo(player_t* player, const char* name)
 	gitem_t* it;
 
 	if (player != &consoleplayer())
-		Printf(PRINT_HIGH, "%s is a cheater: give %s\n", player->userinfo.netname.c_str(),
+		Printf(PRINT_HIGH, "%s is a cheater: give %s\n", player->userinfo.netname,
 		       name);
 
 	if (stricmp(name, "all") == 0)

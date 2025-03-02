@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -118,9 +118,9 @@ lumpHandle_t W_LumpToHandle(const unsigned lump);
 int W_HandleToLump(const lumpHandle_t handle);
 
 int W_CheckNumForName(const char *name, int ns = ns_global);
-int W_CheckNumForName(const OLumpName& name, int ns = ns_global);
+inline int W_CheckNumForName(const OLumpName& name, int ns = ns_global) { return W_CheckNumForName(name.c_str(), ns); };
 int W_GetNumForName(const char *name, int ns = ns_global);
-int W_GetNumForName(const OLumpName& name, int ns = ns_global);
+inline int W_GetNumForName(const OLumpName& name, int ns = ns_global) { return W_GetNumForName(name.c_str(), ns); };
 
 std::string W_LumpName(unsigned lump);
 unsigned	W_LumpLength (unsigned lump);

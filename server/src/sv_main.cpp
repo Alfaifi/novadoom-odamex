@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -325,7 +325,7 @@ BEGIN_COMMAND (kick) {
 	std::string reason;
 
 	if (!CMD_KickCheck(arguments, error, pid, reason)) {
-		Printf("Kick: %s.\n", error.c_str());
+		Printf("Kick: %s.\n", error);
 		return;
 	}
 
@@ -393,11 +393,11 @@ void SV_InvalidateClient(player_t &player, const std::string& reason)
 {
 	if (&(player.client) == NULL)
 	{
-		Printf("Player with NULL client fails security check (%s), client cannot be safely dropped.\n", reason.c_str());
+		Printf("Player with NULL client fails security check (%s), client cannot be safely dropped.\n", reason);
 		return;
 	}
 
-	Printf("%s fails security check (%s), dropping client.\n", NET_AdrToString(player.client.address), reason.c_str());
+	Printf("%s fails security check (%s), dropping client.\n", NET_AdrToString(player.client.address), reason);
 	SV_PlayerPrintf(PRINT_ERROR, player.id,
 	                "The server closed your connection for the following reason: %s.\n",
 	                reason.c_str());
@@ -910,7 +910,7 @@ bool SV_SetupUserInfo(player_t &player)
 					test_netname = new_netname + strnum;
 
 				// Check to see if the enumerated name is taken.
-				player_t& test = nameplayer(test_netname.c_str());
+				player_t& test = nameplayer(test_netname);
 				if (!validplayer(test))
 					break;
 
@@ -955,8 +955,8 @@ bool SV_SetupUserInfo(player_t &player)
 		if (player.mo && player.userinfo.team && player.ingame() && !player.spectator &&
 		    !G_IsLevelState(LevelState::WARMUP))
 		{
-			M_HandleWDLNameChange(team, old_netname.c_str(),
-			                      player.userinfo.netname.c_str(), player.id);
+			M_HandleWDLNameChange(team, old_netname,
+			                      player.userinfo.netname, player.id);
 		}
 	}
 
@@ -1623,7 +1623,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 
 		// GhostlyDeath -- And we tell the server
 		Printf("%s disconnected (version mismatch %s).\n", NET_AdrToString(::net_from),
-		       VersionStr.c_str());
+		       VersionStr);
 	}
 
 	return AllowConnect;
@@ -2135,56 +2135,56 @@ void SV_DrawScores()
 		else
 			sortedspectators.push_back(&player);
 
-	Printf_Bold("\n");
+	PrintFmt_Bold("\n");
 
 	if (sv_gametype == GM_CTF)
 	{
 		compare_player_points comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                    CAPTURE THE FLAG");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                    CAPTURE THE FLAG");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		if (sv_scorelimit)
 			str = fmt::format("Scorelimit: {:<6d}", sv_scorelimit.asInt());
 		else
 			str = fmt::format("Scorelimit: N/A   ");
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = fmt::format("Timelimit: N/A");
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
 		for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
 		{
 			if (team_num == TEAM_BLUE)
-                Printf_Bold("--------------------------------------------------BLUE TEAM");
+                PrintFmt_Bold("--------------------------------------------------BLUE TEAM");
 			else if (team_num == TEAM_RED)
-                Printf_Bold("---------------------------------------------------RED TEAM");
+                PrintFmt_Bold("---------------------------------------------------RED TEAM");
 			else if (team_num == TEAM_GREEN)
-				Printf_Bold("-------------------------------------------------GREEN TEAM");
+				PrintFmt_Bold("-------------------------------------------------GREEN TEAM");
 			else		// shouldn't happen
-                Printf_Bold("-----------------------------------------------UNKNOWN TEAM");
+                PrintFmt_Bold("-----------------------------------------------UNKNOWN TEAM");
 
-            Printf_Bold("ID  Address          Name            Points Caps Frags Time");
-            Printf_Bold("-----------------------------------------------------------");
+            PrintFmt_Bold("ID  Address          Name            Points Caps Frags Time");
+            PrintFmt_Bold("-----------------------------------------------------------");
 
 			for (const auto& player : sortedplayers)
 			{
 				if (player->userinfo.team == team_num)
 				{
-					Printf_Bold("%-3d %-16s %-15s %-6d N/A  %-5d %-3d",
-							player->id,
-							NET_AdrToString(player->client.address),
-							player->userinfo.netname.c_str(),
-							P_GetPointCount(player),
-							//itplayer->captures,
-					        P_GetFragCount(player),
-							player->GameTime / 60);
+					PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<6d} N/A  {:<5d} {:<3d}",
+					              player->id,
+					              NET_AdrToString(player->client.address),
+					              player->userinfo.netname,
+					              P_GetPointCount(player),
+					              //itplayer->captures,
+					              P_GetFragCount(player),
+					              player->GameTime / 60);
 				}
 			}
 		}
@@ -2195,49 +2195,49 @@ void SV_DrawScores()
 		compare_player_frags comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                     TEAM DEATHMATCH");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                     TEAM DEATHMATCH");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
 			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
 			str = fmt::format("Fraglimit: N/A    ");
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = fmt::format("Timelimit: N/A");
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
 		for (int team_num = 0; team_num < sv_teamsinplay; team_num++)
 		{
 			if (team_num == TEAM_BLUE)
-                Printf_Bold("--------------------------------------------------BLUE TEAM");
+                PrintFmt_Bold("--------------------------------------------------BLUE TEAM");
 			else if (team_num == TEAM_RED)
-                Printf_Bold("---------------------------------------------------RED TEAM");
+                PrintFmt_Bold("---------------------------------------------------RED TEAM");
 			else if (team_num == TEAM_GREEN)
-				Printf_Bold("-------------------------------------------------GREEN TEAM");
+				PrintFmt_Bold("-------------------------------------------------GREEN TEAM");
 			else		// shouldn't happen
-                Printf_Bold("-----------------------------------------------UNKNOWN TEAM");
+                PrintFmt_Bold("-----------------------------------------------UNKNOWN TEAM");
 
-            Printf_Bold("ID  Address          Name            Frags Deaths  K/D Time");
-            Printf_Bold("-----------------------------------------------------------");
+            PrintFmt_Bold("ID  Address          Name            Frags Deaths  K/D Time");
+            PrintFmt_Bold("-----------------------------------------------------------");
 
 			for (const auto& player : sortedplayers)
 			{
 				if (player->userinfo.team == team_num)
 				{
-					Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-							player->id,
-							NET_AdrToString(player->client.address),
-							player->userinfo.netname.c_str(),
-							P_GetFragCount(player),
-							P_GetDeathCount(player),
-							SV_CalculateFragDeathRatio(player),
-							player->GameTime / 60);
+					PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<5d} {:<6d} {:2.1f} {:<3d}",
+					              player->id,
+					              NET_AdrToString(player->client.address),
+					              player->userinfo.netname,
+					              P_GetFragCount(player),
+					              P_GetDeathCount(player),
+					              SV_CalculateFragDeathRatio(player),
+					              player->GameTime / 60);
 				}
 			}
 		}
@@ -2248,36 +2248,36 @@ void SV_DrawScores()
 		compare_player_frags comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                        DEATHMATCH");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                        DEATHMATCH");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		if (sv_fraglimit)
 			str = fmt::format("Fraglimit: {:<7d}", sv_fraglimit.asInt());
 		else
 			str = fmt::format("Fraglimit: N/A    ");
 
-		Printf_Bold("%s  ", str);
+		PrintFmt_Bold("{}  ", str);
 
 		if (sv_timelimit)
 			str = fmt::format("Timelimit: {:<7d}", sv_timelimit.asInt());
 		else
 			str = fmt::format("Timelimit: N/A");
 
-		Printf_Bold("%18s\n", str);
+		PrintFmt_Bold("{:18s}\n", str);
 
-        Printf_Bold("ID  Address          Name            Frags Deaths  K/D Time");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("ID  Address          Name            Frags Deaths  K/D Time");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		for (const auto& player : sortedplayers)
 		{
-			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-					player->id,
-					NET_AdrToString(player->client.address),
-					player->userinfo.netname.c_str(),
-					P_GetFragCount(player),
-					P_GetDeathCount(player),
-					SV_CalculateFragDeathRatio(player),
-					player->GameTime / 60);
+			PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<5d} {:<6d} {:2.1f} {:<3d}",
+			              player->id,
+			              NET_AdrToString(player->client.address),
+			              player->userinfo.netname,
+			              P_GetFragCount(player),
+			              P_GetDeathCount(player),
+			              SV_CalculateFragDeathRatio(player),
+			              player->GameTime / 60);
 		}
 
 	}
@@ -2287,21 +2287,21 @@ void SV_DrawScores()
 		compare_player_kills comparison_functor;
 		sortedplayers.sort(comparison_functor);
 
-        Printf_Bold("                       COOPERATIVE");
-        Printf_Bold("-----------------------------------------------------------");
-        Printf_Bold("ID  Address          Name            Kills Deaths  K/D Time");
-        Printf_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("                       COOPERATIVE");
+        PrintFmt_Bold("-----------------------------------------------------------");
+        PrintFmt_Bold("ID  Address          Name            Kills Deaths  K/D Time");
+        PrintFmt_Bold("-----------------------------------------------------------");
 
 		for (const auto& player : sortedplayers)
 		{
-			Printf_Bold("%-3d %-16s %-15s %-5d %-6d %2.1f %-3d",
-					player->id,
-					NET_AdrToString(player->client.address),
-					player->userinfo.netname.c_str(),
-					player->killcount,
-					player->deathcount,
-					SV_CalculateKillDeathRatio(player),
-					player->GameTime / 60);
+			PrintFmt_Bold("{:<3d} {:<16s} {:<15s} {:<5d} {:<6d} {:2.1f} {:<3d}",
+			              player->id,
+			              NET_AdrToString(player->client.address),
+			              player->userinfo.netname,
+			              player->killcount,
+			              player->deathcount,
+			              SV_CalculateKillDeathRatio(player),
+			              player->GameTime / 60);
 		}
 	}
 
@@ -2310,18 +2310,18 @@ void SV_DrawScores()
 		compare_player_names comparison_functor;
 		sortedspectators.sort(comparison_functor);
 
-    	Printf_Bold("-------------------------------------------------SPECTATORS");
+    	PrintFmt_Bold("-------------------------------------------------SPECTATORS");
 
 		for (const auto& spec : sortedspectators)
 		{
-			Printf_Bold("%-3d %-16s %-15s\n",
-					spec->id,
-					NET_AdrToString(spec->client.address),
-					spec->userinfo.netname.c_str());
+			PrintFmt_Bold("{:<3d} {:<16s} {:<15s}\n",
+			              spec->id,
+			              NET_AdrToString(spec->client.address),
+			              spec->userinfo.netname);
 		}
 	}
 
-	Printf_Bold("\n");
+	PrintFmt_Bold("\n");
 }
 
 BEGIN_COMMAND (showscores)
@@ -2519,9 +2519,9 @@ void SVC_TeamSay(player_t &player, const char* message)
 void SVC_SpecSay(player_t &player, const char* message)
 {
 	if (strnicmp(message, "/me ", 4) == 0)
-		Printf(PRINT_TEAMCHAT, "<SPEC> * %s %s\n", player.userinfo.netname.c_str(), &message[4]);
+		Printf(PRINT_TEAMCHAT, "<SPEC> * %s %s\n", player.userinfo.netname, &message[4]);
 	else
-		Printf(PRINT_TEAMCHAT, "<SPEC> %s: %s\n", player.userinfo.netname.c_str(), message);
+		Printf(PRINT_TEAMCHAT, "<SPEC> %s: %s\n", player.userinfo.netname, message);
 
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
@@ -2547,9 +2547,9 @@ void SVC_SpecSay(player_t &player, const char* message)
 void SVC_Say(player_t &player, const char* message)
 {
 	if (strnicmp(message, "/me ", 4) == 0)
-		Printf(PRINT_CHAT, "<CHAT> * %s %s\n", player.userinfo.netname.c_str(), &message[4]);
+		Printf(PRINT_CHAT, "<CHAT> * %s %s\n", player.userinfo.netname, &message[4]);
 	else
-		Printf(PRINT_CHAT, "<CHAT> %s: %s\n", player.userinfo.netname.c_str(), message);
+		Printf(PRINT_CHAT, "<CHAT> %s: %s\n", player.userinfo.netname, message);
 
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
@@ -2572,10 +2572,10 @@ void SVC_PrivMsg(player_t &player, player_t &dplayer, const char* message)
 {
 	if (strnicmp(message, "/me ", 4) == 0)
 		Printf(PRINT_CHAT, "<PRIVMSG> * %s (to %s) %s\n",
-				player.userinfo.netname.c_str(), dplayer.userinfo.netname.c_str(), &message[4]);
+				player.userinfo.netname, dplayer.userinfo.netname, &message[4]);
 	else
 		Printf(PRINT_CHAT, "<PRIVMSG> %s (to %s): %s\n",
-				player.userinfo.netname.c_str(), dplayer.userinfo.netname.c_str(), message);
+				player.userinfo.netname, dplayer.userinfo.netname, message);
 
 	MSG_WriteSVC(&dplayer.client.reliablebuf, SVC_Say(true, player.id, message));
 
@@ -3587,7 +3587,7 @@ BEGIN_COMMAND (forcespec) {
 	size_t pid;
 
 	if (!CMD_ForcespecCheck(arguments, error, pid)) {
-		Printf("forcespec: %s\n", error.c_str());
+		Printf("forcespec: %s\n", error);
 		return;
 	}
 
@@ -3760,7 +3760,7 @@ void SV_RConLogout (player_t &player)
 
 	if (cl->allow_rcon)
 	{
-		Printf("RCON logout from %s - %s", player.userinfo.netname.c_str(), NET_AdrToString(cl->address));
+		Printf("RCON logout from %s - %s", player.userinfo.netname, NET_AdrToString(cl->address));
 		cl->allow_rcon = false;
 	}
 }
@@ -3784,11 +3784,11 @@ void SV_RConPassword (player_t &player)
 	if (!password.empty() && MD5SUM(password + cl->digest) == challenge)
 	{
 		cl->allow_rcon = true;
-		Printf(PRINT_HIGH, "RCON login from %s - %s", player.userinfo.netname.c_str(), NET_AdrToString(cl->address));
+		Printf(PRINT_HIGH, "RCON login from %s - %s", player.userinfo.netname, NET_AdrToString(cl->address));
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "RCON login failure from %s - %s", player.userinfo.netname.c_str(), NET_AdrToString(cl->address));
+		Printf(PRINT_HIGH, "RCON login failure from %s - %s", player.userinfo.netname, NET_AdrToString(cl->address));
 		MSG_WriteSVC(&cl->reliablebuf, SVC_Print(PRINT_HIGH, "Bad password\n"));
 	}
 }
@@ -3953,7 +3953,7 @@ void SV_ParseCommands(player_t &player)
 				if (player.client.allow_rcon)
 				{
 					Printf(PRINT_HIGH, "RCON command from %s - %s -> %s",
-							player.userinfo.netname.c_str(), NET_AdrToString(net_from), str.c_str());
+							player.userinfo.netname, NET_AdrToString(net_from), str);
 					AddCommandString(str);
 				}
 			}
@@ -4350,7 +4350,7 @@ BEGIN_COMMAND(playerlist)
 
 		std::string strMain, strScore;
 		strMain = fmt::sprintf("(%02d): %s %s - %s - time:%d - ping:%d", it->id,
-		                       it->userinfo.netname.c_str(), it->spectator ? "(SPEC)" : "",
+		                       it->userinfo.netname, it->spectator ? "(SPEC)" : "",
 		                       NET_AdrToString(it->client.address), it->GameTime, it->ping);
 
 		if (G_IsCoopGame())
@@ -4408,7 +4408,7 @@ BEGIN_COMMAND(playerlist)
 			}
 		}
 
-		Printf("%s%s\n", strMain.c_str(), strScore.c_str());
+		Printf("%s%s\n", strMain, strScore);
 		anybody = true;
 	}
 

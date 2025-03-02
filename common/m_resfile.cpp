@@ -338,12 +338,12 @@ std::vector<scannedIWAD_t> M_ScanIWADs()
 	std::vector<scannedIWAD_t> rvo;
 	OHashTable<OCRC32Sum, bool> found;
 
-	for (size_t i = 0; i < dirs.size(); i++)
+	for (const auto& dir : dirs)
 	{
-		std::vector<std::string> files = M_BaseFilesScanDir(dirs[i], iwads);
-		for (size_t j = 0; j < files.size(); j++)
+		std::vector<std::string> files = M_BaseFilesScanDir(dir, iwads);
+		for (const auto& file : files)
 		{
-			const std::string fullpath = dirs[i] + PATHSEP + files[j];
+			const std::string fullpath = dir + PATHSEP + file;
 
 			// Check to see if we got a real IWAD.
 			const OCRC32Sum crc32 = W_CRC32(fullpath);
@@ -451,8 +451,8 @@ BEGIN_COMMAND(whereis)
 	if (M_ResolveWantedFile(res, want))
 	{
 		Printf("basename: %s\nfullpath: %s\nCRC32: %s\nMD5: %s\n",
-		       res.getBasename().c_str(), res.getFullpath().c_str(),
-		       W_CRC32(res.getFullpath()).getHexCStr(), res.getMD5().getHexCStr());
+		       res.getBasename(), res.getFullpath(),
+		       W_CRC32(res.getFullpath()).getHexStr(), res.getMD5().getHexStr());
 		return;
 	}
 

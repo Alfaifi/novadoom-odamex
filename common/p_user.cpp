@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -319,15 +319,15 @@ PlayersView SpecQuery::execute()
 {
 	PlayersView rvo;
 
-	for (Players::iterator it = ::players.begin(); it != ::players.end(); ++it)
+	for (auto& player : ::players)
 	{
-		if (!it->ingame() || !it->spectator)
+		if (!player.ingame() || !player.spectator)
 			continue;
 
-		if (m_onlyInQueue && it->QueuePosition == 0)
+		if (m_onlyInQueue && player.QueuePosition == 0)
 			continue;
 
-		rvo.push_back(&*it);
+		rvo.push_back(&player);
 	}
 
 	return rvo;
@@ -950,7 +950,7 @@ void P_PlayerThink (player_t *player)
 	if (!player->mo && clientside && multiplayer)
 	{
 		DPrintf("Warning: P_PlayerThink called for player %s without a valid Actor.\n",
-				player->userinfo.netname.c_str());
+				player->userinfo.netname);
 		return;
 	}
 	else if (!player->mo)
@@ -1224,7 +1224,7 @@ BEGIN_COMMAND(cheat_players)
 			if (mo->player)
 			{
 				Printf("%.3u: %s\n", mo->player->id,
-				       mo->player->userinfo.netname.c_str());
+				       mo->player->userinfo.netname);
 			}
 			else
 			{

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -321,9 +321,9 @@ BEGIN_COMMAND(vid_listmodes)
 	for (const auto& mode : *I_GetVideoCapabilities()->getSupportedVideoModes())
 	{
 		if (mode == I_GetWindow()->getVideoMode())
-			Printf_Bold("%s\n", I_GetVideoModeString(mode));
+			PrintFmt_Bold("{}\n", I_GetVideoModeString(mode));
 		else
-			Printf(PRINT_HIGH, "%s\n", I_GetVideoModeString(mode));
+			PrintFmt(PRINT_HIGH, "{}\n", I_GetVideoModeString(mode));
 	}
 }
 END_COMMAND(vid_listmodes)

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -3764,7 +3764,7 @@ void DLevelScript::RunScript ()
 			}
 			else
 			{
-				STACK(1) = (int)var->value();
+				STACK(1) = var->asInt();
 			}
 		}
 		break;
@@ -4009,7 +4009,7 @@ static void addDefered (level_pwad_info_t& i, acsdefered_t::EType type, int scri
 			def->playernum = -1;
 		}
 		i.defered = def;
-		DPrintf ("Script %d on map %s defered\n", script, i.mapname.c_str());
+		DPrintFmt("Script {} on map {} defered\n", script, i.mapname);
 	}
 }
 

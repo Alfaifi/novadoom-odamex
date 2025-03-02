@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 // Copyright (C) 2012 by Alex Mayfield.
 //
 // This program is free software; you can redistribute it and/or
@@ -42,7 +42,7 @@ public:
 	[[nodiscard]] bool check(const std::string &input) const;
 	void set(const netadr_t &address);
 	bool set(const std::string &input);
-	std::string string(void);
+	std::string string() const;
 };
 
 struct Ban

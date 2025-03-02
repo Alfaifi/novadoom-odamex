@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -261,15 +261,13 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	// Doom 95
 	{
-		unsigned int i;
-
-		for (i = 0; i < ARRAY_LENGTH(uninstall_values); ++i)
+		for (auto& uninstallval : uninstall_values)
 		{
 			char* val;
 			char* path;
 			char* unstr;
 
-			val = GetRegistryString(&uninstall_values[i]);
+			val = GetRegistryString(&uninstallval);
 
 			if (val == NULL)
 				continue;
@@ -292,23 +290,15 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	// Doom Collectors Edition
 	{
-		char* install_path;
-		char* subpath;
-		unsigned int i;
-
-		install_path = GetRegistryString(&collectors_edition_value);
+		char* install_path = GetRegistryString(&collectors_edition_value);
 
 		if (install_path != NULL)
 		{
-			for (i = 0; i < ARRAY_LENGTH(collectors_edition_subdirs); ++i)
+			for (const auto& dir : collectors_edition_subdirs)
 			{
-				subpath = static_cast<char*>(malloc(strlen(install_path)
-				                             + strlen(collectors_edition_subdirs[i])
-				                             + 5));
-				sprintf(subpath, "%s\\%s", install_path, collectors_edition_subdirs[i]);
+				const std::string subpath = fmt::format("{}\\{}", install_path, dir);
 
-				const char* csubpath = subpath;
-				D_AddSearchDir(dirs, csubpath, separator);
+				D_AddSearchDir(dirs, subpath.c_str(), separator);
 			}
 
 			M_Free(install_path);
@@ -317,22 +307,15 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 
 	// Doom on Steam
 	{
-		char* install_path;
-		char* subpath;
-		size_t i;
-
-		install_path = GetRegistryString(&steam_install_location);
+		char* install_path = GetRegistryString(&steam_install_location);
 
 		if (install_path != NULL)
 		{
-			for (i = 0; i < ARRAY_LENGTH(steam_install_subdirs); ++i)
+			for (const auto& dir : steam_install_subdirs)
 			{
-				subpath = static_cast<char*>(malloc(strlen(install_path)
-				                             + strlen(steam_install_subdirs[i]) + 5));
-				sprintf(subpath, "%s\\%s", install_path, steam_install_subdirs[i]);
+				const std::string subpath = fmt::format("{}\\{}", install_path, dir);
 
-				const char* csubpath = subpath;
-				D_AddSearchDir(dirs, csubpath, separator);
+				D_AddSearchDir(dirs, subpath.c_str(), separator);
 
 				M_FileExists(subpath);
 			}
@@ -390,16 +373,16 @@ static void D_PrintIWADIdentity()
     	                   "\36\36\36\36\36\36\36\36\36\36\36\36\37\n");
 
 		if (gamemode == undetermined)
-			Printf_Bold("Game mode indeterminate, no standard wad found.\n\n");
+			PrintFmt_Bold("Game mode indeterminate, no standard wad found.\n\n");
 		else
-			Printf_Bold("%s\n\n", D_GetTitleString().c_str());
+			PrintFmt_Bold("{}\n\n", D_GetTitleString());
 	}
 	else
 	{
 		if (gamemode == undetermined)
 			Printf(PRINT_HIGH, "Game mode indeterminate, no standard wad found.\n");
 		else
-			Printf(PRINT_HIGH, "%s\n", D_GetTitleString().c_str());
+			Printf(PRINT_HIGH, "%s\n", D_GetTitleString());
 	}
 }
 
@@ -570,7 +553,7 @@ static bool CommercialIWADWarning(const OWantFile& wanted)
 		return false;
 	}
 
-	Printf("Odamex attempted to load\n> %s.\n\n", info->mIdName.c_str());
+	Printf("Odamex attempted to load\n> %s.\n\n", info->mIdName);
 
 	// Try to find an IWAD file with a matching name in the user's directories.
 	OWantFile sameNameWant;
@@ -583,7 +566,7 @@ static bool CommercialIWADWarning(const OWantFile& wanted)
 		    "Odamex could not find the data file for this game in any of the locations "
 		    "it searches for WAD files.  If you know you have %s on your hard drive, you "
 		    "can add that path to the 'waddirs' cvar so Odamex can find it.\n\n",
-		    wanted.getBasename().c_str());
+		    wanted.getBasename());
 	}
 	else
 	{
@@ -593,14 +576,14 @@ static bool CommercialIWADWarning(const OWantFile& wanted)
 			// Found a file, but it's the wrong version.
 			Printf("Odamex found a possible data file, but it's the wrong version.\n> "
 			       "%s\n> %s\n\n",
-			       curInfo->mIdName.c_str(), sameNameRes.getFullpath().c_str());
+			       curInfo->mIdName, sameNameRes.getFullpath());
 		}
 		else
 		{
 			// Found a file, but it's not recognized at all.
 			Printf("Odamex found a possible data file, but Odamex does not recognize "
 			       "it.\n> %s\n\n",
-			       sameNameRes.getFullpath().c_str());
+			       sameNameRes.getFullpath());
 		}
 
 #ifdef _WIN32
@@ -652,7 +635,7 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 
 			::missingfiles.push_back(wantfile);
 			Printf(PRINT_WARNING, "Could not resolve resource file \"%s\".",
-			       wantfile.getWantedPath().c_str());
+			       wantfile.getWantedPath());
 			continue;
 		}
 		resolved_wads.push_back(file);
@@ -668,7 +651,7 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 		{
 			::missingfiles.push_back(wantfile);
 			Printf(PRINT_WARNING, "Could not resolve patch file \"%s\".",
-			       wantfile.getWantedPath().c_str());
+			       wantfile.getWantedPath());
 			continue;
 		}
 		resolved_patches.push_back(file);
@@ -685,7 +668,7 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 		{
 			I_FatalError("Could not resolve \"%s\".  Please ensure this file is "
 			             "someplace where Odamex can find it.\n",
-			             want_odamex.getBasename().c_str());
+			             want_odamex.getBasename());
 		}
 	}
 	else
@@ -708,9 +691,9 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 			resolved_wads.erase(resolved_wads.begin());
 			if (W_IsIWADDeprecated(next_iwad))
 			{
-				Printf_Bold("WARNING: IWAD %s is outdated. Please update it to the "
-				            "latest version.\n",
-				            next_iwad.getBasename().c_str());
+				PrintFmt_Bold("WARNING: IWAD {} is outdated. Please update it to the "
+				              "latest version.\n",
+				              next_iwad.getBasename());
 			}
 		}
 	}
@@ -843,7 +826,7 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 		Printf(PRINT_WARNING,
 		       "Could not load new resource files.\n%s\nReloading previous resource "
 		       "set...\n",
-		       failmsg.c_str());
+		       failmsg);
 
 		D_Shutdown();
 
@@ -866,7 +849,7 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 		{
 			I_FatalError("Failed to load new resource files, then ran into error when "
 			             "loading original resource files:\n%s\n",
-			             fatalmsg.c_str());
+			             fatalmsg);
 		}
 	}
 
