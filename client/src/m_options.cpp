@@ -147,9 +147,13 @@ EXTERN_CVAR (m_side)
 EXTERN_CVAR (m_forward)
 
 // [Ralphis - Menu] Sound Menu
-EXTERN_CVAR (snd_midireset)
-EXTERN_CVAR (snd_musicsystem)
 EXTERN_CVAR (snd_musicvolume)
+EXTERN_CVAR (snd_musicsystem)
+EXTERN_CVAR (snd_midireset)
+EXTERN_CVAR (snd_oplcore)
+EXTERN_CVAR (snd_oplpan)
+EXTERN_CVAR (snd_oplchips)
+EXTERN_CVAR (snd_oplbank)
 EXTERN_CVAR (snd_announcervolume)
 EXTERN_CVAR (snd_sfxvolume)
 EXTERN_CVAR (snd_crossover)
@@ -536,6 +540,7 @@ menu_t JoystickMenu = {
 
 static value_t MusSys[] = {
 	{ MS_SDLMIXER,	"SDL Mixer"},
+	{ MS_LIBADLMIDI,"libADLMIDI (OPL3 FM)"},
 	#ifdef OSX
 	{ MS_AUDIOUNIT,	"AudioUnit"},
 	#endif	// OSX
@@ -550,6 +555,18 @@ static value_t MidiReset[] = {
 	{ 1.0,			"GM" },
 	{ 2.0,			"GS" },
 	{ 3.0,			"XG" }
+};
+
+static value_t OplCore[] = {
+	{ 0.0,			"Fast (Dosbox)"},
+	{ 1.0,			"Balanced (Nuked 1.74)"},
+	{ 2.0,			"Accurate (Nuked 1.8)"}
+};
+
+static value_t OplBank[] = {
+	{ 0.0,			"Doom"},
+	{ 1.0,			"Doom II"},
+	{ 2.0,			"DMXOPL3"}
 };
 
 static value_t VoxType[] = {
@@ -579,6 +596,10 @@ static menuitem_t SoundItems[] = {
 	{ yellowtext ,   "Music Options"                     , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
 	{ discrete	,	"Music System Backend"				, {&snd_musicsystem},	{num_mussys},	{0.0},		{0.0},		{MusSys} },
 	{ discrete	,	"MIDI Reset"						, {&snd_midireset},		{4.0},			{0.0},		{0.0},		{MidiReset} },
+	{ discrete	,	"OPL quality"						, {&snd_oplcore},		{3.0},			{0.0},		{0.0},		{OplCore} },
+	{ discrete	,	"Full OPL panning"					, {&snd_oplpan},		{2.0},			{0.0},		{0.0},		{OnOff} },
+	{ slider	,	"OPL chips"							, {&snd_oplchips},		{1.0},			{8.0},		{1.0},		{NULL} },
+	{ discrete	,	"OPL instruments"					, {&snd_oplbank},		{3.0},			{0.0},		{0.0},		{OplBank} },
 	{ redtext   ,	" "                                 , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
 	{ yellowtext ,   "Sound Options"                     , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
 	{ discrete  ,   "Game SFX"                          , {&snd_gamesfx},		{2.0},			{0.0},		{0.0},		{OnOff} },

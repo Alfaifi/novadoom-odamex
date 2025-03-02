@@ -40,6 +40,7 @@
 #include "i_musicsystem_portmidi.h"
 #endif
 #include "i_musicsystem_sdl.h"
+#include "i_musicsystem_adlmidi.h"
 
 MusicSystem* musicsystem = NULL;
 MusicSystemType current_musicsystem_type = MS_NONE;
@@ -203,6 +204,10 @@ void I_InitMusic(MusicSystemType musicsystem_type)
 			musicsystem = new PortMidiMusicSystem();
 			break;
 		#endif	// PORTMIDI
+
+		case MS_LIBADLMIDI:
+			musicsystem = new AdlMidiMusicSystem();
+			break;
 
 		case MS_SDLMIXER:	// fall through
 		default:
