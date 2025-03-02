@@ -518,7 +518,7 @@ AActor* CHEAT_Summon(player_s* player, const std::string& sum, bool friendly)
 
 void CHEAT_GiveTo(player_t* player, const char* name)
 {
-	BOOL giveall;
+	bool giveall;
 	int i;
 	gitem_t* it;
 

@@ -115,7 +115,7 @@ bool		recv_full_update = false;
 
 std::string connectpasshash = "";
 
-BOOL      connected;
+bool      connected;
 netadr_t  serveraddr; // address of a server
 netadr_t  lastconaddr;
 
@@ -598,7 +598,7 @@ void CL_SpyCycle(Iterator begin, Iterator end)
 	} while (it != sentinal);
 }
 
-extern BOOL advancedemo;
+extern bool advancedemo;
 QWORD nextstep = 0;
 int canceltics = 0;
 
@@ -1910,7 +1910,7 @@ void CL_ClearPlayerJustTeleported(player_t *player)
 		teleported_players.erase(player->id);
 }
 
-ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped);
+ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped);
 
 //
 // CL_ClearSectorSnapshots

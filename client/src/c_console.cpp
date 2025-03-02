@@ -1300,7 +1300,7 @@ static size_t C_PrintString(int printlevel, const char* color_code, const char* 
 
 size_t C_BasePrint(const int printlevel, const char* color_code, const std::string& str)
 {
-	extern BOOL gameisdead;
+	extern bool gameisdead;
 	if (gameisdead)
 		return 0;
 

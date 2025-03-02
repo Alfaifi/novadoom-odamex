@@ -827,7 +827,7 @@ std::string C_EscapeWadList(const std::vector<std::string> wadlist)
 	return wadstr;
 }
 
-static int DumpHash (BOOL aliases)
+static int DumpHash (bool aliases)
 {
 	int count = 0;
 

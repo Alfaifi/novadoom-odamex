@@ -78,7 +78,7 @@ std::list<sector_t*> specialdoors;
 bool s_SpecialFromServer;
 
 int P_FindSectorFromLineTag(int tag, int start);
-BOOL EV_DoDoor(DDoor::EVlDoor type, line_t* line, AActor* thing, int tag, int speed,
+bool EV_DoDoor(DDoor::EVlDoor type, line_t* line, AActor* thing, int tag, int speed,
                int delay, card_t lock);
 bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line);
 bool P_ActivateZDoomLine(line_t* line, AActor* mo, int side,
@@ -1799,7 +1799,7 @@ bool P_CanUnlockGenDoor(line_t* line, player_t* player)
 //	Returns true if the player has the desired key,
 //	false otherwise.
 
-BOOL P_CheckKeys (player_t *p, card_t lock, BOOL remote)
+bool P_CheckKeys (player_t *p, card_t lock, bool remote)
 {
 	if ((lock & 0x7f) == NoKey)
 		return true;
@@ -1808,8 +1808,8 @@ BOOL P_CheckKeys (player_t *p, card_t lock, BOOL remote)
 		return false;
 
 	const OString* msg = NULL;
-	BOOL bc, rc, yc, bs, rs, ys;
-	BOOL equiv = lock & 0x80;
+	bool bc, rc, yc, bs, rs, ys;
+	bool equiv = lock & 0x80;
 
         lock = (card_t)(lock & 0x7f);
 
@@ -2882,7 +2882,7 @@ DPusher::DPusher (DPusher::EPusher type, line_t *l, int magnitude, int angle,
 
 DPusher *tmpusher; // pusher structure for blockmap searches
 
-BOOL PIT_PushThing (AActor *thing)
+bool PIT_PushThing (AActor *thing)
 {
 	if (thing->player &&
 		!(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))

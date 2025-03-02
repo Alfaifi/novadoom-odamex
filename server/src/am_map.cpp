@@ -44,7 +44,7 @@ void AM_Start()
 
 }
 
-BOOL AM_Responder(event_t* ev)
+bool AM_Responder(event_t* ev)
 {
 	return false;
 }
