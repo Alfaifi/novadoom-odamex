@@ -33,6 +33,7 @@
 #include "m_fileio.h"
 
 #include <sstream>
+#include <filesystem>
 
 #include <errno.h>
 #include <pwd.h>
@@ -50,6 +51,8 @@
 #include "m_argv.h"
 #include "m_ostring.h"
 #include "w_wad.h"
+
+namespace fs = std::filesystem;
 
 std::string M_GetBinaryDir()
 {
@@ -139,7 +142,7 @@ std::string M_GetUserDir()
 {
 	fs::path path = M_GetHomeDir();
 	path /= ".odamex";
-	return path;
+	return path.string();
 }
 
 std::string M_GetWriteDir()

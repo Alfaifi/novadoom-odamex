@@ -36,9 +36,7 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 
-#include "cmdlib.h"
 #include "i_system.h"
-#include "m_ostring.h"
 
 std::string M_GetBinaryDir()
 {
