@@ -3112,7 +3112,7 @@ void A_PlaySound(AActor* mo)
 
 	if (sndmap >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
 	{
-		DPrintf("Warning: Sound ID is beyond the array of the Sound Map!\n");
+		DPrintFmt("Warning: Sound ID is beyond the array of the Sound Map!\n");
 		sndmap = 0;
 	}
 

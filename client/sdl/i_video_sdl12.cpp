@@ -451,11 +451,11 @@ void ISDL12Window::getEvents()
 			{
 				// Debugging messages
 				if (sdl_ev.active.state & SDL_APPMOUSEFOCUS)
-					DPrintf("SDL_ACTIVEEVENT SDL_APPMOUSEFOCUS %s\n", sdl_ev.active.gain ? "gained" : "lost");
+					DPrintFmt("SDL_ACTIVEEVENT SDL_APPMOUSEFOCUS {}\n", sdl_ev.active.gain ? "gained" : "lost");
 				if (sdl_ev.active.state & SDL_APPINPUTFOCUS)
-					DPrintf("SDL_ACTIVEEVENT SDL_APPINPUTFOCUS %s\n", sdl_ev.active.gain ? "gained" : "lost");
+					DPrintFmt("SDL_ACTIVEEVENT SDL_APPINPUTFOCUS {}\n", sdl_ev.active.gain ? "gained" : "lost");
 				if (sdl_ev.active.state & SDL_APPACTIVE)
-					DPrintf("SDL_ACTIVEEVENT SDL_APPACTIVE %s\n", sdl_ev.active.gain ? "gained" : "lost");
+					DPrintFmt("SDL_ACTIVEEVENT SDL_APPACTIVE {}\n", sdl_ev.active.gain ? "gained" : "lost");
 
 				// TODO: do we need to do anything here anymore?
 			}

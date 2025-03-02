@@ -285,13 +285,13 @@ void FLZOFile::Implode()
 		// If the data could not be compressed, store it as-is.
 		if (res != LZO_E_OK || compressed_len > input_len)
 		{
-			DPrintf("LZOFile could not be imploded\n");
+			DPrintFmt("LZOFile could not be imploded\n");
 			compressed_len = 0;
 		}
 		else
 		{
 			// A comment inside LZO says "lzo_uint must match size_t".
-			DPrintf("LZOFile shrunk from %u to %zu bytes\n", input_len, compressed_len);
+			DPrintFmt("LZOFile shrunk from {} to {} bytes\n", input_len, compressed_len);
 		}
 	}
 

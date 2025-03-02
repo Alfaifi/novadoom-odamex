@@ -3084,7 +3084,7 @@ void SV_ProcessPlayerCmd(player_t &player)
 		return;
 
 	#ifdef _TICCMD_QUEUE_DEBUG_
-	DPrintf("Cmd queue size for %s: %d\n",
+	DPrintFmt("Cmd queue size for {}: {}\n",
 				player.userinfo.netname, player.cmdqueue.size());
 	#endif	// _TICCMD_QUEUE_DEBUG_
 

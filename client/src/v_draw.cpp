@@ -666,7 +666,7 @@ void DCanvas::DrawSWrapper(EWrapperCode drawer, const patch_t* patch, int x0, in
 #ifdef RANGECHECK
 	if (x0 < 0 || x0 + destwidth > surface_width || y0 < 0 || y0 + destheight > surface_height)
 	{
-		DPrintf("DCanvas::DrawSWrapper: bad patch (ignored)\n");
+		DPrintFmt("DCanvas::DrawSWrapper: bad patch (ignored)\n");
 		return;
 	}
 #endif

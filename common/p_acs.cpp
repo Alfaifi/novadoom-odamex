@@ -241,7 +241,7 @@ mobjtype_t FindWeaponEntity(const char* type)
 		{
 			if (DoomWeaponNames[i].Type == MT_NULL)
 			{
-				DPrintf("ACS: LOGIC ERROR - Cannot spawn default weapons!\n");
+				DPrintFmt("ACS: LOGIC ERROR - Cannot spawn default weapons!\n");
 				return MT_NULL;
 			}
 			return DoomWeaponNames[i].Type;
@@ -2033,7 +2033,7 @@ int DLevelScript::DoSpawnSpot(int type, int spot, int tid, int angle)
 
 void DLevelScript::DoFadeTo(AActor* who, int r, int g, int b, int a, fixed_t time)
 {
-    DPrintf("DoFadeRange now... \n");
+    DPrintFmt("DoFadeRange now... \n");
 	DoFadeRange(who, 0, 0, 0, -1, r, g, b, a, time);
 }
 
@@ -2205,7 +2205,7 @@ void DLevelScript::RunScript ()
 		switch (pcd)
 		{
 		default:
-			DPrintf("Unknown P-Code %d in script %d\n", pcd, script);
+			DPrintFmt("Unknown P-Code {} in script {}\n", pcd, script);
 			continue;
 			// fall through
 		case PCD_TERMINATE:
@@ -3860,12 +3860,12 @@ void DLevelScript::RunScript ()
 
 	if (state == SCRIPT_DivideBy0)
 	{
-		DPrintf("Divide by zero in script %d\n", script);
+		DPrintFmt("Divide by zero in script {}\n", script);
 		state = SCRIPT_PleaseRemove;
 	}
 	else if (state == SCRIPT_ModulusBy0)
 	{
-		DPrintf("Modulus by zero in script %d\n", script);
+		DPrintFmt("Modulus by zero in script {}\n", script);
 		state = SCRIPT_PleaseRemove;
 	}
 

@@ -992,7 +992,7 @@ bool MSG_ReadBool(void)
 
     if (Value < 0 || Value > 1)
     {
-        DPrintf("MSG_ReadBool: Value is not 0 or 1, possibly corrupted packet");
+        DPrintFmt("MSG_ReadBool: Value is not 0 or 1, possibly corrupted packet");
 
         return (Value ? true : false);
     }

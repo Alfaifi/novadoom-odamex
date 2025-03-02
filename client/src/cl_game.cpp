@@ -1150,7 +1150,7 @@ void G_Ticker (void)
 				consoleplayer().mo = consoleplayer().camera = mobj->ptr();
 				consoleplayer().mo->player = &consoleplayer();
 				G_PlayerReborn(consoleplayer());
-				DPrintf("Did not receive spawn for consoleplayer.\n");
+				DPrintFmt("Did not receive spawn for consoleplayer.\n");
 			}
 
 			CL_SimulateWorld();

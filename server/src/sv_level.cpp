@@ -635,7 +635,7 @@ void G_DoResetLevel(bool full_reset)
 	if (reset_snapshot == NULL)
 	{
 		// No saved state to reload to
-		DPrintf("G_DoResetLevel: No saved state to reload.");
+		DPrintFmt("G_DoResetLevel: No saved state to reload.");
 		return;
 	}
 

@@ -96,7 +96,7 @@ void R_ReallocDrawSegs(void)
 		drawsegs = (drawseg_t*)Realloc(drawsegs, newmax*sizeof(*drawsegs));
 		ds_p = drawsegs + pos;				// jff 8/9/98 fix from ZDOOM1.14a
 		maxdrawsegs = newmax;
-		DPrintf("MaxDrawSegs increased to %d\n", maxdrawsegs);
+		DPrintFmt("MaxDrawSegs increased to {}\n", maxdrawsegs);
 	}
 }
 

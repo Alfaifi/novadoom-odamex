@@ -1046,14 +1046,14 @@ void SV_Callvote(player_t &player)
 	vote_type_t votecmd = (vote_type_t)MSG_ReadByte();
 	byte argc = (byte)MSG_ReadByte();
 
-	DPrintf("SV_Callvote: Got votecmd %s from player %d, %d additional arguments.\n",
+	DPrintFmt("SV_Callvote: Got votecmd {} from player {}, {} additional arguments.\n",
 	        vote_type_cmd[votecmd], player.id, argc);
 
 	std::vector<std::string> arguments(argc);
 	for (int i = 0; i < argc; i++)
 	{
 		arguments[i] = std::string(MSG_ReadString());
-		DPrintf("SV_Callvote: arguments[%d] = \"%s\"\n", i, arguments[i]);
+		DPrintFmt("SV_Callvote: arguments[{}] = \"{}\"\n", i, arguments[i]);
 	}
 
 	if (!(votecmd > VOTE_NONE && votecmd < VOTE_MAX))

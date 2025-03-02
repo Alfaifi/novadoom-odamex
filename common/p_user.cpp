@@ -949,8 +949,8 @@ void P_PlayerThink (player_t *player)
 	// hope the client receives the spawn message at a later time.
 	if (!player->mo && clientside && multiplayer)
 	{
-		DPrintf("Warning: P_PlayerThink called for player %s without a valid Actor.\n",
-				player->userinfo.netname);
+		DPrintFmt("Warning: P_PlayerThink called for player {} without a valid Actor.\n",
+				  player->userinfo.netname);
 		return;
 	}
 	else if (!player->mo)

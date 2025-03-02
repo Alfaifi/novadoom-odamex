@@ -552,49 +552,49 @@ void ISDL20Window::getEvents()
 			{
 				if (sdl_ev.window.event == SDL_WINDOWEVENT_SHOWN)
 				{
-					DPrintf("SDL_WINDOWEVENT_SHOWN\n");
+					DPrintFmt("SDL_WINDOWEVENT_SHOWN\n");
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_HIDDEN)
 				{
-					DPrintf("SDL_WINDOWEVENT_HIDDEN\n");
+					DPrintFmt("SDL_WINDOWEVENT_HIDDEN\n");
 					mMouseFocus = mKeyboardFocus = false;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_EXPOSED)
 				{
-					DPrintf("SDL_WINDOWEVENT_EXPOSED\n");
+					DPrintFmt("SDL_WINDOWEVENT_EXPOSED\n");
 					mMouseFocus = mKeyboardFocus = true;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_MINIMIZED)
 				{
-					DPrintf("SDL_WINDOWEVENT_MINIMIZED\n");
+					DPrintFmt("SDL_WINDOWEVENT_MINIMIZED\n");
 					mMouseFocus = mKeyboardFocus = false;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_MAXIMIZED)
 				{
-					DPrintf("SDL_WINDOWEVENT_MAXIMIZED\n");
+					DPrintFmt("SDL_WINDOWEVENT_MAXIMIZED\n");
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_RESTORED)
 				{
-					DPrintf("SDL_WINDOWEVENT_RESTORED\n");
+					DPrintFmt("SDL_WINDOWEVENT_RESTORED\n");
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_ENTER)
 				{
-					DPrintf("SDL_WINDOWEVENT_ENTER\n");
+					DPrintFmt("SDL_WINDOWEVENT_ENTER\n");
 					mMouseFocus = true;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_LEAVE)
 				{
-					DPrintf("SDL_WINDOWEVENT_LEAVE\n");
+					DPrintFmt("SDL_WINDOWEVENT_LEAVE\n");
 					mMouseFocus = false;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 				{
-					DPrintf("SDL_WINDOWEVENT_FOCUS_GAINED\n");
+					DPrintFmt("SDL_WINDOWEVENT_FOCUS_GAINED\n");
 					mKeyboardFocus = true;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 				{
-					DPrintf("SDL_WINDOWEVENT_FOCUS_LOST\n");
+					DPrintFmt("SDL_WINDOWEVENT_FOCUS_LOST\n");
 					mKeyboardFocus = false;
 				}
 				else if (sdl_ev.window.event == SDL_WINDOWEVENT_RESIZED)
@@ -602,7 +602,7 @@ void ISDL20Window::getEvents()
 					// Resizable window mode resolutions
 					uint16_t width = sdl_ev.window.data1;
 					uint16_t height = sdl_ev.window.data2;
-					DPrintf("SDL_WINDOWEVENT_RESIZED (%dx%d)\n", width, height);
+					DPrintFmt("SDL_WINDOWEVENT_RESIZED ({}x{})\n", width, height);
 
 					int current_time = I_MSTime();
 					if ((EWindowMode)vid_fullscreen.asInt() == WINDOW_Windowed && current_time > mAcceptResizeEventsTime)
