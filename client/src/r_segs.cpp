@@ -49,11 +49,11 @@ Pool<int> sprclip_pool(4096);
 
 // killough 1/6/98: replaced globals with statics where appropriate
 
-static BOOL		segtextured;	// True if any of the segs textures might be visible.
-static BOOL		markfloor;		// False if the back side is the same plane.
-static BOOL		markceiling;
-static BOOL		maskedtexture;
+static bool		segtextured;	// True if any of the segs textures might be visible.
+static bool		markfloor;		// False if the back side is the same plane.
+static bool		markceiling;
 static bool		didsolidcol;
+static int		maskedtexture;
 static int		toptexture;
 static int		bottomtexture;
 static int		midtexture;

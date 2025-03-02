@@ -515,7 +515,7 @@ void STACK_ARGS I_Quit (void)
 //
 // I_Error
 //
-BOOL gameisdead;
+bool gameisdead;
 
 #define MAX_ERRORTEXT	1024
 
@@ -557,7 +557,7 @@ void I_BaseError(const std::string& errortext)
 {
 	std::string messagetext;
 
-	static BOOL alreadyThrown = false;
+	static bool alreadyThrown = false;
 	gameisdead = true;
 
 	if (!alreadyThrown) // ignore all but the first message -- killough
@@ -814,7 +814,7 @@ std::string I_GetClipboardText()
 	return "";
 }
 
-void I_PrintStr (int xp, const char *cp, int count, BOOL scroll)
+void I_PrintStr (int xp, const char *cp, int count, bool scroll)
 {
 	// used in the DOS version
 }

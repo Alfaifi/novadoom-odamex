@@ -193,7 +193,7 @@ bool M_FileExistsExt(const std::string& filename, const char* ext)
 //
 // Writes a buffer to a new file, if it already exists, the file will be
 // erased and recreated with the new contents
-BOOL M_WriteFile(std::string filename, void *source, QWORD length)
+bool M_WriteFile(std::string filename, void *source, QWORD length)
 {
     FILE *handle;
     QWORD count;
