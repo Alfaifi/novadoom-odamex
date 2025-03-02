@@ -109,9 +109,9 @@ void G_Ticker (void)
 	// do player reborns if needed
 	if (serverside)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
-			if (it->ingame() && (it->playerstate == PST_REBORN || it->playerstate == PST_ENTER))
-				G_DoReborn(*it);
+		for (auto& player : players)
+			if (player.ingame() && (player.playerstate == PST_REBORN || player.playerstate == PST_ENTER))
+				G_DoReborn(player);
 	}
 
 	// do things to change the game state
@@ -393,17 +393,16 @@ bool G_CheckSpot (player_t &player, mapthing2_t *mthing)
 // zdoom 2.x still has it!
 static fixed_t PlayersRangeFromSpot (mapthing2_t *spot)
 {
-	Players::iterator it;
 	fixed_t closest = MAXINT;
 	fixed_t distance;
 
-	for (it = players.begin(); it != players.end(); ++it)
+	for (const auto& player : players)
 	{
-		if (!it->ingame() || !it->mo || it->health <= 0)
+		if (!player.ingame() || !player.mo || player.health <= 0)
 			continue;
 
-		distance = P_AproxDistance (it->mo->x - spot->x * FRACUNIT,
-									it->mo->y - spot->y * FRACUNIT);
+		distance = P_AproxDistance (player.mo->x - spot->x * FRACUNIT,
+									player.mo->y - spot->y * FRACUNIT);
 
 		if (distance < closest)
 			closest = distance;
@@ -598,11 +597,11 @@ void G_DoReborn (player_t &player)
 	}
 
 	// try to spawn at one of the other players' spots
-	for (size_t i = 0; i < playerstarts.size(); i++)
+	for (auto& playerstart : playerstarts)
 	{
-		if (G_CheckSpot (player, &playerstarts[i]) )
+		if (G_CheckSpot (player, &playerstart) )
 		{
-			P_SpawnPlayer (player, &playerstarts[i]);
+			P_SpawnPlayer (player, &playerstart);
 			return;
 		}
 	}

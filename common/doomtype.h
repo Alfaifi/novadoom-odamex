@@ -247,20 +247,11 @@ forceinline constexpr T clamp(const T in, const T min, const T max)
 //
 // Safely counts the number of items in an C array.
 //
-// https://www.drdobbs.com/cpp/counting-array-elements-at-compile-time/197800525?pgno=1
-//
-#define ARRAY_LENGTH(arr) ( \
-	0 * sizeof(reinterpret_cast<const ::Bad_arg_to_ARRAY_LENGTH*>(arr)) + \
-	0 * sizeof(::Bad_arg_to_ARRAY_LENGTH::check_type((arr), &(arr))) + \
-	sizeof(arr) / sizeof((arr)[0]) )
-
-struct Bad_arg_to_ARRAY_LENGTH {
-	class Is_pointer; // incomplete
-	class Is_array {};
-	template <typename T>
-	static Is_pointer check_type(const T*, const T* const*);
-	static Is_array check_type(const void*, const void*);
-};
+template <typename T, size_t N>
+constexpr size_t ARRAY_LENGTH(T (&arr)[N])
+{
+	return std::extent_v<T[N]>;
+}
 
 
 // ----------------------------------------------------------------------------
@@ -519,7 +510,7 @@ public:
 
 	argb_t tlate(const translationref_t &translation, const byte c) const;
 
-	bool operator==(const shaderef_t &other) const;
+	[[nodiscard]] bool operator==(const shaderef_t &other) const;
 };
 
 forceinline bool shaderef_t::isValid() const

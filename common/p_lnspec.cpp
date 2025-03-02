@@ -432,7 +432,7 @@ FUNC(LS_NOP)
 
 FUNC(LS_NOTIMP)
 {
-	Printf(PRINT_HIGH, "Line special not implemented yet.");
+	PrintFmt(PRINT_HIGH, "Line special not implemented yet.\n");
 	return false;
 }
 
@@ -1435,8 +1435,8 @@ FUNC(LS_Scroll_Wall)
 {
 	if (arg4)
 	{
-		Printf(PRINT_HIGH,
-		       "Warning: Odamex can only scroll entire sidedefs (special 52)");
+		PrintFmt(PRINT_HIGH,
+		       "Warning: Odamex can only scroll entire sidedefs (special 52)\n");
 	}
 	if (arg0)
 	{
@@ -1458,8 +1458,8 @@ FUNC(LS_Line_SetTextureOffset)
 {
 	if (arg4 & 7)
 	{
-		Printf(PRINT_HIGH,
-		       "Warning: Odamex can only offset entire sidedefs (special 53)");
+		PrintFmt(PRINT_HIGH,
+		       "Warning: Odamex can only offset entire sidedefs (special 53)\n");
 	}
 	if (arg0 && arg3 <= 1)
 	{
@@ -2542,21 +2542,21 @@ FUNC(LS_ChangeCamera)
 
 	if (!it || !it->player || arg1)
 	{
-		for (Players::iterator itr = players.begin();itr != players.end();++itr)
+		for (auto& player : players)
 		{
-			if (!(itr->ingame()))
+			if (!(player.ingame()))
 				continue;
 
 			if (camera)
 			{
-				itr->camera = camera->ptr();
+				player.camera = camera->ptr();
 				if (arg2)
-					itr->cheats |= CF_REVERTPLEASE;
+					player.cheats |= CF_REVERTPLEASE;
 			}
 			else
 			{
-				itr->camera = itr->mo;
-				itr->cheats &= ~CF_REVERTPLEASE;
+				player.camera = player.mo;
+				player.cheats &= ~CF_REVERTPLEASE;
 			}
 		}
 	}
@@ -2607,15 +2607,15 @@ FUNC(LS_SetPlayerProperty)
 	}
 	else
 	{
-		for (Players::iterator itr = players.begin();itr != players.end();++itr)
+		for (auto& player : players)
 		{
-			if (!(itr->ingame()))
+			if (!(player.ingame()))
 				continue;
 
 			if (arg1)
-				itr->cheats |= mask;
+				player.cheats |= mask;
 			else
-				itr->cheats &= ~mask;
+				player.cheats &= ~mask;
 		}
 	}
 

@@ -91,13 +91,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 //
 std::list<movingsector_t>::iterator P_FindMovingSector(sector_t *sector)
 {
-	std::list<movingsector_t>::iterator itr;
-	for (itr = movingsectors.begin(); itr != movingsectors.end(); ++itr)
-		if (sector == itr->sector)
-			return itr;
-
-	// not found
-	return movingsectors.end();
+	return std::find_if(movingsectors.begin(), movingsectors.end(), [sector](const auto& it){ return it.sector == sector; });
 }
 
 fixed_t P_ArgsToFixed(fixed_t arg_i, fixed_t arg_f)
@@ -270,7 +264,7 @@ void P_AddMovingCeiling(sector_t *sector)
 	}
 	else
 	{
-		movingsectors.push_back(movingsector_t());
+		movingsectors.emplace_back();
 		movesec = &(movingsectors.back());
 	}
 
@@ -305,7 +299,7 @@ void P_AddMovingFloor(sector_t *sector)
 	}
 	else
 	{
-		movingsectors.push_back(movingsector_t());
+		movingsectors.emplace_back();
 		movesec = &(movingsectors.back());
 	}
 
@@ -827,7 +821,7 @@ void P_InitPicAnims (void)
 	if(anims)
 	{
 		M_Free(anims);
-		lastanim = 0;
+		lastanim = nullptr;
 		maxanims = 0;
 	}
 
