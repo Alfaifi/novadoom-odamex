@@ -87,10 +87,10 @@ ACSWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
 FLZOMemFile	*reset_snapshot = NULL;
 
 extern bool r_underwater;
-BOOL savegamerestore;
+bool savegamerestore;
 
 extern int mousex, mousey, joyforward, joystrafe, joyturn, joylook, Impulse;
-extern BOOL sendpause, sendsave, sendcenterview;
+extern bool sendpause, sendsave, sendcenterview;
 
 
 bool isFast = false;
@@ -318,9 +318,9 @@ void G_InitNew (const char *mapname)
 //
 // G_DoCompleted
 //
-BOOL 			secretexit;
+bool 			secretexit;
 static int		startpos;	// [RH] Support for multiple starts per level
-extern BOOL		NoWipe;		// [RH] Don't wipe when travelling in hubs
+extern int		NoWipe;		// [RH] Don't wipe when travelling in hubs
 
 // [RH] The position parameter to these next three functions should
 //		match the first parameter of the single player start spots
