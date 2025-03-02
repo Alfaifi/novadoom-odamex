@@ -123,7 +123,7 @@ int				lightscaleymul;
 int 			extralight;
 
 // [RH] ignore extralight and fullbright
-BOOL			foggy;
+bool			foggy;
 
 static bool		setsizeneeded = true;
 int				setblocks;

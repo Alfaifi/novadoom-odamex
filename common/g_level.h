@@ -445,7 +445,7 @@ extern int ACS_GlobalVars[NUM_GLOBALVARS];
 extern ACSWorldGlobalArray ACS_WorldArrays[NUM_WORLDVARS];
 extern ACSWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
 
-extern BOOL savegamerestore;
+extern bool savegamerestore;
 
 void G_InitNew(const char *mapname);
 inline void G_InitNew(const OLumpName& mapname) { G_InitNew(mapname.c_str()); }

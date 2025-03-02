@@ -45,11 +45,6 @@
 	#include <gctypes.h>
 #endif
 
-// [RH] Some windows includes already define this
-#if !defined(_WINDEF_) && !defined(__wtypes_h__) && !defined(GEKKO)
-typedef int BOOL;
-#endif
-
 typedef unsigned char byte;
 typedef unsigned int uint;
 
