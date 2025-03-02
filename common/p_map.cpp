@@ -435,7 +435,7 @@ bool PIT_CheckLine (line_t *ld)
 		{
 			CheckForPushSpecial(ld, 0, tmthing);
 			return false;
-		}		
+		}
     }
 
 	// [RH] Steep sectors count as dropoffs (unless already in one)
@@ -630,7 +630,7 @@ static bool PIT_CheckThing (AActor *thing)
 	// [Blair] This emulates hexen behavior, where rockets can push
 	// dead/stationary things marked bouncy.
 	// Out of place in Doom, should fix.
-	if (tmthing->flags & MF_MISSILE || (tmthing->flags & MF_BOUNCES 
+	if (tmthing->flags & MF_MISSILE || (tmthing->flags & MF_BOUNCES
 		&& !(tmthing->flags & MF_SOLID)))
 	{
 		// see if it went over / under
@@ -2618,13 +2618,13 @@ void P_RailAttack (AActor *source, int damage, int offset)
 		P_DrawRailTrail (start, end);
 	else
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			AActor *mo = it->mo;
+			AActor *mo = player.mo;
 			if (!mo || mo == source)
 				continue;
 
-			buf_t* buf = &(it->client.netbuf);
+			buf_t* buf = &(player.client.netbuf);
 
 			MSG_WriteSVC(buf, SVC_RailTrail(start, end));
 		}
@@ -2792,7 +2792,7 @@ bool PTR_UseTraverse (intercept_t *in)
 	//	   it through, including SPAC_USETHROUGH.
 	//[ML] And NOW (8/16/10) it checks whether it's use or NOT the passthrough flags
 	// (passthru on a cross or use line).  This may get augmented/changed even more in the future.
-	
+
 	bool donteatuse;
 	if (map_format.getZDoom())
 	{
@@ -2927,9 +2927,9 @@ static bool PIT_DoomRadiusAttack(AActor* thing)
 
 	// Boss spider and cyborg
 	// take no damage from concussion.
-	if (((thing->type == MT_CYBORG && bombsource->type == MT_CYBORG) || 
-		(thing->flags3 & MF3_NORADIUSDMG || thing->flags2 & MF2_BOSS)) && 
-		!(bombspot->flags3 & MF3_FORCERADIUSDMG)) 
+	if (((thing->type == MT_CYBORG && bombsource->type == MT_CYBORG) ||
+		(thing->flags3 & MF3_NORADIUSDMG || thing->flags2 & MF2_BOSS)) &&
+		!(bombspot->flags3 & MF3_FORCERADIUSDMG))
 		return true;
 
 	fixed_t dx = abs(thing->x - bombspot->x);
@@ -2986,7 +2986,7 @@ static bool PIT_ZDoomRadiusAttack(AActor* thing)
 	// take no damage from concussion.
 	if (((thing->type == MT_CYBORG && bombsource->type == MT_CYBORG) ||
 	   (thing->flags3 & MF3_NORADIUSDMG || thing->flags2 & MF2_BOSS)) &&
-	   !(bombspot->flags3 & MF3_FORCERADIUSDMG)) 
+	   !(bombspot->flags3 & MF3_FORCERADIUSDMG))
 		return true;
 
 	// Barrels always use the original code, since this makes
@@ -3128,11 +3128,9 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance,
 			}
 		}
 
-		std::set<AActor*>::iterator itr = actorset.begin();
-		while (itr != actorset.end())
+		for (const auto& actor : actorset)
 		{
-			pAttackFunc(*itr);
-			++itr;
+			pAttackFunc(actor);
 		}
 	}
 	else
@@ -3995,12 +3993,12 @@ void P_CopySector(sector_t *dest, sector_t *src)
 		dest->ceilingdata = src->ceilingdata->Clone(dest);
 	else
 		dest->ceilingdata = NULL;
-	
+
 	if (src->floordata != NULL)
 		dest->floordata = src->floordata->Clone(dest);
 	else
 		dest->floordata = NULL;
-	
+
 	if (src->lightingdata != NULL)
 		dest->lightingdata = src->lightingdata->Clone(dest);
 	else

@@ -137,18 +137,14 @@ std::string M_GetHomeDir(const std::string& user)
 
 std::string M_GetUserDir()
 {
-	std::string path = M_GetHomeDir();
-
-	if (path[path.length() - 1] != PATHSEPCHAR)
-		path += PATHSEP;
-
-	path += ".odamex";
+	fs::path path = M_GetHomeDir();
+	path /= ".odamex";
 	return path;
 }
 
 std::string M_GetWriteDir()
 {
-	// Our path is relative to the home directory.
+	// Our path is relative to the home directory
 	std::string path = M_GetUserDir();
 
 	// Create the directory.
