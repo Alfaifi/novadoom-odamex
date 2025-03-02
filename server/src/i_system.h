@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -97,7 +97,7 @@ void addterm (void (STACK_ARGS *func)(void), const char *name);
 #define atterm(t) addterm (t, #t)
 
 // Print a console string
-void I_PrintStr (int x, const char *str, int count, BOOL scroll);
+void I_PrintStr (int x, const char *str, int count, bool scroll);
 
 // Set the title string of the startup window
 void I_SetTitleString (const char *title);

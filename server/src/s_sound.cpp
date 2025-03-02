@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -195,7 +195,7 @@ void S_StartMusic(const char *m_id)
 
 // [RH] S_ChangeMusic() now accepts the name of the music lump.
 // It's up to the caller to figure out what that name is.
-void S_ChangeMusic(std::string musicname, int looping)
+void S_ChangeMusic(std::string musicname, bool looping)
 {
 }
 

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -99,7 +99,8 @@ struct lumpHandle_t
 	{
 		return id == 0;
 	}
-	bool operator==(const lumpHandle_t& other)
+	[[nodiscard]]
+	bool operator==(const lumpHandle_t& other) const
 	{
 		return id == other.id;
 	}

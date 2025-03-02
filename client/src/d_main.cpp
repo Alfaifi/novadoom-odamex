@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -103,18 +103,18 @@ void D_DoAdvanceDemo();
 void D_DoomLoop();
 
 extern int testingmode;
-extern BOOL gameisdead;
+extern bool gameisdead;
 extern bool M_DemoNoPlay;	// [RH] if true, then skip any demos in the loop
 extern DThinker ThinkerCap;
 extern dyncolormap_t NormalLight;
 
-BOOL devparm;				// started game with -devparm
+bool devparm;				// started game with -devparm
 const char *D_DrawIcon;			// [RH] Patch name of icon to draw on next refresh
 static bool wiping_screen = false;
 
 OLumpName startmap;
-BOOL autostart;
-BOOL advancedemo;
+bool autostart;
+bool advancedemo;
 event_t events[MAXEVENTS];
 int eventhead;
 int eventtail;

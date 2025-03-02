@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -85,7 +85,7 @@ int ShutdownNow()
 BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType)
 {
     SetEvent(hEvent);
-    return TRUE;
+    return true;
 }
 
 int __cdecl main(int argc, char *argv[])
@@ -98,10 +98,10 @@ int __cdecl main(int argc, char *argv[])
     try
     {
         // Handle close box, shutdown and logoff events
-        if (!(hEvent = CreateEvent(NULL, FALSE, FALSE, NULL)))
+        if (!(hEvent = CreateEvent(NULL, false, false, NULL)))
             throw CDoomError("Could not create console control event!\n");
 
-        if (!SetConsoleCtrlHandler(ConsoleHandlerRoutine, TRUE))
+        if (!SetConsoleCtrlHandler(ConsoleHandlerRoutine, true))
             throw CDoomError("Could not set console control handler!\n");
 
         // Disable QuickEdit mode as any text selection will cause all functions

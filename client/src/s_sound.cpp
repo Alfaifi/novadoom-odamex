@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -1083,7 +1083,7 @@ void S_StartMusic(const char *m_id)
 
 // [RH] S_ChangeMusic() now accepts the name of the music lump.
 // It's up to the caller to figure out what that name is.
-void S_ChangeMusic(std::string musicname, int looping)
+void S_ChangeMusic(std::string musicname, bool looping)
 {
 	// [SL] Avoid caching music lumps if we're not playing music
 	if (snd_musicsystem == MS_NONE)
@@ -1114,7 +1114,7 @@ void S_ChangeMusic(std::string musicname, int looping)
 
 		data = static_cast<byte*>(W_CacheLumpNum(lumpnum, PU_CACHE));
 		length = W_LumpLength(lumpnum);
-		I_PlaySong({data, length}, (looping != 0));
+		I_PlaySong({data, length}, looping);
     }
     else
 	{
@@ -1125,7 +1125,7 @@ void S_ChangeMusic(std::string musicname, int looping)
 
 		if (result == 1)
 		{
-			I_PlaySong({data, length}, (looping != 0));
+			I_PlaySong({data, length}, looping);
 		}
 		M_Free(data);
 	}
@@ -1535,7 +1535,7 @@ void S_ActivateAmbient(AActor *origin, int ambient)
 	if (!(amb->type & 3) && !amb->periodmin)
 	{
 		const int sndnum = S_FindSound(amb->sound);
-		if (sndnum == 0)
+		if (sndnum == 0 || sndnum == -1)
 			return;
 
 		sfxinfo_t *sfx = &S_sfx[sndnum];

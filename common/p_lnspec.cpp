@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@
 #include "m_wdlstats.h"
 #include "p_mapformat.h"
 
-#define FUNC(a) static BOOL a (line_t *ln, AActor *it, int arg0, int arg1, \
+#define FUNC(a) static bool a (line_t *ln, AActor *it, int arg0, int arg1, \
 							   int arg2, int arg3, int arg4)
 
 // Used by the teleporters to know if they were
@@ -42,15 +42,15 @@ int TeleportSide;
 extern bool s_SpecialFromServer;
 
 // Set true if this special was activated from inside a script.
-BOOL InScript;
+bool InScript;
 
 // 9/11/10: Add poly action definitions here, even though they're in p_local...
 // Why are these needed here?  Linux won't compile without these definitions??
 //
-BOOL EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, BOOL overRide);
-BOOL EV_OpenPolyDoor (line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
-BOOL EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, BOOL overRide);
-BOOL EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t* line, byte tag, fixed_t speed,
+bool EV_MovePoly (line_t *line, int polyNum, int speed, angle_t angle, fixed_t dist, bool overRide);
+bool EV_OpenPolyDoor (line_t *line, int polyNum, int speed, angle_t angle, int delay, int distance, podoortype_t type);
+bool EV_RotatePoly (line_t *line, int polyNum, int speed, int byteAngle, int direction, bool overRide);
+bool EV_DoZDoomCeiling(DCeiling::ECeiling type, line_t* line, byte tag, fixed_t speed,
                        fixed_t speed2, fixed_t height, int crush, byte silent, int change,
                        crushmode_e crushmode);
 
@@ -950,7 +950,7 @@ FUNC(LS_Generic_Stairs)
 // Generic_Stairs (tag, speed, step, dir/igntxt, reset)
 {
 	DFloor::EStair type = (arg3 & 1) ? DFloor::buildUp : DFloor::buildDown;
-	BOOL res = EV_BuildStairs (arg0, type, ln,
+	bool res = EV_BuildStairs (arg0, type, ln,
 							   arg2 * FRACUNIT, SPEED(arg1), 0, arg4, arg3 & 2, 0);
 
 	if (res && ln && (ln->flags & ML_REPEATSPECIAL) && ln->special == Generic_Stairs)
@@ -1596,7 +1596,7 @@ FUNC(LS_Teleport)
 // Teleport (tid, tag, nosourcefog)
 {
 	if(!it) return false;
-	BOOL result;
+	bool result;
 
 	if (map_format.getZDoom())
 		// [AM] Use ZDoom-style teleport for Hexen-format maps
@@ -2509,7 +2509,7 @@ FUNC(LS_Line_AlignCeiling)
 // Line_AlignCeiling (lineid, side)
 {
 	int line = P_FindLineFromID (arg0, -1);
-	BOOL ret = 0;
+	bool ret = 0;
 
 	if (line < 0)
 		I_Error("Sector_AlignCeiling: Lineid {} is undefined", arg0);
@@ -2524,7 +2524,7 @@ FUNC(LS_Line_AlignFloor)
 // Line_AlignFloor (lineid, side)
 {
 	int line = P_FindLineFromID (arg0, -1);
-	BOOL ret = 0;
+	bool ret = 0;
 
 	if (line < 0)
 		I_Error("Sector_AlignFloor: Lineid {} is undefined", arg0);
@@ -2931,7 +2931,7 @@ EXTERN_CVAR (sv_fraglimit)
 EXTERN_CVAR (sv_allowexit)
 EXTERN_CVAR (sv_fragexitswitch)
 
-BOOL CheckIfExitIsGood (AActor *self)
+bool CheckIfExitIsGood (AActor *self)
 {
 	if (self == NULL || !serverside)
 		return false;

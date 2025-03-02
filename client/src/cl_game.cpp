@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -76,7 +76,7 @@
 
 #define TURN180_TICKS	9				// [RH] # of ticks to complete a turn180
 
-BOOL	G_CheckDemoStatus (void);
+bool	G_CheckDemoStatus (void);
 void	G_ReadDemoTiccmd ();
 void	G_WriteDemoTiccmd ();
 void	G_PlayerReborn (player_t &player);
@@ -111,23 +111,23 @@ EXTERN_CVAR (chasedemo)
 gameaction_t	gameaction;
 gamestate_t 	gamestate = GS_STARTUP;
 
-BOOL 			paused;
-BOOL 			sendpause;				// send a pause event next tic
-BOOL			sendsave;				// send a save event next tic
-BOOL 			usergame;				// ok to save / end game
-BOOL			sendcenterview;			// send a center view event next tic
+bool 			paused;
+bool 			sendpause;				// send a pause event next tic
+bool			sendsave;				// send a save event next tic
+bool 			usergame;				// ok to save / end game
+bool			sendcenterview;			// send a center view event next tic
 
 bool			timingdemo; 			// if true, exit with report on completion
 bool			longtics;				// don't quantize yaw for classic vanilla demos
 bool 			nodrawers;				// for comparative timing purposes
 bool 			noblit; 				// for comparative timing purposes
 
-BOOL	 		viewactive;
+bool	 		viewactive;
 
 // Describes if a network game is being played
-BOOL			network_game;
+bool			network_game;
 // Describes if this is a multiplayer game or not
-BOOL			multiplayer;
+bool			multiplayer;
 // The player vector, contains all player information
 Players			players;
 
@@ -198,18 +198,18 @@ CVAR_FUNC_IMPL(cl_mouselook)
 }
 
 char			demoname[256];
-BOOL 			demoplayback;
+bool 			demoplayback;
 
 extern bool		simulated_connection;
 
 int				iffdemover;
 byte*			demobuffer;
 byte			*demo_p, *demo_e;
-BOOL 			singledemo; 			// quit after playing a demo from cmdline
+bool 			singledemo; 			// quit after playing a demo from cmdline
 int				demostartgametic;
 FILE*			recorddemo_fp;
 
-BOOL 			precache = true;		// if true, load all graphics at start
+bool 			precache = true;		// if true, load all graphics at start
 
 wbstartstruct_t wminfo; 				// parms for world map / intermission
 
@@ -720,7 +720,7 @@ bool G_ShouldIgnoreMouseInput()
 // G_Responder
 // Get info needed to make ticcmd_ts for the players.
 //
-BOOL G_Responder (event_t *ev)
+bool G_Responder (event_t *ev)
 {
 	// any other key pops up menu if in demos
 	// [RH] But only if the key isn't bound to a "special" command
@@ -955,7 +955,7 @@ void G_Ticker (void)
 			if (demoplayback)
 				G_CheckDemoStatus();
 
-			extern BOOL advancedemo;
+			extern bool advancedemo;
 			advancedemo = false;
 
 			if (gamestate != GS_STARTUP)
@@ -1747,7 +1747,7 @@ void G_DoSaveGame()
 		arc << ACS_WorldVars[i];
 		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
 		arc << worldarr.size();
-		for (const auto& [key, val] : worldarr)
+		for (const auto [key, val] : worldarr)
 		{
 			arc << key;
 			arc << val;
@@ -1759,7 +1759,7 @@ void G_DoSaveGame()
 		arc << ACS_GlobalVars[i];
 		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
 		arc << globalarr.size();
-		for (const auto& [key, val] : globalarr)
+		for (const auto [key, val] : globalarr)
 		{
 			arc << key;
 			arc << val;
@@ -2030,7 +2030,6 @@ void G_DoPlayDemo(bool justStreamInput)
 			}
 
 			sv_respawnsuper.Set(0.0f);
-			sv_showplayerpowerups.Set(0.0f);
 
 			usergame = false;
 		}
@@ -2124,7 +2123,7 @@ void G_CleanupDemo()
 ===================
 */
 
-BOOL G_CheckDemoStatus (void)
+bool G_CheckDemoStatus (void)
 {
 	if (demoplayback)
 	{

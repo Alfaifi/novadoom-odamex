@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -80,7 +80,7 @@ static byte OrgHeights[] = {
 static char *PatchFile, *PatchPt;
 static char *Line1, *Line2;
 static int dversion, pversion;
-static BOOL including, includenotext;
+static bool including, includenotext;
 
 // English strings for DeHackEd replacement.
 static StringTable ENGStrings;
@@ -443,10 +443,10 @@ static const struct
 };
 
 static int HandleMode(const char* mode, int num);
-static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,
+static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize = 0);
 static void BackupData(void);
-static BOOL ReadChars(char** stuff, int size);
+static bool ReadChars(char** stuff, int size);
 static char* igets(void);
 static int GetLine(void);
 
@@ -483,7 +483,7 @@ static int HandleMode(const char* mode, int num)
 	return i;
 }
 
-static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,
+static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize)
 {
 	while (keys->name && stricmp(keys->name, key))
@@ -585,7 +585,7 @@ void D_UndoDehPatch()
 	deh = backupDeh;
 }
 
-static BOOL ReadChars(char** stuff, int size)
+static bool ReadChars(char** stuff, int size)
 {
 	char* str = *stuff;
 
@@ -2021,7 +2021,7 @@ static int PatchText(int oldSize)
 	char* oldStr;
 	char* newStr;
 	char* temp;
-	BOOL good;
+	bool good;
 	int result;
 	const OString* name = NULL;
 
@@ -2053,7 +2053,7 @@ static int PatchText(int oldSize)
 	}
 
 	good = ReadChars(&oldStr, oldSize);
-	good += ReadChars(&newStr, newSize);
+	good = good || ReadChars(&newStr, newSize);
 
 	if (!good)
 	{

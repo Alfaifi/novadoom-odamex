@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@
 // killough 10/98: special mask indicates sky flat comes from sidedef
 #define PL_SKYFLAT (0x80000000)
 
-BOOL R_AlignFlat (int linenum, int side, int fc);
+bool R_AlignFlat (int linenum, int side, int fc);
 
 extern int negonearray[MAXWIDTH];
 extern int viewheightarray[MAXWIDTH];
@@ -102,6 +102,7 @@ extern int				zlight[LIGHTLEVELS][MAXLIGHTZ];
 inline int				extralight;
 // [RH] ignore extralight and fullbright
 inline bool				foggy;
+
 extern int				fixedlightlev;
 extern shaderef_t		fixedcolormap;
 

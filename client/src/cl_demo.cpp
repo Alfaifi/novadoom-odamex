@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -300,7 +300,7 @@ bool NetDemo::writeSnapshotIndex()
 
 
 
-	for (const auto& [ticnum, offset] : snapshot_index)
+	for (const auto [ticnum, offset] : snapshot_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
@@ -360,7 +360,7 @@ bool NetDemo::writeMapIndex()
 {
 	fseek(demofp, header.map_index_offset, SEEK_SET);
 
-	for (const auto& [ticnum, offset] : map_index)
+	for (const auto [ticnum, offset] : map_index)
 	{
 		netdemo_index_entry_t entry;
 		// convert to little-endian
@@ -1351,7 +1351,7 @@ void NetDemo::readSnapshot(const netdemo_index_entry_t *snap)
 //
 //   Returns the total length of the demo in seconds
 //
-int NetDemo::calculateTotalTime()
+int NetDemo::calculateTotalTime() const
 {
 	if (!isPlaying() && !isPaused())
 		return 0;
@@ -1365,7 +1365,7 @@ int NetDemo::calculateTotalTime()
 //
 //   Returns the number of seconds since the demo started playing
 //
-int NetDemo::calculateTimeElapsed()
+int NetDemo::calculateTimeElapsed() const
 {
 	if (!isPlaying() && !isPaused())
 		return 0;
@@ -1379,11 +1379,11 @@ int NetDemo::calculateTimeElapsed()
 	return elapsed;
 }
 
-const std::vector<int> NetDemo::getMapChangeTimes()
+const std::vector<int> NetDemo::getMapChangeTimes() const
 {
 	std::vector<int> times;
 
-	for (const auto& [ticnum, _] : map_index)
+	for (const auto [ticnum, _] : map_index)
 	{
 		int start_time = (ticnum - header.starting_gametic) / TICRATE;
 		times.push_back(start_time);
@@ -1480,7 +1480,7 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_WorldVars[i];
 		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
 		arc << worldarr.size();
-		for (const auto& [key, val] : worldarr)
+		for (const auto [key, val] : worldarr)
 		{
 			arc << key;
 			arc << val;
@@ -1493,7 +1493,7 @@ void NetDemo::writeSnapshotData(std::vector<byte>& buf)
 		arc << ACS_GlobalVars[i];
 		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
 		arc << globalarr.size();
-		for (const auto& [key, val] : globalarr)
+		for (const auto [key, val] : globalarr)
 		{
 			arc << key;
 			arc << val;

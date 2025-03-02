@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom 1.22).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -128,6 +128,7 @@ struct fhfprint_s
 	{
 		ArrayInit(fingerprint, 0);
 	}
+	[[nodiscard]]
 	bool operator==(const fhfprint_s& other)
 	{
 		return fingerprint == other.fingerprint;
@@ -448,7 +449,7 @@ inline std::array<ACSWorldGlobalArray, NUM_WORLDVARS> ACS_WorldArrays;
 inline std::array<int, NUM_GLOBALVARS> ACS_GlobalVars;
 inline std::array<ACSWorldGlobalArray, NUM_GLOBALVARS> ACS_GlobalArrays;
 
-extern BOOL savegamerestore;
+extern bool savegamerestore;
 
 void G_InitNew(const char *mapname);
 inline void G_InitNew(const OLumpName& mapname) { G_InitNew(mapname.c_str()); }

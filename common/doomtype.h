@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -43,11 +43,6 @@
 
 #ifdef GEKKO
 	#include <gctypes.h>
-#endif
-
-// [RH] Some windows includes already define this
-#if !defined(_WINDEF_) && !defined(__wtypes_h__) && !defined(GEKKO)
-typedef int BOOL;
 #endif
 
 typedef unsigned char byte;
@@ -515,7 +510,7 @@ public:
 
 	argb_t tlate(const translationref_t &translation, const byte c) const;
 
-	bool operator==(const shaderef_t &other) const;
+	[[nodiscard]] bool operator==(const shaderef_t &other) const;
 };
 
 forceinline bool shaderef_t::isValid() const

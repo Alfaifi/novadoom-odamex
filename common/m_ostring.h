@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -37,11 +37,11 @@
 class OString;
 
 // Forward declarations for non-member functions
-bool operator== (const OString& lhs, const OString& rhs);
-bool operator== (const OString& lhs, const std::string& rhs);
-bool operator== (const std::string& lhs, const OString& rhs);
-bool operator== (const OString& lhs, const char* rhs);
-bool operator== (const char* lhs, const OString& rhs);
+[[nodiscard]] bool operator== (const OString& lhs, const OString& rhs);
+[[nodiscard]] bool operator== (const OString& lhs, const std::string& rhs);
+[[nodiscard]] bool operator== (const std::string& lhs, const OString& rhs);
+[[nodiscard]] bool operator== (const OString& lhs, const char* rhs);
+[[nodiscard]] bool operator== (const char* lhs, const OString& rhs);
 bool operator!= (const OString& lhs, const OString& rhs);
 bool operator!= (const OString& lhs, const std::string& rhs);
 bool operator!= (const std::string& lhs, const OString& rhs);

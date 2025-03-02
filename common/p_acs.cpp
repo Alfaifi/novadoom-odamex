@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -228,7 +228,7 @@ static DoomEntity DoomDecorationNames[60] = {{"BurningBarrel", MT_MISC77},
                                              {"ExplosiveBarrel", MT_BARREL}};
 
 extern ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammo, float num);
-extern ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped);
+extern ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped);
 extern ItemEquipVal P_GiveCard(player_t *player, card_t card);
 extern ItemEquipVal P_GivePower(player_t *player, int  power);
 
@@ -406,7 +406,7 @@ static void TakeWeapon(player_t* player, int weapon)
 	SERVER_ONLY(SV_SendPlayerInfo(*player));
 }
 
-extern BOOL P_CheckAmmo (player_t *player);
+extern bool P_CheckAmmo (player_t *player);
 
 static void TakeAmmo(player_t* player, int ammo, int amount)
 {

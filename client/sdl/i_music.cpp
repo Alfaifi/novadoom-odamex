@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -45,7 +45,7 @@ MusicSystem* musicsystem = NULL;
 MusicSystemType current_musicsystem_type = MS_NONE;
 
 void S_StopMusic();
-void S_ChangeMusic (std::string musicname, int looping);
+void S_ChangeMusic (std::string musicname, bool looping);
 
 EXTERN_CVAR (snd_musicvolume)
 EXTERN_CVAR (snd_musicsystem)

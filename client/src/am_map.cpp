@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -815,7 +815,7 @@ END_COMMAND(togglemap)
 //
 // Handle events (user inputs) in automap mode
 //
-BOOL AM_Responder(event_t* ev)
+bool AM_Responder(event_t* ev)
 {
 	if (automapactive && (ev->type == ev_keydown || ev->type == ev_keyup))
 	{

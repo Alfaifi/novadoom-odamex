@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -116,7 +116,7 @@ class player_s
 public:
 	void Serialize (FArchive &arc);
 
-	bool ingame() const
+	[[nodiscard]] bool ingame() const
 	{
 		return playerstate == PST_LIVE ||
 				playerstate == PST_DEAD ||
@@ -390,7 +390,7 @@ public:
 
 	struct ticcmd_t netcmds[BACKUPTICS];
 
-	int GetPlayerNumber() const
+	[[nodiscard]] int GetPlayerNumber() const
 	{
 		return id - 1;
 	}
@@ -654,7 +654,7 @@ extern byte displayplayer_id;
 //
 typedef struct wbplayerstruct_s
 {
-	BOOL		in;			// whether the player is in game
+	bool		in;			// whether the player is in game
 
 	// Player stats, kills, collected items etc.
 	int			skills;

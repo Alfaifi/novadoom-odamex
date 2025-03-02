@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ class OHash
 
   public:
 	virtual ~OHash() { }
-	bool operator==(const OHash& other) const { return m_hash == other.m_hash; }
+	[[nodiscard]] bool operator==(const OHash& other) const { return m_hash == other.m_hash; }
 	bool operator!=(const OHash& other) const { return !(operator==(other)); }
 	const std::string& getHexStr() const { return m_hash; }
 	const char* getHexCStr() const { return m_hash.c_str(); }

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -381,7 +381,7 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 // P_GiveWeapon
 // The weapon name may have a MF_DROPPED flag ored in.
 //
-ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped)
+ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped)
 {
 	bool gaveammo;
 	bool gaveweapon;
@@ -621,7 +621,7 @@ static void P_GiveCarePack(player_t* player)
 	// Players who are extremely low on ammo for a weapon they are holding
 	// always get ammo for that weapon.
 	const hordeDefine_t::ammos_t& ammos = P_HordeAmmos();
-	for (const auto& ammo : ammos)
+	for (const auto ammo : ammos)
 	{
 		if (blocks < 1)
 		{
@@ -656,7 +656,7 @@ static void P_GiveCarePack(player_t* player)
 	if (blocks >= 1)
 	{
 		const hordeDefine_t::weapons_t& weapons = P_HordeWeapons();
-		for (const auto& weapon : weapons)
+		for (const auto weapon : weapons)
 		{
 			// No weapon is a special case that means give the player
 			// berserk strength (without the health).

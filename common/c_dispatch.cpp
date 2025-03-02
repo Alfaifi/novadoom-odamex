@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -795,7 +795,7 @@ std::string C_QuoteString(const std::string &argstr)
 {
 	std::ostringstream buffer;
 	buffer << "\"";
-	for (const auto& c : argstr)
+	for (const auto c : argstr)
 	{
 		if (ValidEscape(c))
 		{
@@ -827,7 +827,7 @@ std::string C_EscapeWadList(const std::vector<std::string> wadlist)
 	return wadstr;
 }
 
-static int DumpHash (BOOL aliases)
+static int DumpHash (bool aliases)
 {
 	int count = 0;
 
