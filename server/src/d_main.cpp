@@ -85,14 +85,8 @@ void daemon_init();
 
 void D_DoomLoop (void);
 
-extern gameinfo_t SharewareGameInfo;
-extern gameinfo_t RegisteredGameInfo;
-extern gameinfo_t RetailGameInfo;
-extern gameinfo_t CommercialGameInfo;
-extern gameinfo_t RetailBFGGameInfo;
-extern gameinfo_t CommercialBFGGameInfo;
-
 extern bool gameisdead;
+
 extern DThinker ThinkerCap;
 extern dyncolormap_t NormalLight;
 
@@ -116,7 +110,7 @@ void D_DoomLoop (void)
 		}
 		catch (CRecoverableError &error)
 		{
-			Printf ("ERROR: %s\n", error.GetMsg().c_str());
+			Printf ("ERROR: %s\n", error.GetMsg());
 			Printf ("sleeping for 10 seconds before map reload...");
 
 			// denis - drop clients

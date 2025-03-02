@@ -697,12 +697,12 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
 	memset(playeringame, 0, sizeof(player_t*) * MAXPLAYERS);
 
 	short maxid = 0;
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame() && !(it->spectator))
+		if (player.ingame() && !(player.spectator))
 		{
-			playeringame[(it->id) - 1] = &*it;
-			maxid = it->id;
+			playeringame[(player.id) - 1] = &player;
+			maxid = player.id;
 		}
 	}
 

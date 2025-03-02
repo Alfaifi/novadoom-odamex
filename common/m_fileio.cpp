@@ -118,11 +118,11 @@ std::string M_FindUserFileName(const std::string& file, const char* ext)
 void M_FixPathSep(std::string& path)
 {
 	// Use the platform appropriate path separator
-	for (size_t i = 0; i < path.length(); i++)
+	for (auto& c : path)
 	{
-		if (path[i] == '\\' || path[i] == '/')
+		if (c == '\\' || c == '/')
 		{
-			path[i] = PATHSEPCHAR;
+			c = PATHSEPCHAR;
 		}
 	}
 }
@@ -223,7 +223,7 @@ bool M_WriteFile(std::string filename, void *source, QWORD length)
 
     if (handle == NULL)
 	{
-		Printf(PRINT_HIGH, "Could not open file %s for writing\n", filename.c_str());
+		Printf(PRINT_HIGH, "Could not open file %s for writing\n", filename);
 		return false;
 	}
 
@@ -232,7 +232,7 @@ bool M_WriteFile(std::string filename, void *source, QWORD length)
 
 	if (count != length)
 	{
-		Printf(PRINT_HIGH, "Failed while writing to file %s\n", filename.c_str());
+		Printf(PRINT_HIGH, "Failed while writing to file %s\n", filename);
 		return false;
 	}
 
@@ -255,7 +255,7 @@ QWORD M_ReadFile(std::string filename, BYTE **buffer)
 
 	if (handle == NULL)
 	{
-		Printf(PRINT_HIGH, "Could not open file %s for reading\n", filename.c_str());
+		Printf(PRINT_HIGH, "Could not open file %s for reading\n", filename);
 		return false;
 	}
 
@@ -267,7 +267,7 @@ QWORD M_ReadFile(std::string filename, BYTE **buffer)
 
     if (count != length)
 	{
-		Printf(PRINT_HIGH, "Failed while reading from file %s\n", filename.c_str());
+		Printf(PRINT_HIGH, "Failed while reading from file %s\n", filename);
 		return false;
 	}
 
