@@ -358,7 +358,7 @@ CVAR_RANGE(sv_countdown, "5",
 	//------------------------------
 
 	CVAR(			co_pursuit, "0",
-					"Use MBF pursuit behavior -- monsters will change targets " 
+					"Use MBF comp_pursuit behavior -- monsters will change targets " 
 					"if their current target is out of sight and a new valid target is in sight.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
@@ -387,11 +387,11 @@ CVAR_RANGE(sv_countdown, "5",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 	CVAR(			co_staylift, "0",
-					"Use MBF comp_staylift behavior -- monsters will try to stay on lifts.",
+					"Use MBF comp_staylift behavior -- monsters will try to stay on the same lift their target is on.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 	CVAR(			co_dogjumping, "0",
-					"Use MBF dog__jumping behavior -- friendly monsters will drop off high ledges "
+					"Use MBF dog_jumping behavior -- friendly monsters will drop off high ledges "
 					"if the target is immediately on the other side.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
