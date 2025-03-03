@@ -1328,24 +1328,16 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 			}
 		}
 
-		 /* killough 3/15/98: Allow certain objects to drop off
-		 * killough 7/24/98, 8/1/98:
-		 * Prevent monsters from getting stuck hanging off ledges
-		 * killough 10/98: Allow dropoffs in controlled circumstances
-		 * killough 11/98: Improve symmetry of clipping on stairs
-		 */
+		/* killough 3/15/98: Allow certain objects to drop off
+		* killough 7/24/98, 8/1/98:
+		* Prevent monsters from getting stuck hanging off ledges
+		* killough 10/98: Allow dropoffs in controlled circumstances
+		* killough 11/98: Improve symmetry of clipping on stairs
+		*/
 		// killough 3/15/98: Allow certain objects to drop off
 		if (!(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)))
 		{
-			// Allowing blasting off ledges without allowing dropoff is a Hexen thing
-			// But this doesn't seem to break any demos
-			if (!(P_AllowDropOff() && dropoff) && 
-					tmfloorz - tmdropoffz > 24 * FRACUNIT && 
-					!(thing->flags2 & MF2_BLASTED))
-			{
-				return false;
-			}
-			else
+			if (P_AllowDropOff())
 			{
 				if (!dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
 				                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
@@ -1361,6 +1353,16 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 				{ /* dropoff allowed -- check for whether it fell more than 24 */
 					felldown = !(thing->flags & MF_NOGRAVITY) &&
 					           thing->z - tmfloorz > 24 * FRACUNIT;
+				}
+			}
+			else if (!(P_AllowDropOff() && dropoff))
+			{
+				// Allowing blasting off ledges without allowing dropoff is a Hexen thing
+				// But this doesn't seem to break any demos
+				if (tmfloorz - tmdropoffz > 24 * FRACUNIT &&
+				    !(thing->flags2 & MF2_BLASTED))
+				{
+					return false;
 				}
 			}
 		}
