@@ -43,10 +43,6 @@
 #include "szp.h"
 
 #include "teamdef.h"
-
-// STL
-#include <map>
-
 //
 // NOTES: AActor
 //
@@ -140,7 +136,7 @@ public:
 		bitfield[bytenum] &= ~(1 << bitnum);
 	}
 
-	bool get(byte id) const
+	[[nodiscard]] bool get(byte id) const
 	{
 		int bytenum = id >> 3;
 		int bitnum = id & bytemask;
@@ -151,10 +147,10 @@ public:
 private:
 	static constexpr int bytesize = 8 * sizeof(byte);
 	static constexpr int bytemask = bytesize - 1;
-	
+
 	// Hacky way of getting ceil() at compile-time
 	static constexpr size_t fieldsize = (MAXPLAYERS + bytemask) / bytesize;
-	
+
 	byte	bitfield[fieldsize];
 };
 
@@ -417,11 +413,28 @@ class AActor : public DThinker
 			return ptr;
 		}
 
+		operator const AActorPtr() const
+		{
+			return ptr;
+		}
+		operator const AActor*() const
+		{
+			return ptr;
+		}
+
 		AActor &operator *()
 		{
 			return *ptr;
 		}
 		AActor *operator ->()
+		{
+			return ptr;
+		}
+		const AActor &operator *() const
+		{
+			return *ptr;
+		}
+		const AActor *operator ->() const
 		{
 			return ptr;
 		}
@@ -432,7 +445,7 @@ public:
 	AActor (const AActor &other);
 	AActor &operator= (const AActor &other);
 	AActor (fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
-	void Destroy ();
+	void Destroy() override;
 	~AActor ();
 
 	void RunThink () override;
@@ -563,10 +576,10 @@ public:
 	static void ClearTIDHashes ();
 	void AddToHash ();
 	void RemoveFromHash ();
-	AActor *FindByTID (int tid) const;
-	static AActor *FindByTID (const AActor *first, int tid);
-	AActor *FindGoal (int tid, int kind) const;
-	static AActor *FindGoal (const AActor *first, int tid, int kind);
+	[[nodiscard]] AActor *FindByTID (int tid) const;
+	[[nodiscard]] static AActor *FindByTID (const AActor *first, int tid);
+	[[nodiscard]] AActor *FindGoal (int tid, int kind) const;
+	[[nodiscard]] static AActor *FindGoal (const AActor *first, int tid, int kind);
 
 	uint32_t		netid;          // every object has its own netid
 	short			tid;			// thing identifier
@@ -608,7 +621,7 @@ public:
 	private:
 		void clear();
 		size_t getIndex(int bmx, int bmy);
-		
+
 		static constexpr size_t BLOCKSX = 3;
 		static constexpr size_t BLOCKSY = 3;
 

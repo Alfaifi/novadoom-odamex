@@ -118,9 +118,9 @@ CVAR_FUNC_IMPL (sv_gravity)
 //
 // PIT_StompThing
 //
-static BOOL StompAlwaysFrags;
+static bool StompAlwaysFrags;
 
-BOOL PIT_StompThing (AActor *thing)
+bool PIT_StompThing (AActor *thing)
 {
 	fixed_t blockdist;
 
@@ -188,7 +188,7 @@ BOOL PIT_StompThing (AActor *thing)
 //		move was made, so the height checking I added for 1.13 could
 //		potentially erroneously indicate the move was okay if the thing
 //		was being teleported between two non-overlapping height ranges.
-BOOL P_TeleportMove (AActor *thing, fixed_t x, fixed_t y, fixed_t z, BOOL telefrag)
+bool P_TeleportMove (AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefrag)
 {
 	int 				xl;
 	int 				xh;
@@ -382,7 +382,7 @@ static void CheckForPushSpecial (line_t *line, int side, AActor *mobj)
 
 
 static // killough 3/26/98: make static
-BOOL PIT_CrossLine (line_t* ld)
+bool PIT_CrossLine (line_t* ld)
 {
 	if (!(ld->flags & ML_TWOSIDED) ||
 		(ld->flags & (ML_BLOCKING|ML_BLOCKMONSTERS|ML_BLOCKEVERYTHING)))
@@ -401,7 +401,7 @@ BOOL PIT_CrossLine (line_t* ld)
 //
 
 static // killough 3/26/98: make static
-BOOL PIT_CheckLine (line_t *ld)
+bool PIT_CheckLine (line_t *ld)
 {
 	if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
 		|| tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
@@ -443,7 +443,7 @@ BOOL PIT_CheckLine (line_t *ld)
 		{
 			CheckForPushSpecial(ld, 0, tmthing);
 			return false;
-		}		
+		}
     }
 
 	// [RH] Steep sectors count as dropoffs (unless already in one)
@@ -615,7 +615,7 @@ bool P_ProjectileImmune(AActor* target, AActor* source)
 	                mobjinfo[source->type].projectile_group));
 }
 
-static BOOL PIT_CheckThing (AActor *thing)
+static bool PIT_CheckThing (AActor *thing)
 {
 	bool solid = thing->flags & MF_SOLID;
 
@@ -698,7 +698,7 @@ static BOOL PIT_CheckThing (AActor *thing)
 	// [Blair] This emulates hexen behavior, where rockets can push
 	// dead/stationary things marked bouncy.
 	// Out of place in Doom, should fix.
-	if (tmthing->flags & MF_MISSILE || (tmthing->flags & MF_BOUNCES 
+	if (tmthing->flags & MF_MISSILE || (tmthing->flags & MF_BOUNCES
 		&& !(tmthing->flags & MF_SOLID)))
 	{
 		// see if it went over / under
@@ -846,7 +846,7 @@ static BOOL PIT_CheckThing (AActor *thing)
 // sides of the blocking line. If so, return true, otherwise
 // false.
 
-BOOL Check_Sides(AActor* actor, int x, int y)
+bool Check_Sides(AActor* actor, int x, int y)
 {
 	int bx,by,xl,xh,yl,yh;
 
@@ -886,7 +886,7 @@ BOOL Check_Sides(AActor* actor, int x, int y)
 //
 //---------------------------------------------------------------------------
 
-BOOL PIT_CheckOnmobjZ (AActor *thing)
+bool PIT_CheckOnmobjZ (AActor *thing)
 {
 	if (!(thing->flags & MF_SOLID))
 		return true;
@@ -936,7 +936,7 @@ BOOL PIT_CheckOnmobjZ (AActor *thing)
 // Returns true if the mobj is not blocked by anything at its current
 // location, otherwise returns false.
 //
-BOOL P_TestMobjLocation (AActor *mobj)
+bool P_TestMobjLocation (AActor *mobj)
 {
 	int flags = mobj->flags;
 	mobj->flags &= ~MF_PICKUP;
@@ -1239,7 +1239,7 @@ void P_CheckPushLines(AActor *thing)
 // Attempt to move to a new position,
 // crossing special lines unless MF_TELEPORT is set.
 //
-BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
+bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 				int dropoff, // killough 3/15/98: allow dropoff as option
 				bool onfloor) // [RH] Let P_TryMove keep the thing on the floor
 {
@@ -1450,7 +1450,7 @@ BOOL P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 // so balancing is possible.
 //
 
-static BOOL PIT_ApplyTorque (line_t *ld)
+static bool PIT_ApplyTorque (line_t *ld)
 {
 	if (ld->backsector &&		// If thing touches two-sided pivot linedef
 		tmbbox[BOXRIGHT]  > ld->bbox[BOXLEFT]  &&
@@ -1574,7 +1574,7 @@ void P_ApplyTorque (AActor *mo)
 // the z will be set to the lowest value
 // and false will be returned.
 //
-BOOL P_ThingHeightClip (AActor* thing)
+bool P_ThingHeightClip (AActor* thing)
 {
 	if (!thing)
 		return true;
@@ -1751,7 +1751,7 @@ void P_HitSlideLine (line_t* ld)
 
 	fixed_t movelen;
 	fixed_t newlen;
-	BOOL	icyfloor;	// is floor icy?							// phares
+	bool	icyfloor;	// is floor icy?							// phares
 																	//   |
 	// Under icy conditions, if the angle of approach to the wall	//   V
 	// is more than 45 degrees, then you'll bounce and lose half
@@ -1841,7 +1841,7 @@ void P_HitSlideLine (line_t* ld)
 //
 // PTR_SlideTraverse
 //
-BOOL PTR_SlideTraverse (intercept_t* in)
+bool PTR_SlideTraverse (intercept_t* in)
 {
 	line_t* 	li;
 
@@ -2049,7 +2049,7 @@ static fixed_t	bottomslope;
 // PTR_AimTraverse
 // Sets linetaget and aimslope when a target is aimed at.
 //
-BOOL PTR_AimTraverse (intercept_t* in)
+bool PTR_AimTraverse (intercept_t* in)
 {
 	line_t* 			li;
 	AActor* 			th;
@@ -2288,7 +2288,7 @@ bool P_ShootLine(intercept_t* in)
 //
 // PTR_ShootTraverse
 //
-BOOL PTR_ShootTraverse (intercept_t* in)
+bool PTR_ShootTraverse (intercept_t* in)
 {
 	fixed_t x, y, z;
 	fixed_t frac;
@@ -2556,7 +2556,7 @@ static struct SRailHit {
 } *RailHits;
 static v3double_t RailEnd;
 
-BOOL PTR_RailTraverse (intercept_t *in)
+bool PTR_RailTraverse (intercept_t *in)
 {
 	fixed_t 			x;
 	fixed_t 			y;
@@ -2747,13 +2747,13 @@ void P_RailAttack (AActor *source, int damage, int offset)
 		P_DrawRailTrail (start, end);
 	else
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			AActor *mo = it->mo;
+			AActor *mo = player.mo;
 			if (!mo || mo == source)
 				continue;
 
-			buf_t* buf = &(it->client.netbuf);
+			buf_t* buf = &(player.client.netbuf);
 
 			MSG_WriteSVC(buf, SVC_RailTrail(start, end));
 		}
@@ -2767,7 +2767,7 @@ fixed_t CameraX, CameraY, CameraZ;
 sector_t* CameraSector;
 #define CAMERA_DIST	0x1000	// Minimum distance between camera and walls
 
-BOOL PTR_CameraTraverse (intercept_t* in)
+bool PTR_CameraTraverse (intercept_t* in)
 {
 	fixed_t z;
 	fixed_t frac;
@@ -2882,7 +2882,7 @@ void P_AimCamera (AActor *t1)
 AActor *usething;
 bool foundline;
 
-BOOL PTR_UseTraverse (intercept_t *in)
+bool PTR_UseTraverse (intercept_t *in)
 {
 	if (!in->isaline)
 		I_Error ("PTR_UseTraverse: non-line intercept\n");
@@ -2921,7 +2921,7 @@ BOOL PTR_UseTraverse (intercept_t *in)
 	//	   it through, including SPAC_USETHROUGH.
 	//[ML] And NOW (8/16/10) it checks whether it's use or NOT the passthrough flags
 	// (passthru on a cross or use line).  This may get augmented/changed even more in the future.
-	
+
 	bool donteatuse;
 	if (map_format.getZDoom())
 	{
@@ -2949,7 +2949,7 @@ BOOL PTR_UseTraverse (intercept_t *in)
 // by Lee Killough
 //
 
-BOOL PTR_NoWayTraverse (intercept_t *in)
+bool PTR_NoWayTraverse (intercept_t *in)
 {
 	if (!in->isaline)
 		I_Error ("PTR_NoWayTraverse: non-line intercept\n");
@@ -3045,7 +3045,7 @@ static bool P_SplashImmune(AActor* target, AActor* spot)
 	    mobjinfo[target->type].splash_group == mobjinfo[spot->type].splash_group;
 }
 
-static BOOL PIT_DoomRadiusAttack(AActor* thing)
+static bool PIT_DoomRadiusAttack(AActor* thing)
 {
 	if (!serverside || !(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)))
 		return true;
@@ -3056,9 +3056,9 @@ static BOOL PIT_DoomRadiusAttack(AActor* thing)
 
 	// Boss spider and cyborg
 	// take no damage from concussion.
-	if (((thing->type == MT_CYBORG && bombsource->type == MT_CYBORG) || 
-		(thing->flags3 & MF3_NORADIUSDMG || thing->flags2 & MF2_BOSS)) && 
-		!(bombspot->flags3 & MF3_FORCERADIUSDMG)) 
+	if (((thing->type == MT_CYBORG && bombsource->type == MT_CYBORG) ||
+		(thing->flags3 & MF3_NORADIUSDMG || thing->flags2 & MF2_BOSS)) &&
+		!(bombspot->flags3 & MF3_FORCERADIUSDMG))
 		return true;
 
 	fixed_t dx = abs(thing->x - bombspot->x);
@@ -3102,7 +3102,7 @@ static BOOL PIT_DoomRadiusAttack(AActor* thing)
 // "bombsource" is the creature that caused the explosion at "bombspot".
 // [RH] Now it knows about vertical distances and can thrust things vertically, too.
 //
-static BOOL PIT_ZDoomRadiusAttack(AActor* thing)
+static bool PIT_ZDoomRadiusAttack(AActor* thing)
 {
 	if (!serverside || !(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)))
 		return true;
@@ -3115,7 +3115,7 @@ static BOOL PIT_ZDoomRadiusAttack(AActor* thing)
 	// take no damage from concussion.
 	if (((thing->type == MT_CYBORG && bombsource->type == MT_CYBORG) ||
 	   (thing->flags3 & MF3_NORADIUSDMG || thing->flags2 & MF2_BOSS)) &&
-	   !(bombspot->flags3 & MF3_FORCERADIUSDMG)) 
+	   !(bombspot->flags3 & MF3_FORCERADIUSDMG))
 		return true;
 
 	// Barrels always use the original code, since this makes
@@ -3233,7 +3233,7 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance,
 	}
 
 	// decide which radius attack function to use
-	BOOL (*pAttackFunc)(AActor*) = co_zdoomphys ?
+	bool (*pAttackFunc)(AActor*) = co_zdoomphys ?
 		PIT_ZDoomRadiusAttack : PIT_DoomRadiusAttack;
 
 	if (co_blockmapfix)
@@ -3257,11 +3257,9 @@ void P_RadiusAttack(AActor *spot, AActor *source, int damage, int distance,
 			}
 		}
 
-		std::set<AActor*>::iterator itr = actorset.begin();
-		while (itr != actorset.end())
+		for (const auto& actor : actorset)
 		{
-			pAttackFunc(*itr);
-			++itr;
+			pAttackFunc(actor);
 		}
 	}
 	else
@@ -3293,7 +3291,7 @@ bool 	nofit;
 //
 // PIT_ChangeSector
 //
-BOOL PIT_ChangeSector (AActor *thing)
+bool PIT_ChangeSector (AActor *thing)
 {
 	if (P_ThingHeightClip (thing))
 	{
@@ -3572,7 +3570,7 @@ void P_DelSeclist (msecnode_t *node)
 // at this location, so don't bother with checking impassable or
 // blocking lines.
 
-BOOL PIT_GetSectors (line_t *ld)
+bool PIT_GetSectors (line_t *ld)
 {
 	if (tmbbox[BOXRIGHT]	  <= ld->bbox[BOXLEFT]	 ||
 			tmbbox[BOXLEFT]   >= ld->bbox[BOXRIGHT]  ||
@@ -4132,12 +4130,12 @@ void P_CopySector(sector_t *dest, sector_t *src)
 		dest->ceilingdata = src->ceilingdata->Clone(dest);
 	else
 		dest->ceilingdata = NULL;
-	
+
 	if (src->floordata != NULL)
 		dest->floordata = src->floordata->Clone(dest);
 	else
 		dest->floordata = NULL;
-	
+
 	if (src->lightingdata != NULL)
 		dest->lightingdata = src->lightingdata->Clone(dest);
 	else
