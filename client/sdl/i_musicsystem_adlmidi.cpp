@@ -69,7 +69,7 @@ AdlMidiMusicSystem::AdlMidiMusicSystem()
 	// Midi mapper volume can interfere with PCM volume on some windows versions, ensure that it's set properly
 	I_ResetMidiVolume();
 
-	m_midiPlayer = adl_init(static_cast<int>(snd_samplerate));
+	m_midiPlayer = adl_init(snd_samplerate.asInt());
 	if (!m_midiPlayer)
 	{
 		Printf(PRINT_WARNING, "I_InitMusic: Failed to initialize libADLMIDI with sample rate %shz", snd_samplerate.cstring());
@@ -148,8 +148,7 @@ void AdlMidiMusicSystem::startSong(byte* data, size_t length, bool loop)
 //
 // AdlMidiMusicSystem::_StopSong()
 //
-// Fades the current music out and frees the data structures used for the
-// current song with _UnregisterSong().
+// Fades the current music out
 //
 void AdlMidiMusicSystem::_StopSong()
 {
@@ -158,6 +157,7 @@ void AdlMidiMusicSystem::_StopSong()
 
 	if (!m_isPlaying)
 		return;
+
 	Mix_HookMusic(NULL, NULL);
 }
 
@@ -204,6 +204,7 @@ void AdlMidiMusicSystem::resumeSong()
 // output mixer channel.  Note that Windows Vista/7 combines the volume control
 // for the audio and midi channels and changing the midi volume also changes
 // the SFX volume.
+//
 void AdlMidiMusicSystem::setVolume(float volume)
 {
 	MusicSystem::setVolume(volume);
@@ -231,8 +232,8 @@ void AdlMidiMusicSystem::_UpdateMidiHook()
 // AdlMidiMusicSystem::_RegisterSong
 //
 // Determines the format of music data and allocates the memory for the music
-// data if appropriate.  Note that _UnregisterSong should be called after
-// playing to free the allocated memory.
+// data if appropriate.
+//
 void AdlMidiMusicSystem::_RegisterSong(byte* data, size_t length)
 {
 	m_isPlaying = false;
@@ -255,10 +256,10 @@ void AdlMidiMusicSystem::applyCVars()
 	if (m_isPlaying)
 		Mix_HookMusic(NULL, NULL);
 
-	adl_switchEmulator(m_midiPlayer, oplCoreMap[static_cast<int>(snd_oplcore)]);
+	adl_switchEmulator(m_midiPlayer, oplCoreMap[snd_oplcore.asInt()]);
 	adl_setSoftPanEnabled(m_midiPlayer, snd_oplpan);
 	adl_setNumChips(m_midiPlayer, snd_oplchips);
-	adl_setBank(m_midiPlayer, oplBankMap[static_cast<int>(snd_oplbank)]);
+	adl_setBank(m_midiPlayer, oplBankMap[snd_oplbank.asInt()]);
 
 	if (m_isPlaying)
 		_UpdateMidiHook();
