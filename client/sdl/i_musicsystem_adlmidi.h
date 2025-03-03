@@ -36,7 +36,7 @@ struct AdlMidiHookData
 /**
  * @brief Plays music utilizing the libADLMIDI music library.
  */
-class AdlMidiMusicSystem : public MidiMusicSystem
+class AdlMidiMusicSystem : public MusicSystem
 {
   public:
 	AdlMidiMusicSystem();
@@ -54,13 +54,9 @@ class AdlMidiMusicSystem : public MidiMusicSystem
 
 	void applyCVars();
 
-	// TODO: actually see if these need real implementations
-	void writeVolume(int time, byte channel, byte volume) override {};
-	void writeControl(int time, byte channel, byte control, byte value) override {};
-	void writeChannel(int time, byte channel, byte status, byte param1, byte param2 = 0) override {};
-	void writeSysEx(int time, const byte *data, size_t length) override {};
-	void allNotesOff() override {};
-	void allSoundOff() override {};
+	// Only plays midi-type music
+	bool isMusCapable() const override { return true; }
+	bool isMidiCapable() const override { return true; }
 
   private:
 	bool m_isInitialized = false;
