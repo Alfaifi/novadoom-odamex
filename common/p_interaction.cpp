@@ -2136,6 +2136,10 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		ang >>= ANGLETOFINESHIFT;
 		target->momx += FixedMul(thrust, finecosine[ang]);
 		target->momy += FixedMul(thrust, finesine[ang]);
+
+		/* killough 11/98: thrust objects hanging off ledges */
+		if (target->oflags & MFO_FALLING && target->gear >= MAXGEAR)
+			target->gear = 0;
 	}
 
 	// player specific
