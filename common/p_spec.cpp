@@ -74,6 +74,10 @@ EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
 EXTERN_CVAR(co_boomphys)
 
+#ifdef CLIENT_APP
+EXTERN_CVAR(cl_showfriends)
+#endif
+
 std::list<movingsector_t> movingsectors;
 std::list<sector_t*> specialdoors;
 bool s_SpecialFromServer;
@@ -2377,6 +2381,11 @@ void P_SetupWorldState(void)
 	{
 		level.behavior->StartTypedScripts(SCRIPT_Open, NULL, 0, 0, 0, false);
 	}
+
+#ifdef CLIENT_APP
+	if (cl_showfriends)
+		P_FriendlyEffects(); // Mark any new friendly monsters with an effect
+#endif
 }
 
 void P_AddSectorSecret(sector_t* sector)

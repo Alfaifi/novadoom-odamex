@@ -950,7 +950,7 @@ static bool P_HelpFriend(AActor* actor)
 
 bool P_LookForMonsters(AActor* actor, bool allaround)
 {
-	if (demoplayback)
+	if (!P_IsMBFCompatMode())
 		return false;
 
 	// Use last known enemy if no hatee sighted -- killough 2/15/98:
