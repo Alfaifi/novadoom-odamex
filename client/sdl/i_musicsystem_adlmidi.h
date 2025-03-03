@@ -63,14 +63,12 @@ class AdlMidiMusicSystem : public MidiMusicSystem
 	void allSoundOff() override {};
 
   private:
-	bool m_isInitialized;
-	int m_songType;
-	MusicHandler_t m_digitalSong;
+	bool m_isInitialized = false;
+	bool m_isPlaying = false;
 	ADL_MIDIPlayer *m_midiPlayer;
 	AdlMidiHookData m_midiHookData;
 
 	void _StopSong();
 	void _RegisterSong(byte* data, size_t length);
-	void _UnregisterSong();
 	void _UpdateMidiHook();
 };

@@ -60,19 +60,11 @@ CVAR_FUNC_IMPL (snd_oplbank)
 		static_cast<AdlMidiMusicSystem *>(musicsystem)->applyCVars();
 }
 
-
-typedef enum
-{
-	SONGTYPE_NONE = 0,
-	SONGTYPE_MIDI = 1,
-	SONGTYPE_DIGITAL = 2
-} SongType;
-
 static int oplCoreMap[] = {ADLMIDI_EMU_DOSBOX, ADLMIDI_EMU_NUKED_174, ADLMIDI_EMU_NUKED};
 static int oplBankMap[] = {16, 14, 72};
 
 
-AdlMidiMusicSystem::AdlMidiMusicSystem() : m_isInitialized(false), m_songType(SONGTYPE_NONE), m_digitalSong()
+AdlMidiMusicSystem::AdlMidiMusicSystem()
 {
 	// Midi mapper volume can interfere with PCM volume on some windows versions, ensure that it's set properly
 	I_ResetMidiVolume();
@@ -144,25 +136,11 @@ void AdlMidiMusicSystem::startSong(byte* data, size_t length, bool loop)
 
 	_RegisterSong(data, length);
 
-	switch (m_songType)
-	{
-	case SONGTYPE_NONE: return;
+	if (!m_isPlaying)
+		return;
 
-	case SONGTYPE_MIDI:
-		adl_setLoopEnabled(m_midiPlayer, loop);
-		_UpdateMidiHook();
-		break;
-
-	case SONGTYPE_DIGITAL:
-		Mix_HaltMusic();
-		if (Mix_PlayMusic(m_digitalSong.Track, loop ? -1 : 1) == -1)
-		{
-			Printf(PRINT_WARNING, "Mix_PlayMusic: %s\n", Mix_GetError());
-			_UnregisterSong();
-			return;
-		}
-		break;
-	}
+	adl_setLoopEnabled(m_midiPlayer, loop);
+	_UpdateMidiHook();
 
 	MusicSystem::startSong(data, length, loop);
 }
@@ -178,20 +156,9 @@ void AdlMidiMusicSystem::_StopSong()
 	if (!isInitialized() || !isPlaying())
 		return;
 
-	switch (m_songType)
-	{
-	case SONGTYPE_NONE: return;
-
-	case SONGTYPE_MIDI:
-		Mix_HookMusic(NULL, NULL);
-		break;
-	case SONGTYPE_DIGITAL:
-		if (!isPaused())
-			Mix_FadeOutMusic(100);
-		break;
-	}
-
-	_UnregisterSong();
+	if (!m_isPlaying)
+		return;
+	Mix_HookMusic(NULL, NULL);
 }
 
 //
@@ -212,34 +179,20 @@ void AdlMidiMusicSystem::pauseSong()
 {
 	MusicSystem::pauseSong();
 
-	switch (m_songType)
-	{
-	case SONGTYPE_NONE: return;
+	if (!m_isPlaying)
+		return;
 
-	case SONGTYPE_MIDI:
-		_UpdateMidiHook();
-		break;
-	case SONGTYPE_DIGITAL:
-		Mix_PauseMusic();
-		break;
-	}
+	_UpdateMidiHook();
 }
 
 void AdlMidiMusicSystem::resumeSong()
 {
 	MusicSystem::resumeSong();
 
-	switch (m_songType)
-	{
-	case SONGTYPE_NONE: return;
+	if (!m_isPlaying)
+		return;
 
-	case SONGTYPE_MIDI:
-		_UpdateMidiHook();
-		break;
-	case SONGTYPE_DIGITAL:
-		Mix_ResumeMusic();
-		break;
-	}
+	_UpdateMidiHook();
 }
 
 
@@ -262,7 +215,7 @@ void AdlMidiMusicSystem::setVolume(float volume)
 
 void AdlMidiMusicSystem::_UpdateMidiHook()
 {
-	if (m_songType != SONGTYPE_MIDI)
+	if (!m_isPlaying)
 		return;
 
 	SDL_LockAudio();
@@ -274,31 +227,6 @@ void AdlMidiMusicSystem::_UpdateMidiHook()
 	Mix_HookMusic(adlmidi_music_hook, &m_midiHookData);
 }
 
-
-//
-// AdlMidiMusicSystem::_UnregisterSong
-//
-// Frees the data structures that store the song.  Called when stopping song.
-//
-void AdlMidiMusicSystem::_UnregisterSong()
-{
-	if (!isInitialized())
-		return;
-
-	if (m_digitalSong.Track)
-		Mix_FreeMusic(m_digitalSong.Track);
-
-	m_digitalSong.Track = NULL;
-	m_digitalSong.Data = NULL;
-	if (m_digitalSong.Mem != NULL)
-	{
-		mem_fclose(m_digitalSong.Mem);
-		m_digitalSong.Mem = NULL;
-	}
-
-	m_songType = SONGTYPE_NONE;
-}
-
 //
 // AdlMidiMusicSystem::_RegisterSong
 //
@@ -307,8 +235,7 @@ void AdlMidiMusicSystem::_UnregisterSong()
 // playing to free the allocated memory.
 void AdlMidiMusicSystem::_RegisterSong(byte* data, size_t length)
 {
-	_UnregisterSong();
-
+	m_isPlaying = false;
 	if (S_MusicIsMus(data, length) || S_MusicIsMidi(data, length))
 	{
 		adl_reset(m_midiPlayer);
@@ -318,39 +245,14 @@ void AdlMidiMusicSystem::_RegisterSong(byte* data, size_t length)
 			return;
 		}
 
-		m_songType = SONGTYPE_MIDI;
-	}
-	else
-	{
-		m_digitalSong.Data = SDL_RWFromMem(data, length);
-
-		if (!m_digitalSong.Data)
-		{
-			Printf(PRINT_WARNING, "SDL_RWFromMem: %s\n", SDL_GetError());
-			return;
-		}
-
-	// We can read the midi data directly from memory
-	#ifdef SDL20
-		m_digitalSong.Track = Mix_LoadMUS_RW(m_digitalSong.Data, 0);
-	#elif defined SDL12
-		m_digitalSong.Track = Mix_LoadMUS_RW(m_digitalSong.Data);
-	#endif // SDL12
-
-		if (!m_digitalSong.Track)
-		{
-			Printf(PRINT_WARNING, "Mix_LoadMUS_RW: %s\n", Mix_GetError());
-			return;
-		}
-
-		m_songType = SONGTYPE_DIGITAL;
+		m_isPlaying = true;
 	}
 }
 
 
 void AdlMidiMusicSystem::applyCVars()
 {
-	if (m_songType == SONGTYPE_MIDI)
+	if (m_isPlaying)
 		Mix_HookMusic(NULL, NULL);
 
 	adl_switchEmulator(m_midiPlayer, oplCoreMap[static_cast<int>(snd_oplcore)]);
@@ -358,6 +260,6 @@ void AdlMidiMusicSystem::applyCVars()
 	adl_setNumChips(m_midiPlayer, snd_oplchips);
 	adl_setBank(m_midiPlayer, oplBankMap[static_cast<int>(snd_oplbank)]);
 
-	if (m_songType == SONGTYPE_MIDI)
+	if (m_isPlaying)
 		_UpdateMidiHook();
 }
