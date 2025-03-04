@@ -348,7 +348,7 @@ CVAR_RANGE(sv_countdown, "5",
 					"sectors and lines",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
-	CVAR(			co_allowdropoff, "0", "Allow monsters can get pushed or thrusted off of ledges. Friends can also drop down from ledges with this.",
+	CVAR(			co_allowdropoff, "0", "Allow monsters can get pushed or thrusted off of ledges.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH)
 
 	CVAR(			co_removesoullimit, "0", "Allows pain elementals to still spawn lost souls if more than 20 are present",
@@ -394,6 +394,18 @@ CVAR_RANGE(sv_countdown, "5",
 					"Use MBF dog_jumping behavior -- friendly monsters will drop off high ledges "
 					"if the target is immediately on the other side.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
+
+	CVAR_RANGE(co_playerhelpers, "0",
+					"Use MBF player_helpers behavior -- amount of friendly things to spawn at map start.\n" \
+					"If in an online game, dogs spawn only once on map start per helper per player.\n" \
+					"The helpers are defined in BEX or through the cvar co_helpertype.",
+					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 4.0f)
+
+		CVAR(co_helpertype, "MBFHelperDog", 
+					"Name of the actor type to spawn as a helper.\n" \
+					"Spawnable actors can be found using the ccmd `dumpactors`\n" \
+					"If the actor name can't be found, an MBF helper dog will be spawned\n",
+					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
 
 
 
