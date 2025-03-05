@@ -33,6 +33,7 @@ RUN true \
 WORKDIR /build/odamex
 
 # Apply Manual Patches (make sure they are UTF-8 encoded)
+RUN mkdir /patches
 COPY docker-files/patches /patches
 RUN true \
     && shopt -s nullglob \
