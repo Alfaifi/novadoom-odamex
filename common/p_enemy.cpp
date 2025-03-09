@@ -976,7 +976,7 @@ bool P_LookForMonsters(AActor* actor, bool allaround)
 
 	// This is NOT MBF behavior
 	// But we want a smarter monster check for friendlies and hostiles attacking friendlies.
-	AActor* enemy = P_RoughTargetSearch(actor, FixedToAngle(INT2FIXED(180)), 896, RoughMonsterCheck);
+	AActor* enemy = P_RoughTargetSearch(actor, FixedToAngle(INT2FIXED(180)), 7, RoughMonsterCheck);
 
 	if (enemy)
 	{
