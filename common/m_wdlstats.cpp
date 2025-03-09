@@ -411,12 +411,12 @@ static std::string GenerateTimestamp()
 
 static void WDLStatsHelp()
 {
-	Printf(PRINT_HIGH,
-	       "wdlstats - Starts logging WDL statistics to the given directory.  Unless "
-	       "you are running a WDL server, you probably are not interested in this.\n\n"
-	       "Usage:\n"
-	       "  ] wdlstats <DIRNAME>\n"
-	       "  Starts logging WDL statistics in the directory DIRNAME.\n");
+	PrintFmt(PRINT_HIGH,
+	         "wdlstats - Starts logging WDL statistics to the given directory.  Unless "
+	         "you are running a WDL server, you probably are not interested in this.\n\n"
+	         "Usage:\n"
+	         "  ] wdlstats <DIRNAME>\n"
+	         "  Starts logging WDL statistics in the directory DIRNAME.\n");
 }
 
 BEGIN_COMMAND(wdlstats)
@@ -434,9 +434,9 @@ BEGIN_COMMAND(wdlstats)
 	if (::wdlstate.logdir.back() != PATHSEPCHAR)
 		::wdlstate.logdir += PATHSEPCHAR;
 
-	Printf(PRINT_HIGH,
-	       "wdlstats: Enabled, will log to directory \"%s\" on next map change.\n",
-	       wdlstate.logdir.c_str());
+	PrintFmt(PRINT_HIGH,
+	         "wdlstats: Enabled, will log to directory \"{}\" on next map change.\n",
+	         wdlstate.logdir);
 }
 END_COMMAND(wdlstats)
 
@@ -498,8 +498,8 @@ void M_StartWDLLog(bool newmap)
 	// Set our starting tic.
 	::wdlstate.begintic = ::gametic;
 
-	Printf(PRINT_HIGH, "wdlstats: Started, will log to directory \"%s\".\n",
-	       wdlstate.logdir.c_str());
+	PrintFmt(PRINT_HIGH, "wdlstats: Started, will log to directory \"{}\".\n",
+	       wdlstate.logdir);
 }
 
 /**
@@ -990,8 +990,8 @@ void M_CommitWDLLog()
 	if (fh == NULL)
 	{
 		::wdlstate.recording = false;
-		Printf(PRINT_HIGH, "wdlstats: Could not save\"%s\" for writing.\n",
-		       filename);
+		PrintFmt(PRINT_HIGH, "wdlstats: Could not save\"%s\" for writing.\n",
+		         filename);
 		return;
 	}
 
@@ -1000,7 +1000,7 @@ void M_CommitWDLLog()
 	fmt::print(fh, "time={}\n", iso8601buf);
 	fmt::print(fh, "levelnum={}\n", ::level.levelnum);
 	fmt::print(fh, "levelname={}\n", ::level.level_name);
-	fmt::fprintf(fh, "levelhash=%.16llx%.16llx\n", reconsthash1, reconsthash2);
+	fmt::print(fh, "levelhash={:016x}{:016x}\n", reconsthash1, reconsthash2);
 	fmt::print(fh, "gametype={}\n", ::sv_gametype.str());
 	fmt::print(fh, "lives={}\n", ::g_lives.str());
 	fmt::print(fh, "attackdefend={}\n", ::g_sides.str());
@@ -1049,7 +1049,7 @@ void M_CommitWDLLog()
 	// log starter next go-around.
 	::wdlstate.recording = false;
 
-	Printf(PRINT_HIGH, "wdlstats: Log saved as \"%s\".\n", filename.c_str());
+	PrintFmt(PRINT_HIGH, "wdlstats: Log saved as \"{}\".\n", filename);
 }
 
 static void PrintWDLEvent(const WDLEvent& evt)
@@ -1059,17 +1059,17 @@ static void PrintWDLEvent(const WDLEvent& evt)
 
 static void WDLInfoHelp()
 {
-	Printf(PRINT_HIGH,
-	       "wdlinfo - Looks up internal information about logged WDL events\n\n"
-	       "Usage:\n"
-	       "  ] wdlinfo event <ID>\n"
-	       "  Print the event by ID.\n\n"
-	       "  ] wdlinfo size\n"
-	       "  Return the size of the internal event array.\n\n"
-	       "  ] wdlinfo state\n"
-	       "  Return relevant WDL stats state.\n\n"
-	       "  ] wdlinfo tail\n"
-	       "  Print the last 10 events.\n");
+	PrintFmt(PRINT_HIGH,
+	         "wdlinfo - Looks up internal information about logged WDL events\n\n"
+	         "Usage:\n"
+	         "  ] wdlinfo event <ID>\n"
+	         "  Print the event by ID.\n\n"
+	         "  ] wdlinfo size\n"
+	         "  Return the size of the internal event array.\n\n"
+	         "  ] wdlinfo state\n"
+	         "  Return relevant WDL stats state.\n\n"
+	         "  ] wdlinfo tail\n"
+	         "  Print the last 10 events.\n");
 }
 
 BEGIN_COMMAND(wdlinfo)
@@ -1083,17 +1083,17 @@ BEGIN_COMMAND(wdlinfo)
 	if (stricmp(argv[1], "size") == 0)
 	{
 		// Count total events.
-		Printf(PRINT_HIGH, "%zu events found\n", ::wdlevents.size());
+		PrintFmt(PRINT_HIGH, "{} events found\n", ::wdlevents.size());
 		return;
 	}
 	else if (stricmp(argv[1], "state") == 0)
 	{
 		// Count total events.
-		Printf(PRINT_HIGH, "Currently recording?: %s\n",
-		       ::wdlstate.recording ? "Yes" : "No");
-		Printf(PRINT_HIGH, "Directory to write logs to: \"%s\"\n",
-		       ::wdlstate.logdir);
-		Printf(PRINT_HIGH, "Log starting gametic: %d\n", ::wdlstate.begintic);
+		PrintFmt(PRINT_HIGH, "Currently recording?: {}\n",
+		         ::wdlstate.recording ? "Yes" : "No");
+		PrintFmt(PRINT_HIGH, "Directory to write logs to: \"{}\"\n",
+		         ::wdlstate.logdir);
+		PrintFmt(PRINT_HIGH, "Log starting gametic: {}\n", ::wdlstate.begintic);
 		return;
 	}
 	else if (stricmp(argv[1], "tail") == 0)
@@ -1101,7 +1101,7 @@ BEGIN_COMMAND(wdlinfo)
 		// [Blair] C++ doesn't like when you access an iterator on an empty vector.
 		if (::wdlevents.empty())
 		{
-			Printf(PRINT_HIGH, "No events to show.\n");
+			PrintFmt(PRINT_HIGH, "No events to show.\n");
 			return;
 		}
 		// Show last 10 events.
@@ -1109,8 +1109,8 @@ BEGIN_COMMAND(wdlinfo)
 		if (it < ::wdlevents.begin())
 			it = wdlevents.begin();
 
-		Printf(PRINT_HIGH, "Showing last %zd events:\n",
-		       ::wdlevents.end() - it);
+		PrintFmt(PRINT_HIGH, "Showing last {} events:\n",
+		         ::wdlevents.end() - it);
 		for (; it != ::wdlevents.end(); ++it)
 			PrintWDLEvent(*it);
 		return;
@@ -1127,7 +1127,7 @@ BEGIN_COMMAND(wdlinfo)
 		int id = atoi(argv[2]);
 		if (id >= static_cast<int>(::wdlevents.size()))
 		{
-			Printf(PRINT_HIGH, "Event number %d not found\n", id);
+			PrintFmt(PRINT_HIGH, "Event number {} not found\n", id);
 			return;
 		}
 		WDLEvent evt = ::wdlevents.at(id);
