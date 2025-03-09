@@ -153,6 +153,15 @@ struct WDLEvent
 	int arg3;
 };
 
+auto inline format_as(const WDLEvent& ev)
+{
+	//                 "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
+	return fmt::format("{},{},{},{},{},{},{},{},{},{},{},{},{},{}", ev.ev,
+	                   ev.activator, ev.target, ev.gametic, ev.apos[0], ev.apos[1],
+	                   ev.apos[2], ev.tpos[0], ev.tpos[1], ev.tpos[2], ev.arg0,
+	                   ev.arg1, ev.arg2, ev.arg3);
+}
+
 // Events that we're keeping track of.
 typedef std::vector<WDLEvent> WDLEventLog;
 static WDLEventLog wdlevents;
@@ -1032,13 +1041,7 @@ void M_CommitWDLLog()
 	// Events
 	fmt::print(fh, "events\n");
 	for (const auto& ev : ::wdlevents)
-	{
-		//             "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
-		fmt::print(fh, "{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n", ev.ev,
-		           ev.activator, ev.target, ev.gametic, ev.apos[0], ev.apos[1],
-		           ev.apos[2], ev.tpos[0], ev.tpos[1], ev.tpos[2], ev.arg0,
-		           ev.arg1, ev.arg2, ev.arg3);
-	}
+		fmt::print(fh, "{}\n", ev);
 
 	fclose(fh);
 
@@ -1051,11 +1054,7 @@ void M_CommitWDLLog()
 
 static void PrintWDLEvent(const WDLEvent& evt)
 {
-	// FIXME: Once we have access to StrFormat, dedupe this format string.
-	//                 "ev,ac,tg,gt,ax,ay,az,tx,ty,tz,a0,a1,a2,a3"
-	Printf(PRINT_HIGH, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", evt.ev,
-	       evt.activator, evt.target, evt.gametic, evt.apos[0], evt.apos[1], evt.apos[2],
-	       evt.tpos[0], evt.tpos[1], evt.tpos[2], evt.arg0, evt.arg1, evt.arg2, evt.arg3);
+	PrintFmt(PRINT_HIGH, "{}\n", evt);
 }
 
 static void WDLInfoHelp()
