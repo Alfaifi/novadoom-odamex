@@ -50,6 +50,8 @@ EXTERN_CVAR(g_horde_spawnempty_min)
 EXTERN_CVAR(g_horde_spawnempty_max)
 EXTERN_CVAR(g_horde_spawnfull_min)
 EXTERN_CVAR(g_horde_spawnfull_max)
+EXTERN_CVAR(g_horde_extralife)
+EXTERN_CVAR(g_horde_resurrect)
 EXTERN_CVAR(sv_nomonsters)
 
 void A_PainDie(AActor* actor);
@@ -714,7 +716,24 @@ void HordeState::tick()
 		const int offset = P_RandomInt(16) + 30;
 		m_nextPowerup = ::level.time + (offset * TICRATE);
 
-		const mobjtype_t pw = define.randomPowerup().mobj;
+		hordeDefine_t newdef = define;
+
+		// Add extra life/resurrect powerups when
+		if (g_horde_extralife.value() > 0.0f)
+		{
+			hordeDefine_t::powConfig_t config;
+			config.chance = g_horde_extralife.value();
+			newdef.addPowerup(MT_EXTRALIFE, config);
+		}
+
+		if (g_horde_resurrect.value() > 0.0f)
+		{
+			hordeDefine_t::powConfig_t config;
+			config.chance = g_horde_resurrect.value();
+			newdef.addPowerup(MT_RESTEAMMATE, config);
+		}
+
+		const mobjtype_t pw = newdef.randomPowerup().mobj;
 		P_HordeSpawnPowerup(pw);
 	}
 }

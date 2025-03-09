@@ -226,6 +226,8 @@ typedef enum
 	SPR_WPGF,
 
 	SPR_CARE,
+	SPR_LIVES,
+	SPR_RES,
 
 	NUMSPRITES
 
@@ -1362,6 +1364,8 @@ typedef enum
 	S_WPGF2,
 
 	S_CARE, // Horde - Care Package
+	S_LIVES,// Horde - Extra Life Power Up
+	S_RES,  // Horde - Resurrect Power Up
 
 	S_NOWEAPONUP,
 	S_NOWEAPONDOWN,
@@ -1665,6 +1669,8 @@ typedef enum {
 	MT_AVATAR,
 	MT_HORDESPAWN,
 	MT_CAREPACK,
+	MT_EXTRALIFE,
+	MT_RESTEAMMATE,
 
 	NUMMOBJTYPES
 

@@ -1318,7 +1318,9 @@ state_t odastates[NUMSTATES - S_GIB0] = {
     {SPR_WPGF, 0, 1, NULL, S_WPGF2, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_WPGF1 - Waypoint Green Flag
     {SPR_WPGF, 1, 1, NULL, S_WPGF1, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_WPGF2
 
-    {SPR_CARE, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE}, // S_CARE - Horde Care Package
+    {SPR_CARE, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_CARE - Horde Care Package
+    {SPR_LIVES, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},      // S_LIVES - Horde Extra Life Powerup
+    {SPR_RES, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},        // S_RES - Horde Resurrect Powerup
 
     {SPR_TNT1, 0, 1, A_Raise, S_NOWEAPON, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_NOWEAPONUP
     {SPR_TNT1, 0, 1, A_Lower, S_NOWEAPON, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_NOWEAPONDOWN
@@ -9170,6 +9172,82 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 		S_NULL,         // raisestate
 		0x10000,
 		"MT_CAREPACK",
+		NO_ALTSPEED,	// altspeed
+		64 * FRACUNIT,	// meleerange
+		IG_DEFAULT,		// infighting group
+		PG_DEFAULT,		// projectile group
+		SG_DEFAULT,		// splash group
+		0,		// flags3
+		NULL, // ripsound
+		MT_NULL		// droppeditem
+	},
+	{                 // MT_EXTRALIFE
+		-1,             // doomednum
+		S_LIVES,        // spawnstate
+		1000,           // spawnhealth
+		0,              // gibhealth
+		S_NULL,         // seestate
+		NULL,           // seesound
+		8,              // reactiontime
+		NULL,           // attacksound
+		S_NULL,         // painstate
+		0,              // painchance
+		NULL,           // painsound
+		S_NULL,         // meleestate
+		S_NULL,         // missilestate
+		S_NULL,         // deathstate
+		S_NULL,         // xdeathstate
+		NULL,           // deathsound
+		0,              // speed
+		20*FRACUNIT,    // radius
+		16*FRACUNIT,    // height
+		16*FRACUNIT,    // cdheight
+		100,            // mass
+		0,              // damage
+		NULL,           // activesound
+		MF_SPECIAL,     // flags
+		0,              // flags2
+		S_NULL,         // raisestate
+		0x10000,
+		"MT_EXTRALIFE",
+		NO_ALTSPEED,	// altspeed
+		64 * FRACUNIT,	// meleerange
+		IG_DEFAULT,		// infighting group
+		PG_DEFAULT,		// projectile group
+		SG_DEFAULT,		// splash group
+		0,		// flags3
+		NULL, // ripsound
+		MT_NULL		// droppeditem
+	},
+	{                 // MT_RESTEAMMATE
+		-1,             // doomednum
+		S_RES,          // spawnstate
+		1000,           // spawnhealth
+		0,              // gibhealth
+		S_NULL,         // seestate
+		NULL,           // seesound
+		8,              // reactiontime
+		NULL,           // attacksound
+		S_NULL,         // painstate
+		0,              // painchance
+		NULL,           // painsound
+		S_NULL,         // meleestate
+		S_NULL,         // missilestate
+		S_NULL,         // deathstate
+		S_NULL,         // xdeathstate
+		NULL,           // deathsound
+		0,              // speed
+		20*FRACUNIT,    // radius
+		16*FRACUNIT,    // height
+		16*FRACUNIT,    // cdheight
+		100,            // mass
+		0,              // damage
+		NULL,           // activesound
+		MF_SPECIAL,     // flags
+		0,              // flags2
+		S_NULL,         // raisestate
+		0x10000,
+		"MT_RESTEAMMATE",
 		NO_ALTSPEED,	// altspeed
 		64 * FRACUNIT,	// meleerange
 		IG_DEFAULT,		// infighting group

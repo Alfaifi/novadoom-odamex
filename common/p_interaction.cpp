@@ -577,6 +577,85 @@ ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power)
 
 #include "v_textcolors.h"
 
+	/*
+ * @brief Player grabbed a resurrect player powerup
+ */
+static void P_ResurrectPlayerPowerUp(player_t* player)
+{
+	// Not lives game? Nothing to do.
+	if (!G_IsLivesGame())
+		return;
+
+	if (!player)
+		return;
+
+	// Grab all the players in game, make a list of their ids, then pick one at random
+	PlayersView ingame = PlayerQuery().notHasLives().execute().players;
+	std::vector<int> ingameplayers;
+	for (const auto& p : ingame)
+	{
+		if (p->id != player->id)
+			ingameplayers.push_back(p->id);
+	}
+
+	if (ingameplayers.empty())
+	{
+		SV_BroadcastPrintf("%s tried to resurrect someone, but nobody else is in game!\n",
+		                   player->userinfo.netname.c_str());
+		return;
+	}
+
+	int playerid = M_RandomInt(ingameplayers.size());
+
+	auto it = std::find_if(players.begin(), players.end(),
+	                       [&](player_s& p) { return p.id == playerid; });
+
+	if (it == players.end())
+		return;
+
+	it->lives += 1;
+	it->playerstate = PST_REBORN;
+
+	SV_BroadcastPrintf("%s has brought %s back into the fight!\n",
+	                   player->userinfo.netname.c_str(), it->userinfo.netname.c_str());
+
+	PlayersView currentplayers = PlayerQuery().execute().players;
+
+	for (const auto& p : currentplayers)
+	{
+		if (p->id == playerid)
+		{
+			// Send a res sound directly to this player.
+			MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
+			S_PlayerSound(p, NULL, CHAN_INTERFACE, "misc/plraise", ATTN_NONE);
+		}
+	}
+
+	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*player, SVC_PM_LIVES),
+	                 player->id);
+}
+
+/*
+ * @brief Player grabbed an extra life powerup
+ */
+static void P_AwardExtraLifePowerUp(player_t* player)
+{
+	// Not lives game? Nothing to do.
+	if (!G_IsLivesGame())
+		return;
+
+	if (!player)
+		return;
+
+	SV_BroadcastPrintf("%s was awarded an extra life!\n",
+	                   player->userinfo.netname.c_str());
+
+	player->lives += 1;
+	MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
+	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*player, SVC_PM_LIVES),
+	                 player->id);
+}
+
 /**
  * @brief Give the player a care package.
  *
@@ -1120,6 +1199,18 @@ void P_GiveSpecial(player_t *player, AActor *special)
 			P_GiveCarePack(player);
 		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_CAREPACKAGE, false);
 			break;
+
+		case SPR_LIVES:
+		    // Award an extra life to the player who collects this
+		    P_AwardExtraLifePowerUp(player);
+		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_EXTRALIFE, false);
+		    break;
+
+		case SPR_RES:
+		    // Resurrect a player with this power up
+		    P_ResurrectPlayerPowerUp(player);
+		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_RESTEAMMATE, false);
+		    break;
 
 		// weapons
 	    case SPR_BFUG:
