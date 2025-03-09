@@ -1062,6 +1062,9 @@ void P_ClearHelpers()
 
 void P_SetupHelpers()
 {
+	if (!serverside)
+		return;
+
 	for (Players::iterator it = players.begin(); it != players.end(); ++it)
 	{
 		if (!(it->ingame()))
