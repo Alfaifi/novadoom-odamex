@@ -88,6 +88,22 @@ extern line_t*			lines;
 extern int				numsides;
 extern side_t*			sides;
 
+constexpr nonstd::span<spritedef_t> R_GetSprites() { return { sprites, numsprites }; }
+
+constexpr nonstd::span<vertex_t>    R_GetVertices() { return { vertexes, numvertexes }; }
+
+constexpr nonstd::span<seg_t>       R_GetSegs() { return { segs, numsegs }; }
+
+constexpr nonstd::span<sector_t>    R_GetSectors() { return { sectors, numsectors }; }
+
+constexpr nonstd::span<subsector_t> R_GetSubsectors() { return { subsectors, numsubsectors }; }
+
+constexpr nonstd::span<node_t>      R_GetNodes() { return { nodes, numnodes }; }
+
+constexpr nonstd::span<line_t>      R_GetLines() { return { lines, numlines }; }
+
+constexpr nonstd::span<side_t>      R_GetSides() { return { sides, numsides }; }
+
 extern std::vector<int> originalLightLevels;
 
 inline FArchive &operator<< (FArchive &arc, sector_t *sec)
