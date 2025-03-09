@@ -136,11 +136,13 @@ AActor**		blocklinks;		// for thing chains
 byte*			rejectmatrix;
 bool			rejectempty;
 
-
 // Maintain single and multi player starting spots.
 std::vector<mapthing2_t> DeathMatchStarts;
 std::vector<mapthing2_t> playerstarts;
 std::vector<mapthing2_t> voodoostarts;
+
+// Maintain list of helpers to spawn in a given map
+std::vector<HelperSpawns> helperspawns;
 
 // For sorting player starts
 static bool cmpPlayerNum(mapthing2_t i, mapthing2_t j)
@@ -1971,6 +1973,8 @@ void P_SetupLevel (const char *lumpname, int position)
 	// [AM] Every new level starts with fresh netids.
 	P_ClearAllNetIds();
 
+	P_ClearHelpers();
+
 	// UNUSED W_Profile ();
 
 	// find map num
@@ -2091,6 +2095,8 @@ void P_SetupLevel (const char *lumpname, int position)
 
 	// set up world state
 	P_SetupWorldState();
+
+	P_SetupHelpers();
 
 	// build subsector connect matrix
 	//	UNUSED P_ConnectSubsectors ();

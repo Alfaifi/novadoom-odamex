@@ -418,6 +418,16 @@ player_t		&idplayer(byte id);
 player_t		&nameplayer(const std::string &netname);
 bool			validplayer(const player_t &ref);
 
+// A helper spawn object.
+// One object = 1 spawn
+struct HelperSpawns
+{
+	mobjtype_t helpertype;
+	int playerid;
+};
+
+extern std::vector<HelperSpawns> helperspawns;
+
 /**
  * @brief A collection of pointers to players, commonly called a "view".
  */

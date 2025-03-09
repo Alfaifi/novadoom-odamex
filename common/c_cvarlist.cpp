@@ -398,12 +398,13 @@ CVAR_RANGE(sv_countdown, "5",
 	CVAR_RANGE(co_playerhelpers, "0",
 					"Use MBF player_helpers behavior -- amount of friendly things to spawn at map start.\n" \
 					"If in an online game, dogs spawn only once on map start per helper per player.\n" \
-					"The helpers are defined in BEX or through the cvar co_helpertype.",
-					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 4.0f)
+					"The helper type is defined in BEX or through the cvar co_helpertype.",
+					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 64.0f)
 
-		CVAR(co_helpertype, "MBFHelperDog", 
+		CVAR(co_helpertype, "", 
 					"Name of the actor type to spawn as a helper.\n" \
 					"Spawnable actors can be found using the ccmd `dumpactors`\n" \
+					"If empty, it uses the defined default friend in Dehacked (BEX).\n" \
 					"If the actor name can't be found, an MBF helper dog will be spawned\n",
 					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
 

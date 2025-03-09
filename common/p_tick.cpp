@@ -60,7 +60,10 @@ void P_Ticker (void)
 #endif
 
 	if (serverside)
+	{
 		P_RunHordeTics();
+		P_RunHelperTics();
+	}
 
 	if (clientside)
 		P_ThinkParticles ();	// [RH] make the particles think

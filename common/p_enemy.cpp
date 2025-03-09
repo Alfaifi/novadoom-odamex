@@ -47,6 +47,7 @@
 #include "p_mapformat.h"
 #include "p_boomfspec.h"
 #include "c_effect.h"
+#include "infomap.h"
 
 
 EXTERN_CVAR(sv_allowexit)
@@ -63,6 +64,12 @@ EXTERN_CVAR(co_avoidhazards)
 EXTERN_CVAR(co_staylift)
 EXTERN_CVAR(co_dogjumping)
 EXTERN_CVAR(co_removesoullimit)
+EXTERN_CVAR(co_helpertype)
+EXTERN_CVAR(co_playerhelpers)
+
+#ifdef CLIENT_APP
+EXTERN_CVAR(cl_showfriends)
+#endif
 
 enum dirtype_t
 {
@@ -107,6 +114,7 @@ void A_Fall (AActor *actor);
 void SV_UpdateMonsterRespawnCount();
 void SV_UpdateMobj(AActor* mo);
 void SV_Sound(AActor* mo, byte channel, const char* name, byte attenuation);
+void SV_SpawnMobj(AActor* mobj);
 
 extern bool isFast;
 
@@ -988,6 +996,182 @@ bool P_LookForMonsters(AActor* actor, bool allaround)
 	return false;
 }
 
+/**
+ * @brief Spawn a helper. (borrowed from SpawnMonster from horde)
+ *
+ * @param point Spawn point of the monster.
+ * @param recipe Recipe of a monster to spawn.
+ * @param offset Offset from the spawn point to spawn at.
+ * @param target Player to target.
+ * @return Actor pointer we just spawned, or NULL if the spawn failed.
+ */
+AActor::AActorPtr SpawnHelper(const MapThing SpawnPoint, mobjtype_t SpawnType, const AActor* origin)
+{
+	AActor* mo = new AActor(
+	    SpawnPoint.x << FRACBITS, SpawnPoint.y << FRACBITS,
+	    (level.flags & LEVEL_USEPLAYERSTARTZ ? SpawnPoint.z << FRACBITS : ONFLOORZ),
+	    SpawnType);
+	if (mo)
+	{
+		if (P_TestMobjLocation(mo))
+		{
+			mo->flags |= MF_FRIEND;
+
+			mo->angle = ANG45 * (SpawnPoint.angle / 45);
+
+			P_GiveFriendlyOwnerInfo(mo, origin);
+
+#ifdef CLIENT_APP
+			if (cl_showfriends && validplayer(displayplayer()) && displayplayer().mo &&
+			    P_IsFriendlyThing(displayplayer().mo, mo))
+			{
+				mo->effects = FX_FRIENDHEARTS;
+				mo->translation = translationref_t(&friendtable[0]);
+			}
+#endif
+
+			SV_SpawnMobj(mo);
+
+			// Spawn a teleport fog if it's not an ambush.
+			if ((SpawnPoint.flags & MF_AMBUSH) == 0)
+			{
+				AActor* tele =
+				    new AActor(SpawnPoint.x << FRACBITS, SpawnPoint.y << FRACBITS,
+				    (level.flags & LEVEL_USEPLAYERSTARTZ ? SpawnPoint.z << FRACBITS : ONFLOORZ) + INT2FIXED(gameinfo.telefogHeight),
+				    MT_TFOG);
+				SV_SpawnMobj(tele);
+				S_NetSound(tele, CHAN_VOICE, "misc/teleport", ATTN_NORM);
+			}
+
+			return mo->ptr();
+		}
+		else
+		{
+			// Spawn blocked.
+			mo->Destroy();
+		}
+	}
+
+	return AActor::AActorPtr();
+}
+
+void P_ClearHelpers()
+{
+	helperspawns.clear();
+}
+
+void P_SetupHelpers()
+{
+	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	{
+		if (!(it->ingame()))
+			continue;
+
+		for (int i = 0; i < co_playerhelpers.asInt(); i++)
+		{
+
+			mobjtype_t monstertype = P_INameToMobj(co_helpertype.str());
+
+			if (monstertype == MT_NULL)
+				monstertype = MT_DOGS;
+
+			HelperSpawns helper = {monstertype, it->id};
+
+			helperspawns.push_back(helper);
+		}
+	}
+}
+
+void P_RunHelperTics()
+{
+	if (::helperspawns.empty())
+	{
+		// nothing to do
+		return;
+	}
+
+	std::vector<HelperSpawns>::const_iterator i = ::helperspawns.begin();
+
+	while (i != ::helperspawns.end())
+	{
+		// Remove any disconnected player helpers in the queue
+		// before spawning
+
+		auto it = std::find_if(::players.begin(), ::players.end(),
+			[&](const player_s& p) { return p.id == i->playerid; });
+
+		if (it == players.end() || !it->ingame())
+		{
+			i = ::helperspawns.erase(i);
+			continue;
+		}
+
+		bool spawned = false;
+
+		if (G_UsesCoopSpawns())
+		{
+			// Spawn at coop player spawns
+			for (const auto& spawn : ::playerstarts)
+			{
+				AActor::AActorPtr mo = SpawnHelper(spawn, i->helpertype, it->mo);
+
+				if (!mo)
+				{
+					continue;
+				}
+				else
+				{
+					spawned = true;
+					break;
+				}
+			}
+		}
+		else if (G_IsTeamGame())
+		{
+			// Spawn at player's team starts
+			TeamInfo* teamInfo = GetTeamInfo(it->userinfo.team);
+
+			for (const auto& spawn : teamInfo->Starts)
+			{
+				AActor::AActorPtr mo = SpawnHelper(spawn, i->helpertype, it->mo);
+
+				if (!mo)
+				{
+					continue;
+				}
+				else
+				{
+					spawned = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Spawn at deathmatch spawns
+			for (const auto& spawn : ::DeathMatchStarts)
+			{
+				AActor::AActorPtr mo = SpawnHelper(spawn, i->helpertype, it->mo);
+
+				if (!mo)
+				{
+					continue;
+				}
+				else
+				{
+					spawned = true;
+					break;
+				}
+			}
+		}
+
+		if (spawned)
+			i = ::helperspawns.erase(i);
+		else
+			i++;
+	}
+}
+
 //
 // P_LookForPlayers
 // If allaround is false, only look 180 degrees in front.
@@ -1841,7 +2025,7 @@ void A_CyberAttack (AActor *actor)
 	}
 }
 
-void P_GiveFriendlyOwnerInfo(AActor* friendly, AActor* origin)
+void P_GiveFriendlyOwnerInfo(AActor* friendly, const AActor* origin)
 {
 	if (origin->player && friendly->flags & MF_FRIEND)
 	{
