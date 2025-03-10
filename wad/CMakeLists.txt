@@ -332,7 +332,10 @@ set(ODAWAD_SOURCES
   sprites/wpgfa0.gif
   sprites/wpgfb0.gif
   sprites/wprfa0.gif
-  sprites/wprfb0.gif)
+  sprites/wprfb0.gif
+  sprites/carea0.gif
+  sprites/livea0.gif
+  sprites/rstma0.gif)
 
 if(USE_INTERNAL_DEUTEX)
   if(WIN32)

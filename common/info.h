@@ -226,8 +226,8 @@ typedef enum
 	SPR_WPGF,
 
 	SPR_CARE,
-	SPR_LIVES,
-	SPR_RES,
+	SPR_LIVE,
+	SPR_RSTM,
 
 	NUMSPRITES
 

@@ -718,19 +718,22 @@ void HordeState::tick()
 
 		hordeDefine_t newdef = define;
 
-		// Add extra life/resurrect powerups when
-		if (g_horde_extralife.value() > 0.0f)
+		if (g_lives.asInt() > 0)
 		{
-			hordeDefine_t::powConfig_t config;
-			config.chance = g_horde_extralife.value();
-			newdef.addPowerup(MT_EXTRALIFE, config);
-		}
+			// Add extra life/resurrect powerups when
+			if (g_horde_extralife.value() > 0.0f)
+			{
+				hordeDefine_t::powConfig_t config;
+				config.chance = g_horde_extralife.value();
+				newdef.addPowerup(MT_EXTRALIFE, config);
+			}
 
-		if (g_horde_resurrect.value() > 0.0f)
-		{
-			hordeDefine_t::powConfig_t config;
-			config.chance = g_horde_resurrect.value();
-			newdef.addPowerup(MT_RESTEAMMATE, config);
+			if (g_horde_resurrect.value() > 0.0f)
+			{
+				hordeDefine_t::powConfig_t config;
+				config.chance = g_horde_resurrect.value();
+				newdef.addPowerup(MT_RESTEAMMATE, config);
+			}
 		}
 
 		const mobjtype_t pw = newdef.randomPowerup().mobj;

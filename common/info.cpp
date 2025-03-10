@@ -75,7 +75,7 @@ const char *sprnames[NUMSPRITES+1] = {
 
 	//	[Toke - CTF]
 	"BSOK","RSOK","BFLG","RFLG","BDWN","RDWN","BCAR","RCAR", "GSOK", "GFLG",
-	"GDWN","GCAR","TLGL","WPBF","WPRF","WPGF", "CARE",
+    "GDWN", "GCAR", "TLGL", "WPBF", "WPRF", "WPGF", "CARE", "LIVE", "RSTM",
 	NULL
 };
 
@@ -1319,8 +1319,8 @@ state_t odastates[NUMSTATES - S_GIB0] = {
     {SPR_WPGF, 1, 1, NULL, S_WPGF1, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_WPGF2
 
     {SPR_CARE, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_CARE - Horde Care Package
-    {SPR_LIVES, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},      // S_LIVES - Horde Extra Life Powerup
-    {SPR_RES, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},        // S_RES - Horde Resurrect Powerup
+    {SPR_LIVE, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},      // S_LIVES - Horde Extra Life Powerup
+    {SPR_RSTM, 0, -1, NULL, S_NULL, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},        // S_RES - Horde Resurrect Powerup
 
     {SPR_TNT1, 0, 1, A_Raise, S_NOWEAPON, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_NOWEAPONUP
     {SPR_TNT1, 0, 1, A_Lower, S_NOWEAPON, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}, STATEF_NONE},       // S_NOWEAPONDOWN

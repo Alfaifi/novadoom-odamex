@@ -297,11 +297,13 @@ CVAR_RANGE(g_horde_spawnfull_max, "6",
            60)
 
 CVAR_RANGE(g_horde_extralife, "0.0", "Chance to spawn an `extra life powerup` in Horde.\n" \
-     "The value is the chance this spawns when a powerup is awarded, capped at 4x as likely.",
+     "The value is the chance this spawns when a powerup is awarded, capped at 4x as likely.\n" \
+     "If `g_lives` isn't greater than 0, this cvar has no effect.",
      CVARTYPE_FLOAT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 4.0f)
 
 CVAR_RANGE(g_horde_resurrect, "0.0", "Chance to spawn a `resurrect teammate powerup` in Horde.\n" \
-     "The value is the chance this spawns when a powerup is awarded, capped at 4x as likely.",
+     "The value is the chance this spawns when a powerup is awarded, capped at 4x as likely.\n" \
+     "If `g_lives` isn't greater than 0, this cvar has no effect.",
      CVARTYPE_FLOAT, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 4.0f)
 
 // Game mode options commonized from the server
