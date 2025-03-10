@@ -65,7 +65,8 @@ static float MonsterChance(const hordeDefine_t::monster_t* const& mon)
 
 void hordeDefine_t::addPowerup(const mobjtype_t mobj, const powConfig_t& config)
 {
-	powerups.emplace_back(mobj, config);
+	powerup_t pow = {mobj, config};
+	powerups.push_back(pow);
 }
 
 const hordeDefine_t::powerup_t& hordeDefine_t::randomPowerup() const
@@ -76,7 +77,8 @@ const hordeDefine_t::powerup_t& hordeDefine_t::randomPowerup() const
 void hordeDefine_t::addMonster(const waveMonsterType_e monster, const mobjtype_t mobj,
                                const monConfig_t& config)
 {
-	monsters.emplace_back(monster, mobj, config);
+	monster_t mon = {monster, mobj, config};
+	monsters.push_back(mon);
 }
 
 int hordeDefine_t::minTotalHealth() const
