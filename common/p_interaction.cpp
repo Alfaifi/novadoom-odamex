@@ -600,7 +600,7 @@ static void P_ResurrectPlayerPowerUp(player_t* player)
 
 	if (ingameplayers.empty())
 	{
-		SV_BroadcastPrintf("%s tried to resurrect someone, but nobody else is in game!\n",
+		SV_BroadcastPrintf("%s tried to resurrect someone, but everyone is alive!\n",
 		                   player->userinfo.netname.c_str());
 		return;
 	}
