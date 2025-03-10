@@ -59,6 +59,7 @@ class OLumpName
 	// string operations
 	[[nodiscard]] const char* c_str() const;
 	[[nodiscard]] const char* data() const;
+	operator std::string_view() const;
 	// Note: comparison operations are done without regard to case sensitivity.
 	[[nodiscard]] int compare(const OLumpName& other) const;
 	[[nodiscard]] int compare(const char* other) const;

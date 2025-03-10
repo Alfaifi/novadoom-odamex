@@ -198,6 +198,11 @@ const char* OLumpName::data() const
 	return m_data;
 }
 
+OLumpName::operator std::string_view() const
+{
+	return { m_data, size() };
+}
+
 int OLumpName::compare(const OLumpName& other) const
 {
 	return !stricmp(m_data, other.m_data);
