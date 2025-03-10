@@ -70,7 +70,7 @@ void P_SerializeWorld (FArchive &arc)
 	{ // saving to archive
 
 		// do sectors
-		for (const sector_t& sec : R_GetSectors())
+		for (sector_t& sec : R_GetSectors())
 		{
 			arc << sec.floorheight
 				<< sec.ceilingheight
@@ -134,7 +134,7 @@ void P_SerializeWorld (FArchive &arc)
 		}
 
 		// do lines
-		for (const line_t& line : R_GetLines())
+		for (line_t& line : R_GetLines())
 		{
 			arc << line.flags
 				<< line.special

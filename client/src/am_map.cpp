@@ -374,15 +374,15 @@ void AM_findMinMaxBoundaries()
 	M_SetVec2Fixed64(&min, MAXLONG, MAXLONG);
 	M_SetVec2Fixed64(&max, -MAXLONG, -MAXLONG);
 
-	for (int i = 0; i < numvertexes; i++)
+	for (const auto [x, y]: R_GetVertices())
 	{
-		fixed64_t vx = FIXED2FIXED64(vertexes[i].x);
+		fixed64_t vx = FIXED2FIXED64(x);
 		if (vx < min.x)
 			min.x = vx;
 		else if (vx > max.x)
 			max.x = vx;
 
-		fixed64_t vy = FIXED2FIXED64(vertexes[i].y);
+		fixed64_t vy = FIXED2FIXED64(y);
 		if (vy < min.y)
 			min.y = vy;
 		else if (vy > max.y)
@@ -1288,10 +1288,10 @@ void AM_drawWalls()
 	float rdif, gdif, bdif;
 	const palette_t* pal = V_GetDefaultPalette();
 
-	for (int i = 0; i < numlines; i++)
+	for (const line_t& line : R_GetLines())
 	{
-		M_SetVec2Fixed64(&l.a, FIXED2FIXED64(lines[i].v1->x), FIXED2FIXED64(lines[i].v1->y));
-		M_SetVec2Fixed64(&l.b, FIXED2FIXED64(lines[i].v2->x), FIXED2FIXED64(lines[i].v2->y));
+		M_SetVec2Fixed64(&l.a, FIXED2FIXED64(line.v1->x), FIXED2FIXED64(line.v1->y));
+		M_SetVec2Fixed64(&l.b, FIXED2FIXED64(line.v2->x), FIXED2FIXED64(line.v2->y));
 
 		if (am_rotate)
 		{
@@ -1299,41 +1299,41 @@ void AM_drawWalls()
 			AM_rotatePoint(l.b);
 		}
 
-		if (am_cheating || (lines[i].flags & ML_MAPPED))
+		if (am_cheating || (line.flags & ML_MAPPED))
 		{
-			if ((lines[i].flags & ML_DONTDRAW) && !am_cheating)
+			if ((line.flags & ML_DONTDRAW) && !am_cheating)
 				continue;
-			if (!lines[i].backsector && ((am_usecustomcolors || viewactive) ||
-			                             (!am_usecustomcolors && !viewactive)))
+			if (!line.backsector && ((am_usecustomcolors || viewactive) ||
+			                         (!am_usecustomcolors && !viewactive)))
 			{
 				AM_drawMline(&l, gameinfo.currentAutomapColors.WallColor);
 			}
 			else
 			{
-				if ((P_IsTeleportLine(lines[i].special)) &&
+				if ((P_IsTeleportLine(line.special)) &&
 				    (am_usecustomcolors || viewactive))
 				{ // teleporters
 					AM_drawMline(&l, gameinfo.currentAutomapColors.TeleportColor);
 				}
-				else if ((P_IsExitLine(lines[i].special)) &&
+				else if ((P_IsExitLine(line.special)) &&
 				         (am_usecustomcolors || viewactive))
 				{ // exit
 					AM_drawMline(&l, gameinfo.currentAutomapColors.ExitColor);
 				}
-				else if (lines[i].flags & ML_SECRET)
+				else if (line.flags & ML_SECRET)
 				{ // secret door
 					if (am_cheating)
 						AM_drawMline(&l, gameinfo.currentAutomapColors.SecretWallColor);
 					else
 						AM_drawMline(&l, gameinfo.currentAutomapColors.WallColor);
 				}
-				else if (lines[i].backsector->floorheight !=
-				         lines[i].frontsector->floorheight)
+				else if (line.backsector->floorheight !=
+				         line.frontsector->floorheight)
 				{
 					AM_drawMline(&l, gameinfo.currentAutomapColors.FDWallColor); // floor level change
 				}
-				else if (lines[i].backsector->ceilingheight !=
-				         lines[i].frontsector->ceilingheight)
+				else if (line.backsector->ceilingheight !=
+				         line.frontsector->ceilingheight)
 				{
 					AM_drawMline(&l, gameinfo.currentAutomapColors.CDWallColor); // ceiling level change
 				}
@@ -1344,7 +1344,7 @@ void AM_drawWalls()
 
 				if (map_format.getZDoom())
 				{
-					if (lines[i].special == Door_LockedRaise)
+					if (line.special == Door_LockedRaise)
 					{
 						// NES - Locked doors glow from a predefined color to either blue,
 						// yellow, or red.
@@ -1354,13 +1354,13 @@ void AM_drawWalls()
 
 						if (am_usecustomcolors)
 						{
-							if (lines[i].args[3] == (zk_blue_card | zk_blue))
+							if (line.args[3] == (zk_blue_card | zk_blue))
 							{
 								rdif = (0 - r) / 30;
 								gdif = (0 - g) / 30;
 								bdif = (255 - b) / 30;
 							}
-							else if (lines[i].args[3] == (zk_yellow_card | zk_yellow))
+							else if (line.args[3] == (zk_yellow_card | zk_yellow))
 							{
 								rdif = (255 - r) / 30;
 								gdif = (255 - g) / 30;
@@ -1392,7 +1392,7 @@ void AM_drawWalls()
 				}
 				else
 				{
-					if (P_IsCompatibleLockedDoorLine(lines[i].special))
+					if (P_IsCompatibleLockedDoorLine(line.special))
 					{
 						// NES - Locked doors glow from a predefined color to either blue,
 						// yellow, or red.
@@ -1402,13 +1402,13 @@ void AM_drawWalls()
 
 						if (am_usecustomcolors)
 						{
-							if (P_IsCompatibleBlueDoorLine(lines[i].special))
+							if (P_IsCompatibleBlueDoorLine(line.special))
 							{
 								rdif = (0 - r) / 30;
 								gdif = (0 - g) / 30;
 								bdif = (255 - b) / 30;
 							}
-							else if (P_IsCompatibleYellowDoorLine(lines[i].special))
+							else if (P_IsCompatibleYellowDoorLine(line.special))
 							{
 								rdif = (255 - r) / 30;
 								gdif = (255 - g) / 30;
@@ -1442,7 +1442,7 @@ void AM_drawWalls()
 		}
 		else if (consoleplayer().powers[pw_allmap])
 		{
-			if (!(lines[i].flags & ML_DONTDRAW))
+			if (!(line.flags & ML_DONTDRAW))
 				AM_drawMline(&l, gameinfo.currentAutomapColors.NotSeenColor);
 		}
 	}
