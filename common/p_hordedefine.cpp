@@ -174,22 +174,6 @@ StringTokens hordeDefine_t::weaponStrings(player_t* player) const
 /**
  * @brief Get a define to use for this wave.
  *
- * @param defineNum Horde definition to change.
- * @param newDefine New define to replace the old one.
- * @return True if save was successful
- */
-bool P_HordeSaveDefine(const int defineNum, hordeDefine_t* newDefine)
-{
-	hordeDefine_t* def = &::WAVE_DEFINES.at(defineNum);
-
-	def = newDefine;
-
-	return true;
-}
-
-/**
- * @brief Get a define to use for this wave.
- *
  * @param current Current wave.
  * @param total Total waves.
  * @return Define we selected.
