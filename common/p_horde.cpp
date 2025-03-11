@@ -710,34 +710,38 @@ void HordeState::tick()
 	// Always try to spawn an item.
 	P_HordeSpawnItem();
 
-	// Always try to spawn a powerup between 30-45 seconds.
-	if (!define.powerups.empty() && ::level.time >= m_nextPowerup)
+	if (::level.time >= m_nextPowerup)
 	{
-		const int offset = P_RandomInt(16) + 30;
-		m_nextPowerup = ::level.time + (offset * TICRATE);
+		// Inject horde powerups
+		hordeDefine_t def = G_HordeDefine(m_defineID);
 
-		hordeDefine_t newdef = define;
-
-		if (g_lives.asInt() > 0)
+		if (G_IsLivesGame())
 		{
 			// Add extra life/resurrect powerups when
 			if (g_horde_extralife.value() > 0.0f)
 			{
 				hordeDefine_t::powConfig_t config;
 				config.chance = g_horde_extralife.value();
-				newdef.addPowerup(MT_EXTRALIFE, config);
+				def.addPowerup(MT_EXTRALIFE, config);
 			}
 
 			if (g_horde_resurrect.value() > 0.0f)
 			{
 				hordeDefine_t::powConfig_t config;
 				config.chance = g_horde_resurrect.value();
-				newdef.addPowerup(MT_RESTEAMMATE, config);
+				def.addPowerup(MT_RESTEAMMATE, config);
 			}
 		}
 
-		const mobjtype_t pw = newdef.randomPowerup().mobj;
-		P_HordeSpawnPowerup(pw);
+		// Always try to spawn a powerup between 30-45 seconds.
+		if (!def.powerups.empty())
+		{
+			const int offset = P_RandomInt(16) + 30;
+			m_nextPowerup = ::level.time + (offset * TICRATE);
+
+			const mobjtype_t pw = def.randomPowerup().mobj;
+			P_HordeSpawnPowerup(pw);
+		}
 	}
 }
 

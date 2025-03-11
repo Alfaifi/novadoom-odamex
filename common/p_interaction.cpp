@@ -601,23 +601,24 @@ static void P_ResurrectPlayerPowerUp(player_t* player)
 	if (ingameplayers.empty())
 	{
 		SV_BroadcastPrintf("%s tried to resurrect someone, but everyone is alive!\n",
-		                   player->userinfo.netname.c_str());
+		                   player->userinfo.netname);
 		return;
 	}
 
-	int playerid = M_RandomInt(ingameplayers.size());
+	int arrayindex = M_RandomInt(ingameplayers.size());
 
-	auto it = std::find_if(players.begin(), players.end(),
-	                       [&](player_s& p) { return p.id == playerid; });
+	int playerid = ingameplayers.at(arrayindex);
 
-	if (it == players.end())
+	player_t* pl = &idplayer(playerid);
+
+	if (!validplayer(*pl))
 		return;
 
-	it->lives += 1;
-	it->playerstate = PST_REBORN;
+	pl->lives += 1;
+	pl->playerstate = PST_REBORN;
 
 	SV_BroadcastPrintf("%s has brought %s back into the fight!\n",
-	                   player->userinfo.netname.c_str(), it->userinfo.netname.c_str());
+	                   player->userinfo.netname, pl->userinfo.netname);
 
 	PlayersView currentplayers = PlayerQuery().execute().players;
 
@@ -648,7 +649,7 @@ static void P_AwardExtraLifePowerUp(player_t* player)
 		return;
 
 	SV_BroadcastPrintf("%s was awarded an extra life!\n",
-	                   player->userinfo.netname.c_str());
+	                   player->userinfo.netname);
 
 	player->lives += 1;
 	MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
