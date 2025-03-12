@@ -26,3 +26,6 @@
 [submodule "libraries/portmidi"]
 	path = libraries/portmidi
 	url = https://github.com/PortMidi/portmidi.git
+[submodule "packaging/flatpak/shared-modules"]
+	path = packaging/flatpak/shared-modules
+	url = https://github.com/flathub/shared-modules.git
