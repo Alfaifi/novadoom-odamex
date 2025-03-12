@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom 1.22).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -136,6 +136,7 @@ EXTERN_CVAR (co_boomphys)			// [ML] Roll-up of various compat options
 EXTERN_CVAR (co_removesoullimit)
 EXTERN_CVAR (co_blockmapfix)
 EXTERN_CVAR (co_globalsound)
+EXTERN_CVAR (co_novileghosts)
 
 // [Toke - Menu] New Menu Stuff.
 void MouseSetup (void);
@@ -257,8 +258,8 @@ static value_t DoomOrOdamex[2] =
 menu_t  *CurrentMenu;
 int		CurrentItem;
 bool configuring_controls = false;
-static BOOL	WaitingForKey;
-static BOOL	WaitingForAxis;
+static bool	WaitingForKey;
+static bool	WaitingForAxis;
 static const char	   *OldContMessage;
 static itemtype OldContType;
 static const char	   *OldAxisMessage;
@@ -610,6 +611,7 @@ static menuitem_t CompatItems[] ={
 	{svdiscrete, "Finer-precision Autoaim",        {&co_fineautoaim},       {2.0}, {0.0}, {0.0}, {OnOff}},
 	{svdiscrete, "Fix hit detection at grid edges",{&co_blockmapfix},       {2.0}, {0.0}, {0.0}, {OnOff}},
 	{svdiscrete, "Remove pain elemental spawn limit",{&co_removesoullimit}, {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Fix arch-vile ghost bug",			{&co_novileghosts}, {2.0}, {0.0}, {0.0}, {OnOff}},
 	{redtext,   " ",								{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{yellowtext, "Items and Decoration",				{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "Fix invisible puffs under skies",{&co_fixweaponimpacts},  {2.0}, {0.0}, {0.0}, {OnOff}},
@@ -659,7 +661,7 @@ static menuitem_t NetworkItems[] = {
 	{ discrete,		"Predict sector actions",		{&cl_predictsectors},{3.0},		{0.0},		{0.0},		{PredictSectors} },
 	{ discrete,		"Predict weapon effects",		{&cl_predictweapons},{2.0},		{0.0},		{0.0},		{OnOff} },
 	{ redtext,		" ",							{NULL},				{0.0}, 		{0.0}, 		{0.0}, 		{NULL} },
-	{ discrete, 	"Download From Server", 		{&cl_serverdownload}, {2.0}, 		{0.0}, 		{0.0}, 		{OnOff} },
+	{ discrete, 	"Download From Internet", 		{&cl_serverdownload}, {2.0}, 		{0.0}, 		{0.0}, 		{OnOff} },
 
 	{ redtext,		" ",							{NULL},				{0.0},		{0.0},		{0.0},		{NULL} },
 	{ yellowtext,	"Netdemo Settings",				{NULL},				{0.0},		{0.0},		{0.0},		{NULL} },
@@ -796,17 +798,17 @@ int dummy = 0;
 
 CVAR_FUNC_IMPL (ui_transred)
 {
-    M_SlideUIRed((int)var);
+    M_SlideUIRed(var.asInt());
 }
 
 CVAR_FUNC_IMPL (ui_transgreen)
 {
-    M_SlideUIGreen((int)var);
+    M_SlideUIGreen(var.asInt());
 }
 
 CVAR_FUNC_IMPL (ui_transblue)
 {
-    M_SlideUIBlue((int)var);
+    M_SlideUIBlue(var.asInt());
 }
 
 static value_t Endoom[] = {{0.0, "Off"}, {1.0, "On"}, {2.0, "PWAD Only"}};
@@ -1016,11 +1018,11 @@ static menuitem_t MessagesItems[] = {
 	{ discrete,	"Colorize messages",	{&con_coloredmessages},	{2.0}, {0.0},   {0.0},	{OnOff} },
 	{ discrete,	"Scale console text",   {&con_scaletext},		{5.0}, {0.0}, 	{0.0}, {ScaleFactors} },
 	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
-	{ yellowtext,"Display settings",		{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
-	{ discrete,	"Show pickup messages",	{&message_showpickups},	{2.0}, {0.0},   {0.0},	{OnOff} },
-	{ discrete,	"Show death messages",	{&message_showobituaries},	{2.0}, {0.0},   {0.0},	{OnOff} },
-	{ discrete,	"Hide spectator messages",	{&mute_spectators},	{2.0}, {0.0},   {0.0},	{OnOff} },
-	{ discrete,	"Hide enemies messages",	{&mute_enemies},	{2.0}, {0.0},   {0.0},	{OnOff} },
+	{ yellowtext,"Display settings",	{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
+	{ discrete,	"Pickup messages",		{&message_showpickups},	{2.0}, {0.0},   {0.0},	{OnOff} },
+	{ discrete,	"Death messages",		{&message_showobituaries},	{2.0}, {0.0},   {0.0},	{OnOff} },
+	{ discrete,	"Spectator messages",	{&mute_spectators},	{2.0}, {0.0},   {0.0},	{OffOn} },
+	{ discrete,	"Enemy messages",		{&mute_enemies},	{2.0}, {0.0},   {0.0},	{OffOn} },
 
 	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
 	{ yellowtext, "Message Colors",		{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
@@ -1109,9 +1111,7 @@ static void M_SetVideoMode(uint16_t width, uint16_t height)
 	old_width = I_GetVideoWidth();
 	old_height = I_GetVideoHeight();
 
-	char command[30];
-	snprintf(command, 30, "vid_setmode %d %d", width, height);
-	AddCommandString(command);
+	AddCommandString(fmt::format("vid_setmode {} {}", width, height));
 
 	SetModesMenu(width, height);
 }
@@ -1214,9 +1214,9 @@ static void BuildModesList(int hiwidth, int hiheight)
 	MenuModeList menumodelist;
 
 	const IVideoModeList* videomodelist = I_GetVideoCapabilities()->getSupportedVideoModes();
-	for (IVideoModeList::const_iterator it = videomodelist->begin(); it != videomodelist->end(); ++it)
-		if (it->isFullScreen() == fullscreen)
-			menumodelist.push_back(std::make_pair(it->width, it->height));
+	for (const auto& mode : *videomodelist)
+		if (mode.isFullScreen() == fullscreen)
+			menumodelist.emplace_back(mode.width, mode.height);
 	menumodelist.erase(std::unique(menumodelist.begin(), menumodelist.end()), menumodelist.end());
 
 	MenuModeList::const_iterator mode_it = menumodelist.begin();
@@ -1237,8 +1237,7 @@ static void BuildModesList(int hiwidth, int hiheight)
 
 			if (mode_it != menumodelist.end())
 			{
-				int width = mode_it->first;
-				int height = mode_it->second;
+				auto [width, height] = *mode_it;
 				++mode_it;
 
 				if (width == hiwidth && height == hiheight)
@@ -1348,10 +1347,7 @@ EXTERN_CVAR(ui_dimcolor)
 // [Russell] - Modified to send new colours
 static void M_SendUINewColor (int red, int green, int blue)
 {
-	char command[24];
-
-	snprintf (command, 24, "ui_dimcolor \"%02x %02x %02x\"", red, green, blue);
-	AddCommandString (command);
+	AddCommandString(fmt::format("ui_dimcolor \"{:02} {:02x} {:02}\"", red, green, blue));
 }
 
 static void M_SlideUIRed(int val)
@@ -1521,11 +1517,11 @@ void M_DrawSlider (int x, int y, float leftval, float rightval, float cur, float
 	if (step == 0.0f)
 		return;
 	else if (step >= 1.0f)
-		StrFormat(buf, "%.0f", cur);
+		buf = fmt::sprintf("%.0f", cur);
 	else if (step >= 0.1f)
-		StrFormat(buf, "%.1f", cur);
+		buf = fmt::sprintf("%.1f", cur);
 	else
-		StrFormat(buf, "%.2f", cur);
+		buf = fmt::sprintf("%.2f", cur);
 	screen->DrawTextCleanMove(CR_GREEN, x + 96, y, buf.c_str());
 }
 
@@ -1766,12 +1762,11 @@ void M_OptDrawer (void)
 
 			case joyactive:
 			{
-				int         numjoy;
 				std::string joyname;
 
-				numjoy = I_GetJoystickCount();
+				size_t numjoy = I_GetJoystickCount();
 
-				if((int)item->a.cvar->value() > numjoy)
+				if((size_t)item->a.cvar->value() > numjoy)
 					item->a.cvar->Set(0.0);
 
 				if(!numjoy)
@@ -2153,13 +2148,11 @@ void M_OptResponder (event_t *ev)
 
 		case joyactive:
 		{
-			int         numjoy;
+			size_t numjoy = I_GetJoystickCount();
 
-			numjoy = I_GetJoystickCount();
-
-			if ((int)item->a.cvar->value() > numjoy)
+			if ((size_t)item->a.cvar->value() > numjoy)
 				item->a.cvar->Set(0.0);
-			else if ((int)item->a.cvar->value() > 0)
+			else if ((size_t)item->a.cvar->value() > 0)
 				item->a.cvar->Set(item->a.cvar->value() - 1);
 		}
 		S_Sound(CHAN_INTERFACE, "plats/pt1_mid", 1, ATTN_NONE);
@@ -2284,13 +2277,11 @@ void M_OptResponder (event_t *ev)
 
 		case joyactive:
 		{
-			int         numjoy;
+			size_t numjoy = I_GetJoystickCount();
 
-			numjoy = I_GetJoystickCount();
-
-			if ((int)item->a.cvar->value() >= numjoy)
+			if ((size_t)item->a.cvar->value() >= numjoy)
 				item->a.cvar->Set(0.0);
-			else if ((int)item->a.cvar->value() < (numjoy - 1))
+			else if ((size_t)item->a.cvar->value() < (numjoy - 1))
 				item->a.cvar->Set(item->a.cvar->value() + 1);
 
 		}

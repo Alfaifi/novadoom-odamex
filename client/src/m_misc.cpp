@@ -1,10 +1,10 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -117,7 +117,7 @@ void STACK_ARGS M_SaveDefaults(std::string filename)
 
 		fclose(f);
 
-		Printf(PRINT_HIGH, "Configuration saved to %s.\n", configfile.c_str());
+		Printf(PRINT_HIGH, "Configuration saved to %s.\n", configfile);
 	}
 }
 
@@ -161,7 +161,7 @@ void M_LoadDefaults(void)
 		// dead or so intermittent that it slows down WAD downloading.
 
 		const char* cl_download_old =
-		    "https://static.allfearthesentinel.com/wads/ https://doomshack.org/wads/ "
+		    "https://static.allfearthesentinel.net/wads/ https://doomshack.org/wads/ "
 		    "http://grandpachuck.org/files/wads/ http://ts.chaosunleashed.net/ "
 		    "https://wads.doomleague.org/ http://files.funcrusher.net/wads/";
 
@@ -176,9 +176,26 @@ void M_LoadDefaults(void)
 		// Add new defaults - dogsoft and doomshack's upload dir.
 
 		const char* cl_download_old =
-		    "https://static.allfearthesentinel.com/wads/ https://doomshack.org/wads/ "
+		    "https://static.allfearthesentinel.net/wads/ https://doomshack.org/wads/ "
 		    "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
 		    "http://files.funcrusher.net/wads/";
+
+		if (!strcmp(::cl_downloadsites.cstring(), cl_download_old))
+		{
+			updated = true;
+			::cl_downloadsites.RestoreDefault();
+		}
+	}
+	else if (::configver > 93 && ::configver <= 10060)
+	{
+		// Add new defaults - doomshack's wadlist dir, firestick, euroboros, audrealms, and captainpollutiontv.
+		// Update the TSPG url from .net to .com.
+
+		const char* cl_download_old =
+		    "https://static.allfearthesentinel.net/wads/ https://doomshack.org/wads/ "
+    	    "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
+		    "http://files.funcrusher.net/wads/ https://doomshack.org/uploads/ "
+		    "https://doom.dogsoft.net/getwad.php?search=";
 
 		if (!strcmp(::cl_downloadsites.cstring(), cl_download_old))
 		{
@@ -199,7 +216,7 @@ void M_LoadDefaults(void)
 	if (updated)
 		Printf("%s: Updating old defaults.\n", __FUNCTION__);
 
-	AddCommandString("alias ? help");	
+	AddCommandString("alias ? help");
 
 	DefaultsLoaded = true;
 }

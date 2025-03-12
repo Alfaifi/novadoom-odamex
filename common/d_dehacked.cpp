@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -80,7 +80,7 @@ static byte OrgHeights[] = {
 static char *PatchFile, *PatchPt;
 static char *Line1, *Line2;
 static int dversion, pversion;
-static BOOL including, includenotext;
+static bool including, includenotext;
 
 // English strings for DeHackEd replacement.
 static StringTable ENGStrings;
@@ -266,7 +266,7 @@ struct CodePtr
 	long default_args[MAXSTATEARGS];
 };
 
-static const struct CodePtr CodePtrs[] = {
+static const CodePtr CodePtrs[] = {
     {"NULL", NULL, 0, {0, 0, 0, 0, 0, 0, 0, 0}},
     {"MonsterRail", A_MonsterRail, 0, {0, 0, 0, 0, 0, 0, 0, 0}},
     {"FireRailgun", A_FireRailgun, 0, {0, 0, 0, 0, 0, 0, 0, 0}},
@@ -443,10 +443,10 @@ static const struct
 };
 
 static int HandleMode(const char* mode, int num);
-static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,
+static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize = 0);
 static void BackupData(void);
-static BOOL ReadChars(char** stuff, int size);
+static bool ReadChars(char** stuff, int size);
 static char* igets(void);
 static int GetLine(void);
 
@@ -456,7 +456,7 @@ static size_t filelen = 0; // Be quiet, gcc
 
 static void PrintUnknown(const char* key, const char* loc, const size_t idx)
 {
-	DPrintf("Unknown key %s encountered in %s (%" PRIuSIZE ").\n", key, loc, idx);
+	DPrintf("Unknown key %s encountered in %s (%zu).\n", key, loc, idx);
 }
 
 static int HandleMode(const char* mode, int num)
@@ -483,7 +483,7 @@ static int HandleMode(const char* mode, int num)
 	return i;
 }
 
-static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,
+static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize)
 {
 	while (keys->name && stricmp(keys->name, key))
@@ -585,7 +585,7 @@ void D_UndoDehPatch()
 	deh = backupDeh;
 }
 
-static BOOL ReadChars(char** stuff, int size)
+static bool ReadChars(char** stuff, int size)
 {
 	char* str = *stuff;
 
@@ -966,14 +966,14 @@ static int PatchThing(int thingy)
 	thingNum--;
 	if (thingNum < 0 || thingNum >= NUMMOBJTYPES)
 	{
-		DPrintf("Thing %" PRIuSIZE " out of range.\n", thingNum);
+		DPrintf("Thing %zu out of range.\n", thingNum);
 	}
 	else
 	{
 		info = &mobjinfo[thingNum];
 		*ednum = *&info->doomednum;
 #if defined _DEBUG
-		DPrintf("Thing %" PRIuSIZE " found.\n", thingNum);
+		DPrintf("Thing %zu found.\n", thingNum);
 #endif
 	}
 
@@ -987,7 +987,7 @@ static int PatchThing(int thingy)
 		}
 
 		size_t val = atoi(Line2);
-		int linelen = strlen(Line1);
+		size_t linelen = strlen(Line1);
 
 		if (stricmp(Line1 + linelen - 6, " frame") == 0)
 		{
@@ -1470,21 +1470,21 @@ static int PatchSound(int soundNum)
 
 static int PatchFrame(int frameNum)
 {
-	static const struct Key keys[] = {{"Sprite number", offsetof(state_t, sprite)},
-	                                  {"Sprite subnumber", offsetof(state_t, frame)},
-	                                  {"Duration", offsetof(state_t, tics)},
-	                                  {"Next frame", offsetof(state_t, nextstate)},
-	                                  {"Unknown 1", offsetof(state_t, misc1)},
-	                                  {"Unknown 2", offsetof(state_t, misc2)},
-	                                  {"Args1", offsetof(state_t, args[0])},
-	                                  {"Args2", offsetof(state_t, args[1])},
-	                                  {"Args3", offsetof(state_t, args[2])},
-	                                  {"Args4", offsetof(state_t, args[3])},
-	                                  {"Args5", offsetof(state_t, args[4])},
-	                                  {"Args6", offsetof(state_t, args[5])},
-	                                  {"Args7", offsetof(state_t, args[6])},
-	                                  {"Args8", offsetof(state_t, args[7])},
-	                                  {NULL, 0}};
+	static const Key keys[] = {{"Sprite number", offsetof(state_t, sprite)},
+	                             {"Sprite subnumber", offsetof(state_t, frame)},
+	                             {"Duration", offsetof(state_t, tics)},
+	                             {"Next frame", offsetof(state_t, nextstate)},
+	                             {"Unknown 1", offsetof(state_t, misc1)},
+	                             {"Unknown 2", offsetof(state_t, misc2)},
+	                             {"Args1", offsetof(state_t, args[0])},
+	                             {"Args2", offsetof(state_t, args[1])},
+	                             {"Args3", offsetof(state_t, args[2])},
+	                             {"Args4", offsetof(state_t, args[3])},
+	                             {"Args5", offsetof(state_t, args[4])},
+	                             {"Args6", offsetof(state_t, args[5])},
+	                             {"Args7", offsetof(state_t, args[6])},
+	                             {"Args8", offsetof(state_t, args[7])},
+	                             {NULL, 0}};
 	int result;
 	state_t *info, dummy;
 
@@ -1510,7 +1510,7 @@ static int PatchFrame(int frameNum)
 	while ((result = GetLine()) == 1)
 	{
 		size_t val = atoi(Line2);
-		int linelen = strlen(Line1);
+		size_t linelen = strlen(Line1);
 
 		if (HandleKey(keys, info, Line1, val, sizeof(*info)))
 		{
@@ -1658,7 +1658,7 @@ static int PatchAmmo(int ammoNum)
 
 static int PatchWeapon(int weapNum)
 {
-	static const struct Key keys[] = {
+	static const Key keys[] = {
 	    {"Ammo type", offsetof(weaponinfo_t, ammotype)},
 	    {"Deselect frame", offsetof(weaponinfo_t, upstate)},
 	    {"Select frame", offsetof(weaponinfo_t, downstate)},
@@ -1698,7 +1698,7 @@ static int PatchWeapon(int weapNum)
 	while ((result = GetLine()) == 1)
 	{
 		size_t val = atoi(Line2);
-		int linelen = strlen(Line1);
+		size_t linelen = strlen(Line1);
 
 		if (HandleKey(keys, info, Line1, val, sizeof(*info)))
 		{
@@ -1817,7 +1817,7 @@ static int PatchCheats(int dummy)
 
 static int PatchMisc(int dummy)
 {
-	static const struct Key keys[] = {
+	static const Key keys[] = {
 	    {"Initial Health", offsetof(struct DehInfo, StartHealth)},
 	    {"Initial Bullets", offsetof(struct DehInfo, StartBullets)},
 	    {"Max Health", offsetof(struct DehInfo, MaxHealth)},
@@ -1874,8 +1874,9 @@ static int PatchMisc(int dummy)
 
 static int PatchPars(int dummy)
 {
-	char *space, mapname[8], *moredata;
+	char *space, *moredata;
 	int result, par;
+	OLumpName mapname;
 #if defined _DEBUG
 	DPrintf("[Pars]\n");
 #endif
@@ -1912,13 +1913,13 @@ static int PatchPars(int dummy)
 		if (moredata)
 		{
 			// At least 3 items on this line, must be E?M? format
-			snprintf(mapname, 8, "E%cM%c", *Line2, *space);
+			mapname = fmt::format("E{:c}M{:c}", *Line2, *space);
 			par = atoi(moredata + 1);
 		}
 		else
 		{
 			// Only 2 items, must be MAP?? format
-			snprintf(mapname, 8, "MAP%02d", atoi(Line2) % 100);
+			mapname = fmt::format("MAP{:02d}", atoi(Line2) % 100);
 			par = atoi(space);
 		}
 
@@ -1927,13 +1928,13 @@ static int PatchPars(int dummy)
 
 		if (!info.exists())
 		{
-			DPrintf("No map %s\n", mapname);
+			DPrintFmt("No map {}\n", mapname);
 			continue;
 		}
 
 		info.partime = par;
 #if defined _DEBUG
-		DPrintf("Par for %s changed to %d\n", mapname, par);
+		DPrintFmt("Par for {} changed to {}\n", mapname, par);
 #endif
 	}
 	return result;
@@ -1995,7 +1996,7 @@ static int PatchCodePtrs(int dummy)
 static int PatchMusic(int dummy)
 {
 	int result;
-	char keystring[128];
+	OString keystring;
 #if defined _DEBUG
 	DPrintf("[Music]\n");
 #endif
@@ -2003,7 +2004,7 @@ static int PatchMusic(int dummy)
 	{
 		const char* newname = skipwhite(Line2);
 
-		snprintf(keystring, ARRAY_LENGTH(keystring), "MUSIC_%s", Line1);
+		keystring = fmt::format("MUSIC_{}", Line1);
 		if (GStrings.hasString(keystring))
 		{
 			GStrings.setString(keystring, newname);
@@ -2020,7 +2021,7 @@ static int PatchText(int oldSize)
 	char* oldStr;
 	char* newStr;
 	char* temp;
-	BOOL good;
+	bool good;
 	int result;
 	const OString* name = NULL;
 
@@ -2052,7 +2053,7 @@ static int PatchText(int oldSize)
 	}
 
 	good = ReadChars(&oldStr, oldSize);
-	good += ReadChars(&newStr, newSize);
+	good = ReadChars(&newStr, newSize) || good;
 
 	if (!good)
 	{
@@ -2198,7 +2199,7 @@ static int PatchStrings(int dummy)
 			    (i >= GStrings.toIndex(OB_FRIENDLY1) &&
 			     i <= GStrings.toIndex(OB_FRIENDLY4) && strstr(holdstring, "%k") == NULL))
 			{
-				int len = strlen(holdstring);
+				size_t len = strlen(holdstring);
 				memmove(holdstring + 3, holdstring, len);
 				holdstring[0] = '%';
 				holdstring[1] = i <= GStrings.toIndex(OB_DEFAULT) ? 'o' : 'k';
@@ -2309,7 +2310,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 		if (fh == NULL)
 		{
 			Printf(PRINT_WARNING, "Could not open DeHackEd patch \"%s\"\n",
-			       patchfile->getBasename().c_str());
+			       patchfile->getBasename());
 			return false;
 		}
 
@@ -2352,7 +2353,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 			if (patchfile)
 			{
 				Printf(PRINT_WARNING, "\"%s\" is not a DeHackEd patch file\n",
-				       patchfile->getBasename().c_str());
+				       patchfile->getBasename());
 			}
 			else
 			{
@@ -2422,7 +2423,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 
 	if (patchfile)
 	{
-		Printf("adding %s\n", patchfile->getFullpath().c_str());
+		Printf("adding %s\n", patchfile->getFullpath());
 	}
 	else
 	{
@@ -2496,7 +2497,7 @@ bool CheckIfDehActorDefined(const mobjtype_t mobjtype)
 	if (mobj.doomednum == -1 &&
 		mobj.spawnstate == S_TNT1 &&
 		mobj.spawnhealth == 0 &&
-		mobj.gibhealth == 0 && 
+		mobj.gibhealth == 0 &&
 		mobj.seestate == S_NULL &&
 		mobj.seesound == NULL &&
 	    mobj.reactiontime == 0 &&

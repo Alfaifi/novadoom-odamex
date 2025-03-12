@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -134,7 +134,7 @@ AActor**		blocklinks;		// for thing chains
 //	used as a PVS lookup as well.
 //
 byte*			rejectmatrix;
-BOOL			rejectempty;
+bool			rejectempty;
 
 
 // Maintain single and multi player starting spots.
@@ -1013,7 +1013,7 @@ void P_AdjustLine (line_t *ld)
 void P_FinishLoadingLineDefs (void)
 {
 	int i, linenum;
-	register line_t *ld = lines;
+	line_t *ld = lines;
 
 	for (i = numlines, linenum = 0; i--; ld++, linenum++)
 	{
@@ -1045,8 +1045,6 @@ void P_LoadLineDefs (const int lump)
 	// We'll fix this for now by just checking for the E2M7 FarmHash
 	const std::string e2m7hash = "43ffa244f5ae923b7df59dbf511c0468";
 
-	std::string levelHash;
-
 	// [Blair] Serialize the hashes before reading.
 	uint64_t reconsthash1 = (uint64_t)(::level.level_fingerprint[0]) |
 	                        (uint64_t)(::level.level_fingerprint[1]) << 8 |
@@ -1066,7 +1064,7 @@ void P_LoadLineDefs (const int lump)
 	                        (uint64_t)(::level.level_fingerprint[14]) << 48 |
 	                        (uint64_t)(::level.level_fingerprint[15]) << 56;
 
-	StrFormat(levelHash, "%16llx%16llx", reconsthash1, reconsthash2);
+	std:: string levelHash = fmt::sprintf("%16llx%16llx", reconsthash1, reconsthash2);
 
 	bool isE2M7 = (levelHash == e2m7hash);
 
@@ -1292,9 +1290,9 @@ void P_LoadSideDefs2 (int lump)
 
 	for (int i = 0; i < numsides; i++)
 	{
-		register mapsidedef_t* msd = (mapsidedef_t*)data + i;
-		register side_t* sd = sides + i;
-		register sector_t* sec;
+		mapsidedef_t* msd = (mapsidedef_t*)data + i;
+		side_t* sd = sides + i;
+		sector_t* sec;
 
 		sd->textureoffset = LESHORT(msd->textureoffset)<<FRACBITS;
 		sd->rowoffset = LESHORT(msd->rowoffset)<<FRACBITS;
@@ -1697,13 +1695,13 @@ void P_GenerateUniqueMapFingerPrint(int maplumpnum)
 	typedef std::vector<byte> LevelLumps;
 	LevelLumps levellumps;
 
-	const byte* thingbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_THINGS, PU_STATIC));
-	const byte* lindefbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_LINEDEFS, PU_STATIC));
-	const byte* sidedefbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_SIDEDEFS, PU_STATIC));
-	const byte* vertexbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_VERTEXES, PU_STATIC));
-	const byte* segsbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_SEGS, PU_STATIC));
-	const byte* ssectorsbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_SSECTORS, PU_STATIC));
-	const byte* sectorsbytes = const_cast<const byte*>((const byte*)W_CacheLumpNum(maplumpnum+ML_SECTORS, PU_STATIC));
+	const byte* thingbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_THINGS, PU_STATIC));
+	const byte* lindefbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_LINEDEFS, PU_STATIC));
+	const byte* sidedefbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_SIDEDEFS, PU_STATIC));
+	const byte* vertexbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_VERTEXES, PU_STATIC));
+	const byte* segsbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_SEGS, PU_STATIC));
+	const byte* ssectorsbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_SSECTORS, PU_STATIC));
+	const byte* sectorsbytes = static_cast<const byte*>(W_CacheLumpNum(maplumpnum+ML_SECTORS, PU_STATIC));
 
 	levellumps.insert(levellumps.end(), W_LumpLength(maplumpnum+ML_THINGS), *thingbytes);
 	levellumps.insert(levellumps.end(), W_LumpLength(maplumpnum+ML_LINEDEFS), *lindefbytes);
@@ -1921,7 +1919,7 @@ extern polyblock_t **PolyBlockMap;
 // Hash the sector tags across the sectors and linedefs.
 static void P_InitTagLists(void)
 {
-	register int i;
+	int i;
 
 	for (i = numsectors; --i >= 0; )		// Initially make all slots empty.
 		sectors[i].firsttag = -1;
@@ -1957,9 +1955,9 @@ void P_SetupLevel (const char *lumpname, int position)
 
 	if (!savegamerestore)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			it->killcount = it->secretcount = it->itemcount = 0;
+			player.killcount = player.secretcount = player.itemcount = 0;
 		}
 	}
 
@@ -2089,15 +2087,15 @@ void P_SetupLevel (const char *lumpname, int position)
 
     if (serverside)
     {
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			SV_PreservePlayer(*it);
+			SV_PreservePlayer(player);
 
-			if (it->ingame())
+			if (player.ingame())
 			{
 				// if deathmatch, randomly spawn the active players
 				// denis - this function checks for deathmatch internally
-				G_DeathMatchSpawnPlayer(*it);
+				G_DeathMatchSpawnPlayer(player);
 			}
 		}
     }
