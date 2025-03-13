@@ -121,7 +121,7 @@ jobs:
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Install flatpak
-      run: sudo apt install flatpak flatpak-builder
+      run: sudo apt update && sudo apt install flatpak flatpak-builder
     - name: Create escaped branch name
       env:
         name: "${{ github.ref_name }}"
