@@ -1478,6 +1478,9 @@ bool PIT_VileCheck (AActor *thing)
 	corpsehit = thing;
 	corpsehit->momx = corpsehit->momy = 0;
 
+	if (P_AllowPassover())
+		corpsehit->flags |= MF_SOLID;
+
 	if (co_novileghosts)
 	{
 		int height, radius;
@@ -1498,6 +1501,9 @@ bool PIT_VileCheck (AActor *thing)
 		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
 		corpsehit->height >>= 2;
 	}
+
+	if (P_AllowPassover())
+		corpsehit->flags &= ~MF_SOLID;
 
 	return !check;
 }
