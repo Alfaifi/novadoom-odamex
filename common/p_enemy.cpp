@@ -1184,6 +1184,7 @@ void A_CPosRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator) 
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1202,6 +1203,7 @@ void A_SpidRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator) 
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1940,6 +1942,8 @@ void A_SpawnObject(AActor* actor)
 		}
 	}
 
+	SV_UpdateMobj(mo);
+
 	// [XA] don't bother with the dont-inherit-friendliness hack
 	// that exists in A_Spawn, 'cause WTF is that about anyway?
 }
@@ -1997,6 +2001,8 @@ void A_MonsterProjectile(AActor* actor)
 	// always set the 'tracer' field, so this pointer
 	// can be used to fire seeker missiles at will.
 	mo->tracer = actor->target;
+
+	SV_UpdateMobj(mo);
 }
 
 //
