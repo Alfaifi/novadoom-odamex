@@ -624,7 +624,7 @@ static void P_ResurrectPlayerPowerUp(player_t* player)
 	MSG_WriteSVC(&pl->client.reliablebuf, SVC_PlayerInfo(*pl));
 	S_PlayerSound(pl, NULL, CHAN_INTERFACE, "misc/plraise", ATTN_NONE);
 
-	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*player, SVC_PM_LIVES),
+	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*pl, SVC_PM_LIVES),
 	                 playerid);
 }
 
