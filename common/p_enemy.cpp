@@ -1485,7 +1485,7 @@ bool PIT_VileCheck (AActor *thing)
 		corpsehit->flags |= MF_SOLID;
 		height = corpsehit->height; // save temporarily
 		radius = corpsehit->radius; // save temporarily
-		corpsehit->height = corpsehit->info->height;
+		corpsehit->height = P_ThingInfoHeight(corpsehit->info);
 		corpsehit->radius = corpsehit->info->radius;
 		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
 		corpsehit->height = height; // restore
