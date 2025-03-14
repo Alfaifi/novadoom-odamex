@@ -1477,9 +1477,27 @@ bool PIT_VileCheck (AActor *thing)
 
 	corpsehit = thing;
 	corpsehit->momx = corpsehit->momy = 0;
-	corpsehit->height <<= 2;
-	check = P_CheckPosition (corpsehit, corpsehit->x, corpsehit->y);
-	corpsehit->height >>= 2;
+
+	if (co_novileghosts)
+	{
+		int height, radius;
+
+		corpsehit->flags |= MF_SOLID;
+		height = corpsehit->height; // save temporarily
+		radius = corpsehit->radius; // save temporarily
+		corpsehit->height = corpsehit->info->height;
+		corpsehit->radius = corpsehit->info->radius;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height = height; // restore
+		corpsehit->radius = radius; // restore
+		corpsehit->flags &= ~MF_SOLID;
+	}
+	else
+	{
+		corpsehit->height <<= 2;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height >>= 2;
+	}
 
 	return !check;
 }
