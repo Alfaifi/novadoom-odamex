@@ -620,20 +620,12 @@ static void P_ResurrectPlayerPowerUp(player_t* player)
 	SV_BroadcastPrintf("%s has brought %s back into the fight!\n",
 	                   player->userinfo.netname, pl->userinfo.netname);
 
-	PlayersView currentplayers = PlayerQuery().execute().players;
-
-	for (const auto& p : currentplayers)
-	{
-		if (p->id == playerid)
-		{
-			// Send a res sound directly to this player.
-			MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
-			S_PlayerSound(p, NULL, CHAN_INTERFACE, "misc/plraise", ATTN_NONE);
-		}
-	}
+	// Send a res sound directly to this player.
+	MSG_WriteSVC(&pl->client.reliablebuf, SVC_PlayerInfo(*pl));
+	S_PlayerSound(pl, NULL, CHAN_INTERFACE, "misc/plraise", ATTN_NONE);
 
 	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*player, SVC_PM_LIVES),
-	                 player->id);
+	                 playerid);
 }
 
 /*
