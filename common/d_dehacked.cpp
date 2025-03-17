@@ -1067,9 +1067,12 @@ static int PatchThing(int thingy)
 		mobjinfo.insert(mobj, (mobjtype_t) thingNum);
 		// set the type
 		mobj->type = thingNum;
+		info = mobj;
+	} else 
+	{
+		info = mobjinfo_it->second;
 	}
-
-	info = mobjinfo[thingNum];
+	
 	*ednum = (info->doomednum);
 #if defined _DEBUG
 		DPrintf("Thing %zu found.\n", thingNum);
@@ -1631,11 +1634,16 @@ static int PatchFrame(int frameNum)
 		};
 		state_t* state = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
 		*state = state_t_default(frameNum);
-		states.insert(state, frameNum);
 		// set the proper state number
 		state->statenum = frameNum;
-    }
-    info = states[frameNum];
+		states.insert(state, frameNum);
+		info = state;
+	}
+	else
+	{
+		info = states_it->second;
+	}
+	
 
 	while ((result = GetLine()) == 1)
 	{
@@ -2215,7 +2223,8 @@ static int PatchCodePtrs(int dummy)
 		if (!strnicmp("Frame", Line1, 5) && isspace(Line1[5]))
 		{
 			int frame = atoi(Line1 + 5);
-            if (states.find(frame) == states.end())
+			auto states_it = states.find(frame);
+			if (states_it == states.end())
 			{
 				DPrintf("Frame %d out of range\n", frame);
 			}
@@ -2223,6 +2232,7 @@ static int PatchCodePtrs(int dummy)
 			{
 				int i = 0;
 				char* data;
+				state_t* state = states_it->second;
 
 				COM_Parse(Line2);
 
@@ -2242,12 +2252,12 @@ static int PatchCodePtrs(int dummy)
 
 				if (CodePtrs[i].name)
 				{
-					states[frame]->action = CodePtrs[i].func;
+					state->action = CodePtrs[i].func;
 					DPrintf("Frame %d set to %s\n", frame, CodePtrs[i].name);
 				}
 				else
 				{
-					states[frame]->action = NULL;
+					state->action = NULL;
 					DPrintf("Unknown code pointer: %s\n", com_token);
 				}
 			}
@@ -2670,10 +2680,8 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 	}
 	else if (::dversion == 2021)
 	{
-		// [CMB] TODO: handle 'Doom version = 2021'
-		// [CMB] TODO: this version is used to calculate offsets for sprite limits
-		// [CMB] TODO: dsdhacked has "unlimited" so for now we'll use 4, but we may need to use something else
-		::dversion = 4;
+		// [CMB] 'Doom version = 2021'; Patch format = 6
+		::dversion = 6;
 	}
 	else
 	{

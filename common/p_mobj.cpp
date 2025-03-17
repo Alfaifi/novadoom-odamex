@@ -1026,8 +1026,7 @@ bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 
 	do
 	{
-		// if (state >= ::num_state_t_types() || state < 0)
-		// [CMB] TODO: find will find NULL as it can be interpreted as 0
+		// [CMB] find will find NULL as it can be interpreted as 0
 		if (states.find(state) == states.end())
 		{
 			I_Error("P_SetMobjState: State %d does not exist in state table.", state);
