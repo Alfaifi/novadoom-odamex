@@ -85,7 +85,7 @@ static byte OrgHeights[] = {
 static char *PatchFile, *PatchPt;
 static char *Line1, *Line2;
 static int dversion, pversion;
-static BOOL including, includenotext;
+static bool including, includenotext;
 
 // English strings for DeHackEd replacement.
 static StringTable ENGStrings;
@@ -470,10 +470,10 @@ void D_Initialize_SoundMap(const char** source, int count)
 }
 
 static int HandleMode(const char* mode, int num);
-static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,
+static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize = 0);
 static void BackupData(void);
-static BOOL ReadChars(char** stuff, int size);
+static bool ReadChars(char** stuff, int size);
 static char* igets(void);
 static int GetLine(void);
 
@@ -510,7 +510,7 @@ static int HandleMode(const char* mode, int num)
 	return i;
 }
 
-static BOOL HandleKey(const struct Key* keys, void* structure, const char* key, int value,
+static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize)
 {
 	while (keys->name && stricmp(keys->name, key))
@@ -666,7 +666,7 @@ void D_UndoDehPatch()
 	BackedUpData = false;
 }
 
-static BOOL ReadChars(char** stuff, int size)
+static bool ReadChars(char** stuff, int size)
 {
 	char* str = *stuff;
 
@@ -1068,11 +1068,11 @@ static int PatchThing(int thingy)
 		// set the type
 		mobj->type = thingNum;
 		info = mobj;
-	} else 
+	} else
 	{
 		info = mobjinfo_it->second;
 	}
-	
+
 	*ednum = (info->doomednum);
 #if defined _DEBUG
 		DPrintf("Thing %zu found.\n", thingNum);
@@ -1643,7 +1643,7 @@ static int PatchFrame(int frameNum)
 	{
 		info = states_it->second;
 	}
-	
+
 
 	while ((result = GetLine()) == 1)
 	{
@@ -1784,7 +1784,7 @@ static int PatchSprites(int dummy)
 	int result;
 #if defined _DEBUG
 	static int call_amt = 0;
-	Printf_Bold("[SPRITES] call amt: %d\n", ++call_amt);
+	PrintFmt_Bold("[SPRITES] call amt: {}\n", ++call_amt);
 #endif
 
 	// [CMB] static char* Line1 is the left hand side
@@ -2147,8 +2147,9 @@ static int PatchMisc(int dummy)
 
 static int PatchPars(int dummy)
 {
-	char *space, mapname[8], *moredata;
+	char *space, *moredata;
 	int result, par;
+	OLumpName mapname;
 #if defined _DEBUG
 	DPrintf("[Pars]\n");
 #endif
@@ -2185,13 +2186,13 @@ static int PatchPars(int dummy)
 		if (moredata)
 		{
 			// At least 3 items on this line, must be E?M? format
-			snprintf(mapname, 8, "E%cM%c", *Line2, *space);
+			mapname = fmt::format("E{:c}M{:c}", *Line2, *space);
 			par = atoi(moredata + 1);
 		}
 		else
 		{
 			// Only 2 items, must be MAP?? format
-			snprintf(mapname, 8, "MAP%02d", atoi(Line2) % 100);
+			mapname = fmt::format("MAP{:02d}", atoi(Line2) % 100);
 			par = atoi(space);
 		}
 
@@ -2200,13 +2201,13 @@ static int PatchPars(int dummy)
 
 		if (!info.exists())
 		{
-			DPrintf("No map %s\n", mapname);
+			DPrintFmt("No map {}\n", mapname);
 			continue;
 		}
 
 		info.partime = par;
 #if defined _DEBUG
-		DPrintf("Par for %s changed to %d\n", mapname, par);
+		DPrintFmt("Par for {} changed to {}\n", mapname, par);
 #endif
 	}
 	return result;
@@ -2269,7 +2270,7 @@ static int PatchCodePtrs(int dummy)
 static int PatchMusic(int dummy)
 {
 	int result;
-	char keystring[128];
+	OString keystring;
 #if defined _DEBUG
 	DPrintf("[Music]\n");
 #endif
@@ -2277,7 +2278,7 @@ static int PatchMusic(int dummy)
 	{
 		const char* newname = skipwhite(Line2);
 
-		snprintf(keystring, ARRAY_LENGTH(keystring), "MUSIC_%s", Line1);
+		keystring = fmt::format("MUSIC_{}", Line1);
 		if (GStrings.hasString(keystring))
 		{
 			GStrings.setString(keystring, newname);
@@ -2294,7 +2295,7 @@ static int PatchText(int oldSize)
 	char* oldStr;
 	char* newStr;
 	char* temp;
-	BOOL good;
+	bool good;
 	int result;
 	const OString* name = NULL;
 
@@ -2326,7 +2327,7 @@ static int PatchText(int oldSize)
 	}
 
 	good = ReadChars(&oldStr, oldSize);
-	good += ReadChars(&newStr, newSize);
+	good = ReadChars(&newStr, newSize) || good;
 
 	if (!good)
 	{
@@ -2589,7 +2590,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 		if (fh == NULL)
 		{
 			Printf(PRINT_WARNING, "Could not open DeHackEd patch \"%s\"\n",
-			       patchfile->getBasename().c_str());
+			       patchfile->getBasename());
 			return false;
 		}
 
@@ -2632,7 +2633,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 			if (patchfile)
 			{
 				Printf(PRINT_WARNING, "\"%s\" is not a DeHackEd patch file\n",
-				       patchfile->getBasename().c_str());
+				       patchfile->getBasename());
 			}
 			else
 			{
@@ -2707,7 +2708,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 
 	if (patchfile)
 	{
-		Printf("adding %s\n", patchfile->getFullpath().c_str());
+		Printf("adding %s\n", patchfile->getFullpath());
 	}
 	else
 	{
