@@ -60,8 +60,10 @@
 #define STOPSPEED						0x1000
 #define FRICTION						0xe800
 
-#define USERANGE		(64*FRACUNIT)
+#ifndef MELEERANGE // TODO: only have a single spot this is defined
 #define MELEERANGE		(64*FRACUNIT)
+#endif
+#define USERANGE		(64*FRACUNIT)
 #define MISSILERANGE	(32*64*FRACUNIT)
 
 #define WATER_SINK_FACTOR		3

@@ -31,7 +31,7 @@
 #include "doom_obj_container.h"
 
 #define NO_ALTSPEED -1
-#ifndef MELEERANGE
+#ifndef MELEERANGE // TODO: only have a single spot this is defined
 #define MELEERANGE (64 * FRACUNIT)
 #endif
 
