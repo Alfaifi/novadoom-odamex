@@ -199,7 +199,7 @@ bool P_Thing_Spawn (int tid, int type, angle_t angle, bool fog)
 	fixed_t z;
 	int rtn = 0;
 	int kind;
-	AActor *spot = NULL, *mobj;
+	AActor *spot = NULL;
 	mobjinfo_t* pmobj = NULL;
 
 	// type is doomednum

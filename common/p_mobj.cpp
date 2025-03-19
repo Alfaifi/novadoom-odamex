@@ -2551,8 +2551,6 @@ void P_RespawnSpecials (void)
 	AActor* 			mo;
 	mapthing2_t* 		mthing;
 
-	int 				i;
-
 	// clients do no control respawning of items
 	if(!serverside)
 		return;
