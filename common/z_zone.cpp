@@ -24,7 +24,6 @@
 
 #include "odamex.h"
 
-#include <map>
 #include <stdlib.h>
 #include <string.h>
 

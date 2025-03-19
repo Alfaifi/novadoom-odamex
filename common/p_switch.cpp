@@ -24,8 +24,6 @@
 
 #include "odamex.h"
 
-#include <map>
-
 #include "p_local.h"
 #include "p_lnspec.h"
 #include "s_sound.h"

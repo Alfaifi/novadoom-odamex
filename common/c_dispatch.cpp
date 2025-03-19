@@ -27,7 +27,6 @@
 #include <sstream>
 #include <algorithm>
 #include <ctime>
-#include <map>
 
 #include "cmdlib.h"
 #include "c_console.h"

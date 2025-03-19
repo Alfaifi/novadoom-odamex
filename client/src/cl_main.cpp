@@ -70,7 +70,6 @@
 #include "cl_replay.h"
 
 #include <bitset>
-#include <map>
 #include <set>
 #include <sstream>
 

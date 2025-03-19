@@ -23,8 +23,6 @@
 
 #pragma once
 
-#include <map>
-
 extern int MaxVisSprites;
 
 extern vissprite_t *vissprites;

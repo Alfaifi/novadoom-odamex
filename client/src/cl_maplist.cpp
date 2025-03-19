@@ -23,7 +23,6 @@
 
 #include "odamex.h"
 
-#include <map>
 #include <sstream>
 
 #include "c_maplist.h"

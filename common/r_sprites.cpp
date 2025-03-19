@@ -24,7 +24,7 @@
 
 #include "odamex.h"
 
-#include"r_sprites.h"
+#include "r_sprites.h"
 
 #include "m_alloc.h"
 
@@ -91,7 +91,7 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, bool fli
 	if (frame >= MAX_SPRITE_FRAMES || rotation > 16)
 	{
 		I_FatalError("R_InstallSpriteLump: Bad frame characters in lump %i", lump);
-	}	
+	}
 
 	if (static_cast<int>(frame) > maxframe)
 		maxframe = frame;
