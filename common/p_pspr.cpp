@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <stdlib.h>
@@ -203,7 +202,11 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, int32_t stnum)
 		if (psp->state->action)
 		{
 			if (!player->spectator && player->mo != NULL)
+			{
+				// [CMB] TODO: can we calculate psprnum here using the present psp and length of psprites?
+				player->psprnum = psp - player->psprites;
 				psp->state->action(player->mo);
+			}
 
 			if (!psp->state)
 				break;
@@ -218,7 +221,6 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, int32_t stnum)
 void P_SetPsprite(player_t* player, int position, int32_t stnum)
 {
 	// TODO [CMB] set psprnum here to the correct position in the sprites
-	player->psprnum = position;
 	P_SetPspritePtr(player, &player->psprites[position], stnum);
 }
 
