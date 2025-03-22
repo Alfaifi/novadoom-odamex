@@ -593,7 +593,7 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 		return;
 
   	// check for bogus sound #
-	if (sfx_id < 1 || sfx_id > static_cast<int>(S_sfx.size()) - 1)
+	if (sfx_id < 0 || sfx_id > static_cast<int>(S_sfx.size()) - 1)
 	{
 		DPrintf("Bad sfx #: %d\n", sfx_id);
 		return;
