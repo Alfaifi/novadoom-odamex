@@ -1150,7 +1150,7 @@ void G_Ticker (void)
 				consoleplayer().mo = consoleplayer().camera = mobj->ptr();
 				consoleplayer().mo->player = &consoleplayer();
 				G_PlayerReborn(consoleplayer());
-				DPrintf("Did not receive spawn for consoleplayer.\n");
+				DPrintFmt("Did not receive spawn for consoleplayer.\n");
 			}
 
 			CL_SimulateWorld();
@@ -1595,7 +1595,7 @@ void G_DoLoadGame (void)
 	FLZOFile savefile (stdfile, FFile::EReading);
 
 	if (!savefile.IsOpen ())
-		I_Error ("Savegame '%s' is corrupt\n", savename);
+		I_Error ("Savegame '{}' is corrupt\n", savename);
 
 	Printf (PRINT_HIGH, "Loading savegame '%s'...\n", savename);
 

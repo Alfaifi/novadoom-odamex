@@ -189,7 +189,7 @@ int ParseHex(const char* hex)
 		else if (*str >= 'A' && *str <= 'F')
 			num += 10 + *str-'A';
 		else {
-			DPrintf("Bad hex number: %s\n",hex);
+			DPrintFmt("Bad hex number: {}\n",hex);
 			return 0;
 		}
 		str++;
