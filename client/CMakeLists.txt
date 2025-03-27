@@ -219,6 +219,8 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     target_link_libraries(odamex PkgConfig::JSONCPP)
   endif()
 
+  target_link_libraries(odamex libADLMIDI::ADLMIDI_static)
+
   if(ENABLE_PORTMIDI)
     target_link_libraries(odamex ${PORTMIDI_LIBRARY})
   endif()
