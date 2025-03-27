@@ -692,7 +692,7 @@ END_COMMAND (give)
 
 BEGIN_COMMAND (fov)
 {
-	if (!sv_allowfov && (!CHEAT_AreCheatsEnabled() || !m_Instigator))
+	if (multiplayer && !sv_allowfov && (!CHEAT_AreCheatsEnabled() || !m_Instigator))
 		return;
 
 	if (argc != 2)
