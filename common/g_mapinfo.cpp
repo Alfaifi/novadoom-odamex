@@ -166,6 +166,7 @@ void MustGetStringName(OScanner& os, const char* name)
 bool ContainsMapInfoTopLevel(const OScanner& os)
 {
 	return os.compareTokenNoCase("map") || os.compareTokenNoCase("defaultmap") ||
+	       os.compareTokenNoCase("adddefaultmap") ||
 	       os.compareTokenNoCase("cluster") || os.compareTokenNoCase("clusterdef") ||
 	       os.compareTokenNoCase("episode") || os.compareTokenNoCase("clearepisodes") ||
 	       os.compareTokenNoCase("skill") || os.compareTokenNoCase("clearskills") ||
@@ -878,19 +879,19 @@ void MIType_Map07Special(OScanner& os, bool newStyleMapInfo, void* data, unsigne
 
 	// mancubus
 	bossactionvector.emplace_back();
-	bossaction_t& lastaction = bossactionvector.back();
+	bossaction_t& mancaction = bossactionvector.back();
 
-	lastaction.type = MT_FATSO;
-	lastaction.special = 23;
-	lastaction.tag = 666;
+	mancaction.type = MT_FATSO;
+	mancaction.special = 23;
+	mancaction.tag = 666;
 
 	// arachnotron
 	bossactionvector.emplace_back();
-	lastaction = bossactionvector.back();
+	bossaction_t& arachnoaction = bossactionvector.back();
 
-	lastaction.type = MT_BABY;
-	lastaction.special = 30;
-	lastaction.tag = 667;
+	arachnoaction.type = MT_BABY;
+	arachnoaction.special = 30;
+	arachnoaction.tag = 667;
 }
 
 // Sets the map to use the baron bossaction
@@ -957,9 +958,9 @@ void MIType_SpecialAction_ExitLevel(OScanner& os, bool newStyleMapInfo, void* da
 	}
 
 	bossactionvector.emplace_back();
-	bossaction_t& lastaction = bossactionvector.back();
-	lastaction.special = 11;
-	lastaction.tag = 0;
+	bossaction_t& action = bossactionvector.back();
+	action.special = 11;
+	action.tag = 0;
 }
 
 //
@@ -979,9 +980,9 @@ void MIType_SpecialAction_OpenDoor(OScanner& os, bool newStyleMapInfo, void* dat
 	}
 
 	bossactionvector.emplace_back();
-	bossaction_t& lastaction = bossactionvector.back();
-	lastaction.special = 29;
-	lastaction.tag = 666;
+	bossaction_t& action = bossactionvector.back();
+	action.special = 29;
+	action.tag = 666;
 }
 
 //
@@ -1001,9 +1002,9 @@ void MIType_SpecialAction_LowerFloor(OScanner& os, bool newStyleMapInfo, void* d
 	}
 
 	bossactionvector.emplace_back();
-	bossaction_t& lastaction = bossactionvector.back();
-	lastaction.special = 23;
-	lastaction.tag = 666;
+	bossaction_t& action = bossactionvector.back();
+	action.special = 23;
+	action.tag = 666;
 }
 
 //
@@ -1749,7 +1750,7 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 	LevelInfos& levels = getLevelInfos();
 	ClusterInfos& clusters = getClusterInfos();
 
-	level_pwad_info_t defaultinfo;
+	level_pwad_info_t defaultinfo{};
 
 	const char* buffer = static_cast<char*>(W_CacheLumpNum(lump, PU_STATIC));
 
@@ -1766,6 +1767,11 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 		{
 			defaultinfo = level_pwad_info_t();
 
+			MapInfoDataSetter<level_pwad_info_t> defaultsetter(defaultinfo);
+			ParseMapInfoLower<level_pwad_info_t>(os, defaultsetter);
+		}
+		else if (os.compareTokenNoCase("adddefaultmap"))
+		{
 			MapInfoDataSetter<level_pwad_info_t> defaultsetter(defaultinfo);
 			ParseMapInfoLower<level_pwad_info_t>(os, defaultsetter);
 		}

@@ -61,10 +61,10 @@ bool	IsRealNum(const char* str);
 bool iequals(const std::string &, const std::string &);
 
 size_t  StdStringFind(const std::string& haystack, const std::string& needle,
-    size_t pos, size_t n, bool CIS);
+    size_t pos = 0, size_t n = std::string::npos, bool CIS = false);
 
 size_t  StdStringRFind(const std::string& haystack, const std::string& needle,
-    size_t pos, size_t n, bool CIS);
+    size_t pos = 0, size_t n = std::string::npos, bool CIS = false);
 
 std::string StdStringToLower(const std::string&, size_t n = std::string::npos);
 std::string StdStringToLower(const char*, size_t n = std::string::npos);
