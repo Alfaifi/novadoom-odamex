@@ -166,6 +166,7 @@ void MustGetStringName(OScanner& os, const char* name)
 bool ContainsMapInfoTopLevel(const OScanner& os)
 {
 	return os.compareTokenNoCase("map") || os.compareTokenNoCase("defaultmap") ||
+	       os.compareTokenNoCase("adddefaultmap") ||
 	       os.compareTokenNoCase("cluster") || os.compareTokenNoCase("clusterdef") ||
 	       os.compareTokenNoCase("episode") || os.compareTokenNoCase("clearepisodes") ||
 	       os.compareTokenNoCase("skill") || os.compareTokenNoCase("clearskills") ||
@@ -1749,7 +1750,7 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 	LevelInfos& levels = getLevelInfos();
 	ClusterInfos& clusters = getClusterInfos();
 
-	level_pwad_info_t defaultinfo;
+	level_pwad_info_t defaultinfo{};
 
 	const char* buffer = static_cast<char*>(W_CacheLumpNum(lump, PU_STATIC));
 
@@ -1766,6 +1767,11 @@ void ParseMapInfoLump(int lump, const OLumpName& lumpname)
 		{
 			defaultinfo = level_pwad_info_t();
 
+			MapInfoDataSetter<level_pwad_info_t> defaultsetter(defaultinfo);
+			ParseMapInfoLower<level_pwad_info_t>(os, defaultsetter);
+		}
+		else if (os.compareTokenNoCase("adddefaultmap"))
+		{
 			MapInfoDataSetter<level_pwad_info_t> defaultsetter(defaultinfo);
 			ParseMapInfoLower<level_pwad_info_t>(os, defaultsetter);
 		}

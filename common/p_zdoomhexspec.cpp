@@ -235,6 +235,10 @@ void P_PlayerInZDoomSector(player_t* player)
 
 	if (sector->damageamount > 0)
 	{
+		// Some maps, like rjspace9f, abuse the fact that "end sector damage" will actually
+		// not damage the player beyond 1hp, but won't trigger the exit because they're not damaged.
+		short oldhealth = player->health;
+
 		if (sector->flags & SECF_ENDGODMODE)
 		{
 			player->cheats &= ~CF_GODMODE;
@@ -271,7 +275,7 @@ void P_PlayerInZDoomSector(player_t* player)
 				P_DamageMobj(player->mo, NULL, NULL, sector->damageamount);
 			}
 
-			if (sector->flags & SECF_ENDLEVEL && player->health <= 10)
+			if (sector->flags & SECF_ENDLEVEL && player->health <= 10 && oldhealth != player->health)
 			{
 				if (serverside && sv_allowexit)
 				{
@@ -554,7 +558,7 @@ void P_SpawnZDoomSectorSpecial(sector_t* sector)
 			break;
 		P_SetupSectorDamage(sector, 20, 32, 0,
 		                    SECF_ENDGODMODE | SECF_ENDLEVEL | SECF_DMGUNBLOCKABLE);
-		sector->special = 0;
+		//sector->special = 0;
 		break;
 	case Damage_InstantDeath:
 		if (IgnoreSpecial)
