@@ -2821,7 +2821,7 @@ void P_SpawnBrainTargets (void)	// killough 3/26/98: renamed old function
 		{	// killough 2/7/98: remove limit on icon landings:
 			if (numbraintargets >= numbraintargets_alloc)
 			{
-				braintargets = (AActor **)Realloc (braintargets,
+				braintargets = (AActor **)M_Realloc (braintargets,
 					(numbraintargets_alloc = numbraintargets_alloc ?
 					 numbraintargets_alloc*2 : 32) *sizeof *braintargets);
 			}

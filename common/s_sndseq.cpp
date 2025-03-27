@@ -321,7 +321,7 @@ static void VerifySeqPtr (int pos, int need)
 	if (pos + need > ScriptTempSize)
 	{
 		ScriptTempSize *= 2;
-		ScriptTemp = (unsigned int *)Realloc (ScriptTemp, ScriptTempSize * sizeof(*ScriptTemp));
+		ScriptTemp = (unsigned int *) M_Realloc(ScriptTemp, ScriptTempSize * sizeof(*ScriptTemp));
 	}
 }
 
