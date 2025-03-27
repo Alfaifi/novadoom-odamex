@@ -1350,7 +1350,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 		{ 3, 3, 3 },
 		{ 2, 2, 3 }
 	};
-	const char *subst = NULL;
+	const char *subst = nullptr;
 
 	do
 	{
@@ -1384,7 +1384,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 			}
 			else
 			{
-				strcpy (to, genderstuff[gender][gendermsg]);
+				strncpy(to, genderstuff[gender][gendermsg], gendershift[gender][gendermsg]);
 				to += gendershift[gender][gendermsg];
 				from++;
 			}
