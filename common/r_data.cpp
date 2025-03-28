@@ -257,7 +257,7 @@ void R_DrawColumnInCache(const tallpost_t *post, byte *cache,
 // In Odamex, these cause issues and need to be set to zero manually
 void R_VanillaTextureHacks(texture_t* tex)
 {
-	if (iequals(tex->name, "SKY1") &&
+	if (tex->name == "SKY1" &&
 	    tex->height == 128 &&
 		tex->patchcount == 1 &&
 		tex->patches[0].originy == -8)
@@ -621,8 +621,7 @@ void R_InitTextures (void)
 		texture->height = SAFESHORT(mtexture->height);
 		texture->patchcount = SAFESHORT(mtexture->patchcount);
 
-		strncpy (texture->name, mtexture->name, 9); // denis - todo string limit?
-		std::transform(texture->name, texture->name + strlen(texture->name), texture->name, toupper);
+		texture->name = mtexture->name;
 
 		mpatch = &mtexture->patches[0];
 		patch = &texture->patches[0];
@@ -634,7 +633,7 @@ void R_InitTextures (void)
 			patch->patch = patchlookup[LESHORT(mpatch->patch)];
 			if (patch->patch == -1)
 			{
-				Printf (PRINT_WARNING, "R_InitTextures: Missing patch in texture %s\n", texture->name);
+				PrintFmt(PRINT_WARNING, "R_InitTextures: Missing patch in texture {}\n", texture->name);
 				errors++;
 			}
 		}
@@ -1010,21 +1009,17 @@ int R_FlatNumForName (const char* name)
 //
 int R_CheckTextureNumForName (const char *name)
 {
-	unsigned char uname[9];
-	int  i;
-
 	// "NoTexture" marker.
 	if (name[0] == '-')
 		return 0;
 
 	// [RH] Use a hash table instead of linear search
-	strncpy ((char *)uname, name, 9); // denis - todo - string limit?
-	std::transform(uname, uname + sizeof(uname), uname, toupper);
+	OLumpName uname = name;
 
-	i = textures[/*W_LumpNameHash (uname) % (unsigned) numtextures*/0]->index; // denis - todo - replace with map<>
+	int i = textures[/*W_LumpNameHash (uname) % (unsigned) numtextures*/0]->index; // denis - todo - replace with map<>
 
 	while (i != -1) {
-		if (!strncmp (textures[i]->name, (char *)uname, 8))
+		if (textures[i]->name == uname)
 			break;
 		i = textures[i]->next;
 	}
