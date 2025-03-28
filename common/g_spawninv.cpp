@@ -428,7 +428,7 @@ void G_SetupSpawnInventory()
 	spawnInventory_t inv;
 
 	// Split value into comma-separated tokens.
-	const std::string& str = ::g_spawninv.str();
+	const std::string& str = ::g_spawninv.string();
 	StringTokens tok = TokenizeString(str, " ");
 	for (StringTokens::iterator it = tok.begin(); it != tok.end(); ++it)
 	{
@@ -738,7 +738,7 @@ BEGIN_COMMAND(spawninv)
 	if (!stricmp(argv[1], "info"))
 	{
 		// Information about our currently-set spawn inventory.
-		Printf("g_spawninv: %s\n", ::g_spawninv.cstring());
+		Printf("g_spawninv: %s\n", ::g_spawninv.c_str());
 		Printf("serialized: %s\n", SpawnInvSerialize(::gSpawnInv));
 
 		Printf("Health: %d\n", ::gSpawnInv.health);

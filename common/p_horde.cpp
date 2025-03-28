@@ -1018,14 +1018,14 @@ BEGIN_COMMAND(hordeinfo)
 	       define.difficulty(false));
 	Printf("Min Total Health: %d = waveMaxGroup:%d * g_horde_mintotalhp:%s * "
 	       "skillLevel:%0.2f\n",
-	       define.minTotalHealth(), define.maxGroupHealth, ::g_horde_mintotalhp.str(),
+	       define.minTotalHealth(), define.maxGroupHealth, ::g_horde_mintotalhp.string(),
 	       skillScaler);
 	Printf("Max Total Health: %d = waveMaxGroup:%d * g_horde_maxtotalhp:%s * "
 	       "skillLevel:%0.2f\n",
-	       define.maxTotalHealth(), define.maxGroupHealth, ::g_horde_maxtotalhp.str(),
+	       define.maxTotalHealth(), define.maxGroupHealth, ::g_horde_maxtotalhp.string(),
 	       skillScaler);
 	Printf("Goal Health: %d = waveMaxGroup:%d * g_horde_goalhp:%s * skillLevel:%0.2f\n",
-	       define.goalHealth(), define.maxGroupHealth, ::g_horde_goalhp.str(),
+	       define.goalHealth(), define.maxGroupHealth, ::g_horde_goalhp.string(),
 	       skillScaler);
 
 	const char* stateStr = NULL;

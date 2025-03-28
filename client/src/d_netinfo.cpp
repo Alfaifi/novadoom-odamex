@@ -62,10 +62,10 @@ enum
 
 CVAR_FUNC_IMPL(cl_name)
 {
-	std::string newname(var.str());
+	std::string newname(var.string());
 	StripColorCodes(newname);
 
-	if (var.str().compare(newname) != 0)
+	if (var.string().compare(newname) != 0)
 		var.Set(newname.c_str());
 }
 
@@ -162,13 +162,13 @@ void D_SetupUserInfo(void)
 {
 	UserInfo* coninfo = &consoleplayer().userinfo;
 
-	std::string netname(cl_name.str());
+	std::string netname(cl_name.string());
 	StripColorCodes(netname);
 
 	if (netname.length() > MAXPLAYERNAME)
 		netname.erase(MAXPLAYERNAME);
 
-	team_t newteam = D_TeamByName(cl_team.cstring());
+	team_t newteam = D_TeamByName(cl_team.c_str());
 	if (newteam == TEAM_NONE){
 		cl_team.RestoreDefault();
 		newteam = TEAM_BLUE;
@@ -177,7 +177,7 @@ void D_SetupUserInfo(void)
 
 	coninfo->netname			= netname;
 	coninfo->team				= newteam; // [Toke - Teams]
-	coninfo->gender				= D_GenderByName (cl_gender.cstring());
+	coninfo->gender				= D_GenderByName (cl_gender.c_str());
 	coninfo->aimdist			= (fixed_t)(cl_autoaim * 16384.0);
 	coninfo->predict_weapons	= (cl_predictweapons != 0);
 

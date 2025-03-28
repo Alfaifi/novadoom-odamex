@@ -1852,7 +1852,7 @@ void M_OptDrawer (void)
 					joyname = "No device detected";
 				else
 				{
-					joyname = item->a.cvar->cstring();
+					joyname = item->a.cvar->c_str();
 					joyname += ": " + I_GetJoystickNameFromIndex((int)item->a.cvar->value());
 				}
 
@@ -1862,7 +1862,7 @@ void M_OptDrawer (void)
 
 			case joyaxis:
 			{
-				screen->DrawTextCleanMove (CR_GREY, CurrentMenu->indent + 14, y, item->a.cvar->cstring());
+				screen->DrawTextCleanMove (CR_GREY, CurrentMenu->indent + 14, y, item->a.cvar->c_str());
 			}
 			break;
 
@@ -2139,7 +2139,7 @@ void M_OptResponder (event_t *ev)
 		case greenslider:
 		case blueslider:
 		{
-			const char* oldcolor = item->a.cvar->cstring();
+			const char* oldcolor = item->a.cvar->c_str();
 			char newcolor[9];
 
 			if (strlen(oldcolor) == 8)
@@ -2265,7 +2265,7 @@ void M_OptResponder (event_t *ev)
 		case greenslider:
 		case blueslider:
 		{
-			const char* oldcolor = item->a.cvar->cstring();
+			const char* oldcolor = item->a.cvar->c_str();
 			char newcolor[9];
 
 			if (strlen(oldcolor) == 8)

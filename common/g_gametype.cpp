@@ -56,8 +56,8 @@ EXTERN_CVAR(sv_warmup)
 const std::string& G_GametypeName()
 {
 	static std::string name;
-	if (!g_gametypename.str().empty())
-		name = g_gametypename.str();
+	if (!g_gametypename.string().empty())
+		name = g_gametypename.string();
 	else if (G_IsHordeMode() && g_lives)
 		name = "Survival Horde";
 	else if (G_IsHordeMode())

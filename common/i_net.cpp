@@ -228,7 +228,7 @@ void upnp_add_redir (const char * addr, int port)
 	const std::string port_str = fmt::format("{}", port);
 
 	// Set a description if none exists
-	if (!sv_upnp_description.cstring()[0])
+	if (!sv_upnp_description.c_str()[0])
 	{
 		std::stringstream desc;
 
@@ -238,7 +238,7 @@ void upnp_add_redir (const char * addr, int port)
 	}
 
 	const int r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
-		port_str.c_str(), port_str.c_str(), addr, sv_upnp_description.cstring(), "UDP", NULL, 0);
+		port_str.c_str(), port_str.c_str(), addr, sv_upnp_description.c_str(), "UDP", NULL, 0);
 
 	if (r != 0)
 	{
@@ -249,7 +249,7 @@ void upnp_add_redir (const char * addr, int port)
 	else
 	{
 		PrintFmt(PRINT_HIGH, "UPnP: Port mapping added to router: {}",
-			sv_upnp_description.str());
+			sv_upnp_description.string());
 
 		is_upnp_ok = true;
 	}

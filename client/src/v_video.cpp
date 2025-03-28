@@ -1187,7 +1187,7 @@ void DCanvas::Dim(int x1, int y1, int w, int h) const
 	if (ui_dimamount == 0.0f)
 		return;
 
-	Dim(x1, y1, w, h, ui_dimcolor.cstring(), ui_dimamount);
+	Dim(x1, y1, w, h, ui_dimcolor.c_str(), ui_dimamount);
 }
 
 // Build the tables necessary for translucency

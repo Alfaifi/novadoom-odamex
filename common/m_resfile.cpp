@@ -232,11 +232,11 @@ std::vector<std::string> M_FileSearchDirs()
 	std::vector<std::string> dirs;
 
 	// [cSc] Add cl_waddownloaddir as default path
-	D_AddSearchDir(dirs, ::cl_waddownloaddir.cstring(), PATHLISTSEPCHAR);
+	D_AddSearchDir(dirs, ::cl_waddownloaddir.c_str(), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, ::Args.CheckValue("-waddir"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, getenv("DOOMWADDIR"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
-	D_AddSearchDir(dirs, ::waddirs.cstring(), PATHLISTSEPCHAR);
+	D_AddSearchDir(dirs, ::waddirs.c_str(), PATHLISTSEPCHAR);
 	dirs.push_back(M_GetUserDir());
 	dirs.push_back(M_GetCWD());
 	dirs.push_back(M_GetBinaryDir());

@@ -885,32 +885,32 @@ cvar_t msglevel("msg", "0", "", CVARTYPE_INT, CVAR_ARCHIVE | CVAR_NOENABLEDISABL
 
 CVAR_FUNC_IMPL(msg0color)
 {
-	setmsgcolor(0, var.cstring());
+	setmsgcolor(0, var.c_str());
 }
 
 CVAR_FUNC_IMPL(msg1color)
 {
-	setmsgcolor(1, var.cstring());
+	setmsgcolor(1, var.c_str());
 }
 
 CVAR_FUNC_IMPL(msg2color)
 {
-	setmsgcolor(2, var.cstring());
+	setmsgcolor(2, var.c_str());
 }
 
 CVAR_FUNC_IMPL(msg3color)
 {
-	setmsgcolor(3, var.cstring());
+	setmsgcolor(3, var.c_str());
 }
 
 CVAR_FUNC_IMPL(msg4color)
 {
-	setmsgcolor(4, var.cstring());
+	setmsgcolor(4, var.c_str());
 }
 
 CVAR_FUNC_IMPL(msgmidcolor)
 {
-	setmsgcolor(PRINTLEVELS-1, var.cstring());
+	setmsgcolor(PRINTLEVELS-1, var.c_str());
 }
 
 CVAR_FUNC_IMPL(con_scaletext)

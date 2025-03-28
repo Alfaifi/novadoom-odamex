@@ -165,7 +165,7 @@ void M_LoadDefaults(void)
 		    "http://grandpachuck.org/files/wads/ http://ts.chaosunleashed.net/ "
 		    "https://wads.doomleague.org/ http://files.funcrusher.net/wads/";
 
-		if (!strcmp(::cl_downloadsites.cstring(), cl_download_old))
+		if (!strcmp(::cl_downloadsites.c_str(), cl_download_old))
 		{
 			updated = true;
 			cl_downloadsites.RestoreDefault();
@@ -180,7 +180,7 @@ void M_LoadDefaults(void)
 		    "http://grandpachuck.org/files/wads/ https://wads.doomleague.org/ "
 		    "http://files.funcrusher.net/wads/";
 
-		if (!strcmp(::cl_downloadsites.cstring(), cl_download_old))
+		if (!strcmp(::cl_downloadsites.c_str(), cl_download_old))
 		{
 			updated = true;
 			::cl_downloadsites.RestoreDefault();
@@ -197,7 +197,7 @@ void M_LoadDefaults(void)
 		    "http://files.funcrusher.net/wads/ https://doomshack.org/uploads/ "
 		    "https://doom.dogsoft.net/getwad.php?search=";
 
-		if (!strcmp(::cl_downloadsites.cstring(), cl_download_old))
+		if (!strcmp(::cl_downloadsites.c_str(), cl_download_old))
 		{
 			updated = true;
 			::cl_downloadsites.RestoreDefault();
@@ -285,7 +285,7 @@ std::string M_ExpandTokens(const std::string &str)
 				break;
 			}
 			case 'n':
-				buffer << cl_name.cstring();
+				buffer << cl_name.c_str();
 				break;
 			case 'g':
 			{

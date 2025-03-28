@@ -248,7 +248,7 @@ EXTERN_CVAR (g_lives)
 // Private server settings
 CVAR_FUNC_IMPL (join_password)
 {
-	if (strlen(var.cstring()))
+	if (strlen(var.c_str()))
 		Printf("Join password set.");
 	else
 		Printf("Join password cleared.");
@@ -256,9 +256,9 @@ CVAR_FUNC_IMPL (join_password)
 
 CVAR_FUNC_IMPL (rcon_password) // Remote console password.
 {
-	if(strlen(var.cstring()) < 5)
+	if(strlen(var.c_str()) < 5)
 	{
-		if(!strlen(var.cstring()))
+		if(!strlen(var.c_str()))
 			Printf("RCON password cleared.");
 		else
 		{
@@ -1628,7 +1628,7 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 	// GhostlyDeath -- boot em
 	if (!AllowConnect)
 	{
-		std::string msg = VersionMessage(GAMEVER, GameVer, ::sv_email.cstring());
+		std::string msg = VersionMessage(GAMEVER, GameVer, ::sv_email.c_str());
 		if (msg.empty())
 		{
 			// Failsafe.
@@ -1678,7 +1678,7 @@ static void SV_DisconnectOldClient()
 	int cl_maj, cl_min, cl_pat;
 	BREAKVER(GameVer, cl_maj, cl_min, cl_pat);
 
-	std::string msg = VersionMessage(GAMEVER, GameVer, ::sv_email.cstring());
+	std::string msg = VersionMessage(GAMEVER, GameVer, ::sv_email.c_str());
 	if (msg.empty())
 	{
 		// Failsafe.
@@ -1837,7 +1837,7 @@ void SV_ConnectClient()
 
 	// Check if the user entered a good password (if any)
 	std::string passhash = MSG_ReadString();
-	if (strlen(join_password.cstring()) && MD5SUM(join_password.cstring()) != passhash)
+	if (!join_password.string().empty() && MD5SUM(join_password.c_str()) != passhash)
 	{
 		Printf("%s disconnected (password failed).\n", NET_AdrToString(net_from));
 
@@ -1913,7 +1913,7 @@ void SV_ConnectClient2(player_t& player)
 	SV_SendPlayerQueuePositions(&player, true);
 
 	// Send out the server's MOTD.
-	SV_MidPrint((char*)sv_motd.cstring(), &player, 6);
+	SV_MidPrint((char*)sv_motd.c_str(), &player, 6);
 }
 
 
@@ -3577,7 +3577,7 @@ static void ReadyCmd(player_t &player)
  */
 void MOTDCmd(player_t& player)
 {
-	SV_MidPrint((char*)sv_motd.cstring(), &player, 6);
+	SV_MidPrint((char*)sv_motd.c_str(), &player, 6);
 }
 
 /**
@@ -3645,7 +3645,7 @@ void SV_RConPassword (player_t &player)
 	client_t *cl = &player.client;
 
 	std::string challenge = MSG_ReadString();
-	std::string password = rcon_password.cstring();
+	std::string password = rcon_password.c_str();
 
 	// Don't display login messages again if the client is already logged in
 	if (cl->allow_rcon)

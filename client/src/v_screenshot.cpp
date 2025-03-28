@@ -86,7 +86,7 @@ EXTERN_CVAR(vid_gammatype)
 CVAR_FUNC_IMPL(cl_screenshotname)
 {
 	// No empty format strings allowed.
-	if (strlen(var.cstring()) == 0)
+	if (strlen(var.c_str()) == 0)
 		var.RestoreDefault();
 }
 
@@ -385,7 +385,7 @@ void V_ScreenShot(std::string filename)
 
 	// If no filename was passed, use the screenshot format variable.
 	if (filename.empty())
-		filename = cl_screenshotname.str();
+		filename = cl_screenshotname.string();
 
 	// Expand tokens
 	filename = M_ExpandTokens(filename);

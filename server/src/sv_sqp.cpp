@@ -105,10 +105,10 @@ static void IntQryBuildInformation(const DWORD& EqProtocolVersion,
 		{
 			CvarField.Name = var->name();
 			CvarField.Type = var->type();
-			CvarField.Value = var->cstring();
+			CvarField.Value = var->c_str();
 
 			// Skip empty strings
-			if(CvarField.Type == CVARTYPE_STRING && var->cstring()[0] != '\0')
+			if(CvarField.Type == CVARTYPE_STRING && var->c_str()[0] != '\0')
 			{
 				Cvars.push_back(CvarField);
 				goto next;
@@ -168,7 +168,7 @@ next:
 		}
 	}
 
-	MSG_WriteHexString(&ml_message, strlen(join_password.cstring()) ? MD5SUM(join_password.cstring()).c_str() : "");
+	MSG_WriteHexString(&ml_message, !join_password.string().empty() ? MD5SUM(join_password.string()).c_str() : "");
 
 	MSG_WriteString(&ml_message, level.mapname.c_str());
 

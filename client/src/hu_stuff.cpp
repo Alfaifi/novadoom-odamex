@@ -297,19 +297,19 @@ bool HU_Responder(event_t *ev)
 		// send a macro
 		if (ev->data1 >= OKEY_JOY1 && ev->data1 <= OKEY_JOY10)
 		{
-			ShoveChatStr(chat_macros[ev->data1 - OKEY_JOY1]->cstring(), HU_ChatMode()- 1);
+			ShoveChatStr(chat_macros[ev->data1 - OKEY_JOY1]->c_str(), HU_ChatMode()- 1);
 			HU_UnsetChatMode();
 			return true;
 		}
 		else if (ev->data1 >= '0' && ev->data1 <= '9')
 		{
-			ShoveChatStr(chat_macros[ev->data1 - '0']->cstring(), HU_ChatMode() - 1);
+			ShoveChatStr(chat_macros[ev->data1 - '0']->c_str(), HU_ChatMode() - 1);
 			HU_UnsetChatMode();
 			return true;
 		}
 		else if (ev->data1 >= OKEYP_1 && ev->data1 <= OKEYP_0 && ev->mod & OMOD_NUM) // Use numpad keys for chat macros if numlock is on
 		{
-			ShoveChatStr(chat_macros[HU_GetMacroForNumpadKey(ev->data1)]->cstring(), HU_ChatMode() - 1);
+			ShoveChatStr(chat_macros[HU_GetMacroForNumpadKey(ev->data1)]->c_str(), HU_ChatMode() - 1);
 			HU_UnsetChatMode();
 			return true;
 		}
@@ -725,7 +725,7 @@ void drawHeader(player_t *player, int y)
 	brokenlines_t* hostname = NULL;
 	if (::multiplayer)
 	{
-		hostname = V_BreakLines(192, sv_hostname.cstring());
+		hostname = V_BreakLines(192, sv_hostname.c_str());
 	}
 	else
 	{

@@ -584,52 +584,52 @@ void AM_initColors(const bool overlayed)
 
 	if (overlayed && !am_ovshare)
 	{
-		gameinfo.currentAutomapColors.YourColor = AM_GetColorFromString(palette_colors, am_ovyourcolor.cstring());
+		gameinfo.currentAutomapColors.YourColor = AM_GetColorFromString(palette_colors, am_ovyourcolor.c_str());
 		gameinfo.currentAutomapColors.SecretWallColor = gameinfo.currentAutomapColors.WallColor =
-		    AM_GetColorFromString(palette_colors, am_ovwallcolor.cstring());
-		gameinfo.currentAutomapColors.TSWallColor = AM_GetColorFromString(palette_colors, am_ovtswallcolor.cstring());
-		gameinfo.currentAutomapColors.FDWallColor = AM_GetColorFromString(palette_colors, am_ovfdwallcolor.cstring());
-		gameinfo.currentAutomapColors.CDWallColor = AM_GetColorFromString(palette_colors, am_ovcdwallcolor.cstring());
-		gameinfo.currentAutomapColors.ThingColor = AM_GetColorFromString(palette_colors, am_ovthingcolor.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Item = AM_GetColorFromString(palette_colors, am_ovthingcolor_item.cstring());
-		gameinfo.currentAutomapColors.ThingColor_CountItem = AM_GetColorFromString(palette_colors, am_ovthingcolor_countitem.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Monster = AM_GetColorFromString(palette_colors, am_ovthingcolor_monster.cstring());
-		gameinfo.currentAutomapColors.ThingColor_NoCountMonster = AM_GetColorFromString(palette_colors, am_ovthingcolor_nocountmonster.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Friend = AM_GetColorFromString(palette_colors, am_ovthingcolor_friend.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Projectile = AM_GetColorFromString(palette_colors, am_ovthingcolor_projectile.cstring());
-		gameinfo.currentAutomapColors.GridColor = AM_GetColorFromString(palette_colors, am_ovgridcolor.cstring());
-		gameinfo.currentAutomapColors.XHairColor = AM_GetColorFromString(palette_colors, am_ovxhaircolor.cstring());
-		gameinfo.currentAutomapColors.NotSeenColor = AM_GetColorFromString(palette_colors, am_ovnotseencolor.cstring());
-		gameinfo.currentAutomapColors.LockedColor = AM_GetColorFromString(palette_colors, am_ovlockedcolor.cstring());
-		gameinfo.currentAutomapColors.ExitColor = AM_GetColorFromString(palette_colors, am_ovexitcolor.cstring());
+		    AM_GetColorFromString(palette_colors, am_ovwallcolor.c_str());
+		gameinfo.currentAutomapColors.TSWallColor = AM_GetColorFromString(palette_colors, am_ovtswallcolor.c_str());
+		gameinfo.currentAutomapColors.FDWallColor = AM_GetColorFromString(palette_colors, am_ovfdwallcolor.c_str());
+		gameinfo.currentAutomapColors.CDWallColor = AM_GetColorFromString(palette_colors, am_ovcdwallcolor.c_str());
+		gameinfo.currentAutomapColors.ThingColor = AM_GetColorFromString(palette_colors, am_ovthingcolor.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Item = AM_GetColorFromString(palette_colors, am_ovthingcolor_item.c_str());
+		gameinfo.currentAutomapColors.ThingColor_CountItem = AM_GetColorFromString(palette_colors, am_ovthingcolor_countitem.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Monster = AM_GetColorFromString(palette_colors, am_ovthingcolor_monster.c_str());
+		gameinfo.currentAutomapColors.ThingColor_NoCountMonster = AM_GetColorFromString(palette_colors, am_ovthingcolor_nocountmonster.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Friend = AM_GetColorFromString(palette_colors, am_ovthingcolor_friend.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Projectile = AM_GetColorFromString(palette_colors, am_ovthingcolor_projectile.c_str());
+		gameinfo.currentAutomapColors.GridColor = AM_GetColorFromString(palette_colors, am_ovgridcolor.c_str());
+		gameinfo.currentAutomapColors.XHairColor = AM_GetColorFromString(palette_colors, am_ovxhaircolor.c_str());
+		gameinfo.currentAutomapColors.NotSeenColor = AM_GetColorFromString(palette_colors, am_ovnotseencolor.c_str());
+		gameinfo.currentAutomapColors.LockedColor = AM_GetColorFromString(palette_colors, am_ovlockedcolor.c_str());
+		gameinfo.currentAutomapColors.ExitColor = AM_GetColorFromString(palette_colors, am_ovexitcolor.c_str());
 		gameinfo.currentAutomapColors.TeleportColor =
-		    AM_GetColorFromString(palette_colors, am_ovteleportcolor.cstring());
+		    AM_GetColorFromString(palette_colors, am_ovteleportcolor.c_str());
 	}
 	else if (am_usecustomcolors || (overlayed && am_ovshare))
 	{
 		/* Use the custom colors in the am_* cvars */
-		gameinfo.currentAutomapColors.Background = AM_GetColorFromString(palette_colors, am_backcolor.cstring());
-		gameinfo.currentAutomapColors.YourColor = AM_GetColorFromString(palette_colors, am_yourcolor.cstring());
+		gameinfo.currentAutomapColors.Background = AM_GetColorFromString(palette_colors, am_backcolor.c_str());
+		gameinfo.currentAutomapColors.YourColor = AM_GetColorFromString(palette_colors, am_yourcolor.c_str());
 		gameinfo.currentAutomapColors.SecretWallColor = gameinfo.currentAutomapColors.WallColor =
-		    AM_GetColorFromString(palette_colors, am_wallcolor.cstring());
-		gameinfo.currentAutomapColors.TSWallColor = AM_GetColorFromString(palette_colors, am_tswallcolor.cstring());
-		gameinfo.currentAutomapColors.FDWallColor = AM_GetColorFromString(palette_colors, am_fdwallcolor.cstring());
-		gameinfo.currentAutomapColors.CDWallColor = AM_GetColorFromString(palette_colors, am_cdwallcolor.cstring());
-		gameinfo.currentAutomapColors.ThingColor = AM_GetColorFromString(palette_colors, am_thingcolor.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Item = AM_GetColorFromString(palette_colors, am_thingcolor_item.cstring());
-		gameinfo.currentAutomapColors.ThingColor_CountItem = AM_GetColorFromString(palette_colors, am_thingcolor_countitem.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Monster = AM_GetColorFromString(palette_colors, am_thingcolor_monster.cstring());
-		gameinfo.currentAutomapColors.ThingColor_NoCountMonster = AM_GetColorFromString(palette_colors, am_thingcolor_nocountmonster.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Friend = AM_GetColorFromString(palette_colors, am_thingcolor_friend.cstring());
-		gameinfo.currentAutomapColors.ThingColor_Projectile = AM_GetColorFromString(palette_colors, am_thingcolor_projectile.cstring());
-		gameinfo.currentAutomapColors.GridColor = AM_GetColorFromString(palette_colors, am_gridcolor.cstring());
-		gameinfo.currentAutomapColors.XHairColor = AM_GetColorFromString(palette_colors, am_xhaircolor.cstring());
-		gameinfo.currentAutomapColors.NotSeenColor = AM_GetColorFromString(palette_colors, am_notseencolor.cstring());
-		gameinfo.currentAutomapColors.LockedColor = AM_GetColorFromString(palette_colors, am_lockedcolor.cstring());
-		gameinfo.currentAutomapColors.ExitColor = AM_GetColorFromString(palette_colors, am_exitcolor.cstring());
-		gameinfo.currentAutomapColors.TeleportColor = AM_GetColorFromString(palette_colors, am_teleportcolor.cstring());
+		    AM_GetColorFromString(palette_colors, am_wallcolor.c_str());
+		gameinfo.currentAutomapColors.TSWallColor = AM_GetColorFromString(palette_colors, am_tswallcolor.c_str());
+		gameinfo.currentAutomapColors.FDWallColor = AM_GetColorFromString(palette_colors, am_fdwallcolor.c_str());
+		gameinfo.currentAutomapColors.CDWallColor = AM_GetColorFromString(palette_colors, am_cdwallcolor.c_str());
+		gameinfo.currentAutomapColors.ThingColor = AM_GetColorFromString(palette_colors, am_thingcolor.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Item = AM_GetColorFromString(palette_colors, am_thingcolor_item.c_str());
+		gameinfo.currentAutomapColors.ThingColor_CountItem = AM_GetColorFromString(palette_colors, am_thingcolor_countitem.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Monster = AM_GetColorFromString(palette_colors, am_thingcolor_monster.c_str());
+		gameinfo.currentAutomapColors.ThingColor_NoCountMonster = AM_GetColorFromString(palette_colors, am_thingcolor_nocountmonster.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Friend = AM_GetColorFromString(palette_colors, am_thingcolor_friend.c_str());
+		gameinfo.currentAutomapColors.ThingColor_Projectile = AM_GetColorFromString(palette_colors, am_thingcolor_projectile.c_str());
+		gameinfo.currentAutomapColors.GridColor = AM_GetColorFromString(palette_colors, am_gridcolor.c_str());
+		gameinfo.currentAutomapColors.XHairColor = AM_GetColorFromString(palette_colors, am_xhaircolor.c_str());
+		gameinfo.currentAutomapColors.NotSeenColor = AM_GetColorFromString(palette_colors, am_notseencolor.c_str());
+		gameinfo.currentAutomapColors.LockedColor = AM_GetColorFromString(palette_colors, am_lockedcolor.c_str());
+		gameinfo.currentAutomapColors.ExitColor = AM_GetColorFromString(palette_colors, am_exitcolor.c_str());
+		gameinfo.currentAutomapColors.TeleportColor = AM_GetColorFromString(palette_colors, am_teleportcolor.c_str());
 		{
-			argb_t ba = AM_GetColorFromString(palette_colors, am_backcolor.cstring()).rgb;
+			argb_t ba = AM_GetColorFromString(palette_colors, am_backcolor.c_str()).rgb;
 
 			if (ba.getr() < 16)
 				ba.setr(ba.getr() + 32);

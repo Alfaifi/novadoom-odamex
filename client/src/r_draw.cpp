@@ -1810,7 +1810,7 @@ static bool R_IsOptimizationAvailable(r_optimize_kind kind)
 
 CVAR_FUNC_IMPL(r_optimize)
 {
-	const char* val = var.cstring();
+	const char* val = var.c_str();
 
 	// Only print the detected list the first time:
 	if (detect_optimizations())

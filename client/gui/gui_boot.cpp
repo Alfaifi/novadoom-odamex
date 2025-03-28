@@ -468,7 +468,7 @@ class BootWindow : public Fl_Window
 		{
 			m_IWADBrowser->add(iwad.id->mNiceName.c_str(), (void*)iwad.id);
 		}
-		m_genWADDirs = ::waddirs.str();
+		m_genWADDirs = ::waddirs.string();
 	}
 
 	void rescanPWADs()
@@ -482,7 +482,7 @@ class BootWindow : public Fl_Window
 			m_filterIndices.emplace_back(pwad.filename, i);
 			i++;
 		}
-		m_genWADDirs = ::waddirs.str();
+		m_genWADDirs = ::waddirs.string();
 
 		// clear order browser since selection browser is being reset
 		m_PWADOrderBrowser->clear();
@@ -607,7 +607,7 @@ class BootWindow : public Fl_Window
 	/**
 	 * @brief Initialize WAD directories from CVar.
 	 */
-	void initWADDirs() { m_WADDirs = TokenizeString(::waddirs.str(), PATHLISTSEP); }
+	void initWADDirs() { m_WADDirs = TokenizeString(::waddirs.string(), PATHLISTSEP); }
 
 	/**
 	 * @brief Update the CVar from WAD directories list.

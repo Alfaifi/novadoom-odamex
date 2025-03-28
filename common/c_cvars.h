@@ -128,8 +128,8 @@ public:
 			DWORD flags, void (*callback)(cvar_t &), float minval = -FLT_MAX, float maxval = FLT_MAX);
 	virtual ~cvar_t ();
 
-	[[nodiscard]] const char *cstring() const {return m_String.c_str(); }
-	[[nodiscard]] const std::string& str() const { return m_String; }
+	[[nodiscard]] const char *c_str() const {return m_String.c_str(); }
+	[[nodiscard]] const std::string& string() const { return m_String; }
 	[[nodiscard]] const char *name() const { return m_Name.c_str(); }
 	[[nodiscard]] const char *helptext() const {return m_HelpText.c_str(); }
 	[[nodiscard]] const char *latched() const { return m_LatchedString.c_str(); }
