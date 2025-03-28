@@ -98,7 +98,7 @@ OLumpName& OLumpName::operator=(const std::string& other)
 	return *this;
 }
 
-OLumpName& OLumpName::operator=(const std::string& other)
+OLumpName& OLumpName::operator=(std::string_view other)
 {
 	strncpy(m_data, other.data(), 8);
 	MakeDataPresentable();
