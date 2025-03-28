@@ -638,7 +638,7 @@ void M_ReadSaveStrings()
 			const size_t readlen = fread (&savegamestrings[i], SAVESTRINGSIZE, 1, handle);
 			if (readlen < 1)
 			{
-				printf("M_Read_SaveStrings(): Failed to read handle.\n");
+				fmt::print("M_Read_SaveStrings(): Failed to read handle.\n");
 				fclose(handle);
 				return;
 			}
