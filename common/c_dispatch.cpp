@@ -848,7 +848,7 @@ static int DumpHash (bool aliases)
 
 void DConsoleAlias::Archive(FILE *f)
 {
-	fprintf(f, "alias %s %s\n", C_QuoteString(m_Name).c_str(), C_QuoteString(m_Command).c_str());
+	fmt::print(f, "alias {} {}\n", C_QuoteString(m_Name), C_QuoteString(m_Command));
 }
 
 void DConsoleAlias::C_ArchiveAliases (FILE *f)
