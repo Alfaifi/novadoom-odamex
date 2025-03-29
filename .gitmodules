@@ -29,3 +29,6 @@
 [submodule "packaging/flatpak/shared-modules"]
 	path = packaging/flatpak/shared-modules
 	url = https://github.com/flathub/shared-modules.git
+[submodule "libraries/libadlmidi"]
+	path = libraries/libadlmidi
+	url = https://github.com/Wohlstand/libADLMIDI.git

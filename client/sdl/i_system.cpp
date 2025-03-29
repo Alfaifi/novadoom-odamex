@@ -196,7 +196,7 @@ void *I_ZoneBase (size_t *size)
 	// Die if the system has insufficient memory
 	if (got_heapsize < min_heapsize)
 		I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
-					 "is %lu MB but got %lu MB instead",
+					 "is {} MB but got {} MB instead",
 					 min_heapsize,
 					 got_heapsize);
 
@@ -686,7 +686,7 @@ std::string I_GetClipboardText()
 		if (!bytes_left)
 		{
 			XDestroyWindow(dis, WindowEvents);
-			DPrintf("I_GetClipboardText: Len was: %lu", len);
+			DPrintFmt("I_GetClipboardText: Len was: {}", len);
 			XUnlockDisplay(dis);
 			XCloseDisplay(dis);
 			return "";
@@ -1000,7 +1000,7 @@ void I_ErrorMessageBox(const char* message)
 
 void I_ErrorMessageBox(const char* message)
 {
-	fprintf(stderr, "%s\n%s\n", ODAMEX_ERROR_TITLE, message);
+	fmt::print(stderr, "{}\n{}\n", ODAMEX_ERROR_TITLE, message);
 }
 
 #endif
@@ -1011,7 +1011,7 @@ BEGIN_COMMAND(debug_userfilename)
 {
 	if (argc < 2)
 	{
-		Printf("debug_userfilename: needs a path to check.\n");
+		PrintFmt("debug_userfilename: needs a path to check.\n");
 		return;
 	}
 
