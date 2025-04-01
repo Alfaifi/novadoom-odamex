@@ -894,7 +894,7 @@ void P_SwitchSpyOnNoLives(player_t* player)
 		if (::g_lives && player->lives < 1 &&
 		    player->id == displayplayer_id &&
 		    level.time >= player->death_time + (TICRATE * 2) &&
-		    !G_CanEndGame())
+		    ::levelstate.getState() == LevelState::INGAME)
 		{
 			// CL_SpyCycle is located in cl and templated, so we use this
 			// instead.
