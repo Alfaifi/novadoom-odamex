@@ -338,7 +338,7 @@ bool P_Move (AActor *actor)
 	}
 
 	if ((unsigned)actor->movedir >= 8)
-		I_Error ("Weird actor->movedir!");
+		I_Error("Weird actor->movedir!");
 
 	speed = actor->info->speed;
 
@@ -526,7 +526,7 @@ void P_NewChaseDir (AActor *actor)
 	dirtype_t	turnaround;
 
 	if (!actor->target)
-		I_Error ("P_NewChaseDir: called with no target");
+		I_Error("P_NewChaseDir: called with no target");
 
 	olddir = (dirtype_t)actor->movedir;
 	turnaround = opposite[olddir];
@@ -3112,7 +3112,7 @@ void A_PlaySound(AActor* mo)
 
 	if (sndmap >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
 	{
-		DPrintf("Warning: Sound ID is beyond the array of the Sound Map!\n");
+		DPrintFmt("Warning: Sound ID is beyond the array of the Sound Map!\n");
 		sndmap = 0;
 	}
 

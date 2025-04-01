@@ -166,7 +166,7 @@ int ParseHex(const char* hex)
 		else if (*str >= 'A' && *str <= 'F')
 			num += 10 + *str-'A';
 		else {
-			DPrintf("Bad hex number: %s\n",hex);
+			DPrintFmt("Bad hex number: {}\n",hex);
 			return 0;
 		}
 		str++;
@@ -269,13 +269,13 @@ size_t StdStringFind(const std::string& haystack, const std::string& needle,
 }
 
 size_t StdStringFind(const std::string& haystack, const std::string& needle,
-    size_t pos = 0, size_t n = std::string::npos, bool CIS = false)
+    size_t pos, size_t n, bool CIS)
 {
     return StdStringFind(haystack, needle, pos, n, CIS, false);
 }
 
 size_t StdStringRFind(const std::string& haystack, const std::string& needle,
-    size_t pos = 0, size_t n = std::string::npos, bool CIS = false)
+    size_t pos, size_t n, bool CIS)
 {
     return StdStringFind(haystack, needle, pos, n, CIS, true);
 }

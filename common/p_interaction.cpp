@@ -325,7 +325,7 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 
 	if (ammotype < 0 || ammotype > NUMAMMO)
     {
-		I_Error("P_GiveAmmo: bad type %i", ammotype);
+		I_Error("P_GiveAmmo: bad type {}", ammotype);
     }
 
 	if (player->ammo[ammotype] == player->maxammo[ammotype])
@@ -1585,7 +1585,7 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	{
 		SexMessage(message, gendermessage, gender, self->player->userinfo.netname.c_str(),
 		           self->player->userinfo.netname.c_str());
-		SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+		SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 		toast_t toast;
 		toast.flags = toast_t::ICON | toast_t::RIGHT_PID;
@@ -1661,7 +1661,7 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	{
 		SexMessage(message, gendermessage, gender, self->player->userinfo.netname.c_str(),
 		           attacker->player->userinfo.netname.c_str());
-		SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+		SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 		toast_t toast;
 		toast.flags = toast_t::LEFT_PID | toast_t::ICON | toast_t::RIGHT_PID;
@@ -1675,7 +1675,7 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	SexMessage(GStrings(OB_DEFAULT), gendermessage, gender,
 	           self->player->userinfo.netname.c_str(),
 	           self->player->userinfo.netname.c_str());
-	SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+	SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 	toast_t toast;
 	toast.flags = toast_t::ICON | toast_t::RIGHT_PID;
@@ -1901,8 +1901,8 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 
 	// [AM] Save the "out of lives" message until after the obit.
 	if (g_lives && tplayer && tplayer->lives <= 0)
-		SV_BroadcastPrintf("%s is out of lives.\n",
-		                   tplayer->userinfo.netname.c_str());
+		SV_BroadcastPrintFmt("{} is out of lives.\n",
+		                     tplayer->userinfo.netname.c_str());
 
 	// Check sv_fraglimit.
 	if (source && source->player && target->player && level.time)
