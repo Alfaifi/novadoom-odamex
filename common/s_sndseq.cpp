@@ -556,9 +556,9 @@ void S_ParseSndSeq()
 					break;
 
 				case SS_STRING_END:
-					Sequences[curseq] = (sndseq_t *)Z_Malloc (sizeof(sndseq_t) + sizeof(int)*cursize, PU_STATIC, 0);
+					Sequences[curseq] = (sndseq_t *) Z_Malloc(sizeof(sndseq_t) + sizeof(int)*cursize, PU_STATIC, 0);
 					M_StringCopy(Sequences[curseq]->name, name, MAX_SNDNAME + 1);
-					memcpy (Sequences[curseq]->script, ScriptTemp, sizeof(int)*cursize);
+					memcpy(Sequences[curseq]->script, ScriptTemp, sizeof(int)*cursize);
 					Sequences[curseq]->script[cursize] = SS_CMD_END;
 					Sequences[curseq]->stopsound = stopsound;
 					curseq = -1;
