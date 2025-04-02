@@ -73,7 +73,6 @@ int*			texturewidthmask;
 // needed for texture pegging
 fixed_t*		textureheight;
 static int*		texturecompositesize;
-static short** 	texturecolumnlump;
 static unsigned **texturecolumnofs;
 static byte**	texturecomposite;
 fixed_t*		texturescalex;
@@ -463,11 +462,7 @@ tallpost_t* R_GetTextureColumn(int texnum, int colnum)
 		colnum &= mask;
 	else
 		colnum -= width * std::floor((float)colnum / (float)width);
-	int lump = texturecolumnlump[texnum][colnum];
 	int ofs = texturecolumnofs[texnum][colnum];
-
-	if (lump > 0)
-		return (tallpost_t*)((byte *)W_CachePatch(lump, PU_CACHE) + ofs);
 
 	if (!texturecomposite[texnum])
 		R_GenerateComposite(texnum);
@@ -568,13 +563,11 @@ void R_InitTextures (void)
 	// denis - fix memory leaks
 	for (i = 0; i < numtextures; i++)
 	{
-		delete[] texturecolumnlump[i];
 		delete[] texturecolumnofs[i];
 	}
 
 	// denis - fix memory leaks
 	delete[] textures;
-	delete[] texturecolumnlump;
 	delete[] texturecolumnofs;
 	delete[] texturecomposite;
 	delete[] texturecompositesize;
@@ -586,7 +579,6 @@ void R_InitTextures (void)
 	numtextures = numtextures1 + numtextures2;
 
 	textures = new texture_t *[numtextures];
-	texturecolumnlump = new short *[numtextures];
 	texturecolumnofs = new unsigned int *[numtextures];
 	texturecomposite = new byte *[numtextures];
 	texturecompositesize = new int[numtextures];
@@ -637,7 +629,6 @@ void R_InitTextures (void)
 				errors++;
 			}
 		}
-		texturecolumnlump[i] = new short[texture->width];
 		texturecolumnofs[i] = new unsigned int[texture->width];
 
 		for (j = 1; j*2 <= texture->width; j <<= 1)
