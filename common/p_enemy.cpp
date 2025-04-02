@@ -894,13 +894,13 @@ void A_Look (AActor *actor)
 	{
 		char sound[MAX_SNDNAME];
 
-		strcpy (sound, actor->info->seesound);
+		M_StringCopy(sound, actor->info->seesound, MAX_SNDNAME);
 
-		if (sound[strlen(sound)-1] == '1')
+		if (sound[strlen(sound) - 1] == '1')
 		{
-			sound[strlen(sound)-1] = P_Random(actor)%3 + '1';
+			sound[strlen(sound) - 1] = P_Random(actor)%3 + '1';
 			if (S_FindSound (sound) == -1)
-				sound[strlen(sound)-1] = '1';
+				sound[strlen(sound) - 1] = '1';
 		}
 
 		if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
@@ -2601,19 +2601,19 @@ void A_Scream (AActor *actor)
         return;
 
 
-	strcpy (sound, actor->info->deathsound);
+	M_StringCopy(sound, actor->info->deathsound, MAX_SNDNAME);
 
     if (stricmp(sound, "grunt/death1") == 0 ||
         stricmp(sound, "shotguy/death1") == 0 ||
         stricmp(sound, "chainguy/death1") == 0)
     {
-        sound[strlen(sound)-1] = P_Random(actor) % 3 + '1';
+        sound[strlen(sound) - 1] = P_Random(actor) % 3 + '1';
     }
 
     if (stricmp(sound, "imp/death1") == 0 ||
         stricmp(sound, "imp/death2") == 0)
     {
-        sound[strlen(sound)-1] = P_Random(actor) % 2 + '1';
+        sound[strlen(sound) - 1] = P_Random(actor) % 2 + '1';
     }
 
 	if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
