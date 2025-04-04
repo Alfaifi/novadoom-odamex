@@ -138,7 +138,7 @@ include(FetchContent)
 FetchContent_Declare(
   cpptrace
   GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
-  GIT_TAG        v0.8.2 # <HASH or TAG>
+  GIT_TAG        88d75647903b8fe9383601d1cf87a98016e9041b
 )
 FetchContent_MakeAvailable(cpptrace)
 
