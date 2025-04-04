@@ -18,7 +18,6 @@
 //
 // DESCRIPTION:
 //	Stacktrace for more useful error messages
-//  Adapted from https://github.com/iboB/b_stacktrace
 //
 //-----------------------------------------------------------------------------
 
@@ -32,12 +31,12 @@
 std::string M_GetStacktrace(std::string header)
 {
 	auto formatter = cpptrace::formatter{}
-    	.header(header)
+		.header(header)
 		.colors(cpptrace::formatter::color_mode::none)
-    	.addresses(cpptrace::formatter::address_mode::none)
+		.addresses(cpptrace::formatter::address_mode::none)
 		.paths(cpptrace::formatter::path_mode::basename)
 		.columns(false)
-    	.snippets(false)
+		.snippets(false)
 		.filter([](const auto& frame)
 			{ return frame.symbol.find("M_GetStacktrace") == std::string::npos; })
 		.filtered_frame_placeholders(false);
