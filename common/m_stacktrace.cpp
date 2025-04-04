@@ -26,6 +26,7 @@
 
 #include "m_stacktrace.h"
 #include "m_fileio.h"
+#include "fmt/ranges.h"
 
 #if defined(__linux__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
@@ -35,7 +36,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define B_STACKTRACE_MAX_DEPTH 1024
+#define STACKTRACE_MAX_DEPTH 1024
 
 #if defined(_WIN32)
 
@@ -46,7 +47,7 @@
 
 #pragma comment(lib, "DbgHelp.lib")
 
-#define B_STACKTRACE_ERROR_FLAG ((DWORD64)1 << 63)
+#define STACKTRACE_ERROR_FLAG ((DWORD64)1 << 63)
 
 struct traceentry_t
 {
@@ -107,7 +108,7 @@ std::string M_GetStacktrace()
 	while (true)
 	{
 		traceentry_t& entry = entries.emplace_back();
-		if (entries.size() == B_STACKTRACE_MAX_DEPTH)
+		if (entries.size() == STACKTRACE_MAX_DEPTH)
 		{
 			entry.AddrPC_Offset = 0;
 			entry.AddrReturn_Offset = 0;
@@ -117,7 +118,7 @@ std::string M_GetStacktrace()
 		if (!StackWalk64(imageType, process, thread, &frame, &context, NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL))
 		{
 			entry.AddrPC_Offset = frame.AddrPC.Offset;
-			entry.AddrReturn_Offset = B_STACKTRACE_ERROR_FLAG; /* mark error */
+			entry.AddrReturn_Offset = STACKTRACE_ERROR_FLAG; /* mark error */
 			entry.AddrReturn_Offset |= GetLastError();
 			break;
 		}
@@ -140,7 +141,7 @@ std::string M_GetStacktrace()
 		DWORD lineOffset = 0;
 		DWORD64 symOffset = 0;
 
-		if (entry.AddrReturn_Offset & B_STACKTRACE_ERROR_FLAG)
+		if (entry.AddrReturn_Offset & STACKTRACE_ERROR_FLAG)
 		{
 			DWORD error = entry.AddrReturn_Offset & 0xFFFFFFFF;
 			ret += fmt::format("StackWalk64 error: {} @ {}\n", error, entry.AddrPC_Offset);
@@ -175,29 +176,16 @@ std::string M_GetStacktrace()
 #include <unistd.h>
 #include <dlfcn.h>
 
-typedef struct b_stacktrace {
-	void* trace[B_STACKTRACE_MAX_DEPTH];
-	int trace_size;
-} b_stacktrace;
+std::string M_GetStacktrace()
+{
+	static void* trace[STACKTRACE_MAX_DEPTH];
+	int trace_size = backtrace(trace, STACKTRACE_MAX_DEPTH);
+	char** messages = backtrace_symbols(trace, trace_size);
 
-b_stacktrace_handle b_stacktrace_get(void) {
-	b_stacktrace* ret = (b_stacktrace*)malloc(sizeof(b_stacktrace));
-	ret->trace_size = backtrace(ret->trace, B_STACKTRACE_MAX_DEPTH);
-	return (b_stacktrace_handle)(ret);
-}
+	std::string ret = fmt::format("{}", fmt::join(nonstd::span(messages, trace_size), "\n"));
 
-char* b_stacktrace_to_string(b_stacktrace_handle h) {
-	const b_stacktrace* stacktrace = (b_stacktrace*)h;
-	char** messages = backtrace_symbols(stacktrace->trace, stacktrace->trace_size);
-	print_buf out = buf_init();
-	*out.buf = 0;
-
-	for (int i = 0; i < stacktrace->trace_size; ++i) {
-		buf_printf(&out, "%s\n", messages[i]);
-	}
-
-	free(messages);
-	return out.buf;
+	M_Free(messages);
+	return ret;
 }
 
 #elif defined(__linux__)
@@ -210,8 +198,8 @@ char* b_stacktrace_to_string(b_stacktrace_handle h) {
 
 std::string M_GetStacktrace()
 {
-	static void* trace[B_STACKTRACE_MAX_DEPTH];
-	int trace_size = backtrace(trace, B_STACKTRACE_MAX_DEPTH);
+	static void* trace[STACKTRACE_MAX_DEPTH];
+	int trace_size = backtrace(trace, STACKTRACE_MAX_DEPTH);
 	char** messages = backtrace_symbols(trace, trace_size);
 	std::string ret;
 
