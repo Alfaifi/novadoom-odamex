@@ -1336,7 +1336,7 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 //		%o -> other (victim)
 //		%k -> killer
 //
-void SexMessage (const char *from, char *to, int gender, std::string_view victim, std::string_view killer)
+void SexMessage (const char *from, char *to, gender_t gender, std::string_view victim, std::string_view killer)
 {
 	static constexpr std::string_view genderstuff[3][3] =
 	{
@@ -1344,7 +1344,6 @@ void SexMessage (const char *from, char *to, int gender, std::string_view victim
 		{ "she", "her", "her" },
 		{ "it",  "it",  "its" }
 	};
-	std::string_view subst{};
 
 	do
 	{
@@ -1355,6 +1354,7 @@ void SexMessage (const char *from, char *to, int gender, std::string_view victim
 		else
 		{
 			int gendermsg = -1;
+			std::string_view subst{};
 
 			switch (from[1])
 			{
@@ -1369,7 +1369,6 @@ void SexMessage (const char *from, char *to, int gender, std::string_view victim
 				strncpy(to, subst.data(), subst.length());
 				to += subst.length();
 				from++;
-				subst = {};
 			}
 			else if (gendermsg < 0)
 			{
@@ -1400,7 +1399,7 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	if (!G_CanShowObituary() || gamestate != GS_LEVEL)
 		return;
 
-	int gender = self->player->userinfo.gender;
+	gender_t gender = self->player->userinfo.gender;
 
 	// Treat voodoo dolls as unknown deaths
 	if (inflictor && inflictor->player == self->player)
