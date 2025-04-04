@@ -18,12 +18,14 @@
 //
 // DESCRIPTION:
 //	Stacktrace for more useful error messages
+//  Adapted from https://github.com/iboB/b_stacktrace
 //
 //-----------------------------------------------------------------------------
 
 #include "odamex.h"
 
 #include "m_stacktrace.h"
+#include "m_fileio.h"
 
 #if defined(__linux__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
@@ -60,7 +62,6 @@ std::string M_GetStacktrace() {
     STACKFRAME64 frame; /* in/out stackframe */
     DWORD imageType;
     std::vector<traceentry_t> entries;
-    int i = 0;
 
     if (!SymInitialize_called) {
         SymInitialize(process, NULL, TRUE);
@@ -101,8 +102,8 @@ std::string M_GetStacktrace() {
 #endif
 
     while (true) {
-        traceentry_t entry = entries.emplace_back();
-        if (i == B_STACKTRACE_MAX_DEPTH) {
+        traceentry_t& entry = entries.emplace_back();
+        if (entries.size() == B_STACKTRACE_MAX_DEPTH) {
             entry.AddrPC_Offset = 0;
             entry.AddrReturn_Offset = 0;
             break;
@@ -121,15 +122,14 @@ std::string M_GetStacktrace() {
         if (frame.AddrReturn.Offset == 0) {
             break;
         }
-        i++;
     }
 
     std::string ret;
-    IMAGEHLP_SYMBOL64* symbol = (IMAGEHLP_SYMBOL64*)M_Malloc(sizeof(IMAGEHLP_SYMBOL64) + 1024);
+    IMAGEHLP_SYMBOL64* symbol = (IMAGEHLP_SYMBOL64*) M_Malloc(sizeof(IMAGEHLP_SYMBOL64) + 1024);
     symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
     symbol->MaxNameLength = 1024;
 
-    for (const auto& entry : entries) {
+    for (const auto& entry : nonstd::span(entries).subspan(1)) {
         IMAGEHLP_LINE64 lineData;
         DWORD lineOffset = 0;
         DWORD64 symOffset = 0;
@@ -146,7 +146,7 @@ std::string M_GetStacktrace() {
         }
 
         SymGetLineFromAddr64(process, entry.AddrPC_Offset, &lineOffset, &lineData);
-        ret += fmt::format("{}({}): ", lineData.FileName, lineData.LineNumber);
+        ret += fmt::format("{}({}): ", M_ExtractFileName(lineData.FileName), lineData.LineNumber);
 
         if (SymGetSymFromAddr64(process, entry.AddrPC_Offset, &symOffset, symbol)) {
             ret += fmt::format("{}\n", symbol->Name);
