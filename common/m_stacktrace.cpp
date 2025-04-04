@@ -182,7 +182,7 @@ std::string M_GetStacktrace()
 	int trace_size = backtrace(trace, STACKTRACE_MAX_DEPTH);
 	char** messages = backtrace_symbols(trace, trace_size);
 
-	std::string ret = fmt::format("{}", fmt::join(nonstd::span(messages, trace_size), "\n"));
+	std::string ret = fmt::format("{}", fmt::join(nonstd::span(&messages[1], trace_size), "\n"));
 
 	M_Free(messages);
 	return ret;
@@ -203,7 +203,7 @@ std::string M_GetStacktrace()
 	char** messages = backtrace_symbols(trace, trace_size);
 	std::string ret;
 
-	for (int i = 0; i < trace_size; ++i)
+	for (int i = 1; i < trace_size; ++i)
 	{
 		void* tracei = trace[i];
 		char* msg = messages[i];
@@ -221,7 +221,7 @@ std::string M_GetStacktrace()
 			char line[2048];
 
 			FILE* fp;
-			std::string cmd = fmt::format("addr2line -e {} -f -C -p {} 2>/dev/null", messages[i], (void*)((char*)tracei - (char*)info.dli_fbase));
+			std::string cmd = fmt::format("addr2line -e {} -i -f -C -p {} 2>/dev/null", messages[i], (void*)((byte*)tracei - (byte*)info.dli_fbase));	
 
 			fp = popen(cmd.c_str(), "r");
 			if (!fp)
