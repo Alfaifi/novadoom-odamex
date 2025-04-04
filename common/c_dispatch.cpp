@@ -261,10 +261,10 @@ void C_DoCommand(const char *cmd, uint32_t key)
 		argsize = 0;
 		while (data = ParseString(data))
 		{
-			size_t arglen = strlen(arg) + 1;
-			M_StringCopy(arg, com_token, arglen);
+			size_t tokenlen = strlen(com_token) + 1;
+			M_StringCopy(arg, com_token, tokenlen);
 			argv[argsize] = arg;
-			arg += arglen;
+			arg += tokenlen;
 			argsize++;
 		}
 
