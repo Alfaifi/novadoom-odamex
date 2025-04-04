@@ -28,6 +28,8 @@
 #include "m_fileio.h"
 #include "fmt/ranges.h"
 
+#include "cpptrace/cpptrace.hpp"
+
 #if defined(__linux__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE
 #endif
@@ -170,7 +172,7 @@ std::string M_GetStacktrace()
 	return ret;
 }
 
-#elif defined(__APPLE__)
+#elif defined __APPLE__ && defined HAVE_BACKTRACE
 
 #include <execinfo.h>
 #include <unistd.h>
@@ -188,7 +190,7 @@ std::string M_GetStacktrace()
 	return ret;
 }
 
-#elif defined(__linux__)
+#elif defined __linux__ && defined HAVE_BACKTRACE
 
 #include <execinfo.h>
 #include <ucontext.h>
@@ -198,53 +200,7 @@ std::string M_GetStacktrace()
 
 std::string M_GetStacktrace()
 {
-	static void* trace[STACKTRACE_MAX_DEPTH];
-	int trace_size = backtrace(trace, STACKTRACE_MAX_DEPTH);
-	char** messages = backtrace_symbols(trace, trace_size);
-	std::string ret;
-
-	for (int i = 1; i < trace_size; ++i)
-	{
-		void* tracei = trace[i];
-		char* msg = messages[i];
-
-		/* calculate load offset */
-		Dl_info info;
-		dladdr(tracei, &info);
-		if (info.dli_fbase == (void*)0x400000)
-			info.dli_fbase = NULL; // address from executable, so don't offset
-
-		while (*msg && *msg != '(') ++msg;
-		*msg = 0;
-
-		{
-			char line[2048];
-
-			FILE* fp;
-			std::string cmd = fmt::format("addr2line -e {} -i -f -C -p {} 2>/dev/null", messages[i], (void*)((byte*)tracei - (byte*)info.dli_fbase));	
-
-			fp = popen(cmd.c_str(), "r");
-			if (!fp)
-			{
-				ret += "Failed to generate trace further...\n";
-				break;
-			}
-
-			while (fgets(line, sizeof(line), fp))
-			{
-				ret += fmt::format("{}: ", messages[i]);
-				if (strstr(line, "?? "))
-					ret += fmt::format("{}\n", tracei); // just output address if nothing can be found
-				else
-					ret += fmt::format("{}", line);
-			}
-
-			pclose(fp);
-		}
-	}
-
-	M_Free(messages);
-	return ret;
+	return cpptrace::generate_trace().to_string();
 }
 
 #else

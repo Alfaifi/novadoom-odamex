@@ -134,6 +134,14 @@ if(BUILD_CLIENT OR BUILD_SERVER)
   target_include_directories(minilzo PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/minilzo")
 endif()
 
+include(FetchContent)
+FetchContent_Declare(
+  cpptrace
+  GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
+  GIT_TAG        v0.8.2 # <HASH or TAG>
+)
+FetchContent_MakeAvailable(cpptrace)
+
 include(zlib-lib.cmake)
 
 include(libpng-lib.cmake)
