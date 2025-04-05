@@ -2436,13 +2436,14 @@ void A_JumpIfFlagsSet(AActor* actor)
 //
 void A_AddFlags(AActor* actor)
 {
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	const int flags = actor->state->args[0];
+	const int flags2 = actor->state->args[1];
+
+	if (flags & MF_TRANSLUCENT)
+		actor->translucency = TRANSLUC66;
 
 	actor->flags |= flags;
 	actor->flags2 |= flags2;
@@ -2456,13 +2457,14 @@ void A_AddFlags(AActor* actor)
 //
 void A_RemoveFlags(AActor* actor)
 {
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	const int flags = actor->state->args[0];
+	const int flags2 = actor->state->args[1];
+
+	if (flags & MF_TRANSLUCENT)
+		actor->translucency = FRACUNIT;
 
 	actor->flags &= ~flags;
 	actor->flags2 &= ~flags2;

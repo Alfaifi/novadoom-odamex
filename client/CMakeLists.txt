@@ -225,7 +225,7 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     target_link_libraries(odamex ${PORTMIDI_LIBRARY})
   endif()
 
-  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo)
+  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo cpptrace::cpptrace)
 
   if(WIN32)
     target_link_libraries(odamex winmm wsock32 shlwapi)
