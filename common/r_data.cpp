@@ -694,8 +694,6 @@ void R_InitTextures (void)
 //
 void R_InitFlats (void)
 {
-	int i;
-
 	firstflat = W_GetNumForName ("F_START") + 1;
 	lastflat = W_GetNumForName ("F_END") - 1;
 
@@ -709,7 +707,7 @@ void R_InitFlats (void)
 	// Create translation table for global animation.
 	flattranslation = new int[numflats+1];
 
-	for (i = 0; i < numflats; i++)
+	for (int i = 0; i < numflats; i++)
 		flattranslation[i] = i;
 
 	delete[] flatwarp;
@@ -1027,11 +1025,9 @@ int R_CheckTextureNumForName (const char *name)
 //
 int R_TextureNumForName (const char *name)
 {
-	int i;
+	const int i = R_CheckTextureNumForName (name);
 
-	i = R_CheckTextureNumForName (name);
-
-	if (i==-1) {
+	if (i == -1) {
 		char namet[9];
 		strncpy (namet, name, 8);
 		namet[8] = 0;

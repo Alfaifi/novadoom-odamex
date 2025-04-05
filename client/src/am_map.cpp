@@ -1686,9 +1686,9 @@ am_color_t AM_getKeyColor(AActor *t)
 
 void AM_drawEasyKeys()
 {
-	for (int i = 0; i < numsectors; i++)
+	for (const sector_t& sector : R_GetSectors())
 	{
-		AActor* t = sectors[i].thinglist;
+		AActor* t = sector.thinglist;
 		while (t)
 		{
 			if (AM_actorIsKey(t))
@@ -1709,9 +1709,9 @@ void AM_drawThings()
 {
 	OInterpolation& oi = OInterpolation::getInstance();
 
-	for (int i = 0; i < numsectors; i++)
+	for (const sector_t& sector : R_GetSectors())
 	{
-		AActor* t = sectors[i].thinglist;
+		AActor* t = sector.thinglist;
 		while (t)
 		{
 			mpoint_t p;
