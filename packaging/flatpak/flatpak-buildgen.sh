@@ -16,21 +16,12 @@ tar -xvf wxWidgets-3.0.5.tar.bz2 -C libraries/
 
 mkdir -p build && cd build
 # Generate build
-if [[ -z ${USE_SDL12:-} ]]; then
-    cmake .. -GNinja \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-        -DBUILD_OR_FAIL=1 -DBUILD_CLIENT=1 -DBUILD_SERVER=1 \
-        -DBUILD_MASTER=0 -DBUILD_LAUNCHER=1 -DUSE_INTERNAL_LIBS=1 \
-        -DUSE_INTERNAL_WXWIDGETS=1 -DUSE_INTERNAL_DEUTEX=1 \
-        -DODAMEX_INSTALL_BINDIR=/app/bin -DODAMEX_INSTALL_DATADIR=/run/host/usr/share
-else
-    cmake .. -GNinja \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo -DUSE_SDL12=1 \
-        -DBUILD_OR_FAIL=1 -DBUILD_CLIENT=1 -DBUILD_SERVER=1 \
-        -DBUILD_MASTER=0 -DBUILD_LAUNCHER=1 -DUSE_INTERNAL_LIBS=1 \
-        -DUSE_INTERNAL_WXWIDGETS=1 -DUSE_INTERNAL_DEUTEX=1 \
-        -DODAMEX_INSTALL_BINDIR=/app/bin -DODAMEX_INSTALL_DATADIR=/run/host/usr/share
-fi
+cmake .. -GNinja \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DBUILD_OR_FAIL=1 -DBUILD_CLIENT=1 -DBUILD_SERVER=1 \
+    -DBUILD_MASTER=0 -DBUILD_LAUNCHER=1 -DUSE_INTERNAL_LIBS=1 \
+    -DUSE_INTERNAL_WXWIDGETS=1 -DUSE_INTERNAL_DEUTEX=1 \
+    -DODAMEX_INSTALL_BINDIR=/app/bin -DODAMEX_INSTALL_DATADIR=/run/host/usr/share
 
 ninja odamex
 ninja odasrv
