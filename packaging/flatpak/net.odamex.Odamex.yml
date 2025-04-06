@@ -21,6 +21,8 @@ modules:
     builddir: true
     config-opts:
       - -D SDL2MIXER_VENDORED=ON
+      - -D SDL2MIXER_DEPS_SHARED=OFF
+      - -D SDL2MIXER_SAMPLES=OFF
     sources:
       - type: git
         url: https://github.com/libsdl-org/SDL_mixer.git
