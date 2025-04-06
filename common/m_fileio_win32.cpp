@@ -122,6 +122,51 @@ std::string M_GetWriteDir()
 #endif
 }
 
+std::string M_GetDownloadDir()
+{
+#if defined(_XBOX)
+	return "T:" PATHSEP;
+#else
+	// Does the download folder exist?
+	std::string downloadPath = M_GetWriteDir() + PATHSEP "downloads";
+	int ok = SHCreateDirectoryEx(NULL, downloadPath.c_str(), NULL);
+	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
+		return M_CleanPath(downloadPath);
+	else
+		I_FatalError("Failed to create %s directory.\n", downloadPath.c_str());
+#endif
+}
+
+std::string M_GetScreenshotDir()
+{
+#if defined(_XBOX)
+	return "T:" PATHSEP;
+#else
+	// Does the screenshot folder exist?
+	std::string screenshotPath = M_GetWriteDir() + PATHSEP "screenshots";
+	int ok = SHCreateDirectoryEx(NULL, screenshotPath.c_str(), NULL);
+	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
+		return M_CleanPath(screenshotPath);
+	else
+		I_FatalError("Failed to create %s directory.\n", screenshotPath.c_str());
+#endif
+}
+
+std::string M_GetNetDemoDir()
+{
+#if defined(_XBOX)
+	return "T:" PATHSEP;
+#else
+	// Does the netdemo folder exist?
+	std::string netDemoPath = M_GetWriteDir() + PATHSEP "netdemos";
+	int ok = SHCreateDirectoryEx(NULL, netDemoPath.c_str(), NULL);
+	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
+		return M_CleanPath(netDemoPath);
+	else
+		I_FatalError("Failed to create %s directory.\n", netDemoPath.c_str());
+#endif
+}
+
 std::string M_GetUserFileName(const std::string& file)
 {
 #if defined(_XBOX)
@@ -152,6 +197,50 @@ std::string M_GetUserFileName(const std::string& file)
 	// Direct our path to our write directory.
 	std::string path = M_GetWriteDir();
 	if (!M_IsPathSep(path.back()))
+	{
+		path += PATHSEP;
+	}
+	path += file;
+
+	return path;
+#endif
+}
+
+std::string M_GetScreenshotFileName(const std::string& file)
+{
+#if defined(_XBOX)
+	std::string path = "T:";
+
+	path += PATHSEP;
+	path += file;
+
+	return M_CleanPath(path);
+#else
+	// Direct our path to our screenshot directory.
+	std::string path = M_GetScreenshotDir();
+	if (!M_IsPathSep(*(path.end() - 1)))
+	{
+		path += PATHSEP;
+	}
+	path += file;
+
+	return path;
+#endif
+}
+
+std::string M_GetNetDemoFileName(const std::string& file)
+{
+#if defined(_XBOX)
+	std::string path = "T:";
+
+	path += PATHSEP;
+	path += file;
+
+	return M_CleanPath(path);
+#else
+	// Direct our path to our netdemo directory.
+	std::string path = M_GetNetDemoDir();
+	if (!M_IsPathSep(*(path.end() - 1)))
 	{
 		path += PATHSEP;
 	}
