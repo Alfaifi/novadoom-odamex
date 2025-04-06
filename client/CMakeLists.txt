@@ -212,7 +212,7 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   endif()
 
   if(USE_INTERNAL_JSONCPP)
-    target_link_libraries(odamex jsoncpp_lib_static)
+    target_link_libraries(odamex jsoncpp_static)
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
@@ -225,7 +225,7 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     target_link_libraries(odamex ${PORTMIDI_LIBRARY})
   endif()
 
-  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo)
+  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo cpptrace::cpptrace)
 
   if(WIN32)
     target_link_libraries(odamex winmm wsock32 shlwapi)

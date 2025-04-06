@@ -153,7 +153,7 @@ static void ActivateMonsters(AActors& mobjs)
 		{
 			char sound[MAX_SNDNAME];
 
-			strcpy(sound, mo->info->seesound);
+			M_StringCopy(sound, mo->info->seesound, MAX_SNDNAME);
 
 			if (sound[strlen(sound) - 1] == '1')
 			{

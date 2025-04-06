@@ -894,13 +894,13 @@ void A_Look (AActor *actor)
 	{
 		char sound[MAX_SNDNAME];
 
-		strcpy (sound, actor->info->seesound);
+		M_StringCopy(sound, actor->info->seesound, MAX_SNDNAME);
 
-		if (sound[strlen(sound)-1] == '1')
+		if (sound[strlen(sound) - 1] == '1')
 		{
-			sound[strlen(sound)-1] = P_Random(actor)%3 + '1';
+			sound[strlen(sound) - 1] = P_Random(actor)%3 + '1';
 			if (S_FindSound (sound) == -1)
-				sound[strlen(sound)-1] = '1';
+				sound[strlen(sound) - 1] = '1';
 		}
 
 		if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
@@ -1184,6 +1184,7 @@ void A_CPosRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator) 
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1202,6 +1203,7 @@ void A_SpidRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator) 
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1477,9 +1479,33 @@ bool PIT_VileCheck (AActor *thing)
 
 	corpsehit = thing;
 	corpsehit->momx = corpsehit->momy = 0;
-	corpsehit->height <<= 2;
-	check = P_CheckPosition (corpsehit, corpsehit->x, corpsehit->y);
-	corpsehit->height >>= 2;
+
+	if (P_AllowPassover())
+		corpsehit->flags |= MF_SOLID;
+
+	if (co_novileghosts)
+	{
+		int height, radius;
+
+		corpsehit->flags |= MF_SOLID;
+		height = corpsehit->height; // save temporarily
+		radius = corpsehit->radius; // save temporarily
+		corpsehit->height = P_ThingInfoHeight(corpsehit->info);
+		corpsehit->radius = corpsehit->info->radius;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height = height; // restore
+		corpsehit->radius = radius; // restore
+		corpsehit->flags &= ~MF_SOLID;
+	}
+	else
+	{
+		corpsehit->height <<= 2;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height >>= 2;
+	}
+
+	if (P_AllowPassover())
+		corpsehit->flags &= ~MF_SOLID;
 
 	return !check;
 }
@@ -1940,6 +1966,8 @@ void A_SpawnObject(AActor* actor)
 		}
 	}
 
+	SV_UpdateMobj(mo);
+
 	// [XA] don't bother with the dont-inherit-friendliness hack
 	// that exists in A_Spawn, 'cause WTF is that about anyway?
 }
@@ -1997,6 +2025,8 @@ void A_MonsterProjectile(AActor* actor)
 	// always set the 'tracer' field, so this pointer
 	// can be used to fire seeker missiles at will.
 	mo->tracer = actor->target;
+
+	SV_UpdateMobj(mo);
 }
 
 //
@@ -2436,13 +2466,14 @@ void A_JumpIfFlagsSet(AActor* actor)
 //
 void A_AddFlags(AActor* actor)
 {
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	const int flags = actor->state->args[0];
+	const int flags2 = actor->state->args[1];
+
+	if (flags & MF_TRANSLUCENT)
+		actor->translucency = TRANSLUC66;
 
 	actor->flags |= flags;
 	actor->flags2 |= flags2;
@@ -2456,13 +2487,14 @@ void A_AddFlags(AActor* actor)
 //
 void A_RemoveFlags(AActor* actor)
 {
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	const int flags = actor->state->args[0];
+	const int flags2 = actor->state->args[1];
+
+	if (flags & MF_TRANSLUCENT)
+		actor->translucency = FRACUNIT;
 
 	actor->flags &= ~flags;
 	actor->flags2 &= ~flags2;
@@ -2601,19 +2633,19 @@ void A_Scream (AActor *actor)
         return;
 
 
-	strcpy (sound, actor->info->deathsound);
+	M_StringCopy(sound, actor->info->deathsound, MAX_SNDNAME);
 
     if (stricmp(sound, "grunt/death1") == 0 ||
         stricmp(sound, "shotguy/death1") == 0 ||
         stricmp(sound, "chainguy/death1") == 0)
     {
-        sound[strlen(sound)-1] = P_Random(actor) % 3 + '1';
+        sound[strlen(sound) - 1] = P_Random(actor) % 3 + '1';
     }
 
     if (stricmp(sound, "imp/death1") == 0 ||
         stricmp(sound, "imp/death2") == 0)
     {
-        sound[strlen(sound)-1] = P_Random(actor) % 2 + '1';
+        sound[strlen(sound) - 1] = P_Random(actor) % 2 + '1';
     }
 
 	if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
@@ -2821,7 +2853,7 @@ void P_SpawnBrainTargets (void)	// killough 3/26/98: renamed old function
 		{	// killough 2/7/98: remove limit on icon landings:
 			if (numbraintargets >= numbraintargets_alloc)
 			{
-				braintargets = (AActor **)Realloc (braintargets,
+				braintargets = (AActor **)M_Realloc (braintargets,
 					(numbraintargets_alloc = numbraintargets_alloc ?
 					 numbraintargets_alloc*2 : 32) *sizeof *braintargets);
 			}

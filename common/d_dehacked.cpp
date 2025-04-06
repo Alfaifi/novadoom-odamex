@@ -1333,8 +1333,7 @@ static int PatchThing(int thingy)
 			{
 				if (value[0] & MF_TRANSLUCENT)
 				{
-					info->translucency =
-					    TRANSLUC50; // Correct value should be 0.66 (BOOM)...
+					info->translucency = TRANSLUC66;
 				}
 
 				// Unsupported flags have to be announced for developers...
@@ -2159,7 +2158,7 @@ static int PatchStrings(int dummy)
 #endif
 	if (!holdstring)
 	{
-		holdstring = (char*)Malloc(maxstrlen);
+		holdstring = static_cast<char*>(M_Malloc(maxstrlen));
 	}
 
 	while ((result = GetLine()) == 1)
@@ -2172,9 +2171,9 @@ static int PatchStrings(int dummy)
 			while (maxstrlen < strlen(holdstring) + strlen(Line2) + 8)
 			{
 				maxstrlen += 128;
-				holdstring = (char*)Realloc(holdstring, maxstrlen);
+				holdstring = static_cast<char*>(M_Realloc(holdstring, maxstrlen));
 			}
-			strcat(holdstring, skipwhite(Line2));
+			strncat(holdstring, skipwhite(Line2), maxstrlen - strlen(holdstring) - 1);
 			stripwhite(holdstring);
 			if (holdstring[strlen(holdstring) - 1] == '\\')
 			{
@@ -2636,7 +2635,7 @@ BEGIN_COMMAND(playstate)
 		PrintState(index);
 
 		// Mark as visited.
-		visited.insert(std::pair<int, bool>(index, true));
+		visited.emplace(index, true);
 
 		// Next state.
 		index = ::states[index].nextstate;
