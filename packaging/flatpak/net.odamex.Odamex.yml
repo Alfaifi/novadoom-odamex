@@ -41,6 +41,9 @@ modules:
     only-arches:
       - x86_64
       - aarch64
+    build-options:
+      build-args:
+        - --share=network
     build-commands:
       - chmod +x ./flatpak-buildgen.sh
       - "./flatpak-buildgen.sh"
