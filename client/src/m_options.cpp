@@ -839,6 +839,7 @@ EXTERN_CVAR (am_classicmapstring)
 EXTERN_CVAR (am_usecustomcolors)
 EXTERN_CVAR (st_scale)
 EXTERN_CVAR (r_stretchsky)
+EXTERN_CVAR (r_linearsky)
 EXTERN_CVAR (r_skypalette)
 EXTERN_CVAR (r_wipetype)
 EXTERN_CVAR (r_drawplayersprites)
@@ -921,7 +922,8 @@ static menuitem_t VideoItems[] = {
 	{ slider,   "UI Background Visibility", {&ui_dimamount},        {0.0}, {1.0},   {0.1},  {NULL} },
 	{ redtext,	" ",					    {NULL},					{0.0}, {0.0},	{0.0},  {NULL} },
 	{ discrete, "See killer on Death",			{&cl_deathcam},   {2.0}, {0.0}, {0.0}, {OnOff}},
-	{ discrete, "Stretch short skies",	    {&r_stretchsky},	   	{3.0}, {0.0},	{0.0},  {OnOffAuto} },
+	{ discrete, "Stretch short skies",	    {&r_stretchsky},	   	{2.0}, {0.0},	{0.0},  {OnOff} },
+	{ discrete, "Linear Skies",			    {&r_linearsky},	   		{3.0}, {0.0},	{0.0},  {OnOffAuto} },
 	{ discrete, "Invuln changes skies",		{&r_skypalette},		{2.0}, {0.0},	{0.0},	{OnOff} },
 	{ discrete, "Use softer invuln effect", {&r_softinvulneffect},	{2.0}, {0.0},	{0.0},	{OnOff} },
 	{ discrete, "Screen wipe style",	    {&r_wipetype},			{4.0}, {0.0},	{0.0},  {Wipes} },
