@@ -237,6 +237,8 @@ std::vector<std::string> M_FileSearchDirs()
 	D_AddSearchDir(dirs, getenv("DOOMWADDIR"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, ::waddirs.cstring(), PATHLISTSEPCHAR);
+	dirs.push_back(M_CleanPath(M_GetUserDir() + PATHSEP "downloads"));
+	dirs.push_back(M_CleanPath(M_GetBinaryDir() + PATHSEP "downloads"));
 	dirs.push_back(M_GetUserDir());
 	dirs.push_back(M_GetCWD());
 	dirs.push_back(M_GetBinaryDir());

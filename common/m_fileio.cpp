@@ -36,6 +36,7 @@
 
 #include "w_wad.h"
 #include "z_zone.h"
+#include "i_system.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -427,6 +428,71 @@ std::string M_GetUserFileName(const std::string& file)
 
 	return (path / file).string();
 #endif
+}
+
+std::string M_GetWriteSubDir(std::string_view folder)
+{
+#if defined(_XBOX)
+	return "T:" PATHSEP;
+#else
+	// Does the folder exist?
+	fs::path path = M_GetWriteDir();
+	path /= folder;
+	try
+	{
+		fs::create_directory(path);
+		return M_CleanPath(path.string());
+	}
+	catch (const fs::filesystem_error& e)
+	{
+		I_FatalError("Failed to create directory {}: {}\n", path, e.what());
+	}
+#endif
+}
+
+std::string M_GetDownloadDir()
+{
+	return M_GetWriteSubDir("downloads");
+}
+
+std::string M_GetScreenshotDir()
+{
+	return M_GetWriteSubDir("screenshots");
+}
+
+std::string M_GetNetDemoDir()
+{
+	return M_GetWriteSubDir("netdemos");
+}
+
+std::string M_GetScreenshotFileName(const std::string& file)
+{
+	#if defined(_XBOX)
+	fs::path path = "T:";
+	path /= file;
+#elif defined __SWITCH__
+	fs::path path = file;
+#else
+	// Direct our path to our screenshot directory.
+	fs::path path = M_GetScreenshotDir();
+	path /= file;
+#endif
+	return M_CleanPath(path.string());
+}
+
+std::string M_GetNetDemoFileName(const std::string& file)
+{
+#if defined(_XBOX)
+	fs::path path = "T:";
+	path /= file;
+#elif defined __SWITCH__
+	fs::path path = file;
+#else
+	// Direct our path to our netdemo directory.
+	fs::path path = M_GetNetDemoDir();
+	path /= file;
+#endif
+	return M_CleanPath(path.string());
 }
 
 std::string M_BaseFileSearchDir(std::string dir, const std::string& name,
