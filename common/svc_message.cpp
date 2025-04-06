@@ -636,6 +636,37 @@ odaproto::svc::KillMobj SVC_KillMobj(AActor* source, AActor* target, AActor* inf
 	return msg;
 }
 
+/**
+ * @brief Resurrect a mobj.
+ */
+odaproto::svc::RaiseMobj SVC_RaiseMobj(AActor* source, AActor* corpse)
+{
+	odaproto::svc::RaiseMobj msg;
+
+	odaproto::Actor* cps = msg.mutable_corpse();
+
+	// corpse netid
+	cps->set_netid(corpse->netid);
+
+	cps->set_rndindex(corpse->rndindex);
+
+	odaproto::Vec3* cpspos = cps->mutable_pos();
+	cpspos->set_x(corpse->x);
+	cpspos->set_y(corpse->y);
+	cpspos->set_z(corpse->z);
+
+	cps->set_angle(corpse->angle);
+
+	odaproto::Vec3* cpsmom = cps->mutable_mom();
+	cpsmom->set_x(corpse->momx);
+	cpsmom->set_y(corpse->momy);
+	cpsmom->set_z(corpse->momz);
+
+	msg.set_source_netid(source ? source->netid : 0);
+
+	return msg;
+}
+
 odaproto::svc::FireWeapon SVC_FireWeapon(player_t& player)
 {
 	odaproto::svc::FireWeapon msg;
