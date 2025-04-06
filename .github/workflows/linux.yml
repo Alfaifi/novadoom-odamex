@@ -137,10 +137,10 @@ jobs:
     - name: Pack flatpak
       run: |
         flatpak build-bundle repo odamex.flatpak net.odamex.Odamex ${{ env.MODIFIED_BRANCH_NAME }} \
-        --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo 
+        --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Flatpak
+        name: Odamex-Flatpak
         path: odamex.flatpak
 
