@@ -569,9 +569,9 @@ std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString
 
 	// Fix up parameters.
 	fs::path path(M_CleanPath(dir));
-	for (size_t i = 0; i < files.size(); i++)
+	for (auto& file : files)
 	{
-		files[i] = StdStringToUpper(files[i]);
+		file = StdStringToUpper(file);
 	}
 
 	try
@@ -583,14 +583,14 @@ std::vector<std::string> M_BaseFilesScanDir(std::string dir, std::vector<OString
 				continue;
 
 			// Find the file.
-			std::string check = StdStringToUpper(entry.path().filename().string());
+			std::string filename = entry.path().filename().string();
 			std::vector<OString>::iterator it =
-		    	std::find(files.begin(), files.end(), check);
+		    	std::find(files.begin(), files.end(), StdStringToUpper(filename));
 
 			if (it == files.end())
 				continue;
 
-			rvo.push_back(check);
+			rvo.push_back(filename);
 		}
 	}
 	catch (const fs::filesystem_error& e)
