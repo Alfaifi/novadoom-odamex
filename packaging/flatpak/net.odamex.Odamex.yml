@@ -18,6 +18,7 @@ finish-args:
 modules:
   - name: SDL2-mixer
     buildsystem: cmake
+    builddir: true
     # config-opts:
     #   - --disable-static
     cleanup:
