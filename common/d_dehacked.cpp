@@ -1333,8 +1333,7 @@ static int PatchThing(int thingy)
 			{
 				if (value[0] & MF_TRANSLUCENT)
 				{
-					info->translucency =
-					    TRANSLUC50; // Correct value should be 0.66 (BOOM)...
+					info->translucency = TRANSLUC66;
 				}
 
 				// Unsupported flags have to be announced for developers...
