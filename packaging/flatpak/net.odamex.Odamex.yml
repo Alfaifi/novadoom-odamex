@@ -20,7 +20,8 @@ modules:
     buildsystem: cmake
     builddir: true
     config-opts:
-      - -D SDL2_MIXER_VENDORED=ON
+      - -D SDL2MIXER_VENDORED=ON
+      # - -D BUILD_SHARED_LIBS=ON
     cleanup:
       - "/bin/sdl2-config"
       - "/include"
@@ -33,9 +34,9 @@ modules:
       - "/share/aclocal"
       - "/lib/pkgconfig"
     sources:
-      - type: archive
-        url: https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.8.1.tar.gz
-        sha256: cb760211b056bfe44f4a1e180cc7cb201137e4d1572f2002cc1be728efd22660
+      - type: git
+        url: https://github.com/libsdl-org/SDL_mixer.git
+        tag: release-2.8.1
   # Odamex (combined)
   - name: Odamex
     buildsystem: simple
