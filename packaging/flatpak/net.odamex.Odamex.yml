@@ -15,24 +15,19 @@ finish-args:
   - --socket=x11
   - --socket=fallback-x11
   - --filesystem=host
+  - --env=TIMIDITY_CFG=/app/etc/timidity.cfg
 modules:
-  - name: eawpatches
-    buildsystem: simple
-    build-commands:
-      - mkdir -p app/share/timidity/eawpats
-      - cp -r * app/share/timidity/eawpats/
-    sources:
-      - type: "archive
-        url: "http://distfiles.gentoo.org/distfiles/eawpats12_full.tar.gz
-        sha256: "0a1b7368e6e525d62900b34bd061ccc830e6fe1747601ede703e3eb0d1d968b6
-  - name: timidity-config
+  - name: timidity-instruments
     buildsystem: simple
     build-commands:
       - mkdir -p /app/etc/
-      - install timidity.cfg app/etc/timidity.cfg
+      - install timidity.cfg /app/etc/timidity.cfg
+      - mkdir -p /app/share/timidity/
+      - cp -r instruments /app/share/timidity/instruments
     sources:
-      - type: file
-        path: timidity.cfg
+      - type: archive
+        url: http://www.libsdl.org/projects/mixer/timidity/timidity.tar.gz
+        sha256: ee7c59bb5d5fae206d53eef0e82b5ed739e7cbf69252a3754024f8f52ebe77aa
   - name: SDL2-mixer
     buildsystem: cmake
     builddir: true
