@@ -274,6 +274,11 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo* msg)
 
 	P_SetPlayerPowerupStatuses(&p, p.powers);
 
+	// Sync mo health with player health
+	// For crosshaircolor, etc.
+	if (p.mo)
+		p.mo->health = p.health;
+
 	if (!p.spectator)
 		p.cheats = msg->player().cheats();
 
@@ -1322,7 +1327,7 @@ static void CL_FireWeapon(const odaproto::svc::FireWeapon* msg)
 
 	if (firedweap != p->readyweapon)
 	{
-		DPrintf("CL_FireWeapon: weapon misprediction\n");
+		DPrintFmt("CL_FireWeapon: weapon misprediction\n");
 		A_ForceWeaponFire(p->mo, firedweap, servertic);
 
 		// Request the player's ammo status from the server
