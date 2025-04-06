@@ -16,7 +16,6 @@ finish-args:
   - --socket=fallback-x11
   - --filesystem=host
 modules:
-  - shared-modules/glu/glu-9.json
   - name: SDL2-mixer
     buildsystem: autotools
     config-opts:
