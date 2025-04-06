@@ -17,9 +17,9 @@ finish-args:
   - --filesystem=host
 modules:
   - name: SDL2-mixer
-    buildsystem: autotools
-    config-opts:
-      - --disable-static
+    buildsystem: cmake
+    # config-opts:
+    #   - --disable-static
     cleanup:
       - "/bin/sdl2-config"
       - "/include"
