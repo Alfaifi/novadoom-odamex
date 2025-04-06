@@ -21,18 +21,6 @@ modules:
     builddir: true
     config-opts:
       - -D SDL2MIXER_VENDORED=ON
-      # - -D BUILD_SHARED_LIBS=ON
-    cleanup:
-      - "/bin/sdl2-config"
-      - "/include"
-      - "/lib/libSDL2.la"
-      - "/lib/libSDL2main.a"
-      - "/lib/libSDL2main.la"
-      - "/lib/libSDL2_test.a"
-      - "/lib/libSDL2_test.la"
-      - "/lib/cmake"
-      - "/share/aclocal"
-      - "/lib/pkgconfig"
     sources:
       - type: git
         url: https://github.com/libsdl-org/SDL_mixer.git
