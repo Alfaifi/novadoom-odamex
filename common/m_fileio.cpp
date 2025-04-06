@@ -445,7 +445,7 @@ std::string M_GetWriteSubDir(std::string_view folder)
 	}
 	catch (const fs::filesystem_error& e)
 	{
-		I_FatalError("Failed to create directory {}: {}\n", path, e.what());
+		I_FatalError("Failed to create directory {}: {}\n", path.string(), e.what());
 	}
 #endif
 }
