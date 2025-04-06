@@ -19,8 +19,8 @@ modules:
   - name: SDL2-mixer
     buildsystem: cmake
     builddir: true
-    # config-opts:
-    #   - --disable-static
+    config-opts:
+      - -DSDL2_MIXER_VENDORED
     cleanup:
       - "/bin/sdl2-config"
       - "/include"
