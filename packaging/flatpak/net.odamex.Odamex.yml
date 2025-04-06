@@ -20,7 +20,7 @@ modules:
     buildsystem: cmake
     builddir: true
     config-opts:
-      - -DSDL2_MIXER_VENDORED
+      - -D SDL2_MIXER_VENDORED=ON
     cleanup:
       - "/bin/sdl2-config"
       - "/include"
