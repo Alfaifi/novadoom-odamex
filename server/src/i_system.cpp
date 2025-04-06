@@ -144,7 +144,7 @@ void *I_ZoneBase (size_t *size)
 	// Die if the system has insufficient memory
 	if (got_heapsize < min_heapsize)
 		I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
-					 "is %lu MB but got %lu MB instead",
+					 "is {} MB but got {} MB instead",
 					 min_heapsize,
 					 got_heapsize);
 
@@ -510,7 +510,7 @@ std::string I_ConsoleInput (void)
 		fwrite(&ch, 1, 1, stdout);
 		fflush(stdout);
 
-		strcpy(text, buffer);
+		M_StringCopy(text, buffer, 1024);
 		text[len-1] = 0; // rip off the /n and terminate
 		buffer[0] = 0;
 		len = 0;

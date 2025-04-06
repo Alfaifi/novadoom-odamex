@@ -630,7 +630,7 @@ void M_ReadSaveStrings()
 		FILE* handle = fopen(name.c_str(), "rb");
 		if (handle == NULL)
 		{
-			strcpy (&savegamestrings[i][0], GStrings(EMPTYSTRING));
+			M_StringCopy(&savegamestrings[i][0], GStrings(EMPTYSTRING), SAVESTRINGSIZE);
 			LoadSavegameMenu[i].status = 0;
 		}
 		else
@@ -638,7 +638,7 @@ void M_ReadSaveStrings()
 			const size_t readlen = fread (&savegamestrings[i], SAVESTRINGSIZE, 1, handle);
 			if (readlen < 1)
 			{
-				printf("M_Read_SaveStrings(): Failed to read handle.\n");
+				fmt::print("M_Read_SaveStrings(): Failed to read handle.\n");
 				fclose(handle);
 				return;
 			}
@@ -670,7 +670,7 @@ void M_LoadSelect (int choice)
 	std::string name;
 
 	G_BuildSaveName (name, choice);
-	G_LoadGame(name.c_str());
+	G_LoadGame(name);
 	gamestate = gamestate == GS_FULLCONSOLE ? GS_HIDECONSOLE : gamestate;
 	M_ClearMenus ();
 	if (quickSaveSlot == -2)
@@ -721,7 +721,7 @@ void M_DrawSave()
 //
 void M_DoSave (int slot)
 {
-	G_SaveGame (slot,savegamestrings[slot]);
+	G_SaveGame (slot, { savegamestrings[slot], 24 });
 	M_ClearMenus ();
 		// PICK QUICKSAVE SLOT YET?
 	if (quickSaveSlot == -2)
@@ -744,7 +744,7 @@ void M_SaveSelect (int choice)
 	genStringLen = SAVESTRINGSIZE-1;
 
 	saveSlot = choice;
-	strcpy(saveOldString,savegamestrings[choice]);
+	M_StringCopy(saveOldString, savegamestrings[choice], SAVESTRINGSIZE);
 
 	// If on a game console, auto-fill with date and time to save name
 
@@ -1280,7 +1280,7 @@ EXTERN_CVAR (cl_autoaim)
 
 void M_PlayerSetup(int choice)
 {
-	strcpy(savegamestrings[0], cl_name.cstring());
+	M_StringCopy(savegamestrings[0], cl_name.cstring(), SAVESTRINGSIZE);
 	M_SetupNextMenu (&PSetupDef);
 	PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
 	PlayerTics = PlayerState->tics;
@@ -1716,8 +1716,8 @@ static void M_EditPlayerName (int choice)
 	genStringLen = MAXPLAYERNAME;
 
 	saveSlot = 0;
-	strcpy(saveOldString,savegamestrings[0]);
-	if (!strcmp(savegamestrings[0],GStrings(EMPTYSTRING)))
+	M_StringCopy(saveOldString, savegamestrings[0], SAVESTRINGSIZE);
+	if (!strcmp(savegamestrings[0], GStrings(EMPTYSTRING)))
 		savegamestrings[0][0] = 0;
 	saveCharIndex = strlen(savegamestrings[0]);
 }
@@ -1940,7 +1940,7 @@ bool M_Responder (event_t* ev)
 			if (genStringEnter == oldmenustring_t::SAVEGAME)
 				M_ClearMenus();
 			genStringEnter = oldmenustring_t::NONE;
-			strcpy(&savegamestrings[saveSlot][0], saveOldString);
+			M_StringCopy(&savegamestrings[saveSlot][0], saveOldString, SAVESTRINGSIZE);
 		}
 		else if (Key_IsAcceptKey(ch))
 		{
