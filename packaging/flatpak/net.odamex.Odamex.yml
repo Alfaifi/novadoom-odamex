@@ -23,6 +23,7 @@ modules:
       - -D SDL2MIXER_VENDORED=ON
       - -D SDL2MIXER_DEPS_SHARED=OFF
       - -D SDL2MIXER_SAMPLES=OFF
+      - -D CMAKE_INSTALL_LIBDIR=lib
     sources:
       - type: git
         url: https://github.com/libsdl-org/SDL_mixer.git
