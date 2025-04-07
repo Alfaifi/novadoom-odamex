@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
-    Generator for metainfo & .desktop files: 
+<!--
+    Generator for metainfo & .desktop files:
     https://www.freedesktop.org/software/appstream/metainfocreator/#/
 -->
 <component type="desktop-application">
@@ -34,6 +34,6 @@
   </screenshots>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="10.5.0" date="2024-08-28" />
+    <release version="11.0.0" date="YYYY-MM-DD" />
   </releases>
 </component>

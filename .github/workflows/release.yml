@@ -196,6 +196,10 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v4
+    - name: Update metainfo dates
+      run: |
+        DATE=$(date +'%Y-%m-%d')
+        sed -i 's/YYYY-MM-DD/$DATE/g' packaging/linux/net.Odamex.Odamex.*.metainfo.xml
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Install flatpak
@@ -243,6 +247,10 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v4
+    - name: Update metainfo dates
+      run: |
+        DATE=$(date +'%Y-%m-%d')
+        sed -i 's/YYYY-MM-DD/$DATE/g' packaging/linux/net.Odamex.Odamex.*.metainfo.xml
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Install flatpak
