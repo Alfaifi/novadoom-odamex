@@ -197,6 +197,7 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v4
     - name: Update metainfo dates
+      shell: bash
       run: |
         DATE=$(date +'%Y-%m-%d')
         sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.Odamex.Odamex.*.metainfo.xml
@@ -248,6 +249,7 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v4
     - name: Update metainfo dates
+      shell: bash
       run: |
         DATE=$(date +'%Y-%m-%d')
         sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.Odamex.Odamex.*.metainfo.xml

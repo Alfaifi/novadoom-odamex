@@ -188,6 +188,7 @@ jobs:
         MINORVERSION: ${{ needs.pre_job.outputs.minor }}
         PATCHVERSION: ${{ needs.pre_job.outputs.patch }}
     - name: Update metainfo dates
+      shell: bash
       run: |
         DATE=$(date +'%Y-%m-%d')
         sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.Odamex.Odamex.*.metainfo.xml
@@ -235,6 +236,7 @@ jobs:
         MINORVERSION: ${{ needs.pre_job.outputs.minor }}
         PATCHVERSION: ${{ needs.pre_job.outputs.patch }}
     - name: Update metainfo dates
+      shell: bash
       run: |
         DATE=$(date +'%Y-%m-%d')
         sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.Odamex.Odamex.*.metainfo.xml
