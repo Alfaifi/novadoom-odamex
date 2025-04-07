@@ -7,7 +7,7 @@
   <id>net.odamex.Odamex</id>
   <name>Odamex</name>
   <summary>Client, server, and launcher for the DOOM port Odamex</summary>
-  <developer>
+  <developer id="net.odamex">
     <name>The Odamex Team</name>
   </developer>
   <url type="homepage">https://odamex.net</url>
