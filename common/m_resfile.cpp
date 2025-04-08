@@ -137,7 +137,7 @@ bool OWantFile::make(OWantFile& out, const std::string& file, const ofile_t type
 	out.m_wantedpath = file;
 	out.m_wantedtype = type;
 	out.m_basename = basename;
-	out.m_extension = std::string(".") + extension;
+	out.m_extension = extension;
 	return true;
 }
 
@@ -237,6 +237,8 @@ std::vector<std::string> M_FileSearchDirs()
 	D_AddSearchDir(dirs, getenv("DOOMWADDIR"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
 	D_AddSearchDir(dirs, ::waddirs.cstring(), PATHLISTSEPCHAR);
+	dirs.push_back(M_CleanPath(M_GetUserDir() + PATHSEP "downloads"));
+	dirs.push_back(M_CleanPath(M_GetBinaryDir() + PATHSEP "downloads"));
 	dirs.push_back(M_GetUserDir());
 	dirs.push_back(M_GetCWD());
 	dirs.push_back(M_GetBinaryDir());
@@ -290,7 +292,7 @@ bool M_ResolveWantedFile(OResFile& out, const OWantFile& wanted)
 	M_ExtractFileBase(path, basename);
 	if (M_ExtractFileExtension(path, strext))
 	{
-		exts.push_back("." + strext);
+		exts.push_back(strext);
 	}
 	else
 	{

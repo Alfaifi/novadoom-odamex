@@ -275,6 +275,11 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo* msg)
 
 	P_SetPlayerPowerupStatuses(&p, p.powers);
 
+	// Sync mo health with player health
+	// For crosshaircolor, etc.
+	if (p.mo)
+		p.mo->health = p.health;
+
 	if (!p.spectator)
 		p.cheats = msg->player().cheats();
 
