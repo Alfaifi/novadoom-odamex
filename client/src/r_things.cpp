@@ -718,14 +718,14 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 	// decide which patch to use
 #ifdef RANGECHECK
 	if ( (unsigned)psp->state->sprite >= (unsigned)numsprites) {
-		DPrintFmt("R_DrawPSprite: invalid sprite number %i\n", psp->state->sprite);
+		DPrintFmt("R_DrawPSprite: invalid sprite number {}\n", psp->state->sprite);
 		return;
 	}
 #endif
 	sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
 	if ( (psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes) {
-		DPrintFmt("R_DrawPSprite: invalid sprite frame %i : %i\n", psp->state->sprite, psp->state->frame);
+		DPrintFmt("R_DrawPSprite: invalid sprite frame {} : {}\n", psp->state->sprite, psp->state->frame);
 		return;
 	}
 #endif
