@@ -45,6 +45,7 @@ extern fixed_t freelookviewheight;
 EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(cl_mouselook)
 EXTERN_CVAR(r_skypalette)
+EXTERN_CVAR(r_linearsky)
 
 
 //
@@ -62,6 +63,7 @@ int			sky1shift,        sky2shift;
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
 static angle_t xtoviewangle[MAXWIDTH + 1];
+static angle_t linearskyangle[MAXWIDTH + 1];
 
 CVAR_FUNC_IMPL(r_stretchsky)
 {
@@ -235,17 +237,27 @@ static void R_InitXToViewAngle()
 			const fixed_t dfocus = FocalLengthX >> DBITS;
 
 			for (int i = centerx, slope = 0; i <= t; i++, slope += slopestep)
-				xtoviewangle[i] = (angle_t)-(signed)tantoangle[slope >> DBITS];
+			{
+				xtoviewangle[i]   = (angle_t)-(signed)tantoangle[slope >> DBITS];
+				linearskyangle[i] = (0.5 - i / (double)viewwidth) * FIXED2DOUBLE(hitan) * ANG90;
+			}
 
 			for (int i = t + 1; i <= viewwidth; i++)
-				xtoviewangle[i] = ANG270+tantoangle[dfocus / (i - centerx)];
+			{
+				xtoviewangle[i]   = ANG270+tantoangle[dfocus / (i - centerx)];
+				linearskyangle[i] = (0.5 - i / (double)viewwidth) * FIXED2DOUBLE(hitan) * ANG90;
+			}
 
 			for (int i = 0; i < centerx; i++)
-				xtoviewangle[i] = (angle_t)(-(signed)xtoviewangle[viewwidth-i-1]);
+			{
+				xtoviewangle[i]   = (angle_t)(-(signed)xtoviewangle[viewwidth-i-1]);
+				linearskyangle[i] = (angle_t)(-(signed)linearskyangle[viewwidth-i-1]);
+			}
 		}
 		else
 		{
 			memset(xtoviewangle, 0, sizeof(angle_t) * viewwidth + 1);
+			memset(linearskyangle, 0, sizeof(angle_t) * viewwidth + 1);
 		}
 
 		last_viewwidth = viewwidth;
@@ -496,10 +508,7 @@ void R_InitSkyDefs()
 
 	jsonlumpresult_t result =  M_ParseJSONLump("SKYDEFS", "skydefs", { 1, 0, 0 }, ParseSkydef);
 	if (result != jsonlumpresult_t::SUCCESS && result != jsonlumpresult_t::NOTFOUND)
-	{
-		I_Error("R_InitSkyDefs: SKYDEFS JSON error: %s",
-		        M_JSONLumpResultToString(result));
-	}
+		I_Error("R_InitSkyDefs: SKYDEFS JSON error: {}", M_JSONLumpResultToString(result));
 }
 
 void R_ClearSkyDefs()
@@ -727,6 +736,7 @@ void R_RenderSkyRange(visplane_t* pl)
 	fixed_t frontrow_offset = 0;
 	fixed_t backrow_offset = 0;
 	angle_t skyflip = 0;
+	const angle_t* xtoskyangle = r_linearsky.asBool() ? linearskyangle : xtoviewangle;
 
 	auto skyflat = skyflatlookup.find(pl->picnum);
 
@@ -841,7 +851,7 @@ void R_RenderSkyRange(visplane_t* pl)
 
 		for (int x = pl->minx; x <= pl->maxx; x++)
 		{
-			int sky2colnum = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky2shift) + back_offset) >> FRACBITS;
+			int sky2colnum = ((((viewangle + xtoskyangle[x]) ^ skyflip) >> sky2shift) + back_offset) >> FRACBITS;
 			sky2colnum = FIXED2INT(FixedMul(INT2FIXED(sky2colnum), sky2scalex));
 			tallpost_t* skypost = R_GetTextureColumn(backskytex, sky2colnum);
 			skyposts[x] = skypost;
@@ -860,7 +870,7 @@ void R_RenderSkyRange(visplane_t* pl)
 	{
 		for (int x = pl->minx; x <= pl->maxx; x++)
 		{
-			int sky1colnum = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
+			int sky1colnum = ((((viewangle + xtoskyangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
 			sky1colnum = FIXED2INT(FixedMul(INT2FIXED(sky1colnum), sky1scalex));
 			tallpost_t* skypost = R_GetTextureColumn(frontskytex, sky1colnum);
 			skyposts[x] = skypost;
@@ -873,7 +883,7 @@ void R_RenderSkyRange(visplane_t* pl)
 	{
 		for (int x = pl->minx; x <= pl->maxx; x++)
 		{
-			int sky1colnum = ((((viewangle + xtoviewangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
+			int sky1colnum = ((((viewangle + xtoskyangle[x]) ^ skyflip) >> sky1shift) + front_offset) >> FRACBITS;
 			sky1colnum = FIXED2INT(FixedMul(INT2FIXED(sky1colnum), sky1scalex));
 			tallpost_t* skypost = R_GetTextureColumn(frontskytex, sky1colnum);
 

@@ -992,7 +992,7 @@ bool MSG_ReadBool(void)
 
     if (Value < 0 || Value > 1)
     {
-        DPrintf("MSG_ReadBool: Value is not 0 or 1, possibly corrupted packet");
+        DPrintFmt("MSG_ReadBool: Value is not 0 or 1, possibly corrupted packet");
 
         return (Value ? true : false);
     }
@@ -1076,6 +1076,7 @@ static void InitNetMessageFormats()
 	SVC_INFO(svc_spawnplayer);
 	SVC_INFO(svc_damageplayer);
 	SVC_INFO(svc_killmobj);
+	SVC_INFO(svc_raisemobj);
 	SVC_INFO(svc_fireweapon);
 	SVC_INFO(svc_updatesector);
 	SVC_INFO(svc_print);
@@ -1197,7 +1198,7 @@ void InitNetCommon(void)
 
    BindToLocalPort (inet_socket, localport);
    if (ioctlsocket(inet_socket, FIONBIO, &_true) == -1)
-       I_FatalError ("UDPsocket: ioctl FIONBIO: %s", strerror(errno));
+       I_FatalError ("UDPsocket: ioctl FIONBIO: {}", strerror(errno));
 
 	// enter message information into message info structs
 	InitNetMessageFormats();

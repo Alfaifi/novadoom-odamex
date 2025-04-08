@@ -1103,7 +1103,7 @@ void A_WeaponMeleeAttack(AActor* mo)
 	auto soundIt = SoundMap.find(hitsound);
 	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
+		DPrintFmt("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
 		snd = nullptr;
 	}
 	else
@@ -1165,7 +1165,7 @@ void A_WeaponSound(AActor *mo)
 	auto soundIt = SoundMap.find(sndmap);
 	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon sound ID is beyond the array of the Sound Map!\n");
+		DPrintFmt("Warning: Weapon sound ID is beyond the array of the Sound Map!\n");
 		snd = nullptr;
 	}
 	else

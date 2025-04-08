@@ -260,7 +260,7 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjinfo_t* mobjinfo)
 	// Fly!!! fix it in P_RespawnSpecial
 	if (mobjinfo == NULL)
 	{
-		I_Error("Tried to spawn actor type %d\n", type);
+		I_Error("Tried to spawn actor type {}\n", type);
 	}
 
 	self.init(this);
@@ -1029,7 +1029,7 @@ bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 		// [CMB] find will find NULL as it can be interpreted as 0
 		if (states.find(state) == states.end())
 		{
-			I_Error("P_SetMobjState: State %d does not exist in state table.", state);
+			I_Error("P_SetMobjState: State {} does not exist in state table.", state);
 		}
 
 		// strongly typed enum
@@ -1068,7 +1068,7 @@ bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 		// [AM] A slightly different heruistic that doesn't involve global state.
 		if (cycle_counter++ > MOBJ_CYCLE_LIMIT)
 		{
-			I_Error("P_SetMobjState: Infinite state cycle detected for %s at state %d.",
+			I_Error("P_SetMobjState: Infinite state cycle detected for {} at state {}.",
 			        mobj->info->name, state);
 		}
 	} while (!mobj->tics);

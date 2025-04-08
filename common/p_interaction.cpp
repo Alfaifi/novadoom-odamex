@@ -325,7 +325,7 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 
 	if (ammotype < 0 || ammotype > NUMAMMO)
     {
-		I_Error("P_GiveAmmo: bad type %i", ammotype);
+		I_Error("P_GiveAmmo: bad type {}", ammotype);
     }
 
 	if (player->ammo[ammotype] == player->maxammo[ammotype])
@@ -1337,21 +1337,14 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 //		%o -> other (victim)
 //		%k -> killer
 //
-void SexMessage (const char *from, char *to, int gender, const char *victim, const char *killer)
+void SexMessage (const char *from, char *to, gender_t gender, std::string_view victim, std::string_view killer)
 {
-	static const char *genderstuff[3][3] =
+	static constexpr std::string_view genderstuff[3][3] =
 	{
 		{ "he",  "him", "his" },
 		{ "she", "her", "her" },
 		{ "it",  "it",  "its" }
 	};
-	static constexpr int gendershift[3][3] =
-	{
-		{ 2, 3, 3 },
-		{ 3, 3, 3 },
-		{ 2, 2, 3 }
-	};
-	const char *subst = NULL;
 
 	do
 	{
@@ -1362,6 +1355,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 		else
 		{
 			int gendermsg = -1;
+			std::string_view subst{};
 
 			switch (from[1])
 			{
@@ -1371,13 +1365,11 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 			case 'o':	subst = victim;	break;
 			case 'k':	subst = killer;	break;
 			}
-			if (subst != NULL)
+			if (!subst.empty())
 			{
-				size_t len = strlen (subst);
-				memcpy (to, subst, len);
-				to += len;
+				strncpy(to, subst.data(), subst.length());
+				to += subst.length();
 				from++;
-				subst = NULL;
 			}
 			else if (gendermsg < 0)
 			{
@@ -1385,8 +1377,8 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 			}
 			else
 			{
-				strcpy (to, genderstuff[gender][gendermsg]);
-				to += gendershift[gender][gendermsg];
+				strncpy(to, genderstuff[gender][gendermsg].data(), genderstuff[gender][gendermsg].length());
+				to += genderstuff[gender][gendermsg].length();
 				from++;
 			}
 		}
@@ -1408,7 +1400,7 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	if (!G_CanShowObituary() || gamestate != GS_LEVEL)
 		return;
 
-	int gender = self->player->userinfo.gender;
+	gender_t gender = self->player->userinfo.gender;
 
 	// Treat voodoo dolls as unknown deaths
 	if (inflictor && inflictor->player == self->player)
@@ -1584,9 +1576,9 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 
 	if (message)
 	{
-		SexMessage(message, gendermessage, gender, self->player->userinfo.netname.c_str(),
-		           self->player->userinfo.netname.c_str());
-		SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+		SexMessage(message, gendermessage, gender, self->player->userinfo.netname,
+		           self->player->userinfo.netname);
+		SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 		toast_t toast;
 		toast.flags = toast_t::ICON | toast_t::RIGHT_PID;
@@ -1660,9 +1652,9 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 
 	if (message && attacker && attacker->player)
 	{
-		SexMessage(message, gendermessage, gender, self->player->userinfo.netname.c_str(),
-		           attacker->player->userinfo.netname.c_str());
-		SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+		SexMessage(message, gendermessage, gender, self->player->userinfo.netname,
+		           attacker->player->userinfo.netname);
+		SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 		toast_t toast;
 		toast.flags = toast_t::LEFT_PID | toast_t::ICON | toast_t::RIGHT_PID;
@@ -1674,9 +1666,9 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	}
 
 	SexMessage(GStrings(OB_DEFAULT), gendermessage, gender,
-	           self->player->userinfo.netname.c_str(),
-	           self->player->userinfo.netname.c_str());
-	SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+	           self->player->userinfo.netname,
+	           self->player->userinfo.netname);
+	SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 	toast_t toast;
 	toast.flags = toast_t::ICON | toast_t::RIGHT_PID;
@@ -1902,8 +1894,8 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 
 	// [AM] Save the "out of lives" message until after the obit.
 	if (g_lives && tplayer && tplayer->lives <= 0)
-		SV_BroadcastPrintf("%s is out of lives.\n",
-		                   tplayer->userinfo.netname.c_str());
+		SV_BroadcastPrintFmt("{} is out of lives.\n",
+		                     tplayer->userinfo.netname.c_str());
 
 	// Check sv_fraglimit.
 	if (source && source->player && target->player && level.time)

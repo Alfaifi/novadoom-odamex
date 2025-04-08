@@ -41,6 +41,7 @@
 
 EXTERN_CVAR(sv_gametype)
 
+EXTERN_CVAR(g_lives)
 EXTERN_CVAR(sv_fraglimit)
 EXTERN_CVAR(sv_scorelimit)
 EXTERN_CVAR(sv_timelimit)
@@ -54,6 +55,7 @@ EXTERN_CVAR(sv_vote_timelimit)
 EXTERN_CVAR(sv_vote_timeout)
 
 EXTERN_CVAR(sv_callvote_coinflip)
+EXTERN_CVAR(sv_callvote_lives)
 EXTERN_CVAR(sv_callvote_forcespec)
 EXTERN_CVAR(sv_callvote_forcestart)
 EXTERN_CVAR(sv_callvote_kick)
@@ -103,7 +105,57 @@ public:
 	{
 		std::string result;
 		CMD_CoinFlip(result);
-		SV_BroadcastPrintf("%s\n", result.c_str());
+		SV_BroadcastPrintFmt("{}\n", result);
+		return true;
+	}
+};
+
+class LivesVote : public Vote
+{
+private:
+	unsigned int lives;
+public:
+	LivesVote() : Vote("lives", &sv_callvote_lives) { };
+	bool setup(const std::vector<std::string> &args, const player_t &player) override
+	{
+		unsigned int lives;
+
+		if (!Vote::setup_check_cvar())
+			return false;
+
+		// Do we have at least one argument?
+		if (args.size() < 1)
+		{
+			this->error = "lives needs a second argument.";
+			return false;
+		}
+
+		// Are the lives a numeric value?
+		std::istringstream buffer(args[0].c_str());
+		buffer >> lives;
+		if (!buffer)
+		{
+			this->error = "lives must be a number.";
+			return false;
+		}
+
+		// Are the lives positive?
+		if (args[0].length() > 0 && args[0][0] == '-')
+		{
+			this->error = "lives must be 0 or a positive number.";
+			return false;
+		}
+
+		std::ostringstream vote_string;
+		vote_string << "lives " << lives;
+
+		this->lives = lives;
+		this->votestring = vote_string.str();
+		return true;
+	}
+	bool exec() override
+	{
+		g_lives.Set(this->lives);
 		return true;
 	}
 };
@@ -886,7 +938,7 @@ bool Vote::init(const std::vector<std::string> &args, const player_t &player)
 			this->tally[it->id] = VOTE_UNDEC;
 	}
 
-	SV_BroadcastPrintf("%s has called a vote for %s.\n", player.userinfo.netname.c_str(), this->get_votestring().c_str());
+	SV_BroadcastPrintFmt("{} has called a vote for {}.\n", player.userinfo.netname, this->get_votestring());
 	return true;
 }
 
@@ -904,7 +956,7 @@ void Vote::parse(vote_result_t vote_result)
 
 	if (this->tally.empty() || vote_result == VOTE_ABANDON)
 	{
-		SV_BroadcastPrintf("Vote %s abandoned!\n", this->votestring.c_str());
+		SV_BroadcastPrintFmt("Vote {} abandoned!\n", this->votestring);
 		return;
 	}
 
@@ -914,13 +966,13 @@ void Vote::parse(vote_result_t vote_result)
 
 	if (vote_result == VOTE_INTERRUPT)
 	{
-		SV_BroadcastPrintf("Vote %s interrupted! (Yes: %lu, No: %lu, Abs: %lu)\n", this->votestring.c_str(), yes, no, abs);
+		SV_BroadcastPrintFmt("Vote {} interrupted! (Yes: {}, No: {}, Abs: {})\n", this->votestring, yes, no, abs);
 		return;
 	}
 
 	if (vote_result != VOTE_YES)
 	{
-		SV_BroadcastPrintf("Vote %s failed! (Yes: %lu, No: %lu, Abs: %lu)\n", this->votestring.c_str(), yes, no, abs);
+		SV_BroadcastPrintFmt("Vote {} failed! (Yes: {}, No: {}, Abs: {})\n", this->votestring, yes, no, abs);
 
 		// Only set the timeout tic if the vote failed.
 		player_t caller = idplayer(this->caller_id);
@@ -932,7 +984,7 @@ void Vote::parse(vote_result_t vote_result)
 		return;
 	}
 
-	SV_BroadcastPrintf("Vote %s passed! (Yes: %lu, No: %lu, Abs: %lu)\n", this->votestring.c_str(), yes, no, abs);
+	SV_BroadcastPrintFmt("Vote {} passed! (Yes: {}, No: {}, Abs: {})\n", this->votestring, yes, no, abs);
 
 	// NOTE: This can return false if there is an error, but we're already
 	//       catching errors in Vote_Runtic by seeing if the error is
@@ -978,11 +1030,11 @@ bool Vote::vote(player_t &player, bool ballot)
 	{
 		if (!sv_vote_specvote && player.spectator)
 		{
-			SV_PlayerPrintf(PRINT_HIGH, player.id, "Spectators can't vote on this server.\n");
+			SV_PlayerPrintFmt(PRINT_HIGH, player.id, "Spectators can't vote on this server.\n");
 		}
 		else
 		{
-			SV_PlayerPrintf(PRINT_HIGH, player.id, "You can't vote on something that was called before you joined the server.\n");
+			SV_PlayerPrintFmt(PRINT_HIGH, player.id, "You can't vote on something that was called before you joined the server.\n");
 		}
 		return false;
 	}
@@ -1004,8 +1056,8 @@ bool Vote::vote(player_t &player, bool ballot)
 
 		if (timeout < timeout_check)
 		{
-			SV_PlayerPrintf(PRINT_HIGH, player.id, "Please wait another %d second%s to change your vote.\n",
-			                timeout_waitsec, timeout_waitsec != 1 ? "s" : "");
+			SV_PlayerPrintFmt(PRINT_HIGH, player.id, "Please wait another %d second%s to change your vote.\n",
+			                  timeout_waitsec, timeout_waitsec != 1 ? "s" : "");
 			return false;
 		}
 	}
@@ -1046,14 +1098,14 @@ void SV_Callvote(player_t &player)
 	vote_type_t votecmd = (vote_type_t)MSG_ReadByte();
 	byte argc = (byte)MSG_ReadByte();
 
-	DPrintf("SV_Callvote: Got votecmd %s from player %d, %d additional arguments.\n",
+	DPrintFmt("SV_Callvote: Got votecmd {} from player {}, {} additional arguments.\n",
 	        vote_type_cmd[votecmd], player.id, argc);
 
 	std::vector<std::string> arguments(argc);
 	for (int i = 0; i < argc; i++)
 	{
 		arguments[i] = std::string(MSG_ReadString());
-		DPrintf("SV_Callvote: arguments[%d] = \"%s\"\n", i, arguments[i]);
+		DPrintFmt("SV_Callvote: arguments[{}] = \"{}\"\n", i, arguments[i]);
 	}
 
 	if (!(votecmd > VOTE_NONE && votecmd < VOTE_MAX))
@@ -1070,28 +1122,28 @@ void SV_Callvote(player_t &player)
 				buffer << ", ";
 			}
 		}
-		SV_PlayerPrintf(PRINT_HIGH, player.id, "%s\n", buffer.str().c_str());
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id, "{}\n", buffer.str());
 		return;
 	}
 
 	// Is the player ingame?
 	if (!player.ingame())
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id, "You can't callvote until you're in the game.\n");
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id, "You can't callvote until you're in the game.\n");
 		return;
 	}
 
 	// Is the server in intermission?
 	if (gamestate == GS_INTERMISSION)
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id, "You can't callvote while the server is in intermission.\n");
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id, "You can't callvote while the server is in intermission.\n");
 		return;
 	}
 
 	// Is another vote already in progress?
 	if (vote != 0)
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id, "Another vote is already in progress.\n");
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id, "Another vote is already in progress.\n");
 		return;
 	}
 
@@ -1137,6 +1189,9 @@ void SV_Callvote(player_t &player)
 	case VOTE_COINFLIP:
 		vote = new CoinflipVote;
 		break;
+	case VOTE_LIVES:
+		vote = new LivesVote;
+		break;
 	default:
 		return;
 	}
@@ -1148,7 +1203,7 @@ void SV_Callvote(player_t &player)
 	// abort the vote and print a message to the player.
 	if (!valid)
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id, "%s\n", vote->get_error().c_str());
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id, "%s\n", vote->get_error());
 		delete vote;
 		vote = 0;
 		return;
@@ -1163,8 +1218,8 @@ void SV_VoteCmd(player_t& player, const std::vector<std::string>& args)
 {
 	if (args.size() < 2)
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id,
-		                "Invalid vote, must be \"yes\" or \"no\".\n");
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id,
+		                  "Invalid vote, must be \"yes\" or \"no\".\n");
 		return;
 	}
 
@@ -1179,7 +1234,7 @@ void SV_VoteCmd(player_t& player, const std::vector<std::string>& args)
 	}
 	else
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id,
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id,
 		                "Invalid vote, must be \"yes\" or \"no\".\n");
 		return;
 	}
@@ -1187,15 +1242,15 @@ void SV_VoteCmd(player_t& player, const std::vector<std::string>& args)
 	// Is there even a vote going on?
 	if (vote == 0)
 	{
-		SV_PlayerPrintf(PRINT_HIGH, player.id, "Invalid vote, no vote in progress.\n");
+		SV_PlayerPrintFmt(PRINT_HIGH, player.id, "Invalid vote, no vote in progress.\n");
 		return;
 	}
 
 	// Did the player actually change his vote?
 	if (vote->vote(player, ballot))
 	{
-		SV_BroadcastPrintf("%s voted %s.\n", player.userinfo.netname.c_str(),
-		                   ballot == true ? "Yes" : "No");
+		SV_BroadcastPrintFmt("{} voted {}.\n", player.userinfo.netname,
+		                     ballot == true ? "Yes" : "No");
 		SV_GlobalVoteUpdate();
 	}
 }
@@ -1249,7 +1304,7 @@ void Vote_Runtic()
 		// If there is an error message, display it.
 		if (!vote->get_error().empty())
 		{
-			SV_BroadcastPrintf("%s\n", vote->get_error().c_str());
+			SV_BroadcastPrintFmt("{}\n", vote->get_error());
 		}
 
 		delete vote;
