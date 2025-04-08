@@ -57,6 +57,7 @@ modules:
         - --share=network
     build-commands:
       - chmod +x ./flatpak-buildgen.sh
+      - IS_FLATHUB=0
       - "./flatpak-buildgen.sh"
     sources:
       - type: file
