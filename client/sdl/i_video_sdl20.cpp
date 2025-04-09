@@ -49,10 +49,6 @@
     #include "resource.h"
 #endif // WIN32
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 EXTERN_CVAR (vid_fullscreen)
 EXTERN_CVAR (vid_widescreen)
 EXTERN_CVAR (vid_pillarbox)

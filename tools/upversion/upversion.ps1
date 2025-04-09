@@ -32,7 +32,7 @@ $majminpatchbuildComma = "$maj,$min,$patch,0"
 
 if (([int]$maj -le 9) -and ([int]$min -le 9) -and ([int]$patch -le 9))
 {
-  $configver = "$maj" + "$min" + "$patch"  
+  $configver = "$maj" + "$min" + "$patch"
 }
 else
 {
@@ -44,7 +44,6 @@ $year = "2006-$curYear"
 $majminpatchFiles = @(
 '.\README',
 '.\CMakeLists.txt',
-'.\Xbox\README.Xbox',
 '.\ag-odalaunch\res\Info.plist',
 '.\common\version.h',
 '.\odalaunch\res\Info.plist',

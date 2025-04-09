@@ -27,12 +27,7 @@
 
 // denis - todo - remove
 #include "win32inc.h"
-#ifdef _WIN32
-    #ifndef _XBOX
-        #undef GetMessage
-        typedef bool (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
-    #endif // !_XBOX
-#else
+#ifndef _WIN32
     #include <sched.h>
 #endif // WIN32
 
@@ -63,10 +58,6 @@
 #include "i_system.h"
 #include "c_console.h"
 #include "z_zone.h"
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
 
 // Use main() on windows for msvc
 #if defined(_MSC_VER) && !defined(GCONSOLE)

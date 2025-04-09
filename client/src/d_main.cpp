@@ -90,10 +90,6 @@
 #include "i_wii.h"
 #endif
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 extern size_t got_heapsize;
 
 void D_CheckNetGame();

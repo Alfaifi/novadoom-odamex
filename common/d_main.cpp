@@ -63,10 +63,6 @@
 #include "i_wii.h"
 #endif
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 OResFiles wadfiles;
 OResFiles patchfiles;
 OWantFiles missingfiles;

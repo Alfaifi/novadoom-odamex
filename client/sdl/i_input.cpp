@@ -42,9 +42,7 @@
 #include "i_system.h"
 #include "hu_stuff.h"
 
-#ifdef _XBOX
-	#include "i_xbox.h"
-#elif __SWITCH__
+#ifdef __SWITCH__
 	#include "nx_io.h"
 #endif
 

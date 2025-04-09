@@ -41,27 +41,22 @@
 
 #include "win32inc.h"
 #ifdef _WIN32
-#include <direct.h>
-#include <io.h>
-#include <process.h>
-
-#ifdef _XBOX
-#include <xtl.h>
-#else
-#include <shlwapi.h>
-#include <winsock2.h>
-#include <mmsystem.h>
-#include <shlobj.h>
-#endif // !_XBOX
+	#include <direct.h>
+	#include <io.h>
+	#include <process.h>
+	#include <shlwapi.h>
+	#include <winsock2.h>
+	#include <mmsystem.h>
+	#include <shlobj.h>
 #endif // WIN32
 
 #ifdef UNIX
 // for getuid and geteuid
-#include <unistd.h>
-#include <sys/types.h>
-#include <limits.h>
-#include <time.h>
-#include <pwd.h>
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <limits.h>
+	#include <time.h>
+	#include <pwd.h>
 #endif
 
 #include <sstream>
@@ -93,10 +88,6 @@
 #include "m_fileio.h"
 #include "txt_main.h"
 
-#ifdef _XBOX
-	#include "i_xbox.h"
-#endif
-
 #ifdef GEKKO
 	#include "i_wii.h"
 #endif
@@ -109,7 +100,7 @@
 	}
 	#define ENDOOM_W 80
 	#define ENDOOM_H 25
-#endif // _XBOX
+#endif // GCONSOLE
 
 EXTERN_CVAR (r_loadicon)
 EXTERN_CVAR (r_showendoom)
