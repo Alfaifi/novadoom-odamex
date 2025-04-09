@@ -41,10 +41,6 @@
 
 #include "fmt/ranges.h"
 
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
 #ifdef __SWITCH__
 #include "nx_system.h"
 #endif

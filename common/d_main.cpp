@@ -59,10 +59,6 @@
 #include "w_ident.h"
 #include "m_resfile.h"
 
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
 OResFiles wadfiles;
 OResFiles patchfiles;
 OWantFiles missingfiles;

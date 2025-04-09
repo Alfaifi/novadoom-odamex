@@ -86,10 +86,6 @@
 #include "gui_boot.h"
 #include "g_episode.h"
 
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
 extern size_t got_heapsize;
 
 void D_CheckNetGame();
@@ -156,9 +152,9 @@ void D_SetPlatform(void)
 #ifdef GCONSOLE
 	#ifdef _XBOX
 		platform = PF_XBOX;
-	#elif GEKKO
+	#elif defined(GEKKO)
 		platform = PF_WII;
-	#elif __SWITCH__
+	#elif defined(__SWITCH__)
 		platform = PF_SWITCH;
 	#else
 		platform = PF_UNKNOWN;

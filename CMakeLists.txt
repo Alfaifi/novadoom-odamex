@@ -2,7 +2,7 @@
 #
 # Note that if you are running Linux, there are many ways to get newer
 # versions of CMake.
-# 
+#
 # - Kitware offers binary downloads direct from their website, which you can
 #   extract to /usr/local or ~/.local.
 # - Ubuntu LTS users can install the CMake snap, and Kitware also runs an
@@ -62,8 +62,6 @@ set(PROJECT_COMPANY "The Odamex Team")
 # Include early required commands for specific systems
 if (NSWITCH)
 	include("switch.cmake" REQUIRED)  # Nintendo Switch
-elseif(VWII)
-  include("wii.cmake" REQUIRED)     # Wii/vWii
 endif()
 
 # Ensure that we can use folders in projects.

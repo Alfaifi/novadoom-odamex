@@ -41,10 +41,6 @@
 // For __BIG_ENDIAN__ macro, requires forceinline
 #include "m_swap.h"
 
-#ifdef GEKKO
-	#include <gctypes.h>
-#endif
-
 typedef unsigned char byte;
 typedef unsigned int uint;
 
@@ -57,7 +53,7 @@ using OByteSpan = nonstd::span<byte>;
 #endif
 
 // Predefined with some OS.
-#if !defined(UNIX) && !defined(_WIN32) && !defined(GEKKO)
+#if !defined(UNIX) && !defined(_WIN32)
 	#include <limits.h>
 	#include <float.h>
 #endif
