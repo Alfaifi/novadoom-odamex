@@ -92,6 +92,7 @@ AdlMidiMusicSystem::~AdlMidiMusicSystem()
 	_StopSong();
 
 	adl_close(m_midiPlayer);
+	m_isInitialized = false;
 }
 
 
