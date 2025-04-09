@@ -75,7 +75,7 @@ bool capfps = true;
 float maxfps = 35.0f;
 
 
-#if defined(_WIN32) && !defined(_XBOX)
+#if defined(_WIN32)
 
 typedef struct
 {
@@ -251,7 +251,7 @@ void D_AddSearchDir(std::vector<std::string> &dirs, const char *dir, const char 
 // [AM] Add platform-sepcific search directories
 void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 {
-	#if defined(_WIN32) && !defined(_XBOX)
+	#if defined(_WIN32)
 
 	const char separator = ';';
 

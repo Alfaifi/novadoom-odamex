@@ -27,7 +27,10 @@
 
 // denis - todo - remove
 #include "win32inc.h"
-#ifndef _WIN32
+#ifdef _WIN32
+    #undef GetMessage
+    typedef bool (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
+#else
     #include <sched.h>
 #endif // WIN32
 
@@ -179,7 +182,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 
         // Set the process affinity mask to 1 on Windows, so that all threads
         // run on the same processor.  This is a workaround for a bug in
@@ -199,7 +202,7 @@ int main(int argc, char *argv[])
                     LOG << "Failed to set process affinity mask: " << GetLastError() << std::endl;
             }
         }
-#endif	// _WIN32 && !_XBOX
+#endif	// _WIN32
 
 		unsigned int sdl_flags = SDL_INIT_TIMER;
 

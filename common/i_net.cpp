@@ -37,10 +37,8 @@
 /* [Petteri] Use Winsock for Win32: */
 #include "win32inc.h"
 #ifdef _WIN32
-    #ifndef _XBOX
-    	#include <winsock2.h>
-        #include <ws2tcpip.h>
-    #endif // !_XBOX
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
 #else
 #ifdef GEKKO // Wii/GC
 #	include <network.h>
@@ -81,10 +79,6 @@ typedef int SOCKET;
 #include "i_net.h"
 #include "svc_map.h"
 #include "d_player.h"
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
 
 #ifdef GEKKO
 #include "i_wii.h"

@@ -76,10 +76,6 @@
 
 #include "server.pb.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 #if _MSC_VER == 1310
 #pragma optimize("",off)
 #endif

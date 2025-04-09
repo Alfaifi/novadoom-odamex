@@ -70,7 +70,7 @@ using OByteSpan = nonstd::span<byte>;
 	#define __int64 long
 #endif
 
-#if (defined _XBOX || defined _MSC_VER)
+#if defined _MSC_VER
 	#define DBL_EPSILON 2.2204460492503131e-016
 	#define FLT_EPSILON 1.192092896e-07F
 #else

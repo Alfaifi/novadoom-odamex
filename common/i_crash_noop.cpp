@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 
 
-#if defined _WIN32 && !defined _XBOX && defined _MSC_VER && !defined _DEBUG
+#if defined _WIN32 && defined _MSC_VER && !defined _DEBUG
 #elif defined UNIX && defined HAVE_BACKTRACE && !defined GEKKO
 #else
 

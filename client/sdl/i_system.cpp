@@ -226,7 +226,7 @@ dtime_t I_GetTime()
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return ts.tv_sec * 1000LL * 1000LL * 1000LL + ts.tv_nsec;
 
-#elif defined WIN32 && !defined _XBOX
+#elif defined WIN32
 	static bool initialized = false;
 	static LARGE_INTEGER initial_count;
 	static double nanoseconds_per_count;
@@ -310,7 +310,7 @@ void I_Sleep(dtime_t sleep_time)
 #if defined UNIX
 	usleep(sleep_time / 1000LL);
 
-#elif defined(WIN32) && !defined(_XBOX)
+#elif defined(WIN32)
 	Sleep(sleep_time / 1000000LL);
 
 #else
@@ -343,7 +343,7 @@ void I_WaitVBL(int count)
 //
 // SubsetLanguageIDs
 //
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 static void SubsetLanguageIDs (LCID id, LCTYPE type, int idx)
 {
 	char buf[8];
@@ -372,7 +372,7 @@ void SetLanguageIDs()
 
 	if (strcmp(langid, "auto") == 0)
 	{
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 		memset(LanguageIDs, 0, sizeof(LanguageIDs));
 		SubsetLanguageIDs(LOCALE_USER_DEFAULT, LOCALE_ILANGUAGE, 0);
 		SubsetLanguageIDs(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTLANGUAGE, 1);
@@ -705,7 +705,7 @@ std::string I_GetClipboardText()
 	return ret;
 #endif
 
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 	std::string ret;
 
 	if(!IsClipboardFormatAvailable(CF_TEXT))
@@ -969,7 +969,7 @@ void I_ErrorMessageBox(const char* message)
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, ODAMEX_ERROR_TITLE, message, NULL);
 }
 
-#elif defined(WIN32) && !defined(_XBOX)
+#elif defined(WIN32)
 
 void I_ErrorMessageBox(const char* message)
 {
