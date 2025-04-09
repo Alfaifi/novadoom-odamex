@@ -46,15 +46,25 @@ modules:
       - type: git
         url: https://github.com/libsdl-org/SDL_mixer.git
         tag: release-2.8.1
+  # cpptrace dependencies
+  - name: zstd
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/facebook/zstd.git
+        tag: v1.5.7
+  - name: libdwarf
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/jeremy-rifkin/libdwarf-lite.git
+        tag: v0.12.0
   # Odamex (combined)
   - name: Odamex
     buildsystem: simple
     only-arches:
       - x86_64
       - aarch64
-    build-options:
-      build-args:
-        - --share=network
     build-commands:
       - chmod +x ./flatpak-buildgen.sh
       - IS_FLATHUB=0
