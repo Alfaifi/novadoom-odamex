@@ -48,13 +48,8 @@ modules:
         tag: release-2.8.1
   # cpptrace dependencies
   - name: zstd
-    buildsystem: simple
-    build-commands:
-      - cd build/cmake
-      - mkdir build && cd build
-      - cmake ..
-      - make -j
-      - make install
+    buildsystem: cmake-ninja
+    subdir: build/cmake
     sources:
       - type: git
         url: https://github.com/facebook/zstd.git
