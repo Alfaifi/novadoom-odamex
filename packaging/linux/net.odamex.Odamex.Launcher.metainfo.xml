@@ -29,6 +29,10 @@
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />
+  <branding>
+    <color type="primary" scheme_preference="light">#ffa314</color>
+    <color type="primary" scheme_preference="dark">#363638</color>
+  </branding>
   <releases>
     <release version="11.0.0" date="YYYY-MM-DD" />
   </releases>
