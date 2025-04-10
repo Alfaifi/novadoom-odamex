@@ -11,6 +11,8 @@
     <name>The Odamex Team</name>
   </developer>
   <url type="homepage">https://odamex.net</url>
+  <url type="bugtracker">https://github.com/odamex/odamex/issues</url>
+  <url type="vcs-browser">https://github.com/odamex/odamex</url>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
   <supports>
