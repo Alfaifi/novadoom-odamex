@@ -421,7 +421,7 @@ bool P_CheckSwitchWeapon(player_t *player, weapontype_t weapon)
 // Returns true if there is enough ammo to shoot.
 // If not, selects the next weapon to use.
 //
-BOOL P_CheckAmmo (player_t *player)
+bool P_CheckAmmo (player_t *player)
 {
 	if (P_EnoughAmmo(player, player->readyweapon))
 		return true;
@@ -1103,7 +1103,7 @@ void A_WeaponMeleeAttack(AActor* mo)
 	auto soundIt = SoundMap.find(hitsound);
 	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
+		DPrintFmt("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
 		snd = nullptr;
 	}
 	else
@@ -1165,7 +1165,7 @@ void A_WeaponSound(AActor *mo)
 	auto soundIt = SoundMap.find(sndmap);
 	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon sound ID is beyond the array of the Sound Map!\n");
+		DPrintFmt("Warning: Weapon sound ID is beyond the array of the Sound Map!\n");
 		snd = nullptr;
 	}
 	else

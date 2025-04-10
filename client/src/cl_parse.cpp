@@ -85,6 +85,7 @@ EXTERN_CVAR(hud_revealsecrets)
 EXTERN_CVAR(mute_enemies)
 EXTERN_CVAR(mute_spectators)
 EXTERN_CVAR(show_messages)
+EXTERN_CVAR(co_novileghosts)
 
 extern std::string digest;
 extern bool forcenetdemosplit;
@@ -194,14 +195,14 @@ static void CL_Disconnect(const odaproto::svc::Disconnect* msg)
 	std::string buffer;
 	if (!msg->message().empty())
 	{
-		buffer = fmt::sprintf("Disconnected from server: %s", msg->message().c_str());
+		buffer = fmt::sprintf("Disconnected from server: %s", msg->message());
 	}
 	else
 	{
 		buffer = fmt::sprintf("Disconnected from server\n");
 	}
 
-	Printf("%s", msg->message().c_str());
+	Printf("%s", msg->message());
 	CL_QuitNetGame(NQ_SILENT);
 }
 
@@ -274,6 +275,11 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo* msg)
 	}
 
 	P_SetPlayerPowerupStatuses(&p, p.powers);
+
+	// Sync mo health with player health
+	// For crosshaircolor, etc.
+	if (p.mo)
+		p.mo->health = p.health;
 
 	if (!p.spectator)
 		p.cheats = msg->player().cheats();
@@ -786,7 +792,7 @@ static void CL_LoadMap(const odaproto::svc::LoadMap* msg)
 		{
 			Printf(PRINT_WARNING,
 			       "Could not construct wanted file \"%s\" that server requested.\n",
-			       name.c_str());
+			       name);
 			CL_QuitNetGame(NQ_DISCONNECT);
 			return;
 		}
@@ -809,7 +815,7 @@ static void CL_LoadMap(const odaproto::svc::LoadMap* msg)
 		{
 			Printf(PRINT_WARNING,
 			       "Could not construct wanted patch \"%s\" that server requested.\n",
-			       name.c_str());
+			       name);
 			CL_QuitNetGame(NQ_DISCONNECT);
 			return;
 		}
@@ -842,7 +848,7 @@ static void CL_LoadMap(const odaproto::svc::LoadMap* msg)
 	// the music from the old wad continues to play...
 	S_StopMusic();
 
-	G_InitNew(mapname.c_str());
+	G_InitNew(mapname);
 
 	// [AM] Sync the server's level time with the client.
 	::level.time = server_level_time;
@@ -851,8 +857,8 @@ static void CL_LoadMap(const odaproto::svc::LoadMap* msg)
 	::teleported_players.clear();
 
 	CL_ClearSectorSnapshots();
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
-		it->snapshots.clearSnapshots();
+	for (auto& player : players)
+		player.snapshots.clearSnapshots();
 
 	// reset the world_index (force it to sync)
 	CL_ResyncWorldIndex();
@@ -1302,6 +1308,48 @@ static void CL_KillMobj(const odaproto::svc::KillMobj* msg)
 	P_KillMobj(source, target, inflictor, joinkill);
 }
 
+//
+// CL_RaiseMobj
+//
+static void CL_RaiseMobj(const odaproto::svc::RaiseMobj* msg)
+{
+	uint32_t srcid = msg->source_netid();
+	uint32_t cpsid = msg->corpse().netid();
+
+	AActor* source = P_FindThingById(srcid);
+	AActor* corpsehit = P_FindThingById(cpsid);
+
+	if (!corpsehit)
+		return;
+
+	corpsehit->x = msg->corpse().pos().x();
+	corpsehit->y = msg->corpse().pos().y();
+	corpsehit->z = msg->corpse().pos().z();
+	corpsehit->angle = msg->corpse().angle();
+	corpsehit->momx = msg->corpse().mom().x();
+	corpsehit->momy = msg->corpse().mom().y();
+	corpsehit->momz = msg->corpse().mom().z();
+
+	mobjinfo_t* info = corpsehit->info;
+
+	P_SetMobjState(corpsehit, info->raisestate);
+
+	// [Nes] - Classic demo compatability: Ghost monster bug.
+	if (co_novileghosts)
+	{
+		corpsehit->height = P_ThingInfoHeight(info); // [RH] Use real mobj height
+		corpsehit->radius = info->radius;            // [RH] Use real radius
+	}
+	else
+	{
+		corpsehit->height <<= 2;
+	}
+
+	corpsehit->flags = info->flags;
+	corpsehit->health = info->spawnhealth;
+	corpsehit->target = AActor::AActorPtr();
+}
+
 ///////////////////////////////////////////////////////////
 ///// CL_Fire* called when someone uses a weapon  /////////
 ///////////////////////////////////////////////////////////
@@ -1324,7 +1372,7 @@ static void CL_FireWeapon(const odaproto::svc::FireWeapon* msg)
 
 	if (firedweap != p->readyweapon)
 	{
-		DPrintf("CL_FireWeapon: weapon misprediction\n");
+		DPrintFmt("CL_FireWeapon: weapon misprediction\n");
 		A_ForceWeaponFire(p->mo, firedweap, servertic);
 
 		// Request the player's ammo status from the server
@@ -1376,7 +1424,7 @@ static void CL_UpdateSector(const odaproto::svc::UpdateSector* msg)
 static void CL_Print(const odaproto::svc::Print* msg)
 {
 	byte level = msg->level();
-	const char* str = msg->message().c_str();
+	const std::string& str = msg->message();
 
 	// Disallow getting NORCON messages
 	if (level == PRINT_NORCON)
@@ -1804,7 +1852,7 @@ static void CL_Say(const odaproto::svc::Say* msg)
 			filtermessage = true;
 	}
 
-	const char* name = player.userinfo.netname.c_str();
+	const std::string& name = player.userinfo.netname;
 	printlevel_t publicmsg = filtermessage ? PRINT_FILTERCHAT : PRINT_CHAT;
 	printlevel_t publicteammsg = filtermessage ? PRINT_FILTERCHAT : PRINT_TEAMCHAT;
 
@@ -1836,11 +1884,11 @@ static void CL_Say(const odaproto::svc::Say* msg)
 static void CL_CTFRefresh(const odaproto::svc::CTFRefresh* msg)
 {
 	// clear player flags client may have imagined
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
 		for (size_t i = 0; i < NUMTEAMS; i++)
 		{
-			it->flags[i] = false;
+			player.flags[i] = false;
 		}
 	}
 
@@ -2005,8 +2053,8 @@ static void CL_SecretEvent(const odaproto::svc::SecretEvent* msg)
 
 	std::string buf;
 	buf = fmt::sprintf("%s%s %sfound a secret!\n", TEXTCOLOR_YELLOW,
-	                   player.userinfo.netname.c_str(), TEXTCOLOR_NORMAL);
-	Printf("%s", buf.c_str());
+	                   player.userinfo.netname, TEXTCOLOR_NORMAL);
+	Printf("%s", buf);
 
 	if (::hud_revealsecrets == 1)
 		S_Sound(CHAN_INTERFACE, "misc/secret", 1, ATTN_NONE);
@@ -2734,10 +2782,9 @@ static void CL_MaplistUpdate(const odaproto::svc::MaplistUpdate* msg)
 	OStringIndexer indexer = OStringIndexer::maplistFactory();
 
 	// Parse our dictionary first.
-	google::protobuf::Map<uint32_t, std::string>::const_iterator it;
-	for (it = msg->dict().begin(); it != msg->dict().end(); ++it)
+	for (const auto& [idx, str] : msg->dict())
 	{
-		indexer.setIndex(it->first, it->second);
+		indexer.setIndex(idx, str);
 	}
 
 	// Load our maps into the local cache.
@@ -3004,6 +3051,7 @@ parseError_e CL_ParseCommand()
 		SV_MSG(svc_spawnplayer, CL_SpawnPlayer, odaproto::svc::SpawnPlayer);
 		SV_MSG(svc_damageplayer, CL_DamagePlayer, odaproto::svc::DamagePlayer);
 		SV_MSG(svc_killmobj, CL_KillMobj, odaproto::svc::KillMobj);
+		SV_MSG(svc_raisemobj, CL_RaiseMobj, odaproto::svc::RaiseMobj);
 		SV_MSG(svc_fireweapon, CL_FireWeapon, odaproto::svc::FireWeapon);
 		SV_MSG(svc_updatesector, CL_UpdateSector, odaproto::svc::UpdateSector);
 		SV_MSG(svc_print, CL_Print, odaproto::svc::Print);
