@@ -39,6 +39,9 @@ cd ..
 
 # Assemble Flatpak assets
 
+# Install timidity config
+install packaging/flatpak/timidity.cfg /app/etc/timidity.cfg
+
 # Client app
 projectName=Odamex.Client
 projectId=net.odamex.Odamex.Client
