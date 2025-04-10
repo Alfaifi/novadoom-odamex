@@ -9,7 +9,7 @@ separate-locales: false
 finish-args:
   - --share=ipc
   - --device=dri
-  - --device=input
+  - --device=all
   - --socket=pulseaudio
   - --share=network
   - --socket=wayland
