@@ -2,7 +2,7 @@
 #
 # Note that if you are running Linux, there are many ways to get newer
 # versions of CMake.
-# 
+#
 # - Kitware offers binary downloads direct from their website, which you can
 #   extract to /usr/local or ~/.local.
 # - Ubuntu LTS users can install the CMake snap, and Kitware also runs an
@@ -52,6 +52,7 @@ option(USE_INTERNAL_DEUTEX "Use internal DeuTex" ${USE_INTERNAL_LIBS})
 option(USE_LTO "Build Release builds with Link Time Optimization" 1)
 option(ODAMEX_INSTALL_BINDIR "Smart default for bin dir location" "/usr/local/bin")
 option(ODAMEX_INSTALL_DATADIR "Smart default for data dir location" "/usr/local/share")
+option(USE_EXTERNAL_LIBDWARF "Use external libdwarf for cpptrace" 0)
 cmake_dependent_option( USE_INTERNAL_ZLIB "Use internal zlib" ${USE_INTERNAL_LIBS} BUILD_CLIENT 0 )
 cmake_dependent_option( USE_INTERNAL_PNG "Use internal libpng" ${USE_INTERNAL_LIBS} BUILD_CLIENT 0 )
 cmake_dependent_option( USE_INTERNAL_CURL "Use internal libcurl" ${USE_INTERNAL_LIBS} BUILD_CLIENT 0 )
