@@ -1,14 +1,14 @@
 #!/bin/bash
 odamex_client() {
-    command odamex
+    command odamex "$@"
 }
 
 odamex_server() {
-    command odasrv
+    command odasrv "$@"
 }
 
 odamex_launcher() {
-    command odalaunch
+    command odalaunch "$@"
 }
 
 if declare -f "odamex_$1" >/dev/null; then
