@@ -22,24 +22,50 @@
   </supports>
   <description>
     <p>
-      Odamex is a multiplayer-oriented DOOM port with a focus on classic DOOM gameplay.
-      Maintaining the ability to play back vanilla demos, it is highly faithful to the original experience,
-      while providing an enhanced experience with modern quality-of-life features and expanded modding capabilites.
+      Odamex is a multiplayer-oriented DOOM port with a focus on classic DOOM gameplay. Perfect for playing with friends or alone,
+      Odamex is faithful to the original Doom games. It has the ability to play back vanilla demos,
+      while also providing an enhanced experience with modern quality-of-life features and expanded modding capabilites.
     </p>
     <p>Features include:</p>
     <ul>
-      <li>255 Player Maximum</li>
-      <li>32-bit renderer</li>
-      <li>MBF21 compatible</li>
-      <li>
-        Many multiplayer gamemodes:
+      <li>General Improvements on the Original Games
         <ul>
-          <li>Cooperative</li>
-          <li>Deathmatch</li>
-          <li>Team Deathmatch</li>
-          <li>Capture the Flag</li>
-          <li>Survival</li>
-          <li>And more!</li>
+          <li>Can play many Doom engine games, including Ultimate DOOM, DOOM II, Final DOOM, Freedoom, Chex Quest, Hacx, and REKKR</li>
+          <li>Supports many modern editing features, such as “limit removing”, Boom, MBF, MBF21, and ID24</li>
+          <li>Supports Hexen format and older ZDoom format maps</li>
+          <li>Uncapped framerate</li>
+          <li>High resolutions</li>
+          <li>Widescreen support up to 32:9 ratio (ultra widescreen)</li>
+          <li>32-bit color renderer</li>
+          <li>Multiple ways to playback MIDI music, including an FM Synth emulator to rekindle those 1990s memories
+            <ul><li>Supports MOD and other tracker music, MP3, and OGG in custom wads</li></ul>
+          </li>
+          <li>Quake-style console and key bindings</li>
+          <li>Crosshairs</li>
+          <li>Extended HUD</li>
+          <li>Mouselook, jumping, swimming, and flying</li>
+          <li>Walk over/under monsters and other things</li>
+        </ul>
+      </li>
+      <li>Unmatched Multiplayer Experience
+        <ul>
+          <li>Support for up to 255 players at once</li>
+          <li>Top tier network code. Play with your friends on the other side of the world!</li>
+          <li>Unlagged - Odamex will compensate for poor network conditions</li>
+          <li>Exciting multiplayer gamemodes:
+            <ul>
+              <li>Cooperative &amp; Survival</li>
+              <li>Deathmatch / Team Deathmatch</li>
+              <li>Last Man Standing / Team Last Man Standing</li>
+              <li>Capture the Flag</li>
+              <li>The Cacoward winning Horde mode</li>
+              <li>And more!</li>
+            </ul>
+          </li>
+          <li>In-game wad downloading</li>
+          <li>On-the-fly wad loading (servers can run hundreds of wads without you disconnecting!)</li>
+          <li>Vote to change server settings such as fraglimit, timelimit, map, and more (must be enabled on server)</li>
+          <li>Custom player colors</li>
         </ul>
       </li>
     </ul>
