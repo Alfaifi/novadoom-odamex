@@ -6,13 +6,14 @@
 <component type="desktop-application">
   <id>net.odamex.Odamex</id>
   <name>Odamex</name>
-  <summary>Client, server, and launcher for classic DOOM multiplayer</summary>
+  <summary>Fast, faithful Classic DOOM action &#x2014; solo or online.</summary>
   <developer id="net.odamex">
     <name>The Odamex Team</name>
   </developer>
   <url type="homepage">https://odamex.net</url>
-  <url type="bugtracker">https://github.com/odamex/odamex/issues</url>
   <url type="vcs-browser">https://github.com/odamex/odamex</url>
+  <url type="bugtracker">https://github.com/odamex/odamex/issues</url>
+  <url type="help">https://github.com/odamex/odamex/wiki</url>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
   <supports>
@@ -23,14 +24,14 @@
   <description>
     <p>
       Odamex is a multiplayer-oriented DOOM port with a focus on classic DOOM gameplay. Perfect for playing with friends or alone,
-      Odamex is faithful to the original Doom games. It has the ability to play back vanilla demos,
+      Odamex is faithful to the original DOOM games. It has the ability to play back vanilla demos,
       while also providing an enhanced experience with modern quality-of-life features and expanded modding capabilites.
     </p>
     <p>Features include:</p>
     <ul>
       <li>General Improvements on the Original Games
         <ul>
-          <li>Can play many Doom engine games, including Ultimate DOOM, DOOM II, Final DOOM, Freedoom, Chex Quest, Hacx, and REKKR</li>
+          <li>Can play many DOOM engine games, including Ultimate DOOM, DOOM II, Final DOOM, Freedoom, Chex Quest, Hacx, and REKKR</li>
           <li>Supports many modern editing features, such as “limit removing”, Boom, MBF, MBF21, and ID24</li>
           <li>Supports Hexen format and older ZDoom format maps</li>
           <li>Uncapped framerate</li>
@@ -71,7 +72,7 @@
     </ul>
     <p>To use your own Timidity config file, use this command: <code>flatpak override net.odamex.Odamex --env=TIMIDITY_CFG=&lt;config location&gt;</code></p>
     <p><em>Note: The included version of Timidity does NOT support soundfonts, only GUS patches.</em></p>
-    <p>A copy of DOOM, DOOM II, Freedoom, Hacx, REKKR, or Chex Quest is required. If you do not own DOOM, it can be purchased on GOG or Steam.</p>
+    <p>A copy of DOOM, DOOM II, Final DOOM, Freedoom, Hacx, REKKR, or Chex Quest is required. If you do not own DOOM, it can be purchased on GOG or Steam.</p>
   </description>
   <screenshots>
       <screenshot  type="default">
@@ -96,8 +97,6 @@
       </screenshot>
   </screenshots>
   <launchable type="desktop-id">net.odamex.Odamex.Client.desktop</launchable>
-  <launchable type="desktop-id">net.odamex.Odamex.Server.desktop</launchable>
-  <launchable type="desktop-id">net.odamex.Odamex.Launcher.desktop</launchable>
   <content_rating type="oars-1.1">
     <content_attribute id="violence-realistic">moderate</content_attribute>
     <content_attribute id="violence-bloodshed">moderate</content_attribute>
@@ -105,8 +104,8 @@
     <content_attribute id="social-chat">intense</content_attribute>
   </content_rating>
   <branding>
-    <color type="primary" scheme_preference="light">#ffa314</color>
-    <color type="primary" scheme_preference="dark">#363638</color>
+    <color type="primary" scheme_preference="light">#a0a0a7</color>
+    <color type="primary" scheme_preference="dark">#404042</color>
   </branding>
   <releases>
     <release version="11.0.0" date="YYYY-MM-DD" />
