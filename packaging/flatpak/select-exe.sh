@@ -13,7 +13,7 @@ odamex_launcher() {
 
 if declare -f "odamex_$1" >/dev/null; then
     func="odamex_$1"
-    shift; shift
+    shift
     "$func" "$@"
 else
     echo -e "\e[4mUsage:\e[0m flatpak run net.odamex.Odamex <COMMAND>"
