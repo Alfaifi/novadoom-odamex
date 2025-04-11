@@ -102,6 +102,6 @@
     <color type="primary" scheme_preference="dark">#404042</color>
   </branding>
   <releases>
-    <release version="11.0.0" date="2025-04-10" />
+    <release version="11.0.0" date="YYYY-MM-DD" />
   </releases>
 </component>
