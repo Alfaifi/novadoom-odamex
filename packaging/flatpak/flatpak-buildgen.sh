@@ -86,6 +86,9 @@ cp -r build/wad/odamex.wad /app/$projectName/
 cp -r build/wad/odamex.wad /app/bin/
 ln -s /app/$projectName/$executableName /app/bin/$executableName
 
+# Copy config samples into the flatpak
+cp -r config-samples /app/$projectName/
+
 # Install the icon.
 iconDir=/app/share/icons/hicolor/512x512/apps
 mkdir -p $iconDir
