@@ -127,7 +127,7 @@ jobs:
       shell: bash
       run: |
         DATE=$(date +'%Y-%m-%d')
-        sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.odamex.Odamex*metainfo.xml
+        sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.odamex.Odamex.metainfo.xml
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Install flatpak
@@ -165,7 +165,7 @@ jobs:
       shell: bash
       run: |
         DATE=$(date +'%Y-%m-%d')
-        sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.odamex.Odamex*metainfo.xml
+        sed -i "s/YYYY-MM-DD/$DATE/g" packaging/linux/net.odamex.Odamex.metainfo.xml
     - name: Checkout submodules
       run: git submodule update --init --recursive
     - name: Install flatpak

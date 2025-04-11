@@ -42,6 +42,12 @@ cd ..
 # Install timidity config
 install packaging/flatpak/timidity.cfg /app/etc/timidity.cfg
 
+# Install the AppStream metadata file.
+projectId=net.odamex.Odamex
+metadataDir=/app/share/metainfo
+mkdir -p $metadataDir
+cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
+
 # Client app
 projectName=Odamex.Client
 projectId=net.odamex.Odamex.Client
@@ -65,11 +71,6 @@ cp -r ./media/icon_odamex_512.png $iconDir/$projectId.png
 desktopFileDir=/app/share/applications
 mkdir -p $desktopFileDir
 cp -r packaging/linux/$projectId.desktop $desktopFileDir/
-
-# Install the AppStream metadata file.
-metadataDir=/app/share/metainfo
-mkdir -p $metadataDir
-cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
 
 # Server app
 projectName=Odamex.Server
@@ -95,11 +96,6 @@ desktopFileDir=/app/share/applications
 mkdir -p $desktopFileDir
 cp -r packaging/linux/$projectId.desktop $desktopFileDir/
 
-# Install the AppStream metadata file.
-metadataDir=/app/share/metainfo
-mkdir -p $metadataDir
-cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
-
 # Launcher app
 projectName=Odamex.Launcher
 projectId=net.odamex.Odamex.Launcher
@@ -121,14 +117,3 @@ cp -r ./media/icon_odalaunch_512.png $iconDir/$projectId.png
 desktopFileDir=/app/share/applications
 mkdir -p $desktopFileDir
 cp -r packaging/linux/$projectId.desktop $desktopFileDir/
-
-# Install the AppStream metadata file.
-metadataDir=/app/share/metainfo
-mkdir -p $metadataDir
-cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
-
-# Install the AppStream metadata file.
-projectId=net.odamex.Odamex
-metadataDir=/app/share/metainfo
-mkdir -p $metadataDir
-cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
