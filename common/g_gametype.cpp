@@ -821,15 +821,15 @@ void G_LivesCheckEndGame()
 		if (pr.count == 1 && P_NumPlayersInGame() > 1 && !lastplayerhype)
 		{
 			lastplayerhype = true;
-      SERVER_ONLY(
-			  SV_BroadcastPrintfButPlayer(PRINT_HIGH, pr.players.front()->id,
-			                              "%s is the last player alive!\n",
-			                            pr.players.front()->userinfo.netname.c_str());
-			  SV_MidPrint(TEXTCOLOR_RED "!! LAST PLAYER ALIVE !!\n" TEXTCOLOR_WHITE
-			  	        "You're the" TEXTCOLOR_YELLOW " last resort" TEXTCOLOR_WHITE
-			  	        ".\nGood luck!\n", pr.players.front()->id, 5);
-			  S_PlayerSound(pr.players.front(), NULL, CHAN_GAMEINFO, "misc/horde/boss", ATTN_NONE);
-      )
+			SERVER_ONLY(
+			SV_BroadcastPrintFmtButPlayer(PRINT_HIGH, pr.players.front()->id,
+			                              "{} is the last player alive!\n",
+			                              pr.players.front()->userinfo.netname);
+			SV_MidPrint(TEXTCOLOR_RED "!! LAST PLAYER ALIVE !!\n" TEXTCOLOR_WHITE
+			            "You're the" TEXTCOLOR_YELLOW " last resort" TEXTCOLOR_WHITE
+			            ".\nGood luck!\n", pr.players.front(), 5);
+			S_PlayerSound(pr.players.front(), NULL, CHAN_GAMEINFO, "misc/horde/boss", ATTN_NONE);
+    		)
 		}
 		// [Acts 19 quiz] If new players join or a new map starts, we want to
 		// be able to display the hype message again.
@@ -880,6 +880,7 @@ void G_LivesCheckEndGame()
 				aliveteams += 1;
 		}
 
+		SERVER_ONLY (
 		if (aliveteams > 1)
 		{
 			PlayerResults blueplayers = PlayerQuery().onTeam(TEAM_BLUE).execute();
@@ -890,26 +891,27 @@ void G_LivesCheckEndGame()
 			PlayerResults greenlivingplayers = PlayerQuery().onTeam(TEAM_GREEN).hasLives().execute();
 			if (bluelivingplayers.count == 1 && blueplayers.count > 1 && !lastblueplayerhype)
 			{
-				SV_TeamPrintf(PRINT_WARNING, bluelivingplayers.players.front()->id,
-				              "%s is the last BLUE player alive!\n",
-				              bluelivingplayers.players.front()->userinfo.netname.c_str());
+				SV_TeamPrintFmt(PRINT_WARNING, bluelivingplayers.players.front()->id,
+				                "{} is the last BLUE player alive!\n",
+				                bluelivingplayers.players.front()->userinfo.netname);
 				lastblueplayerhype = true;
 			}
 			if (redlivingplayers.count == 1 && redplayers.count > 1 && !lastredplayerhype)
 			{
-				SV_TeamPrintf(PRINT_WARNING, redlivingplayers.players.front()->id,
-				              "%s is the last RED player alive!\n",
-				              redlivingplayers.players.front()->userinfo.netname.c_str());
+				SV_TeamPrintFmt(PRINT_WARNING, redlivingplayers.players.front()->id,
+				                "{} is the last RED player alive!\n",
+				                redlivingplayers.players.front()->userinfo.netname);
 				lastredplayerhype = true;
 			}
 			if (greenlivingplayers.count == 1 && greenplayers.count > 1 && !lastgreenplayerhype)
 			{
-				SV_TeamPrintf(PRINT_WARNING, greenlivingplayers.players.front()->id,
-				              "%s is the last GREEN player alive!\n",
-				              greenlivingplayers.players.front()->userinfo.netname.c_str());
+				SV_TeamPrintFmt(PRINT_WARNING, greenlivingplayers.players.front()->id,
+				                "{} is the last GREEN player alive!\n",
+				                greenlivingplayers.players.front()->userinfo.netname);
 				lastgreenplayerhype = true;
 			}
 		}
+		)
 
 		// [AM] This end-of-game logic branch is necessary becuase otherwise
 		//      going for objectives in CTF would never be worth it.  However,
