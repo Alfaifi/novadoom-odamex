@@ -40,7 +40,8 @@ cd ..
 # Assemble Flatpak assets
 
 # Install timidity config
-install packaging/flatpak/timidity.cfg /app/etc/timidity.cfg
+mkdir -p /app/etc
+cp -r packaging/flatpak/timidity.cfg /app/etc/timidity.cfg
 
 # Install the AppStream metadata file.
 projectId=net.odamex.Odamex
@@ -55,8 +56,7 @@ executableName=odamex
 
 # Copy the client app to the Flatpak-based location.
 mkdir -p /app/$projectName
-cp -r build/client/$executableName /app/$projectName/
-chmod +x /app/$projectName/$executableName
+install -c build/client/$executableName /app/$projectName/$executableName
 mkdir -p /app/bin
 cp -r build/wad/odamex.wad /app/$projectName/
 cp -r build/wad/odamex.wad /app/bin/
@@ -79,8 +79,7 @@ executableName=odasrv
 
 # Copy the server app to the Flatpak-based location.
 mkdir -p /app/$projectName
-cp -r build/server/$executableName /app/$projectName/
-chmod +x /app/$projectName/$executableName
+install -c build/server/$executableName /app/$projectName/$executableName
 mkdir -p /app/bin
 cp -r build/wad/odamex.wad /app/$projectName/
 cp -r build/wad/odamex.wad /app/bin/
@@ -106,8 +105,7 @@ executableName=odalaunch
 
 # Copy the launcher app to the Flatpak-based location.
 mkdir -p /app/$projectName
-cp -r build/odalaunch/$executableName /app/$projectName/
-chmod +x /app/$projectName/$executableName
+install -c build/odalaunch/$executableName /app/$projectName/$executableName
 mkdir -p /app/bin
 ln -s /app/$projectName/$executableName /app/bin/$executableName
 
@@ -120,3 +118,6 @@ cp -r ./media/icon_odalaunch_512.png $iconDir/$projectId.png
 desktopFileDir=/app/share/applications
 mkdir -p $desktopFileDir
 cp -r packaging/linux/$projectId.desktop $desktopFileDir/
+
+# Install helper script
+install -c packaging/flatpak/select-exe.sh /app/bin/select-exe
