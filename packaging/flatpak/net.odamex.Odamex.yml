@@ -21,7 +21,7 @@ modules:
     buildsystem: simple
     build-commands:
       - mkdir -p /app/etc/
-      - install timidity.cfg /app/etc/sdl_timidity.cfg
+      - cp -r timidity.cfg /app/etc/sdl_timidity.cfg
       - mkdir -p /app/share/timidity/
       - cp -r instruments /app/share/timidity/instruments
     sources:
