@@ -1330,19 +1330,20 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 // SexMessage: Replace parts of strings with gender-specific pronouns
 //
 // The following expansions are performed:
-//		%g -> he/she/it
-//		%h -> him/her/it
-//		%p -> his/her/its
+//		%g -> he/she/it/they
+//		%h -> him/her/it/them
+//		%p -> his/her/its/their
 //		%o -> other (victim)
 //		%k -> killer
 //
 void SexMessage (const char *from, char *to, gender_t gender, std::string_view victim, std::string_view killer)
 {
-	static constexpr std::string_view genderstuff[3][3] =
+	static constexpr std::string_view genderstuff[4][3] =
 	{
 		{ "he",  "him", "his" },
 		{ "she", "her", "her" },
-		{ "it",  "it",  "its" }
+		{ "it",  "it",  "its" },
+		{ "they",  "them",  "their" },
 	};
 
 	do

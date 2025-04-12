@@ -883,7 +883,7 @@ bool SV_SetupUserInfo(player_t &player)
 
 	// ensure sane values for userinfo
 	if (gender < 0 || gender >= NUMGENDER)
-		gender = GENDER_NEUTER;
+		gender = GENDER_OTHER;
 
 	aimdist = clamp(aimdist, 0, 5000 * 16384);
 
@@ -971,7 +971,8 @@ bool SV_SetupUserInfo(player_t &player)
 		switch (gender) {
 			case GENDER_MALE:	gendermessage = "his";  break;
 			case GENDER_FEMALE:	gendermessage = "her";  break;
-			default:			gendermessage = "its";  break;
+			case GENDER_CYBORG:	gendermessage = "its";  break;
+			default:			gendermessage = "their";  break;
 		}
 
 		SV_BroadcastPrintFmt("{} changed {} name to {}.\n",

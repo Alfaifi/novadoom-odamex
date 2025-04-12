@@ -770,9 +770,9 @@ static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, in
 		// Sexed sound
 		char nametemp[128];
 		const char templat[] = "player/%s/%s";
-                // Hacks away! -joek
-		//const char *genders[] = { "male", "female", "cyborg" };
-                const char *genders[] = { "male", "male", "male" };
+        // Hacks away! -joek
+		//const char *genders[] = { "male", "female", "cyborg", "other" };
+        const char *genders[] = { "male", "male", "male", "male" };
 		player_t *player;
 
 		sfx_id = -1;
