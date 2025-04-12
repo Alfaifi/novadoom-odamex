@@ -35,6 +35,7 @@ void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 	// initialize the associative array
 	mobjinfo.clear();
     mobjinfo.reserve(count);
+	spawn_map.clear();
 	if (source)
 	{
 

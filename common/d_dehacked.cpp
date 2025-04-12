@@ -29,6 +29,7 @@
 
 #include "cmdlib.h"
 #include "d_dehacked.h"
+#include "doom_obj_container.h"
 #include "d_items.h"
 #include "gstrings.h"
 #include "i_system.h"
@@ -532,19 +533,30 @@ static bool HandleKey(const struct Key* keys, void* structure, const char* key, 
 	return true;
 }
 
-typedef struct
+typedef struct DoomBackup_s
 {
-	DoomObjectContainer<state_t> backupStates; // boomstates
-	DoomObjectContainer<mobjinfo_t> backupMobjInfo; // doom_mobjinfo
-	DoomObjectContainer<const char*> backupSprnames; // doom_sprnames
-	DoomObjectContainer<const char*> backupSoundMap; // doom_SoundMap
+	DoomObjectContainer<state_t*, int32_t> backupStates; // boomstates
+	DoomObjectContainer<mobjinfo_t*, int32_t> backupMobjInfo; // doom_mobjinfo
+	DoomObjectContainer<const char*, int32_t> backupSprnames; // doom_sprnames
+	DoomObjectContainer<const char*, int32_t> backupSoundMap; // doom_SoundMap
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	int backupMaxAmmo[NUMAMMO];
 	int backupClipAmmo[NUMAMMO];
 	DehInfo backupDeh;
-} DoomBackup;
 
-DoomBackup doomBackup;
+	DoomBackup_s()
+	    : backupStates(NULL, [](state_t* obj) { M_Free(obj); }),
+	      backupMobjInfo(NULL, [](mobjinfo_t* obj) { M_Free(obj); }),
+	      backupSprnames(NULL, [](const char* obj) { M_Free(obj); }),
+	      backupSoundMap(NULL, [](const char* obj) { M_Free(obj); }), 
+		  backupWeaponInfo(),
+	      backupMaxAmmo(),
+	      backupDeh()
+	{}
+} DoomBackup_t;
+
+
+DoomBackup_t doomBackup;
 
 // [CMB] useful typedefs for iteration over global doom object containers
 typedef DoomObjectContainer<state_t*, int32_t>::const_iterator StatesIterator;
@@ -575,25 +587,27 @@ static void BackupData(void)
 		OrgActionPtrs[i] = states[i]->action;
 	}
 
-	// states
+	// states -- allocate to the heap
 	doomBackup.backupStates.clear();
 	doomBackup.backupStates.reserve(states.size());
 	for (const std::pair<int32_t, state_t*> & it : states)
 	{
-		state_t state = *it.second;
-		doomBackup.backupStates.insert(state, it.first);
+		state_t* newstate = (state_t*) M_Malloc(sizeof(state_t));
+		*newstate = *it.second;
+		doomBackup.backupStates.insert(newstate, it.first);
 	}
 
-	// mobjinfo
+	// mobjinfo -- allocate to the heap
 	doomBackup.backupMobjInfo.clear();
 	doomBackup.backupMobjInfo.reserve(mobjinfo.size());
 	for (const std::pair<int32_t, mobjinfo_t*> & it : mobjinfo)
 	{
-		mobjinfo_t mobj = *it.second;
-		doomBackup.backupMobjInfo.insert(mobj, it.first);
+		mobjinfo_t* newmobjinfo = (mobjinfo_t*) M_Malloc(sizeof(mobjinfo_t));
+		*newmobjinfo = *it.second;
+		doomBackup.backupMobjInfo.insert(newmobjinfo, it.first);
 	}
 
-	// sprites
+	// sprites -- allocate to the heap
 	doomBackup.backupSprnames.clear();
 	doomBackup.backupSprnames.reserve(sprnames.size());
 	for(const std::pair<int32_t, const char*> & it : sprnames)
@@ -602,7 +616,7 @@ static void BackupData(void)
 		doomBackup.backupSprnames.insert(spr, it.first);
 	}
 
-	// sounds
+	// sounds -- allocate to the heap
 	doomBackup.backupSoundMap.clear();
 	doomBackup.backupSoundMap.reserve(SoundMap.size());
 	for(const auto& [idx, mapsound] : SoundMap)
@@ -648,9 +662,29 @@ void D_UndoDehPatch()
 	{
 		sprnames.insert(sprname.second, sprname.first);
 	}
+
+	// mobjinfo restore
+    mobjinfo.clear();
+	for(const auto& bmobjit : doomBackup.backupMobjInfo) {
+		mobjinfo_t* newmobjinfo = (mobjinfo_t*) Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
+        // TODO: we need to clear out the previous backup once we are done
+		*newmobjinfo = *bmobjit.second;
+
+		mobjinfo.insert(newmobjinfo, bmobjit.first);
+	}
+
+    states.clear();
+	for(const auto& bstateit : doomBackup.backupStates) {
+		state_t* newstate = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
+        // TODO: we need to clear out the previous backup once we are done
+		*newstate = *bstateit.second;
+
+		states.insert(newstate, bstateit.first);
+	}
+
 	// unsafe usage of data() here but to keep a consistent API
-	D_Initialize_States(doomBackup.backupStates.data(), static_cast<int>(doomBackup.backupStates.size()));
-	D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), static_cast<int>(doomBackup.backupMobjInfo.size()));
+	// D_Initialize_States(doomBackup.backupStates.data(), static_cast<int>(doomBackup.backupStates.size()));
+	// D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), static_cast<int>(doomBackup.backupMobjInfo.size()));
 	D_Initialize_SoundMap(doomBackup.backupSoundMap.data(), static_cast<int>(doomBackup.backupSoundMap.size()));
 
 	extern bool isFast;

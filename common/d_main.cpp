@@ -832,10 +832,10 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	std::string failmsg;
 
 	
-	// Zone memory manager already reset by D_Shutdown() calling Z_Close()
-	// Z_Init();
-	// Printf("Z_Init: D_DoomWadReboot: Using native allocator with OZone "
-	//       "bookkeeping.\n");
+	 // [CMB] Zone memory manager already reset by D_Shutdown() calling Z_Close() so this is doing it twice
+	 // Z_Init();
+	 // Printf("Z_Init: D_DoomWadReboot: Using native allocator with OZone "
+	 //      "bookkeeping.\n");
 
 	try
 	{

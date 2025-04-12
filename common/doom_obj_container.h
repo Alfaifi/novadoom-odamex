@@ -9,13 +9,12 @@
 //----------------------------------------------------------------------------------------------
 
 #pragma once
-#include "info.h" // doom object definitions - including enums with negative indices
 
-#include "hashtable.h"
-#include "i_system.h"
-#include <functional>
-#include <vector>
+#include "i_system.h" // needed for WORD
 #include <cstddef>
+#include <functional>
+#include <map>
+#include <vector>
 #include <typeinfo>
 
 template <class ObjType, class IdxType, class FreeFunction>
@@ -35,7 +34,7 @@ template <class ObjType, class IdxType = int32_t,
 class DoomObjectContainer
 {
 
-	typedef OHashTable<int, ObjType> LookupTable;
+	typedef std::unordered_map<int, ObjType> LookupTable;
 	typedef std::vector<ObjType> DoomObjectContainerData;
 	typedef DoomObjectContainer<ObjType, IdxType, FreeFunction> DoomObjectContainerType;
 
@@ -53,7 +52,7 @@ class DoomObjectContainer
 	typedef void (*ResetObjType)(ObjType, IdxType);
 
 	explicit DoomObjectContainer(
-	    ResetObjType resetFunc = NULL, 
+	    ResetObjType resetFunc = NULL,
 		FreeFunction freeFunc = [](ObjType) -> void { return; });
 	explicit DoomObjectContainer(
 	    size_t count, ResetObjType resetFunc = NULL,
@@ -128,7 +127,7 @@ typename DoomObjectContainer<ObjType, IdxType, FreeFunction>::ObjReference DoomO
 	iterator it = this->lookup_table.find(idx);
     if (it == this->end())
     {
-	    I_Error("Attempt to access invalid %s at idx %d", typeid(ObjType).name(), idx);
+	    I_Error("Attempt to access invalid {} at idx {}", typeid(ObjType).name(), idx);
     }
     return it->second;
 }
@@ -140,7 +139,7 @@ typename DoomObjectContainer<ObjType, IdxType, FreeFunction>::ConstObjReference 
     const_iterator it = this->lookup_table.find(idx);
     if (it == this->end())
     {
-    	I_Error("Attempt to access invalid %s at idx %d", typeid(ObjType).name(), idx);
+    	I_Error("Attempt to access invalid {} at idx {}", typeid(ObjType).name(), idx);
     }
     return it->second;
 }
@@ -224,14 +223,12 @@ template <class ObjType, class IdxType, class FreeFunction>
 void DoomObjectContainer<ObjType, IdxType, FreeFunction>::resize(size_t count)
 {
 	this->container.resize(count);
-	// this->lookup_table.resize(count);
 }
 
 template <class ObjType, class IdxType, class FreeFunction>
 void DoomObjectContainer<ObjType, IdxType, FreeFunction>::reserve(size_t new_cap)
 {
 	this->container.reserve(new_cap);
-	// this->lookup_table.resize(new_cap);
 }
 
 // Insertion

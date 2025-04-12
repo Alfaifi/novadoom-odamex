@@ -1,12 +1,11 @@
 #include "odamex.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "sprite.h"
 #include "doom_obj_container.h"
 #include "z_zone.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <sstream>
 
 //----------------------------------------------------------------------------------------------
