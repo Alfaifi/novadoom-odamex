@@ -748,6 +748,28 @@ void S_LoopedSoundID(fixed_t *pt, int channel, int sound_id, float volume, int a
 	S_StartSound(pt, 0, 0, channel, sound_id, volume, attenuation, true);
 }
 
+int S_FindGenderedSound(std::string_view name, AActor* ent)
+{
+	static constexpr std::string_view templat = "player/{}/{}";
+	static constexpr std::string_view genders[] = { "male", "female", "cyborg", "other" };
+	player_t *player;
+
+	int sfx_id = -1;
+	if (ent && ent != (AActor *)(~0) && (player = ent->player))
+	{
+		sfx_id = S_FindSound(fmt::format(templat, "base", name).c_str());
+		if (sfx_id == -1)
+		{
+			sfx_id = S_FindSound(fmt::format(templat, genders[player->userinfo.gender], name).c_str());
+		}
+	}
+	if (sfx_id == -1)
+	{
+		sfx_id = S_FindSound(fmt::format(templat, "male", name).c_str());
+	}
+	return sfx_id;
+}
+
 static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, int channel,
                               const char *name, float volume, int attenuation, bool looping)
 {
@@ -767,30 +789,7 @@ static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, in
 
 	if (soundname[0] == '*')
 	{
-		// Sexed sound
-		char nametemp[128];
-		const char templat[] = "player/%s/%s";
-        // Hacks away! -joek
-		//const char *genders[] = { "male", "female", "cyborg", "other" };
-        const char *genders[] = { "male", "male", "male", "male" };
-		player_t *player;
-
-		sfx_id = -1;
-		if (ent && ent != (AActor *)(~0) && (player = ent->player))
-		{
-			snprintf(nametemp, 128, templat, "base", soundname.substr(1).c_str());
-			sfx_id = S_FindSound(nametemp);
-			if (sfx_id == -1)
-			{
-				snprintf(nametemp, 128, templat, genders[player->userinfo.gender], soundname.substr(1).c_str());
-				sfx_id = S_FindSound(nametemp);
-			}
-		}
-		if (sfx_id == -1)
-		{
-			snprintf(nametemp, 128, templat, "male", soundname.substr(1).c_str());
-			sfx_id = S_FindSound(nametemp);
-		}
+		sfx_id = S_FindGenderedSound(soundname.substr(1), ent);
 	}
 	else
 		sfx_id = S_FindSound(soundname.c_str());
