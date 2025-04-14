@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -275,7 +275,7 @@ static visplane_t *new_visplane(unsigned hash)
 
 	if (!check)
 	{
-		check = (visplane_t *)Calloc(1, sizeof(*check) + sizeof(*check->top)*2*I_GetSurfaceWidth());
+		check = (visplane_t *)M_Calloc(1, sizeof(*check) + sizeof(*check->top)*2*I_GetSurfaceWidth());
 		check->bottom = &check->top[I_GetSurfaceWidth() + 2];
 	}
 	else
@@ -741,7 +741,7 @@ bool R_PlaneInitData(IWindowSurface* surface)
 //
 // R_AlignFlat
 //
-BOOL R_AlignFlat (int linenum, int side, int fc)
+bool R_AlignFlat (int linenum, int side, int fc)
 {
 	line_t *line = lines + linenum;
 	sector_t *sec = side ? line->backsector : line->frontsector;

@@ -1,7 +1,7 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) 2006-2021 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -31,27 +31,27 @@ int ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NULL
 {
 	// Check if the given map name can be expressed as a gameepisode/gamemap pair and be
 	// reconstructed from it.
-	char lumpname[9];
+	OLumpName lumpname;
 	int epi = -1, map = -1;
 
 	if (gamemode != commercial)
 	{
 		if (sscanf(mapname.c_str(), "E%dM%d", &epi, &map) != 2)
 			return 0;
-		snprintf(lumpname, 9, "E%dM%d", epi, map);
+		lumpname = fmt::format("E{}M{}", epi, map);
 	}
 	else
 	{
 		if (sscanf(mapname.c_str(), "MAP%d", &map) != 1)
 			return 0;
-		snprintf(lumpname, 9, "MAP%02d", map);
+		lumpname = fmt::format("MAP{:02d}", map);
 		epi = 1;
 	}
 	if (pEpi)
 		*pEpi = epi;
 	if (pMap)
 		*pMap = map;
-	return !strcmp(mapname.c_str(), lumpname);
+	return mapname == lumpname;
 }
 
 // used for munching the strings in UMAPINFO
@@ -108,7 +108,7 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 
 	if (!os.isIdentifier())
 	{
-		os.error("Expected identifier, got \"%s\".", os.getToken().c_str());
+		os.error("Expected identifier, got \"{}\".", os.getToken());
 	}
 	std::string pname = os.getToken();
 	os.mustScan();
@@ -141,18 +141,18 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	else if (!stricmp(pname.c_str(), "next"))
 	{
 		ParseOLumpName(os, mape->nextmap);
-		if (!ValidateMapName(mape->nextmap.c_str()))
+		if (!ValidateMapName(mape->nextmap))
 		{
-			os.error("Invalid map name %s.", mape->nextmap.c_str());
+			os.error("Invalid map name {}", mape->nextmap);
 			return 0;
 		}
 	}
 	else if (!stricmp(pname.c_str(), "nextsecret"))
 	{
 		ParseOLumpName(os, mape->secretmap);
-		if (!ValidateMapName(mape->secretmap.c_str()))
+		if (!ValidateMapName(mape->secretmap))
 		{
-			os.error("Invalid map name %s", mape->nextmap.c_str());
+			os.error("Invalid map name {}", mape->nextmap);
 			return 0;
 		}
 	}
@@ -309,7 +309,7 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 			const mobjtype_t i = P_INameToMobj(actor_name);
 			if (i == MT_NULL)
 			{
-				os.error("Unknown thing type %s", os.getToken().c_str());
+				os.error("Unknown thing type {}", os.getToken());
 				return 0;
 			}
 
@@ -351,7 +351,7 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	return 1;
 }
 
-void ParseUMapInfoLump(int lump, const char* lumpname)
+void ParseUMapInfoLump(int lump, const OLumpName& lumpname)
 {
 	LevelInfos& levels = getLevelInfos();
 
@@ -368,7 +368,7 @@ void ParseUMapInfoLump(int lump, const char* lumpname)
 	{
 		if (!os.compareTokenNoCase("map"))
 		{
-			os.error("Expected map definition, got %s", os.getToken().c_str());
+			os.error("Expected map definition, got {}", os.getToken());
 		}
 
 		os.mustScan(8);
@@ -376,7 +376,7 @@ void ParseUMapInfoLump(int lump, const char* lumpname)
 
 		if (!ValidateMapName(mapname))
 		{
-			os.error("Invalid map name %s", mapname.c_str());
+			os.error("Invalid map name {}", mapname);
 		}
 
 		// Find the level.
@@ -447,19 +447,17 @@ void ParseUMapInfoLump(int lump, const char* lumpname)
 			}
 			else
 			{
-				char arr[9] = "";
 				int ep, map;
-				ValidateMapName(info.mapname.c_str(), &ep, &map);
+				ValidateMapName(info.mapname, &ep, &map);
 				map++;
 				if (gamemode == commercial)
 				{
-					snprintf(arr, 9, "MAP%02d", map);
+					info.nextmap = fmt::format("MAP{:02d}", map);
 				}
 				else
 				{
-					snprintf(arr, 9, "E%dM%d", ep, map);
+					info.nextmap = fmt::format("E{}M{}", ep, map);
 				}
-				info.nextmap = arr;
 			}
 		}
 	}

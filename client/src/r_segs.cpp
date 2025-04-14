@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -49,11 +49,11 @@ Pool<int> sprclip_pool(4096);
 
 // killough 1/6/98: replaced globals with statics where appropriate
 
-static BOOL		segtextured;	// True if any of the segs textures might be visible.
-static BOOL		markfloor;		// False if the back side is the same plane.
-static BOOL		markceiling;
-static BOOL		maskedtexture;
+static bool		segtextured;	// True if any of the segs textures might be visible.
+static bool		markfloor;		// False if the back side is the same plane.
+static bool		markceiling;
 static bool		didsolidcol;
+static int		maskedtexture;
 static int		toptexture;
 static int		bottomtexture;
 static int		midtexture;
@@ -461,7 +461,7 @@ void R_RenderSolidSegRange(int start, int stop)
 	if (start > stop)
 		return;
 
-	constexpr int columnmethod = 2;
+	static constexpr int columnmethod = 2;
 
 	// clip the front of the walls to the ceiling and floor
 	for (int x = start; x <= stop; x++)
@@ -645,7 +645,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 
 	const int64_t topscreenclip = int64_t(centery) << 2*FRACBITS;
 	const int64_t botscreenclip = int64_t(centery - viewheight) << 2*FRACBITS;
- 
+
 	// top of texture entirely below screen?
 	if (int64_t(dcol.texturemid) * ds->scale1 <= botscreenclip &&
 		int64_t(dcol.texturemid) * ds->scale2 <= botscreenclip)
@@ -678,7 +678,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 	mfloorclip = ds->sprbottomclip;
 	mceilingclip = ds->sprtopclip;
 
-	dcol.textureheight = 512*FRACUNIT;
+	dcol.textureheight = 0;
 
 	// draw the columns
 	// TODO: change negonearray to the actual top/bottom
@@ -723,7 +723,7 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 	const fixed_t segoffs = curline->offset + R_LineLength(curline->v1->x, curline->v1->y, px1, py1);
 
 	const fixed_t mindist = NEARCLIP;
-	constexpr fixed_t maxdist = 16384*FRACUNIT;
+	static constexpr fixed_t maxdist = 16384*FRACUNIT;
 	dist1 = clamp(dist1, mindist, maxdist);
 	dist2 = clamp(dist2, mindist, maxdist);
 
@@ -796,8 +796,8 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 		// calculate the upper and lower heights of the walls in the back
 		R_FillWallHeightArray(walltopb, start, stop, rw_backcz1, rw_backcz2, scale1, scale2);
 		R_FillWallHeightArray(wallbottomb, start, stop, rw_backfz1, rw_backfz2, scale1, scale2);
-	
-		constexpr fixed_t tolerance = FRACUNIT / 2;
+
+		static constexpr fixed_t tolerance = FRACUNIT / 2;
 
 		// determine if an upper texture is showing
 		rw_hashigh	= (P_CeilingHeight(curline->v1->x, curline->v1->y, frontsector) - tolerance >
@@ -829,7 +829,7 @@ void R_StoreWallRange(int start, int stop)
 {
 #ifdef RANGECHECK
 	if (start >= viewwidth || start > stop)
-		I_FatalError ("Bad R_StoreWallRange: %i to %i", start , stop);
+		I_FatalError("Bad R_StoreWallRange: {} to {}", start , stop);
 #endif
 
 	const int count = stop - start + 1;

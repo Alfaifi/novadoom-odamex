@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -205,7 +205,7 @@ struct wi_animation_t
 	std::vector<wi_animationstate_t>* states;
 };
 
-static wi_animation_t* animation;
+static wi_animation_t animation;
 
 //
 // CODE
@@ -332,38 +332,33 @@ static void WI_updateAnimationStates(std::vector<wi_animationstate_t>& states)
 
 static void WI_updateAnimation(bool enteringcondition)
 {
-	if (!animation)
-	{
-		return;
-	}
-
-	animation->states = nullptr;
+	animation.states = nullptr;
 
 	if (!enteringcondition && exitanim)
 	{
-		animation->states = &animation->exiting_states;
+		animation.states = &animation.exiting_states;
 	}
 	else if (enteranim)
 	{
-		animation->states = &animation->entering_states;
+		animation.states = &animation.entering_states;
 	}
 
-	if (!animation->states)
+	if (!animation.states)
 		return;
 
-	WI_updateAnimationStates(*animation->states);
+	WI_updateAnimationStates(*animation.states);
 }
 
 static void WI_drawAnimation(void)
 {
-	if (!animation || !animation->states)
+	if (!animation.states)
 	{
 		return;
 	}
 
 	int scaled_x = (inter_width - 320) / 2;
 	DCanvas* canvas = anim_surface->getDefaultCanvas();
-	for (const auto& state : *animation->states)
+	for (const auto& state : *animation.states)
 	{
 		const interlevelframe_t& frame = state.frames.at(state.frame_index);
 		patch_t* patch = W_CachePatch(frame.imagelumpnum);
@@ -409,19 +404,14 @@ static void WI_initAnimationStates(std::vector<wi_animationstate_t>& out,
 
 static void WI_initAnimation(void)
 {
-	if (!animation)
-	{
-		return;
-	}
-
 	if (exitanim)
 	{
-		WI_initAnimationStates(animation->exiting_states, exitanim->layers, false);
+		WI_initAnimationStates(animation.exiting_states, exitanim->layers, false);
 	}
 
 	if (enteranim)
 	{
-		WI_initAnimationStates(animation->entering_states, enteranim->layers, true);
+		WI_initAnimationStates(animation.entering_states, enteranim->layers, true);
 	}
 
 	return;
@@ -507,9 +497,7 @@ static int WI_DrawName (const char *str, int x, int y)
 	::V_ColorMap = translationref_t(::Ranges + CR_GREY * 256);
 	while (*str)
 	{
-		char charname[9];
-		snprintf (charname, 9, "FONTB%02u", toupper(*str) - 32);
-		int lump = W_CheckNumForName(charname);
+		int lump = W_CheckNumForName(fmt::format("FONTB{:02d}", toupper(*str) - 32));
 
 		if (lump != -1)
 		{
@@ -534,8 +522,7 @@ static int WI_DrawSmallName(const char* str, int x, int y)
 
 	while (*str)
 	{
-		char charname[9];
-		snprintf(charname, 9, "STCFN%.3d", HU_FONTSTART + (toupper(*str) - 32) - 1);
+		const OLumpName charname = fmt::format("STCFN{:03d}", HU_FONTSTART + (toupper(*str) - 32) - 1);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)
@@ -774,7 +761,7 @@ void WI_drawNoState()
 	WI_drawShowNextLoc();
 }
 
-int WI_fragSum (player_t &player)
+int WI_fragSum (const player_t &player)
 {
 	return player.fragcount;
 }
@@ -802,9 +789,9 @@ void WI_initNetgameStats()
 	cnt_secret_c.clear();
 	cnt_frags_c.clear();
 
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (const auto& player : players)
 	{
-		if (!(it->ingame()))
+		if (!(player.ingame()))
 			continue;
 
 		cnt_kills_c.push_back(0);
@@ -812,7 +799,7 @@ void WI_initNetgameStats()
 		cnt_secret_c.push_back(0);
 		cnt_frags_c.push_back(0);
 
-		dofrags += WI_fragSum(*it);
+		dofrags += WI_fragSum(player);
 	}
 
 	dofrags = !!dofrags;
@@ -1039,8 +1026,7 @@ void WI_drawNetgameStats()
 		// Display player names online!
 		if (!demoplayback)
 		{
-			std::string str = fmt::sprintf("%s", it->userinfo.netname.c_str());
-			WI_DrawSmallName(str.c_str(), x+10, y+24);
+			WI_DrawSmallName(it->userinfo.netname.c_str(), x+10, y+24);
 		}
 
 		x += NG_SPACINGX;
@@ -1166,7 +1152,7 @@ void WI_updateStats()
 				else
 					S_ChangeMusic(gameinfo.intermissionMusic.c_str(), true);
 				// background
-				const char* bg_lump = enteranim == nullptr ? enterpic.c_str() : enteranim->backgroundlump.c_str();
+				const OLumpName& bg_lump = enteranim == nullptr ? enterpic : enteranim->backgroundlump;
 				const patch_t* bg_patch = W_CachePatch(bg_lump);
 
 				inter_width = bg_patch->width();
@@ -1243,28 +1229,26 @@ void WI_checkForAccelerate()
 		return;
 
 	// check for button presses to skip delays
-	for (Players::iterator it = players.begin();it != players.end();++it)
+	for (auto& player : players)
 	{
-		if (it->ingame())
+		if (player.ingame())
 		{
-			player_t *player = &*it;
-
-			if (player->cmd.buttons & BT_ATTACK)
+			if (player.cmd.buttons & BT_ATTACK)
 			{
-				if (!player->attackdown)
+				if (!player.attackdown)
 					acceleratestage = 1;
-				player->attackdown = true;
+				player.attackdown = true;
 			}
 			else
-				player->attackdown = false;
-			if (player->cmd.buttons & BT_USE)
+				player.attackdown = false;
+			if (player.cmd.buttons & BT_USE)
 			{
-				if (!player->usedown)
+				if (!player.usedown)
 					acceleratestage = 1;
-				player->usedown = true;
+				player.usedown = true;
 			}
 			else
-				player->usedown = false;
+				player.usedown = false;
 		}
 	}
 }
@@ -1343,8 +1327,7 @@ static int WI_CalcWidth (const char *str)
 
 	while (*str)
 	{
-		char charname[9];
-		snprintf (charname, 9, "FONTB%02u", toupper(*str) - 32);
+		const OLumpName charname = fmt::format("FONTB{:02d}", toupper(*str) - 32);
 		int lump = W_CheckNumForName(charname);
 
 		if (lump != -1)
@@ -1362,6 +1345,7 @@ static int WI_CalcWidth (const char *str)
 
 void WI_loadData()
 {
+	exitanim = enteranim = nullptr;
 	LevelInfos& levels = getLevelInfos();
 	level_pwad_info_t& currentlevel = levels.findByName(wbs->current);
 	level_pwad_info_t& nextlevel = levels.findByName(wbs->next);
@@ -1373,19 +1357,19 @@ void WI_loadData()
 	else if (W_CheckNumForName(wbs->winner ? "WINERPIC" : "LOSERPIC") != -1)
 		winpic = wbs->winner ? "WINERPIC" : "LOSERPIC";
 
-	animation = new wi_animation_t();
+	animation = wi_animation_t();
 
 	if (!winanim.empty())
-		exitanim = WI_GetInterlevel(winanim.c_str());
+		exitanim = WI_GetInterlevel(winanim);
 	else if (!currentlevel.exitanim.empty())
-		exitanim = WI_GetInterlevel(currentlevel.exitanim.c_str());
+		exitanim = WI_GetInterlevel(currentlevel.exitanim);
 	else if (!currentlevel.exitscript.empty())
-		exitanim = WI_GetIntermissionScript(currentlevel.exitscript.c_str());
+		exitanim = WI_GetIntermissionScript(currentlevel.exitscript);
 
 	if (!nextlevel.enteranim.empty())
-		enteranim = WI_GetInterlevel(nextlevel.enteranim.c_str());
+		enteranim = WI_GetInterlevel(nextlevel.enteranim);
 	else if (!nextlevel.enterscript.empty())
-		enteranim = WI_GetIntermissionScript(nextlevel.enterscript.c_str());
+		enteranim = WI_GetIntermissionScript(nextlevel.enterscript);
 
 	WI_initAnimation();
 
@@ -1395,8 +1379,8 @@ void WI_loadData()
 		name = exitanim->backgroundlump;
 	else if (!winpic.empty())
 		name = winpic;
-	else if (currentlevel.exitpic[0] != '\0')
-		currentlevel.exitpic;
+	else if (!currentlevel.exitpic.empty())
+		name = currentlevel.exitpic;
 	else
 		name = "INTERPIC";
 
@@ -1416,9 +1400,9 @@ void WI_loadData()
 
 	for (int i = 0, j; i < 2; i++)
 	{
-		char *lname = (i == 0 ? wbs->lname0 : wbs->lname1);
+		const OLumpName& lname = (i == 0 ? wbs->lname0 : wbs->lname1);
 
-		if (lname)
+		if (!lname.empty())
 			j = W_CheckNumForName (lname);
 		else
 			j = -1;
@@ -1523,15 +1507,12 @@ void WI_loadData()
 	for (int i = 0; i < 4; i++)
 	{
 		name = fmt::format("STPB{}", i);
-		faceclassic[i] = W_CachePatchHandle(name.c_str(), PU_STATIC);
+		faceclassic[i] = W_CachePatchHandle(name, PU_STATIC);
 	}
 }
 
 void WI_unloadData()
 {
-	exitanim = enteranim = nullptr;
-	delete animation;
-
 	for (int i = 0; i < 10; i++)
 		num[i].clear();
 
@@ -1551,7 +1532,7 @@ void WI_unloadData()
 	p.clear();
 
 	for (int i = 0; i < 4; i++)
-		faceclassic[i ].clear();
+		faceclassic[i].clear();
 }
 
 void WI_Drawer()

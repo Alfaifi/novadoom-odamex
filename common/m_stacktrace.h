@@ -3,8 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 1993-1996 by id Software, Inc.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,15 +17,10 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	GI
+//	Stacktrace for more useful error messages
 //
 //-----------------------------------------------------------------------------
 
+#pragma once
 
-#include "odamex.h"
-
-#include "gi.h"
-
-gameinfo_t gameinfo;
-
-VERSION_CONTROL (gi_cpp, "$Id$")
+std::string M_GetStacktrace(std::string header = "Stack trace:");

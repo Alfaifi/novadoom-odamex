@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -147,11 +147,9 @@ const T& P_RandomFloatWeighted(const std::vector<T>& data, float (*func)(const T
 
 	// currently selected element
 	const T* selected = NULL;
-	for (typename std::vector<T>::const_iterator it = data.begin(); it != data.end();
-	     ++it)
+	for (const auto& ele : data)
 	{
 		// weight of current element
-		const T& ele = *it;
 		const float weight = func(ele);
 
 		// random value

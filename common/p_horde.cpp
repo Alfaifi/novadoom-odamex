@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -130,10 +130,8 @@ class corpseCollector_t
  */
 static void ActivateMonsters(AActors& mobjs)
 {
-	for (AActors::iterator it = mobjs.begin(); it != mobjs.end(); ++it)
+	for (auto& mo : mobjs)
 	{
-		AActor* mo = *it;
-
 		// Add them health pool now, since the function to do this is
 		// in this TU anyway.
 		P_AddHealthPool(mo);
@@ -152,7 +150,7 @@ static void ActivateMonsters(AActors& mobjs)
 		{
 			char sound[MAX_SNDNAME];
 
-			strcpy(sound, mo->info->seesound);
+			M_StringCopy(sound, mo->info->seesound, MAX_SNDNAME);
 
 			if (sound[strlen(sound) - 1] == '1')
 			{
@@ -207,13 +205,7 @@ class HordeState
 	 * @brief Returns number of bosses currently alive.
 	 */
 	size_t countLivingBosses() {
-		size_t alive = 0;
-		for (AActors::iterator it = m_bosses.begin(); it != m_bosses.end(); ++it)
-		{
-			if (*it && (*it)->health > 0)
-				alive += 1;
-		}
-		return alive;
+		return std::count_if(m_bosses.begin(), m_bosses.end(), [](const auto& boss){ return boss && boss.health > 0; });
 	}
 
 	/**
@@ -226,7 +218,7 @@ class HordeState
 		if (m_state == HS_WANTBOSS && m_bossTime == m_waveTime)
 		{
 			// Do the boss intro fanfare.
-			SV_BroadcastPrintf("The floor trembles as the boss of the wave arrives.\n");
+			SV_BroadcastPrintFmt("The floor trembles as the boss of the wave arrives.\n");
 			S_NetSound(NULL, CHAN_GAMEINFO, "misc/horde/boss", ATTN_NONE);
 			m_bossTime = ::level.time;
 		}
@@ -267,8 +259,8 @@ class HordeState
 		// Avoid printing wave name on boot and map switch.
 		if (printWave)
 		{
-			SV_BroadcastPrintf("Wave %d: \"%s\"\n", m_wave,
-			                   G_HordeDefine(m_defineID).name.c_str());
+			SV_BroadcastPrintFmt("Wave {}: \"{}\"\n", m_wave,
+			                     G_HordeDefine(m_defineID).name);
 		}
 	}
 
@@ -283,27 +275,27 @@ class HordeState
 		{
 			// Give all ingame players an extra life for beating the wave.
 			PlayersView ingame = PlayerQuery().execute().players;
-			for (PlayersView::iterator it = ingame.begin(); it != ingame.end(); ++it)
+			for (const auto& player : ingame)
 			{
 				// Dead players are reborn with a message.
-				if ((*it)->lives <= 0)
+				if (player->lives <= 0)
 				{
-					(*it)->playerstate = PST_REBORN;
-					SV_BroadcastPrintf("%s gets a new lease on life.\n",
-					                   (*it)->userinfo.netname.c_str());
+					player->playerstate = PST_REBORN;
+					SV_BroadcastPrintFmt("{} gets a new lease on life.\n",
+					                     player->userinfo.netname);
 
 					// Send a res sound directly to this player.
-					S_PlayerSound(*it, NULL, CHAN_INTERFACE, "misc/plraise",
+					S_PlayerSound(player, NULL, CHAN_INTERFACE, "misc/plraise",
 					              ATTN_NONE);
 				}
 				// Give everyone an extra life.
-				if ((*it)->lives < g_lives)
+				if (player->lives < g_lives)
 				{
-					(*it)->lives += 1;
-					MSG_WriteSVC(&(*it)->client.reliablebuf, SVC_PlayerInfo(**it));
+					player->lives += 1;
+					MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
 					MSG_BroadcastSVC(CLBUF_RELIABLE,
-					                 SVC_PlayerMembers(**it, SVC_PM_LIVES),
-					                 (*it)->id);
+					                 SVC_PlayerMembers(*player, SVC_PM_LIVES),
+					                 player->id);
 				}
 			}
 
@@ -312,12 +304,12 @@ class HordeState
 			// players a single life to start with.
 			PlayersView queued = SpecQuery().onlyInQueue().execute();
 			SV_UpdatePlayerQueuePositions(G_CanJoinGameStart, NULL);
-			for (PlayersView::iterator it = queued.begin(); it != queued.end(); ++it)
+			for (const auto& player : queued)
 			{
-				(*it)->lives = 1;
-				MSG_WriteSVC(&(*it)->client.reliablebuf, SVC_PlayerInfo(**it));
+				player->lives = 1;
+				MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
 				MSG_BroadcastSVC(CLBUF_RELIABLE,
-				                 SVC_PlayerMembers(**it, SVC_PM_LIVES), (*it)->id);
+				                 SVC_PlayerMembers(*player, SVC_PM_LIVES), player->id);
 			}
 		#endif
 		}
@@ -362,8 +354,8 @@ class HordeState
 		m_corpses.startWave();
 		m_bossCounts.clear();
 
-		SV_BroadcastPrintf("Wave %d: \"%s\"\n", m_wave,
-		                   G_HordeDefine(m_defineID).name.c_str());
+		SV_BroadcastPrintFmt("Wave {}: \"{}\"\n", m_wave,
+		                     G_HordeDefine(m_defineID).name);
 	}
 
 	/**
@@ -374,7 +366,7 @@ class HordeState
 	 */
 	bool forceWave(const std::string& name)
 	{
-		int defineID;
+		size_t defineID;
 		if (!P_HordeDefineNamed(defineID, name))
 			return false;
 
@@ -390,8 +382,8 @@ class HordeState
 		m_corpses.startWave();
 		m_bossCounts.clear();
 
-		SV_BroadcastPrintf("Wave %d: \"%s\"\n", m_wave,
-		                   G_HordeDefine(m_defineID).name.c_str());
+		SV_BroadcastPrintFmt("Wave {}: \"{}\"\n", m_wave,
+		                     G_HordeDefine(m_defineID).name);
 		return true;
 	}
 
@@ -413,6 +405,7 @@ class HordeState
 	/**
 	 * @brief Serialize horde data into POD struct.
 	 */
+	[[nodiscard]]
 	hordeInfo_t serialize() const
 	{
 		hordeInfo_t info;
@@ -710,8 +703,8 @@ void HordeState::tick()
 			}
 
 			const int hp = ::mobjinfo[recipe.type].spawnhealth * recipe.count;
-			DPrintf("Spawning %d %s (%d hp) at a %s spawn\n", recipe.count,
-			        ::mobjinfo[recipe.type].name, hp, HordeThingStr(spawn->type));
+			DPrintFmt("Spawning {} {} ({} hp) at a {} spawn\n", recipe.count,
+			          ::mobjinfo[recipe.type].name, hp, HordeThingStr(spawn->type));
 
 			AActors mobjs = P_HordeSpawn(*spawn, recipe, m_monsterCounts);
 			ActivateMonsters(mobjs);
@@ -1083,21 +1076,21 @@ BEGIN_COMMAND(hordeinfo)
 
 	const hordeDefine_t& define = G_HordeDefine(::g_HordeDirector.getDefineID());
 
-	Printf("[Define: %s]\n", define.name.c_str());
-	Printf("Weapons: %s\n", JoinStrings(define.weaponStrings(NULL), " ").c_str());
+	Printf("[Define: %s]\n", define.name);
+	Printf("Weapons: %s\n", JoinStrings(define.weaponStrings(NULL), " "));
 	Printf("Min Group Health: %d\n", define.minGroupHealth);
 	Printf("Max Group Health: %d (Difficulty: %s)\n", define.maxGroupHealth,
 	       define.difficulty(false));
 	Printf("Min Total Health: %d = waveMaxGroup:%d * g_horde_mintotalhp:%s * "
 	       "skillLevel:%0.2f\n",
-	       define.minTotalHealth(), define.maxGroupHealth, ::g_horde_mintotalhp.cstring(),
+	       define.minTotalHealth(), define.maxGroupHealth, ::g_horde_mintotalhp.str(),
 	       skillScaler);
 	Printf("Max Total Health: %d = waveMaxGroup:%d * g_horde_maxtotalhp:%s * "
 	       "skillLevel:%0.2f\n",
-	       define.maxTotalHealth(), define.maxGroupHealth, ::g_horde_maxtotalhp.cstring(),
+	       define.maxTotalHealth(), define.maxGroupHealth, ::g_horde_maxtotalhp.str(),
 	       skillScaler);
 	Printf("Goal Health: %d = waveMaxGroup:%d * g_horde_goalhp:%s * skillLevel:%0.2f\n",
-	       define.goalHealth(), define.maxGroupHealth, ::g_horde_goalhp.cstring(),
+	       define.goalHealth(), define.maxGroupHealth, ::g_horde_goalhp.str(),
 	       skillScaler);
 
 	const char* stateStr = NULL;

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom 1.22).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -115,7 +115,7 @@ static int PrintString(int printlevel, const std::string& str)
 	return sanitized_str.length();
 }
 
-extern BOOL gameisdead;
+extern bool gameisdead;
 
 size_t C_BasePrint(const int printlevel, const char* color_code, const std::string& str)
 {
@@ -126,9 +126,9 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 	std::string newStr = str;
 
 	// denis - 0x07 is a system beep, which can DoS the console (lol)
-	for (size_t i = 0; i < newStr.length(); i++)
-		if (newStr[i] == 0x07)
-			newStr[i] = '.';
+	for (auto& c : newStr)
+		if (c == 0x07)
+			c = '.';
 
 	newStr = std::string(TimeStamp()) + " " + newStr;
 
@@ -136,9 +136,9 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 		newStr += '\n';
 
 	// Only allow sending internal messages to RCON players that are PRINT_HIGH
-	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	for (auto& player : players)
 	{
-		client_t* cl = &(it->client);
+		client_t* cl = &(player.client);
 
 		// Only allow RCON messages that are PRINT_HIGH
 		if (cl->allow_rcon && (printlevel == PRINT_HIGH || printlevel == PRINT_WARNING ||
@@ -168,7 +168,7 @@ BEGIN_COMMAND (echo)
 	if (argc > 1)
 	{
 		std::string text = C_ArgCombine(argc - 1, (const char **)(argv + 1));
-		Printf(PRINT_HIGH, "%s\n", text.c_str());
+		Printf(PRINT_HIGH, "%s\n", text);
 	}
 }
 END_COMMAND (echo)

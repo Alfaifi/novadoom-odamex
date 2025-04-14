@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@
 #ifdef _WIN32
     #ifndef _XBOX
         #undef GetMessage
-        typedef BOOL (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
+        typedef bool (WINAPI *SetAffinityFunc)(HANDLE hProcess, DWORD mask);
     #endif // !_XBOX
 #else
     #include <sched.h>
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
 			fclose(fh);
 #else
-			printf("Odamex %s\n", NiceVersion());
+			fmt::print("Odamex {}\n", NiceVersion());
 #endif
 			exit(EXIT_SUCCESS);
 		}
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 #endif
 
 		if (SDL_Init(sdl_flags) == -1)
-			I_FatalError("Could not initialize SDL:\n%s\n", SDL_GetError());
+			I_FatalError("Could not initialize SDL:\n{}\n", SDL_GetError());
 
 		atterm (SDL_Quit);
 

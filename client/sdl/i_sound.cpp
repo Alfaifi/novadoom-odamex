@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -29,6 +29,7 @@
 #include "i_sdl.h"
 #include <SDL_mixer.h>
 #include <stdlib.h>
+#include <nonstd/scope.hpp>
 
 #include "z_zone.h"
 
@@ -270,6 +271,7 @@ static void getsfx(sfxinfo_struct *sfx)
 		return;
 
     Uint8* data = (Uint8*)W_CacheLumpNum(sfx->lumpnum, PU_STATIC);
+	auto guard = nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
 
     // [Russell] - ICKY QUICKY HACKY SPACKY *I HATE THIS SOUND MANAGEMENT SYSTEM!*
     // get the lump size, shouldn't this be filled in elsewhere?
@@ -307,6 +309,9 @@ static void getsfx(sfxinfo_struct *sfx)
     // if the lump is longer than the value, fixes exec.wad's ssg
     length = (sfx->length - 8 > length) ? sfx->length - 8 : length;
 
+	if (length <= 0)
+		return;
+
     Uint32 expanded_length = (uint32_t)((((uint64_t)length) * mixer_freq) / samplerate);
 
     // Double up twice: 8 -> 16 bit and mono -> stereo
@@ -321,8 +326,6 @@ static void getsfx(sfxinfo_struct *sfx)
 
     ExpandSoundData((byte*)data + 8, samplerate, 8, length, chunk);
     sfx->data = chunk;
-
-    Z_ChangeTag(data, PU_CACHE);
 }
 
 //
@@ -366,7 +369,7 @@ int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
 
 		if (channel == nextchannel)
 		{
-			fprintf(stderr, "No free sound channels left.\n");
+			fmt::print(stderr, "No free sound channels left.\n");
 			return -1;
 		}
 	} while (channel_in_use[channel]);
@@ -435,7 +438,7 @@ void I_LoadSound (sfxinfo_struct *sfx)
 
 	if (!sfx->data)
 	{
-		DPrintf ("loading sound \"%s\" (%d)\n", sfx->name, sfx->lumpnum);
+		DPrintFmt("loading sound \"{}\" ({})\n", sfx->name, sfx->lumpnum);
 		getsfx (sfx);
 	}
 }

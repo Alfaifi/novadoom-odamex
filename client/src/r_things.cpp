@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -119,10 +119,10 @@ vissprite_t *R_NewVisSprite()
 		int prevvisspritenum = vissprite_p - vissprites;
 
 		MaxVisSprites *= 2;
-		vissprites = (vissprite_t *)Realloc (vissprites, MaxVisSprites * sizeof(vissprite_t));
+		vissprites = (vissprite_t *)M_Realloc (vissprites, MaxVisSprites * sizeof(vissprite_t));
 		lastvissprite = &vissprites[MaxVisSprites];
 		vissprite_p = &vissprites[prevvisspritenum];
-		DPrintf ("MaxVisSprites increased to %d\n", MaxVisSprites);
+		DPrintFmt("MaxVisSprites increased to {}\n", MaxVisSprites);
 	}
 
 	vissprite_p++;
@@ -188,32 +188,6 @@ void R_BlastSpriteColumn(void (*drawfunc)())
 void SpriteColumnBlaster()
 {
 	R_BlastSpriteColumn(colfunc);
-}
-
-// WARNING
-// The following will break vanilla demos!
-void R_SpawnBerserkPuff(int x, int y, int z)
-{
-	// don't run if menu is open
-	if (menuactive || ConsoleState == c_down || paused)
-		return;
-
-	AActor* puff;
-
-	int ang = P_RandomHitscanAngle(256 * 65535);
-
-	puff = new AActor(x, y, z, MT_PUFF);
-
-	puff->x += FixedMul(((P_RandomDiff() >> 4) * FRACUNIT) - -(16 * FRACUNIT),
-	                    finecosine[ang >> ANGLETOFINESHIFT]);
-	puff->y += FixedMul(((P_RandomDiff() >> 4) * FRACUNIT) - -(16 * FRACUNIT),
-	                    finesine[ang >> ANGLETOFINESHIFT]);
-	puff->z += abs((P_RandomDiff() >> 2) * FRACUNIT);
-	puff->momz = abs((FRACUNIT * P_RandomDiff()) >> 4);
-	puff->tics -= P_Random(puff) & 3;
-
-	if (puff->tics < 1)
-		puff->tics = 1;
 }
 
 EXTERN_CVAR(sv_showplayerpowerups)
@@ -294,10 +268,11 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 		else if (vis->statusflags & SF_BERSERK)
 		{
 			// draw a red palette on the vissprite
-			dcol.translation = translationref_t(&::redtable[id][0]);
-
-			if (vis && vis->mo && !(vis->statusflags & SF_INVIS))
-				R_SpawnBerserkPuff(vis->mo->x, vis->mo->y, vis->mo->z);
+			// but only if the fist is out.
+			if (vis->mo && vis->mo->player && vis->mo->player->readyweapon == wp_fist)
+			{
+				dcol.translation = translationref_t(&::redtable[id][0]);
+			}
 		}
 		else if (vis->statusflags & SF_IRONFEET)
 		{
@@ -479,7 +454,7 @@ static vissprite_t* R_GenerateVisSprite(const sector_t* sector, int fakeside,
 void R_DrawHitBox(AActor* thing)
 {
 	v3fixed_t vertices[8];
-	constexpr byte color = 0x80;
+	static constexpr byte color = 0x80;
 
 	// bottom front left
 	vertices[0].x = thing->x - thing->radius;
@@ -591,7 +566,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 #ifdef RANGECHECK
 	if (static_cast<unsigned>(thing->sprite) >= static_cast<unsigned>(numsprites))
 	{
-		DPrintf ("R_ProjectSprite: invalid sprite number %i\n", thing->sprite);
+		DPrintFmt("R_ProjectSprite: invalid sprite number {}\n", thing->sprite);
 		return;
 	}
 #endif
@@ -601,7 +576,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 #ifdef RANGECHECK
 	if ( (thing->frame & FF_FRAMEMASK) >= sprdef->numframes )
 	{
-		DPrintf ("R_ProjectSprite: invalid sprite frame %i : %i\n ", thing->sprite, thing->frame);
+		DPrintFmt("R_ProjectSprite: invalid sprite frame {} : {}\n ", thing->sprite, thing->frame);
 		return;
 	}
 #endif
@@ -624,13 +599,13 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 		}
 
 		lump = sprframe->lump[rot];
-		flip = static_cast<bool>(sprframe->flip[rot]);
+		flip = sprframe->flip[rot];
 	}
 	else
 	{
 		// use single rotation for all views
 		lump = sprframe->lump[rot = 0];
-		flip = static_cast<bool>(sprframe->flip[0]);
+		flip = sprframe->flip[0];
 	}
 
 	if (sprframe->width[rot] == SPRITE_NEEDS_INFO)
@@ -733,28 +708,28 @@ void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 	spritedef_t*		sprdef;
 	spriteframe_t*		sprframe;
 	int 				lump;
-	BOOL 				flip;
+	bool 				flip;
 	vissprite_t*		vis;
 	vissprite_t 		avis;
 
 	// decide which patch to use
 #ifdef RANGECHECK
 	if ( (unsigned)psp->state->sprite >= (unsigned)numsprites) {
-		DPrintf ("R_DrawPSprite: invalid sprite number %i\n", psp->state->sprite);
+		DPrintFmt("R_DrawPSprite: invalid sprite number {}\n", psp->state->sprite);
 		return;
 	}
 #endif
 	sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
 	if ( (psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes) {
-		DPrintf ("R_DrawPSprite: invalid sprite frame %i : %i\n", psp->state->sprite, psp->state->frame);
+		DPrintFmt("R_DrawPSprite: invalid sprite frame {} : {}\n", psp->state->sprite, psp->state->frame);
 		return;
 	}
 #endif
 	sprframe = &sprdef->spriteframes[ psp->state->frame & FF_FRAMEMASK ];
 
 	lump = sprframe->lump[0];
-	flip = static_cast<BOOL>(sprframe->flip[0]);
+	flip = sprframe->flip[0];
 
 	if (sprframe->width[0] == SPRITE_NEEDS_INFO)
 		R_CacheSprite (sprdef);	// [RH] speeds up game startup time

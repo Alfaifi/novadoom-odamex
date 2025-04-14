@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2024 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -27,7 +27,6 @@
 
 #include "odamex.h"
 
-#include "doomtype.h"
 #include "w_wad.h"
 
 #include <functional>
@@ -105,7 +104,7 @@ inline jsonlumpresult_t M_ParseJSONLump(int lumpindex, const char* lumptype, con
 	return M_ParseJSONLump(lumpindex, lumptype, maxversion, parsefunc);
 }
 
-inline jsonlumpresult_t M_ParseJSONLump(const char* lumpname, const char* lumptype, const JSONLumpVersion& maxversion, JSONLumpFunc&& parsefunc)
+inline jsonlumpresult_t M_ParseJSONLump(const OLumpName& lumpname, const char* lumptype, const JSONLumpVersion& maxversion, JSONLumpFunc&& parsefunc)
 {
 	return M_ParseJSONLump(W_CheckNumForName(lumpname), lumptype, maxversion, parsefunc);
 }

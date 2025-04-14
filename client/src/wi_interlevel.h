@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -101,6 +101,6 @@ struct interlevel_t
     std::vector<interlevellayer_t> layers;
 };
 
-interlevel_t* WI_GetInterlevel(const char* lumpname);
-interlevel_t* WI_GetIntermissionScript(const char* lumpname);
+interlevel_t* WI_GetInterlevel(const OLumpName& lumpname);
+interlevel_t* WI_GetIntermissionScript(const OLumpName& lumpname);
 void WI_ClearInterlevels();

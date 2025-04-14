@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -39,7 +39,8 @@ typedef enum
 	MS_NONE			= 0,
 	MS_SDLMIXER		= 1,
 	MS_AUDIOUNIT	= 2,
-	MS_PORTMIDI		= 3
+	MS_PORTMIDI		= 3,
+	MS_LIBADLMIDI		= 4
 } MusicSystemType;
 
 bool S_MusicIsMus(byte* data, size_t length);

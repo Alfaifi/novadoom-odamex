@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom 1.22).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -40,48 +40,49 @@
  */
 typedef uint32_t levelFlags_t;
 
-const static levelFlags_t LEVEL_NOINTERMISSION = BIT(0);
-const static levelFlags_t LEVEL_SECRET = BIT(1);
-const static levelFlags_t LEVEL_DOUBLESKY = BIT(2);
-const static levelFlags_t LEVEL_NOSOUNDCLIPPING = BIT(3);
+constexpr static levelFlags_t LEVEL_NOINTERMISSION = BIT(0);
+constexpr static levelFlags_t LEVEL_SECRET = BIT(1);
+constexpr static levelFlags_t LEVEL_DOUBLESKY = BIT(2);
+constexpr static levelFlags_t LEVEL_NOSOUNDCLIPPING = BIT(3);
 
-const static levelFlags_t LEVEL_MAP07SPECIAL = BIT(4);
-const static levelFlags_t LEVEL_BRUISERSPECIAL = BIT(5);
-const static levelFlags_t LEVEL_CYBORGSPECIAL = BIT(6);
-const static levelFlags_t LEVEL_SPIDERSPECIAL = BIT(7);
+constexpr static levelFlags_t LEVEL_MAP07SPECIAL = BIT(4);
+constexpr static levelFlags_t LEVEL_BRUISERSPECIAL = BIT(5);
+constexpr static levelFlags_t LEVEL_CYBORGSPECIAL = BIT(6);
+constexpr static levelFlags_t LEVEL_SPIDERSPECIAL = BIT(7);
 
-const static levelFlags_t LEVEL_SPECLOWERFLOOR = BIT(8);
-const static levelFlags_t LEVEL_SPECOPENDOOR = BIT(9);
+constexpr static levelFlags_t LEVEL_SPECLOWERFLOOR = BIT(8);
+constexpr static levelFlags_t LEVEL_SPECOPENDOOR = BIT(9);
 const static levelFlags_t LEVEL_SPECACTIONSMASK = BIT_MASK(LEVEL_SPECLOWERFLOOR, LEVEL_SPECOPENDOOR);
-const static levelFlags_t LEVEL_MONSTERSTELEFRAG = BIT(10);
-const static levelFlags_t LEVEL_EVENLIGHTING = BIT(11);
+constexpr static levelFlags_t LEVEL_MONSTERSTELEFRAG = BIT(10);
+constexpr static levelFlags_t LEVEL_EVENLIGHTING = BIT(11);
 
-const static levelFlags_t LEVEL_SNDSEQTOTALCTRL = BIT(12);
-const static levelFlags_t LEVEL_FORCENOSKYSTRETCH = BIT(13);
-const static levelFlags_t LEVEL_JUMP_NO = BIT(14);
-const static levelFlags_t LEVEL_JUMP_YES = BIT(15);
+constexpr static levelFlags_t LEVEL_SNDSEQTOTALCTRL = BIT(12);
+constexpr static levelFlags_t LEVEL_FORCENOSKYSTRETCH = BIT(13);
+constexpr static levelFlags_t LEVEL_JUMP_NO = BIT(14);
+constexpr static levelFlags_t LEVEL_JUMP_YES = BIT(15);
 
-const static levelFlags_t LEVEL_FREELOOK_NO = BIT(16);
-const static levelFlags_t LEVEL_FREELOOK_YES = BIT(17);
-const static levelFlags_t LEVEL_COMPAT_DROPOFF = BIT(18);
-const static levelFlags_t LEVEL_COMPAT_NOPASSOVER = BIT(19);
-const static levelFlags_t LEVEL_COMPAT_LIMITPAIN = BIT(20);
+constexpr static levelFlags_t LEVEL_FREELOOK_NO = BIT(16);
+constexpr static levelFlags_t LEVEL_FREELOOK_YES = BIT(17);
+constexpr static levelFlags_t LEVEL_COMPAT_DROPOFF = BIT(18);
+constexpr static levelFlags_t LEVEL_COMPAT_NOPASSOVER = BIT(19);
+constexpr static levelFlags_t LEVEL_COMPAT_LIMITPAIN = BIT(20);
+constexpr static levelFlags_t LEVEL_COMPAT_SHORTTEX = BIT(21);
 
  // Automatically start lightning
-const static levelFlags_t LEVEL_STARTLIGHTNING = BIT(24);
+constexpr static levelFlags_t LEVEL_STARTLIGHTNING = BIT(24);
 // Apply mapthing filtering to player starts
-const static levelFlags_t LEVEL_FILTERSTARTS = BIT(25);
+constexpr static levelFlags_t LEVEL_FILTERSTARTS = BIT(25);
 // That level is a lobby, and has a few priorities
-const static levelFlags_t LEVEL_LOBBYSPECIAL = BIT(26);
+constexpr static levelFlags_t LEVEL_LOBBYSPECIAL = BIT(26);
 // Player spawns will have z-height
-const static levelFlags_t LEVEL_USEPLAYERSTARTZ = BIT(27);
+constexpr static levelFlags_t LEVEL_USEPLAYERSTARTZ = BIT(27);
 
  // Level was defined in a MAPINFO lump
-const static levelFlags_t LEVEL_DEFINEDINMAPINFO = BIT(29);
+constexpr static levelFlags_t LEVEL_DEFINEDINMAPINFO = BIT(29);
 // Don't display cluster messages
-const static levelFlags_t LEVEL_CHANGEMAPCHEAT = BIT(30);
+constexpr static levelFlags_t LEVEL_CHANGEMAPCHEAT = BIT(30);
 // Used for intermission map
-const static levelFlags_t LEVEL_VISITED = BIT(31);
+constexpr static levelFlags_t LEVEL_VISITED = BIT(31);
 
 struct acsdefered_s;
 class FBehavior;
@@ -127,6 +128,7 @@ struct fhfprint_s
 	{
 		ArrayInit(fingerprint, 0);
 	}
+	[[nodiscard]]
 	bool operator==(const fhfprint_s& other)
 	{
 		return fingerprint == other.fingerprint;
@@ -381,13 +383,13 @@ struct cluster_info_t
 	int				cluster;
 	OLumpName		messagemusic;
 	OLumpName		finaleflat;
-	char*			exittext;
-	char*			entertext;
+	std::string		exittext;
+	std::string		entertext;
 	int				flags;
 	OLumpName		finalepic;
 
 	cluster_info_t()
-	    : cluster(0), messagemusic(""), finaleflat(""), exittext(NULL), entertext(NULL),
+	    : cluster(0), messagemusic(""), finaleflat(""), exittext(""), entertext(""),
 	      flags(0)
 	{
 	}
@@ -439,12 +441,15 @@ public:
 
 typedef OHashTable<int, int> ACSWorldGlobalArray;
 
-extern int ACS_WorldVars[NUM_WORLDVARS];
-extern int ACS_GlobalVars[NUM_GLOBALVARS];
-extern ACSWorldGlobalArray ACS_WorldArrays[NUM_WORLDVARS];
-extern ACSWorldGlobalArray ACS_GlobalArrays[NUM_GLOBALVARS];
+// ACS variables with world scope
+inline std::array<int, NUM_WORLDVARS> ACS_WorldVars;
+inline std::array<ACSWorldGlobalArray, NUM_WORLDVARS> ACS_WorldArrays;
 
-extern BOOL savegamerestore;
+// ACS variables with global scope
+inline std::array<int, NUM_GLOBALVARS> ACS_GlobalVars;
+inline std::array<ACSWorldGlobalArray, NUM_GLOBALVARS> ACS_GlobalArrays;
+
+extern bool savegamerestore;
 
 void G_InitNew(const char *mapname);
 inline void G_InitNew(const OLumpName& mapname) { G_InitNew(mapname.c_str()); }
@@ -455,7 +460,7 @@ void G_RestartMap();
 // Can be called by the startup code or M_Responder.
 // A normal game starts at map 1,
 // but a warp test can start elsewhere
-void G_DeferedInitNew(const char *mapname);
+void G_DeferedInitNew(const OLumpName& mapname);
 
 // Map reset functions
 void G_DeferedFullReset();
@@ -471,7 +476,7 @@ void G_InitLevelLocals();
 
 void G_AirControlChanged();
 
-char *CalcMapName(int episode, int level);
+OLumpName CalcMapName(int episode, int level);
 
 void G_ParseMusInfo();
 

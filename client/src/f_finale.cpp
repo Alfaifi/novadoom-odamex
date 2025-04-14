@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -53,7 +53,7 @@ static IWindowSurface* finale_surface = NULL;
 // Draw the bunny scroll on 2 surfaces
 // and clip them against the screen
 static IWindowSurface* bunny1_surface = NULL;
-static IWindowSurface* bunny2_surface = NULL; 
+static IWindowSurface* bunny2_surface = NULL;
 
 // Stage of animation:
 //	0 = text, 1 = art screen, 2 = character cast
@@ -74,13 +74,13 @@ enum finale_lump_t
 	FINALE_GRAPHIC,
 };
 
-const char* finaletext;
+std::string finaletext;
 OLumpName finalelump;
 finale_lump_t finalelumptype = FINALE_NONE;
 
 void	F_StartCast (void);
 void	F_CastTicker (void);
-BOOL	F_CastResponder (event_t *ev);
+bool	F_CastResponder (event_t *ev);
 void	F_CastDrawer (void);
 
 
@@ -199,7 +199,7 @@ void F_StartFinale(finale_options_t& options)
 		::finalelump = gameinfo.finaleFlat;
 	}
 
-	if (options.text)
+	if (!options.text.empty())
 	{
 		::finaletext = options.text;
 	}
@@ -235,7 +235,7 @@ void STACK_ARGS F_ShutdownFinale()
 }
 
 
-BOOL F_Responder (event_t *event)
+bool F_Responder (event_t *event)
 {
 	if (finalestage == 2)
 		return F_CastResponder (event);
@@ -332,14 +332,14 @@ void F_TextWrite ()
 	switch (finalelumptype)
 	{
 	case FINALE_GRAPHIC:
-		lump = W_CheckNumForName(finalelump.c_str(), ns_global);
+		lump = W_CheckNumForName(finalelump, ns_global);
 		if (lump >= 0)
 		{
 			screen->DrawPatchFullScreen(W_CachePatch(lump, PU_CACHE), true);
 		}
 		break;
 	case FINALE_FLAT:
-		lump = W_CheckNumForName(finalelump.c_str(), ns_flats);
+		lump = W_CheckNumForName(finalelump, ns_flats);
 		if (lump >= 0)
 		{
 			// Support high resolution flats
@@ -368,7 +368,7 @@ void F_TextWrite ()
 
 	// draw some of the text onto the screen
 	int cx = gameinfo.textScreenX, cy = gameinfo.textScreenY;
-	const char* ch = finaletext;
+	const char* ch = finaletext.c_str();
 
 	if (finalecount < gameinfo.textScreenY + 1)
 		return;
@@ -438,7 +438,6 @@ castinfo_t castorder[] = {
 
 static int 		castnum;
 static int 		casttics;
-static int		castsprite;
 static state_t*	caststate;
 static bool	 	castdeath;
 static int 		castframes;
@@ -476,7 +475,6 @@ void F_StartCast()
 	wipegamestate = GS_FORCEWIPE;
 	castnum = 0;
 	caststate = &states[mobjinfo[castorder[castnum].type].seestate];
-	castsprite = caststate->sprite;
 	casttics = caststate->tics;
 	castdeath = false;
 	finalestage = 2;
@@ -507,11 +505,10 @@ void F_CastTicker()
 			castnum = 0;
 		if (mobjinfo[castorder[castnum].type].seesound)
 		{
-			constexpr int atten = ATTN_NONE;
+			static constexpr int atten = ATTN_NONE;
 			S_Sound (CHAN_VOICE, mobjinfo[castorder[castnum].type].seesound, 1, atten);
 		}
 		caststate = &states[mobjinfo[castorder[castnum].type].seestate];
-		castsprite = caststate->sprite;
 		castframes = 0;
 	}
 	else
@@ -570,18 +567,16 @@ void F_CastTicker()
 		// go into attack frame
 		castattacking = true;
 		if (castonmelee)
-			caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
+			caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
 		else
-			caststate=&states[mobjinfo[castorder[castnum].type].missilestate];
+			caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
 		castonmelee ^= 1;
 		if (caststate == &states[S_NULL])
 		{
 			if (castonmelee)
-				caststate=
-					&states[mobjinfo[castorder[castnum].type].meleestate];
+				caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
 			else
-				caststate=
-					&states[mobjinfo[castorder[castnum].type].missilestate];
+				caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
 		}
 	}
 
@@ -607,7 +602,7 @@ void F_CastTicker()
 // F_CastResponder
 //
 
-BOOL F_CastResponder (event_t* ev)
+bool F_CastResponder (event_t* ev)
 {
 	if (ev->type != ev_keydown)
 		return false;
@@ -649,7 +644,7 @@ void F_CastDrawer()
 	cast_surface->getDefaultCanvas()->DrawPatch(background_patch, 0, 0);
 
 	// draw the current frame in the middle of the screen
-	const spritedef_t* sprdef = &sprites[castsprite];
+	const spritedef_t* sprdef = &sprites[caststate->sprite];
 	const spriteframe_t* sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
 
 	int scaled_x = (finale_width - 320) / 2;
@@ -683,7 +678,6 @@ void F_CastDrawer()
 // by cropping the 2 canvas positions to the screen.
 void F_BunnyScroll()
 {
-	char		name[10];
 	static int	laststage;
 
 	const patch_t* p1 = W_CachePatch("PFUB1");
@@ -796,7 +790,7 @@ void F_BunnyScroll()
 		laststage = stage;
 	}
 
-	snprintf (name, 6, "END%i", stage);
+	OLumpName name = fmt::format("END{}", stage);
 	screen->DrawPatchIndirect(W_CachePatch(name), (320-13*8)/2, (200-8*8)/2);
 }
 
@@ -806,13 +800,13 @@ void F_BunnyScroll()
 // Draws an endpic on the finale canvas.
 // If using a normal 320x200 endpic,
 // It will be scaled to fit the viewport.
-// 
+//
 // If using a widescreen endpic, it will
 // be scaled keeping aspect ratio to fill
 // the screen and may be too wide for the
 // viewport. It will be cropped in that case.
 //
-void F_DrawEndPic(const char* page)
+void F_DrawEndPic(const OLumpName& page)
 {
 	IWindowSurface* primary_surface = I_GetPrimarySurface();
 	primary_surface->clear(); // ensure black background in matted modes
@@ -830,7 +824,7 @@ void F_DrawEndPic(const char* page)
 
 	const int x = (primary_surface->getWidth() - width) / 2;
 	const int y = (primary_surface->getHeight() - height) / 2;
-	
+
 	// draw the background to the surface
 	finale_surface->lock();
 
@@ -860,19 +854,19 @@ void F_Drawer (void)
 				default:
 				case '1':
 				{
-					const char* page = !level.endpic.empty() ? level.endpic.c_str() : gameinfo.finalePage[0].c_str();
+					const OLumpName& page = !level.endpic.empty() ? level.endpic : gameinfo.finalePage[0];
 
 					F_DrawEndPic(page);
 					break;
 				}
 				case '2':
-			        F_DrawEndPic(gameinfo.finalePage[1].c_str());
+			        F_DrawEndPic(gameinfo.finalePage[1]);
 					break;
 				case '3':
 					F_BunnyScroll ();
 					break;
 				case '4':
-			        F_DrawEndPic(gameinfo.finalePage[2].c_str());
+			        F_DrawEndPic(gameinfo.finalePage[2]);
 					break;
 			}
 			break;
