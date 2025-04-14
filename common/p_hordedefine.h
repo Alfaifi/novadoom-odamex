@@ -155,4 +155,4 @@ int P_HordeMobjCount(const mobjCounts_t& counts, const mobjtype_t type);
 size_t P_HordePickDefine(const int current, const int total);
 bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
                         const bool wantBoss, const mobjCounts_t& monsterCounts);
-bool P_HordeDefineNamed(int& out, const std::string& name);
+bool P_HordeDefineNamed(size_t& out, const std::string& name);

@@ -21,9 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <math.h>
-#include <climits>
-
 #include "odamex.h"
 
 #include "p_hordedefine.h"
@@ -37,6 +34,9 @@
 #include "oscanner.h"
 #include "v_textcolors.h"
 #include "w_wad.h"
+
+#include <limits>
+#include <cmath>
 
 EXTERN_CVAR(g_horde_mintotalhp)
 EXTERN_CVAR(g_horde_maxtotalhp)
@@ -130,38 +130,38 @@ const char* hordeDefine_t::difficulty(const bool colored) const
 StringTokens hordeDefine_t::weaponStrings(player_t* player) const
 {
 	StringTokens rvo;
-	for (size_t i = 0; i < weapons.size(); i++)
+	for (const auto& weapon : weapons)
 	{
-		if (!(player == NULL || !player->weaponowned[weapons[i]]))
+		if (!(player == NULL || !player->weaponowned[weapon]))
 		{
 			continue;
 		}
 
-		switch (weapons[i])
+		switch (weapon)
 		{
 		case wp_none:
-			rvo.push_back("BSK");
+			rvo.emplace_back("BSK");
 			break;
 		case wp_chainsaw:
-			rvo.push_back("1+");
+			rvo.emplace_back("1+");
 			break;
 		case wp_shotgun:
-			rvo.push_back("3");
+			rvo.emplace_back("3");
 			break;
 		case wp_supershotgun:
-			rvo.push_back("3+");
+			rvo.emplace_back("3+");
 			break;
 		case wp_chaingun:
-			rvo.push_back("4");
+			rvo.emplace_back("4");
 			break;
 		case wp_missile:
-			rvo.push_back("5");
+			rvo.emplace_back("5");
 			break;
 		case wp_plasma:
-			rvo.push_back("6");
+			rvo.emplace_back("6");
 			break;
 		case wp_bfg:
-			rvo.push_back("7");
+			rvo.emplace_back("7");
 			break;
 		case wp_fist:
 		case wp_pistol:
@@ -194,7 +194,7 @@ size_t P_HordePickDefine(const int current, const int total)
 {
 	if (::WAVE_DEFINES.empty())
 	{
-		I_Error("%s: No wave defines found.\n", __FUNCTION__);
+		I_Error("{}: No wave defines found.\n", __FUNCTION__);
 	}
 
 	if (total > 0)
@@ -235,10 +235,8 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 	std::vector<const hordeDefine_t::monster_t*> monsters;
 
 	// Figure out which monster we want to spawn.
-	for (size_t i = 0; i < define.monsters.size(); i++)
+	for (const auto& waveMon : define.monsters)
 	{
-		const hordeDefine_t::monster_t& waveMon = define.monsters.at(i);
-
 		// Boss spawns have to spawn boss things.
 		if (wantBoss && waveMon.monster == hordeDefine_t::RM_NORMAL)
 			continue;
@@ -256,7 +254,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 	// Randomly select a monster to spawn.
 	const hordeDefine_t::monster_t* monster = NULL;
-	int limit = INT_MAX;
+	int limit = std::numeric_limits<int>::max();
 	for (size_t i = 0; i < 5; i++)
 	{
 		monster = P_RandomFloatWeighted(monsters, MonsterChance);
@@ -268,7 +266,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 		// Scale the limit, but whatever number we come up with must end
 		// up as an integer anyway.
-		limit = ceilf(float(monster->config.limit) * SkillScaler());
+		limit = std::ceilf(monster->config.limit * SkillScaler());
 		const int numAlive = P_HordeMobjCount(monsterCounts, monster->mobj);
 		if (numAlive < limit)
 		{
@@ -278,7 +276,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 		// Can't fit this monster.
 		monster = NULL;
-		limit = INT_MAX;
+		limit = std::numeric_limits<int>::max();
 	}
 
 	if (monster == NULL)
@@ -358,7 +356,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 	out.type = outType;
 	out.count = outCount;
-	out.limit = limit == INT_MAX ? 0 : limit;
+	out.limit = limit == std::numeric_limits<int>::max() ? 0 : limit;
 	out.totalCount = MAX(outTotalCount, outCount);
 	out.isBoss = outIsBoss;
 
@@ -373,7 +371,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
  * @param name Partial name to search for.
  * @return True if the define was found, otherwise false.
  */
-bool P_HordeDefineNamed(int& out, const std::string& name)
+bool P_HordeDefineNamed(size_t& out, const std::string& name)
 {
 	for (size_t i = 0; i < ::WAVE_DEFINES.size(); i++)
 	{
@@ -400,7 +398,7 @@ static void PrintDefines(const std::vector<hordeDefine_t>::const_iterator& begin
 	for (; it != end; ++it)
 	{
 		const ptrdiff_t idx = it - ::WAVE_DEFINES.begin();
-		Printf("%zd: %s (Group HP: %d)\n", idx, it->name.c_str(), it->maxGroupHealth);
+		Printf("%zd: %s (Group HP: %d)\n", idx, it->name, it->maxGroupHealth);
 	}
 }
 
