@@ -587,10 +587,10 @@ BEGIN_COMMAND(ban)
 	Printf(PRINT_HIGH, "ban: ban added.\n");
 
 	// If we have a banfile, save the banlist.
-	if (sv_banfile.c_str()[0] != 0)
+	if (sv_banfile.cstring()[0] != 0)
 	{
 		Json::Value json_bans(Json::arrayValue);
-		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.c_str(), json_bans, true)))
+		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.cstring(), json_bans, true)))
 			Printf(PRINT_HIGH, "ban: banlist could not be saved.\n");
 	}
 
@@ -652,10 +652,10 @@ BEGIN_COMMAND(addban)
 	Printf(PRINT_HIGH, "addban: ban added.\n");
 
 	// If we have a banfile, save the banlist.
-	if (sv_banfile.c_str()[0] != 0)
+	if (sv_banfile.cstring()[0] != 0)
 	{
 		Json::Value json_bans(Json::arrayValue);
-		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.c_str(), json_bans, true)))
+		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.cstring(), json_bans, true)))
 			Printf(PRINT_HIGH, "addban: banlist could not be saved.\n");
 	}
 }
@@ -749,10 +749,10 @@ BEGIN_COMMAND(delban)
 	Printf(PRINT_HIGH, "delban: ban deleted.\n");
 
 	// If we have a banfile, save the banlist.
-	if (sv_banfile.c_str()[0] != 0)
+	if (sv_banfile.cstring()[0] != 0)
 	{
 		Json::Value json_bans(Json::arrayValue);
-		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.c_str(), json_bans, true)))
+		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.cstring(), json_bans, true)))
 			Printf(PRINT_HIGH, "delban: banlist could not be saved.\n");
 	}
 }
@@ -857,10 +857,10 @@ BEGIN_COMMAND(clearbanlist)
 	Printf(PRINT_HIGH, "clearbanlist: banlist cleared.\n");
 
 	// If we have a banfile, save the banlist.
-	if (sv_banfile.c_str()[0] != 0)
+	if (sv_banfile.cstring()[0] != 0)
 	{
 		Json::Value json_bans(Json::arrayValue);
-		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.c_str(), json_bans, true)))
+		if (!(banlist.json(json_bans) && M_WriteJSON(sv_banfile.cstring(), json_bans, true)))
 			Printf(PRINT_HIGH, "clearbanlist: banlist could not be saved.\n");
 	}
 }
@@ -872,7 +872,7 @@ BEGIN_COMMAND(savebanlist)
 	if (argc > 1)
 		banfile = argv[1];
 	else
-		banfile = sv_banfile.c_str();
+		banfile = sv_banfile.cstring();
 
 	Json::Value json_bans(Json::arrayValue);
 	if (banlist.json(json_bans) && M_WriteJSON(banfile.c_str(), json_bans, true))
@@ -888,7 +888,7 @@ BEGIN_COMMAND(loadbanlist)
 	if (argc > 1)
 		banfile = argv[1];
 	else
-		banfile = sv_banfile.c_str();
+		banfile = sv_banfile.cstring();
 
 	Json::Value json_bans;
 	if (!M_ReadJSON(json_bans, banfile))
@@ -954,7 +954,7 @@ END_COMMAND(clearexceptionlist)
 // Load banlist
 void SV_InitBanlist()
 {
-	const char* banfile = sv_banfile.c_str();
+	const char* banfile = sv_banfile.cstring();
 
 	if (!banfile)
 	{
@@ -1043,10 +1043,10 @@ bool SV_BanCheck(client_t* cl)
 		buffer << "\"\n";
 	}
 
-	if (*(sv_email.c_str()) != 0)
+	if (*(sv_email.cstring()) != 0)
 	{
 		buffer << "The server host can be contacted at ";
-		buffer << sv_email.c_str();
+		buffer << sv_email.cstring();
 		buffer << " if you feel this ban is in error or wish to contest it.";
 	}
 
@@ -1068,7 +1068,7 @@ void SV_BanlistTics()
 	if (min_delta_time == 0)
 		return;
 
-	const char* banfile = sv_banfile.c_str();
+	const char* banfile = sv_banfile.cstring();
 
 	// No banfile to automatically read.
 	if (!banfile)

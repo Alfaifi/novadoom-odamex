@@ -269,8 +269,8 @@ void G_ChangeMap()
 		// [ML] 8/22/2010: There are examples in the wiki that outright don't work
 		// when onlcvars (addcommandstring's second param) is true.  Is there a
 		// reason why the mapscripts ahve to be safe mode?
-		if (strlen(sv_endmapscript.c_str()))
-			AddCommandString(sv_endmapscript.c_str());
+		if (strlen(sv_endmapscript.cstring()))
+			AddCommandString(sv_endmapscript.cstring());
 	}
 }
 
@@ -293,8 +293,8 @@ void G_ChangeMap(size_t index) {
 	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
 	// when onlcvars (addcommandstring's second param) is true.  Is there a
 	// reason why the mapscripts ahve to be safe mode?
-	if(strlen(sv_endmapscript.c_str()))
-		AddCommandString(sv_endmapscript.c_str());
+	if(strlen(sv_endmapscript.cstring()))
+		AddCommandString(sv_endmapscript.cstring());
 }
 
 // Restart the current map.
@@ -306,8 +306,8 @@ void G_RestartMap() {
 	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
 	// when onlcvars (addcommandstring's second param) is true.  Is there a
 	// reason why the mapscripts ahve to be safe mode?
-	if(!sv_endmapscript.string().empty())
-		AddCommandString(sv_endmapscript.string());
+	if(!sv_endmapscript.str().empty())
+		AddCommandString(sv_endmapscript.str());
 }
 
 BEGIN_COMMAND (nextmap) {
@@ -360,8 +360,8 @@ void G_DoNewGame()
 	// [ML] 8/22/2010: There are examples in the wiki that outright don't work
 	// when onlcvars (addcommandstring's second param) is true.  Is there a
 	// reason why the mapscripts ahve to be safe mode?
-	if (strlen(sv_startmapscript.c_str()))
-		AddCommandString(sv_startmapscript.c_str());
+	if (strlen(sv_startmapscript.cstring()))
+		AddCommandString(sv_startmapscript.cstring());
 
 	G_InitNew (d_mapname);
 	gameaction = ga_nothing;

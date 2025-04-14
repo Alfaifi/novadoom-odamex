@@ -72,7 +72,7 @@ AdlMidiMusicSystem::AdlMidiMusicSystem()
 	m_midiPlayer = adl_init(snd_samplerate.asInt());
 	if (!m_midiPlayer)
 	{
-		Printf(PRINT_WARNING, "I_InitMusic: Failed to initialize libADLMIDI with sample rate %shz", snd_samplerate.c_str());
+		Printf(PRINT_WARNING, "I_InitMusic: Failed to initialize libADLMIDI with sample rate %shz", snd_samplerate.cstring());
 		return;
 	}
 	else

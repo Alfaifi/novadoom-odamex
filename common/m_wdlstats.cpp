@@ -1001,15 +1001,15 @@ void M_CommitWDLLog()
 	fmt::print(fh, "levelnum={}\n", ::level.levelnum);
 	fmt::print(fh, "levelname={}\n", ::level.level_name);
 	fmt::print(fh, "levelhash={:016x}{:016x}\n", reconsthash1, reconsthash2);
-	fmt::print(fh, "gametype={}\n", ::sv_gametype.string());
-	fmt::print(fh, "lives={}\n", ::g_lives.string());
-	fmt::print(fh, "attackdefend={}\n", ::g_sides.string());
+	fmt::print(fh, "gametype={}\n", ::sv_gametype.str());
+	fmt::print(fh, "lives={}\n", ::g_lives.str());
+	fmt::print(fh, "attackdefend={}\n", ::g_sides.str());
 	fmt::print(fh, "duration={}\n", ::gametic - ::wdlstate.begintic);
 	fmt::print(fh, "endgametic={}\n", ::gametic);
 	fmt::print(fh, "round={}\n", ::levelstate.getRound());
 	fmt::print(fh, "winresult={}\n", static_cast<int>(::levelstate.getWinInfo().type));
 	fmt::print(fh, "winid={}\n", ::levelstate.getWinInfo().id);
-	fmt::print(fh, "hostname={}\n", ::sv_hostname.string());
+	fmt::print(fh, "hostname={}\n", ::sv_hostname.str());
 
 	// Players
 	fmt::print(fh, "players\n");

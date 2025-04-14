@@ -359,7 +359,7 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 				return;
 			}
 
-			chars = snprintf ((char *)ptr, array_size, "\\%s", cvar->c_str());
+			chars = snprintf ((char *)ptr, array_size, "\\%s", cvar->cstring());
 
 			ptr += chars;
 			array_size -= chars;
@@ -381,7 +381,7 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 				}
 
 				chars = snprintf((char*)ptr, array_size, "\\%s\\%s",
-								cvar->name(), cvar->c_str());
+								cvar->name(), cvar->cstring());
 
 				ptr += chars;
 				array_size -= chars;
@@ -585,7 +585,7 @@ void cvar_t::C_ArchiveCVars (void *f)
 			|| (baseapp == server && (cvar->m_Flags & CVAR_SERVERARCHIVE)))
 		{
 			fprintf ((FILE *)f, "// %s\n", cvar->helptext());
-			fprintf ((FILE *)f, "set %s %s\n\n", C_QuoteString(cvar->name()).c_str(), C_QuoteString(cvar->c_str()).c_str());
+			fprintf ((FILE *)f, "set %s %s\n\n", C_QuoteString(cvar->name()).c_str(), C_QuoteString(cvar->cstring()).c_str());
 		}
 		cvar = cvar->m_Next;
 	}
@@ -611,7 +611,7 @@ void cvar_t::cvarlist()
 					flags & CVAR_LATCH ? 'L' :
 					flags & CVAR_UNSETTABLE ? '*' : ' ',
 				var->name(),
-				var->c_str());
+				var->cstring());
 		var = var->m_Next;
 	}
 	Printf (PRINT_HIGH, "%d cvars\n", count);
@@ -624,9 +624,9 @@ static std::string C_GetValueString(const cvar_t* var)
 		return "unset";
 
 	if (var->flags() & CVAR_NOENABLEDISABLE)
-		return '"' + var->string() + '"';
+		return '"' + var->str() + '"';
 
-	if (atof(var->c_str()) == 0.0f)
+	if (atof(var->cstring()) == 0.0f)
 		return "disabled";
 	else
 		return "enabled";
@@ -696,7 +696,7 @@ BEGIN_COMMAND (set)
 		if (var->flags() & CVAR_LATCH)
 		{
 			// if new value is different from current value and latched value
-			if (strcmp(var->c_str(), argv[2]) && strcmp(var->latched(), argv[2]) && gamestate == GS_LEVEL)
+			if (strcmp(var->cstring(), argv[2]) && strcmp(var->latched(), argv[2]) && gamestate == GS_LEVEL)
 				Printf(PRINT_HIGH, "%s will be changed for next game.\n", argv[1]);
 		}
 

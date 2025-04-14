@@ -1130,7 +1130,7 @@ odaproto::svc::ServerSettings SVC_ServerSettings(const cvar_t& var)
 	odaproto::svc::ServerSettings msg;
 
 	msg.set_key(var.name());
-	msg.set_value(var.string());
+	msg.set_value(var.str());
 
 	return msg;
 }

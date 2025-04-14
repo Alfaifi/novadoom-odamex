@@ -319,7 +319,7 @@ static StringTokens GetDownloadDirs()
 	StringTokens dirs;
 
 	// Add all of the sources.
-	D_AddSearchDir(dirs, cl_waddownloaddir.c_str(), PATHLISTSEPCHAR);
+	D_AddSearchDir(dirs, cl_waddownloaddir.cstring(), PATHLISTSEPCHAR);
 
 		// These folders should only work on PC versions
 #ifndef GCONSOLE
@@ -328,7 +328,7 @@ static StringTokens GetDownloadDirs()
 	D_AddSearchDir(dirs, getenv("DOOMWADPATH"), PATHLISTSEPCHAR);
 #endif
 
-	D_AddSearchDir(dirs, waddirs.c_str(), PATHLISTSEPCHAR);
+	D_AddSearchDir(dirs, waddirs.cstring(), PATHLISTSEPCHAR);
 	dirs.push_back(M_GetUserDir());
 
 #ifdef __SWITCH__
@@ -523,7 +523,7 @@ BEGIN_COMMAND(download)
 
 	if (stricmp(argv[1], "get") == 0 && argc >= 3)
 	{
-		Websites clientsites = TokenizeString(cl_downloadsites.string(), " ");
+		Websites clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
 		// Shuffle the sites so we evenly distribute our requests.
 		std::shuffle(clientsites.begin(), clientsites.end(), rng);

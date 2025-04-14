@@ -898,7 +898,7 @@ BEGIN_COMMAND (serverinfo)
 		Printf( "%*s - %s\n",
 				static_cast<int>(MaxFieldLength),
 				Cvar->name(),
-				Cvar->string());
+				Cvar->str());
 	}
 
     Printf ("\n");
@@ -1130,7 +1130,7 @@ END_COMMAND (exit)
 CVAR_FUNC_IMPL (cl_netdemoname)
 {
 	// No empty format strings allowed.
-	if (strlen(var.c_str()) == 0)
+	if (strlen(var.cstring()) == 0)
 		var.RestoreDefault();
 }
 
@@ -1138,7 +1138,7 @@ CVAR_FUNC_IMPL (cl_netdemoname)
 // CL_GenerateNetDemoFileName
 //
 //
-std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemoname.c_str())
+std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemoname.cstring())
 {
 	const std::string expanded_filename(M_ExpandTokens(filename));
 	std::string newfilename(expanded_filename);
@@ -1505,7 +1505,7 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 		return;
 	}
 
-	if (sv_downloadsites.string().empty() && cl_downloadsites.string().empty())
+	if (sv_downloadsites.str().empty() && cl_downloadsites.str().empty())
 	{
 		// Nobody has any download sites configured.
 		Printf("Unable to find \"%s\".  Both your client and the server have no "
@@ -1516,8 +1516,8 @@ void CL_QuitAndTryDownload(const OWantFile& missing_file)
 	}
 
 	// Gather our server and client sites.
-	StringTokens serversites = TokenizeString(sv_downloadsites.string(), " ");
-	StringTokens clientsites = TokenizeString(cl_downloadsites.string(), " ");
+	StringTokens serversites = TokenizeString(sv_downloadsites.str(), " ");
+	StringTokens clientsites = TokenizeString(cl_downloadsites.str(), " ");
 
 	// Shuffle the sites so we evenly distribute our requests.
 	std::shuffle(serversites.begin(), serversites.end(), rng);

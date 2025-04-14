@@ -536,11 +536,11 @@ BEGIN_COMMAND (if)
 
 	if(op == "eq")
 	{
-		if_command_result = !strcmp(var->c_str(), argv[3]);
+		if_command_result = !strcmp(var->cstring(), argv[3]);
 	}
 	else if(op == "ne")
 	{
-		if_command_result = ((strcmp(var->c_str(), argv[3])) != 0);
+		if_command_result = ((strcmp(var->cstring(), argv[3])) != 0);
 	}
 	else
 	{
@@ -671,7 +671,7 @@ const char *ParseString (const char *data)
 		{
 			if ( (var = cvar_t::FindCVar (&com_token[1], &dummy)) )
 			{
-				M_StringCopy(com_token, var->c_str(), 8192);
+				M_StringCopy(com_token, var->cstring(), 8192);
 			}
 		}
 	}

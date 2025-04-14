@@ -1280,7 +1280,7 @@ EXTERN_CVAR (cl_autoaim)
 
 void M_PlayerSetup(int choice)
 {
-	M_StringCopy(savegamestrings[0], cl_name.c_str(), SAVESTRINGSIZE);
+	M_StringCopy(savegamestrings[0], cl_name.cstring(), SAVESTRINGSIZE);
 	M_SetupNextMenu (&PSetupDef);
 	PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
 	PlayerTics = PlayerState->tics;
@@ -1383,7 +1383,7 @@ static void M_PlayerSetupDrawer()
 	const int x2 = (I_GetSurfaceWidth() / 2) + (160 * CleanXfac);
 	const int y2 = (I_GetSurfaceHeight() / 2) + (100 * CleanYfac);
 
-	int colorpreset = D_ColorPreset(cl_colorpreset.c_str());
+	int colorpreset = D_ColorPreset(cl_colorpreset.cstring());
 
 	// Background effect
 	OdamexEffect(x1,y1,x2,y2);
@@ -1545,7 +1545,7 @@ static void M_PlayerSetupDrawer()
 
 	// Draw team setting
 	{
-		const team_t team = D_TeamByName(cl_team.c_str());
+		const team_t team = D_TeamByName(cl_team.cstring());
 		const int x = V_StringWidth ("Preferred Team") + 8 + PSetupDef.x;
 		screen->DrawTextCleanMove (CR_RED, PSetupDef.x, PSetupDef.y + LINEHEIGHT, "Preferred Team");
 		screen->DrawTextCleanMove (CR_GREY, x, PSetupDef.y + LINEHEIGHT, team == TEAM_NONE ? "NONE" : GetTeamInfo(team)->ColorStringUpper.c_str());
@@ -1553,7 +1553,7 @@ static void M_PlayerSetupDrawer()
 
 	// Draw gender setting
 	{
-		const gender_t gender = D_GenderByName(cl_gender.c_str());
+		const gender_t gender = D_GenderByName(cl_gender.cstring());
 		const int x = V_StringWidth ("Gender") + 8 + PSetupDef.x;
 		screen->DrawTextCleanMove (CR_RED, PSetupDef.x, PSetupDef.y + LINEHEIGHT*2, "Gender");
 		screen->DrawTextCleanMove (CR_GREY, x, PSetupDef.y + LINEHEIGHT*2, genders[gender]);
@@ -1609,7 +1609,7 @@ static void M_PlayerSetupDrawer()
 
 void M_ChangeTeam (int choice) // [Toke - Teams]
 {
-	team_t team = D_TeamByName(cl_team.c_str());
+	team_t team = D_TeamByName(cl_team.cstring());
 
 	int iTeam = (int)team;
 	if (choice)
@@ -1629,7 +1629,7 @@ void M_ChangeTeam (int choice) // [Toke - Teams]
 
 static void M_ChangeGender (int choice)
 {
-	int gender = D_GenderByName(cl_gender.c_str());
+	int gender = D_GenderByName(cl_gender.cstring());
 
 	if (!choice)
 		gender = (gender == 0) ? 2 : gender - 1;
@@ -1669,7 +1669,7 @@ static void M_ChangeAutoAim (int choice)
 
 static void M_ChangeColorPreset (int choice)
 {
-	int colorpreset = D_ColorPreset(cl_colorpreset.c_str());
+	int colorpreset = D_ColorPreset(cl_colorpreset.cstring());
 	argb_t customcolor = V_GetColorFromString(cl_customcolor);
 
 	if (!choice)
@@ -1738,7 +1738,7 @@ static void M_PlayerTeamChanged (int choice)
 
 static void SendNewColor(int red, int green, int blue)
 {
-	int colorpreset = D_ColorPreset(cl_colorpreset.c_str());
+	int colorpreset = D_ColorPreset(cl_colorpreset.cstring());
 
 	AddCommandString(fmt::sprintf("cl_color \"%02x %02x %02x\"", red, green, blue));
 	if (colorpreset == COLOR_CUSTOM)

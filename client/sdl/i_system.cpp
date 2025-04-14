@@ -377,7 +377,7 @@ EXTERN_CVAR(language)
 
 void SetLanguageIDs()
 {
-	const char* langid = language.c_str();
+	const char* langid = language.cstring();
 
 	if (strcmp(langid, "auto") == 0)
 	{
