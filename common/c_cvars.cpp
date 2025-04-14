@@ -601,20 +601,20 @@ void cvar_t::cvarlist()
 		unsigned flags = var->m_Flags;
 
 		count++;
-		Printf (PRINT_HIGH, "%c%c%c%c %s \"%s\"\n",
-				flags & CVAR_ARCHIVE ? 'A' :
-					flags & CVAR_CLIENTARCHIVE ? 'C' :
-					flags & CVAR_SERVERARCHIVE ? 'S' : ' ',
-				flags & CVAR_USERINFO ? 'U' : ' ',
-				flags & CVAR_SERVERINFO ? 'S' : ' ',
-				flags & CVAR_NOSET ? '-' :
-					flags & CVAR_LATCH ? 'L' :
-					flags & CVAR_UNSETTABLE ? '*' : ' ',
-				var->name(),
-				var->cstring());
+		PrintFmt(PRINT_HIGH, "{}{}{}{} {} \"{}\"\n",
+		         flags & CVAR_ARCHIVE ? 'A' :
+		         	flags & CVAR_CLIENTARCHIVE ? 'C' :
+		         	flags & CVAR_SERVERARCHIVE ? 'S' : ' ',
+		         flags & CVAR_USERINFO ? 'U' : ' ',
+		         flags & CVAR_SERVERINFO ? 'S' : ' ',
+		         flags & CVAR_NOSET ? '-' :
+		         	flags & CVAR_LATCH ? 'L' :
+		         	flags & CVAR_UNSETTABLE ? '*' : ' ',
+		         var->name(),
+		         var->str());
 		var = var->m_Next;
 	}
-	Printf (PRINT_HIGH, "%d cvars\n", count);
+	PrintFmt(PRINT_HIGH, "{} cvars\n", count);
 }
 
 

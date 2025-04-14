@@ -86,7 +86,7 @@ EXTERN_CVAR(vid_gammatype)
 CVAR_FUNC_IMPL(cl_screenshotname)
 {
 	// No empty format strings allowed.
-	if (strlen(var.cstring()) == 0)
+	if (var.str().empty())
 		var.RestoreDefault();
 }
 

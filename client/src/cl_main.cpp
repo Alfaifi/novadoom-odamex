@@ -1130,7 +1130,7 @@ END_COMMAND (exit)
 CVAR_FUNC_IMPL (cl_netdemoname)
 {
 	// No empty format strings allowed.
-	if (strlen(var.cstring()) == 0)
+	if (var.str().empty())
 		var.RestoreDefault();
 }
 
@@ -1138,7 +1138,7 @@ CVAR_FUNC_IMPL (cl_netdemoname)
 // CL_GenerateNetDemoFileName
 //
 //
-std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemoname.cstring())
+std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemoname.str())
 {
 	const std::string expanded_filename(M_ExpandTokens(filename));
 	std::string newfilename(expanded_filename);

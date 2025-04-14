@@ -1854,7 +1854,7 @@ void M_OptDrawer (void)
 					joyname = "No device detected";
 				else
 				{
-					joyname = item->a.cvar->cstring();
+					joyname = item->a.cvar->str();
 					joyname += ": " + I_GetJoystickNameFromIndex((int)item->a.cvar->value());
 				}
 
