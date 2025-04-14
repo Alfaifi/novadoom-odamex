@@ -111,7 +111,7 @@ public:
 	{
 		ActionKeyListTable::iterator it = mTable.find(action);
 		if (it == mTable.end())
-			it = mTable.insert(std::make_pair(action, ActionKeyList())).first;
+			it = mTable.emplace(action, ActionKeyList()).first;
 		ActionKeyList* action_key_list = &it->second;
 
 		if (std::find(action_key_list->begin(), action_key_list->end(), key) != action_key_list->end())

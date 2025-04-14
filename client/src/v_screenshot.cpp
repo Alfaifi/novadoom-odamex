@@ -391,7 +391,7 @@ void V_ScreenShot(std::string filename)
 	filename = M_ExpandTokens(filename);
 
 	// Turn filename into complete path.
-	std::string pathname = M_GetUserFileName(filename);
+	std::string pathname = M_GetScreenshotFileName(filename);
 
 	// If the file already exists, append numbers.
 	if (!M_FindFreeName(pathname, extension))

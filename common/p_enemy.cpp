@@ -1184,6 +1184,7 @@ void A_CPosRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator) 
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1202,6 +1203,7 @@ void A_SpidRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator) 
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1477,9 +1479,33 @@ bool PIT_VileCheck (AActor *thing)
 
 	corpsehit = thing;
 	corpsehit->momx = corpsehit->momy = 0;
-	corpsehit->height <<= 2;
-	check = P_CheckPosition (corpsehit, corpsehit->x, corpsehit->y);
-	corpsehit->height >>= 2;
+
+	if (P_AllowPassover())
+		corpsehit->flags |= MF_SOLID;
+
+	if (co_novileghosts)
+	{
+		int height, radius;
+
+		corpsehit->flags |= MF_SOLID;
+		height = corpsehit->height; // save temporarily
+		radius = corpsehit->radius; // save temporarily
+		corpsehit->height = P_ThingInfoHeight(corpsehit->info);
+		corpsehit->radius = corpsehit->info->radius;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height = height; // restore
+		corpsehit->radius = radius; // restore
+		corpsehit->flags &= ~MF_SOLID;
+	}
+	else
+	{
+		corpsehit->height <<= 2;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height >>= 2;
+	}
+
+	if (P_AllowPassover())
+		corpsehit->flags &= ~MF_SOLID;
 
 	return !check;
 }
@@ -1940,6 +1966,8 @@ void A_SpawnObject(AActor* actor)
 		}
 	}
 
+	SV_UpdateMobj(mo);
+
 	// [XA] don't bother with the dont-inherit-friendliness hack
 	// that exists in A_Spawn, 'cause WTF is that about anyway?
 }
@@ -1997,6 +2025,8 @@ void A_MonsterProjectile(AActor* actor)
 	// always set the 'tracer' field, so this pointer
 	// can be used to fire seeker missiles at will.
 	mo->tracer = actor->target;
+
+	SV_UpdateMobj(mo);
 }
 
 //
