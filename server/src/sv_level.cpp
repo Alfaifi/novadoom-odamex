@@ -140,16 +140,6 @@ void G_DeferedReset()
 	gameaction = ga_resetlevel;
 }
 
-const char* GetBase(const char* in)
-{
-	const char* out = &in[strlen(in) - 1];
-
-	while (out > in && *(out-1) != PATHSEPCHAR)
-		out--;
-
-	return out;
-}
-
 BEGIN_COMMAND (wad) // denis - changes wads
 {
 	std::string lastmap = argv[argc-1];
