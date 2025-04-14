@@ -205,7 +205,7 @@ class HordeState
 	 * @brief Returns number of bosses currently alive.
 	 */
 	size_t countLivingBosses() {
-		return std::count_if(m_bosses.begin(), m_bosses.end(), [](const auto& boss){ return boss && boss.health > 0; });
+		return std::count_if(m_bosses.begin(), m_bosses.end(), [](const auto& boss){ return boss && boss->health > 0; });
 	}
 
 	/**
