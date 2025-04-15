@@ -41,6 +41,7 @@
 
 #include "hashtable.h"
 #include "m_ostring.h"
+#include "oscanner.h"
 
 IMPLEMENT_CLASS (DConsoleCommand, DObject)
 IMPLEMENT_CLASS (DConsoleAlias, DConsoleCommand)
@@ -234,34 +235,20 @@ void C_DoCommand(std::string_view cmd, uint32_t key)
 			return;
 	}
 
-	size_t argc = 1;
-	size_t argsize = token->length() + 1;
-	char **argv;
-	char *args, *arg, *realargs;
-
-	size_t datalen = data.length() + 1;
-	realargs = new char[datalen];
-	M_StringCopy(realargs, data.data(), datalen);
-
-	while (token = ParseString(data))
-	{
-		argc++;
-		argsize += token->length() + 1;
-	}
-
-	args = new char[argsize];
-	argv = new char*[argc];
-
-	arg = args;
+	size_t argc = 0;
+	std::vector<char*> argv;
+	StringTokens args;
+	const char *realargs = data.data();
 	data = cmd;
-	argsize = 0;
+
 	while (token = ParseString(data))
 	{
-		M_StringCopy(arg, token->c_str(), token->length() + 1);
-		argv[argsize] = arg;
-		arg += token->length() + 1;
-		argsize++;
+		args.push_back(*token);
+		argc++;
 	}
+
+	for (std::string& arg : args)
+		argv.push_back(arg.data());
 
 	// Checking for matching commands follows this search order:
 	//	1. Check the Commands map
@@ -276,7 +263,7 @@ void C_DoCommand(std::string_view cmd, uint32_t key)
 		if (!safemode || stricmp(argv[0], "if") == 0 || stricmp(argv[0], "exec") == 0)
 		{
 			com->argc = argc;
-			com->argv = argv;
+			com->argv = argv.data();
 			com->args = realargs;
 			com->m_Instigator = consoleplayer().mo;
 			com->Run(key);
@@ -300,7 +287,7 @@ void C_DoCommand(std::string_view cmd, uint32_t key)
 				{
 					com = c->second;
 					com->argc = argc + 1;
-					com->argv = argv - 1; // Hack
+					com->argv = argv.data() - 1; // Hack
 					com->m_Instigator = consoleplayer().mo;
 					com->Run(key);
 				}
@@ -314,7 +301,7 @@ void C_DoCommand(std::string_view cmd, uint32_t key)
 				{
 					com = c->second;
 					com->argc = argc + 1;
-					com->argv = argv - 1; // Hack
+					com->argv = argv.data() - 1; // Hack
 					com->m_Instigator = consoleplayer().mo;
 					com->Run();
 				}
@@ -328,9 +315,6 @@ void C_DoCommand(std::string_view cmd, uint32_t key)
 			PrintFmt(PRINT_WARNING, "Unknown command \"{}\"\n", argv[0]);
 		}
 	}
-	delete[] argv;
-	delete[] args;
-	delete[] realargs;
 }
 
 void AddCommandString(const std::string &str, uint32_t key)
@@ -572,7 +556,7 @@ std::optional<std::string> ParseString2(std::string_view& data)
 
 	// Ch0wW : If having a comment, break immediately the line!
 	if (data.length() >= 2 && data[0] == '/' && data[1] == '/') {
-		return "";
+		return std::nullopt;
 	}
 
 	if (data.length() >= 2 && data[0] == '\\' && ValidEscape(data[1]))
@@ -646,7 +630,7 @@ std::optional<std::string> ParseString (std::string_view& data)
 	cvar_t *var, *dummy;
 	std::optional<std::string> token = ParseString2(data);
 
-	if (token && token->at(0) == '$')
+	if (token && !token->empty() && token->at(0) == '$')
 	{
 		if ( (var = cvar_t::FindCVar (std::string_view(*token).substr(1).data(), &dummy)) )
 		{

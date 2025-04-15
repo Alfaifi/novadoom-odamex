@@ -64,7 +64,7 @@ protected:
 	AActor *m_Instigator;
 	size_t argc;
 	char **argv;
-	char *args;
+	const char *args;
 
 	friend void C_DoCommand(std::string_view cmd, uint32_t key);
 };
