@@ -9,6 +9,6 @@ Categories=Amusement;Game;ActionGame;AdventureGame;ArcadeGame;
 
 Icon=net.odamex.Odamex.Client
 Exec=odamex %u
-MimeType=x-scheme-handler/odamex
+MimeType=x-scheme-handler/odamex;application/odamex-demo
 Terminal=false
 StartupWMClass=odamex
