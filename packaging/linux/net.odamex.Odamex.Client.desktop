@@ -8,6 +8,7 @@ Comment=A DOOM source port with online multiplayer, a 32-bit renderer, and much 
 Categories=Amusement;Game;ActionGame;AdventureGame;ArcadeGame;
 
 Icon=net.odamex.Odamex.Client
-Exec=odamex
+Exec=odamex %u
+MimeType=x-scheme-handler/odamex
 Terminal=false
 StartupWMClass=odamex
