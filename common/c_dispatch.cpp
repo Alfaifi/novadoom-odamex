@@ -647,19 +647,15 @@ DConsoleCommand::DConsoleCommand (const char *name)
 
 	if (firstTime)
 	{
-		char tname[16];
-		int i;
-
 		firstTime = false;
 
 		// Add all the action commands for tab completion
-		for (i = 0; i < NUM_ACTIONS; i++)
+		for (const auto& bit : actionbits)
 		{
-			M_StringCopy(&tname[1], actionbits[i].name, 15);
-			tname[0] = '+';
-			C_AddTabCommand (tname);
+			std::string tname = fmt::format("+{}", bit.name);
+			C_AddTabCommand(tname.c_str());
 			tname[0] = '-';
-			C_AddTabCommand (tname);
+			C_AddTabCommand(tname.c_str());
 		}
 	}
 
