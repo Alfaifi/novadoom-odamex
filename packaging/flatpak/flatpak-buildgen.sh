@@ -57,6 +57,10 @@ mimeDir=/app/share/mime/packages/
 mkdir -p $mimeDir
 cp -r packaging/linux/$projectId-mime.xml $mimeDir/$projectId-mime.xml
 
+# Install odamex.wad
+mkdir -p /app/bin
+cp -r build/wad/odamex.wad /app/bin/
+
 # Client app
 projectName=Odamex.Client
 projectId=net.odamex.Odamex.Client
@@ -65,9 +69,7 @@ executableName=odamex
 # Copy the client app to the Flatpak-based location.
 mkdir -p /app/$projectName
 install -c build/client/$executableName /app/$projectName/$executableName
-mkdir -p /app/bin
-cp -r build/wad/odamex.wad /app/$projectName/
-cp -r build/wad/odamex.wad /app/bin/
+ln -s /app/bin/odamex.wad /app/$projectName/odamex.wad
 ln -s /app/$projectName/$executableName /app/bin/$executableName
 
 # Install the icon.
@@ -89,8 +91,7 @@ executableName=odasrv
 mkdir -p /app/$projectName
 install -c build/server/$executableName /app/$projectName/$executableName
 mkdir -p /app/bin
-cp -r build/wad/odamex.wad /app/$projectName/
-cp -r build/wad/odamex.wad /app/bin/
+ln -s /app/bin/odamex.wad /app/$projectName/odamex.wad
 ln -s /app/$projectName/$executableName /app/bin/$executableName
 
 # Copy config samples into the flatpak
