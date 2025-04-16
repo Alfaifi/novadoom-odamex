@@ -412,6 +412,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: vedantmgoyal9/winget-releaser@main
+        if: ${{ github.repository_owner }} == 'odamex'
         with:
           identifier: Odamex.Odamex
           token: ${{ secrets.WINGET_TOKEN }}
