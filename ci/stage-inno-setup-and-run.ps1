@@ -74,7 +74,7 @@ function BuildOutCommon {
         -Destination "${CommonDir}\licenses"
     Copy-Item -Force -Path "${UnzippedX64}\licenses\LICENSE.opusfile.txt" `
         -Destination "${CommonDir}\licenses"
-    Copy-Item -Force -Path "${UnzippedX64}\licenses\COPYING.SDL2.txt" `
+    Copy-Item -Force -Path "${UnzippedX64}\licenses\LICENSE.SDL2.txt" `
         -Destination "${CommonDir}\licenses"
 }
 
