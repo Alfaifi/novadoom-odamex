@@ -8,12 +8,6 @@ set -e
 # Echo all commands for debug purposes
 set -x
 
-# Untar deutex to wad directory
-tar --zstd -xvf deutex-5.2.2.tar.zst -C wad/
-
-# Untar wxWidgets to libraries directory
-tar -xvf wxWidgets-3.0.5.tar.bz2 -C libraries/
-
 mkdir -p build && cd build
 # Generate build
 cmake .. -GNinja \
