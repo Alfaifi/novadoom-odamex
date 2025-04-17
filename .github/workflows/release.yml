@@ -290,10 +290,10 @@ jobs:
         asset_path: odamex.flatpak
         asset_name: odamex-linux-arm64-${{ env.new_version }}.flatpak
         asset_content_type: application/octet-stream
-  package-and-upload:
+  package-and-upload-windows:
     name: Package and Upload Artifacts
     runs-on: windows-latest
-    needs: [pre_job, build-windows, build-windows-x32, build-flatpak, build-flatpak-arm]
+    needs: [pre_job, build-windows, build-windows-x32]
     env:
       new_version: ${{ needs.pre_job.outputs.new_version }}
       upload_url: ${{ needs.pre_job.outputs.upload_url }}

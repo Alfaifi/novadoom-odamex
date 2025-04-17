@@ -111,8 +111,8 @@ function CopyFiles {
         -Destination "${CommonDir}\licenses"
     Copy-Item -Force -Path "${CurrentDir}\BuildX64\libraries\SDL2_mixer-2.6.2\lib\x64\optional\LICENSE.opusfile.txt" `
         -Destination "${CommonDir}\licenses"
-    Copy-Item -Force -Path "${CurrentDir}\BuildX64\libraries\SDL2-2.32.4\COPYING.txt" `
-        -Destination "${CommonDir}\licenses\COPYING.SDL2.txt"
+    Copy-Item -Force -Path "${CurrentDir}\BuildX64\libraries\SDL2-2.32.4\LICENSE.txt" `
+        -Destination "${CommonDir}\licenses\LICENSE.SDL2.txt"
 
     ########################################
     ## 64-BIT FILES
