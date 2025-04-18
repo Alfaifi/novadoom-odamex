@@ -80,6 +80,16 @@ modules:
     post-install:
       - chmod +x ./flatpak-post-install.sh
       - "./flatpak-post-install.sh"
+    cleanup:
+      - '/app/bin/wx*'
+      - '/app/lib/wx'
+      - '/app/lib/cmake'
+      - '/app/lib/debug'
+      - '/app/lib64/cmake'
+      - '/app/lib64/libdwarf.a'
+      - '/app/include'
+      - '/app/share/aclocal'
+      - '/app/share/bakefile'
     sources:
       - type: archive
         url: https://github.com/Doom-Utils/deutex/releases/download/v5.2.3/deutex-5.2.3.tar.zst
