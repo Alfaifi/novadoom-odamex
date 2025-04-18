@@ -63,11 +63,23 @@ modules:
         sha256: 8aacd56b462f42fb6e33b4d8f5d40be5abc3d3b41348ea968aa515cc8285d813
   # Odamex (combined)
   - name: Odamex
-    buildsystem: simple
-    build-commands:
-      - chmod +x ./flatpak-buildgen.sh
-      - IS_FLATHUB=0
-      - "./flatpak-buildgen.sh"
+    buildsystem: cmake-ninja
+    config-opts:
+      - -D CMAKE_BUILD_TYPE=RelWithDebInfo
+      - -D BUILD_OR_FAIL=1
+      - -D BUILD_CLIENT=1
+      - -D BUILD_SERVER=1
+      - -D BUILD_LAUNCHER=1
+      - -D BUILD_MASTER=0
+      - -D USE_INTERNAL_LIBS=1
+      - -D USE_INTERNAL_DEUTEX=1
+      - -D ODAMEX_INSTALL_BINDIR=/app/bin
+      - -D ODAMEX_INSTALL_DATA_DIR=/app/share
+      - -D USE_EXTERNAL_LIBDWARF=1
+      - -D ODAMEX_NO_GITVER=0
+    post-install:
+      - chmod +x ./flatpak-post-install.sh
+      - "./flatpak-post-install.sh"
     sources:
       - type: archive
         url: https://github.com/Doom-Utils/deutex/releases/download/v5.2.3/deutex-5.2.3.tar.zst
@@ -76,4 +88,4 @@ modules:
       - type: dir
         path: ../..
       - type: file
-        path: ./flatpak-buildgen.sh
+        path: ./flatpak-post-install.sh
