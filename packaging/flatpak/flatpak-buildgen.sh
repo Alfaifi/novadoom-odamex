@@ -14,18 +14,13 @@ cmake .. -GNinja \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DBUILD_OR_FAIL=1 -DBUILD_CLIENT=1 -DBUILD_SERVER=1 \
     -DBUILD_MASTER=0 -DBUILD_LAUNCHER=1 -DUSE_INTERNAL_LIBS=1 \
-    -DUSE_INTERNAL_WXWIDGETS=1 -DUSE_INTERNAL_DEUTEX=1 \
+    -DUSE_INTERNAL_DEUTEX=1 \
     -DODAMEX_INSTALL_BINDIR=/app/bin -DODAMEX_INSTALL_DATADIR=/run/host/usr/share \
     -DUSE_EXTERNAL_LIBDWARF=1 -DODAMEX_NO_GITVER=$IS_FLATHUB
 
 ninja odamex
 ninja odasrv
 
-# Copy wxWidgets dependencies into lib
-# Before running wxrc
-mkdir -p /app/lib
-cp -r libraries/wxWidgets-3.0.5/lib/*.so /app/lib/
-cp -r libraries/wxWidgets-3.0.5/lib/*.0 /app/lib/
 
 ninja odalaunch
 
