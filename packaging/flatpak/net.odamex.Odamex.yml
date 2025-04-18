@@ -57,6 +57,10 @@ modules:
     config-opts:
       - --enable-unicode
       - --with-gtk3
+    cleanup:
+      - '/lib/wx'
+      - '/share/aclocal'
+      - '/share/bakefile'
     sources:
       - type: archive
         url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.0.5/wxWidgets-3.0.5.tar.bz2
@@ -80,18 +84,14 @@ modules:
     post-install:
       - chmod +x ./flatpak-post-install.sh
       - "./flatpak-post-install.sh"
-    cleanup:
-      - '/bin/wx*'
-      - '/lib/wx'
-      - '/lib/cmake'
-      - '/lib/debug'
-      - '/lib/pkgconfig'
-      - '/lib64/cmake'
-      - '/lib64/libdwarf.a'
-      - '/lib64/pkgconfig'
-      - '/include'
-      - '/share/aclocal'
-      - '/share/bakefile'
+      # delete files that cleanup can't see
+      - rm -rf /app/bin/wx*
+      - rm -rf /app/lib/cmake
+      - rm -rf /app/lib/pkgconfig
+      - rm -rf /app/lib64/cmake
+      - rm -rf /app/lib64/libdwarf.a
+      - rm -rf /app/lib64/pkgconfig
+      - rm -rf /app/include
     sources:
       - type: archive
         url: https://github.com/Doom-Utils/deutex/releases/download/v5.2.3/deutex-5.2.3.tar.zst
