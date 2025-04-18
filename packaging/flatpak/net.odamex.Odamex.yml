@@ -78,7 +78,7 @@ modules:
       - -D USE_INTERNAL_LIBS=1
       - -D USE_INTERNAL_DEUTEX=1
       - -D ODAMEX_INSTALL_BINDIR=/app/bin
-      - -D ODAMEX_INSTALL_DATA_DIR=/run/host/usr/share
+      - -D ODAMEX_INSTALL_DATADIR=/run/host/usr/share
       - -D USE_EXTERNAL_LIBDWARF=1
       - -D ODAMEX_NO_GITVER=0
     post-install:
