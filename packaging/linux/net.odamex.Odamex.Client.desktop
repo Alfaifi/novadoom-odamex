@@ -6,7 +6,7 @@ Type=Application
 Name=Odamex
 Comment=A DOOM source port with online multiplayer, a 32-bit renderer, and much more.
 Categories=Amusement;Game;ActionGame;AdventureGame;ArcadeGame;
-Keywords:doom;shooter;multiplayer;iwad;pwad;
+Keywords=doom;shooter;multiplayer;iwad;pwad;
 
 Icon=net.odamex.Odamex.Client
 Exec=odamex %u
