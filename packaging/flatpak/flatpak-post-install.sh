@@ -30,29 +30,29 @@ cp -r packaging/linux/$projectId-mime.xml $mimeDir/$projectId-mime.xml
 
 # Install the icons and .desktop files for the executables
 oda_install() {
-    local projectId=$1
+    local projectIdExt=$1
     local executableName=$2
     local buildFolder=$3
 
     # Install the icon.
     iconDir=/app/share/icons/hicolor/512x512/apps
     mkdir -p $iconDir
-    cp -r media/icon_${executableName}_512.png $iconDir/$projectId.png
+    cp -r media/icon_${executableName}_512.png $iconDir/$projectId.$projectIdExt.png
 
     # Install the desktop file.
     desktopFileDir=/app/share/applications
     mkdir -p $desktopFileDir
-    cp -r packaging/linux/$projectId.desktop $desktopFileDir/
+    cp -r packaging/linux/$projectId.$projectIdExt.desktop $desktopFileDir/
 }
 
 # Client app
-oda_install net.odamex.Odamex.Client odamex client
+oda_install Client odamex client
 
 # Server app
-oda_install net.odamex.Odamex.Server odasrv server
+oda_install Server odasrv server
 
 # Launcher app
-oda_install net.odamex.Odamex.Launcher odalaunch odalaunch
+oda_install Launcher odalaunch odalaunch
 
 # Install helper script
 install -c packaging/flatpak/select-exe.sh /app/bin/select-exe
