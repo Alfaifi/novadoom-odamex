@@ -265,7 +265,7 @@ bool P_EnoughAmmo(player_t *player, weapontype_t weapon, bool switching = false)
 	int				count = 1;	// default amount of ammo for most weapons
 
 	// [SL] Fix for when DeHackEd doesn't patch minammo
-	count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
+	count = MAX(MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse), weaponinfo[weapon].ammopershot);
 
 	// Vanilla Doom requires > 40 cells to switch to BFG and > 2 shells to
 	// switch to SSG when current weapon is out of ammo due to a bug.
@@ -444,7 +444,12 @@ static void DecreaseAmmo(player_t *player)
 	if (!sv_infiniteammo)
 	{
 		ammotype_t ammonum = weaponinfo[player->readyweapon].ammotype;
-		int amount = weaponinfo[player->readyweapon].ammouse;
+		int amount;
+		if (weaponinfo[player->readyweapon].flags & WIF_ENABLEAPS)
+			amount = weaponinfo[player->readyweapon].ammopershot;
+		else
+			amount = weaponinfo[player->readyweapon].ammouse;
+
 
 		if (ammonum < NUMAMMO)
 			player->ammo[ammonum] -= amount;
@@ -896,7 +901,7 @@ void A_CheckAmmo(AActor* mo)
 	if (psp->state->args[1] != 0)
 		amount = psp->state->args[1];
 	else
-		amount = weaponinfo[player->readyweapon].ammouse;
+		amount = weaponinfo[player->readyweapon].ammopershot;
 
 	if (player->ammo[type] < amount)
 		P_SetPspritePtr(player, psp, (statenum_t)psp->state->args[0]);
@@ -929,7 +934,7 @@ void A_ConsumeAmmo(AActor* mo)
 	if (psp->state->args[0] != 0)
 		amount = psp->state->args[0];
 	else
-		amount = weaponinfo[player->readyweapon].ammouse;
+		amount = weaponinfo[player->readyweapon].ammopershot;
 
 	// subtract ammo, but don't let it get below zero
 	if (player->ammo[type] >= amount)
