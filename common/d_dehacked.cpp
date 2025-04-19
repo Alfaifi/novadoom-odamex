@@ -548,7 +548,7 @@ typedef struct DoomBackup_s
 	    : backupStates(NULL, [](state_t* obj) { M_Free(obj); }),
 	      backupMobjInfo(NULL, [](mobjinfo_t* obj) { M_Free(obj); }),
 	      backupSprnames(NULL, [](const char* obj) { M_Free(obj); }),
-	      backupSoundMap(NULL, [](const char* obj) { M_Free(obj); }), 
+	      backupSoundMap(NULL, [](const char* obj) { M_Free(obj); }),
 		  backupWeaponInfo(),
 	      backupMaxAmmo(),
 	      backupDeh()
@@ -1879,12 +1879,12 @@ static int PatchSprites(int dummy)
 	return result;
 }
 
-void IdxToSoundName(const char* sound)
+void IdxToSoundName(const char*& sound)
 {
 	if (sound && sound[0] && IsNum(sound))
 	{
 		auto soundIt = SoundMap.find(atoi(sound));
-		sound = soundIt == SoundMap.end() ? nullptr : (char*)soundIt->second;
+		sound = soundIt == SoundMap.end() ? nullptr : soundIt->second;
 	}
 }
 
