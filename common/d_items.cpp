@@ -153,7 +153,7 @@ weaponinfo_t	weaponinfo[NUMWEAPONS+1] =
 		40,
 		40,
 		WPF_NOAUTOFIRE,
-		1,
+		40,
 		WIF_NOFLAG
 	},
 	{
