@@ -1665,7 +1665,6 @@ static int PatchWeapon(int weapNum)
 	    {"Shooting frame", offsetof(weaponinfo_t, atkstate)},
 	    {"Firing frame", offsetof(weaponinfo_t, flashstate)},
 	    {"Ammo use", offsetof(weaponinfo_t, ammouse)},      // ZDoom 1.23b33
-	    {"Ammo per shot", offsetof(weaponinfo_t, ammouse)}, // Eternity
 	    {"Min ammo", offsetof(weaponinfo_t, minammo)},      // ZDoom 1.23b33
 	    {NULL, 0}};
 
@@ -1701,54 +1700,56 @@ static int PatchWeapon(int weapNum)
 
 		if (HandleKey(keys, info, Line1, val, sizeof(*info)))
 		{
-			if (linelen == 10)
+			if (linelen == 10 && stricmp(Line1, "MBF21 Bits") == 0)
 			{
-				if (stricmp(Line1, "MBF21 Bits") == 0)
+				int value = 0;
+				bool vchanged = false;
+				char* strval;
+
+				for (strval = Line2; (strval = strtok(strval, ",+| \t\f\r"));
+				     strval = NULL)
 				{
-					int value = 0;
-					bool vchanged = false;
-					char* strval;
-
-					for (strval = Line2; (strval = strtok(strval, ",+| \t\f\r"));
-					     strval = NULL)
+					if (IsNum(strval))
 					{
-						if (IsNum(strval))
-						{
-							// Force the top 4 bits to 0 so that the user is forced
-							// to use the mnemonics to change them.
+						// Force the top 4 bits to 0 so that the user is forced
+						// to use the mnemonics to change them.
 
-							// I have no idea why everyone insists on using strtol here
-							// even though it fails dismally if a value is parsed where
-							// the highest bit it set. Do people really use negative
-							// values here? Let's better be safe and check both.
-							value |= atoi(strval);
-							vchanged = true;
-						}
-						else
-						{
-							size_t i;
-
-							for (i = 0; i < ARRAY_LENGTH(bitnames); i++)
-							{
-								if (!stricmp(strval, bitnames[i].Name))
-								{
-									vchanged = true;
-									value |= 1 << (bitnames[i].Bit);
-									break;
-								}
-							}
-
-							if (i == ARRAY_LENGTH(bitnames))
-							{
-								DPrintFmt("Unknown bit mnemonic {}\n", strval);
-							}
-						}
+						// I have no idea why everyone insists on using strtol here
+						// even though it fails dismally if a value is parsed where
+						// the highest bit it set. Do people really use negative
+						// values here? Let's better be safe and check both.
+						value |= atoi(strval);
+						vchanged = true;
 					}
-					if (vchanged)
+					else
 					{
-						info->flags = value; // Weapon Flags
+						size_t i;
+
+						for (i = 0; i < ARRAY_LENGTH(bitnames); i++)
+						{
+							if (!stricmp(strval, bitnames[i].Name))
+							{
+								vchanged = true;
+								value |= 1 << (bitnames[i].Bit);
+								break;
+							}
+						}
+
+						if (i == ARRAY_LENGTH(bitnames))
+						{
+							DPrintFmt("Unknown bit mnemonic {}\n", strval);
+						}
 					}
 				}
+				if (vchanged)
+				{
+					info->flags = value; // Weapon Flags
+				}
+			}
+			else if (linelen == 13 && stricmp(Line1, "Ammo per shot") == 0)  // Eternity/MBF21
+			{
+				info->ammopershot = val;
+				info->internalflags |= WIF_ENABLEAPS;
 			}
 			else
 			{
