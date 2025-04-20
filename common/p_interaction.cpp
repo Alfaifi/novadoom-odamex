@@ -302,12 +302,8 @@ static ItemEquipVal P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int 
 				if (player->weaponowned[i] &&
 				    !(weaponinfo[i].flags & WPF_NOAUTOSWITCHTO) &&
 				    weaponinfo[i].ammotype == ammo &&
-					((weaponinfo[i].internalflags & WIF_ENABLEAPS &&
-					  weaponinfo[i].ammopershot > oldammo &&
-					  weaponinfo[i].ammopershot <= player->ammo[ammo]) ||
-					 (weaponinfo[i].internalflags == WIF_NOFLAG &&
-					  weaponinfo[i].ammouse > oldammo &&
-					  weaponinfo[i].ammouse <= player->ammo[ammo])))
+				    weaponinfo[i].ammopershot > oldammo &&
+				    weaponinfo[i].ammopershot <= player->ammo[ammo])
 				{
 					player->pendingweapon = (weapontype_t)i;
 					break;
