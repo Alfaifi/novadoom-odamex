@@ -1728,6 +1728,7 @@ static int PatchWeapon(int weapNum)
 			{
 				info->ammopershot = val;
 				info->internalflags |= WIF_ENABLEAPS;
+				deh.ZDAmmo = false;
 			}
 			else if (linelen == 9 && stricmp(Line1, "Ammo use") == 0)  // ZDoom 1.23b33
 			{
