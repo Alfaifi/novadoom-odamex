@@ -211,5 +211,6 @@ struct DehInfo
 	int KFAAC;
 	int BFGCells;
 	int Infight;
+	bool ZDAmmo;
 };
 extern struct DehInfo deh;

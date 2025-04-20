@@ -56,6 +56,7 @@ struct DehInfo deh = {
     2,   // .KFAAC
     40,  // .BFGCells (No longer used)
     0,   // .Infight
+	false// .ZDAmmo (Use ZDoom 1.23b33 ammo checks)
 };
 
 // These are the original heights of every Doom 2 thing. They are used if a patch
@@ -1664,8 +1665,6 @@ static int PatchWeapon(int weapNum)
 	    {"Bobbing frame", offsetof(weaponinfo_t, readystate)},
 	    {"Shooting frame", offsetof(weaponinfo_t, atkstate)},
 	    {"Firing frame", offsetof(weaponinfo_t, flashstate)},
-	    {"Ammo use", offsetof(weaponinfo_t, ammouse)},      // ZDoom 1.23b33
-	    {"Min ammo", offsetof(weaponinfo_t, minammo)},      // ZDoom 1.23b33
 	    {NULL, 0}};
 
 	static const struct
@@ -1750,6 +1749,16 @@ static int PatchWeapon(int weapNum)
 			{
 				info->ammopershot = val;
 				info->internalflags |= WIF_ENABLEAPS;
+			}
+			else if (linelen == 9 && stricmp(Line1, "Ammo use") == 0)  // ZDoom 1.23b33
+			{
+				info->ammouse = val;
+				deh.ZDAmmo = true;
+			}
+			else if (linelen == 9 && stricmp(Line1, "Min ammo") == 0)  // ZDoom 1.23b33
+			{
+				info->minammo = val;
+				deh.ZDAmmo = true;
 			}
 			else
 			{
@@ -1853,6 +1862,7 @@ static int PatchMisc(int dummy)
 		{
 			weaponinfo[wp_bfg].ammouse = deh.BFGCells;
 			weaponinfo[wp_bfg].minammo = deh.BFGCells;
+			weaponinfo[wp_bfg].ammopershot = deh.BFGCells;
 		}
 	}
 
