@@ -38,27 +38,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 
-// Miscellaneous info that used to be constant
-struct DehInfo deh = {
-    100, // .StartHealth
-    50,  // .StartBullets
-    100, // .MaxHealth
-    200, // .MaxArmor
-    1,   // .GreenAC
-    2,   // .BlueAC
-    200, // .MaxSoulsphere
-    100, // .SoulsphereHealth
-    200, // .MegasphereHealth
-    100, // .GodHealth
-    200, // .FAArmor
-    2,   // .FAAC
-    200, // .KFAArmor
-    2,   // .KFAAC
-    40,  // .BFGCells (No longer used)
-    0,   // .Infight
-	false// .ZDAmmo (Use ZDoom 1.23b33 ammo checks)
-};
-
 // These are the original heights of every Doom 2 thing. They are used if a patch
 // specifies that a thing should be hanging from the ceiling but doesn't specify
 // a height for the thing, since these are the heights it probably wants.
