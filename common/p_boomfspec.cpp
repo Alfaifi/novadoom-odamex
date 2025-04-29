@@ -3,7 +3,7 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -49,6 +49,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
                                           bool bossaction)
 {
 	int ok;
+	bool resetinv = false;
 
 	//  Things that should never trigger lines
 	//
@@ -86,7 +87,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 	{
 		// pointer to line function is NULL by default, set non-null if
 		// line special is walkover generalized linedef type
-		BOOL (*linefunc)(line_t * line) = NULL;
+		bool (*linefunc)(line_t * line) = NULL;
 
 		// check each range of generalized linedefs
 		if ((unsigned)line->special >= GenEnd)
@@ -199,7 +200,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 269:
 			if (bossaction)
 				return false;
-
+			[[fallthrough]];
 		case 4:  // raise door
 		case 10: // plat down-wait-up-stay trigger
 		case 88: // plat down-wait-up-stay retrigger
@@ -416,11 +417,9 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		break;
 
 	case 40:
-		// RaiseCeilingLowerFloor
+		// RaiseCeilingLowerFloor -- only raises ceiling
 		EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(C_SLOW), 0, 0, 0,
 		             0, 0);
-		EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0,
-		           0); // jff 02/12/98 doesn't work
 		return true;
 		//line->special = 0;
 		break;
@@ -435,13 +434,16 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		}
 		break;
 
+	case 2069:
+		resetinv = true;
+		[[fallthrough]];
 	case 52:
 		// EXIT!
 		// killough 10/98: prevent zombies from exiting levels
 		if (bossaction || ((!(thing->player && thing->player->health <= 0)) &&
 		                   CheckIfExitIsGood(thing)))
 		{
-			G_ExitLevel(0, 1);
+			G_ExitLevel(0, 1, resetinv);
 			return true;
 		}
 		break;
@@ -567,6 +569,9 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		}
 		break;
 
+	case 2072:
+		resetinv = true;
+		[[fallthrough]];
 	case 124:
 		// Secret EXIT
 		// killough 10/98: prevent zombies from exiting levels
@@ -574,7 +579,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		if (bossaction || ((!(thing->player && thing->player->health <= 0)) &&
 		                   CheckIfExitIsGood(thing)))
 		{
-			G_SecretExitLevel(0, 1);
+			G_SecretExitLevel(0, 1, resetinv);
 			return true;
 		}
 		break;
@@ -1451,6 +1456,9 @@ void P_SpawnCompatibleExtra(int i)
 	sector_t* sec;
 	float grav;
 	int damage;
+	fixed_t xoffs;
+	fixed_t yoffs;
+	angle_t angle;
 
 	switch (lines[i].special)
 	{
@@ -1510,6 +1518,105 @@ void P_SpawnCompatibleExtra(int i)
 			sectors[s].mod = MOD_UNKNOWN;
 		}
 		break;
+
+	// 2048-2056 ID24 flat offset and rotation
+	// floor offset
+	case 2048:
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+		}
+		break;
+	// ceiling offset
+	case 2049:
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+	// floor and ceiling offset
+	case 2050:
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+	// floor rotation
+	case 2051:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+		}
+		break;
+	// ceiling rotation
+	case 2052:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_angle -= angle;
+		}
+		break;
+	// floor and ceiling rotation
+	case 2053:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].ceiling_angle -= angle;
+		}
+		break;
+	// floor offset and rotation
+	case 2054:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+		}
+		break;
+	// ceiling offset and rotation
+	case 2055:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].ceiling_angle -= angle;
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+	// floor and ceiling offset and rotation
+	case 2056:
+		angle = P_PointToAngle(lines[i].v1->x, lines[i].v1->y, lines[i].v2->x, lines[i].v2->y);
+		xoffs = lines[i].dx;
+		yoffs = lines[i].dy;
+		for (s = -1; (s = P_FindSectorFromTag(lines[i].id, s)) >= 0;)
+		{
+			sectors[s].floor_angle -= angle;
+			sectors[s].ceiling_angle -= angle;
+			sectors[s].floor_xoffs -= xoffs;
+			sectors[s].floor_yoffs += yoffs;
+			sectors[s].ceiling_xoffs -= xoffs;
+			sectors[s].ceiling_yoffs += yoffs;
+		}
+		break;
+
 	}
 }
 
@@ -1660,7 +1767,7 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 			new DScroller(DScroller::sc_floor, -dx, dy, control, s, accel);
 		if (special != 253)
 			break;
-		// fallthrough
+		[[fallthrough]];
 
 	case 252: // carry objects on floor
 		dx = FixedMul(dx, CARRYFACTOR);
@@ -1690,16 +1797,19 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		              s, accel);
 		break;
 
-	case 1024: // special 255 with tag control
+	// MBF21 scrollers and double sided variants from ID24
 	case 1025:
 	case 1026:
+	case 2085:
+	case 2086:
+		control = sides[*l->sidenum].sector - sectors;
+		[[fallthrough]];
+	case 1024: // special 255 with tag control
+	case 2084:
 		if (l->id == 0)
 			Printf(PRINT_HIGH, "Line %d is missing a tag!", i);
 
-		if (special > 1024)
-			control = sides[*l->sidenum].sector - sectors;
-
-		if (special == 1026)
+		if (special == 1026 || special == 2086)
 			accel = 1;
 
 		s = lines[i].sidenum[0];
@@ -1707,14 +1817,27 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 		dy = sides[s].rowoffset / 8;
 		for (s = -1; (s = P_FindLineFromLineTag(l, s)) >= 0;)
 			if (s != i)
+			{
 				new DScroller(DScroller::sc_side, dx, dy, control, lines[s].sidenum[0],
 				              accel);
+				if (lines[s].sidenum[1] != R_NOSIDE)
+					new DScroller(DScroller::sc_side, -dx, dy, control, lines[s].sidenum[1],
+					              accel);
+			}
 		break;
 
+	case 2082: // scroll both sides left
+		if (lines[i].sidenum[1] != R_NOSIDE)
+			new DScroller(DScroller::sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[1], accel);
+		[[fallthrough]];
 	case 48: // scroll first side
 		new DScroller(DScroller::sc_side, FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
 		break;
 
+	case 2083: // scroll both sides right
+		if (lines[i].sidenum[1] != R_NOSIDE)
+			new DScroller(DScroller::sc_side, FRACUNIT, 0, -1, lines[i].sidenum[1], accel);
+		[[fallthrough]];
 	case 85: // jff 1/30/98 2-way scroll
 		new DScroller(DScroller::sc_side, -FRACUNIT, 0, -1, lines[i].sidenum[0], accel);
 		break;
@@ -1777,6 +1900,7 @@ void P_SpawnCompatiblePusher(line_t* l)
 bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
                                         bool bossaction)
 {
+	bool resetinv = false; // used for exits
 	bool reuse = false;
 	bool trigger = false; // used for bossactions
 	// e6y
@@ -1788,7 +1912,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	// pointer to line function is NULL by default, set non-null if
 	// line special is push or switch generalized linedef type
-	int (*linefunc)(line_t * line) = NULL;
+	bool (*linefunc)(line_t * line) = nullptr;
 
 	// check each range of generalized linedefs
 	if ((unsigned)line->special >= GenEnd)
@@ -2075,6 +2199,9 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		}
 		break;
 
+	case 2070:
+		resetinv = true;
+		[[fallthrough]];
 	case 11:
 		/* Exit level
 		 * killough 10/98: prevent zombies from exiting levels
@@ -2088,7 +2215,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		{
 			reuse = false;
 			trigger = true;
-			G_ExitLevel(0, 1);
+			G_ExitLevel(0, 1, resetinv);
 		}
 		break;
 
@@ -2199,6 +2326,9 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		}
 		break;
 
+	case 2073:
+		resetinv = true;
+		[[fallthrough]];
 	case 51:
 		/* Secret EXIT
 		 * killough 10/98: prevent zombies from exiting levels
@@ -2212,7 +2342,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		{
 			reuse = false;
 			trigger = true;
-			G_SecretExitLevel(0, 1);
+			G_SecretExitLevel(0, 1, resetinv);
 		}
 		break;
 
@@ -3239,9 +3369,11 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 {
+	bool resetinv = false;
+
 	// pointer to line function is NULL by default, set non-null if
 	// line special is gun triggered generalized linedef type
-	int (*linefunc)(line_t * line) = NULL;
+	bool (*linefunc)(line_t * line) = nullptr;
 
 	// check each range of generalized linedefs
 	if ((unsigned)line->special >= GenEnd)
@@ -3379,6 +3511,9 @@ bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 	default:
 		switch (line->special)
 		{
+		case 2071:
+			resetinv = true;
+			[[fallthrough]];
 		case 197:
 			// Exit to next level
 			// killough 10/98: prevent zombies from exiting levels
@@ -3386,11 +3521,14 @@ bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 				break;
 			if (thing && CheckIfExitIsGood(thing))
 			{
-				G_ExitLevel(0, 1);
+				G_ExitLevel(0, 1, resetinv);
 				return true;
 			}
 			break;
 
+		case 2074:
+			resetinv = true;
+			[[fallthrough]];
 		case 198:
 			// Exit to secret level
 			// killough 10/98: prevent zombies from exiting levels
@@ -3398,7 +3536,7 @@ bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 				break;
 			if (thing && CheckIfExitIsGood(thing))
 			{
-				G_SecretExitLevel(0, 1);
+				G_SecretExitLevel(0, 1, resetinv);
 				return true;
 			}
 			break;
@@ -3409,7 +3547,7 @@ bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 	return false;
 }
 
-const unsigned int P_TranslateCompatibleLineFlags(const unsigned int flags, const bool reserved)
+unsigned int P_TranslateCompatibleLineFlags(const unsigned int flags, const bool reserved)
 {
 	/*
 	if (mbf21)

@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -33,6 +33,7 @@
 #include "gi.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include "r_interp.h"
 #include "st_stuff.h"
 #include "v_video.h"
 #include "stats.h"
@@ -43,10 +44,6 @@
 #include "cl_demo.h"
 
 extern NetDemo netdemo;
-
-void R_BeginInterpolation(fixed_t amount);
-void R_EndInterpolation();
-void R_InterpolateCamera(fixed_t amount, bool use_localview);
 
 #define DISTMAP			2
 
@@ -75,37 +72,13 @@ fixed_t			fovtan;
 float			focratio;
 float			ifocratio;
 
-// increment every time a check is made
-int 			validcount = 1;
-
 // [RH] colormap currently drawing with
 shaderef_t		basecolormap;
 int				fixedlightlev;
 shaderef_t		fixedcolormap;
 
-int 			centerx;
-int				centery;
-
-fixed_t 		centerxfrac;
-fixed_t 		centeryfrac;
-fixed_t			yaspectmul;
-
 // just for profiling purposes
 int 			framecount;
-int 			linecount;
-int 			loopcount;
-
-fixed_t 		viewx;
-fixed_t 		viewy;
-fixed_t 		viewz;
-
-angle_t 		viewangle;
-LocalView		localview;
-
-fixed_t 		viewcos;
-fixed_t 		viewsin;
-
-AActor			*camera;	// [RH] camera to draw from. doesn't have to be a player
 
 //
 // precalculated math tables
@@ -120,12 +93,6 @@ int				zlight[LIGHTLEVELS][MAXLIGHTZ];
 // [RH] used to keep hires modes dark enough
 int				lightscalexmul;
 int				lightscaleymul;
-
-// bumped light from gun blasts
-int 			extralight;
-
-// [RH] ignore extralight and fullbright
-BOOL			foggy;
 
 static bool		setsizeneeded = true;
 int				setblocks;
@@ -145,8 +112,6 @@ void (*spanslopefunc) (void);
 // [AM] Number of fineangles in a default 90 degree FOV at a 4:3 resolution.
 int FieldOfView = 2048;
 int CorrectFieldOfView = 2048;
-
-fixed_t			render_lerp_amount;
 
 static void R_InitViewWindow();
 
@@ -367,7 +332,7 @@ void R_ClipLine(const vertex_t* in1, const vertex_t* in2,
 //
 bool R_ClipLineToFrustum(const v2fixed_t* v1, const v2fixed_t* v2, fixed_t clipdist, int32_t& lclip, int32_t& rclip)
 {
-	static const int32_t CLIPUNIT = 1 << 30;
+	static constexpr int32_t CLIPUNIT = 1 << 30;
 	v2fixed_t p1 = *v1, p2 = *v2;
 
 	lclip = 0;
@@ -488,7 +453,7 @@ bool R_CheckProjectionY(int &y1, int &y2)
 {
 	y1 = MAX(y1, 0);
 	y2 = MIN(y2, viewheight - 1);
-	return (y1 <= y2);
+	return y1 <= viewheight - 1 || y2 >= 0;
 }
 
 
@@ -616,7 +581,7 @@ void R_SetViewSize(int blocks)
 
 CVAR_FUNC_IMPL(screenblocks)
 {
-	R_SetViewSize((int)var);
+	R_SetViewSize(var.asInt());
 }
 
 
@@ -787,30 +752,6 @@ void R_SetupFrame (player_t *player)
 	    (consolePlayer.id == displayplayer().id && consolePlayer.health > 0 &&
 	     !consolePlayer.mo->reactiontime && !netdemo.isPlaying() && !demoplayback);
 
-	if (player->cheats & CF_CHASECAM)
-	{
-		// [RH] Use chasecam view
-		P_AimCamera (camera);
-		viewx = CameraX;
-		viewy = CameraY;
-		viewz = CameraZ;
-		viewangle = camera->angle;
-	}
-	else
-	{
-		if (render_lerp_amount < FRACUNIT)
-		{
-			R_InterpolateCamera(render_lerp_amount, use_localview);
-		}
-		else
-		{
-			viewx = camera->x;
-			viewy = camera->y;
-			viewz = camera->player ? camera->player->viewz : camera->z;
-			viewangle = camera->angle;
-		}
-	}
-
 	if (camera->player && camera->player->xviewshift && !paused)
 	{
 		int intensity = camera->player->xviewshift;
@@ -825,10 +766,9 @@ void R_SetupFrame (player_t *player)
 
 	// [SL] Change to a different sector blend color (or colormap in 8bpp mode)
 	// if entering a heightsec (via TransferHeight line special)
-	if (camera->subsector->sector->heightsec &&
-		!(camera->subsector->sector->heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC))
+	if (viewsector->heightsec && !(viewsector->heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC))
 	{
-		const sector_t* sec = camera->subsector->sector->heightsec;
+		const sector_t* sec = viewsector->heightsec;
 
 		argb_t new_sector_blend_color;
 		if (viewz < P_FloorHeight(viewx, viewy, sec))
@@ -1039,6 +979,8 @@ void R_RenderPlayerView(player_t* player)
 		setsizeneeded = false;
 	}
 
+	OInterpolation::getInstance().interpolateView(player, render_lerp_amount);
+
 	if (!viewactive)
 		return;
 
@@ -1065,7 +1007,7 @@ void R_RenderPlayerView(player_t* player)
 		surface->getDefaultCanvas()->Clear(x1, y1, x2, y2, color);
 	}
 
-	R_BeginInterpolation(render_lerp_amount);
+	OInterpolation::getInstance().beginGameInterpolation(render_lerp_amount);
 
 	// [RH] Setup particles for this frame
 	R_FindParticleSubsectors();
@@ -1094,7 +1036,7 @@ void R_RenderPlayerView(player_t* player)
 						viewwindowx, viewwindowy, viewwidth, viewheight);
 	}
 
-	R_EndInterpolation();
+	OInterpolation::getInstance().endGameInterpolation();
 }
 
 
@@ -1289,7 +1231,7 @@ static void R_InitViewWindow()
 	surface->unlock();
 
 	char temp_str[16];
-	sprintf(temp_str, "%d x %d", viewwidth, viewheight);
+	snprintf(temp_str, 16, "%d x %d", viewwidth, viewheight);
 	r_viewsize.ForceSet(temp_str);
 
 	// [SL] clear many renderer variables

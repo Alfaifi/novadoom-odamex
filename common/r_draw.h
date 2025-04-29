@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -188,6 +188,8 @@ extern void (*R_DrawSlopeSpanD)(void);
 extern void (*r_dimpatchD)(IWindowSurface* surface, argb_t color, int alpha, int x1, int y1, int w, int h);
 
 extern byte bosstable[256];
+extern byte greentable[MAXPLAYERS+1][256];
+extern byte redtable[MAXPLAYERS + 1][256];
 extern byte*			translationtables;
 extern argb_t           translationRGB[MAXPLAYERS+1][16];
 
@@ -205,7 +207,7 @@ enum
 
 #define TRANSLATION(a,b)	(((a)<<8)|(b))
 
-const int MAX_ACS_TRANSLATIONS = 32;
+constexpr int MAX_ACS_TRANSLATIONS = 32;
 
 
 // Initialize color translation tables,
@@ -214,6 +216,7 @@ void R_InitTranslationTables (void);
 void R_FreeTranslationTables (void);
 
 void R_CopyTranslationRGB (int fromplayer, int toplayer);
+void R_RebuildPlayerTintTables(int player);
 
 // [RH] Actually create a player's translation table.
 void R_BuildPlayerTranslation(int player, argb_t dest_color);

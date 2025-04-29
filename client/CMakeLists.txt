@@ -136,7 +136,7 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     set(TEXTSCREEN_LIBRARY "textscreen")
     set(TEXTSCREEN_DIR ../libraries/textscreen)
     set(TEXTSCREEN_HEADERS ${TEXTSCREEN_DIR}/txt_sdl.h ${TEXTSCREEN_DIR}/txt_main.h)
-    set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.c)
+    set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.cpp)
 
     include_directories(${TEXTSCREEN_DIR})
     add_library(${TEXTSCREEN_LIBRARY} STATIC ${TEXTSCREEN_SOURCES} ${TEXTSCREEN_HEADERS})
@@ -212,18 +212,20 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   endif()
 
   if(USE_INTERNAL_JSONCPP)
-    target_link_libraries(odamex jsoncpp_lib_static)
+    target_link_libraries(odamex jsoncpp_static)
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
     target_link_libraries(odamex PkgConfig::JSONCPP)
   endif()
 
+  target_link_libraries(odamex libADLMIDI::ADLMIDI_static)
+
   if(ENABLE_PORTMIDI)
     target_link_libraries(odamex ${PORTMIDI_LIBRARY})
   endif()
 
-  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo)
+  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo cpptrace::cpptrace)
 
   if(WIN32)
     target_link_libraries(odamex winmm wsock32 shlwapi)

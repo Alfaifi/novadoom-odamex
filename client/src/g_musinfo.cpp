@@ -25,6 +25,7 @@
 #include "g_level.h"
 #include "g_musinfo.h"
 #include "oscanner.h"
+#include "w_wad.h"
 
 void G_ParseMusInfo()
 {
@@ -68,7 +69,7 @@ void G_ParseMusInfo()
 					const std::string music = os.getToken();
 					if (map.exists())
 					{
-						map.music_map[index] = music;		
+						map.musinfo_map[index] = music;
 					}
 				}
 			}

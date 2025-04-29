@@ -4,7 +4,7 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2024 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -42,7 +42,7 @@ jsonlumpresult_t M_ParseJSONLump(int lumpindex, const char* lumptype, const JSON
 {
 	if(lumpindex < 0 || W_LumpLength(lumpindex) <= 0)
 	{
-		return JL_NOTFOUND;
+		return jsonlumpresult_t::NOTFOUND;
 	}
 
 	const char* jsondata = (const char*)W_CacheLumpNum(lumpindex, PU_STATIC);
@@ -56,8 +56,8 @@ jsonlumpresult_t M_ParseJSONLump(int lumpindex, const char* lumptype, const JSON
     if(!reader->parse(jsondata, jsondata + W_LumpLength(lumpindex), &root, &errs))
     {
         delete reader;
-        I_Error("M_ParseJSONLump: JSON parsing error in lump %s:\n%s", W_LumpName(lumpindex), errs.c_str());
-        return JL_PARSEERROR;
+        I_Error("M_ParseJSONLump: JSON parsing error in lump {}:\n{}", W_LumpName(lumpindex), errs);
+        return jsonlumpresult_t::PARSEERROR;
     }
 
     delete reader;
@@ -76,18 +76,18 @@ jsonlumpresult_t M_ParseJSONLump(int lumpindex, const char* lumptype, const JSON
 	   || !metadata.isObject()
 	   || !data.isObject())
 	{
-		return JL_MALFORMEDROOT;
+		return jsonlumpresult_t::MALFORMEDROOT;
 	}
 
 	if(!std::regex_match(lumptype, TypeMatchRegex)
 	   || type.asString() != lumptype)
 	{
-		return JL_TYPEMISMATCH;
+		return jsonlumpresult_t::TYPEMISMATCH;
 	}
 
 	if(!std::regex_search(versionstr, versionmatch, VersionMatchRegex))
 	{
-		return JL_BADVERSIONFORMATTING;
+		return jsonlumpresult_t::BADVERSIONFORMATTING;
 	}
 
 	JSONLumpVersion versiondata =
@@ -99,7 +99,7 @@ jsonlumpresult_t M_ParseJSONLump(int lumpindex, const char* lumptype, const JSON
 
 	if(versiondata > maxversion)
 	{
-		return JL_VERSIONMISMATCH;
+		return jsonlumpresult_t::VERSIONMISMATCH;
 	}
 
 	return parsefunc(data, versiondata);

@@ -8,14 +8,14 @@ if(BUILD_CLIENT)
     if(WIN32)
       if(MSVC)
         file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL2-devel-2.0.20-VC.zip"
+          "https://www.libsdl.org/release/SDL2-devel-2.32.4-VC.zip"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
-          EXPECTED_HASH SHA256=5b1512ca6c9d2427bd2147da01e5e954241f8231df12f54a7074dccde416df18)
+          EXPECTED_HASH SHA256=28681dbef9c31a2bb4af6cbda90fdabc27c7415d65b9393da83d5abd12c4a265)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20")
+        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4")
         set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include" CACHE PATH "")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
           set(SDL2_LIBRARY "${SDL2_DIR}/lib/x64/SDL2.lib" CACHE FILEPATH "")
@@ -26,17 +26,17 @@ if(BUILD_CLIENT)
         endif()
       else()
         file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL2-devel-2.0.20-mingw.tar.gz"
+          "https://www.libsdl.org/release/SDL2-devel-2.32.4-mingw.tar.gz"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
-          EXPECTED_HASH SHA256=38094d82a857d6c62352e5c5cdec74948c5b4d25c59cbd298d6d233568976bd1)
+          EXPECTED_HASH SHA256=c2ec09788ab99b23b8e8e472775e5f728da549ae27898280cedbb15da87f47c1)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20/x86_64-w64-mingw32")
+          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4/x86_64-w64-mingw32")
         else()
-          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20/i686-w64-mingw32")
+          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4/i686-w64-mingw32")
         endif()
         set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include/SDL2" CACHE PATH "")
         set(SDL2_LIBRARY "${SDL2_DIR}/lib/libSDL2.dll.a" CACHE FILEPATH "")
@@ -85,14 +85,14 @@ if(BUILD_CLIENT)
     if(WIN32)
       if(MSVC)
         file(DOWNLOAD
-          "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.4-VC.zip"
+          "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.6.2-VC.zip"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-VC.zip"
-          EXPECTED_HASH SHA256=258788438b7e0c8abb386de01d1d77efe79287d9967ec92fbb3f89175120f0b0)
+          EXPECTED_HASH SHA256=7f050663ccc7911bb9c57b11e32ca79578b712490186b8645ddbbe4e7d2fe1c9)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-VC.zip"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-        set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.0.4")
+        set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.6.2")
         set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_DIR}/include" CACHE PATH "")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
           set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/x64/SDL2_mixer.lib" CACHE FILEPATH "")
@@ -101,17 +101,17 @@ if(BUILD_CLIENT)
         endif()
       else()
         file(DOWNLOAD
-          "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.0.4-mingw.tar.gz"
+          "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-2.6.2-mingw.tar.gz"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-mingw.tar.gz"
-          EXPECTED_HASH SHA256=14250b2ade20866c7b17cf1a5a5e2c6f3920c443fa3744f45658c8af405c09f1)
+          EXPECTED_HASH SHA256=6c414d05a3b867e0d59e0f9b28ea7e5e64527e612ccf961735dc2478391315b3)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-mingw.tar.gz"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.0.4/x86_64-w64-mingw32")
+          set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.6.2/x86_64-w64-mingw32")
         else()
-          set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.0.4/i686-w64-mingw32")
+          set(SDL2_MIXER_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2_mixer-2.6.2/i686-w64-mingw32")
         endif()
         set(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_DIR}/include/SDL2" CACHE PATH "")
         set(SDL2_MIXER_LIBRARY "${SDL2_MIXER_DIR}/lib/libSDL2_mixer.dll.a" CACHE FILEPATH "")
