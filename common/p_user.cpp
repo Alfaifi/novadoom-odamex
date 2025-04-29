@@ -750,16 +750,17 @@ void P_CheckMusicChange(player_t* player)
 					    level.musinfo_map[player->MUSINFOactor->args[0]];
 					if (!music.empty())
 					{
-						S_ChangeMusic(music.c_str(), player->MUSINFOactor->args[1]);
+						S_ChangeMusic(music, player->MUSINFOactor->args[1]);
+						PrintFmt(PRINT_HIGH, "looping == {}\n", player->MUSINFOactor->args[1]);
 					}
 				}
 				else
 				{
-					S_ChangeMusic("*", true);
+					S_ChangeMusic(level.music.c_str(), true);
 				}
 			}
-			Printf(PRINT_HIGH, "MUSINFO change for player %d to %d\n", player->id,
-			       player->MUSINFOactor->args[0]);
+			PrintFmt(PRINT_HIGH, "MUSINFO change for player {} to track {}\n", player->id,
+			         player->MUSINFOactor->args[0]);
 		}
 	}
 }
@@ -1176,6 +1177,8 @@ void P_PlayerThink (player_t *player)
 			              0, 0);
 		}
 	}
+
+	P_CheckMusicChange(player);
 }
 
 #define CASE_STR(str) case str : return #str

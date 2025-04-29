@@ -672,6 +672,9 @@ void P_TestActorMovement(AActor *mo, fixed_t tryx, fixed_t tryy, fixed_t tryz,
 //
 void AActor::RunThink ()
 {
+	if(!subsector)
+		return;
+
 	// MUSINFO
 	if (type == MT_MUSICSOURCE)
 	{
@@ -685,9 +688,6 @@ void AActor::RunThink ()
 		}
 		return;
 	}
-
-	if(!subsector)
-		return;
 
 	prevx = x;
 	prevy = y;
@@ -2918,16 +2918,17 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	if (mthing->type >= 14001 && mthing->type <= 14064)
 	{
 		mthing->args[0] = mthing->type - 14000;
-		mthing->type = 14065;
+		mthing->type = mobjinfo[MT_AMBIENT].doomednum;
 		i = MT_AMBIENT;
 	}
 
 	// [ML] Determine if it is a musicchanger thing, and if so,
 	//		map it to MT_MUSICSOURCE with the proper parameter.
-	if (mthing->type >= 14101 && mthing->type <= 14164)
+	if (mthing->type >= 14100 && mthing->type <= 14164)
 	{
 		mthing->args[0] = mthing->type - 14100;
-		mthing->type = 14165;
+		mthing->args[1] = true;
+		mthing->type = mobjinfo[MT_MUSICSOURCE].doomednum;
 		i = MT_MUSICSOURCE;
 	}
 

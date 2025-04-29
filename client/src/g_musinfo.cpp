@@ -50,7 +50,7 @@ void G_ParseMusInfo()
 			if (!map.exists())
 			{
 				// Don't abort for invalid maps
-				os.warning("Unknown map '%s'", map_name.c_str());
+				os.warning("Unknown map '{}'", map_name);
 			}
 
 			while (os.scan())

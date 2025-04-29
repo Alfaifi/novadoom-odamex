@@ -912,6 +912,8 @@ void G_InitLevelLocals()
 	::level.clearlabel = info.clearlabel;
 	::level.author = info.author;
 
+	::level.musinfo_map = info.musinfo_map;
+
 	::level.detected_gametype = GM_COOP;
 
 	movingsectors.clear();
