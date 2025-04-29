@@ -20,7 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <string>
+#include "odamex.h"
 
 #include "g_level.h"
 #include "g_musinfo.h"

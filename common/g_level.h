@@ -30,6 +30,7 @@
 #include "r_defs.h" // line_t
 
 #include <assert.h>
+#include <unordered_map>
 
 #define NUM_MAPVARS				128
 #define NUM_WORLDVARS			256
@@ -170,7 +171,7 @@ struct level_pwad_info_t
 	int				airsupply;
 
 	// MUSINFO
-	OHashTable<int, std::string> musinfo_map;
+	std::unordered_map<int, std::string> musinfo_map;
 
 	// The following are necessary for UMAPINFO compatibility
 	OLumpName		exitpic;
@@ -338,7 +339,7 @@ struct level_locals_t
 	int 			airsupply;
 
 	// MUSINFO
-	OHashTable<int, std::string> musinfo_map;
+	std::unordered_map<int, std::string> musinfo_map;
 
 	// The following are all used for ACS scripting
 	FBehavior*		behavior;
