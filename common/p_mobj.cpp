@@ -347,7 +347,6 @@ void P_AnimationTick(AActor *mo)
 		mo->tics--;
 
 		// you can cycle through multiple states in a tic
-		// [CMB] TODO: current bug is mo->state is null pointer
 		if (!mo->tics)
 			if (!P_SetMobjState (mo, mo->state->nextstate) )
 				return;         // freed itself

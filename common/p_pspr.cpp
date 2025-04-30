@@ -203,7 +203,7 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, int32_t stnum)
 		{
 			if (!player->spectator && player->mo != NULL)
 			{
-				// [CMB] TODO: can we calculate psprnum here using the present psp and length of psprites?
+				// [CMB] calculate psprnum here using the present psp and length of psprites
 				player->psprnum = psp - player->psprites;
 				psp->state->action(player->mo);
 			}
@@ -1458,7 +1458,7 @@ void A_FireCGun(AActor* mo)
 
 	DecreaseAmmo(player);
 
-	// [CMB] TODO: this is expecting to calculate a very specific state based on the pointer arthmetic
+	// [CMB] this is expecting to calculate a very specific state based on the pointer arthmetic
 	P_SetPsprite (player, ps_flash, (statenum_t)(weaponinfo[player->readyweapon].flashstate + psp->state->statenum - states[S_CHAIN1]->statenum) );
 
 	spreadtype_t accuracy = player->refire ? SPREAD_NORMAL : SPREAD_NONE;

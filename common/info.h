@@ -1776,7 +1776,7 @@ typedef struct _mobjinfo
 
 } mobjinfo_t;
 
-// [CMB] TODO: new types and function to allocate mobjinfo for dsdhacked
+// [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
 extern DoomObjectContainer<mobjinfo_t*> mobjinfo; // mobjtype_t
 extern size_t num_mobjinfo_types();
