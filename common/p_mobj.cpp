@@ -2927,7 +2927,6 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	if (mthing->type >= 14100 && mthing->type <= 14164)
 	{
 		mthing->args[0] = mthing->type - 14100;
-		mthing->args[1] = true;
 		mthing->type = mobjinfo[MT_MUSICSOURCE].doomednum;
 		i = MT_MUSICSOURCE;
 	}

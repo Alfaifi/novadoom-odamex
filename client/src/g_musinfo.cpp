@@ -64,7 +64,11 @@ void G_ParseMusInfo()
 				const int index = os.getTokenInt();
 				os.mustScan();
 
-				if (index > 0)
+				if (index <= 0)
+				{
+					os.warning("Bad song index ({})", index);
+				}
+				else
 				{
 					const std::string music = os.getToken();
 					if (map.exists())

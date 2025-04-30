@@ -750,8 +750,7 @@ void P_CheckMusicChange(player_t* player)
 					    level.musinfo_map[player->MUSINFOactor->args[0]];
 					if (!music.empty())
 					{
-						S_ChangeMusic(music, player->MUSINFOactor->args[1]);
-						PrintFmt(PRINT_HIGH, "looping == {}\n", player->MUSINFOactor->args[1]);
+						S_ChangeMusic(music, true);
 					}
 				}
 				else
@@ -759,8 +758,8 @@ void P_CheckMusicChange(player_t* player)
 					S_ChangeMusic(level.music.c_str(), true);
 				}
 			}
-			PrintFmt(PRINT_HIGH, "MUSINFO change for player {} to track {}\n", player->id,
-			         player->MUSINFOactor->args[0]);
+			DPrintFmt("MUSINFO change for player {} to track {}\n", player->id,
+			          player->MUSINFOactor->args[0]);
 		}
 	}
 }
