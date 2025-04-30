@@ -750,7 +750,7 @@ void P_CheckMusicChange(player_t* player)
 					    level.musinfo_map[player->MUSINFOactor->args[0]];
 					if (!music.empty())
 					{
-						S_ChangeMusic(music, true);
+						S_ChangeMusic(music, true, player->MUSINFOactor->args[1]);
 					}
 				}
 				else
