@@ -143,7 +143,7 @@ AuMusicSystem::~AuMusicSystem()
 	AUGraphClose(m_graph);
 }
 
-void AuMusicSystem::startSong(byte* data, size_t length, bool loop)
+void AuMusicSystem::startSong(byte* data, size_t length, bool loop, int order)
 {
 	if (!isInitialized())
 		return;
@@ -241,7 +241,7 @@ void AuMusicSystem::startSong(byte* data, size_t length, bool loop)
 		return;
 	}
 
-	MusicSystem::startSong(data, length, loop);
+	MusicSystem::startSong(data, length, loop, order);
 }
 
 //
