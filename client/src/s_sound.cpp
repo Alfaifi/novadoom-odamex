@@ -1082,7 +1082,7 @@ void S_StartMusic(const char *m_id)
 
 // [RH] S_ChangeMusic() now accepts the name of the music lump.
 // It's up to the caller to figure out what that name is.
-void S_ChangeMusic(std::string musicname, bool looping)
+void S_ChangeMusic(std::string musicname, bool looping, int order)
 {
 	// [SL] Avoid caching music lumps if we're not playing music
 	if (snd_musicsystem == MS_NONE)
@@ -1113,7 +1113,7 @@ void S_ChangeMusic(std::string musicname, bool looping)
 
 		data = static_cast<byte*>(W_CacheLumpNum(lumpnum, PU_CACHE));
 		length = W_LumpLength(lumpnum);
-		I_PlaySong({data, length}, looping);
+		I_PlaySong({data, length}, looping, order);
     }
     else
 	{
@@ -1124,7 +1124,7 @@ void S_ChangeMusic(std::string musicname, bool looping)
 
 		if (result == 1)
 		{
-			I_PlaySong({data, length}, looping);
+			I_PlaySong({data, length}, looping, order);
 		}
 		M_Free(data);
 	}

@@ -127,7 +127,7 @@ static void adlmidi_music_hook (void *data, byte *stream, int len)
 }
 
 
-void AdlMidiMusicSystem::startSong(byte* data, size_t length, bool loop)
+void AdlMidiMusicSystem::startSong(byte* data, size_t length, bool loop, int order)
 {
 	if (!isInitialized())
 		return;
@@ -145,7 +145,7 @@ void AdlMidiMusicSystem::startSong(byte* data, size_t length, bool loop)
 	adl_setLoopEnabled(m_midiPlayer, loop);
 	_UpdateMidiHook();
 
-	MusicSystem::startSong(data, length, loop);
+	MusicSystem::startSong(data, length, loop, order);
 }
 
 //

@@ -303,11 +303,11 @@ void PortMidiMusicSystem::_ResetDevice(bool playing)
 	m_useResetDelay = (snd_mididelay > 0);
 }
 
-void PortMidiMusicSystem::startSong(byte *data, size_t length, bool loop)
+void PortMidiMusicSystem::startSong(byte *data, size_t length, bool loop, int order)
 {
 	m_isPlaying = false;
 	_ResetDevice(true);
-	MidiMusicSystem::startSong(data, length, loop);
+	MidiMusicSystem::startSong(data, length, loop, order);
 	m_isPlaying = true;
 }
 
