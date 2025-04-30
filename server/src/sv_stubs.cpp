@@ -51,8 +51,6 @@ void RefreshPalettes (void) {}
 
 void V_RefreshColormaps() {}
 
-void G_ParseMusInfo() {}
-
 CVAR_FUNC_IMPL (sv_allowwidescreen) {}
 
 VERSION_CONTROL (sv_stubs_cpp, "$Id$")

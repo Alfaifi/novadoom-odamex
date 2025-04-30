@@ -228,9 +228,6 @@ public:
 
 	int			air_finished;			// [RH] Time when you start drowning
 
-	AActor::AActorPtr MUSINFOactor;		// For MUSINFO purposes
-	int8_t		MUSINFOtics;
-
 	int			GameTime;				// [Dash|RD] Length of time that this client has been in the game.
 	time_t		JoinTime;				// [Dash|RD] Time this client joined.
     int         ping;                   // [Fly] guess what :)

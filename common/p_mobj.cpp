@@ -46,6 +46,7 @@
 #include "g_skill.h"
 #include "m_wdlstats.h"
 #include "p_mapformat.h"
+#include "g_musinfo.h"
 
 #ifdef CLIENT_APP
 #include "hu_speedometer.h"
@@ -676,15 +677,14 @@ void AActor::RunThink ()
 		return;
 
 	// MUSINFO
-	if (type == MT_MUSICSOURCE)
+	if (type == MT_MUSICSOURCE && clientside)
 	{
-		player_t& player = consoleplayer();
-
-		if (player.MUSINFOactor != this &&
+		if (musinfo.mapthing != this &&
 		    subsector->sector == displayplayer().mo->subsector->sector)
 		{
-			player.MUSINFOactor = this->ptr();
-			player.MUSINFOtics = 30;
+			musinfo.lastmapthing = musinfo.mapthing;
+			musinfo.mapthing = this->ptr();
+			musinfo.tics = 30;
 		}
 		return;
 	}
@@ -2751,7 +2751,8 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	// only servers control spawning of items
     // EXCEPT the client must spawn Type 14 (teleport exit).
 	// otherwise teleporters won't work well.
-	if (!serverside && (mthing->type != 14))
+	// 4/29/2025 also spawn music changers clientside
+	if (!serverside && (mthing->type != 14) && (mthing->type < 14100 || mthing->type > 14165))
 		return;
 
 	// count deathmatch start positions

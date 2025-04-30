@@ -733,38 +733,6 @@ void P_FallingDamage (AActor *ent)
 }
 
 //
-// Check if the music has changed or not
-//
-void P_CheckMusicChange(player_t* player)
-{
-	// MUSINFO stuff
-	if (player->MUSINFOtics >= 0 && player->MUSINFOactor != NULL)
-	{
-		if (--player->MUSINFOtics < 0)
-		{
-			if (player == &consoleplayer())
-			{
-				if (player->MUSINFOactor->args[0] != 0)
-				{
-					const std::string& music =
-					    level.musinfo_map[player->MUSINFOactor->args[0]];
-					if (!music.empty())
-					{
-						S_ChangeMusic(music, true, player->MUSINFOactor->args[1]);
-					}
-				}
-				else
-				{
-					S_ChangeMusic(level.music.c_str(), true);
-				}
-			}
-			DPrintFmt("MUSINFO change for player {} to track {}\n", player->id,
-			          player->MUSINFOactor->args[0]);
-		}
-	}
-}
-
-//
 // P_DeathThink
 // Fall on your face when dying.
 // Decrease POV height to floor height.
@@ -1176,8 +1144,6 @@ void P_PlayerThink (player_t *player)
 			              0, 0);
 		}
 	}
-
-	P_CheckMusicChange(player);
 }
 
 #define CASE_STR(str) case str : return #str
@@ -1440,8 +1406,6 @@ player_s::player_s() :
 	suicidedelay(0),
 	camera(AActor::AActorPtr()),
 	air_finished(0),
-	MUSINFOactor(AActor::AActorPtr()),
-    MUSINFOtics(0),
 	GameTime(0),
 	JoinTime(time_t()),
 	ping(0),
@@ -1556,9 +1520,6 @@ player_s &player_s::operator =(const player_s &other)
 
 	camera = other.camera;
 	air_finished = other.air_finished;
-
-	MUSINFOactor = other.MUSINFOactor;
-	MUSINFOtics = other.MUSINFOtics;
 
 	GameTime = other.GameTime;
 	JoinTime = other.JoinTime;

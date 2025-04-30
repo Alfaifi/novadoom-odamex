@@ -20,4 +20,16 @@
 
 #pragma once
 
+#include <string>
+#include "actor.h"
+
+inline struct musinfo_t
+{
+    AActor::AActorPtr mapthing;
+    AActor::AActorPtr lastmapthing;
+    int tics = 0;
+    std::string savedmusic;
+} musinfo;
+
 void G_ParseMusInfo();
+void P_CheckMusicChange();

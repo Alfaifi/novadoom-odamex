@@ -26,6 +26,7 @@
 #include "g_musinfo.h"
 #include "oscanner.h"
 #include "w_wad.h"
+#include "s_sound.h"
 
 void G_ParseMusInfo()
 {
@@ -77,6 +78,37 @@ void G_ParseMusInfo()
 					}
 				}
 			}
+		}
+	}
+}
+
+//
+// Check if the music has changed or not
+//
+void P_CheckMusicChange()
+{
+	if (!clientside)
+		return;
+
+	// MUSINFO stuff
+	if (musinfo.tics >= 0 && musinfo.mapthing != nullptr)
+	{
+		if (--musinfo.tics < 0)
+		{
+			if (musinfo.mapthing->args[0] != 0)
+			{
+				const std::string& music =
+				    level.musinfo_map[musinfo.mapthing->args[0]];
+				if (!music.empty())
+				{
+					S_ChangeMusic(music, true, musinfo.mapthing->args[1]);
+				}
+			}
+			else
+			{
+				S_ChangeMusic(level.music.c_str(), true);
+			}
+			DPrintFmt("MUSINFO change to track {}\n", musinfo.mapthing->args[0]);
 		}
 	}
 }
