@@ -101,14 +101,24 @@ void P_CheckMusicChange()
 				    level.musinfo_map[musinfo.mapthing->args[0]];
 				if (!music.empty())
 				{
+					musinfo.savedmusic = music;
 					S_ChangeMusic(music, true, musinfo.mapthing->args[1]);
 				}
 			}
 			else
 			{
+				musinfo.savedmusic = level.music.c_str();
 				S_ChangeMusic(level.music.c_str(), true);
 			}
 			DPrintFmt("MUSINFO change to track {}\n", musinfo.mapthing->args[0]);
 		}
 	}
+}
+
+void S_ClearMusInfo()
+{
+	musinfo.tics = 0;
+	musinfo.mapthing.init(nullptr);
+	musinfo.lastmapthing.init(nullptr);
+	musinfo.savedmusic.clear();
 }

@@ -46,6 +46,7 @@
 #include "m_fileio.h"
 #include "gi.h"
 #include "oscanner.h"
+#include "g_musinfo.h"
 
 #define NORM_PITCH		128
 #define NORM_PRIORITY	64
@@ -304,7 +305,10 @@ void S_Start()
 	mus_paused = false;
 
 	// [RH] This is a lot simpler now.
-	S_ChangeMusic (std::string(level.music.c_str(), 8), true);
+	if (!musinfo.savedmusic.empty())
+		S_ChangeMusic (musinfo.savedmusic, true);
+	else
+		S_ChangeMusic (std::string(level.music.c_str(), 8), true);
 }
 
 
