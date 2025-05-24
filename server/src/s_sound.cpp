@@ -338,8 +338,6 @@ void S_AddRandomSound(int owner, std::vector<int>& list)
 // Parses all loaded SNDINFO lumps.
 void S_ParseSndInfo()
 {
-	S_ClearSoundLumps();
-
 	int lump = -1;
 	while ((lump = W_FindLump("SNDINFO", lump)) != -1)
 	{

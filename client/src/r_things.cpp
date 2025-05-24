@@ -564,9 +564,10 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 	}
 
 #ifdef RANGECHECK
-	if (static_cast<unsigned>(thing->sprite) >= static_cast<unsigned>(numsprites))
+	// if (static_cast<unsigned>(thing->sprite) >= static_cast<unsigned>(numsprites))
+	if (sprites.find(thing->sprite) == sprites.end())
 	{
-		DPrintFmt("R_ProjectSprite: invalid sprite number {}\n", thing->sprite);
+		DPrintFmt("R_ProjectSprite: thing ({}: {}): invalid sprite number {}\n on ", thing->type, thing->info->name, thing->sprite);
 		return;
 	}
 #endif
@@ -576,7 +577,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 #ifdef RANGECHECK
 	if ( (thing->frame & FF_FRAMEMASK) >= sprdef->numframes )
 	{
-		DPrintFmt("R_ProjectSprite: invalid sprite frame {} : {}\n ", thing->sprite, thing->frame);
+		DPrintFmt("R_ProjectSprite: thing ({}: {}): invalid sprite frame {} : {}\n ", thing->type, thing->info->name, thing->sprite, thing->frame);
 		return;
 	}
 #endif
@@ -609,7 +610,9 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 	}
 
 	if (sprframe->width[rot] == SPRITE_NEEDS_INFO)
+	{
 		R_CacheSprite (sprdef);	// [RH] speeds up game startup time
+	}
 
 	sector_t* sector = thing->subsector->sector;
 	fixed_t topoffs = sprframe->topoffset[rot];

@@ -27,7 +27,6 @@
 #include <sstream>
 #include <algorithm>
 #include <ctime>
-#include <map>
 
 #include "cmdlib.h"
 #include "c_console.h"
@@ -974,7 +973,7 @@ BEGIN_COMMAND (actorlist)
 	Printf (PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type]->name, mo->x, mo->y, mo->z, mo->angle, mo->state->statenum, mo->tics);
 	}
 }
 END_COMMAND(actorlist)

@@ -1282,7 +1282,7 @@ void M_PlayerSetup(int choice)
 {
 	M_StringCopy(savegamestrings[0], cl_name.cstring(), SAVESTRINGSIZE);
 	M_SetupNextMenu (&PSetupDef);
-	PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
+	PlayerState = states[mobjinfo[MT_PLAYER]->seestate];
 	PlayerTics = PlayerState->tics;
 
 	if (fire_surface == NULL)
@@ -1300,9 +1300,9 @@ static void M_PlayerSetupTicker()
 		return;
 
 	if (PlayerState->tics == -1 || PlayerState->nextstate == S_NULL)
-		PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
+		PlayerState = states[mobjinfo[MT_PLAYER]->seestate];
 	else
-		PlayerState = &states[PlayerState->nextstate];
+		PlayerState = states[PlayerState->nextstate];
 	PlayerTics = PlayerState->tics;
 }
 
@@ -1526,7 +1526,7 @@ static void M_PlayerSetupDrawer()
 		}
 	}
 	{
-		const int spritenum = states[mobjinfo[MT_PLAYER].spawnstate].sprite;
+		const int spritenum = states[mobjinfo[MT_PLAYER]->spawnstate]->sprite;
 		const spriteframe_t* sprframe = &sprites[spritenum].spriteframes[PlayerState->frame & FF_FRAMEMASK];
 
 		// [Nes] Color of player preview uses the unused translation table (player 0), instead

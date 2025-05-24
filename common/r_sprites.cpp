@@ -24,7 +24,7 @@
 
 #include "odamex.h"
 
-#include"r_sprites.h"
+#include "r_sprites.h"
 
 #include "m_alloc.h"
 
@@ -41,16 +41,18 @@
 //
 // INITIALIZATION FUNCTIONS
 //
-spritedef_t* sprites;
+std::map<int32_t, spritedef_t> sprites;
 int numsprites;
 
 spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
 int maxframe;
 
+// [CMB] This function assumes that sprnames has the correct sprites in order
 void R_CacheSprite(spritedef_t *sprite)
 {
+	auto it = sprnames.find(sprite->spritenum);
 	DPrintFmt("cache sprite {}\n",
-		sprite - sprites < NUMSPRITES ? sprnames[sprite - sprites] : "");
+		it != sprnames.end() ? it->second : "");
 	for (int i = 0; i < sprite->numframes; i++)
 	{
 		for (int r = 0; r < 16; r++)
@@ -59,6 +61,7 @@ void R_CacheSprite(spritedef_t *sprite)
 			{
 				if (sprite->spriteframes[i].lump[r] == -1)
 					I_Error("Sprite {}, rotation {} has no lump", i, r);
+
 				patch_t* patch = W_CachePatch(sprite->spriteframes[i].lump[r]);
 				sprite->spriteframes[i].width[r] = patch->width()<<FRACBITS;
 				sprite->spriteframes[i].offset[r] = patch->leftoffset()<<FRACBITS;
@@ -123,7 +126,7 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, bool fli
 
 
 // [RH] Seperated out of R_InitSpriteDefs()
-static void R_InstallSprite(const char *name, int num)
+static void R_InstallSprite(const char *name, int32_t num)
 {
 	if (maxframe == -1)
 	{
@@ -197,7 +200,7 @@ static void R_InstallSprite(const char *name, int num)
 //	(4 chars exactly) to be used.
 // Builds the sprite rotation matrices to account
 //	for horizontally flipped sprites.
-// Will report an error if the lumps are inconsistant.
+// Will report an error if the lumps are inconsistent.
 // Only called at startup.
 //
 // Sprite lump names are 4 characters for the actor,
@@ -206,16 +209,9 @@ static void R_InstallSprite(const char *name, int num)
 //	letter/number appended.
 // The rotation character can be 0 to signify no rotations.
 //
-static void R_InitSpriteDefs(const char **namelist)
+static void R_InitSpriteDefs(std::vector<spriteinfo_t*>& namelist)
 {
-	// count the number of sprite names
-	for (numsprites = 0; namelist[numsprites]; numsprites++)
-		;
-
-	if (!numsprites)
-		return;
-
-	sprites = (spritedef_t *)Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
+	numsprites = namelist.size();
 
 	// scan all the lump names for each of the names,
 	//	noting the highest frame letter.
@@ -229,13 +225,13 @@ static void R_InitSpriteDefs(const char **namelist)
                 }
 
 		maxframe = -1;
-		const int intname = *(int *)namelist[i];
+		const int intname = *(int *)namelist[i]->sprite;
 
 		// scan the lumps,
 		//	filling in the frames for whatever is found
 		for (int l = lastspritelump; l >= firstspritelump; l--)
 		{
-			if (*(int *)lumpinfo[l].name == intname)
+			if (*(int*)lumpinfo[l].name == intname && lumpinfo[l].size > 0)
 			{
 				R_InstallSpriteLump (l,
 									 lumpinfo[l].name[4] - 'A', // denis - fixme - security
@@ -250,7 +246,7 @@ static void R_InitSpriteDefs(const char **namelist)
 			}
 		}
 
-		R_InstallSprite(namelist[i], i);
+		R_InstallSprite(namelist[i]->sprite, namelist[i]->spritenum);
 	}
 }
 
@@ -267,7 +263,7 @@ vissprite_t		*lastvissprite;
 // R_InitSprites
 // Called at program start.
 //
-void R_InitSprites(const char **namelist)
+void R_InitSprites(std::vector<spriteinfo_t*>& sprites)
 {
 	MaxVisSprites = 128;	// [RH] This is the initial default value. It grows as needed.
 
@@ -276,7 +272,7 @@ void R_InitSprites(const char **namelist)
 	vissprites = (vissprite_t *) M_Malloc(MaxVisSprites * sizeof(vissprite_t));
 	lastvissprite = &vissprites[MaxVisSprites];
 
-	R_InitSpriteDefs (namelist);
+	R_InitSpriteDefs (sprites);
 }
 
 VERSION_CONTROL (r_sprites_cpp, "$Id$")

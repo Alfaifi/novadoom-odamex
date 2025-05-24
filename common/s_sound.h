@@ -25,8 +25,6 @@
 
 #include "m_fixed.h"
 
-#include <map>
-
 #define MAX_SNDNAME 63
 
 class AActor;
