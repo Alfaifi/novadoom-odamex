@@ -217,33 +217,46 @@ static bool WI_checkConditions(const std::vector<interlevelcond_t>& conditions,
 	bool conditionsmet = true;
 
 	LevelInfos& levels = getLevelInfos();
-	level_pwad_info_t& exitinglevel = levels.findByName(wbs->current);
-	level_pwad_info_t& enteringlevel = levels.findByName(wbs->next);
-	level_pwad_info_t& currentlevel = enteringcondition ? enteringlevel : exitinglevel;
-	int map_number = currentlevel.levelnum;
+	const level_pwad_info_t& exitinglevel = levels.findByName(wbs->current);
+	const level_pwad_info_t& enteringlevel = levels.findByName(wbs->next);
+	const level_pwad_info_t& currentlevel = enteringcondition ? enteringlevel : exitinglevel;
+	const int mapnum = currentlevel.mapnum;
+	const OLumpName& mapname = currentlevel.mapname;
 
 	for (const auto& cond : conditions)
 	{
 		switch (cond.condition)
 		{
 			case animcondition_t::CurrMapGreater:
-				conditionsmet = conditionsmet && (map_number > cond.param1);
+				conditionsmet = conditionsmet && (mapnum > cond.param);
 				break;
 
 			case animcondition_t::CurrMapEqual:
-				conditionsmet = conditionsmet && (map_number == cond.param1);
+				if (cond.isZDoom)
+					conditionsmet = conditionsmet && (mapname == cond.mapname1);
+				else
+					conditionsmet = conditionsmet && (mapnum == cond.param);
 				break;
 
 			case animcondition_t::CurrMapNotEqual:
-				conditionsmet = conditionsmet && !(map_number == cond.param1);
+				if (cond.isZDoom)
+					conditionsmet = conditionsmet && (mapname != cond.mapname1);
+				else
+					conditionsmet = conditionsmet && (mapnum != cond.param);
 				break;
 
 			case animcondition_t::MapVisited:
-				conditionsmet = conditionsmet && levels.findByNum(cond.param1).flags & LEVEL_VISITED;
+				if (cond.isZDoom)
+					conditionsmet = conditionsmet && levels.findByName(cond.mapname1).flags & LEVEL_VISITED;
+				else
+					conditionsmet = conditionsmet && levels.findByNum(cond.param).flags & LEVEL_VISITED;
 				break;
 
 			case animcondition_t::MapNotVisited:
-				conditionsmet = conditionsmet && !(levels.findByNum(cond.param1).flags & LEVEL_VISITED);
+				if (cond.isZDoom)
+					conditionsmet = conditionsmet && !(levels.findByName(cond.mapname1).flags & LEVEL_VISITED);
+				else
+					conditionsmet = conditionsmet && !(levels.findByNum(cond.param).flags & LEVEL_VISITED);
 				break;
 
 			case animcondition_t::CurrMapNotSecret:
@@ -263,11 +276,11 @@ static bool WI_checkConditions(const std::vector<interlevelcond_t>& conditions,
 				break;
 
 			case animcondition_t::TravelingBetween:
-				conditionsmet = conditionsmet && (exitinglevel.levelnum == cond.param1) && (enteringlevel.levelnum == cond.param2);
+				conditionsmet = conditionsmet && (exitinglevel.mapname == cond.mapname1) && (enteringlevel.mapname == cond.mapname2);
 				break;
 
 			case animcondition_t::NotTravelingBetween:
-				conditionsmet = conditionsmet && !((exitinglevel.levelnum == cond.param1) && (enteringlevel.levelnum == cond.param2));
+				conditionsmet = conditionsmet && !((exitinglevel.mapname == cond.mapname1) && (enteringlevel.mapname == cond.mapname2));
 				break;
 
 			default:
