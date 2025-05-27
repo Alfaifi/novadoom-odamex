@@ -249,14 +249,38 @@ static bool WI_checkConditions(const std::vector<interlevelcond_t>& conditions,
 				if (cond.isZDoom)
 					conditionsmet = conditionsmet && levels.findByName(cond.mapname1).flags & LEVEL_VISITED;
 				else
-					conditionsmet = conditionsmet && levels.findByNum(cond.param).flags & LEVEL_VISITED;
+				{
+					bool res = false;
+					for (size_t i = 0; i < levels.size(); i++)
+					{
+						const level_pwad_info_t& level = levels.at(i);
+						if ((level.mapnum == cond.param) && (level.flags & LEVEL_VISITED))
+						{
+							res = true;
+							break;
+						}
+					}
+					conditionsmet = conditionsmet && res;
+				}
 				break;
 
 			case animcondition_t::MapNotVisited:
 				if (cond.isZDoom)
 					conditionsmet = conditionsmet && !(levels.findByName(cond.mapname1).flags & LEVEL_VISITED);
 				else
-					conditionsmet = conditionsmet && !(levels.findByNum(cond.param).flags & LEVEL_VISITED);
+				{
+					bool res = true;
+					for (size_t i = 0; i < levels.size(); i++)
+					{
+						const level_pwad_info_t& level = levels.at(i);
+						if ((level.mapnum == cond.param) && (level.flags & LEVEL_VISITED))
+						{
+							res = false;
+							break;
+						}
+					}
+					conditionsmet = conditionsmet && res;
+				}
 				break;
 
 			case animcondition_t::CurrMapNotSecret:
