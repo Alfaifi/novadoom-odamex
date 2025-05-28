@@ -12,9 +12,9 @@ RUN true \
         cmake \
         make \
         deutex \
+        zlib1g-dev \
+        libgl1-mesa-dev \
         libssl-dev \
-        libsdl2-dev libsdl2-mixer-dev \
-        libpng-dev libpng++-dev \
         libcurl4-openssl-dev libcurlpp-dev \
         patch \
         > /dev/null
@@ -61,8 +61,10 @@ RUN true \
         -D CMAKE_CXX_COMPILER=g++ \
         -D CMAKE_C_COMPILER=gcc \
         -D BUILD_CLIENT=0 -D BUILD_LAUNCHER=0 \
+        -D CMAKE_C_FLAGS="-w" \
+        -D CMAKE_CXX_FLAGS="-w" \
         .. \
-    && cmake --build . --target odasrv
+    && cmake --build . --parallel 4 --target odasrv
 
 # Install Odamex
 ENV INSTALL_DIR=/usr/local/games/odamex
