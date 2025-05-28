@@ -60,6 +60,7 @@ RUN true \
         -D CMAKE_BUILD_TYPE=Release \
         -D CMAKE_CXX_COMPILER=g++ \
         -D CMAKE_C_COMPILER=gcc \
+        -D BUILD_CLIENT=0 -D BUILD_LAUNCHER=0 \
         .. \
     && cmake --build . --target odasrv
 
