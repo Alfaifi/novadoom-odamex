@@ -1248,7 +1248,8 @@ void M_QuitDOOM(int choice)
 {
 	// We pick index 0 which is language sensitive,
 	//  or one at random, between 1 and maximum number.
-	static std::string endstring =
+	static std::string endstring;
+	endstring =
 		fmt::sprintf("%s\n\n%s",
 		             GStrings.getIndex(GStrings.toIndex(QUITMSG) + (gametic % NUM_QUITMESSAGES)),
 		             GStrings(DOSY));
