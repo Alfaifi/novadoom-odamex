@@ -62,7 +62,8 @@ public:
 	int 		handle;			// handle of the sound being played
 	int			sound_id;
 	int			entchannel;		// entity's sound channel
-	float		attenuation;
+	int			attenuation;	// ATTN_* type (used by Odamex for channel priority)
+	float		dist_scale;		// Distance scaling
 	float		volume;
 	int			priority;
 	bool		loop;
@@ -76,7 +77,8 @@ public:
 		handle = -1;
 		sound_id = -1;
 		entchannel = CHAN_VOICE;
-		attenuation = 0.0f;
+		attenuation = ATTN_NONE;
+		dist_scale = 0.0f;
 		volume = 0.0f;
 		priority = MININT;
 		loop = false;
@@ -164,7 +166,7 @@ void S_NoiseDebug()
 			char temp[16];
 			fixed_t *origin = Channel[i].pt;
 
-			if (Channel[i].attenuation <= 0 && listenplayer().camera)
+			if (Channel[i].attenuation == ATTN_NONE && listenplayer().camera)
 			{
 				ox = listenplayer().camera->x;
 				oy = listenplayer().camera->y;
@@ -383,6 +385,15 @@ int S_GetChannel(sfxinfo_t* sfxinfo, float volume, int priority, unsigned max_in
 	return -1;
 }
 
+static void ApplyDistanceScaling(float dist_scale, fixed_t *approx_dist)
+{
+	if (dist_scale > 0.0f)
+	{
+		float scaled_dist = FIXED2FLOAT(*approx_dist) * dist_scale;
+		scaled_dist = clamp(scaled_dist, 0.0f, 32767.0f);
+		*approx_dist = FLOAT2FIXED(scaled_dist);
+	}
+}
 
 //
 // S_AdjustZdoomSoundParams
@@ -394,11 +405,12 @@ int S_GetChannel(sfxinfo_t* sfxinfo, float volume, int priority, unsigned max_in
 //      might step back in range during the sound.
 //
 static void AdjustSoundParamsZDoom(const AActor* listener, fixed_t x, fixed_t y,
-                                   float* vol, int* sep)
+                                   float* vol, int* sep, float dist_scale)
 {
 	static constexpr fixed_t MAX_SND_DIST = 2025 * FRACUNIT;
 	static constexpr fixed_t MIN_SND_DIST = 1 * FRACUNIT;
-	const int approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+	fixed_t approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+	ApplyDistanceScaling(dist_scale, &approx_dist);
 
 	if (approx_dist > MAX_SND_DIST)
 	{
@@ -446,11 +458,12 @@ static void AdjustSoundParamsZDoom(const AActor* listener, fixed_t x, fixed_t y,
 //      might step back in range during the sound.
 //
 static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
-                                  float* vol, int* sep)
+                                  float* vol, int* sep, float dist_scale)
 {
 	static constexpr fixed_t S_CLIPPING_DIST = 1200 * FRACUNIT;
 	static constexpr fixed_t S_CLOSE_DIST = 200 * FRACUNIT;
 	fixed_t approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+	ApplyDistanceScaling(dist_scale, &approx_dist);
 
 	if (S_UseMap8Volume())
 		approx_dist = MIN(approx_dist, S_CLIPPING_DIST);
@@ -498,7 +511,7 @@ static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
 // S_AdjustSoundParams
 //
 static bool AdjustSoundParams(const AActor* listener, fixed_t x, fixed_t y, float* vol,
-                              int* sep)
+                              int* sep, float dist_scale)
 {
 	*vol = 0.0f;
 	*sep = NORM_SEP;
@@ -507,9 +520,9 @@ static bool AdjustSoundParams(const AActor* listener, fixed_t x, fixed_t y, floa
 		return false;
 
 	if (co_zdoomsound)
-		AdjustSoundParamsZDoom(listener, x, y, vol, sep);
+		AdjustSoundParamsZDoom(listener, x, y, vol, sep, dist_scale);
 	else
-		AdjustSoundParamsDoom(listener, x, y, vol, sep);
+		AdjustSoundParamsDoom(listener, x, y, vol, sep, dist_scale);
 
 	return true;
 }
@@ -540,6 +553,7 @@ int S_CalculateSoundPriority(const fixed_t* pt, int channel, int attenuation)
 			priority = 100;
 			break;
 		case CHAN_BODY:
+		case CHAN_AMBIENT:
 			priority = 75;
 			break;
 		case CHAN_ITEM:
@@ -583,7 +597,8 @@ static int ResolveSound(int soundid)
 // a bit of a whore of a funtion but she works ok
 //
 static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
-	                     int sfx_id, float volume, int attenuation, bool looping)
+	                     int sfx_id, float volume, int attenuation, bool looping,
+	                     float dist_scale = 0.0f)
 {
 	if (volume <= 0.0f)
 		return;
@@ -641,7 +656,7 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	if (listenplayer().camera && attenuation != ATTN_NONE)
 	{
   		// Check to see if it is audible, and if not, modify the params
-		if (!AdjustSoundParams(listenplayer().camera, x, y, &volume, &sep))
+		if (!AdjustSoundParams(listenplayer().camera, x, y, &volume, &sep, dist_scale))
 			return;
 	}
 	else
@@ -699,6 +714,7 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	Channel[cnum].priority = priority;
 	Channel[cnum].entchannel = channel;
 	Channel[cnum].attenuation = attenuation;
+	Channel[cnum].dist_scale = dist_scale;
 	Channel[cnum].volume = volume;
 	Channel[cnum].x = x;
 	Channel[cnum].y = y;
@@ -749,7 +765,8 @@ void S_LoopedSoundID(fixed_t *pt, int channel, int sound_id, float volume, int a
 }
 
 static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, int channel,
-                              const char *name, float volume, int attenuation, bool looping)
+                              const char *name, float volume, int attenuation, bool looping,
+                              float dist_scale = 0.0f)
 {
 	if (!consoleplayer().mo && channel != CHAN_INTERFACE)
 		return;
@@ -802,11 +819,11 @@ static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, in
 	}
 
 	if (ent && ent != (AActor *)(~0))
-		S_StartSound(&ent->x, x, y, channel, sfx_id, volume, attenuation, looping);
+		S_StartSound(&ent->x, x, y, channel, sfx_id, volume, attenuation, looping, dist_scale);
 	else if (pt)
-		S_StartSound(pt, x, y, channel, sfx_id, volume, attenuation, looping);
+		S_StartSound(pt, x, y, channel, sfx_id, volume, attenuation, looping, dist_scale);
 	else
-		S_StartSound((fixed_t *)ent, x, y, channel, sfx_id, volume, attenuation, looping);
+		S_StartSound((fixed_t *)ent, x, y, channel, sfx_id, volume, attenuation, looping, dist_scale);
 }
 
 // [Russell] - Hack to stop multiple plat stop sounds
@@ -1030,7 +1047,7 @@ void S_UpdateSounds(void* listener_p)
 						y = c->y;
 					}
 
-					if (AdjustSoundParams(listener, x, y, &volume, &sep))
+					if (AdjustSoundParams(listener, x, y, &volume, &sep, c->dist_scale))
 						I_UpdateSoundParams(c->handle, volume, sep, NORM_PITCH);
 					else
 						S_StopChannel(cnum);
@@ -1168,7 +1185,7 @@ static struct AmbientSound {
 	int			periodmin;	// # of tics between repeats
 	int			periodmax;	// max # of tics for random ambients
 	float		volume;		// relative volume of sound
-	float		attenuation;
+	float		attenuation; // Used for distance scaling
 	char		sound[MAX_SNDNAME+1]; // Logical name of sound to play
 } Ambients[256];
 
@@ -1333,7 +1350,7 @@ void S_ParseSndInfo()
 					os.mustScan();
 					strncpy(ambient->sound, os.getToken().c_str(), MAX_SNDNAME);
 					ambient->sound[MAX_SNDNAME] = 0;
-					ambient->attenuation = 0.0f;
+					ambient->attenuation = 0.0f; // No change by default
 
 					os.mustScan();
 					if (os.compareTokenNoCase("point"))
@@ -1343,18 +1360,17 @@ void S_ParseSndInfo()
 
 						if (IsRealNum(os.getToken().c_str()))
 						{
-							ambient->attenuation = (os.getTokenFloat() > 0) ? os.getTokenFloat() : 1;
+							if (os.getTokenFloat() > 0.0f)
+							{
+								ambient->attenuation = os.getTokenFloat();
+							}
+
 							os.mustScan();
-						}
-						else
-						{
-							ambient->attenuation = 1;
 						}
 					}
 					else
 					{
 						ambient->type = AMB_TYPE_WORLD;
-						ambient->attenuation = -1;
 
 						if (os.compareTokenNoCase("surround") ||
 						    os.compareTokenNoCase("world"))
@@ -1527,8 +1543,8 @@ void A_Ambient(AActor *actor)
 
 		if (ambient->sound[0])
 		{
-			S_StartNamedSound (actor, NULL, 0, 0, CHAN_BODY,
-				ambient->sound, ambient->volume, ambient->attenuation, true);
+			S_StartNamedSound(actor, NULL, 0, 0, CHAN_AMBIENT, ambient->sound,
+			                  ambient->volume, ATTN_IDLE, true, ambient->attenuation);
 
 			SetTicker (&actor->tics, ambient);
 		}
@@ -1541,8 +1557,8 @@ void A_Ambient(AActor *actor)
 	{
 		if (ambient->sound[0])
 		{
-			S_StartNamedSound (actor, NULL, 0, 0, CHAN_BODY,
-				ambient->sound, ambient->volume, ambient->attenuation, false);
+			S_StartNamedSound(actor, NULL, 0, 0, CHAN_AMBIENT, ambient->sound,
+			                  ambient->volume, ATTN_IDLE, false, ambient->attenuation);
 
 			SetTicker (&actor->tics, ambient);
 		}

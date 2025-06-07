@@ -231,7 +231,7 @@ static struct AmbientSound {
 	int			periodmin;	// # of tics between repeats
 	int			periodmax;	// max # of tics for random ambients
 	float		volume;		// relative volume of sound
-	float		attenuation;
+	float		attenuation; // Used for distance scaling
 	char		sound[MAX_SNDNAME+1]; // Logical name of sound to play
 } Ambients[256];
 
@@ -397,7 +397,7 @@ void S_ParseSndInfo()
 					os.mustScan();
 					strncpy(ambient->sound, os.getToken().c_str(), MAX_SNDNAME);
 					ambient->sound[MAX_SNDNAME] = 0;
-					ambient->attenuation = 0.0f;
+					ambient->attenuation = 0.0f; // No change by default
 
 					os.mustScan();
 					if (os.compareTokenNoCase("point"))
@@ -407,19 +407,17 @@ void S_ParseSndInfo()
 
 						if (IsRealNum(os.getToken().c_str()))
 						{
-							ambient->attenuation =
-							    (os.getTokenFloat() > 0) ? os.getTokenFloat() : 1;
+							if (os.getTokenFloat() > 0.0f)
+							{
+								ambient->attenuation = os.getTokenFloat();
+							}
+
 							os.mustScan();
-						}
-						else
-						{
-							ambient->attenuation = 1;
 						}
 					}
 					else
 					{
 						ambient->type = AMB_TYPE_WORLD;
-						ambient->attenuation = -1;
 
 						if (os.compareTokenNoCase("surround") ||
 						    os.compareTokenNoCase("world"))
