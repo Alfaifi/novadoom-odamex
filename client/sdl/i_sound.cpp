@@ -363,7 +363,7 @@ int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
 	// the last channel we used
 	int channel = nextchannel;
 
-	do
+	while (channel_in_use[channel])
 	{
 		channel = (channel + 1) % NUM_CHANNELS;
 
@@ -372,7 +372,7 @@ int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
 			fmt::print(stderr, "No free sound channels left.\n");
 			return -1;
 		}
-	} while (channel_in_use[channel]);
+	}
 
 	nextchannel = channel;
 
