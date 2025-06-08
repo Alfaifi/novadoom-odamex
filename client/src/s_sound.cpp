@@ -1449,6 +1449,12 @@ void S_ParseSndInfo()
 				strncpy(name, tok.c_str(), MAX_SNDNAME);
 				name[MAX_SNDNAME] = 0;
 				os.mustScan();
+
+				if (os.compareToken("="))
+				{
+					os.mustScan();
+				}
+
 				S_AddSound(name, os.getToken().c_str());
 			}
 		}
