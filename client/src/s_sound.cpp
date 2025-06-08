@@ -1160,7 +1160,7 @@ static struct AmbientSound {
 #define PERIODIC	2
 #define CONTINUOUS	3
 #define POSITIONAL	4
-#define SURROUND	16
+#define WORLD		16
 
 void S_HashSounds()
 {
@@ -1340,16 +1340,17 @@ void S_ParseSndInfo()
 							ambient->attenuation = 1;
 						}
 					}
-					else if (os.compareTokenNoCase("surround"))
+					else
 					{
-						ambient->type = SURROUND;
-						os.mustScan();
+						ambient->type = WORLD;
 						ambient->attenuation = -1;
+
+						if (os.compareTokenNoCase("surround") ||
+						    os.compareTokenNoCase("world"))
+						{
+							os.mustScan();
+						}
 					}
-					//else if (os.compareTokenNoCase("world"))
-					//{
-						// todo
-					//}
 
 					if (os.compareTokenNoCase("continuous"))
 					{
