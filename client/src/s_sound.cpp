@@ -395,6 +395,19 @@ static void ApplyDistanceScaling(float dist_scale, fixed_t *approx_dist)
 	}
 }
 
+static void AdjustStereoSeparation(const AActor *listener, fixed_t x, fixed_t y, int *sep)
+{
+	// angle of source to listener
+	angle_t angle = R_PointToAngle2(listener->x, listener->y, x, y);
+	if (angle > listener->angle)
+		angle = angle - listener->angle;
+	else
+		angle = angle + (0xffffffff - listener->angle);
+
+	// stereo separation
+	*sep -= (FixedMul(S_STEREO_SWING, finesine[angle >> ANGLETOFINESHIFT]) >> FRACBITS);
+}
+
 //
 // S_AdjustZdoomSoundParams
 //
@@ -415,30 +428,14 @@ static void AdjustSoundParamsZDoom(const AActor* listener, fixed_t x, fixed_t y,
 	if (approx_dist > MAX_SND_DIST)
 	{
 		*vol = 0;
-		*sep = NORM_SEP;
 	}
-	else if (approx_dist < MIN_SND_DIST)
-	{
-		*vol = snd_sfxvolume;
-		*sep = NORM_SEP;
-	}
-	else
+	else if (approx_dist >= MIN_SND_DIST)
 	{
 		const float attenuation = static_cast<float>(SoundCurve[approx_dist >> FRACBITS]) / 128.0f;
 
-		*vol = snd_sfxvolume * attenuation;
+		*vol *= attenuation;
 
-		// angle of source to listener
-		angle_t angle = R_PointToAngle2(listener->x, listener->y, x, y);
-		if (angle > listener->angle)
-			angle = angle - listener->angle;
-		else
-			angle = angle + (0xffffffff - listener->angle);
-
-		// stereo separation
-		*sep =
-		    NORM_SEP -
-		    (FixedMul(S_STEREO_SWING, finesine[angle >> ANGLETOFINESHIFT]) >> FRACBITS);
+		AdjustStereoSeparation(listener, x, y, sep);
 	}
 }
 
@@ -471,14 +468,8 @@ static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
 	if (approx_dist > S_CLIPPING_DIST)
 	{
 		*vol = 0;
-		*sep = NORM_SEP;
 	}
-	else if (approx_dist < S_CLOSE_DIST)
-	{
-		*vol = snd_sfxvolume;
-		*sep = NORM_SEP;
-	}
-	else
+	else if (approx_dist >= S_CLOSE_DIST)
 	{
 		float attenuation = FIXED2FLOAT(
 		    FixedDiv(S_CLIPPING_DIST - approx_dist, S_CLIPPING_DIST - S_CLOSE_DIST));
@@ -489,19 +480,9 @@ static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
 		if (S_UseMap8Volume() && attenuation < 0.192)
 			attenuation = 0.192;
 
-		*vol = snd_sfxvolume * attenuation;
+		*vol *= attenuation;
 
-		// angle of source to listener
-		angle_t angle = R_PointToAngle2(listener->x, listener->y, x, y);
-		if (angle > listener->angle)
-			angle = angle - listener->angle;
-		else
-			angle = angle + (0xffffffff - listener->angle);
-
-		// stereo separation
-		*sep =
-		    NORM_SEP -
-		    (FixedMul(S_STEREO_SWING, finesine[angle >> ANGLETOFINESHIFT]) >> FRACBITS);
+		AdjustStereoSeparation(listener, x, y, sep);
 	}
 }
 
@@ -513,9 +494,6 @@ static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
 static bool AdjustSoundParams(const AActor* listener, fixed_t x, fixed_t y, float* vol,
                               int* sep, float dist_scale)
 {
-	*vol = 0.0f;
-	*sep = NORM_SEP;
-
 	if (!listener)
 		return false;
 
@@ -651,18 +629,18 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	if (sfxinfo->lumpnum == sfx_empty)
 		return;
 
-	int sep;
+	int sep = NORM_SEP;
 
 	if (listenplayer().camera && attenuation != ATTN_NONE)
 	{
+		volume = snd_sfxvolume;
+
   		// Check to see if it is audible, and if not, modify the params
 		if (!AdjustSoundParams(listenplayer().camera, x, y, &volume, &sep, dist_scale))
 			return;
 	}
 	else
 	{
-		sep = NORM_SEP;
-
 		if (channel == CHAN_ANNOUNCER)
 			volume = snd_announcervolume;
 		else
@@ -1008,26 +986,18 @@ void S_UpdateSounds(void* listener_p)
 				// initialize parameters
 				int sep = NORM_SEP;
 
-				float maxvolume;
+				float volume;
 				if (Channel[cnum].entchannel == CHAN_ANNOUNCER)
-					maxvolume = snd_announcervolume;
+					volume = snd_announcervolume;
 				else
-					maxvolume = snd_sfxvolume;
-
-				float volume = maxvolume;
+					volume = snd_sfxvolume;
 
 				if (sfx->link != static_cast<int>(sfxinfo_t::NO_LINK))
 				{
-					volume += Channel[cnum].volume;
-
 					if (volume <= 0)
 					{
 						S_StopChannel(cnum);
 						continue;
-					}
-					else if (volume > maxvolume)
-					{
-						volume = maxvolume;
 					}
 				}
 
