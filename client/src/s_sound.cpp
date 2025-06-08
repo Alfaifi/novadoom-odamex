@@ -976,7 +976,7 @@ void S_UpdateSounds(void* listener_p)
 	AActor* listener = (AActor*)listener_p;
 	for (int cnum = 0; cnum < (int)numChannels; cnum++)
 	{
-		const channel_t* c = &Channel[cnum];
+		channel_t* c = &Channel[cnum];
 		const sfxinfo_t* sfx = c->sfxinfo;
 
 		if (c->sfxinfo)
@@ -986,15 +986,14 @@ void S_UpdateSounds(void* listener_p)
 				// initialize parameters
 				int sep = NORM_SEP;
 
-				float volume;
 				if (Channel[cnum].entchannel == CHAN_ANNOUNCER)
-					volume = snd_announcervolume;
+					c->volume = snd_announcervolume;
 				else
-					volume = snd_sfxvolume;
+					c->volume = snd_sfxvolume;
 
 				if (sfx->link != static_cast<int>(sfxinfo_t::NO_LINK))
 				{
-					if (volume <= 0)
+					if (c->volume <= 0.0f)
 					{
 						S_StopChannel(cnum);
 						continue;
@@ -1017,8 +1016,8 @@ void S_UpdateSounds(void* listener_p)
 						y = c->y;
 					}
 
-					if (AdjustSoundParams(listener, x, y, &volume, &sep, c->dist_scale))
-						I_UpdateSoundParams(c->handle, volume, sep, NORM_PITCH);
+					if (AdjustSoundParams(listener, x, y, &c->volume, &sep, c->dist_scale))
+						I_UpdateSoundParams(c->handle, c->volume, sep, NORM_PITCH);
 					else
 						S_StopChannel(cnum);
 				}
