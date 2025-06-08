@@ -1543,8 +1543,10 @@ void A_Ambient(AActor *actor)
 
 		if (ambient->sound[0])
 		{
+			const int attn_type =
+			    (ambient->type == AMB_TYPE_POINT ? ATTN_IDLE : ATTN_NONE);
 			S_StartNamedSound(actor, NULL, 0, 0, CHAN_AMBIENT, ambient->sound,
-			                  ambient->volume, ATTN_IDLE, true, ambient->attenuation);
+			                  ambient->volume, attn_type, true, ambient->attenuation);
 
 			SetTicker (&actor->tics, ambient);
 		}
@@ -1557,8 +1559,10 @@ void A_Ambient(AActor *actor)
 	{
 		if (ambient->sound[0])
 		{
+			const int attn_type =
+			    (ambient->type == AMB_TYPE_POINT ? ATTN_IDLE : ATTN_NONE);
 			S_StartNamedSound(actor, NULL, 0, 0, CHAN_AMBIENT, ambient->sound,
-			                  ambient->volume, ATTN_IDLE, false, ambient->attenuation);
+			                  ambient->volume, attn_type, false, ambient->attenuation);
 
 			SetTicker (&actor->tics, ambient);
 		}
