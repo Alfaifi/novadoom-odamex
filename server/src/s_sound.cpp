@@ -210,20 +210,30 @@ void S_StopMusic()
 //
 // =============================== [RH]
 
+typedef enum
+{
+	AMB_TYPE_NONE,
+    AMB_TYPE_POINT,
+    AMB_TYPE_WORLD,
+} amb_type_t;
+
+typedef enum
+{
+	AMB_MODE_NONE,
+    AMB_MODE_CONTINUOUS,
+    AMB_MODE_RANDOM,
+    AMB_MODE_PERIODIC,
+} amb_mode_t;
+
 static struct AmbientSound {
-	unsigned	type;		// type of ambient sound
+	amb_type_t	type;		// Ambient sound type
+	amb_mode_t	mode;		// Ambient sound mode
 	int			periodmin;	// # of tics between repeats
 	int			periodmax;	// max # of tics for random ambients
 	float		volume;		// relative volume of sound
 	float		attenuation;
 	char		sound[MAX_SNDNAME+1]; // Logical name of sound to play
 } Ambients[256];
-
-#define RANDOM		1
-#define PERIODIC	2
-#define CONTINUOUS	3
-#define POSITIONAL	4
-#define WORLD		16
 
 void S_HashSounds()
 {
@@ -378,7 +388,8 @@ void S_ParseSndInfo()
 						ambient = Ambients + index;
 					}
 
-					ambient->type = 0;
+					ambient->type = AMB_TYPE_NONE;
+					ambient->mode = AMB_MODE_NONE;
 					ambient->periodmin = 0;
 					ambient->periodmax = 0;
 					ambient->volume = 0.0f;
@@ -391,7 +402,7 @@ void S_ParseSndInfo()
 					os.mustScan();
 					if (os.compareTokenNoCase("point"))
 					{
-						ambient->type = POSITIONAL;
+						ambient->type = AMB_TYPE_POINT;
 						os.mustScan();
 
 						if (IsRealNum(os.getToken().c_str()))
@@ -407,7 +418,7 @@ void S_ParseSndInfo()
 					}
 					else
 					{
-						ambient->type = WORLD;
+						ambient->type = AMB_TYPE_WORLD;
 						ambient->attenuation = -1;
 
 						if (os.compareTokenNoCase("surround") ||
@@ -419,11 +430,11 @@ void S_ParseSndInfo()
 
 					if (os.compareTokenNoCase("continuous"))
 					{
-						ambient->type |= CONTINUOUS;
+						ambient->mode = AMB_MODE_CONTINUOUS;
 					}
 					else if (os.compareTokenNoCase("random"))
 					{
-						ambient->type |= RANDOM;
+						ambient->mode = AMB_MODE_RANDOM;
 						os.mustScanFloat();
 						ambient->periodmin =
 						    static_cast<int>(os.getTokenFloat() * TICRATE);
@@ -433,7 +444,7 @@ void S_ParseSndInfo()
 					}
 					else if (os.compareTokenNoCase("periodic"))
 					{
-						ambient->type |= PERIODIC;
+						ambient->mode = AMB_MODE_PERIODIC;
 						os.mustScanFloat();
 						ambient->periodmin =
 						    static_cast<int>(os.getTokenFloat() * TICRATE);
