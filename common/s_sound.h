@@ -145,8 +145,8 @@ void S_ChangeMusic(std::string music_name, bool looping);
 void S_StopMusic();
 
 // Stop and resume music, during game PAUSE.
-void S_PauseSound();
-void S_ResumeSound();
+void S_PauseMusic();
+void S_ResumeMusic();
 
 //
 // Updates music & sounds

@@ -951,7 +951,7 @@ bool S_GetSoundPlayingInfo(AActor *ent, int sound_id)
 //
 // Stop and resume music, during game PAUSE.
 //
-void S_PauseSound()
+void S_PauseMusic()
 {
 	if (!mus_paused)
 	{
@@ -960,7 +960,7 @@ void S_PauseSound()
 	}
 }
 
-void S_ResumeSound()
+void S_ResumeMusic()
 {
 	if (mus_paused)
 	{
