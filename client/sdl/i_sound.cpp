@@ -398,6 +398,41 @@ void I_StopSound (int handle)
 	Mix_HaltChannel(handle);
 }
 
+void I_PauseSound(int handle)
+{
+	if (!sound_initialized)
+	{
+		return;
+	}
+
+	if (channel_in_use[handle])
+	{
+		Mix_Pause(handle);
+	}
+}
+
+void I_ResumeSound(int handle)
+{
+	if (!sound_initialized)
+	{
+		return;
+	}
+
+	if (channel_in_use[handle])
+	{
+		Mix_Resume(handle);
+	}
+}
+
+int I_SoundIsPaused(int handle)
+{
+	if (!sound_initialized)
+	{
+		return 0;
+	}
+
+	return Mix_Paused(handle);
+}
 
 
 int I_SoundIsPlaying (int handle)

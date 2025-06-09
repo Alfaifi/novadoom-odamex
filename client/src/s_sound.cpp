@@ -908,6 +908,47 @@ void S_StopAllChannels()
 		S_StopChannel(i);
 }
 
+void S_StopAmbientSound()
+{
+	for (unsigned int i = 0; i < numChannels; i++)
+	{
+		if (Channel[i].entchannel == CHAN_AMBIENT)
+		{
+			S_StopChannel(i);
+		}
+	}
+}
+
+void S_PauseSound()
+{
+	for (unsigned int i = 0; i < numChannels; i++)
+	{
+		const channel_t *c = &Channel[i];
+
+		// Only applies to ambient sounds for now, but can be extended to all
+		// sounds in the future.
+		if (c->sfxinfo && c->entchannel == CHAN_AMBIENT)
+		{
+			I_PauseSound(c->handle);
+		}
+	}
+}
+
+void S_ResumeSound()
+{
+	for (unsigned int i = 0; i < numChannels; i++)
+	{
+		const channel_t *c = &Channel[i];
+
+		// Only applies to ambient sounds for now, but can be extended to all
+		// sounds in the future.
+		if (c->sfxinfo && c->entchannel == CHAN_AMBIENT)
+		{
+			I_ResumeSound(c->handle);
+		}
+	}
+}
+
 
 // Moves all the sounds from one thing to another. If the destination is
 // NULL, then the sound becomes a positioned sound.
@@ -986,7 +1027,11 @@ void S_UpdateSounds(void* listener_p)
 
 		if (c->sfxinfo)
 		{
-			if (I_SoundIsPlaying(c->handle))
+			if (I_SoundIsPaused(c->handle))
+			{
+				continue;
+			}
+			else if (I_SoundIsPlaying(c->handle))
 			{
 				// initialize parameters
 				int sep = NORM_SEP;

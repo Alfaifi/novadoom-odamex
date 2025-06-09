@@ -128,6 +128,10 @@ void S_StopSound(fixed_t* pt);
 // Stop sound for all channels
 void S_StopAllChannels();
 
+void S_StopAmbientSound();
+void S_PauseSound();
+void S_ResumeSound();
+
 // Is the sound playing on one of the entity's channels?
 bool S_GetSoundPlayingInfo(AActor* ent, int sound_id);
 bool S_GetSoundPlayingInfo(fixed_t* pt, int sound_id);

@@ -140,6 +140,18 @@ void S_StopAllChannels()
 {
 }
 
+void S_StopAmbientSound()
+{
+}
+
+void S_PauseSound()
+{
+}
+
+void S_ResumeSound()
+{
+}
+
 // Moves all the sounds from one thing to another. If the destination is
 // NULL, then the sound becomes a positioned sound.
 void S_RelinkSound(AActor *from, AActor *to)
