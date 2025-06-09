@@ -64,6 +64,7 @@ public:
 	int			entchannel;		// entity's sound channel
 	int			attenuation;	// ATTN_* type (used by Odamex for channel priority)
 	float		dist_scale;		// Distance scaling
+	float		initial_volume;	// Initial volume when sound attempts to start
 	float		volume;
 	int			priority;
 	bool		loop;
@@ -79,6 +80,7 @@ public:
 		entchannel = CHAN_VOICE;
 		attenuation = ATTN_NONE;
 		dist_scale = 0.0f;
+		initial_volume = 0.0f;
 		volume = 0.0f;
 		priority = MININT;
 		loop = false;
@@ -629,11 +631,13 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	if (sfxinfo->lumpnum == sfx_empty)
 		return;
 
+	volume = MIN(volume, 1.0f);
+	const float initial_volume = volume;
 	int sep = NORM_SEP;
 
 	if (listenplayer().camera && attenuation != ATTN_NONE)
 	{
-		volume = snd_sfxvolume;
+		volume *= snd_sfxvolume;
 
   		// Check to see if it is audible, and if not, modify the params
 		if (!AdjustSoundParams(listenplayer().camera, x, y, &volume, &sep, dist_scale))
@@ -642,9 +646,9 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	else
 	{
 		if (channel == CHAN_ANNOUNCER)
-			volume = snd_announcervolume;
+			volume *= snd_announcervolume;
 		else
-			volume = snd_sfxvolume;
+			volume *= snd_sfxvolume;
 	}
 
 	const int priority = S_CalculateSoundPriority(pt, channel, attenuation);
@@ -693,6 +697,7 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	Channel[cnum].entchannel = channel;
 	Channel[cnum].attenuation = attenuation;
 	Channel[cnum].dist_scale = dist_scale;
+	Channel[cnum].initial_volume = initial_volume;
 	Channel[cnum].volume = volume;
 	Channel[cnum].x = x;
 	Channel[cnum].y = y;
@@ -986,10 +991,11 @@ void S_UpdateSounds(void* listener_p)
 				// initialize parameters
 				int sep = NORM_SEP;
 
+				c->volume = c->initial_volume;
 				if (Channel[cnum].entchannel == CHAN_ANNOUNCER)
-					c->volume = snd_announcervolume;
+					c->volume *= snd_announcervolume;
 				else
-					c->volume = snd_sfxvolume;
+					c->volume *= snd_sfxvolume;
 
 				if (sfx->link != static_cast<int>(sfxinfo_t::NO_LINK))
 				{
