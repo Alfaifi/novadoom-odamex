@@ -1386,8 +1386,19 @@ void S_ParseSndInfo()
 						os.warning("Unknown ambient type ({})\n", os.getToken());
 					}
 
+					ambient->periodmin = MAX(0, ambient->periodmin);
+					ambient->periodmax = MAX(ambient->periodmin, ambient->periodmax);
+
 					os.mustScanFloat();
 					ambient->volume = clamp(os.getTokenFloat(), 0.0f, 1.0f);
+
+					if (ambient->mode == AMB_MODE_NONE || ambient->volume == 0.0f ||
+					    (ambient->mode != AMB_MODE_CONTINUOUS &&
+					     ambient->periodmin == 0 && ambient->periodmax == 0))
+					{
+						// Ignore bad ambient sounds
+						ambient->type == AMB_TYPE_NONE;
+					}
 				}
 				else if (os.compareTokenNoCase("map"))
 				{
@@ -1548,6 +1559,11 @@ void S_ActivateAmbient(AActor *origin, int ambient)
 		return;
 
 	AmbientSound *amb = &Ambients[ambient];
+
+	if (amb->type == AMB_TYPE_NONE)
+	{
+		return;
+	}
 
 	if (amb->mode != AMB_MODE_CONTINUOUS && amb->periodmin == 0)
 	{
