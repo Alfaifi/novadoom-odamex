@@ -64,6 +64,7 @@ public:
 	int			entchannel;		// entity's sound channel
 	int			attenuation;	// ATTN_* type (used by Odamex for channel priority)
 	float		dist_scale;		// Distance scaling
+	fixed_t		dist;			// Distance from listener
 	float		initial_volume;	// Initial volume when sound attempts to start
 	float		volume;
 	int			priority;
@@ -80,6 +81,7 @@ public:
 		entchannel = CHAN_VOICE;
 		attenuation = ATTN_NONE;
 		dist_scale = 0.0f;
+		dist = 0;
 		initial_volume = 0.0f;
 		volume = 0.0f;
 		priority = MININT;
@@ -331,9 +333,16 @@ bool S_CompareChannels(const channel_t &a, const channel_t &b)
 	if (a.start_time != b.start_time)
 		return a.start_time > b.start_time;
 
+	if (a.dist != b.dist)
+		return a.dist < b.dist;
+
 	return false;
 }
 
+bool S_CompareDistances(const channel_t &a, const channel_t &b)
+{
+	return a.dist < b.dist;
+}
 
 //
 // S_GetChannel
@@ -344,7 +353,8 @@ bool S_CompareChannels(const channel_t &a, const channel_t &b)
 // Returns -1 if no channels are availible.
 // Returns the number of the availible channel otherwise.
 //
-int S_GetChannel(sfxinfo_t* sfxinfo, float volume, int priority, unsigned max_instances)
+int S_GetChannel(sfxinfo_t* sfxinfo, float volume, int priority, unsigned max_instances,
+                 fixed_t dist, int channel)
 {
 	// not a valid sound
 	if (::Channel == NULL || sfxinfo == NULL)
@@ -360,6 +370,7 @@ int S_GetChannel(sfxinfo_t* sfxinfo, float volume, int priority, unsigned max_in
 	tempchan.priority = priority;
 	tempchan.volume = volume;
 	tempchan.start_time = gametic;
+	tempchan.dist = dist;
 
 	const int sound_id = S_FindSound(sfxinfo->name);
 
@@ -378,6 +389,25 @@ int S_GetChannel(sfxinfo_t* sfxinfo, float volume, int priority, unsigned max_in
 	for (size_t i = 0; i < numChannels; i++)
 		if (Channel[i].sfxinfo == NULL)
 			return i;
+
+	// No empty channels and this is an ambient sound?
+	if (channel == CHAN_AMBIENT)
+	{
+		if (volume > 0.0f)
+		{
+			// Try to kick out the furthest inaudible ambient sound.
+			std::sort(Channel, Channel + numChannels, S_CompareDistances);
+			for (int i = numChannels - 1; i-- > 0;)
+			{
+				if (Channel[i].entchannel == CHAN_AMBIENT && Channel[i].volume == 0.0f)
+				{
+					return i;
+				}
+			}
+		}
+
+		return -1;
+	}
 
 	// Find a channel with lower priority
 	for (size_t i = numChannels - 1; i-- > 0;)
@@ -420,11 +450,12 @@ static void AdjustStereoSeparation(const AActor *listener, fixed_t x, fixed_t y,
 //      might step back in range during the sound.
 //
 static void AdjustSoundParamsZDoom(const AActor* listener, fixed_t x, fixed_t y,
-                                   float* vol, int* sep, float dist_scale)
+                                   float* vol, int* sep, fixed_t* dist, float dist_scale)
 {
 	static constexpr fixed_t MAX_SND_DIST = 2025 * FRACUNIT;
 	static constexpr fixed_t MIN_SND_DIST = 1 * FRACUNIT;
 	fixed_t approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+	*dist = approx_dist;
 	ApplyDistanceScaling(dist_scale, &approx_dist);
 
 	if (approx_dist > MAX_SND_DIST)
@@ -457,11 +488,12 @@ static void AdjustSoundParamsZDoom(const AActor* listener, fixed_t x, fixed_t y,
 //      might step back in range during the sound.
 //
 static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
-                                  float* vol, int* sep, float dist_scale)
+                                  float* vol, int* sep, fixed_t* dist, float dist_scale)
 {
 	static constexpr fixed_t S_CLIPPING_DIST = 1200 * FRACUNIT;
 	static constexpr fixed_t S_CLOSE_DIST = 200 * FRACUNIT;
 	fixed_t approx_dist = P_AproxDistance(listener->x - x, listener->y - y);
+	*dist = approx_dist;
 	ApplyDistanceScaling(dist_scale, &approx_dist);
 
 	if (S_UseMap8Volume())
@@ -494,15 +526,15 @@ static void AdjustSoundParamsDoom(const AActor* listener, fixed_t x, fixed_t y,
 // S_AdjustSoundParams
 //
 static bool AdjustSoundParams(const AActor* listener, fixed_t x, fixed_t y, float* vol,
-                              int* sep, float dist_scale)
+                              int* sep, fixed_t* dist, float dist_scale)
 {
 	if (!listener)
 		return false;
 
 	if (co_zdoomsound)
-		AdjustSoundParamsZDoom(listener, x, y, vol, sep, dist_scale);
+		AdjustSoundParamsZDoom(listener, x, y, vol, sep, dist, dist_scale);
 	else
-		AdjustSoundParamsDoom(listener, x, y, vol, sep, dist_scale);
+		AdjustSoundParamsDoom(listener, x, y, vol, sep, dist, dist_scale);
 
 	return true;
 }
@@ -634,14 +666,18 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	volume = MIN(volume, 1.0f);
 	const float initial_volume = volume;
 	int sep = NORM_SEP;
+	fixed_t dist = 0;
 
 	if (listenplayer().camera && attenuation != ATTN_NONE)
 	{
 		volume *= snd_sfxvolume;
 
   		// Check to see if it is audible, and if not, modify the params
-		if (!AdjustSoundParams(listenplayer().camera, x, y, &volume, &sep, dist_scale))
+		if (!AdjustSoundParams(listenplayer().camera, x, y, &volume, &sep, &dist,
+		                       dist_scale))
+		{
 			return;
+		}
 	}
 	else
 	{
@@ -674,7 +710,8 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	const unsigned int max_instances = (channel == CHAN_ANNOUNCER) ? 1 : 3;
 
 	// try to find a channel
-	const int cnum = S_GetChannel(sfxinfo, volume, priority, max_instances);
+	const int cnum =
+	    S_GetChannel(sfxinfo, volume, priority, max_instances, dist, channel);
 
 	// no channel found
 	if (cnum < 0)
@@ -697,6 +734,7 @@ static void S_StartSound(fixed_t* pt, fixed_t x, fixed_t y, int channel,
 	Channel[cnum].entchannel = channel;
 	Channel[cnum].attenuation = attenuation;
 	Channel[cnum].dist_scale = dist_scale;
+	Channel[cnum].dist = dist;
 	Channel[cnum].initial_volume = initial_volume;
 	Channel[cnum].volume = volume;
 	Channel[cnum].x = x;
@@ -1067,10 +1105,15 @@ void S_UpdateSounds(void* listener_p)
 						y = c->y;
 					}
 
-					if (AdjustSoundParams(listener, x, y, &c->volume, &sep, c->dist_scale))
+					if (AdjustSoundParams(listener, x, y, &c->volume, &sep, &c->dist,
+					                      c->dist_scale))
+					{
 						I_UpdateSoundParams(c->handle, c->volume, sep, NORM_PITCH);
+					}
 					else
+					{
 						S_StopChannel(cnum);
+					}
 				}
 			}
 			else
