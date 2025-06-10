@@ -2737,8 +2737,20 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	// only servers control spawning of items
     // EXCEPT the client must spawn Type 14 (teleport exit).
 	// otherwise teleporters won't work well.
-	if (!serverside && (mthing->type != 14))
+	//
+	// Clients also handle spawning of ambient sounds.
+	//
+	if (mthing->type >= 14001 && mthing->type <= 14065)
+	{
+		if (!clientside)
+		{
+			return;
+		}
+	}
+	else if (!serverside && (mthing->type != 14))
+	{
 		return;
+	}
 
 	// count deathmatch start positions
 	if (mthing->type == 11 || (!sv_teamspawns && mthing->type >= 5080 && mthing->type <= 5082))
