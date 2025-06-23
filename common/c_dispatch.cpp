@@ -423,6 +423,8 @@ void AddCommandString(const std::string &str, uint32_t key)
 	delete[] command;
 }
 
+EXTERN_CVAR (cfgdir)
+
 #define MAX_EXEC_DEPTH 32
 
 static bool if_command_result;
@@ -450,18 +452,22 @@ BEGIN_COMMAND (exec)
 	std::string found = M_FindUserFileName(argv[1], ".cfg");
 	if (found.empty())
 	{
-		Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
-		return;
+		found = M_FindUserFileName(argv[1], ".cfg");
+		if (found.empty())
+		{
+			Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+			return;
+		}
 	}
 
-	std::ifstream ifs(argv[1]);
+	std::ifstream ifs(found);
 	if(ifs.fail())
 	{
 		Printf(PRINT_WARNING, "Could not open \"%s\"\n", argv[1]);
 		return;
 	}
 
-	exec_stack.push_back(argv[1]);
+	exec_stack.push_back(found);
 
 	while(ifs)
 	{

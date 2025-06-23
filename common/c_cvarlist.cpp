@@ -429,6 +429,9 @@ CVAR(				lookspring, "1", "Generate centerview when mlook encountered",
 CVAR(				waddirs, "", "Allow custom WAD directories to be specified",
 					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
 
+CVAR(				cfgdir, "", "Allow custom cfg directory to be specified",
+					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
+
 CVAR_RANGE_FUNC_DECL(net_rcvbuf, "131072", "Net receive buffer size in bytes",
 					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE,
 					1500.0f, 256.0f * 1024.0f * 1024.0f)
