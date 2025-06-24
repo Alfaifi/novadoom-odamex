@@ -33,6 +33,7 @@
 
 #include "p_local.h"
 #include "r_local.h"
+#include "r_sky.h"
 #include "v_video.h"
 
 #include "m_vectors.h"
@@ -813,7 +814,8 @@ void R_PrepWall(fixed_t px1, fixed_t py1, fixed_t px2, fixed_t py2, fixed_t dist
 
 		// hack to allow height changes in outdoor areas (sky hack)
 		// copy back ceiling height array to front ceiling height array
-		if (frontsector->ceilingpic == skyflatnum && backsector->ceilingpic == skyflatnum)
+		if ((frontsector->ceilingpic == skyflatnum || R_IsSkyFlat(frontsector->ceilingpic)) &&
+		    (backsector->ceilingpic == skyflatnum || R_IsSkyFlat(backsector->ceilingpic)))
 			memcpy(walltopf+start, walltopb+start, width*sizeof(*walltopb));
 	}
 
@@ -980,7 +982,8 @@ void R_StoreWallRange(int start, int stop)
 
 			// Sky hack
 			markceiling = markceiling &&
-				(frontsector->ceilingpic != skyflatnum || backsector->ceilingpic != skyflatnum);
+				((frontsector->ceilingpic != skyflatnum || !R_IsSkyFlat(frontsector->ceilingpic)) ||
+				 (backsector->ceilingpic != skyflatnum || !R_IsSkyFlat(backsector->ceilingpic)));
 		}
 
 
@@ -1030,7 +1033,8 @@ void R_StoreWallRange(int start, int stop)
 		}
 
 		// [SL] additional fix for sky hack
-		if (frontsector->ceilingpic == skyflatnum && backsector->ceilingpic == skyflatnum)
+		if ((frontsector->ceilingpic == skyflatnum || R_IsSkyFlat(frontsector->ceilingpic)) &&
+		    (backsector->ceilingpic == skyflatnum || R_IsSkyFlat(backsector->ceilingpic)))
 			toptexture = 0;
 	}
 
@@ -1087,7 +1091,8 @@ void R_StoreWallRange(int start, int stop)
 			markfloor = false;
 		// below view plane?
 		if (P_CeilingHeight(viewx, viewy, frontsector) <= viewz &&
-			frontsector->ceilingpic != skyflatnum)
+			frontsector->ceilingpic != skyflatnum &&
+			!R_IsSkyFlat(frontsector->ceilingpic))
 			markceiling = false;
 	}
 

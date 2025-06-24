@@ -299,7 +299,7 @@ visplane_t *R_FindPlane (plane_t secplane, int picnum, int lightlevel,
 	visplane_t *check;
 	unsigned hash;						// killough
 
-	if (picnum == skyflatnum || picnum & PL_SKYFLAT)  // killough 10/98
+	if (picnum == skyflatnum || picnum & PL_SKYFLAT || R_IsSkyFlat(picnum))  // killough 10/98
 		lightlevel = 0;		// most skies map together
 
 	// New visplane algorithm uses hash table -- killough
