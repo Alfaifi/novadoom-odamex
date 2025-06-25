@@ -429,7 +429,23 @@ CVAR(				lookspring, "1", "Generate centerview when mlook encountered",
 CVAR(				waddirs, "", "Allow custom WAD directories to be specified",
 					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
 
-CVAR(				cfgdir, "", "Allow custom cfg directory to be specified",
+constexpr const char* defaultCfgDir() {
+#ifdef SERVER_APP
+	#ifdef _WIN32
+		return "C:\\Program Files\\Odamex"; // FIXME: account for per-user installs
+	#elif defined(__APPLE__)
+		return ""; // FIXME: put the correct path for macOS here
+	#elif defined(__linux__) && defined(ODAMEX_INSTALL_DATADIR)
+		return ODAMEX_INSTALL_DATADIR;
+	#else
+		return "";
+	#endif
+#else
+	return "";
+#endif
+};
+
+CVAR(				cfgdir, defaultCfgDir(), "Allow custom cfg directory to be specified",
 					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
 
 CVAR_RANGE_FUNC_DECL(net_rcvbuf, "131072", "Net receive buffer size in bytes",

@@ -437,33 +437,37 @@ BEGIN_COMMAND (exec)
 	static std::vector<std::string> exec_stack;
 	static std::vector<bool>	tag_stack;
 
-	if(std::find(exec_stack.begin(), exec_stack.end(), argv[1]) != exec_stack.end())
+	std::string found = M_FindUserFileName(argv[1], ".cfg");
+	if (found.empty())
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", argv[1]);
+		found = M_CleanPath(M_JoinPath(cfgdir.str(), argv[1]));
+		if (!M_FileExists(found))
+		{
+			found += ".cfg";
+			if (!M_FileExists(found))
+			{
+				Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+				return;
+			}
+		}
+	}
+
+	if(std::find(exec_stack.begin(), exec_stack.end(), found) != exec_stack.end())
+	{
+		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
 		return;
 	}
 
 	if(exec_stack.size() >= MAX_EXEC_DEPTH)
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", argv[1]);
+		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
 		return;
-	}
-
-	std::string found = M_FindUserFileName(argv[1], ".cfg");
-	if (found.empty())
-	{
-		found = M_FindUserFileName(argv[1], ".cfg");
-		if (found.empty())
-		{
-			Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
-			return;
-		}
 	}
 
 	std::ifstream ifs(found);
 	if(ifs.fail())
 	{
-		Printf(PRINT_WARNING, "Could not open \"%s\"\n", argv[1]);
+		Printf(PRINT_WARNING, "Could not open \"%s\"\n", found);
 		return;
 	}
 

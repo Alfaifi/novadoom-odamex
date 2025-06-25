@@ -48,6 +48,14 @@ std::ofstream LOG;
 std::ifstream CON;
 
 /**
+ * @brief Joins two paths together
+*/
+std::string M_JoinPath(std::string_view path1, std::string_view path2)
+{
+	return (fs::path(path1) / path2).string();
+}
+
+/**
  * @brief Expand "~" into the user's home directory.
 */
 void M_ExpandHomeDir(std::string& path)
