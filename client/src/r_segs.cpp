@@ -981,8 +981,7 @@ void R_StoreWallRange(int start, int stop)
 
 			// Sky hack
 			markceiling = markceiling &&
-				((frontsector->ceilingpic != skyflatnum || !R_IsSkyFlat(frontsector->ceilingpic)) ||
-				 (backsector->ceilingpic != skyflatnum || !R_IsSkyFlat(backsector->ceilingpic)));
+				(!R_IsSkyFlat(frontsector->ceilingpic) || !R_IsSkyFlat(backsector->ceilingpic));
 		}
 
 
