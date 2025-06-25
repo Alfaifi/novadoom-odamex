@@ -423,8 +423,6 @@ void AddCommandString(const std::string &str, uint32_t key)
 	delete[] command;
 }
 
-EXTERN_CVAR (cfgdir)
-
 #define MAX_EXEC_DEPTH 32
 
 static bool if_command_result;
@@ -440,7 +438,14 @@ BEGIN_COMMAND (exec)
 	std::string found = M_FindUserFileName(argv[1], ".cfg");
 	if (found.empty())
 	{
-		found = M_CleanPath(M_JoinPath(cfgdir.str(), argv[1]));
+		const char* cfgdir = Args.CheckValue("-cfgdir");
+		if (!cfgdir)
+		{
+			Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+			return;
+		}
+
+		found = M_CleanPath(M_JoinPath(cfgdir, argv[1]));
 		if (!M_FileExists(found))
 		{
 			found += ".cfg";
