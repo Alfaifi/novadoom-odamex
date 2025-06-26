@@ -13,9 +13,7 @@ RUN true \
         make \
         deutex \
         zlib1g-dev \
-        libgl1-mesa-dev \
-        libssl-dev \
-        libcurl4-openssl-dev libcurlpp-dev \
+        libzstd1 libzstd-dev \
         patch \
         > /dev/null
 
@@ -42,7 +40,7 @@ RUN true \
 # Update submodules
 RUN true \
     && git submodule init \
-    && git submodule update
+    && git submodule update -r
 
 # Setup Build
 RUN true \
@@ -88,11 +86,6 @@ RUN true \
     && apt-get update -qq \
     && apt-get install -qq --no-install-recommends \
         tini \
-        libssl1.1 \
-        libsdl2-2.0-0 \
-        libsdl2-mixer-2.0-0 \
-        libpng16-16 \
-        libcurl4 \
         gosu \
         > /dev/null \
     && rm -rf /var/lib/apt/lists/*
