@@ -49,12 +49,43 @@ inline auto format_as(maplist_status_t eStatus)
 	return fmt::underlying(eStatus);
 }
 
+struct maplist_lastmaps_t {
+	std::vector<std::pair<OLumpName, OLumpName>> entries;
+
+	bool empty() const {
+		return entries.empty();
+	}
+};
+
 // Map list entry structure
-typedef struct {
+struct maplist_entry_t {
 	std::string map;
+	// FIXME: there's some lastmap duplication here because of this being in common
+	// and requiring compatibility with 11.x
+	// rework this for 12.0.0
 	std::string lastmap;
+	maplist_lastmaps_t lastmaps;
 	std::vector<std::string> wads;
-} maplist_entry_t;
+};
+
+inline auto format_as(const maplist_lastmaps_t& lastmaps)
+{
+	std::string out;
+	bool first = true;
+	for (const auto& [from, to] : lastmaps.entries)
+	{
+		if (!first)
+			out += ",";
+
+		if (!to.empty())
+			out += fmt::format("{}->{}", from, to);
+		else
+			out += from.c_str();
+
+		first = false;
+	}
+	return out;
+}
 
 // Query result
 typedef std::pair<size_t, maplist_entry_t*> maplist_qrow_t;
