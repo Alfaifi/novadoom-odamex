@@ -152,15 +152,6 @@ const char* GetBase(const char* in)
 
 BEGIN_COMMAND (wad) // denis - changes wads
 {
-	std::string lastmap = argv[argc-1];
-	if (lastmap.rfind("lastmap=", 0) == 0)
-	{
-		lastmap = lastmap.substr(8);
-		argc--;
-	}
-	else
-		lastmap = "";
-
 	// [Russell] print out some useful info
 	if (argc == 1)
 	{
@@ -172,6 +163,15 @@ BEGIN_COMMAND (wad) // denis - changes wads
 
 	    return;
 	}
+
+	std::string lastmap = argv[argc-1];
+	if (lastmap.rfind("lastmap=", 0) == 0)
+	{
+		lastmap = lastmap.substr(8);
+		argc--;
+	}
+	else
+		lastmap = "";
 
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
 	G_LoadWadString(wadstr, "", lastmap);
@@ -242,7 +242,7 @@ void G_ChangeMap()
 		if (!Maplist::instance().lobbyempty())
 		{
 			std::string wadstr = C_EscapeWadList(lobby_entry.wads);
-			G_LoadWadString(wadstr, "", lobby_entry.map);
+			G_LoadWadString(wadstr, lobby_entry.map);
 		}
 		else
 		{

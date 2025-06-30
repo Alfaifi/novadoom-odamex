@@ -669,6 +669,14 @@ BEGIN_COMMAND (maplist) {
 } END_COMMAND (maplist)
 
 BEGIN_COMMAND (addmap) {
+	if (argc < 2) {
+		Printf(PRINT_HIGH, "Usage: addmap <map lump> [wad name] [...]\n");
+		Printf(PRINT_HIGH, "If you don't specify a wad name, it'll load the IWAD by default.\n");
+		return;
+	}
+
+	std::vector<std::string> arguments = VectorArgs(argc, argv);
+
 	std::string lastmap = argv[argc-1];
 	if (lastmap.rfind("lastmap=", 0) == 0)
 	{
@@ -677,14 +685,6 @@ BEGIN_COMMAND (addmap) {
 	}
 	else
 		lastmap = "";
-
-	if (argc < 2) {
-		Printf(PRINT_HIGH, "Usage: addmap <map lump> [wad name] [...]\n");
-		Printf(PRINT_HIGH, "If you don't specify a wad name, it'll load the IWAD by default.\n");
-		return;
-	}
-
-	std::vector<std::string> arguments = VectorArgs(argc, argv);
 
 	// Grab the map lump.
 	maplist_entry_t maplist_entry;
@@ -707,6 +707,10 @@ BEGIN_COMMAND (addmap) {
 } END_COMMAND(addmap)
 
 BEGIN_COMMAND(insertmap) {
+	if (argc < 3) {
+		Printf(PRINT_HIGH, "Usage: insertmap <maplist position> <map lump> [wad name] [...]\n");
+	}
+
 	std::string lastmap = argv[argc-1];
 	if (lastmap.rfind("lastmap=", 0) == 0)
 	{
@@ -715,10 +719,6 @@ BEGIN_COMMAND(insertmap) {
 	}
 	else
 		lastmap = "";
-
-	if (argc < 3) {
-		Printf(PRINT_HIGH, "Usage: insertmap <maplist position> <map lump> [wad name] [...]\n");
-	}
 
 	std::vector<std::string> arguments = VectorArgs(argc, argv);
 
