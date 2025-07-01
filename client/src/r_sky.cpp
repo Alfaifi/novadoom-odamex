@@ -537,13 +537,13 @@ static void R_UpdateFireSky(sky_t* sky, bool init = false)
 	if (gametic % sky->fireticrate != 0 && !init) return;
 	const int texnum = sky->background.texnum;
 	texture_t* tex = textures[texnum];
-    for (int x = 0 ; x < tex->width; x++)
+	for (int x = 0 ; x < tex->width; x++)
 	{
-        for (int y = 1; y < tex->height; y++)
+		for (int y = 1; y < tex->height; y++)
 		{
-            spreadFire(y * tex->width + x, sky->firetexturedata, tex->width);
-        }
-    }
+			spreadFire(y * tex->width + x, sky->firetexturedata, tex->width);
+		}
+	}
 	byte* coldata;
 	for (int x = 0; x < tex->width; x++)
 	{
