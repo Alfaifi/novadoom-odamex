@@ -20,9 +20,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __C_MAPLIST__
-#define __C_MAPLIST__
+#pragma once
 
+#include <nonstd/expected.hpp>
 
 // Maplist statuses
 enum maplist_status_t
@@ -50,11 +50,13 @@ inline auto format_as(maplist_status_t eStatus)
 }
 
 struct maplist_lastmaps_t {
-	std::vector<std::pair<OLumpName, OLumpName>> entries;
+	std::vector<std::pair<std::string, std::string>> entries;
 
 	bool empty() const {
 		return entries.empty();
 	}
+
+	static nonstd::expected<maplist_lastmaps_t, std::string> parse(const std::string& lastmaps);
 };
 
 // Map list entry structure
@@ -90,5 +92,3 @@ inline auto format_as(const maplist_lastmaps_t& lastmaps)
 // Query result
 typedef std::pair<size_t, maplist_entry_t*> maplist_qrow_t;
 typedef std::vector<maplist_qrow_t> maplist_qrows_t;
-
-#endif

@@ -24,6 +24,7 @@
 #pragma once
 
 #include "cmdlib.h"
+#include "c_maplist.h"
 #include "m_fixed.h"
 #include "m_resfile.h"
 #include "olumpname.h"
@@ -489,7 +490,7 @@ void P_RemoveDefereds();
 
 bool G_LoadWad(const OWantFiles& newwadfiles, const OWantFiles& newpatchfiles,
                const std::string& mapname = "");
-bool G_LoadWadString(const std::string& str, const std::string& mapname = "", const std::string& lastmap = "");
+bool G_LoadWadString(const std::string& str, const std::string& mapname = "", const maplist_lastmaps_t& lastmaps = {});
 
 LevelInfos& getLevelInfos();
 ClusterInfos& getClusterInfos();

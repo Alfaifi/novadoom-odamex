@@ -25,7 +25,6 @@
 
 #include <algorithm>
 #include <sstream>
-#include <nonstd/expected.hpp>
 
 #include "c_maplist.h"
 #include "sv_maplist.h"
@@ -641,21 +640,20 @@ void Maplist_Disconnect(player_t &player) {
 
 //////// CONSOLE COMMANDS ////////
 
-// TODO: since this is needed for the wad command too, move this to c_maplist.h or smth and make it a static method
-nonstd::expected<maplist_lastmaps_t, std::string> ParseLastmaps(const std::string& lastmaps) {
+nonstd::expected<maplist_lastmaps_t, std::string> maplist_lastmaps_t::parse(const std::string& lastmaps) {
 	StringTokens entries = TokenizeString(lastmaps, ",");
 	maplist_lastmaps_t result;
 	for (const auto& entry : entries) {
 		if (entry.empty()) {
-			return nonstd::make_unexpected("Empty lastmap entry found.");
+			return nonstd::make_unexpected(fmt::format("Empty lastmap entry found in {}", lastmaps));
 		}
-		StringTokens maps = TokenizeString(entry, "->");
-		if (maps.size() == 1)
-			result.entries.push_back({ entry, "" });
+		StringTokens maps = TokenizeString(StdStringToUpper(entry), "->");
+		if (maps.size() == 1 && maps[0].find("->") == std::string::npos)
+			result.entries.push_back({ maps[0], "" });
 		else if (maps.size() == 2)
 			result.entries.push_back({ maps[0], maps[1] });
 		else {
-			return nonstd::make_unexpected(fmt::format("Invalid lastmap entry: {}", entry));
+			return nonstd::make_unexpected(fmt::format("Invalid lastmap entry: {} in {}", entry, lastmaps));
 		}
 	}
 	return result;
@@ -701,7 +699,7 @@ BEGIN_COMMAND (addmap) {
 	std::string lastmap = argv[argc-1];
 	if (lastmap.rfind("lastmap=", 0) == 0)
 	{
-		auto lastmap_result = ParseLastmaps(lastmap.substr(8));
+		auto lastmap_result = maplist_lastmaps_t::parse(lastmap.substr(8));
 		if (!lastmap_result) {
 			PrintFmt(PRINT_HIGH, "Failed to parse lastmap: {}\n", lastmap_result.error());
 			return;
@@ -740,7 +738,7 @@ BEGIN_COMMAND(insertmap) {
 	std::string lastmap = argv[argc-1];
 	if (lastmap.rfind("lastmap=", 0) == 0)
 	{
-		auto lastmap_result = ParseLastmaps(lastmap.substr(8));
+		auto lastmap_result = maplist_lastmaps_t::parse(lastmap.substr(8));
 		if (!lastmap_result) {
 			PrintFmt(PRINT_HIGH, "Failed to parse lastmap: {}\n", lastmap_result.error());
 			return;
