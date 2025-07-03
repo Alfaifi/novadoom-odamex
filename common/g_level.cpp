@@ -1040,10 +1040,13 @@ BEGIN_COMMAND(mapinfo)
 	flags += (info.flags & LEVEL_DEFINEDINMAPINFO ? " DEFINEDINMAPINFO" : "");
 	flags += (info.flags & LEVEL_CHANGEMAPCHEAT ? " CHANGEMAPCHEAT" : "");
 	flags += (info.flags & LEVEL_VISITED ? " VISITED" : "");
-	flags += (info.flags & LEVEL_COMPAT_DROPOFF ? "COMPAT_DROPOFF" : "");
-	flags += (info.flags & LEVEL_COMPAT_NOPASSOVER ? "COMPAT_NOPASSOVER" : "");
-	flags += (info.flags & LEVEL_COMPAT_LIMITPAIN ? "COMPAT_LIMITPAIN" : "");
-	flags += (info.flags & LEVEL_COMPAT_SHORTTEX ? "COMPAT_SHORTTEX" : "");
+	flags += (info.flags & LEVEL_COMPAT_DROPOFF ? " COMPAT_DROPOFF" : "");
+	flags += (info.flags & LEVEL_COMPAT_NOPASSOVER ? " COMPAT_NOPASSOVER" : "");
+	flags += (info.flags & LEVEL_COMPAT_LIMITPAIN ? " COMPAT_LIMITPAIN" : "");
+	flags += (info.flags & LEVEL_COMPAT_SHORTTEX ? " COMPAT_SHORTTEX" : "");
+	flags += (info.flags2 & LEVEL2_NOINFIGHTING ? " NOINFIGHTING" : "");
+	flags += (info.flags2 & LEVEL2_NORMALINFIGHTING ? " NORMALINFIGHTING" : "");
+	flags += (info.flags2 & LEVEL2_TOTALINFIGHTING ? " TOTALINFIGHTING" : "");
 
 	if (flags.length() > 0)
 	{
