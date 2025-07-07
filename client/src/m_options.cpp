@@ -2576,7 +2576,6 @@ static void PlayerSetup (void)
 BEGIN_COMMAND (menu_keys)
 {
 	M_StartControlPanel ();
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	OptionsActive = true;
 	CustomizeControls();
 }
@@ -2620,7 +2619,6 @@ void WeaponOptions (void)
 BEGIN_COMMAND (menu_display)
 {
 	M_StartControlPanel ();
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	OptionsActive = true;
 	M_SwitchMenu (&VideoMenu);
 }
@@ -2630,7 +2628,6 @@ END_COMMAND (menu_display)
 BEGIN_COMMAND (menu_video)
 {
 	M_StartControlPanel ();
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	OptionsActive = true;
 	SetVidMode ();
 }
