@@ -121,9 +121,10 @@ std::string M_GetUserFileName(const std::string& file);
  *         consider the existence of the file in question.
  *
  * @param file Filename to resolve.
+ * @param altpath Optional alternate screenshot directory
  * @return An absolute path pointing to the resolved file.
  */
-std::string M_GetScreenshotFileName(const std::string& file);
+std::string M_GetScreenshotFileName(const std::string& file, const std::string& altpath = "");
 
 /**
  * @brief Resolve a file name into a user netdemo directory.
@@ -138,9 +139,10 @@ std::string M_GetScreenshotFileName(const std::string& file);
  *         consider the existence of the file in question.
  *
  * @param file Filename to resolve.
+ * @param altpath Optional alternate netdemo directory
  * @return An absolute path pointing to the resolved file.
  */
-std::string M_GetNetDemoFileName(const std::string& file);
+std::string M_GetNetDemoFileName(const std::string& file, const std::string& altpath = "");
 
 /**
  * @brief Attempt to find a file in a directory - case insensitive.
