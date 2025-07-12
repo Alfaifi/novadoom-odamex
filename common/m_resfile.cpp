@@ -311,7 +311,7 @@ bool M_ResolveWantedFile(OResFile& out, const OWantFile& wanted)
 		if (!result.empty())
 		{
 			// Found a file.
-			const std::string fullpath = searchpath + PATHSEP + result;
+			const std::string fullpath = M_JoinPath(searchpath, result);
 			return OResFile::make(out, fullpath);
 		}
 	}
