@@ -4,19 +4,18 @@ if(BUILD_CLIENT)
 
   ### SDL2 ###
 
-  # if(NOT USE_SDL3)
-  if(FALSE)
+  if(NOT USE_SDL12)
     if(WIN32)
       if(MSVC)
         file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL2-devel-2.32.4-VC.zip"
+          "https://www.libsdl.org/release/SDL2-devel-2.0.20-VC.zip"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
-          EXPECTED_HASH SHA256=28681dbef9c31a2bb4af6cbda90fdabc27c7415d65b9393da83d5abd12c4a265)
+          EXPECTED_HASH SHA256=5b1512ca6c9d2427bd2147da01e5e954241f8231df12f54a7074dccde416df18)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4")
+        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20")
         set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include" CACHE PATH "")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
           set(SDL2_LIBRARY "${SDL2_DIR}/lib/x64/SDL2.lib" CACHE FILEPATH "")
@@ -27,17 +26,17 @@ if(BUILD_CLIENT)
         endif()
       else()
         file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL2-devel-2.32.4-mingw.tar.gz"
+          "https://www.libsdl.org/release/SDL2-devel-2.0.20-mingw.tar.gz"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
-          EXPECTED_HASH SHA256=c2ec09788ab99b23b8e8e472775e5f728da549ae27898280cedbb15da87f47c1)
+          EXPECTED_HASH SHA256=38094d82a857d6c62352e5c5cdec74948c5b4d25c59cbd298d6d233568976bd1)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4/x86_64-w64-mingw32")
+          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20/x86_64-w64-mingw32")
         else()
-          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4/i686-w64-mingw32")
+          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.0.20/i686-w64-mingw32")
         endif()
         set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include/SDL2" CACHE PATH "")
         set(SDL2_LIBRARY "${SDL2_DIR}/lib/libSDL2.dll.a" CACHE FILEPATH "")
@@ -78,49 +77,6 @@ if(BUILD_CLIENT)
         endif()
       endif()
     endif()
-  else()
-
-    ### SDL3 ###
-
-    if(WIN32)
-      if(MSVC)
-        file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL3-devel-3.2.10-VC.zip"
-          "${CMAKE_CURRENT_BINARY_DIR}/SDL3-VC.zip"
-          EXPECTED_HASH SHA256=afcfafc7e389e048c3693e11fe645ea84392c35673e4f201fe21ac513719935d)
-        execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
-          "${CMAKE_CURRENT_BINARY_DIR}/SDL3-VC.zip"
-          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-
-        set(SDL3_ROOT "${CMAKE_CURRENT_BINARY_DIR}/SDL3-3.2.10/cmake")
-        set(SDL3_DIR "${SDL3_ROOT}/cmake")
-        set(SDL3_INCLUDE_DIR "${SDL3_ROOT}/include" CACHE PATH "")
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          set(SDL3_LIBRARY "${SDL3_ROOT}/lib/x64/SDL3.lib" CACHE FILEPATH "")
-        else()
-          set(SDL3_LIBRARY "${SDL3_ROOT}/lib/x86/SDL3.lib" CACHE FILEPATH "")
-        endif()
-      else()
-        file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL3-devel-3.2.10-mingw.tar.gz"
-          "${CMAKE_CURRENT_BINARY_DIR}/SDL3-mingw.tar.gz"
-          EXPECTED_HASH SHA256=7ae252153992997470918917f899ef7e414c77b33685f43232a4f56c9cb75ac3)
-        execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
-          "${CMAKE_CURRENT_BINARY_DIR}/SDL3-mingw.tar.gz"
-          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          set(SDL3_ROOT "${CMAKE_CURRENT_BINARY_DIR}/SDL3-3.2.10/x86_64-w64-mingw32")
-        else()
-          set(SDL3_ROOT "${CMAKE_CURRENT_BINARY_DIR}/SDL3-3.2.10/i686-w64-mingw32")
-        endif()
-        set(SDL3_INCLUDE_DIR "${SDL3_ROOT}/include/SDL3" CACHE PATH "")
-        set(SDL3_LIBRARY "${SDL3_ROOT}/lib/libSDL3.dll.a" CACHE FILEPATH "")
-        set(SDL3_DIR "${SDL3_ROOT}/lib/cmake" CACHE PATH "")
-      endif()
-    endif()
-
-    find_package(SDL3)
   endif()
 
   ### SDL2_mixer ###
@@ -171,6 +127,65 @@ if(BUILD_CLIENT)
         INTERFACE_INCLUDE_DIRECTORIES "${SDL2_MIXER_INCLUDE_DIR}"
         INTERFACE_LINK_LIBRARIES SDL2::SDL2
         IMPORTED_LOCATION "${SDL2_MIXER_LIBRARY}")
+    endif()
+  endif()
+
+  # We only get SDL 1.2 if the builder explicitly asks for it, and we do not
+  # provide it ourselves, since SDL2 is preferred on most platforms and we
+  # assume the builder knows what they're doing asking for 1.2.
+  if(USE_SDL12)
+
+    ### SDL ###
+
+    find_package(SDL)
+    if(SDL_FOUND)
+      message(STATUS "Using SDL version ${SDL_VERSION_STRING}")
+
+      # [AM] FindSDL.cmake is kind of a hot mess, this is my best attempt at
+      #      turning it into a neat and tidy target.
+      if(UNIX AND NOT APPLE)
+        # On Linux, CMake rolls all the link libraries into one list - the main
+        # library, the actual library, and pthread (which sdl-config says is
+        # unnecessary).
+        list(POP_FRONT SDL_LIBRARY)
+        list(POP_FRONT SDL_LIBRARY SDL_ACTUAL_LIBRARY)
+        set(SDL_LIBRARY "${SDL_ACTUAL_LIBRARY}")
+        unset(SDL_ACTUAL_LIBRARY)
+      else()
+        message(FATAL_ERROR "Unknown platform for SDL 1.2")
+      endif()
+
+      if(TARGET SDL::SDL)
+        # Ensure that the client can see the target.
+        set_target_properties(SDL::SDL PROPERTIES IMPORTED_GLOBAL True)
+      else()
+        # Synthesize SDL target if it doesn't exist.
+        add_library(SDL::SDL UNKNOWN IMPORTED GLOBAL)
+        set_target_properties(SDL::SDL PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${SDL_INCLUDE_DIR}"
+          IMPORTED_LOCATION "${SDL_LIBRARY}")
+
+        if(SDLMAIN_LIBRARY)
+          # SDLmain target.
+          add_library(SDL::SDLmain UNKNOWN IMPORTED GLOBAL)
+          set_target_properties(SDL::SDLmain PROPERTIES
+            IMPORTED_LOCATION "${SDLMAIN_LIBRARY}")
+        endif()
+      endif()
+    endif()
+
+    ### SDL_mixer ###
+
+    find_package(SDL_mixer)
+    if(SDL_FOUND)
+      message(STATUS "Using SDL_mixer version ${SDL_MIXER_VERSION_STRING}")
+
+      # SDL_mixer target.
+      add_library(SDL::mixer UNKNOWN IMPORTED GLOBAL)
+      set_target_properties(SDL::mixer PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_MIXER_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES SDL::SDL
+        IMPORTED_LOCATION "${SDL_MIXER_LIBRARY}")
     endif()
   endif()
 endif()

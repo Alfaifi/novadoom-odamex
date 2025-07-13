@@ -2,30 +2,16 @@ function(odamex_copy_libs TARGET)
   set(ODAMEX_DLLS "")
 
   if(WIN32)
-    # if(NOT USE_SDL3)
-    if(FALSE)
-      # SDL2
-      if(MSVC)
-        set(SDL2_DLL_DIR "$<TARGET_FILE_DIR:SDL2::SDL2>")
-      else()
-        set(SDL2_DLL_DIR "$<TARGET_FILE_DIR:SDL2::SDL2>/../bin")
-      endif()
-      list(APPEND ODAMEX_DLLS "${SDL2_DLL_DIR}/SDL2.dll")
-    else()
-      # SDL3
-      if(MSVC)
-        set(SDL3_DLL_DIR "$<TARGET_FILE_DIR:SDL3::SDL3>")
-      else()
-        set(SDL3_DLL_DIR "$<TARGET_FILE_DIR:SDL3::SDL3>/../bin")
-      endif()
-      list(APPEND ODAMEX_DLLS "${SDL3_DLL_DIR}/SDL3.dll")
-    endif()
-
     if(MSVC)
+      set(SDL2_DLL_DIR "$<TARGET_FILE_DIR:SDL2::SDL2>")
       set(SDL2_MIXER_DLL_DIR "$<TARGET_FILE_DIR:SDL2::mixer>")
     else()
+      set(SDL2_DLL_DIR "$<TARGET_FILE_DIR:SDL2::SDL2>/../bin")
       set(SDL2_MIXER_DLL_DIR "$<TARGET_FILE_DIR:SDL2::mixer>/../bin")
     endif()
+
+    # SDL2
+    list(APPEND ODAMEX_DLLS "${SDL2_DLL_DIR}/SDL2.dll")
 
     # SDL2_mixer
     list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libmodplug-1.dll")
