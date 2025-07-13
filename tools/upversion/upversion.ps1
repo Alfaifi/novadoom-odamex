@@ -48,7 +48,8 @@ $majminpatchFiles = @(
 '.\common\version.h',
 '.\odalaunch\res\Info.plist',
 '.\switch.cmake',
-'.\tools\upversion\upversion.ini'
+'.\tools\upversion\upversion.ini',
+'.\packaging\linux\net.odamex.Odamex.metainfo.xml'
 )
 
 $majminpatchCfgs = Get-ChildItem '.\config-samples' -Filter "*.cfg"

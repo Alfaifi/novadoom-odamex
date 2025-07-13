@@ -194,6 +194,28 @@ static IWindowSurface* fire_surface;
 static constexpr int fire_surface_width = 72;
 static constexpr int fire_surface_height = 77;
 
+static void M_PauseSound(void)
+{
+	if (paused || gamestate != GS_LEVEL || multiplayer || demoplayback ||
+	    netdemo.isPlaying())
+	{
+		return;
+	}
+
+	S_PauseSound();
+}
+
+static void M_ResumeSound(void)
+{
+	if (paused || gamestate != GS_LEVEL || multiplayer || demoplayback ||
+	    netdemo.isPlaying())
+	{
+		return;
+	}
+
+	S_ResumeSound();
+}
+
 //
 // DOOM MENU
 //
@@ -506,7 +528,6 @@ oldmenu_t SaveDef =
 // through console commands.
 BEGIN_COMMAND (menu_main)
 {
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_SetupNextMenu (&MainDef);
 	PSetupDepth = 2;
@@ -516,7 +537,6 @@ END_COMMAND (menu_main)
 BEGIN_COMMAND (menu_help)
 {
     // F1
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_ReadThis(0);
 }
@@ -525,7 +545,6 @@ END_COMMAND (menu_help)
 BEGIN_COMMAND (menu_save)
 {
     // F2
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_SaveGame (0);
 	//Printf (PRINT_WARNING, "Saving is not available at this time.\n");
@@ -535,7 +554,6 @@ END_COMMAND (menu_save)
 BEGIN_COMMAND (menu_load)
 {
     // F3
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_LoadGame (0);
 	//Printf (PRINT_WARNING, "Loading is not available at this time.\n");
@@ -545,7 +563,6 @@ END_COMMAND (menu_load)
 BEGIN_COMMAND (menu_options)
 {
     // F4
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
     M_StartControlPanel ();
 	M_Options(0);
 	PSetupDepth = 1;
@@ -555,7 +572,6 @@ END_COMMAND (menu_options)
 BEGIN_COMMAND (quicksave)
 {
     // F6
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_QuickSave ();
 	//Printf (PRINT_WARNING, "Saving is not available at this time.\n");
@@ -564,7 +580,6 @@ END_COMMAND (quicksave)
 
 BEGIN_COMMAND (menu_endgame)
 {	// F7
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_EndGame(0);
 }
@@ -573,7 +588,6 @@ END_COMMAND (menu_endgame)
 BEGIN_COMMAND (quickload)
 {
     // F9
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_QuickLoad ();
 	//Printf (PRINT_WARNING, "Loading is not available at this time.\n");
@@ -582,7 +596,6 @@ END_COMMAND (quickload)
 
 BEGIN_COMMAND (menu_quit)
 {	// F10
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_QuitDOOM(0);
 }
@@ -590,7 +603,6 @@ END_COMMAND (menu_quit)
 
 BEGIN_COMMAND (menu_player)
 {
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_PlayerSetup(0);
 	PSetupDepth = 0;
@@ -1190,6 +1202,7 @@ void M_EndGameResponse(int ch)
 	}
 
 	currentMenu->lastOn = itemOn;
+	S_StopAmbientSound();
 	M_ClearMenus ();
 	D_StartTitle ();
 	CL_QuitNetGame(NQ_SILENT);
@@ -1244,7 +1257,8 @@ void M_QuitDOOM(int choice)
 {
 	// We pick index 0 which is language sensitive,
 	//  or one at random, between 1 and maximum number.
-	static std::string endstring =
+	static std::string endstring;
+	endstring =
 		fmt::sprintf("%s\n\n%s",
 		             GStrings.getIndex(GStrings.toIndex(QUITMSG) + (gametic % NUM_QUITMESSAGES)),
 		             GStrings(DOSY));
@@ -1278,7 +1292,7 @@ void M_PlayerSetup(int choice)
 {
 	M_StringCopy(savegamestrings[0], cl_name.cstring(), SAVESTRINGSIZE);
 	M_SetupNextMenu (&PSetupDef);
-	PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
+	PlayerState = states[mobjinfo[MT_PLAYER]->seestate];
 	PlayerTics = PlayerState->tics;
 
 	if (fire_surface == NULL)
@@ -1296,9 +1310,9 @@ static void M_PlayerSetupTicker()
 		return;
 
 	if (PlayerState->tics == -1 || PlayerState->nextstate == S_NULL)
-		PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
+		PlayerState = states[mobjinfo[MT_PLAYER]->seestate];
 	else
-		PlayerState = &states[PlayerState->nextstate];
+		PlayerState = states[PlayerState->nextstate];
 	PlayerTics = PlayerState->tics;
 }
 
@@ -1522,7 +1536,7 @@ static void M_PlayerSetupDrawer()
 		}
 	}
 	{
-		const int spritenum = states[mobjinfo[MT_PLAYER].spawnstate].sprite;
+		const int spritenum = states[mobjinfo[MT_PLAYER]->spawnstate]->sprite;
 		const spriteframe_t* sprframe = &sprites[spritenum].spriteframes[PlayerState->frame & FF_FRAMEMASK];
 
 		// [Nes] Color of player preview uses the unused translation table (player 0), instead
@@ -1981,6 +1995,7 @@ bool M_Responder (event_t* ev)
 		}
 
 		menuactive = false;
+		M_ResumeSound();
 		S_Sound (CHAN_INTERFACE, "switches/exitbutn", 1, ATTN_NONE);
 		return true;
 	}
@@ -2130,6 +2145,8 @@ void M_StartControlPanel()
 	currentMenu = &MainDef;
 	itemOn = currentMenu->lastOn;
 	OptionsActive = false;			// [RH] Make sure none of the options menus appear.
+	M_PauseSound();
+	S_Sound(CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 }
 
 
@@ -2216,6 +2233,7 @@ void M_ClearMenus()
 	menuactive = false;
 	drawSkull = true;
 	M_DemoNoPlay = false;
+    M_ResumeSound();
 }
 
 
@@ -2257,7 +2275,6 @@ void M_PopMenuStack()
 		M_ClearMenus ();
 		if (currentMenu == &PSetupDef && PSetupDepth > 0)			// hack for PlayerSetup
 		{
-			S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 			M_StartControlPanel();
 			if (PSetupDepth == 2)
 				M_SetupNextMenu(&MainDef);

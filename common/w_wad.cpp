@@ -669,6 +669,16 @@ int W_CheckNumForName(const char *name, int namespc)
 //
 int W_GetNumForName(const char* name, int namespc)
 {
+	if (name == NULL)
+	{
+		I_Error("W_GetNumForName: NULL name!\n");
+	}
+
+	if (std::string(name).empty())
+	{
+		I_Error("W_GetNumForName: empty name!\n");
+	}
+
 	int i = W_CheckNumForName(name, namespc);
 
 	if (i == -1)

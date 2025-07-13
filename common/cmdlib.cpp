@@ -31,7 +31,6 @@
 
 #include <ctime>
 #include <functional>
-#include <map>
 #include <sstream>
 
 #include "win32inc.h"
