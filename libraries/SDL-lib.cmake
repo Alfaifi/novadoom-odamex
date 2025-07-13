@@ -8,14 +8,14 @@ if(BUILD_CLIENT)
     if(WIN32)
       if(MSVC)
         file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL2-devel-2.32.4-VC.zip"
+          "https://www.libsdl.org/release/SDL2-devel-2.32.8-VC.zip"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
-          EXPECTED_HASH SHA256=28681dbef9c31a2bb4af6cbda90fdabc27c7415d65b9393da83d5abd12c4a265)
+          EXPECTED_HASH SHA256=a16e5f0e5de87a804e3c240a7d92aca0318fda176b22d95550c6512fc4f18172)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-VC.zip"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
-        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4")
+        set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.8")
         set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include" CACHE PATH "")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
           set(SDL2_LIBRARY "${SDL2_DIR}/lib/x64/SDL2.lib" CACHE FILEPATH "")
@@ -26,17 +26,17 @@ if(BUILD_CLIENT)
         endif()
       else()
         file(DOWNLOAD
-          "https://www.libsdl.org/release/SDL2-devel-2.32.4-mingw.tar.gz"
+          "https://www.libsdl.org/release/SDL2-devel-2.32.8-mingw.tar.gz"
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
-          EXPECTED_HASH SHA256=c2ec09788ab99b23b8e8e472775e5f728da549ae27898280cedbb15da87f47c1)
+          EXPECTED_HASH SHA256=f590b3707689562483ded05bf15eaf0f5d33eb97f49d0fd3b894225fe17cc52b)
         execute_process(COMMAND "${CMAKE_COMMAND}" -E tar xf
           "${CMAKE_CURRENT_BINARY_DIR}/SDL2-mingw.tar.gz"
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4/x86_64-w64-mingw32")
+          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.8/x86_64-w64-mingw32")
         else()
-          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.4/i686-w64-mingw32")
+          set(SDL2_DIR "${CMAKE_CURRENT_BINARY_DIR}/SDL2-2.32.8/i686-w64-mingw32")
         endif()
         set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include/SDL2" CACHE PATH "")
         set(SDL2_LIBRARY "${SDL2_DIR}/lib/libSDL2.dll.a" CACHE FILEPATH "")

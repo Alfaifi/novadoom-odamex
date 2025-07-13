@@ -115,7 +115,7 @@ function CopyFiles {
         -Destination "${CommonDir}\licenses"
     Copy-Item -Force -Path "${CurrentDir}\BuildX64\libraries\SDL2_mixer-2.8.1\lib\x64\optional\LICENSE.gme.txt" `
         -Destination "${CommonDir}\licenses"
-    Copy-Item -Force -Path "${CurrentDir}\BuildX64\libraries\SDL2-2.32.4\LICENSE.txt" `
+    Copy-Item -Force -Path "${CurrentDir}\BuildX64\libraries\SDL2-2.32.8\LICENSE.txt" `
         -Destination "${CommonDir}\licenses\LICENSE.SDL2.txt"
 
     ########################################
