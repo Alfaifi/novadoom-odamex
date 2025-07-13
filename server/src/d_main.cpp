@@ -201,6 +201,7 @@ void STACK_ARGS D_Shutdown()
 	W_Close();
 
 	R_ShutdownColormaps();
+	R_ClearSkyDefs();
 
 	// reset the Zone memory manager
 	Z_Close();
