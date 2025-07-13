@@ -156,7 +156,9 @@ function CopyFiles {
     New-Item -Force -ItemType "directory" -Path "${X86Dir}/redist"
 
     Copy-Item -Force -Path `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libmodplug-1.dll", `
+        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libwavpack-1.dll", `
+        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libgme.dll", `
+        "${CurrentDir}\BuildX86\client\RelWithDebInfo\libxmp.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libogg-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libopus-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libopusfile-0.dll", `
