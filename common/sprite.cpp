@@ -29,7 +29,7 @@
 
 // global variables from info.h
 
-DoomObjectContainer<const char*> sprnames(::NUMSPRITES);
+DoomObjectContainer<std::string> sprnames(::NUMSPRITES);
 size_t num_spritenum_t_types()
 {
 	return sprnames.size();

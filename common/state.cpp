@@ -5,7 +5,7 @@
 #include "z_zone.h"
 
 void D_ResetState(state_t* s, int32_t idx);
-DoomObjectContainer<state_t*> states(::NUMSTATES, &D_ResetState);
+DoomObjectContainer<state_t> states(::NUMSTATES);
 
 size_t num_state_t_types()
 {

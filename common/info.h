@@ -249,7 +249,7 @@ typedef struct spriteinfo_s
 } spriteinfo_t;
 
 extern const char* doom_sprnames[];
-extern DoomObjectContainer<const char*> sprnames; // spritenum_t
+extern DoomObjectContainer<std::string> sprnames; // spritenum_t
 extern size_t num_spritenum_t_types();
 
 inline auto format_as(spritenum_t eSpriteNum)
@@ -1431,7 +1431,7 @@ typedef struct _state_t
 } state_t;
 
 extern state_t boomstates[];
-extern DoomObjectContainer<state_t*> states; // statenum_t
+extern DoomObjectContainer<state_t> states; // statenum_t
 extern size_t num_state_t_types(); // [CMB] TODO converted to function to just make code work for now
 extern state_t odastates[];
 
@@ -1447,7 +1447,7 @@ inline FArchive &operator>> (FArchive &arc, state_t *&state)
 {
 	int32_t ofs;
 	arc >> ofs;
-	DoomObjectContainer<state_t*, int32_t>::iterator it = states.find(ofs);
+	DoomObjectContainer<state_t, int32_t>::iterator it = states.find(ofs);
 	if (it != states.end())
 		state = it->second;
 	else
@@ -1778,10 +1778,10 @@ typedef struct _mobjinfo
 
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
-extern DoomObjectContainer<mobjinfo_t*> mobjinfo; // mobjtype_t
+extern DoomObjectContainer<mobjinfo_t> mobjinfo; // mobjtype_t
 extern size_t num_mobjinfo_types();
 // [CMB] spawn map per id24 - the pointer is to the mobjinfo table
-extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
+extern DoomObjectContainer<mobjinfo_t> spawn_map; // int
 
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {
@@ -1795,7 +1795,7 @@ inline FArchive &operator>> (FArchive &arc, mobjinfo_t *&info)
 {
     int32_t ofs;
     arc >> ofs;
-    DoomObjectContainer<mobjinfo_t*, int32_t>::iterator it = mobjinfo.find(ofs);
+    DoomObjectContainer<mobjinfo_t, int32_t>::iterator it = mobjinfo.find(ofs);
     if (it != mobjinfo.end())
         info = it->second;
     else

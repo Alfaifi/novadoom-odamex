@@ -7,8 +7,8 @@
 void D_ResetMobjInfo(mobjinfo_t* m, int32_t idx);
 void D_ResetMobjInfoSpawnMap(mobjinfo_t* m, int32_t idx);
 
-DoomObjectContainer<mobjinfo_t*> mobjinfo(::NUMMOBJTYPES, &D_ResetMobjInfo);
-DoomObjectContainer<mobjinfo_t*, int> spawn_map;
+DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES);
+DoomObjectContainer<mobjinfo_t, int> spawn_map;
 
 size_t num_mobjinfo_types()
 {

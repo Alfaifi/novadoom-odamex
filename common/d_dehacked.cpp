@@ -453,7 +453,7 @@ static const struct
     {NULL, NULL},
 };
 
-DoomObjectContainer<const char*> SoundMap(ARRAY_LENGTH(doom_SoundMap));
+DoomObjectContainer<std::string> SoundMap(ARRAY_LENGTH(doom_SoundMap));
 
 void D_Initialize_SoundMap(const char** source, int count)
 {
@@ -535,20 +535,20 @@ static bool HandleKey(const struct Key* keys, void* structure, const char* key, 
 
 typedef struct DoomBackup_s
 {
-	DoomObjectContainer<state_t*, int32_t> backupStates; // boomstates
-	DoomObjectContainer<mobjinfo_t*, int32_t> backupMobjInfo; // doom_mobjinfo
-	DoomObjectContainer<const char*, int32_t> backupSprnames; // doom_sprnames
-	DoomObjectContainer<const char*, int32_t> backupSoundMap; // doom_SoundMap
+	DoomObjectContainer<state_t, int32_t> backupStates; // boomstates
+	DoomObjectContainer<mobjinfo_t, int32_t> backupMobjInfo; // doom_mobjinfo
+	DoomObjectContainer<std::string, int32_t> backupSprnames; // doom_sprnames
+	DoomObjectContainer<std::string, int32_t> backupSoundMap; // doom_SoundMap
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	int backupMaxAmmo[NUMAMMO];
 	int backupClipAmmo[NUMAMMO];
 	DehInfo backupDeh;
 
 	DoomBackup_s()
-	    : backupStates(NULL, [](state_t* obj) { M_Free(obj); }),
-	      backupMobjInfo(NULL, [](mobjinfo_t* obj) { M_Free(obj); }),
-	      backupSprnames(NULL, [](const char* obj) { M_Free(obj); }),
-	      backupSoundMap(NULL, [](const char* obj) { M_Free(obj); }),
+	    : backupStates(),
+	      backupMobjInfo(),
+	      backupSprnames(),
+	      backupSoundMap(),
 		  backupWeaponInfo(),
 	      backupMaxAmmo(),
 	      backupDeh()
@@ -559,10 +559,10 @@ typedef struct DoomBackup_s
 DoomBackup_t doomBackup;
 
 // [CMB] useful typedefs for iteration over global doom object containers
-typedef DoomObjectContainer<state_t*, int32_t>::const_iterator StatesIterator;
-typedef DoomObjectContainer<mobjinfo_t*, int32_t>::const_iterator MobjIterator;
-typedef DoomObjectContainer<const char*, int32_t>::const_iterator SpriteNamesIterator;
-typedef DoomObjectContainer<const char*, int32_t>::const_iterator SoundMapIterator;
+typedef DoomObjectContainer<state_t, int32_t>::const_iterator StatesIterator;
+typedef DoomObjectContainer<mobjinfo_t, int32_t>::const_iterator MobjIterator;
+typedef DoomObjectContainer<std::string, int32_t>::const_iterator SpriteNamesIterator;
+typedef DoomObjectContainer<std::string, int32_t>::const_iterator SoundMapIterator;
 
 static void BackupData(void)
 {
