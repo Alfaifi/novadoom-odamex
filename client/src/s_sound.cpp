@@ -788,7 +788,8 @@ void S_LoopedSoundID(fixed_t *pt, int channel, int sound_id, float volume, int a
 int S_FindGenderedSound(std::string_view name, AActor* ent)
 {
 	static constexpr std::string_view templat = "player/{}/{}";
-	static constexpr std::string_view genders[] = { "male", "female", "cyborg", "other" };
+	// static constexpr std::string_view genders[] = { "male", "female", "cyborg", "other" };
+	static constexpr std::string_view genders[] = { "male", "male", "male", "male" };
 	player_t *player;
 
 	int sfx_id = -1;
