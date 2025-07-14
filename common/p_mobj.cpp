@@ -46,6 +46,7 @@
 #include "g_skill.h"
 #include "m_wdlstats.h"
 #include "p_mapformat.h"
+#include "r_sky.h"
 
 #ifdef CLIENT_APP
 #include "hu_speedometer.h"
@@ -243,6 +244,9 @@ AActor &AActor::operator= (const AActor &other)
 //
 
 AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
+    : AActor::AActor(ix, iy, iz, mobjinfo[itype]) {}
+
+AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjinfo_t* mobjinfo)
     : x(0), y(0), z(0), prevx(0), prevy(0), prevz(0), snext(NULL), sprev(NULL), angle(0),
       prevangle(0), sprite(SPR_UNKN), frame(0), pitch(0), prevpitch(0), effects(0),
       subsector(NULL), floorz(0), ceilingz(0), dropoffz(0), floorsector(NULL), radius(0),
@@ -255,14 +259,14 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
 {
 	// Fly!!! fix it in P_RespawnSpecial
-	if ((unsigned int)itype >= NUMMOBJTYPES)
+	if (mobjinfo == NULL)
 	{
-		I_Error("Tried to spawn actor type {}\n", itype);
+		I_Error("Tried to spawn actor type {}\n", type);
 	}
 
 	self.init(this);
-	info = &mobjinfo[itype];
-	type = itype;
+	info = mobjinfo;
+	type = static_cast<mobjtype_t>(mobjinfo->type);
 	x = ix;
 	y = iy;
 	radius = info->radius;
@@ -288,7 +292,7 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
 
 	// do not set the state with P_SetMobjState,
 	// because action routines can not be called yet
-	state_t* st = &states[info->spawnstate];
+	state_t* st = states[info->spawnstate];
 	state = st;
 	tics = st->tics;
 	sprite = st->sprite;
@@ -966,11 +970,15 @@ void AActor::Serialize (FArchive &arc)
 		}
 		spawnpoint.Serialize (arc);
 		baseline.Serialize(arc);
-		if(type >= NUMMOBJTYPES)
-			I_Error("Unknown object type in saved game");
-		if(sprite >= NUMSPRITES)
-			I_Error("Unknown sprite in saved game");
-		info = &mobjinfo[type];
+		if (mobjinfo.find(type) == mobjinfo.end())
+		{
+			I_Error("Unknown object type (%d) in saved game", type);
+		}
+		if (sprnames.find(sprite) == sprnames.end())
+		{
+			I_Error("Unknown sprite (%d) in saved game", sprite);
+		}
+		info = mobjinfo[type];
 		touching_sectorlist = NULL;
 
 		LinkToWorld ();
@@ -1011,26 +1019,29 @@ int P_ThingInfoHeight(mobjinfo_t *mi)
 // P_SetMobjState
 //
 // Returns true if the mobj is still present.
-bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
+bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 {
 	state_t* st;
 	int cycle_counter = 0;
 
 	do
 	{
-		if (state >= ARRAY_LENGTH(states) || state < 0)
+		// [CMB] find will find NULL as it can be interpreted as 0
+		if (states.find(state) == states.end())
 		{
 			I_Error("P_SetMobjState: State {} does not exist in state table.", state);
 		}
 
-		if (state == S_NULL)
+		// strongly typed enum
+		if (static_cast<statenum_t>(state) == S_NULL)
 		{
-			mobj->state = (state_t *) S_NULL;
+			mobj->state = states[S_NULL];
 			mobj->Destroy();
 			return false;
 		}
 
-		st = &states[state];
+		st = states[state];
+
 		mobj->state = st;
 		mobj->tics = st->tics;
 		mobj->sprite = st->sprite;
@@ -1047,7 +1058,9 @@ bool P_SetMobjState(AActor *mobj, statenum_t state, bool cl_update)
 		// Modified handling.
 		// Call action functions when the state is set
 		if (st->action)
+		{
 			st->action(mobj);
+		}
 
 		state = st->nextstate;
 
@@ -1154,8 +1167,8 @@ static bool P_ExplodeMissileAgainstWall(AActor* mo)
 				sec2 = ceilingline->frontsector;
 			}
 
-			bool skyceiling1 = sec1->ceilingpic == skyflatnum;
-			bool skyceiling2 = sec2 && sec2->ceilingpic == skyflatnum;
+			bool skyceiling1 = R_IsSkyFlat(sec1->ceilingpic);
+			bool skyceiling2 = sec2 && R_IsSkyFlat(sec2->ceilingpic);
 
 			if (skyceiling2)
 			{
@@ -1269,7 +1282,7 @@ static void P_ApplyXYFriction(AActor* mo)
 	{
 		// if in a walking frame, stop moving
 		// killough 10/98: Don't affect main player when voodoo dolls stop:
-		if (mo->player && !P_IsVoodooDoll(mo) && (unsigned)((mo->state - states) - S_PLAY_RUN1) < 4)
+		if (mo->player && !P_IsVoodooDoll(mo) && (unsigned)((mo->state->statenum) - S_PLAY_RUN1) < 4)
 			P_SetMobjState(mo, S_PLAY);
 
 		mo->momx = mo->momy = 0;
@@ -1603,7 +1616,7 @@ static bool P_ClipMovementToFloor(AActor* mo)
 		// Explode missiles
 		if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
 		{
-			if (co_fixweaponimpacts && mo->subsector->sector->floorpic == skyflatnum)
+			if (co_fixweaponimpacts && R_IsSkyFlat(mo->subsector->sector->floorpic))
 				mo->Destroy();
 			else if (serverside)
 				P_ExplodeMissile(mo);
@@ -1641,7 +1654,7 @@ static bool P_ClipMovementToCeiling(AActor* mo)
 		// Explode missiles
 		if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
 		{
-			if (co_fixweaponimpacts && mo->subsector->sector->ceilingpic == skyflatnum)
+			if (co_fixweaponimpacts && R_IsSkyFlat(mo->subsector->sector->ceilingpic))
 				mo->Destroy();
 			else if (serverside)
 				P_ExplodeMissile(mo);
@@ -1723,7 +1736,7 @@ void P_ApplyBouncyPhysics(AActor *mo)
 			mo->z = mo->ceilingz - mo->height;
 			if (mo->momz > 0)
 			{
-				if (mo->subsector->sector->ceilingpic != skyflatnum)
+				if (!R_IsSkyFlat(mo->subsector->sector->ceilingpic))
 					mo->momz = -mo->momz; // always bounce off non-sky ceiling
 				else if (mo->flags & MF_MISSILE)
 					mo->Destroy(); // missiles don't bounce off skies
@@ -1746,7 +1759,7 @@ void P_ApplyBouncyPhysics(AActor *mo)
 		if (mo->flags & MF_MISSILE)
 		{
 			if (ceilingline && ceilingline->backsector &&
-			    ceilingline->backsector->ceilingpic == skyflatnum &&
+			    R_IsSkyFlat(ceilingline->backsector->ceilingpic) &&
 			    mo->z > ceilingline->backsector->ceilingheight)
 				mo->Destroy();
 			else
@@ -2538,8 +2551,6 @@ void P_RespawnSpecials (void)
 	AActor* 			mo;
 	mapthing2_t* 		mthing;
 
-	int 				i;
-
 	// clients do no control respawning of items
 	if(!serverside)
 		return;
@@ -2562,42 +2573,38 @@ void P_RespawnSpecials (void)
 	y = mthing->y << FRACBITS;
 
 	// find which type to spawn
-	for (i=0 ; i< NUMMOBJTYPES ; i++)
+	auto it = spawn_map.find(mthing->type);
+	if(it != spawn_map.end())
 	{
-		if (mthing->type == mobjinfo[i].doomednum)
+		// Allow or not Partial Invisibility & Invulnerability from respawning
+		if (!sv_respawnsuper && (mthing->type == 2022 || mthing->type == 2024))
 		{
-			// Allow or not Partial Invisibility & Invulnerability from respawning
-			if (!sv_respawnsuper && (mthing->type == 2022 || mthing->type == 2024))
-			{
-				iquetail = (iquetail + 1)&(ITEMQUESIZE - 1);
-				return;
-			} else {
-				break;
-			}
+			iquetail = (iquetail + 1)&(ITEMQUESIZE - 1);
+			return;
 		}
 	}
 
 	// [Fly] crashes sometimes without it
-	if (i >= NUMMOBJTYPES)
+	if (it == spawn_map.end())
 	{
-		// pull it from the que
+		// pull it from the queue
 		iquetail = (iquetail+1)&(ITEMQUESIZE-1);
 		return;
 	}
 
-	if (mobjinfo[i].flags & MF_SPAWNCEILING)
+	if (it->second->flags & MF_SPAWNCEILING)
 		z = ONCEILINGZ;
 	else
 		z = ONFLOORZ;
 
 	// spawn a teleport fog at the new spot
-	mo = new AActor (x, y, z, MT_IFOG);
+	mo = new AActor (x, y, z, mobjinfo[MT_IFOG]);
 	SV_SpawnMobj(mo);
 	if (clientside)
 		S_Sound (mo, CHAN_VOICE, "misc/spawn", 1, ATTN_IDLE);
 
 	// spawn it
-	mo = new AActor (x, y, z, (mobjtype_t)i);
+	mo = new AActor (x, y, z, it->second);
 	mo->spawnpoint = *mthing;
 	mo->angle = ANG45 * (mthing->angle/45);
 
@@ -2658,8 +2665,8 @@ void P_ExplodeMissile (AActor* mo)
 
 	mo->momx = mo->momy = mo->momz = 0;
 
-	P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
-	if (mobjinfo[mo->type].deathstate != S_NULL)
+	P_SetMobjState (mo, mobjinfo[mo->type]->deathstate);
+	if (mobjinfo[mo->type]->deathstate != S_NULL)
 	{
 		// [RH] If the object is already translucent, don't change it.
 		// Otherwise, make it 66% translucent.
@@ -2737,8 +2744,20 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	// only servers control spawning of items
     // EXCEPT the client must spawn Type 14 (teleport exit).
 	// otherwise teleporters won't work well.
-	if (!serverside && (mthing->type != 14))
+	//
+	// Clients also handle spawning of ambient sounds.
+	//
+	if (mthing->type >= 14001 && mthing->type <= 14065)
+	{
+		if (!clientside)
+		{
+			return;
+		}
+	}
+	else if (!serverside && (mthing->type != 14))
+	{
 		return;
+	}
 
 	// count deathmatch start positions
 	if (mthing->type == 11 || (!sv_teamspawns && mthing->type >= 5080 && mthing->type <= 5082))
@@ -2924,25 +2943,28 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		i = MT_FOUNTAIN;
 	}
 
-	if (i == -1)	// we have to search for the type
+	// [CMB] find the value in the mobjinfo table if we asked for a specific type; otherwise check the spawn table
+	mobjinfo_t* info = nullptr;
+	int32_t spawn_idx = i == -1 ? mthing->type : i;
+	auto mobj_it = spawn_map.find(spawn_idx);
+	if (mobj_it != spawn_map.end())
 	{
-		// find which type to spawn
-		for (i = 0; i < NUMMOBJTYPES; i++)
-			if (mthing->type == mobjinfo[i].doomednum)
-				break;
+		info = mobj_it->second;
+		// set this for further down
+		i = mobj_it->first;
 	}
 
-	if (i >= NUMMOBJTYPES || i < 0)
+	if (info == nullptr)
 	{
 		// [RH] Don't die if the map tries to spawn an unknown thing
 		Printf (PRINT_WARNING, "Unknown type %i at (%i, %i)\n",
 			mthing->type,
 			mthing->x, mthing->y);
-		i = MT_UNKNOWNTHING;
+		info = mobjinfo[MT_UNKNOWNTHING]; // [CMB] odamex specific MT_UNKNOWNTHING
 	}
 	// [RH] If the thing's corresponding sprite has no frames, also map
 	//		it to the unknown thing.
-	else if (sprites[states[mobjinfo[i].spawnstate].sprite].numframes == 0)
+	else if (sprites[states[info->spawnstate]->sprite].numframes == 0)
 	{
 		Printf (PRINT_WARNING, "Type %i at (%i, %i) has no frames\n",
 				mthing->type, mthing->x, mthing->y);
@@ -2950,7 +2972,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	}
 
 	// don't spawn keycards and players in deathmatch
-	if (!G_IsCoopGame() && mobjinfo[i].flags & MF_NOTDMATCH)
+	if (!G_IsCoopGame() && info->flags & MF_NOTDMATCH)
 		return;
 
 	// don't spawn deathmatch weapons in offline single player mode
@@ -2982,7 +3004,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	// [csDoom] don't spawn any monsters
 	if (sv_nomonsters || !serverside)
 	{
-		if (i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL) )
+		if (i == MT_SKULL || (info->flags & MF_COUNTKILL) )
 		{
 			return;
 		}
@@ -2991,15 +3013,15 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
     // [SL] 2011-05-31 - Moved so that clients get right level.total_items, etc
 	if (i == MT_SECRETTRIGGER)
 		level.total_secrets++;
-	if (mobjinfo[i].flags & MF_COUNTKILL)
+	if (info->flags & MF_COUNTKILL)
 		level.total_monsters++;
-	if (mobjinfo[i].flags & MF_COUNTITEM)
+	if (info->flags & MF_COUNTITEM)
 		level.total_items++;
 
 	// spawn it
 	const fixed_t x = mthing->x << FRACBITS;
 	const fixed_t y = mthing->y << FRACBITS;
-	const fixed_t z = (mobjinfo[i].flags & MF_SPAWNCEILING) ? ONCEILINGZ : ONFLOORZ;
+	const fixed_t z = (info->flags & MF_SPAWNCEILING) ? ONCEILINGZ : ONFLOORZ;
 
 	if (i == MT_WATERZONE)
 	{
@@ -3008,15 +3030,16 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		return;
 	}
 
-	AActor* mobj = new AActor(x, y, z, (mobjtype_t)i);
+	AActor* mobj = new AActor(x, y, z, info);
 
 	if (i == MT_HORDESPAWN)
 	{
 		// Store the spawn type for later.
+		// [CMB] specific types must be checked; otherwise they won't spawn correctly
 		mobj->special1 = mthing->type;
-		if (mthing->type == 5301) // Supply cache
+		if (mthing->type == 5301) // Supply cache (5301)
 			M_LogWDLItemSpawn(mobj, WDL_PICKUP_CAREPACKAGE);
-		else if (mthing->type == 5307)
+		else if (mthing->type == 5307) // Horde Powerup (5307)
 			M_LogWDLItemSpawn(mobj, WDL_PICKUP_POWERUPSPAWNER);
 	}
 
@@ -3052,7 +3075,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	}
 
 	// [AM] Adjust monster health based on server setting
-	if ((i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL)) && sv_monstershealth != 1.0f)
+	if ((i == MT_SKULL || (info->flags & MF_COUNTKILL)) && sv_monstershealth != 1.0f)
 		mobj->health *= sv_monstershealth;
 
 	if (mobj->tics > 0)
@@ -3263,15 +3286,16 @@ BEGIN_COMMAND(cheat_mobjs)
 	const char* mobj_type = argv[1];
 	ptrdiff_t mobj_index = -1;
 
-	for (size_t i = 0; i < ARRAY_LENGTH(::mobjinfo); i++)
+	for (const auto& it : mobjinfo)
 	{
-		if (stricmp(::mobjinfo[i].name, mobj_type) == 0)
+		if (stricmp(it.second->name, mobj_type) == 0)
 		{
-			mobj_index = i;
+			mobj_index = it.first;
 			break;
 		}
 	}
 
+	// TODO: index < 0 is valid now with dsdhacked
 	if (mobj_index < 0)
 	{
 		Printf("Unknown MT_* mobj type\n");

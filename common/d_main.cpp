@@ -58,6 +58,10 @@
 #include "gi.h"
 #include "w_ident.h"
 #include "m_resfile.h"
+#include "sprite.h"
+#include "mobjinfo.h"
+#include "state.h"
+#include "odamex_objects.h"
 
 #ifdef GEKKO
 #include "i_wii.h"
@@ -77,6 +81,8 @@ extern bool step_mode;
 
 bool capfps = true;
 float maxfps = 35.0f;
+
+extern void D_Init_Nightmare_Flags(void);
 
 
 #if defined(_WIN32) && !defined(_XBOX)
@@ -224,6 +230,23 @@ static char *GetRegistryString(registry_value_t *reg_val)
 
 #endif
 
+//
+// D_Initialize_Doom_Objects()
+// [CMB] Initialize all the doom objects: MobjInfo, SprNames, SoundMap, etc.
+//
+void D_Initialize_Doom_Objects()
+{
+	// [RH] Initialize items. Still only used for the give command. :-(
+	InitItems();
+	D_Initialize_States(boomstates, ::NUMSTATES);
+	D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
+	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
+	D_Initialize_SoundMap(doom_SoundMap, ARRAY_LENGTH(doom_SoundMap));
+	// Initialize all extra frames
+	D_Init_Nightmare_Flags();
+	// Initialize the odamex specific objects
+	D_Initialize_Odamex_Objects();
+}
 
 //
 // D_AddSearchDir
@@ -341,11 +364,21 @@ void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 	D_AddSearchDir(dirs, INSTALL_PREFIX "/" INSTALL_DATADIR "/odamex", separator);
 	D_AddSearchDir(dirs, INSTALL_PREFIX "/" INSTALL_DATADIR "/games/odamex", separator);
 	#endif
+	// Search the maintainer-directed data directory for WADs
+	#if defined(ODAMEX_INSTALL_DATADIR)
+	D_AddSearchDir(dirs, ODAMEX_INSTALL_DATADIR, separator);
+	#endif
 
 	D_AddSearchDir(dirs, "/usr/share/doom", separator);
 	D_AddSearchDir(dirs, "/usr/share/games/doom", separator);
 	D_AddSearchDir(dirs, "/usr/local/share/games/doom", separator);
 	D_AddSearchDir(dirs, "/usr/local/share/doom", separator);
+	// Flatpak sandbox default directories
+	// (Since you need to pass envvars to a Flatpak)
+	D_AddSearchDir(dirs, "/run/host/usr/share/doom", separator);
+	D_AddSearchDir(dirs, "/run/host/usr/share/games/doom", separator);
+	D_AddSearchDir(dirs, "/run/host/usr/local/share/games/doom", separator);
+	D_AddSearchDir(dirs, "/run/host/usr/local/share/doom", separator);
 
 	#endif
 }
@@ -798,6 +831,7 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	::lastWadRebootSuccess = false;
 
 	D_Shutdown();
+	D_Initialize_Doom_Objects(); // start from vanilla objects
 
 	gamestate_t oldgamestate = ::gamestate;
 	::gamestate = GS_STARTUP; // prevent console from trying to use nonexistant font
@@ -806,8 +840,16 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	OResFiles oldwadfiles = ::wadfiles;
 	OResFiles oldpatchfiles = ::patchfiles;
 	std::string failmsg;
+
+	
+	 // [CMB] Zone memory manager already reset by D_Shutdown() calling Z_Close() so this is doing it twice
+	 // Z_Init();
+	 // Printf("Z_Init: D_DoomWadReboot: Using native allocator with OZone "
+	 //      "bookkeeping.\n");
+
 	try
 	{
+
 		D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
 		// get skill / episode / map from parms
@@ -833,6 +875,7 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 		std::string fatalmsg;
 		try
 		{
+
 			LoadResolvedFiles(oldwadfiles, oldpatchfiles);
 
 			// get skill / episode / map from parms
@@ -875,9 +918,13 @@ static void AddCommandLineOptionFiles(OWantFiles& out, const std::string& option
 	DArgs files = Args.GatherFiles(option.c_str());
 	for (size_t i = 0; i < files.NumArgs(); i++)
 	{
-		OWantFile file;
-		OWantFile::make(file, files.GetArg(i), type);
-		out.push_back(file);
+		const char* fileArg = files.GetArg(i);
+		if (!std::string(fileArg).empty())
+		{
+			OWantFile file;
+			OWantFile::make(file, fileArg, type);
+			out.push_back(file);
+		}
 	}
 
 	files.FlushArgs();
