@@ -494,7 +494,7 @@ public:
     // If == validcount, already checked.
     int			validcount;
 
-	mobjtype_t		type;
+	int32_t			type;
     mobjinfo_t*		info;	// &mobjinfo[mobj->type]
     int				tics;	// state tic counter
 	state_t			*state;
