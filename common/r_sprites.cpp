@@ -48,7 +48,7 @@ spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
 int maxframe;
 
 // [CMB] This function assumes that sprnames has the correct sprites in order
-void R_CacheSprite(spritedef_t *sprite)
+void R_CacheSprite(const spritedef_t *sprite)
 {
 	auto it = sprnames.find(sprite->spritenum);
 	DPrintFmt("cache sprite {}\n",

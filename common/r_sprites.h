@@ -39,5 +39,5 @@ extern int maxframe;
 
 extern vissprite_t* lastvissprite;
 
-void R_CacheSprite(spritedef_t *sprite);
+void R_CacheSprite(const spritedef_t *sprite);
 void R_InitSprites(std::vector<spriteinfo_t*>& sprites);
