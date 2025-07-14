@@ -52,7 +52,7 @@ void R_CacheSprite(spritedef_t *sprite)
 {
 	auto it = sprnames.find(sprite->spritenum);
 	DPrintFmt("cache sprite {}\n",
-		it != sprnames.end() ? it->second->data() : "");
+		it != sprnames.end() ? it->second.data() : "");
 	for (int i = 0; i < sprite->numframes; i++)
 	{
 		for (int r = 0; r < 16; r++)

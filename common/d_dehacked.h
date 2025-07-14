@@ -28,7 +28,7 @@
 
 // Sound equivalences. When a patch tries to change a sound,
 // use these sound names.
-static const char* doom_SoundMap[] = {NULL,
+static const char* doom_SoundMap[] = {nullptr,
                             "weapons/pistol",
                             "weapons/shotgf",
                             "weapons/shotgr",

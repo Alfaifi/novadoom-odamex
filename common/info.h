@@ -1449,7 +1449,7 @@ inline FArchive &operator>> (FArchive &arc, state_t *&state)
 	arc >> ofs;
 	DoomObjectContainer<state_t, int32_t>::iterator it = states.find(ofs);
 	if (it != states.end())
-		state = it->second;
+		state = &it->second;
 	else
 		state = NULL;
 	return arc;
@@ -1797,7 +1797,7 @@ inline FArchive &operator>> (FArchive &arc, mobjinfo_t *&info)
     arc >> ofs;
     DoomObjectContainer<mobjinfo_t, int32_t>::iterator it = mobjinfo.find(ofs);
     if (it != mobjinfo.end())
-        info = it->second;
+        info = &it->second;
     else
         info = NULL;
     return arc;

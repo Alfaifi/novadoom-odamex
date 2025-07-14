@@ -3144,7 +3144,7 @@ void A_PlaySound(AActor* mo)
 	// Play the sound from the SoundMap
 
 	int sndmap = mo->state->misc1;
-	char* snd;
+	const char* snd;
 
 	auto soundIt = SoundMap.find(sndmap);
 	if (soundIt == SoundMap.end())
@@ -3154,7 +3154,7 @@ void A_PlaySound(AActor* mo)
 	}
 	else
 	{
-		snd = (char*)soundIt->second;
+		snd = soundIt->second.c_str();
 	}
 
 	S_Sound(mo, CHAN_BODY, snd, 1,

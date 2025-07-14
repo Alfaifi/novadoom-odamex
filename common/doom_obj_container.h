@@ -10,16 +10,12 @@
 
 #pragma once
 
-#include "i_system.h" // needed for WORD
+#include "i_system.h"
 #include "m_stacktrace.h"
-#include <cstddef>
 #include <functional>
 #include <unordered_map>
 #include <vector>
 #include <typeinfo>
-
-template <class ObjType, class IdxType>
-class DoomObjectContainer;
 
 //----------------------------------------------------------------------------------------------
 // DoomObjectContainer replaces the global doom object pointers (states, mobjinfo,
@@ -34,11 +30,10 @@ template <class ObjType, class IdxType = int32_t>
 class DoomObjectContainer
 {
 
-	typedef std::unordered_map<IdxType, ObjType*> LookupTable;
+	typedef std::unordered_map<IdxType, ObjType> LookupTable;
 	typedef std::vector<ObjType> DoomObjectContainerData;
 	typedef DoomObjectContainer<ObjType, IdxType> DoomObjectContainerType;
 
-	DoomObjectContainerData container;
 	LookupTable lookup_table;
 
   public:
@@ -72,14 +67,13 @@ class DoomObjectContainer
 
 	iterator begin();
 	iterator end();
-	const_iterator cbegin();
-	const_iterator cend();
+	const_iterator begin() const;
+	const_iterator end() const;
+	const_iterator cbegin() const;
+	const_iterator cend() const;
 	iterator find(IdxType idx);
 	const_iterator find(IdxType idx) const;
 	bool contains(IdxType idx) const;
-
-	friend ObjType operator-(ObjType obj, DoomObjectContainerType& container);
-	friend ObjType operator+(DoomObjectContainerType& container, WORD ofs);
 };
 
 //----------------------------------------------------------------------------------------------
@@ -92,7 +86,7 @@ DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer() {}
 template <class ObjType, class IdxType>
 DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count)
 {
-	this->container.reserve(count);
+	this->lookup_table.reserve(count);
 }
 
 template <class ObjType, class IdxType>
@@ -112,7 +106,7 @@ ObjType* DoomObjectContainer<
     {
 	    I_Error("Attempt to access invalid {} at idx {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
     }
-    return it->second;
+    return &it->second;
 }
 
 template <class ObjType, class IdxType>
@@ -124,55 +118,7 @@ const ObjType* DoomObjectContainer<
     {
     	I_Error("Attempt to access invalid {} at idx {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
     }
-    return it->second;
-}
-
-template <class ObjType, class IdxType>
-bool DoomObjectContainer<ObjType, IdxType>::operator==(const ObjType* p) const
-{
-	return this->container().data() == p;
-}
-
-template <class ObjType, class IdxType>
-bool DoomObjectContainer<ObjType, IdxType>::operator!=(const ObjType* p) const
-{
-	return this->container().data() != p;
-}
-
-template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::operator const ObjType*() const
-{
-	return const_cast<ObjType>(this->container.data());
-}
-template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::operator ObjType*()
-{
-	return this->container.data();
-}
-
-template <class ObjType, class IdxType>
-ObjType operator-(ObjType obj, DoomObjectContainer<ObjType, IdxType>& container)
-{
-	return obj - container.data();
-}
-template <class ObjType, class IdxType>
-ObjType operator+(DoomObjectContainer<ObjType, IdxType>& container, WORD ofs)
-{
-	return container.data() + ofs;
-}
-
-// data functions for quicker access to all objects presently stored
-
-template <class ObjType, class IdxType>
-ObjType* DoomObjectContainer<ObjType, IdxType>::data()
-{
-	return this->container.data();
-}
-
-template <class ObjType, class IdxType>
-const ObjType* DoomObjectContainer<ObjType, IdxType>::data() const
-{
-	return this->container.data();
+    return &it->second;
 }
 
 // Capacity and Size
@@ -180,23 +126,12 @@ const ObjType* DoomObjectContainer<ObjType, IdxType>::data() const
 template <class ObjType, class IdxType>
 size_t DoomObjectContainer<ObjType, IdxType>::size() const
 {
-	return this->container.size();
-}
-
-template <class ObjType, class IdxType>
-size_t DoomObjectContainer<ObjType, IdxType>::capacity() const
-{
-	return this->container.capacity();
+	return this->lookup_table.size();
 }
 
 template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::clear()
 {
-	// for (auto& obj : this->container)
-	// {
-	// 	this->ff(obj);
-	// }
-	this->container.clear();
 	this->lookup_table.clear();
 }
 
@@ -205,13 +140,13 @@ void DoomObjectContainer<ObjType, IdxType>::clear()
 template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::resize(size_t count)
 {
-	this->container.resize(count);
+	this->lookup_table.resize(count);
 }
 
 template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 {
-	this->container.reserve(new_cap);
+	this->lookup_table.reserve(new_cap);
 }
 
 // Insertion
@@ -219,8 +154,7 @@ void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
 {
-	this->container.insert(this->container.end(), obj);
-	this->lookup_table[idx] = &container.back();
+	this->lookup_table[idx] = obj;
 }
 
 // TODO: more of a copy construct in a sense
@@ -228,11 +162,8 @@ template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::append(
     const DoomObjectContainer<ObjType, IdxType>& dObjContainer)
 {
-	for (DoomObjectContainerType::iterator it = dObjContainer.lookup_table.begin();
-	     it != dObjContainer.lookup_table.end(); ++it)
+	for (const auto& [idx, obj] : dObjContainer.lookup_table)
 	{
-		IdxType idx = it->first;
-		ObjType obj = it->second;
 		this->insert(*obj, idx);
 	}
 }
@@ -242,25 +173,37 @@ void DoomObjectContainer<ObjType, IdxType>::append(
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::begin()
 {
-	return lookup_table.begin();
+	return this->lookup_table.begin();
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::end()
 {
-	return lookup_table.end();
+	return this->lookup_table.end();
 }
 
 template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cbegin()
+typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::begin() const
 {
-	return lookup_table.begin();
+	return this->lookup_table.begin();
 }
 
 template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cend()
+typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::end() const
 {
-	return lookup_table.end();
+	return this->lookup_table.end();
+}
+
+template <class ObjType, class IdxType>
+typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cbegin() const
+{
+	return this->lookup_table.begin();
+}
+
+template <class ObjType, class IdxType>
+typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cend() const
+{
+	return this->lookup_table.end();
 }
 
 // Lookup
@@ -269,24 +212,14 @@ template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<
     ObjType, IdxType>::find(IdxType idx)
 {
-	typename LookupTable::iterator it = this->lookup_table.find(idx);
-	if (it != this->lookup_table.end())
-	{
-		return it;
-	}
-	return this->lookup_table.end();
+	return this->lookup_table.find(idx);
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<
     ObjType, IdxType>::find(IdxType idx) const
 {
-	typename LookupTable::iterator it = this->lookup_table.find(idx);
-	if (it != this->lookup_table.end())
-	{
-		return it;
-	}
-	return this->lookup_table.end();
+	return this->lookup_table.find(idx);
 }
 
 template<class ObjType, class IdxType>

@@ -52,30 +52,24 @@ enum triggertype
 // Migrate some non-hexen data to hexen format, and other misc flags.
 void P_MigrateActorInfo(void)
 {
-	int i;
 	static bool migrated = false;
-	mobjinfo_t* m;
-	// [CMB] data accesses the underlying vector inside of doomobjcontainer
-	// this is a contiguous data structure that has ALL mobjinfo objects
-	mobjinfo_t* mobjinfoptr = mobjinfo.data();
 
 	// Set MF2_PASSMOBJ on dehacked monsters
 	// because we don't expose ZDoom's Bits2 BEX extension (yet...)
 	// which is the normal way MF2_PASSMOBJ gets set.
-	for (i = 0; i < ::num_mobjinfo_types(); ++i)
+	for (auto& [idx, m] : mobjinfo)
 	{
-		m = &mobjinfoptr[i];
-		if (m->flags & MF_COUNTKILL)
+		if (m.flags & MF_COUNTKILL)
 		{
 			if (P_AllowPassover())
 			{
-				if (m->flags & MF_COUNTKILL)
-					m->flags2 |= MF2_PASSMOBJ;
+				if (m.flags & MF_COUNTKILL)
+					m.flags2 |= MF2_PASSMOBJ;
 			}
 			else
 			{
-				if (m->flags & MF_COUNTKILL)
-					m->flags2 &= ~MF2_PASSMOBJ;
+				if (m.flags & MF_COUNTKILL)
+					m.flags2 &= ~MF2_PASSMOBJ;
 			}
 		}
 	}
@@ -94,14 +88,13 @@ void P_MigrateActorInfo(void)
 	{
 		migrated = true;
 
-		for (i = 0; i < ::num_mobjinfo_types(); ++i)
+		for (auto& [idx, m] : mobjinfo)
 		{
-			m = &mobjinfoptr[i];
-			if (m->flags & MF_COUNTKILL)
-				m->flags2 |= MF2_MCROSS | MF2_PUSHWALL;
+			if (m.flags & MF_COUNTKILL)
+				m.flags2 |= MF2_MCROSS | MF2_PUSHWALL;
 
-			if (m->flags & MF_MISSILE)
-				m->flags2 |= MF2_PCROSS | MF2_IMPACT;
+			if (m.flags & MF_MISSILE)
+				m.flags2 |= MF2_PCROSS | MF2_IMPACT;
 		}
 
 		mobjinfo[MT_SKULL]->flags2 |= MF2_MCROSS | MF2_PUSHWALL;
@@ -111,14 +104,13 @@ void P_MigrateActorInfo(void)
 	{
 		migrated = false;
 
-		for (i = 0; i < ::num_mobjinfo_types(); ++i)
+		for (auto& [idx, m] : mobjinfo)
 		{
-			m = &mobjinfoptr[i];
-			if (m->flags & MF_COUNTKILL)
-				m->flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL);
+			if (m.flags & MF_COUNTKILL)
+				m.flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL);
 
-			if (m->flags & MF_MISSILE)
-				m->flags2 &= ~(MF2_PCROSS | MF2_IMPACT);
+			if (m.flags & MF_MISSILE)
+				m.flags2 &= ~(MF2_PCROSS | MF2_IMPACT);
 		}
 
 		mobjinfo[MT_SKULL]->flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL);

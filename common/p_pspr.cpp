@@ -1098,7 +1098,7 @@ void A_WeaponMeleeAttack(AActor* mo)
 	hitsound = psp->state->args[3];
 	range = psp->state->args[4];
 
-	char* snd;
+	const char* snd;
 
 	auto soundIt = SoundMap.find(hitsound);
 	if (soundIt == SoundMap.end())
@@ -1108,7 +1108,7 @@ void A_WeaponMeleeAttack(AActor* mo)
 	}
 	else
 	{
-		snd = (char*)soundIt->second;
+		snd = soundIt->second.c_str();
 	}
 
 	if (range <= 0)
@@ -1160,7 +1160,7 @@ void A_WeaponSound(AActor *mo)
 		return;
 
 	int sndmap = psp->state->args[0];
-	char* snd;
+	const char* snd;
 
 	auto soundIt = SoundMap.find(sndmap);
 	if (soundIt == SoundMap.end())
@@ -1170,7 +1170,7 @@ void A_WeaponSound(AActor *mo)
 	}
 	else
 	{
-		snd = (char*)soundIt->second;
+		snd = soundIt->second.c_str();
 	}
 
 	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, snd,

@@ -231,17 +231,17 @@ void G_InitNew (const char *mapname)
 	{
 		if (wantFast)
 		{
-			for (const auto& it : states)
+			for (auto& it : states)
 			{
-				state_t* state = it.second;
+				state_t* state = &it.second;
 				if (state->flags & STATEF_SKILL5FAST &&
 				    (state->tics != 1 || demoplayback))
 					state->tics >>= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (const auto& it : mobjinfo)
+			for (auto& it : mobjinfo)
 			{
-				mobjinfo_t* minfo = it.second;
+				mobjinfo_t* minfo = &it.second;
 				if (minfo->altspeed != NO_ALTSPEED)
 				{
 					int swap = minfo->speed;
@@ -252,16 +252,16 @@ void G_InitNew (const char *mapname)
 		}
 		else
 		{
-			for (const auto& it : states)
+			for (auto& it : states)
 			{
-				state_t* state = it.second;
+				state_t* state = &it.second;
 				if (state->flags & STATEF_SKILL5FAST)
 					state->tics <<= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (const auto& it : mobjinfo)
+			for (auto& it : mobjinfo)
 			{
-				mobjinfo_t* minfo = it.second;
+				mobjinfo_t* minfo = &it.second;
 				if (minfo->altspeed != NO_ALTSPEED)
 				{
 					int swap = minfo->altspeed;
