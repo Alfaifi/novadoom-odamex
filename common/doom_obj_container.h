@@ -62,9 +62,9 @@ class DoomObjectContainer
 	typedef typename LookupTable::iterator iterator;
 	typedef typename LookupTable::const_iterator const_iterator;
 
-	explicit DoomObjectContainer();
+	explicit DoomObjectContainer() = default;
 	explicit DoomObjectContainer(size_t count);
-	~DoomObjectContainer();
+	~DoomObjectContainer() = default;
 	DoomObjectContainer& operator=(const DoomObjectContainer& other) = default;
 	DoomObjectContainer& operator=(DoomObjectContainer&& other) = default;
 
@@ -97,19 +97,7 @@ class DoomObjectContainer
 // Construction and Destruction
 
 template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer() {}
-
-template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count)
-{
-	this->lookup_table.reserve(count);
-}
-
-template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::~DoomObjectContainer()
-{
-	clear();
-}
+DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count) : lookup_table(count) {}
 
 // Operators
 
