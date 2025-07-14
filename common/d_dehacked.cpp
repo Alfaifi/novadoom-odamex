@@ -589,14 +589,14 @@ static void BackupData(void)
 	OrgSprNames = (const char**) M_Calloc(::NUMSPRITES + 1, sizeof(char*));
 	for (i = 0; i < ::NUMSPRITES; i++)
 	{
-		OrgSprNames[i] = strdup(sprnames[i]->data());
+		OrgSprNames[i] = strdup(sprnames[i].data());
 	}
 	OrgSprNames[NUMSPRITES] = NULL;
 
 	// backup action pointers
 	for (i = 0; i < ::NUMSTATES; i++)
 	{
-		OrgActionPtrs[i] = states[i]->action;
+		OrgActionPtrs[i] = states[i].action;
 	}
 
 	// states -- allocate to the heap
@@ -2079,7 +2079,7 @@ static int PatchPointer(int ptrNum)
 			}
 			else
 			{
-				states[codepconv[ptrNum]]->action = OrgActionPtrs[i];
+				states[codepconv[ptrNum]].action = OrgActionPtrs[i];
 			}
 		}
 		else
@@ -2796,7 +2796,10 @@ void D_PostProcessDeh()
 */
 bool CheckIfDehActorDefined(const mobjtype_t mobjtype)
 {
-	const mobjinfo_t mobj = *::mobjinfo[mobjtype];
+	auto it = ::mobjinfo.find(mobjtype);
+	if (it == ::mobjinfo.end())
+		return false;
+	const auto& mobj = it->second;
 	if (mobj.doomednum == -1 &&
 		mobj.spawnstate == S_TNT1 &&
 		mobj.spawnhealth == 0 &&
@@ -2865,7 +2868,7 @@ static void PrintState(int index)
 
 	// Print this state.
 	state_t& state = it->second;
-	Printf("%4d | sprite:%s frame:%d tics:%d action:%s m1:%d m2:%d\n", index, *::sprnames[state.sprite],
+	PrintFmt("{:4d} | sprite:{} frame:{} tics:{} action:{} m1:{} m2:{}\n", index, ::sprnames[state.sprite],
 	       state.frame, state.tics, ActionPtrString(state.action), state.misc1,
 	       state.misc2);
 }
@@ -3022,7 +3025,7 @@ BEGIN_COMMAND(playstate)
 		visited.emplace(index, true);
 
 		// Next state.
-		index = ::states[index]->nextstate;
+		index = ::states[index].nextstate;
 	}
 }
 END_COMMAND(playstate)

@@ -568,15 +568,15 @@ bool P_ShouldClipPlayer(AActor* projectile, AActor* player)
 static bool P_ProjectileImmune(AActor* target, AActor* source)
 {
 	return ( // PG_GROUPLESS means no immunity, even to own species
-	           mobjinfo[target->type]->projectile_group != PG_GROUPLESS ||
+	           mobjinfo[target->type].projectile_group != PG_GROUPLESS ||
 	           target == source) &&
 	       (( // target type has default behaviour, and things are the same type
-	            mobjinfo[target->type]->projectile_group == PG_DEFAULT &&
+	            mobjinfo[target->type].projectile_group == PG_DEFAULT &&
 	            source->type == target->type) ||
 	        ( // target type has special behaviour, and things have the same group
-	            mobjinfo[target->type]->projectile_group != PG_DEFAULT &&
-	            mobjinfo[target->type]->projectile_group ==
-	                mobjinfo[source->type]->projectile_group));
+	            mobjinfo[target->type].projectile_group != PG_DEFAULT &&
+	            mobjinfo[target->type].projectile_group ==
+	                mobjinfo[source->type].projectile_group));
 }
 
 static bool PIT_CheckThing (AActor *thing)
@@ -1165,7 +1165,7 @@ bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 
 	if(!thing->subsector)
 	{
-		I_Error("Thing {type: %d, info->type: %d} subsector should not be NULL!", thing->type, thing->info->type);
+		I_Error("P_TryMove: Thing {{type: {}, info->type: {}}} subsector was null", thing->type, thing->info->type);
 	}
 
 	sector_t*	oldsec = thing->subsector->sector;	// [RH] for sector actions
@@ -2924,8 +2924,8 @@ CVAR_FUNC_IMPL(sv_splashfactor)
 static bool P_SplashImmune(AActor* target, AActor* spot)
 {
 	return // not default behaviour and same group
-	    mobjinfo[target->type]->splash_group != SG_DEFAULT &&
-	    mobjinfo[target->type]->splash_group == mobjinfo[spot->type]->splash_group;
+	    mobjinfo[target->type].splash_group != SG_DEFAULT &&
+	    mobjinfo[target->type].splash_group == mobjinfo[spot->type].splash_group;
 }
 
 static bool PIT_DoomRadiusAttack(AActor* thing)

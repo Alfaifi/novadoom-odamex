@@ -31,14 +31,11 @@ class DoomObjectContainer
 {
 
 	typedef std::unordered_map<IdxType, ObjType> LookupTable;
-	typedef std::vector<ObjType> DoomObjectContainerData;
 	typedef DoomObjectContainer<ObjType, IdxType> DoomObjectContainerType;
 
 	LookupTable lookup_table;
 
   public:
-	typedef typename DoomObjectContainerData::reference ObjReference;
-	typedef typename DoomObjectContainerData::const_reference ConstObjReference;
 	typedef typename LookupTable::iterator iterator;
 	typedef typename LookupTable::const_iterator const_iterator;
 
@@ -46,23 +43,20 @@ class DoomObjectContainer
 	explicit DoomObjectContainer(size_t count);
 	~DoomObjectContainer();
 
-	ObjType* operator[](int);
-	const ObjType* operator[](int) const;
+	ObjType& operator[](int);
+	const ObjType& operator[](int) const;
 	bool operator==(const ObjType* p) const;
 	bool operator!=(const ObjType* p) const;
 	// convert to ObjType* to allow pointer arithmetic
 	operator const ObjType*() const;
 	operator ObjType*();
-	// direct access similar to STL data()
-	ObjType* data();
-	const ObjType* data() const;
 
 	size_t capacity() const;
 	size_t size() const;
 	void clear();
 	void resize(size_t count);
 	void reserve(size_t new_cap);
-	ObjReference insert(const ObjType& obj, IdxType idx);
+	ObjType& insert(const ObjType& obj, IdxType idx);
 	void append(const DoomObjectContainerType& dObjContainer);
 
 	iterator begin();
@@ -98,7 +92,7 @@ DoomObjectContainer<ObjType, IdxType>::~DoomObjectContainer()
 // Operators
 
 template <class ObjType, class IdxType>
-ObjType* DoomObjectContainer<
+ObjType& DoomObjectContainer<
     ObjType, IdxType>::operator[](int idx)
 {
 	iterator it = this->lookup_table.find(idx);
@@ -106,11 +100,11 @@ ObjType* DoomObjectContainer<
     {
 	    I_Error("Attempt to access invalid {} at idx {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
     }
-    return &it->second;
+    return it->second;
 }
 
 template <class ObjType, class IdxType>
-const ObjType* DoomObjectContainer<
+const ObjType& DoomObjectContainer<
     ObjType, IdxType>::operator[](int idx) const
 {
     const_iterator it = this->lookup_table.find(idx);
@@ -118,7 +112,7 @@ const ObjType* DoomObjectContainer<
     {
     	I_Error("Attempt to access invalid {} at idx {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
     }
-    return &it->second;
+    return it->second;
 }
 
 // Capacity and Size
@@ -152,7 +146,7 @@ void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 // Insertion
 
 template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::ObjReference DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
+ObjType& DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
 {
 	return this->lookup_table[idx] = obj;
 }

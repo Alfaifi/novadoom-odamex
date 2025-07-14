@@ -523,8 +523,6 @@ void R_DrawHitBox(AActor* thing)
 //
 void R_ProjectSprite(AActor *thing, int fakeside)
 {
-	spritedef_t*		sprdef;
-	spriteframe_t*		sprframe;
 	int 				lump;
 	unsigned int		rot;
 	bool 				flip;
@@ -563,15 +561,17 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 		thingz = thing->z;
 	}
 
+	auto it = sprites.find(thing->sprite);
+
 #ifdef RANGECHECK
-	if (sprites.find(thing->sprite) == sprites.end())
+	if (it == sprites.end())
 	{
 		DPrintFmt("R_ProjectSprite: thing ({}: {}): invalid sprite number {}\n on ", thing->type, thing->info->name, thing->sprite);
 		return;
 	}
 #endif
 
-	sprdef = &sprites[thing->sprite];
+	const spritedef_t* sprdef = &it->second;
 
 #ifdef RANGECHECK
 	if ( (thing->frame & FF_FRAMEMASK) >= sprdef->numframes )
@@ -581,7 +581,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 	}
 #endif
 
-	sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
+	const spriteframe_t* sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
 	// decide which patch to use for sprite relative to player
 	if (sprframe->rotate)

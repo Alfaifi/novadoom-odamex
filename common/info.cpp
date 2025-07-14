@@ -7182,32 +7182,32 @@ void D_Init_Nightmare_Flags(void)
 	// Set the flag for nightmare frames
 	for (int i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
 	{
-		states[i]->flags |= STATEF_SKILL5FAST;
+		states[i].flags |= STATEF_SKILL5FAST;
 	}
 
 	// NIGHTMARE! Alt Speed
-	mobjinfo[MT_BRUISERSHOT]->altspeed = 20 * FRACUNIT;
-	mobjinfo[MT_HEADSHOT]->altspeed = 20 * FRACUNIT;
-	mobjinfo[MT_TROOPSHOT]->altspeed = 20 * FRACUNIT;
+	mobjinfo[MT_BRUISERSHOT].altspeed = 20 * FRACUNIT;
+	mobjinfo[MT_HEADSHOT].altspeed = 20 * FRACUNIT;
+	mobjinfo[MT_TROOPSHOT].altspeed = 20 * FRACUNIT;
 
 	// Dropped items
-	mobjinfo[MT_WOLFSS]->droppeditem = MT_CLIP;
-	mobjinfo[MT_POSSESSED]->droppeditem = MT_CLIP;
-	mobjinfo[MT_SHOTGUY]->droppeditem = MT_SHOTGUN;
-	mobjinfo[MT_CHAINGUY]->droppeditem = MT_CHAINGUN;
+	mobjinfo[MT_WOLFSS].droppeditem = MT_CLIP;
+	mobjinfo[MT_POSSESSED].droppeditem = MT_CLIP;
+	mobjinfo[MT_SHOTGUY].droppeditem = MT_SHOTGUN;
+	mobjinfo[MT_CHAINGUY].droppeditem = MT_CHAINGUN;
 
-	mobjinfo[MT_VILE]->flags3 = MF3_SHORTMRANGE | MF3_DMGIGNORED | MF3_NOTHRESHOLD;
-	mobjinfo[MT_CYBORG]->flags3 = MF3_NORADIUSDMG | MF3_HIGHERMPROB | MF3_RANGEHALF | MF3_FULLVOLSOUNDS | MF3_E2M8BOSS | MF3_E4M6BOSS;
-	mobjinfo[MT_SPIDER]->flags3 = MF3_NORADIUSDMG | MF3_RANGEHALF | MF3_FULLVOLSOUNDS | MF3_E3M8BOSS | MF3_E4M8BOSS;
-	mobjinfo[MT_SKULL]->flags3 = MF3_RANGEHALF;
-    mobjinfo[MT_FATSO]->flags3 = MF3_MAP07BOSS1;
-	mobjinfo[MT_BABY]->flags3 = MF3_MAP07BOSS2;
-	mobjinfo[MT_BRUISER]->flags3 = MF3_E1M8BOSS;
-	mobjinfo[MT_UNDEAD]->flags3 = MF3_LONGMELEE | MF3_RANGEHALF;
+	mobjinfo[MT_VILE].flags3 = MF3_SHORTMRANGE | MF3_DMGIGNORED | MF3_NOTHRESHOLD;
+	mobjinfo[MT_CYBORG].flags3 = MF3_NORADIUSDMG | MF3_HIGHERMPROB | MF3_RANGEHALF | MF3_FULLVOLSOUNDS | MF3_E2M8BOSS | MF3_E4M6BOSS;
+	mobjinfo[MT_SPIDER].flags3 = MF3_NORADIUSDMG | MF3_RANGEHALF | MF3_FULLVOLSOUNDS | MF3_E3M8BOSS | MF3_E4M8BOSS;
+	mobjinfo[MT_SKULL].flags3 = MF3_RANGEHALF;
+    mobjinfo[MT_FATSO].flags3 = MF3_MAP07BOSS1;
+	mobjinfo[MT_BABY].flags3 = MF3_MAP07BOSS2;
+	mobjinfo[MT_BRUISER].flags3 = MF3_E1M8BOSS;
+	mobjinfo[MT_UNDEAD].flags3 = MF3_LONGMELEE | MF3_RANGEHALF;
 
 	// Projectile links
-	mobjinfo[MT_BRUISER]->projectile_group = PG_BARON;
-	mobjinfo[MT_KNIGHT]->projectile_group = PG_BARON;
+	mobjinfo[MT_BRUISER].projectile_group = PG_BARON;
+	mobjinfo[MT_KNIGHT].projectile_group = PG_BARON;
 }
 
 VERSION_CONTROL (info_cpp, "$Id$")

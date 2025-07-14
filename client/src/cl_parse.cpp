@@ -697,8 +697,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			tics = -1;
 
 		// already spawned as gibs?
-		state_t* s_gibs_state = states[S_GIBS];
-		if (!mo || mo->state == s_gibs_state)
+		if (!mo || mo->state == &states[S_GIBS])
 			return;
 
 		if ((frame & FF_FRAMEMASK) >= sprites[mo->sprite].numframes)

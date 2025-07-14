@@ -259,7 +259,7 @@ inline auto format_as(spritenum_t eSpriteNum)
 inline FArchive &operator<< (FArchive &arc, spritenum_t i) { DWORD out; out = i; return arc << out; }
 inline FArchive &operator>> (FArchive &arc, spritenum_t &i) { DWORD in; arc >> in; i = (spritenum_t)in; return arc; }
 
-typedef enum statenum_e: int32_t
+enum statenum_t: int32_t
 {
 	//------------ odamex states -----------
 
@@ -1392,7 +1392,7 @@ typedef enum statenum_e: int32_t
 	S_MUSHROOM,  // killough 10/98: mushroom explosion effect
 
 	NUMSTATES
-} statenum_t;
+};
 
 inline auto format_as(statenum_t eStateNum)
 {

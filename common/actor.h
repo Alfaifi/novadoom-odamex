@@ -445,8 +445,7 @@ public:
 	AActor ();
 	AActor (const AActor &other);
 	AActor &operator= (const AActor &other);
-	AActor (fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
-	AActor (fixed_t x, fixed_t y, fixed_t z, mobjinfo_t* info);
+	AActor (fixed_t x, fixed_t y, fixed_t z, int32_t type);
 	void Destroy () override;
 	~AActor () override;
 

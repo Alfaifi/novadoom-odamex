@@ -1550,7 +1550,7 @@ void A_VileChase (AActor *actor)
 
 		vileobj = actor;
 
-		viletryradius = mobjinfo[MT_VILE]->radius;
+		viletryradius = mobjinfo[MT_VILE].radius;
 
 		for (bx=xl ; bx<=xh ; bx++)
 		{
@@ -2099,7 +2099,7 @@ void A_MonsterMeleeAttack(AActor* actor)
 	if (!P_CheckRange(actor, range))
 		return;
 
-	S_Sound(actor, CHAN_WEAPON, SoundMap[hitsound]->data(), 1, ATTN_NORM);
+	S_Sound(actor, CHAN_WEAPON, SoundMap[hitsound].c_str(), 1, ATTN_NORM);
 
 	damage = (P_Random() % damagemod + 1) * damagebase;
 	P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
@@ -2200,9 +2200,9 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 					P_SetMobjState(actor, (statenum_t)healstate, true);
 
 					if (!clientside)
-						SV_Sound(corpsehit, CHAN_BODY, SoundMap[healsound]->data(), ATTN_IDLE);
+						SV_Sound(corpsehit, CHAN_BODY, SoundMap[healsound].c_str(), ATTN_IDLE);
 					else
-						S_Sound(corpsehit, CHAN_BODY, SoundMap[healsound]->data(), 1, ATTN_IDLE);
+						S_Sound(corpsehit, CHAN_BODY, SoundMap[healsound].c_str(), 1, ATTN_IDLE);
 
 					info = corpsehit->info;
 
@@ -2557,7 +2557,7 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 	// okay, there's room for another one
 	an = angle >> ANGLETOFINESHIFT;
 
-	prestep = 4*FRACUNIT + 3*(actor->info->radius + mobjinfo[MT_SKULL]->radius)/2;
+	prestep = 4*FRACUNIT + 3*(actor->info->radius + mobjinfo[MT_SKULL].radius)/2;
 
 	x = actor->x + FixedMul (prestep, finecosine[an]);
 	y = actor->y + FixedMul (prestep, finesine[an]);
@@ -3132,7 +3132,7 @@ void A_Scratch(AActor* mo)
 		if (P_CheckMeleeRange(mo))
 		{
 			if (mo->state->misc2)
-				S_Sound(mo, CHAN_BODY, SoundMap[mo->state->misc2]->data(), 1, ATTN_NORM);
+				S_Sound(mo, CHAN_BODY, SoundMap[mo->state->misc2].c_str(), 1, ATTN_NORM);
 
 			P_DamageMobj(mo->target, mo, mo, mo->state->misc1);
 		}

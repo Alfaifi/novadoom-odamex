@@ -243,14 +243,11 @@ AActor &AActor::operator= (const AActor &other)
 //
 //
 
-AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
-    : AActor::AActor(ix, iy, iz, mobjinfo[itype]) {}
-
-AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjinfo_t* mobjinfo)
-    : x(0), y(0), z(0), prevx(0), prevy(0), prevz(0), snext(NULL), sprev(NULL), angle(0),
+AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, int32_t itype)
+    : x(ix), y(iy), z(0), prevx(0), prevy(0), prevz(0), snext(NULL), sprev(NULL), angle(0),
       prevangle(0), sprite(SPR_UNKN), frame(0), pitch(0), prevpitch(0), effects(0),
       subsector(NULL), floorz(0), ceilingz(0), dropoffz(0), floorsector(NULL), radius(0),
-      height(0), momx(0), momy(0), momz(0), validcount(0), type(MT_UNKNOWNTHING),
+      height(0), momx(0), momy(0), momz(0), validcount(0), type(static_cast<mobjtype_t>(itype)),
       info(NULL), tics(0), state(NULL), damage(0), flags(0), flags2(0), flags3(0), oflags(0),
       statusflags(0), special1(0), special2(0), health(0), movedir(0), movecount(0), visdir(0),
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
@@ -259,16 +256,14 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjinfo_t* mobjinfo)
       rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
 {
 	// Fly!!! fix it in P_RespawnSpecial
-	if (mobjinfo == NULL)
+	const auto it = ::mobjinfo.find(itype);
+	if (it == mobjinfo.end())
 	{
-		I_Error("Tried to spawn actor type {}\n", type);
+		I_Error("Tried to spawn actor type {}\n", itype);
 	}
 
 	self.init(this);
-	info = mobjinfo;
-	type = static_cast<mobjtype_t>(mobjinfo->type);
-	x = ix;
-	y = iy;
+	info = &it->second;
 	radius = info->radius;
 	height = P_ThingInfoHeight(info);
 	damage = info->damage;
@@ -292,11 +287,11 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjinfo_t* mobjinfo)
 
 	// do not set the state with P_SetMobjState,
 	// because action routines can not be called yet
-	state_t* st = states[info->spawnstate];
-	state = st;
-	tics = st->tics;
-	sprite = st->sprite;
-	frame = st->frame;
+	state_t& st = states[info->spawnstate];
+	state = &st;
+	tics = st.tics;
+	sprite = st.sprite;
+	frame = st.frame;
 	touching_sectorlist = NULL;	// NULL head of sector list // phares 3/13/98
 
 	// set subsector and/or block links
@@ -972,13 +967,13 @@ void AActor::Serialize (FArchive &arc)
 		baseline.Serialize(arc);
 		if (mobjinfo.find(type) == mobjinfo.end())
 		{
-			I_Error("Unknown object type (%d) in saved game", type);
+			I_Error("AActor::Serialize: Unknown object type ({}) in saved game", type);
 		}
 		if (sprnames.find(sprite) == sprnames.end())
 		{
-			I_Error("Unknown sprite (%d) in saved game", sprite);
+			I_Error("AActor::Serialize: Unknown sprite ({}) in saved game", sprite);
 		}
-		info = mobjinfo[type];
+		info = &mobjinfo[type];
 		touching_sectorlist = NULL;
 
 		LinkToWorld ();
@@ -1026,21 +1021,20 @@ bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 
 	do
 	{
-		// [CMB] find will find NULL as it can be interpreted as 0
 		if (states.find(state) == states.end())
 		{
 			I_Error("P_SetMobjState: State {} does not exist in state table.", state);
 		}
 
 		// strongly typed enum
-		if (static_cast<statenum_t>(state) == S_NULL)
+		if (state == S_NULL)
 		{
-			mobj->state = states[S_NULL];
+			mobj->state = &states[S_NULL];
 			mobj->Destroy();
 			return false;
 		}
 
-		st = states[state];
+		st = &states[state];
 
 		mobj->state = st;
 		mobj->tics = st->tics;
@@ -1282,7 +1276,7 @@ static void P_ApplyXYFriction(AActor* mo)
 	{
 		// if in a walking frame, stop moving
 		// killough 10/98: Don't affect main player when voodoo dolls stop:
-		if (mo->player && !P_IsVoodooDoll(mo) && (unsigned)((mo->state->statenum) - S_PLAY_RUN1) < 4)
+		if (mo->player && !P_IsVoodooDoll(mo) && static_cast<uint32_t>((mo->state->statenum) - S_PLAY_RUN1) < 4)
 			P_SetMobjState(mo, S_PLAY);
 
 		mo->momx = mo->momy = 0;
@@ -2544,12 +2538,8 @@ void P_SpawnMBF21PlayerMissile(AActor* source, mobjtype_t type, fixed_t angle, f
 //
 void P_RespawnSpecials (void)
 {
-	fixed_t 			x;
-	fixed_t 			y;
 	fixed_t 			z;
-
 	AActor* 			mo;
-	mapthing2_t* 		mthing;
 
 	// clients do no control respawning of items
 	if(!serverside)
@@ -2567,10 +2557,10 @@ void P_RespawnSpecials (void)
 	if (level.time - itemrespawntime[iquetail] < sv_itemrespawntime*TICRATE)
 		return;
 
-	mthing = &itemrespawnque[iquetail];
+	const mapthing2_t* mthing = &itemrespawnque[iquetail];
 
-	x = mthing->x << FRACBITS;
-	y = mthing->y << FRACBITS;
+	const fixed_t x = mthing->x << FRACBITS;
+	const fixed_t y = mthing->y << FRACBITS;
 
 	// find which type to spawn
 	auto it = spawn_map.find(mthing->type);
@@ -2598,13 +2588,13 @@ void P_RespawnSpecials (void)
 		z = ONFLOORZ;
 
 	// spawn a teleport fog at the new spot
-	mo = new AActor (x, y, z, mobjinfo[MT_IFOG]);
+	mo = new AActor (x, y, z, MT_IFOG);
 	SV_SpawnMobj(mo);
 	if (clientside)
 		S_Sound (mo, CHAN_VOICE, "misc/spawn", 1, ATTN_IDLE);
 
 	// spawn it
-	mo = new AActor (x, y, z, it->second);
+	mo = new AActor (x, y, z, it->second->type);
 	mo->spawnpoint = *mthing;
 	mo->angle = ANG45 * (mthing->angle/45);
 
@@ -2665,8 +2655,8 @@ void P_ExplodeMissile (AActor* mo)
 
 	mo->momx = mo->momy = mo->momz = 0;
 
-	P_SetMobjState (mo, mobjinfo[mo->type]->deathstate);
-	if (mobjinfo[mo->type]->deathstate != S_NULL)
+	P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
+	if (mobjinfo[mo->type].deathstate != S_NULL)
 	{
 		// [RH] If the object is already translucent, don't change it.
 		// Otherwise, make it 66% translucent.
@@ -2960,11 +2950,11 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		Printf (PRINT_WARNING, "Unknown type %i at (%i, %i)\n",
 			mthing->type,
 			mthing->x, mthing->y);
-		info = mobjinfo[MT_UNKNOWNTHING]; // [CMB] odamex specific MT_UNKNOWNTHING
+		info = &mobjinfo[MT_UNKNOWNTHING]; // [CMB] odamex specific MT_UNKNOWNTHING
 	}
 	// [RH] If the thing's corresponding sprite has no frames, also map
 	//		it to the unknown thing.
-	else if (sprites[states[info->spawnstate]->sprite].numframes == 0)
+	else if (sprites[states[info->spawnstate].sprite].numframes == 0)
 	{
 		Printf (PRINT_WARNING, "Type %i at (%i, %i) has no frames\n",
 				mthing->type, mthing->x, mthing->y);
@@ -3030,7 +3020,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		return;
 	}
 
-	AActor* mobj = new AActor(x, y, z, info);
+	AActor* mobj = new AActor(x, y, z, info->type);
 
 	if (type == MT_HORDESPAWN)
 	{
@@ -3284,25 +3274,19 @@ BEGIN_COMMAND(cheat_mobjs)
 	}
 
 	const char* mobj_type = argv[1];
-	ptrdiff_t mobj_index = -1;
+	auto it = std::find_if(mobjinfo.begin(), mobjinfo.end(), [&](const auto& it){
+		return iequals(it.second.name, mobj_type);
+	});
 
-	for (const auto& it : mobjinfo)
-	{
-		if (stricmp(it.second.name, mobj_type) == 0)
-		{
-			mobj_index = it.first;
-			break;
-		}
-	}
-
-	// TODO: index < 0 is valid now with dsdhacked
-	if (mobj_index < 0)
+	if (it == mobjinfo.end())
 	{
 		Printf("Unknown MT_* mobj type\n");
 		return;
 	}
 
-	Printf("== %s ==", mobj_type);
+	const int32_t mobj_index = it->first;
+
+	PrintFmt("== {} ==", mobj_type);
 
 	AActor* mo;
 	TThinkerIterator<AActor> iterator;
@@ -3310,8 +3294,8 @@ BEGIN_COMMAND(cheat_mobjs)
 	{
 		if (mo->type == mobj_index)
 		{
-			Printf("ID: %d\n", mo->netid);
-			Printf("  %.1f, %.1f, %.1f\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
+			PrintFmt("ID: {}\n", mo->netid);
+			PrintFmt("  {:.1f}, {:.1f}, {:.1f}\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
 			       FIXED2FLOAT(mo->z));
 		}
 	}

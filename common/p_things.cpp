@@ -200,7 +200,6 @@ bool P_Thing_Spawn (int tid, int type, angle_t angle, bool fog)
 	int rtn = 0;
 	int kind;
 	AActor *spot = NULL;
-	mobjinfo_t* pmobj = NULL;
 
 	// type is doomednum
 	// kind is the mobjtype
@@ -208,15 +207,15 @@ bool P_Thing_Spawn (int tid, int type, angle_t angle, bool fog)
 	if (type >= NumSpawnableThings)
 		return false;
 
-	if ( (kind = SpawnableThings[type]) == 0)
+	if ((kind = SpawnableThings[type]) == 0)
 		return false;
 
-	if ((mobjinfo[kind]->flags & MF_COUNTKILL) && sv_nomonsters == 1)
+	if ((mobjinfo[kind].flags & MF_COUNTKILL) && sv_nomonsters == 1)
 		return false;
 
 	while ( (spot = AActor::FindByTID (spot, tid)) )
 	{
-		if (mobjinfo[kind]->flags2 & MF2_FLOATBOB)
+		if (mobjinfo[kind].flags2 & MF2_FLOATBOB)
 			z = spot->z - spot->floorz;
 		else
 			z = spot->z;
@@ -262,7 +261,7 @@ bool P_Thing_Projectile (int tid, int type, angle_t angle,
 	if ( (kind = SpawnableThings[type]) == 0)
 		return false;
 
-	if ((mobjinfo[kind]->flags & MF_COUNTKILL) && sv_nomonsters)
+	if ((mobjinfo[kind].flags & MF_COUNTKILL) && sv_nomonsters)
 		return false;
 
 	while ( (spot = AActor::FindByTID (spot, tid)) )

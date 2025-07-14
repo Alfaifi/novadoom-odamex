@@ -57,7 +57,7 @@ void P_MigrateActorInfo(void)
 	// Set MF2_PASSMOBJ on dehacked monsters
 	// because we don't expose ZDoom's Bits2 BEX extension (yet...)
 	// which is the normal way MF2_PASSMOBJ gets set.
-	for (auto& [idx, m] : mobjinfo)
+	for (auto& [_, m] : mobjinfo)
 	{
 		if (m.flags & MF_COUNTKILL)
 		{
@@ -77,18 +77,18 @@ void P_MigrateActorInfo(void)
 	// Don't forget about lost souls!
 	if (P_AllowPassover())
 	{
-		mobjinfo[MT_SKULL]->flags2 |= MF2_PASSMOBJ;
+		mobjinfo[MT_SKULL].flags2 |= MF2_PASSMOBJ;
 	}
 	else
 	{
-		mobjinfo[MT_SKULL]->flags2 &= ~MF2_PASSMOBJ;
+		mobjinfo[MT_SKULL].flags2 &= ~MF2_PASSMOBJ;
 	}
 
 	if (map_format.getZDoom() && !migrated)
 	{
 		migrated = true;
 
-		for (auto& [idx, m] : mobjinfo)
+		for (auto& [_, m] : mobjinfo)
 		{
 			if (m.flags & MF_COUNTKILL)
 				m.flags2 |= MF2_MCROSS | MF2_PUSHWALL;
@@ -97,8 +97,8 @@ void P_MigrateActorInfo(void)
 				m.flags2 |= MF2_PCROSS | MF2_IMPACT;
 		}
 
-		mobjinfo[MT_SKULL]->flags2 |= MF2_MCROSS | MF2_PUSHWALL;
-		mobjinfo[MT_PLAYER]->flags2 |= MF2_WINDTHRUST | MF2_PUSHWALL;
+		mobjinfo[MT_SKULL].flags2 |= MF2_MCROSS | MF2_PUSHWALL;
+		mobjinfo[MT_PLAYER].flags2 |= MF2_WINDTHRUST | MF2_PUSHWALL;
 	}
 	else if (!map_format.getZDoom() && migrated)
 	{
@@ -113,8 +113,8 @@ void P_MigrateActorInfo(void)
 				m.flags2 &= ~(MF2_PCROSS | MF2_IMPACT);
 		}
 
-		mobjinfo[MT_SKULL]->flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL);
-		mobjinfo[MT_PLAYER]->flags2 &= ~(MF2_WINDTHRUST | MF2_PUSHWALL);
+		mobjinfo[MT_SKULL].flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL);
+		mobjinfo[MT_PLAYER].flags2 &= ~(MF2_WINDTHRUST | MF2_PUSHWALL);
 	}
 }
 
