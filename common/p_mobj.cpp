@@ -2592,7 +2592,7 @@ void P_RespawnSpecials (void)
 		return;
 	}
 
-	if (it->second.flags & MF_SPAWNCEILING)
+	if (it->second->flags & MF_SPAWNCEILING)
 		z = ONCEILINGZ;
 	else
 		z = ONFLOORZ;
@@ -2604,7 +2604,7 @@ void P_RespawnSpecials (void)
 		S_Sound (mo, CHAN_VOICE, "misc/spawn", 1, ATTN_IDLE);
 
 	// spawn it
-	mo = new AActor (x, y, z, &it->second);
+	mo = new AActor (x, y, z, it->second);
 	mo->spawnpoint = *mthing;
 	mo->angle = ANG45 * (mthing->angle/45);
 
@@ -2949,7 +2949,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	auto mobj_it = spawn_map.find(spawn_idx);
 	if (mobj_it != spawn_map.end())
 	{
-		info = &mobj_it->second;
+		info = mobj_it->second;
 		// set this for further down
 		type = info->type;
 	}

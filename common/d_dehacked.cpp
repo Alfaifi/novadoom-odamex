@@ -1544,10 +1544,10 @@ static int PatchThing(int thingy)
 	// update spawn map
 	if (info->doomednum && info->doomednum != -1)
 	{
-		MobjIterator spawn_map_it = spawn_map.find(info->doomednum);
+		auto spawn_map_it = spawn_map.find(info->doomednum);
 		if (spawn_map_it == spawn_map.end())
 		{
-			spawn_map.insert(*info, info->doomednum);
+			spawn_map.insert(info, info->doomednum);
 		}
 	}
 

@@ -4,10 +4,9 @@
 #include "doom_obj_container.h"
 
 void D_ResetMobjInfo(mobjinfo_t* m, int32_t idx);
-void D_ResetMobjInfoSpawnMap(mobjinfo_t* m, int32_t idx);
 
 DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES);
-DoomObjectContainer<mobjinfo_t, int> spawn_map;
+DoomObjectContainer<mobjinfo_t*, int> spawn_map;
 
 size_t num_mobjinfo_types()
 {
@@ -51,7 +50,7 @@ void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 			if (mobjinfo_source.doomednum != -1)
 			{
 				mobjinfo_t* spawn_info = &mobjinfo.find(idx)->second;
-				spawn_map.insert(*spawn_info, mobjinfo_source.doomednum);
+				spawn_map.insert(spawn_info, mobjinfo_source.doomednum);
 			}
 		}
 	}

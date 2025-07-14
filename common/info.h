@@ -1780,7 +1780,7 @@ extern mobjinfo_t doom_mobjinfo[];
 extern DoomObjectContainer<mobjinfo_t> mobjinfo; // mobjtype_t
 extern size_t num_mobjinfo_types();
 // [CMB] spawn map per id24 - the pointer is to the mobjinfo table
-extern DoomObjectContainer<mobjinfo_t> spawn_map; // int
+extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
 
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {

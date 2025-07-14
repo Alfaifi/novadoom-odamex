@@ -2271,9 +2271,7 @@ void D_Initialize_Odamex_Objects()
 	// states
 	for (int i = 0; i < size; i++)
 	{
-		state_t* state = (state_t*)Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
-		*state = odastates[i];
-		states.insert(*state, state->statenum);
+		states.insert(odastates[i], odastates[i].statenum);
 	}
 #if defined _DEBUG
 	Printf(PRINT_HIGH, "Loaded %d Odamex States\n", size);
@@ -2283,9 +2281,7 @@ void D_Initialize_Odamex_Objects()
 	size = odamobjinfo_size();
 	for (int i = 0; i < size; i++)
 	{
-		mobjinfo_t* mobj = (mobjinfo_t*)Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
-		*mobj = odamobjinfo[i];
-		mobjinfo.insert(*mobj, mobj->type);
+		mobjinfo_t* mobj = &mobjinfo.insert(odamobjinfo[i], odamobjinfo[i].type);
 
 		// update the spawn map
 		if (mobj->doomednum != 0)
@@ -2293,11 +2289,11 @@ void D_Initialize_Odamex_Objects()
 			// MT_HORDESPAWN is re-used across multiple different horde object types
 			if (mobj->type == MT_HORDESPAWN)
 			{
-				spawn_map.insert(*mobj, mobj->type);
+				spawn_map.insert(mobj, mobj->type);
 			}
 			else
 			{
-				spawn_map.insert(*mobj, mobj->doomednum);
+				spawn_map.insert(mobj, mobj->doomednum);
 			}
 
 		}
