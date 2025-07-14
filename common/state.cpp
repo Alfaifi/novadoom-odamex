@@ -2,7 +2,6 @@
 
 #include "state.h"
 #include "doom_obj_container.h"
-#include "z_zone.h"
 
 void D_ResetState(state_t* s, int32_t idx);
 DoomObjectContainer<state_t> states(::NUMSTATES);
@@ -46,9 +45,7 @@ void D_Initialize_States(state_t* source, int count)
         {
         	state_source = source[i];
             state_statenum = state_source.statenum;
-        	state_t* newstate = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
-        	*newstate = state_source;
-			states.insert(*newstate, state_statenum);
+			states.insert(state_source, state_statenum);
         }
     }
 #if defined _DEBUG

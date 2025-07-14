@@ -753,10 +753,6 @@ void D_DoomMain()
 
 	W_SetupFileIdentifiers();
 
-	// start the Zone memory manager
-	Z_Init();
-	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
-
 	D_Initialize_Doom_Objects();
 
 	M_FindResponseFile();		// [ML] 23/1/07 - Add Response file support back in
@@ -847,6 +843,10 @@ void D_DoomMain()
 
 	D_AddWadCommandLineFiles(newwadfiles);
 	D_AddDehCommandLineFiles(newpatchfiles);
+
+	// start the Zone memory manager
+	Z_Init();
+	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
     // do the deh processing
 	D_LoadResourceFiles(newwadfiles, newpatchfiles);
