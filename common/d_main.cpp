@@ -832,16 +832,8 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	OResFiles oldwadfiles = ::wadfiles;
 	OResFiles oldpatchfiles = ::patchfiles;
 	std::string failmsg;
-
-	
-	 // [CMB] Zone memory manager already reset by D_Shutdown() calling Z_Close() so this is doing it twice
-	 // Z_Init();
-	 // Printf("Z_Init: D_DoomWadReboot: Using native allocator with OZone "
-	 //      "bookkeeping.\n");
-
 	try
 	{
-
 		D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
 		// get skill / episode / map from parms
@@ -867,7 +859,6 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 		std::string fatalmsg;
 		try
 		{
-
 			LoadResolvedFiles(oldwadfiles, oldpatchfiles);
 
 			// get skill / episode / map from parms
@@ -910,13 +901,9 @@ static void AddCommandLineOptionFiles(OWantFiles& out, const std::string& option
 	DArgs files = Args.GatherFiles(option.c_str());
 	for (size_t i = 0; i < files.NumArgs(); i++)
 	{
-		const char* fileArg = files.GetArg(i);
-		if (!std::string(fileArg).empty())
-		{
-			OWantFile file;
-			OWantFile::make(file, fileArg, type);
+		OWantFile file;
+		if (OWantFile::make(file, files.GetArg(i), type))
 			out.push_back(file);
-		}
 	}
 
 	files.FlushArgs();

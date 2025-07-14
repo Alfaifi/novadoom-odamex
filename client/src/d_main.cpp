@@ -469,17 +469,13 @@ void D_DoAdvanceDemo (void)
     else
         demosequence = (demosequence+1)%6;
 
-#if defined(_DEBUG)
-	PrintFmt_Bold("D_DoAdvanceDemo:: Checking for DEMO: {}\n", demosequence);
-#endif
-
     switch (demosequence)
     {
         case 0:
             pagetic = gameinfo.titleTime * TICRATE;
 
             gamestate = GS_DEMOSCREEN;
-		    pagename = gameinfo.titlePage;
+            pagename = gameinfo.titlePage;
 
             currentmusic = gameinfo.titleMusic.c_str();
 
@@ -493,7 +489,7 @@ void D_DoAdvanceDemo (void)
         case 2:
             pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-		    pagename = gameinfo.creditPages[0];
+            pagename = gameinfo.creditPages[0];
 
             break;
         case 3:
@@ -515,7 +511,7 @@ void D_DoAdvanceDemo (void)
             else
             {
                 pagetic = gameinfo.pageTime * TICRATE;
-			    pagename = gameinfo.creditPages[1];
+                pagename = gameinfo.creditPages[1];
             }
 
             break;
@@ -526,7 +522,7 @@ void D_DoAdvanceDemo (void)
         case 6:
             pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-		    pagename = gameinfo.creditPages[1];
+            pagename = gameinfo.creditPages[1];
 
             break;
         case 7:
@@ -619,12 +615,17 @@ void D_Init()
 
 	M_ClearRandom();
 
+	// start the Zone memory manager
+	Z_Init();
+	if (first_time)
+		PrintFmt("Z_Init: Using native allocator with OZone bookkeeping.\n");
+
 	// Load palette and set up colormaps
 	V_Init();
 
 	// init the renderer
 	if (first_time)
-		Printf(PRINT_HIGH, "R_Init: Init DOOM refresh daemon.\n");
+		PrintFmt(PRINT_HIGH, "R_Init: Init DOOM refresh daemon.\n");
 	R_Init();
 
 //	V_LoadFonts();
@@ -642,20 +643,20 @@ void D_Init()
 
 	// init the menu subsystem
 	if (first_time)
-		Printf(PRINT_HIGH, "M_Init: Init miscellaneous info.\n");
+		PrintFmt(PRINT_HIGH, "M_Init: Init miscellaneous info.\n");
 	M_Init();
 
 	if (first_time)
-		Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
+		PrintFmt(PRINT_HIGH, "P_Init: Init Playloop state.\n");
 	P_InitEffects();
 	P_Init();
 
 	// init sound and music
 	if (first_time)
 	{
-		Printf (PRINT_HIGH, "S_Init: Setting up sound.\n");
-		Printf (PRINT_HIGH, "S_Init: default sfx volume is %g\n", snd_sfxvolume.value());
-		Printf (PRINT_HIGH, "S_Init: default music volume is %g\n", snd_musicvolume.value());
+		PrintFmt(PRINT_HIGH, "S_Init: Setting up sound.\n");
+		PrintFmt(PRINT_HIGH, "S_Init: default sfx volume is {}\n", snd_sfxvolume.value());
+		PrintFmt(PRINT_HIGH, "S_Init: default music volume is {}\n", snd_musicvolume.value());
 	}
 	S_Init(snd_sfxvolume, snd_musicvolume);
 
@@ -843,10 +844,6 @@ void D_DoomMain()
 
 	D_AddWadCommandLineFiles(newwadfiles);
 	D_AddDehCommandLineFiles(newpatchfiles);
-
-	// start the Zone memory manager
-	Z_Init();
-	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
 
     // do the deh processing
 	D_LoadResourceFiles(newwadfiles, newpatchfiles);
