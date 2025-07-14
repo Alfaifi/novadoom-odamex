@@ -687,7 +687,7 @@ void G_DoResetLevel(bool full_reset)
 		while ((mo = iterator.Next()))
 		{
 			// In sides-based games, destroy objectives that aren't relevant.
-			if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
+			if (mo->netid && !CTF_ShouldSpawnHomeFlag(static_cast<mobjtype_t>(mo->type)))
 			{
 				CTF_ReplaceFlagWithWaypoint(mo);
 			}
@@ -936,7 +936,7 @@ void G_DoLoadLevel (int position)
 		TThinkerIterator<AActor> iterator;
 		while ((mo = iterator.Next()))
 		{
-			if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
+			if (mo->netid && !CTF_ShouldSpawnHomeFlag(static_cast<mobjtype_t>(mo->type)))
 			{
 				CTF_ReplaceFlagWithWaypoint(mo);
 			}
