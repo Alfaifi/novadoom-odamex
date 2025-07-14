@@ -51,8 +51,8 @@ class DoomObjectContainer
 	explicit DoomObjectContainer(size_t count);
 	~DoomObjectContainer();
 
-	ObjReference operator[](int);
-	ConstObjReference operator[](int) const;
+	ObjType* operator[](int);
+	const ObjType* operator[](int) const;
 	bool operator==(const ObjType* p) const;
 	bool operator!=(const ObjType* p) const;
 	// convert to ObjType* to allow pointer arithmetic
@@ -104,7 +104,7 @@ DoomObjectContainer<ObjType, IdxType>::~DoomObjectContainer()
 // Operators
 
 template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::ObjReference DoomObjectContainer<
+ObjType* DoomObjectContainer<
     ObjType, IdxType>::operator[](int idx)
 {
 	iterator it = this->lookup_table.find(idx);
@@ -116,7 +116,7 @@ typename DoomObjectContainer<ObjType, IdxType>::ObjReference DoomObjectContainer
 }
 
 template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::ConstObjReference DoomObjectContainer<
+const ObjType* DoomObjectContainer<
     ObjType, IdxType>::operator[](int idx) const
 {
     const_iterator it = this->lookup_table.find(idx);
@@ -233,7 +233,7 @@ void DoomObjectContainer<ObjType, IdxType>::append(
 	{
 		IdxType idx = it->first;
 		ObjType obj = it->second;
-		this->insert(idx, obj);
+		this->insert(*obj, idx);
 	}
 }
 

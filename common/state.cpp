@@ -48,7 +48,7 @@ void D_Initialize_States(state_t* source, int count)
             state_statenum = state_source.statenum;
         	state_t* newstate = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
         	*newstate = state_source;
-			states.insert(newstate, state_statenum);
+			states.insert(*newstate, state_statenum);
         }
     }
 #if defined _DEBUG

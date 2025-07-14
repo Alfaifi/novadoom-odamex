@@ -57,14 +57,14 @@ void P_MigrateActorInfo(void)
 	mobjinfo_t* m;
 	// [CMB] data accesses the underlying vector inside of doomobjcontainer
 	// this is a contiguous data structure that has ALL mobjinfo objects
-	mobjinfo_t** mobjinfoptr = mobjinfo.data();
+	mobjinfo_t* mobjinfoptr = mobjinfo.data();
 
 	// Set MF2_PASSMOBJ on dehacked monsters
 	// because we don't expose ZDoom's Bits2 BEX extension (yet...)
 	// which is the normal way MF2_PASSMOBJ gets set.
 	for (i = 0; i < ::num_mobjinfo_types(); ++i)
 	{
-		m = mobjinfoptr[i];
+		m = &mobjinfoptr[i];
 		if (m->flags & MF_COUNTKILL)
 		{
 			if (P_AllowPassover())
@@ -82,7 +82,7 @@ void P_MigrateActorInfo(void)
 
 	// Don't forget about lost souls!
 	if (P_AllowPassover())
-	{ 
+	{
 		mobjinfo[MT_SKULL]->flags2 |= MF2_PASSMOBJ;
 	}
 	else
@@ -96,7 +96,7 @@ void P_MigrateActorInfo(void)
 
 		for (i = 0; i < ::num_mobjinfo_types(); ++i)
 		{
-			m = mobjinfoptr[i];
+			m = &mobjinfoptr[i];
 			if (m->flags & MF_COUNTKILL)
 				m->flags2 |= MF2_MCROSS | MF2_PUSHWALL;
 
@@ -113,7 +113,7 @@ void P_MigrateActorInfo(void)
 
 		for (i = 0; i < ::num_mobjinfo_types(); ++i)
 		{
-			m = mobjinfoptr[i];
+			m = &mobjinfoptr[i];
 			if (m->flags & MF_COUNTKILL)
 				m->flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL);
 

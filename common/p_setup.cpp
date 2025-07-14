@@ -2129,7 +2129,7 @@ static std::vector<spriteinfo_t*> P_GetSpriteInfos ()
 	for(auto it = sprnames.begin();it != sprnames.end();++it)
 	{
 		spriteinfo_t* spriteinfo = (spriteinfo_t*) Z_Malloc(sizeof(spriteinfo_t), PU_STATIC, nullptr);
-		spriteinfo->sprite = Z_StrDup(it->second, PU_STATIC);
+		spriteinfo->sprite = Z_StrDup(it->second->data(), PU_STATIC);
 		spriteinfo->spritenum = it->first;
 		infos.push_back(spriteinfo);
 	}

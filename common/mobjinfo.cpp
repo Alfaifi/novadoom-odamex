@@ -48,13 +48,13 @@ void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 			mobjinfo_t* newmobjinfo = (mobjinfo_t*) Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
 			*newmobjinfo = mobjinfo_source;
 
-			mobjinfo.insert(newmobjinfo, idx);
+			mobjinfo.insert(*newmobjinfo, idx);
 
 			// [CMB] -1 is used as the placeholder for now; id24 allows negative range for doomednum
 			if (mobjinfo_source.doomednum != -1)
 			{
 				mobjinfo_t* spawn_info = mobjinfo.find(idx)->second;
-				spawn_map.insert(spawn_info, mobjinfo_source.doomednum);
+				spawn_map.insert(*spawn_info, mobjinfo_source.doomednum);
 			}
 		}
 	}
