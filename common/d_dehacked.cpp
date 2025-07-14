@@ -1094,12 +1094,9 @@ static int PatchThing(int thingy)
 			m.altspeed = NO_ALTSPEED;
 			return m;
 		};
-		mobjinfo_t* mobj = (mobjinfo_t*) Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
-		*mobj = mobjinfo_t_default();
-		mobjinfo.insert(*mobj, (mobjtype_t) thingNum);
+		info = &mobjinfo.insert(mobjinfo_t_default(), (mobjtype_t) thingNum);
 		// set the type
-		mobj->type = thingNum;
-		info = mobj;
+		info->type = thingNum;
 	} else
 	{
 		info = &mobjinfo_it->second;
@@ -1663,12 +1660,8 @@ static int PatchFrame(int frameNum)
 				s.args[7] = 0;
 				return s;
 		};
-		state_t* state = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
-		*state = state_t_default(frameNum);
-		// set the proper state number
-		state->statenum = frameNum;
-		states.insert(*state, frameNum);
-		info = state;
+		info = &states.insert(state_t_default(frameNum), frameNum);
+		info->statenum = frameNum;
 	}
 	else
 	{

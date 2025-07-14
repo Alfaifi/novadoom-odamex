@@ -62,7 +62,7 @@ class DoomObjectContainer
 	void clear();
 	void resize(size_t count);
 	void reserve(size_t new_cap);
-	void insert(const ObjType& obj, IdxType idx);
+	ObjReference insert(const ObjType& obj, IdxType idx);
 	void append(const DoomObjectContainerType& dObjContainer);
 
 	iterator begin();
@@ -152,9 +152,9 @@ void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 // Insertion
 
 template <class ObjType, class IdxType>
-void DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
+typename DoomObjectContainer<ObjType, IdxType>::ObjReference DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
 {
-	this->lookup_table[idx] = obj;
+	return this->lookup_table[idx] = obj;
 }
 
 // TODO: more of a copy construct in a sense
