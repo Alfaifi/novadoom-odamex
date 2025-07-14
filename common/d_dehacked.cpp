@@ -1775,7 +1775,7 @@ static int PatchSprite(int sprNum)
 		// Calculate offset from beginning of sprite names.
 		offset = (offset - toff[dversion] - 22044) / 8;
 
-		if (offset >= 0 && offset < ::num_spritenum_t_types())
+		if (offset >= 0 && offset < sprnames.size())
 		{
 			sprnames.insert(strdup(OrgSprNames[offset]), (spritenum_t) sprNum);
 		}

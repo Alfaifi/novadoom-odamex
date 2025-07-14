@@ -41,7 +41,7 @@
 //
 // INITIALIZATION FUNCTIONS
 //
-std::map<int32_t, spritedef_t> sprites;
+OHashTable<int32_t, spritedef_t> sprites;
 int numsprites;
 
 spriteframe_t sprtemp[MAX_SPRITE_FRAMES];

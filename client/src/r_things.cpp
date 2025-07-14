@@ -564,7 +564,6 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 	}
 
 #ifdef RANGECHECK
-	// if (static_cast<unsigned>(thing->sprite) >= static_cast<unsigned>(numsprites))
 	if (sprites.find(thing->sprite) == sprites.end())
 	{
 		DPrintFmt("R_ProjectSprite: thing ({}: {}): invalid sprite number {}\n on ", thing->type, thing->info->name, thing->sprite);

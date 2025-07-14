@@ -250,7 +250,6 @@ typedef struct spriteinfo_s
 
 extern const char* doom_sprnames[];
 extern DoomObjectContainer<std::string> sprnames; // spritenum_t
-extern size_t num_spritenum_t_types();
 
 inline auto format_as(spritenum_t eSpriteNum)
 {

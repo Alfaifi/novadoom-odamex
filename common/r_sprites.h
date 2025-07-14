@@ -27,7 +27,7 @@ extern int MaxVisSprites;
 
 extern vissprite_t *vissprites;
 
-extern std::map<int32_t, spritedef_t> sprites;
+extern OHashTable<int32_t, spritedef_t> sprites;
 extern int numsprites;
 
 #define MAX_SPRITE_FRAMES 29 // [RH] Macro-ized as in BOOM.

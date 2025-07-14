@@ -12,10 +12,6 @@
 // global variables from info.h
 
 DoomObjectContainer<std::string> sprnames(::NUMSPRITES);
-size_t num_spritenum_t_types()
-{
-	return sprnames.size();
-}
 
 void D_Initialize_sprnames(const char** source, int count, spritenum_t start)
 {

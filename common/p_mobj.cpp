@@ -2733,7 +2733,7 @@ int P_IsPickupableThing(short type)
 //
 void P_SpawnMapThing (mapthing2_t *mthing, int position)
 {
-	int i = -1;
+	int32_t type = -1;
 
 	if (mthing->type == 0 || mthing->type == -1)
 		return;
@@ -2914,7 +2914,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 	if (P_IsHordeThing(mthing->type))
 	{
-		i = MT_HORDESPAWN;
+		type = MT_HORDESPAWN;
 		::level.detected_gametype = GM_HORDE;
 	}
 
@@ -2924,7 +2924,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	{
 		mthing->args[0] = mthing->type - 14000;
 		mthing->type = 14065;
-		i = MT_AMBIENT;
+		type = MT_AMBIENT;
 	}
 
 	// [ML] Determine if it is a musicchanger thing, and if so,
@@ -2933,25 +2933,25 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	{
 		mthing->args[0] = mthing->type - 14100;
 		mthing->type = 14165;
-		i = MT_MUSICSOURCE;
+		type = MT_MUSICSOURCE;
 	}
 
 	// [RH] Check if it's a particle fountain
 	if (mthing->type >= 9027 && mthing->type <= 9033)
 	{
 		mthing->args[0] = mthing->type - 9026;
-		i = MT_FOUNTAIN;
+		type = MT_FOUNTAIN;
 	}
 
 	// [CMB] find the value in the mobjinfo table if we asked for a specific type; otherwise check the spawn table
 	mobjinfo_t* info = nullptr;
-	int32_t spawn_idx = i == -1 ? mthing->type : i;
+	int32_t spawn_idx = type == -1 ? mthing->type : type;
 	auto mobj_it = spawn_map.find(spawn_idx);
 	if (mobj_it != spawn_map.end())
 	{
 		info = &mobj_it->second;
 		// set this for further down
-		i = mobj_it->first;
+		type = info->type;
 	}
 
 	if (info == nullptr)
@@ -2968,7 +2968,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	{
 		Printf (PRINT_WARNING, "Type %i at (%i, %i) has no frames\n",
 				mthing->type, mthing->x, mthing->y);
-		i = MT_UNKNOWNTHING;
+		type = MT_UNKNOWNTHING;
 	}
 
 	// don't spawn keycards and players in deathmatch
@@ -2977,7 +2977,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 	// don't spawn deathmatch weapons in offline single player mode
 	{
-		switch (i)
+		switch (type)
 		{
 		case MT_CHAINGUN:
 		case MT_SHOTGUN:
@@ -3004,14 +3004,14 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	// [csDoom] don't spawn any monsters
 	if (sv_nomonsters || !serverside)
 	{
-		if (i == MT_SKULL || (info->flags & MF_COUNTKILL) )
+		if (type == MT_SKULL || (info->flags & MF_COUNTKILL) )
 		{
 			return;
 		}
 	}
 
     // [SL] 2011-05-31 - Moved so that clients get right level.total_items, etc
-	if (i == MT_SECRETTRIGGER)
+	if (type == MT_SECRETTRIGGER)
 		level.total_secrets++;
 	if (info->flags & MF_COUNTKILL)
 		level.total_monsters++;
@@ -3023,7 +3023,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	const fixed_t y = mthing->y << FRACBITS;
 	const fixed_t z = (info->flags & MF_SPAWNCEILING) ? ONCEILINGZ : ONFLOORZ;
 
-	if (i == MT_WATERZONE)
+	if (type == MT_WATERZONE)
 	{
 		sector_t *sec = P_PointInSubsector (x, y)->sector;
 		sec->waterzone = 1;
@@ -3032,7 +3032,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 	AActor* mobj = new AActor(x, y, z, info);
 
-	if (i == MT_HORDESPAWN)
+	if (type == MT_HORDESPAWN)
 	{
 		// Store the spawn type for later.
 		// [CMB] specific types must be checked; otherwise they won't spawn correctly
@@ -3060,28 +3060,28 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	memcpy (mobj->args, mthing->args, sizeof(mobj->args));
 
 	// [RH] If it's an ambient sound, activate it
-	if (i == MT_AMBIENT)
+	if (type == MT_AMBIENT)
 		S_ActivateAmbient (mobj, mobj->args[0]);
 
 	// [RH] If a fountain and not dormant, start it
-	if (i == MT_FOUNTAIN && !(mthing->flags & MTF_DORMANT))
+	if (type == MT_FOUNTAIN && !(mthing->flags & MTF_DORMANT))
 		mobj->effects = mobj->args[0] << FX_FOUNTAINSHIFT;
 
 	// [SL] ZDoom Custom Bridge Things
-	if (i == MT_ZDOOMBRIDGE)
+	if (type == MT_ZDOOMBRIDGE)
 	{
 		mobj->radius = mobj->args[0] << FRACBITS;
 		mobj->height = mobj->args[1] << FRACBITS;
 	}
 
 	// [AM] Adjust monster health based on server setting
-	if ((i == MT_SKULL || (info->flags & MF_COUNTKILL)) && sv_monstershealth != 1.0f)
+	if ((type == MT_SKULL || (info->flags & MF_COUNTKILL)) && sv_monstershealth != 1.0f)
 		mobj->health *= sv_monstershealth;
 
 	if (mobj->tics > 0)
 		mobj->tics = 1 + (P_Random () % mobj->tics);
 
-	if (i != MT_SPARK)
+	if (type != MT_SPARK)
 		mobj->angle = ANG45 * (mthing->angle/45);
 
 	if (mthing->flags & MTF_AMBUSH)
