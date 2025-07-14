@@ -229,4 +229,4 @@ void D_UndoDehPatch();
 void D_PostProcessDeh();
 bool D_DoDehPatch(const OResFile* patchfile, const int lump);
 bool CheckIfDehActorDefined(const mobjtype_t mobjtype);
-void D_Initialize_SoundMap(const char** source, int count);
+void D_Initialize_SoundMap(const char** source, size_t count);

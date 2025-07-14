@@ -13,21 +13,16 @@
 
 DoomObjectContainer<std::string> sprnames(::NUMSPRITES);
 
-void D_Initialize_sprnames(const char** source, int count, spritenum_t start)
+void D_Initialize_sprnames(const char** source, size_t count, spritenum_t start)
 {
 	sprnames.clear();
     if (source)
     {
-		spritenum_t idx = start;
-		for (int i = 0; i < count; i++)
-		{
-			sprnames.insert(source[i], idx);
-            idx = spritenum_t(idx + 1);
-		}
+		sprnames.insert({source, count}, start);
+        #if defined _DEBUG
+	        Printf(PRINT_HIGH, "D_Allocate_sprnames:: allocated %d sprites.\n", count);
+        #endif
     }
-#if defined _DEBUG
-	Printf(PRINT_HIGH, "D_Allocate_sprnames:: allocated %d sprites.\n", count);
-#endif
 }
 
 /**

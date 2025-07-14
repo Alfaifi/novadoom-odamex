@@ -1,3 +1,26 @@
+// Emacs style mode select   -*- C++ -*-
+//-----------------------------------------------------------------------------
+//
+// $Id$
+//
+// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2024-2025 by Christian Bernard.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// DESCRIPTION:
+//  DoomObjectContainer - replaces arrays for sprnames, mobjinfo, states, etc
+//
+//-----------------------------------------------------------------------------
+
 //----------------------------------------------------------------------------------------------
 // odamex enum definitions with negative indices (similar to id24 specification) are in
 // info.h using negative indices prevents overriding during dehacked (though id24 allows
@@ -11,19 +34,19 @@
 #pragma once
 
 #include "i_system.h"
+#include "version.h"
 #include "m_stacktrace.h"
+#include <nonstd/span.hpp>
 #include <functional>
 #include <unordered_map>
 #include <vector>
 #include <typeinfo>
 
 //----------------------------------------------------------------------------------------------
-// DoomObjectContainer replaces the global doom object pointers (states, mobjinfo,
-// sprnames) with multi-use objects that can handle negative indices. It also
-// auto-resizes, similar to vector, and provides a way to get the size and capacity.
-// Existing code cannot rely on an index being greater than the number of types now
-// because dehacked does not enforce contiguous indices i.e. frame 405 could jump to frame
-// 1055. Because of this, iterators should be used when traversing the container.
+// DoomObjectContainer is a wrapper around std::unordered_map that provides an operator[]
+// that cleanly errors with a helpful message when attempts to access a nonexistent element
+// are made, as well as insertionmethods tailored to the types of structures the default objects
+// are definied within
 //----------------------------------------------------------------------------------------------
 
 template <class ObjType, class IdxType = int32_t>
@@ -42,21 +65,20 @@ class DoomObjectContainer
 	explicit DoomObjectContainer();
 	explicit DoomObjectContainer(size_t count);
 	~DoomObjectContainer();
+	DoomObjectContainer& operator=(const DoomObjectContainer& other) = default;
+	DoomObjectContainer& operator=(DoomObjectContainer&& other) = default;
 
 	ObjType& operator[](int);
 	const ObjType& operator[](int) const;
-	bool operator==(const ObjType* p) const;
-	bool operator!=(const ObjType* p) const;
-	// convert to ObjType* to allow pointer arithmetic
-	operator const ObjType*() const;
-	operator ObjType*();
 
 	size_t capacity() const;
 	size_t size() const;
 	void clear();
-	void resize(size_t count);
 	void reserve(size_t new_cap);
 	ObjType& insert(const ObjType& obj, IdxType idx);
+	void insert(nonstd::span<ObjType> objs, IdxType start_idx);
+	template <typename T = ObjType, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
+	void insert(nonstd::span<const char*> objs, IdxType start_idx);
 	void append(const DoomObjectContainerType& dObjContainer);
 
 	iterator begin();
@@ -132,12 +154,6 @@ void DoomObjectContainer<ObjType, IdxType>::clear()
 // Allocation changes
 
 template <class ObjType, class IdxType>
-void DoomObjectContainer<ObjType, IdxType>::resize(size_t count)
-{
-	this->lookup_table.resize(count);
-}
-
-template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 {
 	this->lookup_table.reserve(new_cap);
@@ -149,6 +165,23 @@ template <class ObjType, class IdxType>
 ObjType& DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
 {
 	return this->lookup_table[idx] = obj;
+}
+
+template <class ObjType, class IdxType>
+void DoomObjectContainer<ObjType, IdxType>::insert(nonstd::span<ObjType> objs, IdxType start_idx)
+{
+	IdxType idx = start_idx;
+	for (const auto& obj : objs)
+		this->lookup_table[idx++] = obj;
+}
+
+template <class ObjType, class IdxType>
+template <typename T, typename>
+void DoomObjectContainer<ObjType, IdxType>::insert(nonstd::span<const char*> objs, IdxType start_idx)
+{
+	IdxType idx = start_idx;
+	for (const auto& obj : objs)
+		this->lookup_table[idx++] = obj == nullptr ? "" : obj;
 }
 
 // TODO: more of a copy construct in a sense

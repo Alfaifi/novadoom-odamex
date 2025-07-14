@@ -455,30 +455,15 @@ static const struct
 
 DoomObjectContainer<std::string> SoundMap(ARRAY_LENGTH(doom_SoundMap));
 
-void D_Initialize_SoundMap(const char** source, int count)
+void D_Initialize_SoundMap(const char** source, size_t count)
 {
 	SoundMap.clear();
     if (source)
     {
-		for (int i = 0; i < count; i++)
-		{
-			SoundMap.insert(source[i] ? source[i] : "", i);
-		}
+		SoundMap.insert({source, count}, 0);
     }
 #if defined _DEBUG
 	PrintFmt(PRINT_HIGH, "D_Allocate_sounds:: allocated {} sounds.\n", count);
-#endif
-}
-
-void D_Initialize_SoundMap(DoomObjectContainer<std::string>& source)
-{
-	SoundMap.clear();
-	for (const auto& [idx, snd] : source)
-	{
-		SoundMap.insert(snd, idx);
-	}
-#if defined _DEBUG
-	PrintFmt(PRINT_HIGH, "D_Allocate_sounds:: allocated {} sounds.\n", source.size());
 #endif
 }
 
@@ -599,37 +584,10 @@ static void BackupData(void)
 		OrgActionPtrs[i] = states[i].action;
 	}
 
-	// states -- allocate to the heap
-	doomBackup.backupStates.clear();
-	doomBackup.backupStates.reserve(states.size());
-	for (const std::pair<int32_t, state_t>& it : states)
-	{
-		doomBackup.backupStates.insert(it.second, it.first);
-	}
-
-	// mobjinfo -- allocate to the heap
-	doomBackup.backupMobjInfo.clear();
-	doomBackup.backupMobjInfo.reserve(mobjinfo.size());
-	for (const std::pair<int32_t, mobjinfo_t>& it : mobjinfo)
-	{
-		doomBackup.backupMobjInfo.insert(it.second, it.first);
-	}
-
-	// sprites -- allocate to the heap
-	doomBackup.backupSprnames.clear();
-	doomBackup.backupSprnames.reserve(sprnames.size());
-	for(const std::pair<int32_t, std::string>& it : sprnames)
-	{
-		doomBackup.backupSprnames.insert(it.second, it.first);
-	}
-
-	// sounds -- allocate to the heap
-	doomBackup.backupSoundMap.clear();
-	doomBackup.backupSoundMap.reserve(SoundMap.size());
-	for(const auto& [idx, sound] : SoundMap)
-	{
-		doomBackup.backupSoundMap.insert(sound, idx);
-	}
+	doomBackup.backupStates = states;
+	doomBackup.backupMobjInfo = mobjinfo;
+	doomBackup.backupSprnames = sprnames;
+	doomBackup.backupSoundMap = SoundMap;
 
 	std::copy(weaponinfo, weaponinfo + ::NUMWEAPONS + 1, doomBackup.backupWeaponInfo);
 	std::copy(clipammo, clipammo + ::NUMAMMO, doomBackup.backupClipAmmo);
@@ -648,11 +606,6 @@ void D_UndoDehPatch()
 		return;
 	}
 
-	/*
-		The initialization functions can be re-used to re-initialize doom objects; except OrgSprNames which is used
-		for looking up the original location of a sprite.
-	*/
-
 	for (i = 0; i < ::NUMSPRITES; i++)
 	{
 		// hacky but needed for const char*
@@ -660,30 +613,10 @@ void D_UndoDehPatch()
 	}
 	M_Free(OrgSprNames);
 
-
-	// [CMB] investigate after using z zone alloc functions
-	sprnames.clear();
-	sprnames.reserve(doomBackup.backupSprnames.size());
-	for (const auto& sprname : doomBackup.backupSprnames)
-	{
-		sprnames.insert(sprname.second, sprname.first);
-	}
-
-	// mobjinfo restore
-    mobjinfo.clear();
-	for(const auto& bmobjit : doomBackup.backupMobjInfo) {
-		mobjinfo.insert(bmobjit.second, bmobjit.first);
-	}
-
-    states.clear();
-	for(const auto& bstateit : doomBackup.backupStates) {
-		states.insert(bstateit.second, bstateit.first);
-	}
-
-	// unsafe usage of data() here but to keep a consistent API
-	// D_Initialize_States(doomBackup.backupStates.data(), static_cast<int>(doomBackup.backupStates.size()));
-	// D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), static_cast<int>(doomBackup.backupMobjInfo.size()));
-	D_Initialize_SoundMap(doomBackup.backupSoundMap);
+	sprnames = std::move(doomBackup.backupSprnames);
+	mobjinfo = std::move(doomBackup.backupMobjInfo);
+	states = std::move(doomBackup.backupStates);
+	SoundMap = std::move(doomBackup.backupSoundMap);
 
 	extern bool isFast;
 	isFast = false;
@@ -2917,7 +2850,7 @@ BEGIN_COMMAND(mobinfo)
 {
     if (argc < 2)
     {
-        Printf("Must pass one or two mobjinfo indexes. (0 to %d)\n", ::num_mobjinfo_types() - 1);
+        Printf("Must pass one or two mobjinfo indexes. (0 to %d)\n", ::mobjinfo.size() - 1);
         return;
     }
 
@@ -2955,7 +2888,7 @@ BEGIN_COMMAND(stateinfo)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass one or two state indexes. (0 to %d)\n", ::num_state_t_types() - 1);
+		Printf("Must pass one or two state indexes. (0 to %d)\n", ::states.size() - 1);
 		return;
 	}
 
@@ -2997,12 +2930,12 @@ BEGIN_COMMAND(playstate)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass state index. (0 to %d)\n", ::num_state_t_types() - 1);
+		Printf("Must pass state index. (0 to %d)\n", ::states.size() - 1);
 		return;
 	}
 
 	int index = atoi(argv[1]);
-	if (index < 0 || index >= ::num_state_t_types())
+	if (index < 0 || index >= ::states.size())
 	{
 		Printf("Not a valid index.\n");
 		return;

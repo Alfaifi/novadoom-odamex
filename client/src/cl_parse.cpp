@@ -506,7 +506,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 	mobjtype_t type = static_cast<mobjtype_t>(msg->current().type());
 	statenum_t state = static_cast<statenum_t>(msg->current().statenum());
 
-	if (type < MT_PLAYER || type >= ::num_mobjinfo_types())
+	if (type < MT_PLAYER || type >= ::mobjinfo.size())
 		return;
 
 	P_ClearId(netid);
@@ -3105,3 +3105,5 @@ parseError_e CL_ParseCommand()
 	RecordProto(static_cast<svc_t>(cmd), msg);
 	return PERR_OK;
 }
+
+VERSION_CONTROL (cl_parse_cpp, "$Id$")

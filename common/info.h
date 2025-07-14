@@ -1431,7 +1431,6 @@ typedef struct _state_t
 
 extern state_t boomstates[];
 extern DoomObjectContainer<state_t> states; // statenum_t
-extern size_t num_state_t_types(); // [CMB] TODO converted to function to just make code work for now
 extern state_t odastates[];
 
 inline FArchive &operator<< (FArchive &arc, state_t *state)
@@ -1778,7 +1777,6 @@ typedef struct _mobjinfo
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
 extern DoomObjectContainer<mobjinfo_t> mobjinfo; // mobjtype_t
-extern size_t num_mobjinfo_types();
 // [CMB] spawn map per id24 - the pointer is to the mobjinfo table
 extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
 
