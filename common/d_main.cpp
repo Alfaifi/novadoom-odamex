@@ -63,14 +63,6 @@
 #include "state.h"
 #include "odamex_objects.h"
 
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 OResFiles wadfiles;
 OResFiles patchfiles;
 OWantFiles missingfiles;
@@ -85,7 +77,7 @@ float maxfps = 35.0f;
 extern void D_Init_Nightmare_Flags(void);
 
 
-#if defined(_WIN32) && !defined(_XBOX)
+#if defined(_WIN32)
 
 typedef struct
 {
@@ -278,7 +270,7 @@ void D_AddSearchDir(std::vector<std::string> &dirs, const char *dir, const char 
 // [AM] Add platform-sepcific search directories
 void D_AddPlatformSearchDirs(std::vector<std::string> &dirs)
 {
-	#if defined(_WIN32) && !defined(_XBOX)
+	#if defined(_WIN32)
 
 	const char separator = ';';
 

@@ -55,10 +55,6 @@
 #include "g_skill.h"
 #include "m_fileio.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 EXTERN_CVAR(g_resetinvonexit)
 
 // temp for screenblocks (0-9)

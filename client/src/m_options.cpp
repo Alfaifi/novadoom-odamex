@@ -333,7 +333,7 @@ menu_t OptionMenu = {
  *=======================================*/
 
 static menuitem_t ControlsItems[] = {
-#ifdef _XBOX
+#ifdef GCONSOLE
 	{ whitetext,"A to change, START to clear", {NULL}, {0.0}, {0.0}, {0.0}, {NULL} },
 #else
 	{ whitetext,"ENTER to change, BACKSPACE to clear", {NULL}, {0.0}, {0.0}, {0.0}, {NULL} },
@@ -514,14 +514,6 @@ static menuitem_t JoystickItems[] =
 	{ slider	,	"Turn Sensitivity"						, {&joy_sensitivity},	{1.0},		{30.0},		{1.0},		{NULL}						},
 	{ slider	,	"Alt. Turn Sensitivity"					, {&joy_fastsensitivity},	{1.0},		{30.0},		{1.0},		{NULL}						},
 	{ slider	,	"Joystick Deadzone"						, {&joy_deadzone},		{0.0},		{0.75},		{0.05},		{NULL}						},
-#ifdef SDL12
-	{ redtext	,	" "										, {NULL},				{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ whitetext	,	"Press ENTER to change"					, {NULL}, 				{0.0}, 		{0.0}, 		{0.0}, 		{NULL} 						},
-	{ joyaxis	,	"Walk Analog Axis"						, {&joy_forwardaxis},	{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ joyaxis	,	"Strafe Analog Axis"					, {&joy_strafeaxis},	{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ joyaxis	,	"Turn Analog Axis"						, {&joy_turnaxis},		{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ joyaxis	,	"Look Analog Axis"						, {&joy_lookaxis},		{0.0},		{0.0},		{0.0},		{NULL}						},
-#endif
 };
 
 menu_t JoystickMenu = {
@@ -1207,7 +1199,7 @@ void M_RestoreVideoMode()
 
 static value_t Depths[22];
 
-#ifdef _XBOX
+#ifdef GCONSOLE
 static const char VMEnterText[] = "Press A to set mode";
 static const char VMTestText[] = "Press X to test mode for 5 seconds";
 #else
@@ -2471,7 +2463,7 @@ void M_OptResponder (event_t *ev)
 		}
 		else
 		{
-#ifdef _XBOX
+#ifdef GCONSOLE
 		if (ev->data3 == 't' || ev->data1 == OKEY_JOY3)
 #else
 		if (ev->data3 == 't')
