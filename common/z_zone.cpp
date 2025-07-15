@@ -312,22 +312,6 @@ void* Z_Malloc2(size_t size, const zoneTag_e tag, void* user, const char* file,
 }
 
 //
-// Z_Realloc
-// Uses the use pointer as the basis for a new memory block
-// You can pass a NULL user if the tag is < PU_PURGELEVEL.
-//
-void* Z_Realloc2(void* ptr, size_t size, const char* file, const int line)
-{
-	void* p = Z_Malloc2(size, PU_STATIC, ptr, file, line);
-	if(p)
-	{
-		Z_Free2(ptr, file, line);
-	}
-	return p;
-}
-
-
-//
 // Z_FreeTags
 //
 void Z_FreeTags(const zoneTag_e lowtag, const zoneTag_e hightag)
