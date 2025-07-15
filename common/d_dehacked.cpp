@@ -1572,7 +1572,7 @@ static int PatchFrame(int frameNum)
 	if(states_it == states.end())
     {
 		auto state_t_default = [](int32_t idx) -> state_t {
-				_state_t s{};
+				state_t s{};
 				s.sprite = SPR_TNT1;
 				s.frame = 0;
 				s.tics = -1;

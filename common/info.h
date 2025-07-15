@@ -35,7 +35,7 @@
 #define MELEERANGE (64 * FRACUNIT)
 #endif
 
-typedef enum spritenum_e: int32_t
+enum spritenum_t: int32_t
 {
     // ---------------odamex sprites------------------------ //
     // [RH] Gibs
@@ -238,15 +238,15 @@ typedef enum spritenum_e: int32_t
 
 	EXTRASPRITES=255,
 
-} spritenum_t;
+};
 
 // id24 spriteinfo_t struct
-typedef struct spriteinfo_s
+struct spriteinfo_t
 {
 	int32_t				spritenum;
-	int32_t				minimumfeatures; // [CMB] use for id24spec
+	int32_t				minimumfeatures; // [CMB] use for id24spec; [EB] just used as part of the auto complevel detection in R&R, do we need this?
 	const char*			sprite;
-} spriteinfo_t;
+};
 
 extern const char* doom_sprnames[];
 extern DoomObjectContainer<std::string> sprnames; // spritenum_t
@@ -1409,7 +1409,7 @@ typedef long statearg_t;
 #define STATEF_NONE 0
 #define STATEF_SKILL5FAST BIT(0) // tics halve on nightmare skill
 
-typedef struct _state_t
+struct state_t
 {
 	int32_t statenum;
 	int32_t	sprite;
@@ -1427,7 +1427,7 @@ typedef struct _state_t
 	DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate, int misc1, int misc2);
 	DState (spritenum_t sprite, int frame, int tics, acp1, statenum_t nextstate);
 	*/
-} state_t;
+};
 
 extern state_t boomstates[];
 extern DoomObjectContainer<state_t> states; // statenum_t
@@ -1453,7 +1453,7 @@ inline FArchive &operator>> (FArchive &arc, state_t *&state)
 	return arc;
 }
 
-typedef enum mobjtype_e: int32_t {
+enum mobjtype_t: int32_t {
 
     // -------------------- odamex things ----------------------------------- //
 
@@ -1699,7 +1699,7 @@ typedef enum mobjtype_e: int32_t {
 
 	NUMMOBJTYPES
 
-} mobjtype_t;
+};
 
 inline auto format_as(mobjtype_t eType)
 {
@@ -1709,28 +1709,28 @@ inline auto format_as(mobjtype_t eType)
 inline FArchive &operator<< (FArchive &arc, mobjtype_t i) { DWORD out; out = i; return arc << out; }
 inline FArchive &operator>> (FArchive &arc, mobjtype_t &i) { DWORD in; arc >> in; i = (mobjtype_t)in; return arc; }
 
-typedef enum
+enum infighting_group_t
 {
 	IG_DEFAULT,
 	// IG_CENTAUR,	// UNUSED
 	IG_END
-} infighting_group_t;
+};
 
-typedef enum
+enum projectile_group_t
 {
 	PG_GROUPLESS = -1,
 	PG_DEFAULT,
 	PG_BARON,
 	PG_END
-} projectile_group_t;
+};
 
-typedef enum
+enum splash_group_t
 {
 	SG_DEFAULT,
 	SG_END
-} splash_group_t;
+};
 
-typedef struct _mobjinfo
+struct mobjinfo_t
 {
 	int32_t type;
 	int doomednum;
@@ -1772,7 +1772,7 @@ typedef struct _mobjinfo
 	const char* ripsound;
 	mobjtype_t droppeditem;
 
-} mobjinfo_t;
+};
 
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
@@ -1792,7 +1792,7 @@ inline FArchive &operator>> (FArchive &arc, mobjinfo_t *&info)
 {
     int32_t ofs;
     arc >> ofs;
-    DoomObjectContainer<mobjinfo_t, int32_t>::iterator it = mobjinfo.find(ofs);
+    auto it = mobjinfo.find(ofs);
     if (it != mobjinfo.end())
         info = &it->second;
     else
