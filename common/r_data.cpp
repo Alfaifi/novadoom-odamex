@@ -39,7 +39,6 @@
 #include "cmdlib.h"
 
 #include "r_data.h"
-#include "r_defs.h"
 
 #include "v_palette.h"
 #include "v_video.h"
@@ -49,7 +48,7 @@
 #include <cmath>
 
 #include <algorithm>
-#include <unordered_map>
+#include <unordered_set>
 
 //
 // Graphics.
@@ -1121,30 +1120,28 @@ void R_PrecacheLevel (void)
 		}
 	}
 
-	// Precache sprites.
-	memset (hitlist, 0, numsprites);
+	delete[] hitlist;
 
+	// Precache sprites.
 	{
 		AActor *actor;
 		TThinkerIterator<AActor> iterator;
-		std::unordered_map<int, int> indexMap;
+		std::unordered_set<int32_t> spriteHitlist;
 
 		// generate a unique list of all the sprites we hit in this level
 		while ( (actor = iterator.Next ()) )
 		{
 			// [CMB] spritenum_t can now be negative so a new structure is needed
 			// [CMB] sprites is a pointer in order by index
-			indexMap[actor->sprite] = 1;
+			spriteHitlist.insert(actor->sprite);
 		}
 
 		// cache each of the sprites
-		for (auto it = indexMap.begin(); it != indexMap.end(); ++it)
+		for (auto sprite : spriteHitlist)
 		{
-			R_CacheSprite (&sprites[it->first]);
+			R_CacheSprite (&sprites[sprite]);
 		}
 	}
-
-	delete[] hitlist;
 }
 
 // Utility function,

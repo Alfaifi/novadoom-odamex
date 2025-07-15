@@ -629,7 +629,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			mo->tics = 1;
 	}
 
-    if(state >= S_NULL && states.find(state) != states.end())
+    if(state >= S_NULL && states.contains(state))
 	{
 		P_SetMobjState(mo, state);
 	}
@@ -2206,8 +2206,8 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 	{
 		if (i < msg->player().psprites_size())
 		{
-			int state = msg->player().psprites().Get(i).statenum();
-            if (states.find(state) == states.end())
+			const int32_t state = msg->player().psprites().Get(i).statenum();
+            if (states.contains(state))
 			{
 				continue;
 			}
@@ -2491,7 +2491,7 @@ static void CL_SetMobjState(const odaproto::svc::MobjState* msg)
 	AActor* mo = P_FindThingById(msg->netid());
 	int s = msg->mostate();
 
-    if (mo == NULL || states.find(s) == states.end())
+    if (mo == NULL || states.contains(s))
 		return;
 
 	P_SetMobjState(mo, static_cast<statenum_t>(s));
