@@ -29,6 +29,7 @@
 #include <math.h>
 #include <set>
 #include <zlib.h>
+#include <nonstd/scope.hpp>
 
 #include "m_alloc.h"
 #include "m_vectors.h"
@@ -727,22 +728,20 @@ enum nodetype_t {
 
 nodetype_t P_CheckNodeType(int lump) {
 	byte *data = (byte *) W_CacheLumpNum(lump, PU_STATIC);
+	nonstd::make_scope_exit([&]{ Z_Free(data); });
 
 	if (memcmp(data, "xNd4\0\0\0\0", 8) == 0)
 	{
-		Z_Free(data);
 		return NT_DEEP;
 	}
 
 	if (memcmp(data, "XNOD", 4) == 0)
 	{
-		Z_Free(data);
 		return NT_XNOD;
 	}
 
 	if (memcmp(data, "ZNOD", 4) == 0)
 	{
-		Z_Free(data);
 		return NT_ZNOD;
 	}
 
