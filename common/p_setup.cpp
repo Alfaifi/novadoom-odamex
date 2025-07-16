@@ -728,7 +728,7 @@ enum nodetype_t {
 
 nodetype_t P_CheckNodeType(int lump) {
 	byte *data = (byte *) W_CacheLumpNum(lump, PU_STATIC);
-	nonstd::make_scope_exit([&]{ Z_Free(data); });
+	nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
 
 	if (memcmp(data, "xNd4\0\0\0\0", 8) == 0)
 	{
