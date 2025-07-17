@@ -61,12 +61,6 @@ class DoomObjectContainer
 	InOrderTable m_inordertable;
 
 public:
-	template <typename MapIter> class generic_iterator;
-	// using iterator = generic_iterator<IdxType, ObjType> iterator;
-	// using const_iterator = generic_iterator<const HashPairType, const HashTableType>;
-	using iterator = generic_iterator<typename LookupTable::iterator>;
-	using const_iterator = generic_iterator<typename LookupTable::const_iterator>;
-
 	template <typename MapIter>
 	class generic_iterator {
 	public:
@@ -99,211 +93,106 @@ public:
 
 		mutable std::optional<value_type> m_value;
 	};
-	// using iterator = LookupTable::iterator;
-	// using const_iterator = LookupTable::const_iterator;
 
+	using iterator = generic_iterator<typename LookupTable::iterator>;
+	using const_iterator = generic_iterator<typename LookupTable::const_iterator>;
+
+	// Construction and Destruction
 	explicit DoomObjectContainer() = default;
-	explicit DoomObjectContainer(size_t count);
+	explicit DoomObjectContainer(size_t count)  : m_lookuptable(count), m_inordertable(count) {}
 	~DoomObjectContainer() = default;
-	DoomObjectContainer& operator=(const DoomObjectContainer& other);
+
+	// Operators
 	DoomObjectContainer& operator=(DoomObjectContainer&& other) = default;
+	DoomObjectContainer& operator=(const DoomObjectContainer& other)
+	{
+		if (this == &other)
+			return *this;
 
-	ObjType& operator[](int);
-	const ObjType& operator[](int) const;
+		clear();
+		for (const auto& [idx, ptr] : other.m_lookuptable)
+		{
+			auto new_ptr = std::make_unique<ObjType>(*ptr);
+			m_lookuptable[idx] = new_ptr.get();
+			m_inordertable.push_back(std::move(new_ptr));
+		}
 
-	size_t capacity() const;
-	size_t size() const;
-	void clear();
-	void reserve(size_t new_cap);
-	ObjType& insert(ObjType obj, IdxType idx);
-	void insert(nonstd::span<ObjType> objs, IdxType start_idx);
-	template <typename T = ObjType, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
-	void insert(nonstd::span<const char*> objs, IdxType start_idx);
-	void append(const DoomObjectContainerType& dObjContainer);
-
-	iterator begin();
-	iterator end();
-	const_iterator begin() const;
-	const_iterator end() const;
-	const_iterator cbegin() const;
-	const_iterator cend() const;
-	iterator find(IdxType idx);
-	const_iterator find(IdxType idx) const;
-	bool contains(IdxType idx) const;
-};
-
-//----------------------------------------------------------------------------------------------
-
-// Construction and Destruction
-
-template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count) : m_lookuptable(count), m_inordertable(count) {}
-
-// Operators
-
-template <class ObjType, class IdxType>
-ObjType& DoomObjectContainer<
-    ObjType, IdxType>::operator[](int idx)
-{
-	iterator it = this->m_lookuptable.find(idx);
-    if (it == this->end())
-    {
-	    I_Error("Attempt to access invalid {} at index {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
-    }
-    return it->second;
-}
-
-template <class ObjType, class IdxType>
-const ObjType& DoomObjectContainer<
-    ObjType, IdxType>::operator[](int idx) const
-{
-    const_iterator it = this->m_lookuptable.find(idx);
-    if (it == this->end())
-    {
-    	I_Error("Attempt to access invalid {} at index {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
-    }
-    return it->second;
-}
-
-template <class ObjType, class IdxType>
-DoomObjectContainer<
-    ObjType, IdxType>& DoomObjectContainer<
-    ObjType, IdxType>::operator=(const DoomObjectContainer& other)
-{
-	if (this == &other)
 		return *this;
-
-	clear();
-	for (const auto& [idx, ptr] : other.m_lookuptable)
-	{
-	    auto new_ptr = std::make_unique<ObjType>(*ptr);
-	    m_lookuptable[idx] = new_ptr.get();
-	    m_inordertable.push_back(std::move(new_ptr));
 	}
 
-	return *this;
-}
-
-
-// Capacity and Size
-
-template <class ObjType, class IdxType>
-size_t DoomObjectContainer<ObjType, IdxType>::size() const
-{
-	return this->m_inordertable.size();
-}
-
-template <class ObjType, class IdxType>
-void DoomObjectContainer<ObjType, IdxType>::clear()
-{
-	this->m_lookuptable.clear();
-	this->m_inordertable.clear();
-}
-
-// Allocation changes
-
-template <class ObjType, class IdxType>
-void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
-{
-	this->m_lookuptable.reserve(new_cap);
-	this->m_inordertable.reserve(new_cap);
-}
-
-// Insertion
-
-template <class ObjType, class IdxType>
-ObjType& DoomObjectContainer<ObjType, IdxType>::insert(ObjType obj, IdxType idx)
-{
-	m_inordertable.push_back(std::make_unique<ObjType>(obj));
-	return *(this->m_lookuptable[idx] = m_inordertable.back().get());
-}
-
-template <class ObjType, class IdxType>
-void DoomObjectContainer<ObjType, IdxType>::insert(nonstd::span<ObjType> objs, IdxType start_idx)
-{
-	IdxType idx = start_idx;
-	for (const auto& obj : objs)
-		insert(obj, idx++);
-}
-
-template <class ObjType, class IdxType>
-template <typename T, typename>
-void DoomObjectContainer<ObjType, IdxType>::insert(nonstd::span<const char*> objs, IdxType start_idx)
-{
-	IdxType idx = start_idx;
-	for (const auto& obj : objs)
-		insert(obj == nullptr ? "" : obj, idx++);
-}
-
-// TODO: more of a copy construct in a sense
-template <class ObjType, class IdxType>
-void DoomObjectContainer<ObjType, IdxType>::append(
-    const DoomObjectContainer<ObjType, IdxType>& dObjContainer)
-{
-	for (const auto& [idx, obj] : dObjContainer.m_lookuptable)
+	ObjType& operator[](int idx)
 	{
-		this->insert(*obj, idx);
+		iterator it = this->m_lookuptable.find(idx);
+		if (it == this->end())
+			I_Error("Attempt to access invalid {} at index {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
+
+		return it->second;
+	};
+
+	const ObjType& operator[](int) const
+	{
+		const_iterator it = this->m_lookuptable.find(idx);
+		if (it == this->end())
+			I_Error("Attempt to access invalid {} at index {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
+
+		return it->second;
+	};
+
+	// Capacity and Size
+	size_t capacity() const { return this->m_inordertable.capacity(); }
+	size_t size() const { return this->m_inordertable.size(); }
+	void reserve(size_t new_cap)
+	{
+		this->m_lookuptable.reserve(new_cap);
+		this->m_inordertable.reserve(new_cap);
 	}
-}
 
-// Iterators
+	// Clearing
+	void clear()
+	{
+		this->m_lookuptable.clear();
+		this->m_inordertable.clear();
+	}
 
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::begin()
-{
-	return this->m_lookuptable.begin();
-}
+	// Insertion
+	ObjType& insert(ObjType obj, IdxType idx)
+	{
+		m_inordertable.push_back(std::make_unique<ObjType>(obj));
+		return *(this->m_lookuptable[idx] = m_inordertable.back().get());
+	}
 
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::end()
-{
-	return this->m_lookuptable.end();
-}
+	void insert(nonstd::span<ObjType> objs, IdxType start_idx)
+	{
+		IdxType idx = start_idx;
+		for (const auto& obj : objs)
+			insert(obj, idx++);
+	}
 
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::begin() const
-{
-	return this->m_lookuptable.begin();
-}
+	template <typename T = ObjType, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
+	void insert(nonstd::span<const char*> objs, IdxType start_idx)
+	{
+		IdxType idx = start_idx;
+		for (const auto& obj : objs)
+			insert(obj == nullptr ? "" : obj, idx++);
+	}
 
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::end() const
-{
-	return this->m_lookuptable.end();
-}
+	// TODO: do we ever need this?
+	void append(const DoomObjectContainerType& other)
+	{
+		for (const auto& [idx, obj] : other.m_lookuptable)
+			this->insert(*obj, idx);
+	}
 
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cbegin() const
-{
-	return this->m_lookuptable.begin();
-}
+	// Lookup
+	iterator find(IdxType idx) { return this->m_lookuptable.find(idx); }
+	const_iterator find(IdxType idx) const { return this->m_lookuptable.find(idx); }
+	bool contains(IdxType idx) const { return this->find(idx) != this->end(); }
 
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cend() const
-{
-	return this->m_lookuptable.end();
-}
-
-// Lookup
-
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<
-    ObjType, IdxType>::find(IdxType idx)
-{
-	return this->m_lookuptable.find(idx);
-}
-
-template <class ObjType, class IdxType>
-typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<
-    ObjType, IdxType>::find(IdxType idx) const
-{
-	return this->m_lookuptable.find(idx);
-}
-
-template<class ObjType, class IdxType>
-bool DoomObjectContainer<ObjType, IdxType>::contains(IdxType idx) const
-{
-	return this->find(idx) != this->end();
-}
-
-//----------------------------------------------------------------------------------------------
+	// Iterators
+	iterator begin() { return this->m_lookuptable.begin() }
+	iterator end() { return this->m_lookuptable.end() }
+	const_iterator begin() const { return this->m_lookuptable.begin() }
+	const_iterator end() const { return this->m_lookuptable.end() }
+	const_iterator cbegin() const { return this->m_lookuptable.begin() }
+	const_iterator cend() const { return this->m_lookuptable.end() }
+};
