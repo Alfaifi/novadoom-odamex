@@ -26,7 +26,7 @@
 // info.h using negative indices prevents overriding during dehacked (though id24 allows
 // this)
 //
-// id24 allows 0x80000000-0x8FFFFFFF (abbreviated as 0x8000-0x8FFF) for negative indices
+// id24 allows 0x80000000-0x8FFFFFFF (or 0x8000-0x8FFF for 16 bit values) for negative indices
 // for source port implementation id24 spec no longer uses enum to define the indices for
 // doom objects, but until that is implemented enums will continue to be used
 //----------------------------------------------------------------------------------------------
@@ -54,6 +54,8 @@ template <class ObjType, class IdxType = int32_t>
 class DoomObjectContainer
 {
 	using LookupTable = std::unordered_map<IdxType, ObjType*>;
+	// TODO: maybe use the vector for iteration instead of the map for speed?
+	// to still have access to the index in the iterator we can make the vector hold pairs
 	using InOrderTable = std::vector<std::unique_ptr<ObjType>>;
 	using DoomObjectContainerType = DoomObjectContainer<ObjType, IdxType>;
 
@@ -61,7 +63,7 @@ class DoomObjectContainer
 	InOrderTable m_inordertable;
 
 public:
-	template <typename MapIter>
+	template <typename table_iterator>
 	class generic_iterator {
 	public:
 		using iterator_category = std::forward_iterator_tag;
@@ -70,7 +72,7 @@ public:
 		using pointer           = value_type*;
 		using reference         = value_type&;
 
-		generic_iterator(MapIter it) : m_it(it) {}
+		generic_iterator(table_iterator it) : m_it(it) {}
 
 		reference operator*() const {
 			m_value.emplace(m_it->first, *m_it->second);
@@ -89,8 +91,7 @@ public:
 		bool operator!=(const generic_iterator& other) const { return m_it != other.m_it; }
 
 	private:
-		MapIter m_it;
-
+		table_iterator m_it;
 		mutable std::optional<value_type> m_value;
 	};
 
@@ -129,7 +130,7 @@ public:
 		return it->second;
 	};
 
-	const ObjType& operator[](int) const
+	const ObjType& operator[](int idx) const
 	{
 		const_iterator it = this->m_lookuptable.find(idx);
 		if (it == this->end())
@@ -189,10 +190,10 @@ public:
 	bool contains(IdxType idx) const { return this->find(idx) != this->end(); }
 
 	// Iterators
-	iterator begin() { return this->m_lookuptable.begin() }
-	iterator end() { return this->m_lookuptable.end() }
-	const_iterator begin() const { return this->m_lookuptable.begin() }
-	const_iterator end() const { return this->m_lookuptable.end() }
-	const_iterator cbegin() const { return this->m_lookuptable.begin() }
-	const_iterator cend() const { return this->m_lookuptable.end() }
+	iterator begin() { return this->m_lookuptable.begin(); }
+	iterator end() { return this->m_lookuptable.end(); }
+	const_iterator begin() const { return this->m_lookuptable.begin(); }
+	const_iterator end() const { return this->m_lookuptable.end(); }
+	const_iterator cbegin() const { return this->m_lookuptable.begin(); }
+	const_iterator cend() const { return this->m_lookuptable.end(); }
 };

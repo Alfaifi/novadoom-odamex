@@ -453,20 +453,6 @@ static const struct
     {NULL, NULL},
 };
 
-DoomObjectContainer<std::string> SoundMap(ARRAY_LENGTH(doom_SoundMap));
-
-void D_Initialize_SoundMap(const char** source, size_t count)
-{
-	SoundMap.clear();
-    if (source)
-    {
-		SoundMap.insert({source, count}, 0);
-    }
-#if defined _DEBUG
-	PrintFmt(PRINT_HIGH, "D_Allocate_sounds:: allocated {} sounds.\n", count);
-#endif
-}
-
 static int HandleMode(const char* mode, int num);
 static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize = 0);
@@ -1571,30 +1557,9 @@ static int PatchFrame(int frameNum)
 	StatesIterator states_it = states.find(frameNum);
 	if(states_it == states.end())
     {
-		auto state_t_default = [](int32_t idx) -> state_t {
-				state_t s{};
-				s.sprite = SPR_TNT1;
-				s.frame = 0;
-				s.tics = -1;
-				s.action = NULL;
-				s.nextstate = idx;
-				s.misc1 = 0;
-				s.misc2 = 0;
-
-				// mbf21 flags
-				s.flags = STATEF_NONE;
-				s.args[0] = 0;
-				s.args[1] = 0;
-				s.args[2] = 0;
-				s.args[3] = 0;
-				s.args[4] = 0;
-				s.args[5] = 0;
-				s.args[6] = 0;
-				s.args[7] = 0;
-				return s;
-		};
-		info = &states.insert(state_t_default(frameNum), frameNum);
+		info = &states.insert(state_t{}, frameNum);
 		info->statenum = frameNum;
+		info->nextstate = frameNum;
 	}
 	else
 	{
