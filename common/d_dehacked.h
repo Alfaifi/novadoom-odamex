@@ -219,9 +219,13 @@ static const char* doom_SoundMap[] = {nullptr,
                             "dehextra/sound188", "dehextra/sound189", "dehextra/sound190", "dehextra/sound191",
                             "dehextra/sound192", "dehextra/sound193", "dehextra/sound194", "dehextra/sound195",
                             "dehextra/sound196", "dehextra/sound197", "dehextra/sound198", "dehextra/sound199",
+                            };
 
-                            // ZDOOM-Specific sounds
-                            "misc/teamchat"};
+static const char* odamex_SoundMap[] =
+{
+    // Odamex/ZDoom sounds
+    "misc/teamchat"
+};
 
 extern DoomObjectContainer<std::string> SoundMap;
 

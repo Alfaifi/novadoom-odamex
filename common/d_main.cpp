@@ -234,6 +234,7 @@ void D_Initialize_Doom_Objects()
 	D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
 	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
 	D_Initialize_SoundMap(doom_SoundMap, ARRAY_LENGTH(doom_SoundMap));
+	SoundMap.insert({odamex_SoundMap, ARRAY_LENGTH(odamex_SoundMap)}, 0x80000000);
 	// Initialize all extra frames
 	D_Init_Nightmare_Flags();
 	// Initialize the odamex specific objects
