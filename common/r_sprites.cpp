@@ -88,7 +88,7 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, bool fli
 		rotation = (rot >= 17) ? rot - 7 : 17;
 
 	if (frame >= MAX_SPRITE_FRAMES || rotation > 16)
-		I_FatalError("R_InstallSpriteLump: Bad frame characters in lump {}", lump);
+		I_FatalError("R_InstallSpriteLump: Bad frame characters in lump {}: {}", lump, W_GetOLumpName(lump));
 
 	if (static_cast<int>(frame) > maxframe)
 		maxframe = frame;

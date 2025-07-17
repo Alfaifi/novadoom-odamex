@@ -798,6 +798,14 @@ void W_GetOLumpName(OLumpName& to, unsigned lump)
 }
 
 //
+// W_GetOLumpName
+//
+OLumpName W_GetOLumpName(unsigned lump)
+{
+	return lumpinfo[lump].name;
+}
+
+//
 // W_CacheLumpNum
 //
 void* W_CacheLumpNum(unsigned int lump, const zoneTag_e tag)

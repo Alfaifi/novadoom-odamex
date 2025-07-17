@@ -1,10 +1,8 @@
 #include "odamex.h"
 
 #include "mobjinfo.h"
+#include "info.h"
 #include "doom_obj_container.h"
-
-DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES);
-DoomObjectContainer<mobjinfo_t*, int> spawn_map;
 
 void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 {
@@ -25,8 +23,8 @@ void D_Initialize_Mobjinfo(mobjinfo_t* source, int count)
 
 			mobjinfo.insert(mobjinfo_source, idx);
 
-			// [CMB] -1 is used as the placeholder for now; id24 allows negative range for doomednum
-			if (mobjinfo_source.doomednum != -1)
+			// [CMB] check for invalid index (-1 or 0xFFFF)
+			if (mobjinfo_source.doomednum != 0xFFFF)
 			{
 				mobjinfo_t* spawn_info = &mobjinfo.find(idx)->second;
 				spawn_map.insert(spawn_info, mobjinfo_source.doomednum);

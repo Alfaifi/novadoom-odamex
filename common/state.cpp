@@ -1,9 +1,8 @@
 #include "odamex.h"
 
 #include "state.h"
+#include "info.h"
 #include "doom_obj_container.h"
-
-DoomObjectContainer<state_t> states(::NUMSTATES);
 
 void D_Initialize_States(state_t* source, int count)
 {

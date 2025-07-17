@@ -249,7 +249,7 @@ struct spriteinfo_t
 };
 
 extern const char* doom_sprnames[];
-extern DoomObjectContainer<std::string> sprnames; // spritenum_t
+inline DoomObjectContainer<std::string> sprnames(::NUMSPRITES); // spritenum_t
 
 inline auto format_as(spritenum_t eSpriteNum)
 {
@@ -1430,7 +1430,7 @@ struct state_t
 };
 
 extern state_t boomstates[];
-extern DoomObjectContainer<state_t> states; // statenum_t
+inline DoomObjectContainer<state_t> states(::NUMSTATES); // statenum_t
 extern state_t odastates[];
 
 inline FArchive &operator<< (FArchive &arc, state_t *state)
@@ -1733,7 +1733,7 @@ enum splash_group_t
 struct mobjinfo_t
 {
 	int32_t type;
-	int doomednum;
+	int16_t doomednum; // only valid range is 16 bits, lets use that
 	statenum_t spawnstate;
 	int spawnhealth;
 	int gibhealth;				// Doom Retro's GibHealth feature
@@ -1771,14 +1771,13 @@ struct mobjinfo_t
 	int flags3;
 	const char* ripsound;
 	mobjtype_t droppeditem;
-
 };
 
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
-extern DoomObjectContainer<mobjinfo_t> mobjinfo; // mobjtype_t
+inline DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES); // mobjtype_t
 // [CMB] spawn map per id24 - the pointer is to the mobjinfo table
-extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
+inline DoomObjectContainer<mobjinfo_t*> spawn_map; // int
 
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {

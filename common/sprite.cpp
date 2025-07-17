@@ -1,6 +1,7 @@
 #include "odamex.h"
 
 #include "sprite.h"
+#include "info.h"
 #include "doom_obj_container.h"
 
 #include <stdlib.h>
@@ -8,10 +9,6 @@
 #include <sstream>
 
 //----------------------------------------------------------------------------------------------
-
-// global variables from info.h
-
-DoomObjectContainer<std::string> sprnames(::NUMSPRITES);
 
 void D_Initialize_sprnames(const char** source, size_t count, spritenum_t start)
 {
