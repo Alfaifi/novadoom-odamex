@@ -334,6 +334,9 @@ public:
 
 	OHashTable& operator= (const HashTableType& other)
 	{
+		if (this == &other)
+			return *this;
+
 		copyFromOther(other);
 		return *this;
 	}

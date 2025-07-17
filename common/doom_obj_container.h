@@ -41,6 +41,7 @@
 #include <unordered_map>
 #include <vector>
 #include <typeinfo>
+#include <optional>
 
 //----------------------------------------------------------------------------------------------
 // DoomObjectContainer is a wrapper around std::unordered_map that provides an operator[]
@@ -52,20 +53,59 @@
 template <class ObjType, class IdxType = int32_t>
 class DoomObjectContainer
 {
+	using LookupTable = std::unordered_map<IdxType, ObjType*>;
+	using InOrderTable = std::vector<std::unique_ptr<ObjType>>;
+	using DoomObjectContainerType = DoomObjectContainer<ObjType, IdxType>;
 
-	typedef std::unordered_map<IdxType, ObjType> LookupTable;
-	typedef DoomObjectContainer<ObjType, IdxType> DoomObjectContainerType;
+	LookupTable m_lookuptable;
+	InOrderTable m_inordertable;
 
-	LookupTable lookup_table;
+public:
+	template <typename MapIter> class generic_iterator;
+	// using iterator = generic_iterator<IdxType, ObjType> iterator;
+	// using const_iterator = generic_iterator<const HashPairType, const HashTableType>;
+	using iterator = generic_iterator<typename LookupTable::iterator>;
+	using const_iterator = generic_iterator<typename LookupTable::const_iterator>;
 
-  public:
-	typedef typename LookupTable::iterator iterator;
-	typedef typename LookupTable::const_iterator const_iterator;
+	template <typename MapIter>
+	class generic_iterator {
+	public:
+		using iterator_category = std::forward_iterator_tag;
+		using value_type        = std::pair<IdxType, ObjType&>;
+		using difference_type   = std::ptrdiff_t;
+		using pointer           = value_type*;
+		using reference         = value_type&;
+
+		generic_iterator(MapIter it) : m_it(it) {}
+
+		reference operator*() const {
+			m_value.emplace(m_it->first, *m_it->second);
+			return *m_value;
+		}
+
+		pointer operator->() const {
+			m_value.emplace(m_it->first, *m_it->second);
+			return &*m_value;
+		}
+
+		generic_iterator& operator++() { ++m_it; return *this; }
+		generic_iterator operator++(int) { generic_iterator tmp = *this; ++m_it; return tmp; }
+
+		bool operator==(const generic_iterator& other) const { return m_it == other.m_it; }
+		bool operator!=(const generic_iterator& other) const { return m_it != other.m_it; }
+
+	private:
+		MapIter m_it;
+
+		mutable std::optional<value_type> m_value;
+	};
+	// using iterator = LookupTable::iterator;
+	// using const_iterator = LookupTable::const_iterator;
 
 	explicit DoomObjectContainer() = default;
 	explicit DoomObjectContainer(size_t count);
 	~DoomObjectContainer() = default;
-	DoomObjectContainer& operator=(const DoomObjectContainer& other) = default;
+	DoomObjectContainer& operator=(const DoomObjectContainer& other);
 	DoomObjectContainer& operator=(DoomObjectContainer&& other) = default;
 
 	ObjType& operator[](int);
@@ -75,7 +115,7 @@ class DoomObjectContainer
 	size_t size() const;
 	void clear();
 	void reserve(size_t new_cap);
-	ObjType& insert(const ObjType& obj, IdxType idx);
+	ObjType& insert(ObjType obj, IdxType idx);
 	void insert(nonstd::span<ObjType> objs, IdxType start_idx);
 	template <typename T = ObjType, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
 	void insert(nonstd::span<const char*> objs, IdxType start_idx);
@@ -97,7 +137,7 @@ class DoomObjectContainer
 // Construction and Destruction
 
 template <class ObjType, class IdxType>
-DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count) : lookup_table(count) {}
+DoomObjectContainer<ObjType, IdxType>::DoomObjectContainer(size_t count) : m_lookuptable(count), m_inordertable(count) {}
 
 // Operators
 
@@ -105,10 +145,10 @@ template <class ObjType, class IdxType>
 ObjType& DoomObjectContainer<
     ObjType, IdxType>::operator[](int idx)
 {
-	iterator it = this->lookup_table.find(idx);
+	iterator it = this->m_lookuptable.find(idx);
     if (it == this->end())
     {
-	    I_Error("Attempt to access invalid {} at idx {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
+	    I_Error("Attempt to access invalid {} at index {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
     }
     return it->second;
 }
@@ -117,26 +157,47 @@ template <class ObjType, class IdxType>
 const ObjType& DoomObjectContainer<
     ObjType, IdxType>::operator[](int idx) const
 {
-    const_iterator it = this->lookup_table.find(idx);
+    const_iterator it = this->m_lookuptable.find(idx);
     if (it == this->end())
     {
-    	I_Error("Attempt to access invalid {} at idx {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
+    	I_Error("Attempt to access invalid {} at index {}\n{}", typeid(ObjType).name(), idx, M_GetStacktrace());
     }
     return it->second;
 }
+
+template <class ObjType, class IdxType>
+DoomObjectContainer<
+    ObjType, IdxType>& DoomObjectContainer<
+    ObjType, IdxType>::operator=(const DoomObjectContainer& other)
+{
+	if (this == &other)
+		return *this;
+
+	clear();
+	for (const auto& [idx, ptr] : other.m_lookuptable)
+	{
+	    auto new_ptr = std::make_unique<ObjType>(*ptr);
+	    m_lookuptable[idx] = new_ptr.get();
+	    m_inordertable.push_back(std::move(new_ptr));
+	}
+
+	return *this;
+}
+
 
 // Capacity and Size
 
 template <class ObjType, class IdxType>
 size_t DoomObjectContainer<ObjType, IdxType>::size() const
 {
-	return this->lookup_table.size();
+	return this->m_inordertable.size();
 }
 
 template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::clear()
 {
-	this->lookup_table.clear();
+	this->m_lookuptable.clear();
+	this->m_inordertable.clear();
 }
 
 // Allocation changes
@@ -144,15 +205,17 @@ void DoomObjectContainer<ObjType, IdxType>::clear()
 template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::reserve(size_t new_cap)
 {
-	this->lookup_table.reserve(new_cap);
+	this->m_lookuptable.reserve(new_cap);
+	this->m_inordertable.reserve(new_cap);
 }
 
 // Insertion
 
 template <class ObjType, class IdxType>
-ObjType& DoomObjectContainer<ObjType, IdxType>::insert(const ObjType& obj, IdxType idx)
+ObjType& DoomObjectContainer<ObjType, IdxType>::insert(ObjType obj, IdxType idx)
 {
-	return this->lookup_table[idx] = obj;
+	m_inordertable.push_back(std::make_unique<ObjType>(obj));
+	return *(this->m_lookuptable[idx] = m_inordertable.back().get());
 }
 
 template <class ObjType, class IdxType>
@@ -160,7 +223,7 @@ void DoomObjectContainer<ObjType, IdxType>::insert(nonstd::span<ObjType> objs, I
 {
 	IdxType idx = start_idx;
 	for (const auto& obj : objs)
-		this->lookup_table[idx++] = obj;
+		insert(obj, idx++);
 }
 
 template <class ObjType, class IdxType>
@@ -169,7 +232,7 @@ void DoomObjectContainer<ObjType, IdxType>::insert(nonstd::span<const char*> obj
 {
 	IdxType idx = start_idx;
 	for (const auto& obj : objs)
-		this->lookup_table[idx++] = obj == nullptr ? "" : obj;
+		insert(obj == nullptr ? "" : obj, idx++);
 }
 
 // TODO: more of a copy construct in a sense
@@ -177,7 +240,7 @@ template <class ObjType, class IdxType>
 void DoomObjectContainer<ObjType, IdxType>::append(
     const DoomObjectContainer<ObjType, IdxType>& dObjContainer)
 {
-	for (const auto& [idx, obj] : dObjContainer.lookup_table)
+	for (const auto& [idx, obj] : dObjContainer.m_lookuptable)
 	{
 		this->insert(*obj, idx);
 	}
@@ -188,37 +251,37 @@ void DoomObjectContainer<ObjType, IdxType>::append(
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::begin()
 {
-	return this->lookup_table.begin();
+	return this->m_lookuptable.begin();
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<ObjType, IdxType>::end()
 {
-	return this->lookup_table.end();
+	return this->m_lookuptable.end();
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::begin() const
 {
-	return this->lookup_table.begin();
+	return this->m_lookuptable.begin();
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::end() const
 {
-	return this->lookup_table.end();
+	return this->m_lookuptable.end();
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cbegin() const
 {
-	return this->lookup_table.begin();
+	return this->m_lookuptable.begin();
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<ObjType, IdxType>::cend() const
 {
-	return this->lookup_table.end();
+	return this->m_lookuptable.end();
 }
 
 // Lookup
@@ -227,14 +290,14 @@ template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::iterator DoomObjectContainer<
     ObjType, IdxType>::find(IdxType idx)
 {
-	return this->lookup_table.find(idx);
+	return this->m_lookuptable.find(idx);
 }
 
 template <class ObjType, class IdxType>
 typename DoomObjectContainer<ObjType, IdxType>::const_iterator DoomObjectContainer<
     ObjType, IdxType>::find(IdxType idx) const
 {
-	return this->lookup_table.find(idx);
+	return this->m_lookuptable.find(idx);
 }
 
 template<class ObjType, class IdxType>
