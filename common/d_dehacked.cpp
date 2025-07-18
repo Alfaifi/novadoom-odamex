@@ -1428,6 +1428,10 @@ static int PatchThing(int thingy)
 		else if (stricmp(Line1, "ID #") == 0)
 		{
 			info->doomednum = (SDWORD)val;
+			// update spawn map
+			auto spawn_map_it = spawn_map.find(info->doomednum);
+			if (spawn_map_it == spawn_map.end())
+				spawn_map.insert(info, info->doomednum);
 		}
 		else if (stricmp(Line1, "Mass") == 0)
 		{
@@ -1457,16 +1461,6 @@ static int PatchThing(int thingy)
 		if (!gibhealth && info->spawnhealth && !info->gibhealth)
 		{
 			info->gibhealth = -info->spawnhealth;
-		}
-	}
-
-	// update spawn map
-	if (info->doomednum && info->doomednum != -1)
-	{
-		auto spawn_map_it = spawn_map.find(info->doomednum);
-		if (spawn_map_it == spawn_map.end())
-		{
-			spawn_map.insert(info, info->doomednum);
 		}
 	}
 
