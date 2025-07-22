@@ -53,7 +53,7 @@ constexpr static levelFlags_t LEVEL_SPIDERSPECIAL = BIT(7);
 
 constexpr static levelFlags_t LEVEL_SPECLOWERFLOOR = BIT(8);
 constexpr static levelFlags_t LEVEL_SPECOPENDOOR = BIT(9);
-const static levelFlags_t LEVEL_SPECACTIONSMASK = BIT_MASK(LEVEL_SPECLOWERFLOOR, LEVEL_SPECOPENDOOR);
+constexpr static levelFlags_t LEVEL_SPECACTIONSMASK = BIT_MASK(8, 9);
 constexpr static levelFlags_t LEVEL_MONSTERSTELEFRAG = BIT(10);
 constexpr static levelFlags_t LEVEL_EVENLIGHTING = BIT(11);
 
@@ -85,6 +85,11 @@ constexpr static levelFlags_t LEVEL_CHANGEMAPCHEAT = BIT(30);
 // Used for intermission map
 constexpr static levelFlags_t LEVEL_VISITED = BIT(31);
 
+constexpr static levelFlags_t LEVEL2_NORMALINFIGHTING = BIT(0);
+constexpr static levelFlags_t LEVEL2_NOINFIGHTING = BIT(1);
+constexpr static levelFlags_t LEVEL2_TOTALINFIGHTING = BIT(2);
+constexpr static levelFlags_t LEVEL2_INFIGHTINGMASK = BIT_MASK(0, 2);
+
 struct acsdefered_s;
 class FBehavior;
 struct bossaction_t;
@@ -104,6 +109,7 @@ struct level_info_t
 	OLumpName     skypic     = "";
 	OLumpName     music      = "";
 	levelFlags_t  flags      = 0;
+	levelFlags_t  flags2     = 0;
 	int           cluster    = 0;
 	FLZOMemFile*  snapshot   = nullptr;
 	acsdefered_s* defered    = nullptr;
@@ -146,6 +152,7 @@ struct level_pwad_info_t
 	OLumpName		skypic;
 	OLumpName		music;
 	levelFlags_t	flags;
+	levelFlags_t	flags2;
 	int				cluster;
 	FLZOMemFile*	snapshot;
 	acsdefered_s*	defered;
@@ -192,7 +199,7 @@ struct level_pwad_info_t
 
 	level_pwad_info_t()
 	    : mapname(""), levelnum(0), mapnum(0), episodenum(0), level_name(""), pname(""), nextmap(""), secretmap(""),
-	      partime(0), skypic(""), music(""), flags(0), cluster(0), snapshot(NULL),
+	      partime(0), skypic(""), music(""), flags(0), flags2(0), cluster(0), snapshot(NULL),
 	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
 	      aircontrol(0.0f), airsupply(10),
 	      exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""), endpic(""), intertext(""),
@@ -210,7 +217,7 @@ struct level_pwad_info_t
 	    : mapname(other.mapname), levelnum(other.levelnum), mapnum(other.mapnum), episodenum(other.episodenum),
 	      level_name(other.level_name), pname(other.pname), nextmap(other.nextmap),
 	      secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
-	      music(other.music), flags(other.flags), cluster(other.cluster),
+	      music(other.music), flags(other.flags), flags2(other.flags2), cluster(other.cluster),
 	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
 	      skypic2(""), gravity(0.0f), aircontrol(0.0f), airsupply(10),
 	      exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""),
@@ -239,6 +246,7 @@ struct level_pwad_info_t
 		skypic = other.skypic;
 		music = other.music;
 		flags = other.flags;
+		flags2 = other.flags2;
 		cluster = other.cluster;
 		snapshot = other.snapshot;
 		defered = other.defered;
@@ -298,7 +306,8 @@ struct level_locals_t
 	OLumpName		nextmap;				// go here when sv_fraglimit is hit
 	OLumpName		secretmap;				// map to go to when used secret exit
 
-	DWORD			flags;
+	levelFlags_t	flags;
+	levelFlags_t	flags2;
 
 	// [SL] use 4 bytes for color types instead of argb_t so that the struct
 	// can consist of only plain-old-data types. It is also important to have

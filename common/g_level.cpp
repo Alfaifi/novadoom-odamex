@@ -551,6 +551,7 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 	{
 		unsigned int playernum = players.size();
 		arc << level.flags
+			<< level.flags2
 			<< level.fadeto_color[0] << level.fadeto_color[1] << level.fadeto_color[2] << level.fadeto_color[3]
 			<< level.found_secrets
 			<< level.found_items
@@ -569,6 +570,7 @@ void G_SerializeLevel(FArchive &arc, bool hubLoad)
 	else
 	{
 		arc >> level.flags
+			>> level.flags2
 			>> level.fadeto_color[0] >> level.fadeto_color[1] >> level.fadeto_color[2] >> level.fadeto_color[3]
 			>> level.found_secrets
 			>> level.found_items
@@ -808,6 +810,7 @@ void G_InitLevelLocals()
 	::level.partime = info.partime;
 	::level.cluster = info.cluster;
 	::level.flags = info.flags;
+	::level.flags2 = info.flags2;
 	::level.levelnum = info.levelnum;
 	ArrayCopy(::level.level_fingerprint, info.level_fingerprint);
 
@@ -1038,9 +1041,13 @@ BEGIN_COMMAND(mapinfo)
 	flags += (info.flags & LEVEL_DEFINEDINMAPINFO ? " DEFINEDINMAPINFO" : "");
 	flags += (info.flags & LEVEL_CHANGEMAPCHEAT ? " CHANGEMAPCHEAT" : "");
 	flags += (info.flags & LEVEL_VISITED ? " VISITED" : "");
-	flags += (info.flags & LEVEL_COMPAT_DROPOFF ? "COMPAT_DROPOFF" : "");
-	flags += (info.flags & LEVEL_COMPAT_NOPASSOVER ? "COMPAT_NOPASSOVER" : "");
-	flags += (info.flags & LEVEL_COMPAT_LIMITPAIN ? "COMPAT_LIMITPAIN" : "");
+	flags += (info.flags & LEVEL_COMPAT_DROPOFF ? " COMPAT_DROPOFF" : "");
+	flags += (info.flags & LEVEL_COMPAT_NOPASSOVER ? " COMPAT_NOPASSOVER" : "");
+	flags += (info.flags & LEVEL_COMPAT_LIMITPAIN ? " COMPAT_LIMITPAIN" : "");
+	flags += (info.flags & LEVEL_COMPAT_SHORTTEX ? " COMPAT_SHORTTEX" : "");
+	flags += (info.flags2 & LEVEL2_NOINFIGHTING ? " NOINFIGHTING" : "");
+	flags += (info.flags2 & LEVEL2_NORMALINFIGHTING ? " NORMALINFIGHTING" : "");
+	flags += (info.flags2 & LEVEL2_TOTALINFIGHTING ? " TOTALINFIGHTING" : "");
 
 	if (flags.length() > 0)
 	{
