@@ -1512,8 +1512,8 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status,
 			const uint32_t mapidx = indexer.getIndex(map);
 			row->set_map(mapidx);
 
-			const std::string& lastmap = entry->lastmap;
-			const uint32_t lastmapidx = indexer.getIndex(lastmap);
+			const std::string lastmaps = fmt::format("{}", entry->lastmaps);
+			const uint32_t lastmapidx = indexer.getIndex(lastmaps);
 			row->set_lastmap(lastmapidx);
 
 			for (const auto& wad : entry->wads)
