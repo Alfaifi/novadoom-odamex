@@ -276,7 +276,7 @@ static inline void R_BlastSolidSegColumn(void (*drawfunc)())
 				destpostlen += translen;
 			}
 
-			if (!srcpost->next()->end() && destpostlen >= srcpost->topdelta + srcpost->length)
+			if (!srcpost->end() && !srcpost->next()->end() && destpostlen >= srcpost->topdelta + srcpost->length)
 			{
 				srcpost = srcpost->next();
 			}
