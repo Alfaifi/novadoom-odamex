@@ -88,7 +88,9 @@ function BuildOutX86 {
     New-Item -Force -ItemType "directory" -Path "${OutX86}\redist"
 
     Copy-Item -Force -Path `
-        "${UnzippedX86}\libmodplug-1.dll", `
+        "${UnzippedX86}\libwavpack-1.dll", `
+        "${UnzippedX86}\libgme.dll", `
+        "${UnzippedX86}\libxmp.dll", `
         "${UnzippedX86}\libogg-0.dll", `
         "${UnzippedX86}\libopus-0.dll", `
         "${UnzippedX86}\libopusfile-0.dll", `
@@ -120,7 +122,9 @@ function BuildOutX64 {
     New-Item -Force -ItemType "directory" -Path "${OutX64}\redist"
 
     Copy-Item -Force -Path `
-        "${UnzippedX64}\libmodplug-1.dll", `
+        "${UnzippedX64}\libwavpack-1.dll", `
+        "${UnzippedX64}\libgme.dll", `
+        "${UnzippedX64}\libxmp.dll", `
         "${UnzippedX64}\libogg-0.dll", `
         "${UnzippedX64}\libopus-0.dll", `
         "${UnzippedX64}\libopusfile-0.dll", `
