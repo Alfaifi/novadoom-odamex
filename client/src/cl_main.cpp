@@ -1129,6 +1129,8 @@ CVAR_FUNC_IMPL (cl_netdemoname)
 		var.RestoreDefault();
 }
 
+EXTERN_CVAR(cl_netdemodir)
+
 //
 // CL_GenerateNetDemoFileName
 //
@@ -1137,7 +1139,7 @@ std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemon
 {
 	const std::string expanded_filename(M_ExpandTokens(filename));
 	std::string newfilename(expanded_filename);
-	newfilename = M_GetNetDemoFileName(newfilename);
+	newfilename = M_GetNetDemoFileName(newfilename, cl_netdemodir);
 
 	// keep trying to find a filename that doesn't yet exist
 	if (!M_FindFreeName(newfilename, "odd"))

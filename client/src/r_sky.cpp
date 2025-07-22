@@ -808,7 +808,7 @@ void R_RenderSkyRange(visplane_t* pl)
 		front_offset = (-side->textureoffset) >> 6;
 
 		// Vertical offset allows careful sky positioning.
-		defaultskytexturemid = side->rowoffset - 28*FRACUNIT;
+		sky1mid = side->rowoffset - 28*FRACUNIT;
 
 		// We sometimes flip the picture horizontally.
 		//
@@ -916,7 +916,7 @@ void R_RenderSkyRange(visplane_t* pl)
 					destpostlen += translen;
 				}
 
-				if (!skypost->next()->end() && destpostlen >= skypost->topdelta + skypost->length)
+				if (!skypost->end() && !skypost->next()->end() && destpostlen >= skypost->topdelta + skypost->length)
 				{
 					skypost = skypost->next();
 				}

@@ -473,7 +473,7 @@ void S_ParseSndInfo()
 					     ambient->periodmin == 0 && ambient->periodmax == 0))
 					{
 						// Ignore bad ambient sounds
-						ambient->type == AMB_TYPE_NONE;
+						ambient->type = AMB_TYPE_NONE;
 					}
 				}
 				else if (os.compareTokenNoCase("map"))
