@@ -916,7 +916,7 @@ void R_RenderSkyRange(visplane_t* pl)
 					destpostlen += translen;
 				}
 
-				if (!skypost->next()->end() && destpostlen >= skypost->topdelta + skypost->length)
+				if (!skypost->end() && !skypost->next()->end() && destpostlen >= skypost->topdelta + skypost->length)
 				{
 					skypost = skypost->next();
 				}
