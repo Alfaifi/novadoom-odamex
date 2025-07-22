@@ -2,7 +2,7 @@
 
 #include "sprite.h"
 #include "info.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 
 #include <stdlib.h>
 #include <string.h>

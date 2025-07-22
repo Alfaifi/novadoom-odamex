@@ -29,7 +29,7 @@
 
 #include "cmdlib.h"
 #include "d_dehacked.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 #include "d_items.h"
 #include "gstrings.h"
 #include "i_system.h"

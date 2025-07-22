@@ -64,7 +64,7 @@
 #include "infomap.h"
 #include "cl_replay.h"
 #include "r_interp.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 
 // Extern data from other files.
 

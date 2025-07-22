@@ -28,7 +28,7 @@
 // Needed for action function pointer handling.
 #include "dthinker.h"
 #include "farchive.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 
 #define NO_ALTSPEED -1
 #ifndef MELEERANGE // TODO: only have a single spot this is defined

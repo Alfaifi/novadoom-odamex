@@ -2,7 +2,7 @@
 
 #include "state.h"
 #include "info.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 
 void D_Initialize_States(state_t* source, int count)
 {
