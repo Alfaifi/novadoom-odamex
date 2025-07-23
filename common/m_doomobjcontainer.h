@@ -43,6 +43,10 @@
 #include <typeinfo>
 #include <optional>
 
+// Forward declarations:
+struct state_t;
+struct mobjinfo_t;
+
 //----------------------------------------------------------------------------------------------
 // DoomObjectContainer is a wrapper around std::unordered_map that provides an operator[]
 // that cleanly errors with a helpful message when attempts to access a nonexistent element
@@ -50,12 +54,10 @@
 // are definied within
 //----------------------------------------------------------------------------------------------
 
-template <class ObjType, class IdxType = int32_t>
+template <typename ObjType, typename IdxType = int32_t>
 class DoomObjectContainer
 {
 	using LookupTable = std::unordered_map<IdxType, ObjType*>;
-	// TODO: maybe use the vector for iteration instead of the map for speed?
-	// to still have access to the index in the iterator we can make the vector hold pairs
 	using InOrderTable = std::vector<std::unique_ptr<ObjType>>;
 	using DoomObjectContainerType = DoomObjectContainer<ObjType, IdxType>;
 
@@ -100,7 +102,9 @@ public:
 
 	// Construction and Destruction
 	explicit DoomObjectContainer() = default;
-	explicit DoomObjectContainer(size_t count)  : m_lookuptable(count), m_inordertable(count) {}
+	explicit DoomObjectContainer(size_t count)  : m_lookuptable(count), m_inordertable() {
+		m_inordertable.reserve(count);
+	}
 	~DoomObjectContainer() = default;
 
 	// Operators
@@ -196,4 +200,27 @@ public:
 	const_iterator end() const { return this->m_lookuptable.end(); }
 	const_iterator cbegin() const { return this->m_lookuptable.begin(); }
 	const_iterator cend() const { return this->m_lookuptable.end(); }
+
+	// Sort vector and rebuild map
+	void rebuildMap(std::function<bool(const ObjType&, const ObjType&)> sorter, std::function<IdxType(const ObjType&)> indexgetter)
+	{
+		std::vector<ObjType*> temp{};
+		temp.reserve(m_inordertable.size());
+		std::transform(m_inordertable.begin(), m_inordertable.end(), std::back_inserter(temp), [](const auto& p) { return p.get(); });
+		std::sort(temp.begin(), temp.end(), [&](const ObjType* lhs, const ObjType* rhs){ return sorter(*lhs, *rhs); });
+		m_lookuptable.clear();
+		for (ObjType* p : temp)
+		{
+			const IdxType index = indexgetter(*p);
+			if constexpr (std::is_same_v<ObjType, mobjinfo_t> || std::is_same_v<ObjType, mobjinfo_t*>)
+			{
+				if (m_lookuptable.find(index) == m_lookuptable.end())
+					m_lookuptable[index] = p;
+			}
+			else
+			{
+				m_lookuptable[index] = p;
+			}
+		}
+	}
 };

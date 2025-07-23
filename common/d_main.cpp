@@ -230,6 +230,11 @@ void D_Initialize_Doom_Objects()
 {
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
+	// states.clear();
+	// states.insert({boomstates, ARRAY_LENGTH(boomstates)}, 0);
+	// states.insert({odastates, odastates_size()}, 0x80000000);
+	// mobjinfo.clear();
+	// mobjinfo.insert({doom_mobjinfo, ARRAY_LENGTH(doom_mobjinfo)}, 0);
 	D_Initialize_States(boomstates, ::NUMSTATES);
 	D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
 	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
@@ -242,6 +247,23 @@ void D_Initialize_Doom_Objects()
 	D_Init_Nightmare_Flags();
 	// Initialize the odamex specific objects
 	D_Initialize_Odamex_Objects();
+
+	states.rebuildMap(
+		[](const state_t& lhs, const state_t& rhs){ return lhs.statenum < rhs.statenum; },
+		[](const state_t& s){ return s.statenum; }
+	);
+	mobjinfo.rebuildMap(
+		[](const mobjinfo_t& lhs, const mobjinfo_t& rhs){
+			return lhs.type < rhs.type || (lhs.type == rhs.type && lhs.doomednum < rhs.doomednum);
+		},
+		[](const mobjinfo_t& m){ return m.type; }
+	);
+	spawn_map.rebuildMap(
+		[](const mobjinfo_t *const& lhs, const mobjinfo_t *const& rhs){
+			return lhs->doomednum < rhs->doomednum;
+		},
+		[](const mobjinfo_t *const& m){ return m->doomednum; }
+	);
 }
 
 //
