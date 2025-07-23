@@ -998,21 +998,7 @@ static int PatchThing(int thingy)
 	MobjIterator mobjinfo_it = mobjinfo.find(thingNum);
 	if (mobjinfo_it == mobjinfo.end())
 	{
-		auto mobjinfo_t_default = []() -> mobjinfo_t
-		{
-			mobjinfo_t m = {};
-			m.doomednum = -1;
-			m.droppeditem = MT_NULL;
-			m.infighting_group = IG_DEFAULT;
-			m.projectile_group = PG_DEFAULT;
-			m.splash_group = SG_DEFAULT;
-			m.altspeed = NO_ALTSPEED;
-			m.meleerange = MELEERANGE;
-			m.translucency = 0x10000;
-			m.altspeed = NO_ALTSPEED;
-			return m;
-		};
-		info = &mobjinfo.insert(mobjinfo_t_default(), (mobjtype_t) thingNum);
+		info = &mobjinfo.insert(mobjinfo_t{}, (mobjtype_t) thingNum);
 		// set the type
 		info->type = thingNum;
 	} else

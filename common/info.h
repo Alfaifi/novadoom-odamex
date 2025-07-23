@@ -1733,45 +1733,45 @@ enum splash_group_t
 
 struct mobjinfo_t
 {
-	int32_t type;
-	int16_t doomednum; // only valid range is 16 bits, lets use that
-	statenum_t spawnstate;
-	int spawnhealth;
-	int gibhealth;				// Doom Retro's GibHealth feature
-	statenum_t seestate;
-	const char *seesound;		// [RH] not int
-	int reactiontime;
-	const char *attacksound;	// [RH] not int
-	statenum_t painstate;
-	int painchance;
-	const char *painsound;	// [RH] not int
-	statenum_t meleestate;
-	statenum_t missilestate;
-	statenum_t deathstate;
-	statenum_t xdeathstate;
-	const char *deathsound;	// [RH] not int
-	int speed;
-	int radius;
-	int height;
-	int cdheight;
-	int mass;
-	int damage;
-	const char *activesound;	// [RH] not int
-	int flags;
-	int flags2;
-	statenum_t raisestate;
-	int translucency;
-	const char *name;
+	int32_t type            = MT_NULL;
+	int16_t doomednum       = -1;      // only valid range is 16 bits, lets use that
+	statenum_t spawnstate   = S_NULL;
+	int spawnhealth         = 0;
+	int gibhealth           = 0;       // Doom Retro's GibHealth feature
+	statenum_t seestate     = S_NULL;
+	const char *seesound    = nullptr; // [RH] not int
+	int reactiontime        = 0;
+	const char *attacksound = nullptr; // [RH] not int
+	statenum_t painstate    = S_NULL;
+	int painchance          = 0;
+	const char *painsound   = nullptr; // [RH] not int
+	statenum_t meleestate   = S_NULL;
+	statenum_t missilestate = S_NULL;
+	statenum_t deathstate   = S_NULL;
+	statenum_t xdeathstate  = S_NULL;
+	const char *deathsound  = nullptr; // [RH] not int
+	int speed               = 0;
+	int radius              = 0;
+	int height              = 0;
+	int cdheight            = 0;
+	int mass                = 0;
+	int damage              = 0;
+	const char *activesound = nullptr; // [RH] not int
+	int flags               = 0;
+	int flags2              = 0;
+	statenum_t raisestate   = S_NULL;
+	int translucency        = 0x10000;
+	const char *name        = nullptr;
 
 	// MBF21 STUFF HERE
-	int altspeed;
-	int meleerange;
-	int infighting_group;
-	int projectile_group;
-	int splash_group;
-	int flags3;
-	const char* ripsound;
-	mobjtype_t droppeditem;
+	int altspeed            = NO_ALTSPEED;
+	int meleerange          = MELEERANGE;
+	int infighting_group    = IG_DEFAULT;
+	int projectile_group    = PG_DEFAULT;
+	int splash_group        = SG_DEFAULT;
+	int flags3              = 0;
+	const char* ripsound    = nullptr;
+	mobjtype_t droppeditem  = MT_NULL;
 };
 
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
