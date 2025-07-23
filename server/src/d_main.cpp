@@ -64,7 +64,6 @@
 #include "r_sky.h"
 #include "s_sound.h"
 #include "sprite.h"
-#include "state.h"
 #include "sv_banlist.h"
 #include "sv_main.h"
 #include "v_video.h"

@@ -86,7 +86,6 @@
 #include "gui_boot.h"
 #include "sprite.h"
 #include "mobjinfo.h"
-#include "state.h"
 #include "odamex_objects.h"
 #include "g_episode.h"
 

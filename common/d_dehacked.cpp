@@ -42,7 +42,6 @@
 #include "w_wad.h"
 #include "sprite.h"
 #include "mobjinfo.h"
-#include "state.h"
 
 // Miscellaneous info that used to be constant
 struct DehInfo deh = {

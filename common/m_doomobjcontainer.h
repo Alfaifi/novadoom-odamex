@@ -34,7 +34,6 @@
 #pragma once
 
 #include "i_system.h"
-#include "version.h"
 #include "m_stacktrace.h"
 #include <nonstd/span.hpp>
 #include <functional>

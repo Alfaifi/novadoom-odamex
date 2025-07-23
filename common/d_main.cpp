@@ -60,7 +60,6 @@
 #include "m_resfile.h"
 #include "sprite.h"
 #include "mobjinfo.h"
-#include "state.h"
 #include "odamex_objects.h"
 
 OResFiles wadfiles;
@@ -230,17 +229,18 @@ void D_Initialize_Doom_Objects()
 {
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
-	// states.clear();
-	// states.insert({boomstates, ARRAY_LENGTH(boomstates)}, 0);
+	states.clear();
+	states.reserve(::NUMSTATES);
+	states.insert({boomstates, ::NUMSTATES}, 0);
 	// states.insert({odastates, odastates_size()}, 0x80000000);
 	// mobjinfo.clear();
 	// mobjinfo.insert({doom_mobjinfo, ARRAY_LENGTH(doom_mobjinfo)}, 0);
-	D_Initialize_States(boomstates, ::NUMSTATES);
 	D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
 	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
 
 	// Initialize soundmap
 	SoundMap.clear();
+	SoundMap.reserve(ARRAY_LENGTH(doom_SoundMap) + ARRAY_LENGTH(odamex_SoundMap));
 	SoundMap.insert({doom_SoundMap, ARRAY_LENGTH(doom_SoundMap)}, 0);
 	SoundMap.insert({odamex_SoundMap, ARRAY_LENGTH(odamex_SoundMap)}, 0x80000000);
 	// Initialize all extra frames
@@ -262,7 +262,7 @@ void D_Initialize_Doom_Objects()
 		[](const mobjinfo_t *const& lhs, const mobjinfo_t *const& rhs){
 			return lhs->doomednum < rhs->doomednum;
 		},
-		[](const mobjinfo_t *const& m){ return m->doomednum; }
+		[](const mobjinfo_t *const& m){ return m->type == MT_HORDESPAWN ? m->type : m->doomednum; }
 	);
 }
 

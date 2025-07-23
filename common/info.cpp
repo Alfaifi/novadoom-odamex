@@ -31,7 +31,6 @@
 #include "m_fixed.h"
 #include "info.h"
 #include "actor.h"
-#include "state.h"
 
 const char* doom_sprnames[::NUMSPRITES] = {
 	"TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
