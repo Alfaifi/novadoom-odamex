@@ -73,9 +73,6 @@ extern bool step_mode;
 bool capfps = true;
 float maxfps = 35.0f;
 
-extern void D_Init_Nightmare_Flags(void);
-
-
 #if defined(_WIN32)
 
 typedef struct
@@ -243,8 +240,6 @@ void D_Initialize_Doom_Objects()
 	SoundMap.reserve(ARRAY_LENGTH(doom_SoundMap) + ARRAY_LENGTH(odamex_SoundMap));
 	SoundMap.insert({doom_SoundMap, ARRAY_LENGTH(doom_SoundMap)}, 0);
 	SoundMap.insert({odamex_SoundMap, ARRAY_LENGTH(odamex_SoundMap)}, 0x80000000);
-	// Initialize all extra frames
-	D_Init_Nightmare_Flags();
 	// Initialize the odamex specific objects
 	D_Initialize_Odamex_Objects();
 

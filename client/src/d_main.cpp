@@ -734,7 +734,6 @@ void STACK_ARGS D_Shutdown()
 
 
 void C_DoCommand(const char *cmd, uint32_t key);
-void D_Init_Nightmare_Flags(void);
 
 //
 // D_DoomMain

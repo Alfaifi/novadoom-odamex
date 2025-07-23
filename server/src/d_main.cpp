@@ -215,8 +215,6 @@ void STACK_ARGS D_Shutdown()
 	NormalLight.next = NULL;
 }
 
-void D_Init_Nightmare_Flags(void);
-
 //
 // D_DoomMain
 //
