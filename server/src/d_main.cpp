@@ -62,7 +62,6 @@
 #include "r_local.h"
 #include "r_sky.h"
 #include "s_sound.h"
-#include "sprite.h"
 #include "sv_banlist.h"
 #include "sv_main.h"
 #include "v_video.h"

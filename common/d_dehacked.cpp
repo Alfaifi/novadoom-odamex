@@ -40,7 +40,6 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "sprite.h"
 
 // Miscellaneous info that used to be constant
 struct DehInfo deh = {

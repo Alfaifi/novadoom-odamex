@@ -84,7 +84,6 @@
 #include "g_horde.h"
 #include "w_ident.h"
 #include "gui_boot.h"
-#include "sprite.h"
 #include "g_episode.h"
 
 extern size_t got_heapsize;

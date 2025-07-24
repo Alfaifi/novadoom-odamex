@@ -58,7 +58,6 @@
 #include "gi.h"
 #include "w_ident.h"
 #include "m_resfile.h"
-#include "sprite.h"
 #include "odainfo.h"
 
 OResFiles wadfiles;
