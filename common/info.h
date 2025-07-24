@@ -1780,6 +1780,8 @@ inline DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES); // mobjtype_t
 // [CMB] spawn map per id24 - the pointer is to the mobjinfo table
 inline DoomObjectContainer<mobjinfo_t*> spawn_map; // int
 
+void D_BuildSpawnMap();
+
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {
 	if (info)

@@ -217,10 +217,10 @@ static char *GetRegistryString(registry_value_t *reg_val)
 #endif
 
 //
-// D_Initialize_Doom_Objects()
+// D_InitializeDoomObjectTables()
 // [CMB] Initialize all the doom objects: MobjInfo, SprNames, SoundMap, etc.
 //
-void D_Initialize_Doom_Objects()
+void D_InitializeDoomObjectTables()
 {
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
@@ -241,12 +241,7 @@ void D_Initialize_Doom_Objects()
 	SoundMap.insert({doom_SoundMap, ARRAY_LENGTH(doom_SoundMap)}, 0);
 	SoundMap.insert({odamex_SoundMap, ARRAY_LENGTH(odamex_SoundMap)}, 0x80000000);
 	// Initialize spawn map
-	spawn_map.clear();
-	for (auto& [_, mobj] : mobjinfo)
-	{
-		if (mobj.doomednum != -1)
-			spawn_map.insert(&mobj, mobj.type == MT_CAREPACK ? mobj.type : mobj.doomednum);
-	}
+	D_BuildSpawnMap();
 
 	states.rebuildMap(
 		[](const state_t& lhs, const state_t& rhs){ return lhs.statenum < rhs.statenum; },
@@ -257,12 +252,6 @@ void D_Initialize_Doom_Objects()
 			return lhs.type < rhs.type || (lhs.type == rhs.type && lhs.doomednum < rhs.doomednum);
 		},
 		[](const mobjinfo_t& m){ return m.type; }
-	);
-	spawn_map.rebuildMap(
-		[](const mobjinfo_t *const& lhs, const mobjinfo_t *const& rhs){
-			return lhs->doomednum < rhs->doomednum;
-		},
-		[](const mobjinfo_t *const& m){ return m->type == MT_HORDESPAWN ? m->type : m->doomednum; }
 	);
 }
 
@@ -849,7 +838,6 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	::lastWadRebootSuccess = false;
 
 	D_Shutdown();
-	D_Initialize_Doom_Objects(); // start from vanilla objects
 
 	gamestate_t oldgamestate = ::gamestate;
 	::gamestate = GS_STARTUP; // prevent console from trying to use nonexistant font

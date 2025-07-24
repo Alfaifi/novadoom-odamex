@@ -227,7 +227,7 @@ void D_DoomMain()
 
 	W_SetupFileIdentifiers();
 
-	D_Initialize_Doom_Objects();
+	D_InitializeDoomObjectTables();
 
 	M_FindResponseFile();		// [ML] 23/1/07 - Add Response file support back in
 

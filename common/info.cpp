@@ -7174,4 +7174,19 @@ mobjinfo_t doom_mobjinfo[::NUMMOBJTYPES] = {
 	{MT_EXTRA99, -1, S_TNT1,0,0,S_NULL,NULL,0,NULL,S_NULL,0,NULL,S_NULL,S_NULL,S_NULL,S_NULL,NULL,0,0,0,0,0,0,NULL,0,0,S_NULL,0x10000,"MT_EXTRA99",NO_ALTSPEED,64*FRACUNIT,IG_DEFAULT,PG_DEFAULT,SG_DEFAULT,0,NULL,MT_NULL},
 };
 
+void D_BuildSpawnMap() {
+	spawn_map.clear();
+	for (auto& [_, mobj] : mobjinfo)
+	{
+		if (mobj.doomednum != -1)
+			spawn_map.insert(&mobj, mobj.type == MT_CAREPACK ? mobj.type : mobj.doomednum);
+	}
+	spawn_map.rebuildMap(
+		[](const mobjinfo_t *const& lhs, const mobjinfo_t *const& rhs){
+			return lhs->doomednum < rhs->doomednum;
+		},
+		[](const mobjinfo_t *const& m){ return m->type == MT_HORDESPAWN ? m->type : m->doomednum; }
+	);
+}
+
 VERSION_CONTROL (info_cpp, "$Id$")

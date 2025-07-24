@@ -592,6 +592,8 @@ void D_UndoDehPatch()
 	states = std::move(doomBackup.backupStates);
 	SoundMap = std::move(doomBackup.backupSoundMap);
 
+	D_BuildSpawnMap();
+
 	extern bool isFast;
 	isFast = false;
 
