@@ -506,7 +506,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 	mobjtype_t type = static_cast<mobjtype_t>(msg->current().type());
 	statenum_t state = static_cast<statenum_t>(msg->current().statenum());
 
-	if (type < MT_PLAYER || type >= ::mobjinfo.size())
+	if (!mobjinfo.contains(type))
 		return;
 
 	P_ClearId(netid);

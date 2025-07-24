@@ -1653,7 +1653,7 @@ static int PatchSprite(int sprNum)
 
 		if (offset >= 0 && offset < sprnames.size())
 		{
-			sprnames.insert(strdup(OrgSprNames[offset]), (spritenum_t) sprNum);
+			sprnames.insert(OrgSprNames[offset], (spritenum_t) sprNum);
 		}
 		else
 		{
@@ -2878,7 +2878,7 @@ BEGIN_COMMAND(playstate)
 	}
 
 	int index = atoi(argv[1]);
-	if (index < 0 || index >= ::states.size())
+	if (!states.contains(index))
 	{
 		Printf("Not a valid index.\n");
 		return;
