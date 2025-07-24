@@ -2207,7 +2207,7 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 		if (i < msg->player().psprites_size())
 		{
 			const int32_t state = msg->player().psprites().Get(i).statenum();
-            if (states.contains(state))
+            if (!states.contains(state))
 			{
 				continue;
 			}
@@ -2491,7 +2491,7 @@ static void CL_SetMobjState(const odaproto::svc::MobjState* msg)
 	AActor* mo = P_FindThingById(msg->netid());
 	int s = msg->mostate();
 
-    if (mo == NULL || states.contains(s))
+    if (mo == NULL || !states.contains(s))
 		return;
 
 	P_SetMobjState(mo, static_cast<statenum_t>(s));
