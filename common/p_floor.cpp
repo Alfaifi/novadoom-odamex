@@ -1135,7 +1135,7 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag)
 			if (line) { // [RH] if no line, no change
 				sec->floorpic = line->frontsector->floorpic;
 				sec->special = line->frontsector->special;
-				sec->SectorChanges |= SPC_FlatPic;
+				sec->SectorChanges |= SPC_FlatPic | SPC_Special;
 				SERVER_ONLY(
 					SV_BroadcastSectorProperties(secnum);
 				)
@@ -1147,7 +1147,7 @@ bool EV_DoChange (line_t *line, EChange changetype, int tag)
 			{
 				sec->floorpic = secm->floorpic;
 				sec->special = secm->special;
-				sec->SectorChanges |= SPC_FlatPic;
+				sec->SectorChanges |= SPC_FlatPic | SPC_Special;
 				SERVER_ONLY(
 					SV_BroadcastSectorProperties(secnum);
 				)
