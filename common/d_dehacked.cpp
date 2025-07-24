@@ -135,7 +135,7 @@ static short codepconv[522] = {
 
 static bool BackedUpData = false;
 // This is the original data before it gets replaced by a patch.
-static const char** OrgSprNames;
+static std::string OrgSprNames[::NUMSPRITES];
 static actionf_p1 OrgActionPtrs[::NUMSTATES];
 
 // Functions used in a .bex [CODEPTR] chunk
@@ -554,12 +554,10 @@ static void BackupData(void)
 	}
 
 	// backup sprites
-	OrgSprNames = (const char**) M_Calloc(::NUMSPRITES + 1, sizeof(char*));
 	for (i = 0; i < ::NUMSPRITES; i++)
 	{
-		OrgSprNames[i] = strdup(sprnames[i].data());
+		OrgSprNames[i] = sprnames[i];
 	}
-	OrgSprNames[NUMSPRITES] = NULL;
 
 	// backup action pointers
 	for (i = 0; i < ::NUMSTATES; i++)
@@ -588,13 +586,6 @@ void D_UndoDehPatch()
 	{
 		return;
 	}
-
-	for (i = 0; i < ::NUMSPRITES; i++)
-	{
-		// hacky but needed for const char*
-		free((char*)OrgSprNames[i]);
-	}
-	M_Free(OrgSprNames);
 
 	sprnames = std::move(doomBackup.backupSprnames);
 	mobjinfo = std::move(doomBackup.backupMobjInfo);
@@ -1652,7 +1643,7 @@ static int PatchSprite(int sprNum)
 
 		if (offset >= 0 && offset < sprnames.size())
 		{
-			sprnames.insert(OrgSprNames[offset], (spritenum_t) sprNum);
+			sprnames[sprNum] = OrgSprNames[offset];
 		}
 		else
 		{
