@@ -10,18 +10,6 @@
 
 //----------------------------------------------------------------------------------------------
 
-void D_Initialize_sprnames(const char** source, size_t count, spritenum_t start)
-{
-	sprnames.clear();
-    if (source)
-    {
-		sprnames.insert({source, count}, start);
-        #if defined _DEBUG
-	        Printf(PRINT_HIGH, "D_Allocate_sprnames:: allocated %d sprites.\n", count);
-        #endif
-    }
-}
-
 /**
  * @brief find the index for a given key
  * @param src_sprnames the sprite names to search for the index

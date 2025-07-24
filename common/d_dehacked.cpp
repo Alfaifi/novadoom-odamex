@@ -41,7 +41,6 @@
 #include "s_sound.h"
 #include "w_wad.h"
 #include "sprite.h"
-#include "mobjinfo.h"
 
 // Miscellaneous info that used to be constant
 struct DehInfo deh = {

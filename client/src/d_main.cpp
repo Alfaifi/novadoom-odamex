@@ -85,8 +85,6 @@
 #include "w_ident.h"
 #include "gui_boot.h"
 #include "sprite.h"
-#include "mobjinfo.h"
-#include "odamex_objects.h"
 #include "g_episode.h"
 
 extern size_t got_heapsize;

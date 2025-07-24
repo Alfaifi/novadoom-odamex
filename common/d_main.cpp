@@ -59,8 +59,7 @@
 #include "w_ident.h"
 #include "m_resfile.h"
 #include "sprite.h"
-#include "mobjinfo.h"
-#include "odamex_objects.h"
+#include "odainfo.h"
 
 OResFiles wadfiles;
 OResFiles patchfiles;
@@ -226,22 +225,29 @@ void D_Initialize_Doom_Objects()
 {
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
+	// Initialize states
 	states.clear();
-	states.reserve(::NUMSTATES);
-	states.insert({boomstates, ::NUMSTATES}, 0);
-	// states.insert({odastates, odastates_size()}, 0x80000000);
-	// mobjinfo.clear();
-	// mobjinfo.insert({doom_mobjinfo, ARRAY_LENGTH(doom_mobjinfo)}, 0);
-	D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
-	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
-
+	states.insert({boomstates, ::NUMSTATES}, S_NULL);
+	states.insert(getOdaStates(), S_GIB0);
+	// Initialize mobjinfo
+	mobjinfo.clear();
+	mobjinfo.insert({doom_mobjinfo, ::NUMMOBJTYPES}, MT_PLAYER);
+	mobjinfo.insert(getOdaMobjinfo(), MT_GIB0);
+	// Initialize sprnames
+	sprnames.clear();
+	sprnames.insert({doom_sprnames, ::NUMSPRITES}, SPR_TROO);
+	sprnames.insert(getOdaSprNames(), SPR_GIB0);
 	// Initialize soundmap
 	SoundMap.clear();
-	SoundMap.reserve(ARRAY_LENGTH(doom_SoundMap) + ARRAY_LENGTH(odamex_SoundMap));
 	SoundMap.insert({doom_SoundMap, ARRAY_LENGTH(doom_SoundMap)}, 0);
 	SoundMap.insert({odamex_SoundMap, ARRAY_LENGTH(odamex_SoundMap)}, 0x80000000);
-	// Initialize the odamex specific objects
-	D_Initialize_Odamex_Objects();
+	// Initialize spawn map
+	spawn_map.clear();
+	for (auto& [_, mobj] : mobjinfo)
+	{
+		if (mobj.doomednum != -1)
+			spawn_map.insert(&mobj, mobj.type == MT_CAREPACK ? mobj.type : mobj.doomednum);
+	}
 
 	states.rebuildMap(
 		[](const state_t& lhs, const state_t& rhs){ return lhs.statenum < rhs.statenum; },

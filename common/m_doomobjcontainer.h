@@ -168,6 +168,7 @@ public:
 	void insert(nonstd::span<ObjType> objs, IdxType start_idx)
 	{
 		IdxType idx = start_idx;
+		reserve(m_lookuptable.size() + objs.size()); // reserve is not additive
 		for (const auto& obj : objs)
 			insert(obj, idx++);
 	}
@@ -176,6 +177,7 @@ public:
 	void insert(nonstd::span<const char*> objs, IdxType start_idx)
 	{
 		IdxType idx = start_idx;
+		reserve(m_lookuptable.size() + objs.size()); // reserve is not additive
 		for (const auto& obj : objs)
 			insert(obj == nullptr ? "" : obj, idx++);
 	}

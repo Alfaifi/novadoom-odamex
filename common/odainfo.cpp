@@ -1,10 +1,32 @@
+// Emacs style mode select   -*- C++ -*-
+//-----------------------------------------------------------------------------
+//
+// $Id$
+//
+// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2024-2025 by Christian Bernard.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// DESCRIPTION:
+//  info.cpp for odamex/zdoom/ctf stuff
+//
+//-----------------------------------------------------------------------------
+
 #include "odamex.h"
 #include "m_fixed.h"
 #include "actor.h"
 #include "info.h"
-#include "z_zone.h"
 
-#include "odamex_objects.h"
+#include "odainfo.h"
 
 // ------------------------------------------------------------------
 // Odamex specific States, Sprites, and Things
@@ -2074,96 +2096,102 @@ mobjinfo_t odamobjinfo[] = {
         NULL,          // ripsound
         MT_NULL        // droppeditem
     },
-    {// MT_WPRFLAG
-     MT_WPRFLAG,
-     -1,            // doomednum
-     S_WPRF1,       // spawnstate
-     1000,          // spawnhealth
-     0,             // gibhealth
-     S_NULL,        // seestate
-     NULL,          // seesound
-     8,             // reactiontime
-     NULL,          // attacksound
-     S_NULL,        // painstate
-     0,             // painchance
-     NULL,          // painsound
-     S_NULL,        // meleestate
-     S_NULL,        // missilestate
-     S_NULL,        // deathstate
-     S_NULL,        // xdeathstate
-     NULL,          // deathsound
-     0,             // speed
-     20 * FRACUNIT, // radius
-     16 * FRACUNIT, // height
-     16 * FRACUNIT, // cdheight
-     100,           // mass
-     0,             // damage
-     NULL,          // activesound
-     0,             // flags
-     0,             // flags2
-     S_NULL,        // raisestate
-     0xC000,
-     "MT_WPRFLAG"},
-    {// MT_WPGFLAG
-     MT_WPGFLAG,
-     -1,            // doomednum
-     S_WPGF1,       // spawnstate
-     1000,          // spawnhealth
-     0,             // gibhealth
-     S_NULL,        // seestate
-     NULL,          // seesound
-     8,             // reactiontime
-     NULL,          // attacksound
-     S_NULL,        // painstate
-     0,             // painchance
-     NULL,          // painsound
-     S_NULL,        // meleestate
-     S_NULL,        // missilestate
-     S_NULL,        // deathstate
-     S_NULL,        // xdeathstate
-     NULL,          // deathsound
-     0,             // speed
-     20 * FRACUNIT, // radius
-     16 * FRACUNIT, // height
-     16 * FRACUNIT, // cdheight
-     100,           // mass
-     0,             // damage
-     NULL,          // activesound
-     0,             // flags
-     0,             // flags2
-     S_NULL,        // raisestate
-     0xC000,
-     "MT_WPGFLAG"},
-    {// MT_AVATAR
-     MT_AVATAR,
-     -1,                                                              // doomednum
-     S_PLAY,                                                          // spawnstate
-     100,                                                             // spawnhealth
-     0,                                                               // gibhealth
-     S_PLAY_RUN1,                                                     // seestate
-     NULL,                                                            // seesound
-     0,                                                               // reactiontime
-     NULL,                                                            // a ttacksound
-     S_PLAY_PAIN,                                                     // painstate
-     255,                                                             // painchance
-     "*pain100_1",                                                    // painsound
-     S_NULL,                                                          // meleestate
-     S_PLAY_ATK1,                                                     // missilestate
-     S_PLAY_DIE1,                                                     // deathstate
-     S_PLAY_XDIE1,                                                    // xdeathstate
-     "*death1",                                                       // deathsound
-     0,                                                               // speed
-     16 * FRACUNIT,                                                   // radius
-     56 * FRACUNIT,                                                   // height
-     56 * FRACUNIT,                                                   // cdheight
-     100,                                                             // mass
-     0,                                                               // damage
-     NULL,                                                            // activesound
-     MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH, // flags
-     MF2_SLIDE | MF2_PASSMOBJ | MF2_PUSHWALL,                         // flags2
-     S_NULL,                                                          // raisestate
-     0x10000,
-     "MT_AVATAR"},
+    {
+        // MT_WPRFLAG
+        MT_WPRFLAG,
+        -1,            // doomednum
+        S_WPRF1,       // spawnstate
+        1000,          // spawnhealth
+        0,             // gibhealth
+        S_NULL,        // seestate
+        NULL,          // seesound
+        8,             // reactiontime
+        NULL,          // attacksound
+        S_NULL,        // painstate
+        0,             // painchance
+        NULL,          // painsound
+        S_NULL,        // meleestate
+        S_NULL,        // missilestate
+        S_NULL,        // deathstate
+        S_NULL,        // xdeathstate
+        NULL,          // deathsound
+        0,             // speed
+        20 * FRACUNIT, // radius
+        16 * FRACUNIT, // height
+        16 * FRACUNIT, // cdheight
+        100,           // mass
+        0,             // damage
+        NULL,          // activesound
+        0,             // flags
+        0,             // flags2
+        S_NULL,        // raisestate
+        0xC000,
+        "MT_WPRFLAG"
+    },
+    {
+        // MT_WPGFLAG
+        MT_WPGFLAG,
+        -1,            // doomednum
+        S_WPGF1,       // spawnstate
+        1000,          // spawnhealth
+        0,             // gibhealth
+        S_NULL,        // seestate
+        NULL,          // seesound
+        8,             // reactiontime
+        NULL,          // attacksound
+        S_NULL,        // painstate
+        0,             // painchance
+        NULL,          // painsound
+        S_NULL,        // meleestate
+        S_NULL,        // missilestate
+        S_NULL,        // deathstate
+        S_NULL,        // xdeathstate
+        NULL,          // deathsound
+        0,             // speed
+        20 * FRACUNIT, // radius
+        16 * FRACUNIT, // height
+        16 * FRACUNIT, // cdheight
+        100,           // mass
+        0,             // damage
+        NULL,          // activesound
+        0,             // flags
+        0,             // flags2
+        S_NULL,        // raisestate
+        0xC000,
+        "MT_WPGFLAG"
+    },
+    {
+        // MT_AVATAR
+        MT_AVATAR,
+        -1,                                                              // doomednum
+        S_PLAY,                                                          // spawnstate
+        100,                                                             // spawnhealth
+        0,                                                               // gibhealth
+        S_PLAY_RUN1,                                                     // seestate
+        NULL,                                                            // seesound
+        0,                                                               // reactiontime
+        NULL,                                                            // a ttacksound
+        S_PLAY_PAIN,                                                     // painstate
+        255,                                                             // painchance
+        "*pain100_1",                                                    // painsound
+        S_NULL,                                                          // meleestate
+        S_PLAY_ATK1,                                                     // missilestate
+        S_PLAY_DIE1,                                                     // deathstate
+        S_PLAY_XDIE1,                                                    // xdeathstate
+        "*death1",                                                       // deathsound
+        0,                                                               // speed
+        16 * FRACUNIT,                                                   // radius
+        56 * FRACUNIT,                                                   // height
+        56 * FRACUNIT,                                                   // cdheight
+        100,                                                             // mass
+        0,                                                               // damage
+        NULL,                                                            // activesound
+        MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH, // flags
+        MF2_SLIDE | MF2_PASSMOBJ | MF2_PUSHWALL,                         // flags2
+        S_NULL,                                                          // raisestate
+        0x10000,
+        "MT_AVATAR"
+    },
     {
         // MT_HORDESPAWN
         MT_HORDESPAWN,
@@ -2248,69 +2276,14 @@ mobjinfo_t odamobjinfo[] = {
     // ----------- odamex mobjinfo end -----------
 };
 
-// size functions
-
-size_t odastates_size()
-{
-	return ARRAY_LENGTH(odastates);
+nonstd::span<mobjinfo_t> getOdaMobjinfo() {
+    return { odamobjinfo, ARRAY_LENGTH(odamobjinfo) };
 }
 
-size_t odasprnames_size()
-{
-	return ARRAY_LENGTH(odasprnames);
+nonstd::span<state_t> getOdaStates() {
+    return { odastates, ARRAY_LENGTH(odastates) };
 }
 
-size_t odamobjinfo_size()
-{
-	return ARRAY_LENGTH(odamobjinfo);
-}
-
-void D_Initialize_Odamex_Objects()
-{
-	size_t size = odastates_size();
-	// states
-	for (int i = 0; i < size; i++)
-	{
-		states.insert(odastates[i], odastates[i].statenum);
-	}
-#if defined _DEBUG
-	Printf(PRINT_HIGH, "Loaded %d Odamex States\n", size);
-#endif
-
-	// mobjinfo
-	size = odamobjinfo_size();
-	for (int i = 0; i < size; i++)
-	{
-		mobjinfo_t* mobj = &mobjinfo.insert(odamobjinfo[i], odamobjinfo[i].type);
-
-		// update the spawn map
-		if (mobj->doomednum != 0)
-		{
-			// MT_HORDESPAWN is re-used across multiple different horde object types
-			if (mobj->type == MT_HORDESPAWN)
-			{
-				spawn_map.insert(mobj, mobj->type);
-			}
-			else
-			{
-				spawn_map.insert(mobj, mobj->doomednum);
-			}
-
-		}
-	}
-#if defined _DEBUG
-	Printf(PRINT_HIGH, "Loaded %d Odamex Things\n", size);
-#endif
-
-	// sprites
-	size = odasprnames_size();
-	spritenum_t spidx = SPR_GIB0;
-	for (int i = 0; i < size; i++)
-	{
-		sprnames.insert(odasprnames[i], spidx);
-		spidx = spritenum_t(spidx + 1);
-	}
-#if defined _DEBUG
-	Printf(PRINT_HIGH, "Loaded %d Odamex Sprites\n", size);
-#endif
+nonstd::span<const char*> getOdaSprNames() {
+    return { odasprnames, ARRAY_LENGTH(odasprnames) };
 }

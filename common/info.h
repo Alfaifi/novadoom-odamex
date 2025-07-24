@@ -39,7 +39,7 @@ enum spritenum_t: int32_t
 {
     // ---------------odamex sprites------------------------ //
     // [RH] Gibs
-    SPR_GIB0 = -2147483647,
+    SPR_GIB0 = -2147483648,
     SPR_GIB1,
     SPR_GIB2,
     SPR_GIB3,
@@ -264,7 +264,7 @@ enum statenum_t: int32_t
 	//------------ odamex states -----------
 
 	// [RH] gibs
-	S_GIB0 = -2147483647,
+	S_GIB0 = -2147483648,
 	S_GIB1,
 	S_GIB2,
 	S_GIB3,
@@ -1459,7 +1459,7 @@ enum mobjtype_t: int32_t {
     // -------------------- odamex things ----------------------------------- //
 
     // [RH] Gibs (code is disabled)
-    MT_GIB0 = -2147483647,
+    MT_GIB0 = -2147483648,
     MT_GIB1,
     MT_GIB2,
     MT_GIB3,
