@@ -1306,6 +1306,9 @@ odaproto::svc::SectorProperties SVC_SectorProperties(sector_t& sector)
 			secmsg->set_base_floor_angle(sector.base_floor_angle);
 			secmsg->set_base_floor_yoffs(sector.base_floor_yoffs);
 			break;
+		case SPC_Special:
+			secmsg->set_special(sector.special);
+			break;
 		default:
 			break;
 		}
