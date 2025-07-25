@@ -149,4 +149,28 @@ struct reverse_wrapper
 template <typename T>
 inline reverse_wrapper<T> reverse(T&& iterable) { return { iterable }; }
 
+// Wrapper for skipping the first N elements in a range-based for loop
+template <typename T>
+struct drop_wrapper
+{
+    T& iterable;
+    size_t count;
+
+    auto begin() {
+        auto it = std::begin(iterable);
+        auto end_it = std::end(iterable);
+        for (size_t i = 0; i < count && it != end_it; ++i)
+            ++it;
+        return it;
+    }
+
+    inline auto end() { return std::end(iterable); }
+};
+
+/**
+ * @brief Skip the first `count` elements in a range-based for loop
+ */
+template <typename T>
+inline drop_wrapper<T> drop(T&& iterable, std::size_t count) { return { iterable, count }; }
+
 }
