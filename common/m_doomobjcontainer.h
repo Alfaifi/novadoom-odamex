@@ -182,13 +182,6 @@ public:
 			insert(obj == nullptr ? "" : obj, idx++);
 	}
 
-	// TODO: do we ever need this?
-	void append(const DoomObjectContainerType& other)
-	{
-		for (const auto& [idx, obj] : other.m_lookuptable)
-			this->insert(*obj, idx);
-	}
-
 	// Lookup
 	iterator find(IdxType idx) { return this->m_lookuptable.find(idx); }
 	const_iterator find(IdxType idx) const { return this->m_lookuptable.find(idx); }
