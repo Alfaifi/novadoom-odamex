@@ -1046,18 +1046,18 @@ static int PatchThing(int thingy)
 		}
 		else if (stricmp(Line1 + linelen - 6, " sound") == 0)
 		{
-			char* snd;
+			const char* snd;
 
 			// If sound is not yet in SoundMap, store the index to be used in PatchSounds
 			auto soundIt = SoundMap.find(val);
 			if (soundIt == SoundMap.end())
 			{
 				snd = Line2;
-				stripwhite(snd);
+				stripwhite((char*)snd);
 			}
 			else
 			{
-				snd =  soundIt->second.data();
+				snd = soundIt->second.c_str();
 			}
 
 			if (!strnicmp(Line1, "Alert", 5))
@@ -1601,7 +1601,7 @@ static int PatchFrame(int frameNum)
 	}
 #if defined _DEBUG
 	SpriteNamesIterator sprnames_it = sprnames.find(info->sprite);
-	const char* sprsub = (sprnames_it == sprnames.end()) ? "<No Sprite>" : sprnames_it->second.data();
+	std::string_view sprsub = (sprnames_it == sprnames.end()) ? "<No Sprite>" : sprnames_it->second;
 	DPrintFmt("FRAME {}: Duration: {}, Next: {}, SprNum: {}({}), SprSub: {}\n", frameNum,
 	          info->tics, info->nextstate, info->sprite, sprsub,
 	          info->frame);
@@ -1703,12 +1703,11 @@ static int PatchSprites(int dummy)
 		else
 		{
 			// find the value that matches
-			for (const std::pair<int32_t, std::string>& sprname : sprnames)
+			for (const auto& [idx, sprname] : sprnames)
 			{
-				const char* spr = sprname.second.data();
-				if (strncmp(zSprIdx, spr, 4) == 0)
+				if (strncmp(zSprIdx, sprname.c_str(), 4) == 0)
 				{
-					sprIdx = sprname.first;
+					sprIdx = idx;
 				}
 			}
 		}
@@ -1720,7 +1719,7 @@ static int PatchSprites(int dummy)
 		SpriteNamesIterator sprnames_it = sprnames.find(sprIdx);
 #if defined _DEBUG
 			const char* prevSprName =
-			    sprnames_it != sprnames.end() ? sprnames_it->second.data() : "No Sprite";
+			    sprnames_it != sprnames.end() ? sprnames_it->second.c_str() : "No Sprite";
 			DPrintFmt("Patching sprite at {} with name {} with new name {}\n",
 			          sprIdx, prevSprName, newSprName);
 #endif
@@ -1735,7 +1734,7 @@ void IdxToSoundName(const char*& sound)
 	if (sound && sound[0] && IsNum(sound))
 	{
 		auto soundIt = SoundMap.find(atoi(sound));
-		sound = soundIt == SoundMap.end() ? nullptr : soundIt->second.data();
+		sound = soundIt == SoundMap.end() ? nullptr : soundIt->second.c_str();
 	}
 }
 
@@ -1749,20 +1748,21 @@ static int PatchSounds(int dummy)
 	{
 		char* newname = Line2;
 		stripwhite(newname);
-		OLumpName newnameds = fmt::sprintf("DS%s", newname);
+		OLumpName newnameds = fmt::format("DS{}", newname);
 
 		if (IsNum(Line1))
 		{
+			std::string sndname = fmt::format("dsdhacked/{}", StdStringToLower(newname));
 			int32_t soundIdx = atoi(Line1);
-			SoundMap.insert(strdup(newname), soundIdx);
-			S_AddSound(newname, newnameds.c_str());
+			SoundMap.insert(sndname, soundIdx);
+			S_AddSound(sndname.c_str(), newnameds.c_str());
 		}
 		else
 		{
-			int lumpnum = W_CheckNumForName(fmt::sprintf("DS%s", Line1).c_str());
+			int lumpnum = W_CheckNumForName(fmt::format("DS{}", Line1).c_str());
 			int sndIdx = S_FindSoundByLump(lumpnum);
 			if (sndIdx == -1)
-				I_Error("Sound %s not found.", Line1);
+				I_Error("Sound {} not found.", Line1);
 			S_AddSound(S_sfx[sndIdx].name, newnameds.c_str());
 		}
 	}
@@ -2196,7 +2196,7 @@ static int PatchText(int oldSize)
 
 	if (*temp == 0)
 	{
-		Printf(PRINT_HIGH, "Text chunk is missing size of new string.\n");
+		PrintFmt(PRINT_HIGH, "Text chunk is missing size of new string.\n");
 		return 2;
 	}
 	newSize = atoi(temp);
@@ -2206,7 +2206,7 @@ static int PatchText(int oldSize)
 
 	if (!oldStr || !newStr)
 	{
-		Printf(PRINT_HIGH, "Out of memory.\n");
+		PrintFmt(PRINT_HIGH, "Out of memory.\n");
 		goto donewithtext;
 	}
 
@@ -2217,13 +2217,13 @@ static int PatchText(int oldSize)
 	{
 		delete[] newStr;
 		delete[] oldStr;
-		Printf(PRINT_HIGH, "Unexpected end-of-file.\n");
+		PrintFmt(PRINT_HIGH, "Unexpected end-of-file.\n");
 		return 0;
 	}
 
 	if (includenotext)
 	{
-		Printf(PRINT_HIGH, "Skipping text chunk in included patch.\n");
+		PrintFmt(PRINT_HIGH, "Skipping text chunk in included patch.\n");
 		goto donewithtext;
 	}
 
@@ -2231,14 +2231,11 @@ static int PatchText(int oldSize)
 	good = false;
 
 	// Search through sprite names
-	// for (int i = 0; i < ::num_spritenum_t_types(); i++)
-	for(auto it = sprnames.begin(); it != sprnames.end(); ++it)
+	for(auto& [idx, sprname] : sprnames)
 	{
-		const char* sprname = it->second.data();
-		if (!strcmp(sprname, oldStr))
+		if (!strcmp(sprname.c_str(), oldStr))
 		{
-			// sprnames[i] = copystring(newStr);
-			sprnames.insert(copystring(newStr), it->first);
+			sprname = newStr;
 			good = true;
 			// See above.
 		}
@@ -2351,7 +2348,7 @@ static int PatchStrings(int dummy)
 		i = GStrings.toIndex(Line1);
 		if (i == -1)
 		{
-			Printf(PRINT_HIGH, "Unknown string: %s\n", Line1);
+			PrintFmt(PRINT_HIGH, "Unknown string: {}\n", Line1);
 		}
 		else
 		{
@@ -2425,13 +2422,13 @@ static int DoInclude(int dummy)
 
 	if (!OWantFile::make(want, com_token, OFILE_DEH))
 	{
-		Printf(PRINT_WARNING, "Could not find BEX include \"%s\"\n", com_token);
+		PrintFmt(PRINT_WARNING, "Could not find BEX include \"{}\"\n", com_token);
 		goto endinclude;
 	}
 
 	if (!M_ResolveWantedFile(res, want))
 	{
-		Printf(PRINT_WARNING, "Could not resolve BEX include \"%s\"\n", com_token);
+		PrintFmt(PRINT_WARNING, "Could not resolve BEX include \"{}\"\n", com_token);
 		goto endinclude;
 	}
 
@@ -2473,7 +2470,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 		FILE* fh = fopen(patchfile->getFullpath().c_str(), "rb+");
 		if (fh == NULL)
 		{
-			Printf(PRINT_WARNING, "Could not open DeHackEd patch \"%s\"\n",
+			PrintFmt(PRINT_WARNING, "Could not open DeHackEd patch \"{}\"\n",
 			       patchfile->getBasename());
 			return false;
 		}
@@ -2516,12 +2513,12 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 			delete[] ::PatchFile;
 			if (patchfile)
 			{
-				Printf(PRINT_WARNING, "\"%s\" is not a DeHackEd patch file\n",
+				PrintFmt(PRINT_WARNING, "\"{}\" is not a DeHackEd patch file\n",
 				       patchfile->getBasename());
 			}
 			else
 			{
-				Printf(PRINT_WARNING, "\"DEHACKED\" is not a DeHackEd patch lump\n");
+				PrintFmt(PRINT_WARNING, "\"DEHACKED\" is not a DeHackEd patch lump\n");
 			}
 			return false;
 		}
@@ -2592,13 +2589,13 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 
 	if (patchfile)
 	{
-		Printf("adding %s\n", patchfile->getFullpath());
+		PrintFmt("adding {}\n", patchfile->getFullpath());
 	}
 	else
 	{
-		Printf("adding DEHACKED lump\n");
+		PrintFmt("adding DEHACKED lump\n");
 	}
-	Printf(" (DeHackEd patch)\n");
+	PrintFmt(" (DeHackEd patch)\n");
 
 	D_PostProcessDeh();
 
@@ -2736,7 +2733,7 @@ static void PrintState(int index)
 
 	// Print this state.
 	state_t& state = it->second;
-	PrintFmt("{:4d} | sprite:{} frame:{} tics:{} action:{} m1:{} m2:{}\n", index, ::sprnames[state.sprite],
+	PrintFmt("{:04d} | sprite:{} frame:{} tics:{} action:{} m1:{} m2:{}\n", index, ::sprnames[state.sprite],
 	       state.frame, state.tics, ActionPtrString(state.action), state.misc1,
 	       state.misc2);
 }
@@ -2753,46 +2750,21 @@ static void PrintMobjinfo(int index)
 		return val == NULL ? "0" : val;
 	};
 
-    mobjinfo_t* mob = &it->second;
-    std::stringstream ss;
-    ss << "%4d | ";
-    // doomednum, spawnstate, spawnhealth, seestate, seesound
-    ss << "doomednum: %d, spawnstate: %d, spawnhealth: %d, seestate: %d, seesound: %s\n";
-    // reactiontime, attacksound, painstate, painchance, painsound
-    ss << "reactiontime: %d, attacksound: %s, painstate: %d, painchance: %d, painsound: %s\n";
-    // meleestate, missilestate, deathstate, xdeathstate, deathsound
-    ss << "meleestate: %d, missilestate: %d, deathstate: %d, xdeathstate: %d, deathsound: %s\n";
-    // speed, radius, height, mass, damage
-    ss << "speed: %d, radius: %d, height: %d, mass: %d, damage: %d\n";
-    // activesound, flags, raisestate, droppeditem, flags2
-    ss << "activesound: %s, flags: %ul, raisestate: %d, droppeditem: %d, flags2: %ul\n";
-    // infighting_group, projectile_group, splash_group, ripsound, altspeed, meleerange
-    ss << "infighting_group: %d, projectile_group: %d, splash_group: %d, ripsound: %s, altspeed: %d, meleerange: %d\n";
-    // translucency
-    ss << "translucency: %d\n";
-	Printf(ss.str().c_str(), index, mob->doomednum, mob->spawnstate, mob->spawnhealth,
-	       mob->seestate, getstring(mob->seesound), mob->reactiontime,
-	       getstring(mob->attacksound), mob->painstate, mob->painchance,
-	       getstring(mob->painsound), mob->meleestate, mob->missilestate, mob->deathstate,
-	       mob->xdeathstate, getstring(mob->deathsound),
-		   mob->speed, mob->radius, mob->height, mob->mass, mob->damage, getstring(mob->activesound), mob->flags,
-	       mob->raisestate, mob->droppeditem, mob->flags2, mob->infighting_group,
-	       mob->projectile_group, mob->splash_group, getstring(mob->ripsound),
-	       mob->altspeed, mob->meleerange, mob->translucency);
+	PrintFmt("{}", it->second);
 }
 
 BEGIN_COMMAND(mobinfo)
 {
     if (argc < 2)
     {
-        Printf("Must pass one or two mobjinfo indexes. (0 to %d)\n", ::mobjinfo.size() - 1);
+        PrintFmt("Must pass one or two mobjinfo indexes.\n");
         return;
     }
 
     int index1 = atoi(argv[1]);
     if (mobjinfo.find(index1) == mobjinfo.end())
     {
-        Printf("Index 1: Not a valid index.\n");
+        PrintFmt("Index 1: Not a valid index.\n");
         return;
     }
     int index2 = index1;
@@ -2802,7 +2774,7 @@ BEGIN_COMMAND(mobinfo)
         index2 = atoi(argv[2]);
         if (mobjinfo.find(index2) == mobjinfo.end())
         {
-            Printf("Index 2: Not a valid index.\n");
+            PrintFmt("Index 2: Not a valid index.\n");
             return;
         }
     }
@@ -2823,14 +2795,14 @@ BEGIN_COMMAND(stateinfo)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass one or two state indexes. (0 to %d)\n", ::states.size() - 1);
+		PrintFmt("Must pass one or two state indexes.\n");
 		return;
 	}
 
 	int index1 = atoi(argv[1]);
     if (states.find(index1) == states.end())
 	{
-		Printf("Index 1: Not a valid index.\n");
+		PrintFmt("Index 1: Not a valid index.\n");
 		return;
 	}
 	int index2 = index1;
@@ -2840,7 +2812,7 @@ BEGIN_COMMAND(stateinfo)
 		index2 = atoi(argv[2]);
         if (states.find(index2) == states.end())
 		{
-			Printf("Index 2: Not a valid index.\n");
+			PrintFmt("Index 2: Not a valid index.\n");
 			return;
 		}
 	}
@@ -2865,14 +2837,14 @@ BEGIN_COMMAND(playstate)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass state index. (0 to %d)\n", ::states.size() - 1);
+		PrintFmt("Must pass state index.\n");
 		return;
 	}
 
 	int index = atoi(argv[1]);
 	if (!states.contains(index))
 	{
-		Printf("Not a valid index.\n");
+		PrintFmt("Not a valid index.\n");
 		return;
 	}
 
@@ -2883,7 +2855,7 @@ BEGIN_COMMAND(playstate)
 		OHashTable<int, bool>::iterator it = visited.find(index);
 		if (it != visited.end())
 		{
-			Printf("Looped back to %d\n", index);
+			PrintFmt("Looped back to {}\n", index);
 			return;
 		}
 

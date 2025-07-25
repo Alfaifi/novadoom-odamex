@@ -1774,6 +1774,33 @@ struct mobjinfo_t
 	mobjtype_t droppeditem  = MT_NULL;
 };
 
+inline auto format_as(const mobjinfo_t& info)
+{
+	auto getstring = [](const char* val) -> const char* {
+		return val == nullptr ? "null" : val;
+	};
+	return fmt::format(
+		"{:04d} | doomednum: {}\n"
+		"spawnhealth: {}, speed: {}, altspeed: {}, radius: {}, height: {}, mass: {}, damage: {}\n"
+		"reactiontime: {}, painchance: {}, meleerange: {}, droppeditem: {}, translucency: {}\n"
+		"spawnstate: {}, seestate: {}, painstate: {}, meleestate: {}\n"
+		"missilestate: {}, deathstate: {}, xdeathstate: {}, raisestate: {}\n"
+		"seesound: {}, attacksound: {}, painsound: {}\n"
+		"deathsound: {}, activesound: {}, ripsound: {}\n"
+		"infighting_group: {}, projectile_group: {}, splash_group: {}\n"
+		"flags: {:#010X}, flags2: {:#010X}, flags3: {:#010X}\n",
+		info.type, info.doomednum,
+		info.spawnhealth, info.speed, info.altspeed, info.radius, info.height, info.mass, info.damage,
+		info.reactiontime, info.painchance, info.meleerange, info.droppeditem, info.translucency,
+		info.spawnstate, info.seestate, info.painstate, info.meleestate,
+		info.missilestate, info.deathstate, info.xdeathstate, info.raisestate,
+		getstring(info.seesound), getstring(info.attacksound), getstring(info.painsound),
+		getstring(info.deathsound), getstring(info.activesound), getstring(info.ripsound),
+		info.infighting_group, info.projectile_group, info.splash_group,
+		info.flags, info.flags2, info.flags3
+	);
+}
+
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
 inline DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES); // mobjtype_t
