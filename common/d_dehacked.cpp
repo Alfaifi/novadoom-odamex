@@ -992,8 +992,8 @@ static int PatchThing(int thingy)
 	    {28, 0, "UNUSED2"}, // BOOM compatibility
 	    {29, 0, "UNUSED3"}, // BOOM compatibility
 	    {30, 0, "UNUSED4"}, // BOOM compatibility
-	    {28, 0, "TOUCHY"},  // UNUSED FOR NOW
-	    {29, 0, "BOUNCES"}, // UNUSED FOR NOW
+	    {28, 0, "TOUCHY"},
+	    {29, 0, "BOUNCES"},
 	    {30, 0, "FRIEND"},
 	    {31, 0, "TRANSLUCENT"}, // BOOM compatibility
 	    {30, 0, "STEALTH"},
@@ -1450,24 +1450,6 @@ static int PatchThing(int thingy)
 				{
 					info->translucency = TRANSLUC66;
 				}
-
-				// Unsupported flags have to be announced for developers...
-				if (value[0] & MF_TOUCHY)
-				{
-					DPrintFmt("[DEH Bits] Unsupported MBF flag TOUCHY.\n");
-					value[0] &= ~MF_TOUCHY;
-				}
-
-				if (value[0] & MF_BOUNCES)
-					DPrintFmt("[DEH Bits] MBF flag BOUNCES is partially supported. Use "
-					          "it at your own risk!\n");
-
-				if (value[0] & MF_FRIEND)
-				{
-					DPrintFmt("[DEH Bits] Unsupported MBF flag FRIEND.\n");
-					value[0] &= ~MF_FRIEND;
-				}
-
 				info->flags = value[0];
 			}
 			if (vchanged[1])

@@ -68,10 +68,15 @@
 
 #include "p_boomfspec.h"
 #include "p_zdoomhexspec.h"
+#include "p_mobj.h"
 
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_fragexitswitch)
 EXTERN_CVAR(co_boomphys)
+
+#ifdef CLIENT_APP
+EXTERN_CVAR(cl_showfriends)
+#endif
 
 std::list<movingsector_t> movingsectors;
 std::list<sector_t*> specialdoors;
@@ -215,31 +220,61 @@ int P_IsUnderDamage(AActor* actor)
 * P_IsFriendlyThing
 * @brief Helper function to determine if a particular thing is of friendly origin.
 *
-* @param actor Source actor
-* @param friendshiptest Thing to test friendliness
+* @param actor - Source actor
+* @param friendshiptest - Thing to test friendliness
 */
 bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest)
 {
+	if (!actor || !friendshiptest)
+	{
+		return true;
+	}
+
 	if (friendshiptest->flags & MF_FRIEND)
 	{
 		if (G_IsCoopGame())
 		{
+			if (actor->flags & MF_FRIEND)
+				return true;
+		}
+		else if (actor->player)
+		{
+			if (actor->player->id == friendshiptest->friend_playerid)
+			{
+				// Don't attack me, I love you!
+				return true;
+			}
+			else if (G_IsTeamGame())
+			{
+				if (actor->player->userinfo.team == friendshiptest->friend_teamid)
+				{
+				   return true;
+				}
+			}
+		}
+		else if (actor->friend_playerid == 0 || friendshiptest->friend_playerid == 0 ||
+		         actor->friend_playerid == friendshiptest->friend_playerid)
+		{
+			// Fellow friend (or general friend)
+			// Do not attack.
 			return true;
 		}
-		else if (actor->player && friendshiptest->target && friendshiptest->target->player &&
-		    actor->player->userinfo.team == friendshiptest->target->player->userinfo.team)
+		else if (G_IsTeamGame())
 		{
-			return true;
-		}
-		else
-		{
-			return false;
+			if (actor->friend_teamid == friendshiptest->friend_teamid)
+			{
+				// Friendly is of the same team as this friendly.
+				// Don't attack
+				return true;
+			}
 		}
 	}
 	else
 	{
-		return false;
+		if (!(actor->flags & MF_FRIEND))
+			return true;
 	}
+	return false;
 }
 
 //
@@ -2341,6 +2376,11 @@ void P_SetupWorldState(void)
 	{
 		level.behavior->StartTypedScripts(SCRIPT_Open, NULL, 0, 0, 0, false);
 	}
+
+#ifdef CLIENT_APP
+	if (cl_showfriends)
+		P_FriendlyEffects(); // Mark any new friendly monsters with an effect
+#endif
 }
 
 void P_AddSectorSecret(sector_t* sector)
@@ -2885,14 +2925,31 @@ DPusher *tmpusher; // pusher structure for blockmap searches
 
 bool PIT_PushThing (AActor *thing)
 {
-	if (thing->player &&
-		!(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
+	if (!P_IsMBFCompatMode() ?
+			thing->player && !(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)) :
+			(sentient(thing) || thing->flags & MF_SHOOTABLE) &&
+			!(thing->flags & MF_NOCLIP))
 	{
 		int sx = tmpusher->m_X;
 		int sy = tmpusher->m_Y;
 		int dist = P_AproxDistance (thing->x - sx,thing->y - sy);
 		int speed = (tmpusher->m_Magnitude -
 					((dist>>FRACBITS)>>1))<<(FRACBITS-PUSH_FACTOR-1);
+
+		// killough 10/98: make magnitude decrease with square
+		// of distance, making it more in line with real nature,
+		// so long as it's still in range with original formula.
+		//
+		// Removes angular distortion, and makes effort required
+		// to stay close to source, grow increasingly hard as you
+		// get closer, as expected. Still, it doesn't consider z :(
+
+		if (speed > 0 && P_IsMBFCompatMode())
+		{
+			int x = (thing->x - sx) >> FRACBITS;
+			int y = (thing->y - sy) >> FRACBITS;
+			speed = (int)(((uint64_t)tmpusher->m_Magnitude << 23) / (x * x + y * y + 1));
+		}
 
 		// If speed <= 0, you're outside the effective radius. You also have
 		// to be able to see the push/pull source point.
