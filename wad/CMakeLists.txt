@@ -248,6 +248,7 @@ set(ODAWAD_SOURCES
   lumps/dsradio2.lmp
   lumps/dssecret.lmp
   lumps/dshboss.lmp
+  lumps/dslastpl.lmp
   lumps/dsplrais.lmp
   lumps/dvbfd.lmp
   lumps/dvbfm.lmp
@@ -339,6 +340,9 @@ set(ODAWAD_SOURCES
   sprites/wpgfb0.gif
   sprites/wprfa0.gif
   sprites/wprfb0.gif
+  sprites/carea0.gif
+  sprites/livea0.gif
+  sprites/rstma0.gif
   sprites/dogsa1.gif
   sprites/dogsa2.gif
   sprites/dogsa3.gif

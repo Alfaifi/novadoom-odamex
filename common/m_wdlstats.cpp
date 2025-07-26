@@ -388,6 +388,12 @@ WDLPowerups M_GetWDLItemByMobjType(const mobjtype_t type)
 	case MT_CAREPACK:
 		itemid = WDL_PICKUP_CAREPACKAGE;
 		break;
+	case MT_EXTRALIFE:
+		itemid = WDL_PICKUP_EXTRALIFE;
+		break;
+	case MT_RESTEAMMATE:
+		itemid = WDL_PICKUP_RESTEAMMATE;
+		break;
 	default:
 		itemid = WDL_PICKUP_UNKNOWN;
 		break;

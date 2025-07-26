@@ -72,6 +72,8 @@ typedef enum spritenum_e: int32_t
     SPR_WPGF,
 
     SPR_CARE,
+	SPR_LIVE,
+	SPR_RSTM,
     // ------------------------------------------------------ //
 	SPR_TROO = 0,
 	SPR_SHTG,
@@ -337,6 +339,8 @@ typedef enum statenum_e: int32_t
 	S_WPGF2,
 
 	S_CARE, // Horde - Care Package
+	S_LIVES,// Horde - Extra Life Power Up
+	S_RES,  // Horde - Resurrect Power Up
 
 	S_NOWEAPONUP,
 	S_NOWEAPONDOWN,
@@ -1523,6 +1527,8 @@ typedef enum mobjtype_e: int32_t {
     MT_AVATAR,
     MT_HORDESPAWN,
     MT_CAREPACK,
+	MT_EXTRALIFE,
+	MT_RESTEAMMATE,
 
     // --------------------------------------------------------------------- //
 
