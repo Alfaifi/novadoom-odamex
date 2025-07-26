@@ -337,6 +337,54 @@ int ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 			}
 		}
 	}
+	else if (!stricmp(pname.c_str(), "bossactionednum"))
+	{
+		os.mustScan();
+
+		if (os.compareTokenNoCase("clear"))
+		{
+			// mark level free of boss actions
+			mape->bossactions.clear();
+		}
+		else
+		{
+			const int actor_ednum = os.getTokenInt();
+			const auto it = spawn_map.find(actor_ednum);
+			int32_t type;
+			if (it == spawn_map.end())
+			{
+				os.error("Unknown thing ednum {}", os.getToken());
+				return 0;
+			}
+			else
+			{
+				type = it->second->type;
+			}
+
+			// skip comma token
+			os.mustScan();
+			os.assertTokenNoCaseIs(",");
+			os.mustScanInt();
+			const int special = os.getTokenInt();
+			os.mustScan();
+			os.assertTokenNoCaseIs(",");
+			os.mustScanInt();
+			const int tag = os.getTokenInt();
+			// allow no 0-tag specials here, unless a level exit.
+			if (tag != 0 || special == 11 || special == 51 || special == 52 ||
+			    special == 124)
+			{
+				bossaction_t new_bossaction;
+
+				new_bossaction.special = static_cast<short>(special);
+				new_bossaction.tag = static_cast<short>(tag);
+
+				new_bossaction.type = type;
+
+				mape->bossactions.push_back(new_bossaction);
+			}
+		}
+	}
 	else
 	{
 		do

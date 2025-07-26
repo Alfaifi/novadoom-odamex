@@ -493,7 +493,7 @@ static bool HandleKey(const struct Key* keys, void* structure, const char* key, 
 	return true;
 }
 
-typedef struct DoomBackup_s
+struct DoomBackup_t
 {
 	DoomObjectContainer<state_t, int32_t> backupStates; // boomstates
 	DoomObjectContainer<mobjinfo_t, int32_t> backupMobjInfo; // doom_mobjinfo
@@ -504,7 +504,7 @@ typedef struct DoomBackup_s
 	int backupClipAmmo[NUMAMMO];
 	DehInfo backupDeh;
 
-	DoomBackup_s()
+	DoomBackup_t()
 	    : backupStates(),
 	      backupMobjInfo(),
 	      backupSprnames(),
@@ -513,10 +513,7 @@ typedef struct DoomBackup_s
 	      backupMaxAmmo(),
 	      backupDeh()
 	{}
-} DoomBackup_t;
-
-
-DoomBackup_t doomBackup;
+} doomBackup;
 
 // [CMB] useful typedefs for iteration over global doom object containers
 typedef DoomObjectContainer<state_t, int32_t>::iterator StatesIterator;
