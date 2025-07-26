@@ -2264,7 +2264,7 @@ bool PIT_VileCheck (AActor *thing)
 //
 void A_VileChase (AActor *actor)
 {
-	if (!P_HealCorpse(actor, mobjinfo[MT_VILE].radius, S_VILE_HEAL1, 31)) //dsslop
+	if (!P_HealCorpse(actor, mobjinfo[MT_VILE]->radius, S_VILE_HEAL1, 31)) //dsslop
 		A_Chase(actor); // Return to normal attack.
 }
 
