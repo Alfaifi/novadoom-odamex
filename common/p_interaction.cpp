@@ -599,7 +599,7 @@ static void P_ResurrectPlayerPowerUp(player_t* player)
 
 	if (ingameplayers.empty())
 	{
-		SV_BroadcastPrintf("%s tried to resurrect someone, but everyone is alive!\n",
+		SV_BroadcastPrintFmt("{} tried to resurrect someone, but everyone is alive!\n",
 		                   player->userinfo.netname);
 		return;
 	}
@@ -616,7 +616,7 @@ static void P_ResurrectPlayerPowerUp(player_t* player)
 	pl->lives += 1;
 	pl->playerstate = PST_REBORN;
 
-	SV_BroadcastPrintf("%s has brought %s back into the fight!\n",
+	SV_BroadcastPrintFmt("{} has brought {} back into the fight!\n",
 	                   player->userinfo.netname, pl->userinfo.netname);
 
 	// Send a res sound directly to this player.
@@ -639,7 +639,7 @@ static void P_AwardExtraLifePowerUp(player_t* player)
 	if (!player)
 		return;
 
-	SV_BroadcastPrintf("%s was awarded an extra life!\n",
+	SV_BroadcastPrintFmt("{} was awarded an extra life!\n",
 	                   player->userinfo.netname);
 
 	player->lives += 1;
