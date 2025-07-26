@@ -81,6 +81,7 @@ EXTERN_CVAR(cl_disconnectalert)
 EXTERN_CVAR(cl_netdemoname)
 EXTERN_CVAR(cl_splitnetdemos)
 EXTERN_CVAR(cl_team)
+EXTERN_CVAR(cl_showfriends)
 EXTERN_CVAR(hud_revealsecrets)
 EXTERN_CVAR(mute_enemies)
 EXTERN_CVAR(mute_spectators)
@@ -588,6 +589,13 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 		mo->oflags |= MFO_FULLBRIGHT;
 		mo->effects = FX_YELLOWFOUNTAIN;
 		mo->translation = translationref_t(&::bosstable[0]);
+	}
+
+	if (cl_showfriends && validplayer(displayplayer()) && displayplayer().mo &&
+	    P_IsFriendlyThing(displayplayer().mo, mo))
+	{
+		mo->effects = FX_FRIENDHEARTS;
+		mo->translation = translationref_t(&friendtable[0]);
 	}
 
 	AActor* tracer = NULL;
@@ -2440,6 +2448,8 @@ static void CL_SectorProperties(const odaproto::svc::SectorProperties* msg)
 			sector->base_ceiling_yoffs = msg->sector().base_ceiling_yoffs();
 			sector->base_floor_angle = msg->sector().base_floor_angle();
 			sector->base_floor_yoffs = msg->sector().base_floor_yoffs();
+		case SPC_Special:
+			sector->special = msg->sector().special();
 		default:
 			break;
 		}

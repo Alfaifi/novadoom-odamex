@@ -32,6 +32,7 @@
 
 #include "p_local.h"
 #include "p_lnspec.h"
+#include "p_boomfspec.h"
 #include "c_effect.h"
 #include "p_mobj.h"
 #include "svc_message.h"
@@ -55,8 +56,6 @@
 
 bool P_ShouldClipPlayer(AActor* projectile, AActor* player);
 
-EXTERN_CVAR(sv_unblockplayers)
-
 fixed_t 		tmbbox[4];
 static AActor  *tmthing;
 static int 		tmflags;
@@ -70,7 +69,8 @@ static int		ls_y;	// Lost Soul position for Lost Soul checks		// phares
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-bool 			floatok;
+int				floatok;
+int				felldown;
 
 fixed_t 		tmfloorz;
 fixed_t 		tmceilingz;
@@ -103,7 +103,10 @@ EXTERN_CVAR (co_zdoomphys)
 EXTERN_CVAR (co_blockmapfix)
 EXTERN_CVAR (co_boomsectortouch)
 EXTERN_CVAR (sv_friendlyfire)
+EXTERN_CVAR (sv_friendlymonsterfire)
 EXTERN_CVAR (sv_unblockplayers)
+EXTERN_CVAR (sv_unblockfriendly)
+EXTERN_CVAR (co_monkeys)
 
 CVAR_FUNC_IMPL (sv_gravity)
 {
@@ -133,8 +136,13 @@ bool PIT_StompThing (AActor *thing)
 	if (tmthing->player && tmthing->player->spectator)
 		return true;
 
-	// Unblocked players shouldn't telefrag friendlies.  Thanks Amateur Spammer!
+	// Unblocked players shouldn't telefrag other players.  Thanks Amateur Spammer!
 	if (tmthing->player && thing->player && sv_unblockplayers)
+		return true;
+
+	// Unblocked friendlies shouldn't telefrag anyone.
+	if (tmthing && thing && thing->flags & MF_FRIEND && P_IsFriendlyThing(thing, tmthing) &&
+	    sv_unblockfriendly)
 		return true;
 
 	// don't clip against self
@@ -292,9 +300,9 @@ int P_GetFriction (const AActor *mo, int *frictionfactor)
 		for (m = mo->touching_sectorlist; m; m = m->m_tnext)
 			if ((sec = m->m_sector)->flags & SECF_FRICTION &&
 				(sec->friction < friction || friction == ORIG_FRICTION) &&
-				(mo->z <= P_FloorHeight(mo) ||
+				(mo->z <= P_FloorHeight(sec) ||
 				(sec->heightsec && !(sec->heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC) &&
-				mo->z <= P_FloorHeight(mo))))
+				mo->z <= P_FloorHeight(sec))))
 			  friction = sec->friction, movefactor = sec->movefactor;
 	}
 
@@ -429,8 +437,8 @@ bool PIT_CheckLine (line_t *ld)
     {
 		if ((ld->flags &
 		     (ML_BLOCKING | ML_BLOCKEVERYTHING)) || // explicitly blocking everything
-		    (!tmthing->player && tmthing->type != MT_AVATAR && (ld->flags & ML_BLOCKMONSTERS)) || // block monsters only
-		    (!tmthing->player && tmthing->type != MT_AVATAR && (ld->flags & ML_BLOCKLANDMONSTERS) &&
+		    (!tmthing->player && tmthing->type != MT_AVATAR && !(tmthing->flags & MF_FRIEND) && (ld->flags & ML_BLOCKMONSTERS)) || // block monsters only
+		    (!tmthing->player && tmthing->type != MT_AVATAR && !(tmthing->flags & MF_FRIEND) && (ld->flags & ML_BLOCKLANDMONSTERS) &&
 		     !(tmthing->flags & MF_FLOAT)) || // [Blair] Block land monsters.
 		    (tmthing->player &&
 		     (ld->flags & ML_BLOCKPLAYERS))) // [Blair] Block players only
@@ -526,6 +534,36 @@ bool PIT_CheckLine (line_t *ld)
 }
 
 /*
+ * @brief Determines if a projectile should clip a friendly monster.
+ *
+ * @param projectile (suspected) projectile actor
+ * @param player (suspected) player actor
+ * @return true if the player should be clipped.
+ */
+bool P_ShouldClipFriendly(AActor* projectile, AActor* monster)
+{
+	if (!sv_unblockfriendly)
+	{
+		return true; // Clip all friendlies all the time.
+	}
+	else if (projectile->target && projectile->target->flags & MF_FRIEND && P_IsFriendlyThing(projectile->target, monster))
+	{
+		if (sv_friendlymonsterfire && !P_ProjectileImmune(monster, projectile->target))
+		{
+			return true; // Always clip if friendly monster fire is on.
+		}
+		else
+		{
+			return false; // Friendly monster
+		}
+	}
+	else
+	{
+		return true; // Not a friendly.
+	}
+}
+
+/*
  * @brief Determines if a projectile should clip a player.
  *
  * @param projectile (suspected) projectile actor
@@ -565,7 +603,7 @@ bool P_ShouldClipPlayer(AActor* projectile, AActor* player)
 // PIT_CheckThing
 //
 
-static bool P_ProjectileImmune(AActor* target, AActor* source)
+bool P_ProjectileImmune(AActor* target, AActor* source)
 {
 	return ( // PG_GROUPLESS means no immunity, even to own species
 	           mobjinfo[target->type].projectile_group != PG_GROUPLESS ||
@@ -587,7 +625,7 @@ static bool PIT_CheckThing (AActor *thing)
 	if (thing == tmthing)
 		return true;
 
-	if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE)) )
+	if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE|MF_TOUCHY)) )
 		return true;	// can't hit thing
 
 	// GhostlyDeath -- Spectators go through everything!
@@ -596,6 +634,10 @@ static bool PIT_CheckThing (AActor *thing)
 		return true;
 
 	if (tmthing->player && thing->player && sv_unblockplayers)
+		return true;
+
+	if (tmthing && thing && thing->flags & MF_FRIEND &&
+	    P_IsFriendlyThing(thing, tmthing) && sv_unblockfriendly)
 		return true;
 
 	fixed_t blockdist = thing->radius + tmthing->radius;
@@ -613,6 +655,32 @@ static bool PIT_CheckThing (AActor *thing)
 		// check if a mobj passed over/under another object
 		if (tmthing->z >= thing->z + thing->height || tmthing->z + tmthing->height <= thing->z)
 			return true;
+	}
+
+	 /* killough 11/98:
+	 *
+	 * TOUCHY flag, for mines or other objects which die on contact with solids.
+	 * If a solid object of a different type comes in contact with a touchy
+	 * thing, and the touchy thing is not the sole one moving relative to fixed
+	 * surroundings such as walls, then the touchy thing dies immediately.
+	 */
+
+	if (thing->flags & MF_TOUCHY &&               // touchy object
+	    tmthing->flags & MF_SOLID &&              // solid object touches it
+	    thing->health > 0 &&                      // touchy object is alive
+	    (thing->oflags & MFO_ARMED ||             // Thing is an armed mine
+	     sentient(thing)) &&                      // ... or a sentient thing
+	    (thing->type != tmthing->type ||          // only different species
+	     thing->type == MT_PLAYER) &&             // ... or different players
+	    thing->z + thing->height >= tmthing->z && // touches vertically
+	    tmthing->z + tmthing->height >= thing->z &&
+	    (thing->type ^ MT_PAIN) |         // PEs and lost souls
+	        (tmthing->type ^ MT_SKULL) && // are considered same
+	    (thing->type ^ MT_SKULL) |        // (but Barons & Knights
+	        (tmthing->type ^ MT_PAIN))    // are intentionally not)
+	{
+		P_DamageMobj(thing, NULL, NULL, thing->health); // kill object
+		return true;
 	}
 
 	// check for skulls slamming into things
@@ -641,19 +709,30 @@ static bool PIT_CheckThing (AActor *thing)
 		if (tmthing->z+tmthing->height < thing->z)
 			return true;				// underneath
 
+    // Check with projectiles owner if we can explode
 		if (tmthing->target &&
 			(P_ProjectileImmune(thing, tmthing->target) &&
 		    !((level.flags2 & LEVEL2_INFIGHTINGMASK) ?
 			    level.flags2 & LEVEL2_TOTALINFIGHTING :
 			    G_GetCurrentSkill().flags & SKILL_TOTALINFIGHTING)))
 		{
-			// Don't hit same species as originator.
+			// Don't hit same species as originator
 			if (thing == tmthing->target)
 				return true;
 
-			// [RH] DeHackEd infighting is here.
-			if (!deh.Infight && !thing->player)
-				return false;		// Hit same species as originator, explode, no damage
+			if (!thing->player)
+			{
+				// Run friendly clip check early if same species
+				if ((thing->flags & tmthing->target->flags & MF_FRIEND) &&
+				    !P_ShouldClipFriendly(tmthing, thing))
+					return true;
+
+				// [RH] DeHackEd infighting is here.
+				if (!deh.Infight && 
+						(!((thing->flags ^ tmthing->target->flags) & MF_FRIEND) ||
+						(thing->flags & tmthing->target->flags & MF_FRIEND && P_IsFriendlyThing(thing, tmthing->target))))
+					return false; // Hit same species as originator, explode, no damage
+			}
 		}
 
 		if (!(thing->flags & MF_SHOOTABLE))
@@ -663,9 +742,13 @@ static bool PIT_CheckThing (AActor *thing)
 		if (!P_ShouldClipPlayer(tmthing, thing))
 			return true;
 
+		// Don't clip the projectile unless it's not a friendly.
+		if (!P_ShouldClipFriendly(tmthing, thing))
+			return true;
+
 		if (tmthing->flags2 & MF2_RIP)
 		{
-			int damage = ((P_Random() & 3) + 2) * tmthing->info->damage;
+			int damage = ((P_Random(tmthing) & 3) + 2) * tmthing->info->damage;
 			if (!(thing->flags & MF_NOBLOOD))
 				P_SpawnBlood(tmthing->x, tmthing->y, tmthing->z, damage);
 			if (tmthing->info->ripsound)
@@ -824,6 +907,11 @@ bool PIT_CheckOnmobjZ (AActor *thing)
 
 	// Don't clip against a player
 	if (tmthing->player && thing->player && sv_unblockplayers)
+		return true;
+
+	// Don't clip against friendlies
+	if (tmthing && thing && thing->flags & MF_FRIEND &&
+	    P_IsFriendlyThing(thing, tmthing) && sv_unblockfriendly)
 		return true;
 
 	// over / under thing
@@ -1158,7 +1246,7 @@ void P_CheckPushLines(AActor *thing)
 // crossing special lines unless MF_TELEPORT is set.
 //
 bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
-				bool dropoff, // killough 3/15/98: allow dropoff as option
+				int dropoff, // killough 3/15/98: allow dropoff as option
 				bool onfloor) // [RH] Let P_TryMove keep the thing on the floor
 {
 	fixed_t		testz = thing->z;
@@ -1170,7 +1258,7 @@ bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 
 	sector_t*	oldsec = thing->subsector->sector;	// [RH] for sector actions
 
-	floatok = false;
+	felldown = floatok = false;
 
 	if (onfloor)
 		testz = P_FloorHeight(x, y, thing->floorsector);
@@ -1252,18 +1340,47 @@ bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 			}
 		}
 
+		/* killough 3/15/98: Allow certain objects to drop off
+		* killough 7/24/98, 8/1/98:
+		* Prevent monsters from getting stuck hanging off ledges
+		* killough 10/98: Allow dropoffs in controlled circumstances
+		* killough 11/98: Improve symmetry of clipping on stairs
+		*/
 		// killough 3/15/98: Allow certain objects to drop off
-		if (!(P_AllowDropOff() && dropoff) &&
-			!(thing->flags & (MF_DROPOFF|MF_FLOAT|MF_MISSILE)) &&
-			  tmfloorz - tmdropoffz > 24*FRACUNIT &&
-			!(thing->flags2 & MF2_BLASTED))
-		{ // Can't move over a dropoff unless it's been blasted
-			return false;
+		if (!(thing->flags & (MF_DROPOFF | MF_FLOAT | MF_MISSILE)))
+		{
+			if (P_AllowDropOff())
+			{
+				if (!dropoff || (dropoff == 2 && // large jump down (e.g. dogs)
+				                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
+				                  !thing->target || thing->target->z > tmdropoffz)))
+				{
+					if (!co_monkeys || !P_IsMBFCompatMode()
+					        ? tmfloorz - tmdropoffz > 24 * FRACUNIT
+					        : thing->floorz - tmfloorz > 24 * FRACUNIT ||
+					              thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
+						return false;
+				}
+				else
+				{ /* dropoff allowed -- check for whether it fell more than 24 */
+					felldown = !(thing->flags & MF_NOGRAVITY) &&
+					           thing->z - tmfloorz > 24 * FRACUNIT;
+				}
+			}
+			else if (!(P_AllowDropOff() && dropoff))
+			{
+				// Allowing blasting off ledges without allowing dropoff is a Hexen thing
+				// But this doesn't seem to break any demos
+				if (tmfloorz - tmdropoffz > 24 * FRACUNIT &&
+				    !(thing->flags2 & MF2_BLASTED))
+				{
+					return false;
+				}
+			}
 		}
 
-		bool sentient = thing->health > 0 && thing->info->seestate;
 		if (thing->flags & MF_BOUNCES && // killough 8/13/98
-		    !(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) && !sentient &&
+		    !(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) && !sentient(thing) &&
 		    tmfloorz - thing->z > 16 * FRACUNIT)
 			return false; // too big a step up for bouncers under gravity
 
@@ -1434,7 +1551,7 @@ void P_ApplyTorque (AActor *mo)
 	int flags = mo->oflags;	//Remember the current state, for gear-change
 
 	tmthing = mo;
-	++validcount; // prevents checking same line twice
+	validcount++; // prevents checking same line twice
 
 	for (bx = xl ; bx <= xh ; bx++)
 		for (by = yl ; by <= yh ; by++)
@@ -1506,6 +1623,10 @@ bool P_ThingHeightClip (AActor* thing)
 			thing->oflags |= MFO_NOSNAPZ;
 		}
 		thing->z = newz;
+
+		/* killough 11/98: Possibly upset balance of objects hanging off ledges */
+		if (thing->oflags & MFO_FALLING && thing->gear >= MAXGEAR)
+			thing->gear = 0;
 	}
 	else
 	{
@@ -2013,6 +2134,11 @@ bool PTR_AimTraverse (intercept_t* in)
 		!sv_friendlyfire)
 		return true;
 
+	// Don't aim at friendlies if you're a player
+	if (shootthing->player && th->flags & MF_FRIEND && P_IsFriendlyThing(shootthing, th) &&
+	    !sv_friendlymonsterfire)
+		return true;
+
 	// check angles to see if the thing can be aimed at
 	dist = FixedMul (attackrange, in->frac);
 	thingtopslope = FixedDiv (th->z+th->height - shootz , dist);
@@ -2231,6 +2357,9 @@ bool PTR_ShootTraverse (intercept_t* in)
 		if (P_AreTeammates(*shootthing->player, *th->player) && !sv_friendlyfire)
 			spawnblood = false;
 	}
+
+	if (th->flags & MF_FRIEND && P_IsFriendlyThing(th, shootthing) && !sv_friendlymonsterfire)
+		spawnblood = false;
 
 	if (spawnblood)
 		P_SpawnBlood(x, y, z, la_damage);
@@ -3190,6 +3319,7 @@ bool PIT_ChangeSector (AActor *thing)
 	if (thing->health <= 0)
 	{
 		P_SetMobjState (thing, S_GIBS);
+		thing->effects = 0;
 
 		// [Nes] - Classic demo compatability: Ghost monster bug.
 		if ((demoplayback)) {
@@ -3208,6 +3338,13 @@ bool PIT_ChangeSector (AActor *thing)
 
 		// keep checking
 		return true;
+	}
+
+	/* killough 11/98: kill touchy things immediately */
+	if (thing->flags & MF_TOUCHY && (thing->oflags & MFO_ARMED || sentient(thing)))
+	{
+		P_DamageMobj(thing, NULL, NULL, thing->health); // kill object
+		return true;                                    // keep checking
 	}
 
 	if (! (thing->flags & MF_SHOOTABLE) )

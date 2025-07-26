@@ -101,7 +101,9 @@ state_t odastates[] = {
     {S_WPGF1, SPR_WPGF, 0, 1, NULL, S_WPGF2, 0, 0}, // S_WPGF1 - Waypoint Green Flag
     {S_WPGF2, SPR_WPGF, 1, 1, NULL, S_WPGF1, 0, 0}, // S_WPGF2
 
-    {S_CARE, SPR_CARE, 0, -1, NULL, S_NULL, 0, 0}, // S_CARE - Horde Care Package
+    {S_CARE, SPR_CARE, 0, -1, NULL, S_NULL, 0, 0},  // S_CARE - Horde Care Package
+    {S_LIVES, SPR_LIVE, 0, -1, NULL, S_NULL, 0, 0}, // S_LIVES - Horde Extra Life Powerup
+    {S_RES, SPR_RSTM, 0, -1, NULL, S_NULL, 0, 0},   // S_RES - Horde Resurrect Powerup
 
     {S_NOWEAPONUP, SPR_TNT1, 0, 1, A_Raise, S_NOWEAPON, 0, 0},     // S_NOWEAPONUP
     {S_NOWEAPONDOWN, SPR_TNT1, 0, 1, A_Lower, S_NOWEAPON, 0, 0},   // S_NOWEAPONDOWN
@@ -114,7 +116,7 @@ const char* odasprnames[] = {
     "GIB0", "GIB1", "GIB2", "GIB3", "GIB4", "GIB5", "GIB6", "GIB7", "UNKN",
     //	[Toke - CTF]
     "BSOK", "RSOK", "BFLG", "RFLG", "BDWN", "RDWN", "BCAR", "RCAR", "GSOK", "GFLG",
-    "GDWN", "GCAR", "TLGL", "WPBF", "WPRF", "WPGF", "CARE"};
+    "GDWN", "GCAR", "TLGL", "WPBF", "WPRF", "WPGF", "CARE", "LIVE", "RSTM",};
 
 // reserved odamex mobjinfo
 // ::MT_CAREPACK - ::MT_GIB0 + 1
@@ -2272,6 +2274,84 @@ mobjinfo_t odamobjinfo[] = {
         NULL,          // ripsound
         MT_NULL        // droppeditem
     },
+    {                 // MT_EXTRALIFE
+        MT_EXTRALIFE,
+		-1,             // doomednum
+		S_LIVES,        // spawnstate
+		1000,           // spawnhealth
+		0,              // gibhealth
+		S_NULL,         // seestate
+		NULL,           // seesound
+		8,              // reactiontime
+		NULL,           // attacksound
+		S_NULL,         // painstate
+		0,              // painchance
+		NULL,           // painsound
+		S_NULL,         // meleestate
+		S_NULL,         // missilestate
+		S_NULL,         // deathstate
+		S_NULL,         // xdeathstate
+		NULL,           // deathsound
+		0,              // speed
+		20*FRACUNIT,    // radius
+		16*FRACUNIT,    // height
+		16*FRACUNIT,    // cdheight
+		100,            // mass
+		0,              // damage
+		NULL,           // activesound
+		MF_SPECIAL,     // flags
+		0,              // flags2
+		S_NULL,         // raisestate
+		0x10000,
+		"MT_EXTRALIFE",
+		NO_ALTSPEED,	// altspeed
+		64 * FRACUNIT,	// meleerange
+		IG_DEFAULT,		// infighting group
+		PG_DEFAULT,		// projectile group
+		SG_DEFAULT,		// splash group
+		0,		// flags3
+		NULL, // ripsound
+		MT_NULL		// droppeditem
+	},
+	{                 // MT_RESTEAMMATE
+        MT_RESTEAMMATE,
+		-1,             // doomednum
+		S_RES,          // spawnstate
+		1000,           // spawnhealth
+		0,              // gibhealth
+		S_NULL,         // seestate
+		NULL,           // seesound
+		8,              // reactiontime
+		NULL,           // attacksound
+		S_NULL,         // painstate
+		0,              // painchance
+		NULL,           // painsound
+		S_NULL,         // meleestate
+		S_NULL,         // missilestate
+		S_NULL,         // deathstate
+		S_NULL,         // xdeathstate
+		NULL,           // deathsound
+		0,              // speed
+		20*FRACUNIT,    // radius
+		16*FRACUNIT,    // height
+		16*FRACUNIT,    // cdheight
+		100,            // mass
+		0,              // damage
+		NULL,           // activesound
+		MF_SPECIAL,     // flags
+		0,              // flags2
+		S_NULL,         // raisestate
+		0x10000,
+		"MT_RESTEAMMATE",
+		NO_ALTSPEED,	// altspeed
+		64 * FRACUNIT,	// meleerange
+		IG_DEFAULT,		// infighting group
+		PG_DEFAULT,		// projectile group
+		SG_DEFAULT,		// splash group
+		0,		// flags3
+		NULL, // ripsound
+		MT_NULL		// droppeditem
+	},
 
     // ----------- odamex mobjinfo end -----------
 };

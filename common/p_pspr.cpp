@@ -56,6 +56,7 @@ EXTERN_CVAR(sv_infiniteammo)
 EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_allowpwo)
 EXTERN_CVAR(co_fineautoaim)
+EXTERN_CVAR(co_zdoomammo)
 EXTERN_CVAR(cl_centerbobonfire)
 
 const char *weaponnames[] =
@@ -269,8 +270,11 @@ bool P_EnoughAmmo(player_t *player, weapontype_t weapon, bool switching = false)
 	ammotype_t		ammotype = weaponinfo[weapon].ammotype;
 	int				count = 1;	// default amount of ammo for most weapons
 
-	// [SL] Fix for when DeHackEd doesn't patch minammo
-	count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
+	if (co_zdoomammo || deh.ZDAmmo)
+		// [SL] Fix for when DeHackEd doesn't patch minammo
+		count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
+	else
+		count = weaponinfo[weapon].ammopershot;
 
 	// Vanilla Doom requires > 40 cells to switch to BFG and > 2 shells to
 	// switch to SSG when current weapon is out of ammo due to a bug.
@@ -439,7 +443,7 @@ bool P_CheckAmmo (player_t *player)
 // example, it is possible to make a weapon that decreases the max
 // number of ammo for another weapon.  Emulate this.
 
-static void DecreaseAmmo(player_t *player)
+static void DecreaseAmmo(player_t *player, int amount = 1)
 {
 	// [SL] 2012-06-17 - Don't decrease ammo for players we are viewing
 	// The server will send the correct ammo
@@ -449,7 +453,11 @@ static void DecreaseAmmo(player_t *player)
 	if (!sv_infiniteammo)
 	{
 		ammotype_t ammonum = weaponinfo[player->readyweapon].ammotype;
-		int amount = weaponinfo[player->readyweapon].ammouse;
+		if (co_zdoomammo || deh.ZDAmmo)
+			amount = weaponinfo[player->readyweapon].ammouse;
+		else if (weaponinfo[player->readyweapon].internalflags & WIF_ENABLEAPS)
+			amount = weaponinfo[player->readyweapon].ammopershot;
+
 
 		if (ammonum < NUMAMMO)
 			player->ammo[ammonum] -= amount;
@@ -783,7 +791,7 @@ void A_FireBFG(AActor* mo)
 	angle_t storedpitch = player->mo->pitch;
 	int storedaimdist = player->userinfo.aimdist;
 
-	DecreaseAmmo(player);
+	DecreaseAmmo(player, deh.BFGCells);
 
 	player->mo->pitch = 0;
 	player->userinfo.aimdist = 81920000;
@@ -876,7 +884,7 @@ void A_WeaponJump(AActor* mo)
 	if (!psp->state)
 		return;
 
-	if (P_Random() < psp->state->args[1])
+	if (P_Random(mo) < psp->state->args[1])
 		P_SetPspritePtr(player, psp, (statenum_t)psp->state->args[0]);
 }
 
@@ -903,7 +911,7 @@ void A_CheckAmmo(AActor* mo)
 	if (psp->state->args[1] != 0)
 		amount = psp->state->args[1];
 	else
-		amount = weaponinfo[player->readyweapon].ammouse;
+		amount = weaponinfo[player->readyweapon].ammopershot;
 
 	if (player->ammo[type] < amount)
 		P_SetPspritePtr(player, psp, (statenum_t)psp->state->args[0]);
@@ -936,7 +944,7 @@ void A_ConsumeAmmo(AActor* mo)
 	if (psp->state->args[0] != 0)
 		amount = psp->state->args[0];
 	else
-		amount = weaponinfo[player->readyweapon].ammouse;
+		amount = weaponinfo[player->readyweapon].ammopershot;
 
 	// subtract ammo, but don't let it get below zero
 	if (player->ammo[type] >= amount)
@@ -1064,7 +1072,7 @@ void A_WeaponBulletAttack(AActor* mo)
 	for (i = 0; i < numbullets; i++)
 	{
 		int bangle = angle;
-		damage = (P_Random() % damagemod + 1) * damagebase;
+		damage = (P_Random(mo) % damagemod + 1) * damagebase;
 		bangle = angle + (int)player->mo->angle + P_RandomHitscanAngle(hspread);
 		slope = bulletslope + P_RandomHitscanSlope(vspread);
 
@@ -1115,15 +1123,15 @@ void A_WeaponMeleeAttack(AActor* mo)
 	if (range <= 0)
 		range = player->mo->info->meleerange;
 
-	damage = (P_Random() % damagemod + 1) * damagebase;
+	damage = (P_Random(mo) % damagemod + 1) * damagebase;
 	if (player->powers[pw_strength])
 		damage = (damage * zerkfactor) >> FRACBITS;
 
 	// slight randomization; weird vanillaism here. :P
 	angle = player->mo->angle;
 
-	t = P_Random();
-	angle += (t - P_Random()) << 18;
+	t = P_Random(mo);
+	angle += (t - P_Random(mo)) << 18;
 
 	// make autoaim prefer enemies
 	slope = P_AimLineAttack(player->mo, angle, range);
@@ -1219,7 +1227,7 @@ void A_FireRailgun(AActor* mo)
 	int damage;
 
     player_t *player = mo->player;
-	DecreaseAmmo(player);
+	DecreaseAmmo(player, 10);
 
 	P_SetPsprite (player,
 				  ps_flash,
@@ -1429,7 +1437,7 @@ void A_FireShotgun2(AActor* mo)
 	A_FireSound (player, "weapons/sshotf");
 	P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-	DecreaseAmmo(player);
+	DecreaseAmmo(player, 2);
 
 	P_SetPsprite (player,
 				  ps_flash,

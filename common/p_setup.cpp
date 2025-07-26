@@ -138,11 +138,13 @@ AActor**		blocklinks;		// for thing chains
 byte*			rejectmatrix;
 bool			rejectempty;
 
-
 // Maintain single and multi player starting spots.
 std::vector<mapthing2_t> DeathMatchStarts;
 std::vector<mapthing2_t> playerstarts;
 std::vector<mapthing2_t> voodoostarts;
+
+// Maintain list of helpers to spawn in a given map
+std::vector<HelperSpawns> helperspawns;
 
 // For sorting player starts
 static bool cmpPlayerNum(mapthing2_t i, mapthing2_t j)
@@ -781,25 +783,8 @@ void P_LoadThings (int lump)
 		//		handle these and more cases better, so we just pass it
 		//		everything and let it decide what to do with them.
 
-		// [RH] Need to translate the spawn flags to Hexen format.
 		short flags = LESHORT(mt->options);
-		mt2.flags = (short)((flags & 0xf) | 0x7e0);
-		if (flags & BTF_NOTSINGLE)
-		{
-			#ifdef SERVER_APP
-			if (G_IsCoopGame())
-			{
-				if (g_thingfilter == 1)
-					mt2.flags |= MTF_FILTER_COOPWPN;
-				else if (g_thingfilter == 2)
-					mt2.flags &= ~MTF_COOPERATIVE;
-			}
-			else
-			#endif
-				mt2.flags &= ~MTF_SINGLE;
-		}
-		if (flags & BTF_NOTDEATHMATCH)		mt2.flags &= ~MTF_DEATHMATCH;
-		if (flags & BTF_NOTCOOPERATIVE)		mt2.flags &= ~MTF_COOPERATIVE;
+		mt2.flags = flags;
 
 		mt2.x = LESHORT(mt->x);
 		mt2.y = LESHORT(mt->y);
@@ -1988,6 +1973,8 @@ void P_SetupLevel (const char *lumpname, int position)
 	// [AM] Every new level starts with fresh netids.
 	P_ClearAllNetIds();
 
+	P_ClearHelpers();
+
 	// UNUSED W_Profile ();
 
 	// find map num
@@ -2108,6 +2095,8 @@ void P_SetupLevel (const char *lumpname, int position)
 
 	// set up world state
 	P_SetupWorldState();
+
+	P_SetupHelpers();
 
 	// build subsector connect matrix
 	//	UNUSED P_ConnectSubsectors ();

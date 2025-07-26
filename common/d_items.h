@@ -43,6 +43,9 @@ struct weaponinfo_s
 
 	// MBF21 Specifications
 	int flags;
+	int ammopershot; // works slightly different from zdoom ammouse, and needs different defaults
+
+	int internalflags;
 };
 typedef struct weaponinfo_s weaponinfo_t;
 
@@ -53,10 +56,13 @@ extern	weaponinfo_t	weaponinfo[NUMWEAPONS+1];
 #define WPF_NOTHRUST		BIT(0)
 #define WPF_SILENT			BIT(1)
 #define WPF_NOAUTOFIRE		BIT(2)
-#define WPF_FLEEMELEE		BIT(3)	// Not Implemented yet (Missing MBF code?)...
+#define WPF_FLEEMELEE		BIT(3)
 #define WPF_AUTOSWITCHFROM	BIT(4)
 #define WPF_NOAUTOSWITCHTO	BIT(5)
 
+// Weapon internal flags
+#define WIF_NOFLAG			0
+#define WIF_ENABLEAPS		BIT(0)
 
 
 // Item stuff: (this is d_items.h, right?)

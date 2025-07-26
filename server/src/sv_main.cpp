@@ -1242,7 +1242,7 @@ void SV_UpdateSector(client_t* cl, int sectornum)
 	sector_t* sector = &sectors[sectornum];
 
 	// Only update moveable sectors to clients
-	if (sector != NULL && sector->moveable)
+	if (sector != nullptr && sector->moveable)
 	{
 		MSG_WriteSVC(&cl->reliablebuf, SVC_UpdateSector(*sector));
 	}
@@ -1252,6 +1252,23 @@ void SV_BroadcastSector(int sectornum)
 {
 	for (auto& player : players)
 		SV_UpdateSector(&(player.client), sectornum);
+}
+
+void SV_UpdateSectorProperties(client_t* cl, int sectornum)
+{
+	sector_t* sector = &sectors[sectornum];
+
+	// Only update sectors with changes
+	if (sector != nullptr && sector->SectorChanges)
+	{
+		MSG_WriteSVC(&cl->reliablebuf, SVC_SectorProperties(*sector));
+	}
+}
+
+void SV_BroadcastSectorProperties(int sectornum)
+{
+	for (auto& player : players)
+		SV_UpdateSectorProperties(&(player.client), sectornum);
 }
 
 //
@@ -3733,6 +3750,24 @@ void SV_Cheat(player_t &player)
 			return;
 
 		AActor* actor = CHEAT_Summon(&player, wantsummon, false);
+
+		if (actor == NULL)
+			return;
+
+		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		{
+			client_t* cl = &it->client;
+			SV_SendMobjToClient(actor, cl);
+		}
+	}
+	else if (cheatType == 3)
+	{
+		const char* wantsummon = MSG_ReadString();
+
+		if (!CHEAT_AreCheatsEnabled())
+			return;
+
+		AActor* actor = CHEAT_Summon(&player, wantsummon, true);
 
 		if (actor == NULL)
 			return;

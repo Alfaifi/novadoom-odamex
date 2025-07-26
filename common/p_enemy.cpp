@@ -29,6 +29,7 @@
 #include <math.h>
 #include "m_random.h"
 #include "m_alloc.h"
+#include "m_bbox.h"
 #include "i_system.h"
 #include "p_local.h"
 #include "p_lnspec.h"
@@ -36,20 +37,39 @@
 #include "r_state.h"
 #include "gi.h"
 #include "p_mobj.h"
+#include "p_inter.h"
 
 #include "d_player.h"
 #include "p_setup.h"
 #include "d_dehacked.h"
+#include "g_gametype.h"
 #include "g_skill.h"
 #include "p_mapformat.h"
+#include "p_boomfspec.h"
+#include "c_effect.h"
+#include "infomap.h"
 
 
 EXTERN_CVAR(sv_allowexit)
-EXTERN_CVAR (sv_fastmonsters)
-EXTERN_CVAR (co_zdoomphys)
-EXTERN_CVAR (co_novileghosts)
+EXTERN_CVAR(sv_fastmonsters)
+EXTERN_CVAR(co_zdoomphys)
+EXTERN_CVAR(co_novileghosts)
 EXTERN_CVAR(co_zdoomsound)
+EXTERN_CVAR(co_pursuit)
+EXTERN_CVAR(co_helpfriends)
+EXTERN_CVAR(co_distfriend)
+EXTERN_CVAR(co_monsterbacking)
+EXTERN_CVAR(co_monsterfriction)
+EXTERN_CVAR(co_avoidhazards)
+EXTERN_CVAR(co_staylift)
+EXTERN_CVAR(co_dogjumping)
 EXTERN_CVAR(co_removesoullimit)
+EXTERN_CVAR(co_helpertype)
+EXTERN_CVAR(co_playerhelpers)
+
+#ifdef CLIENT_APP
+EXTERN_CVAR(cl_showfriends)
+#endif
 
 enum dirtype_t
 {
@@ -95,12 +115,7 @@ void SV_UpdateMonsterRespawnCount();
 void SV_SendRaiseMobj(AActor* source, AActor* corpse);
 void SV_UpdateMobj(AActor* mo);
 void SV_Sound(AActor* mo, byte channel, const char* name, byte attenuation);
-
-// killough 8/8/98: distance friends tend to move towards players
-constexpr int distfriend = 128;
-
-// killough 9/8/98: whether monsters are allowed to strafe or retreat
-constexpr int monster_backing = 0;
+void SV_SpawnMobj(AActor* mobj);
 
 extern bool isFast;
 
@@ -192,7 +207,7 @@ static bool P_CheckRange(AActor* actor, fixed_t range)
 	AActor* pl = actor->target;
 
 	return // killough 7/18/98: friendly monsters don't attack other friends
-	    pl && !(actor->flags & pl->flags & MF_FRIEND) &&
+	    pl && !(actor->flags & pl->flags & MF_FRIEND && P_IsFriendlyThing(actor, pl)) &&
 	    P_AproxDistance(pl->x - actor->x, pl->y - actor->y) < range &&
 	    P_CheckSight(actor, actor->target) &&
 	        pl->z <= actor->z + actor->height && actor->z <= pl->z + pl->height;
@@ -214,6 +229,9 @@ bool P_CheckMeleeRange (AActor *actor)
 
 	pl = actor->target;
 	dist = P_AproxDistance (pl->x-actor->x, pl->y-actor->y);
+
+	if (actor->flags & pl->flags & MF_FRIEND && P_IsFriendlyThing(actor, pl))
+		return false;
 
 	if (dist >= range - 20 * FRACUNIT + pl->info->radius)
 		return false;
@@ -252,8 +270,23 @@ bool P_CheckMissileRange (AActor *actor)
 		// the target just hit the enemy,
 		// so fight back!
 		actor->flags &= ~MF_JUSTHIT;
-		return true;
+
+		 /* killough 7/18/98: no friendly fire at corpses
+		 * killough 11/98: prevent too much infighting among friends
+		 * cph - yikes, talk about fitting everything on one line... */
+
+		return !(actor->flags & MF_FRIEND) ||
+		       (actor->target->health > 0 &&
+		        (!(actor->target->player
+		              ? true
+		              : !(actor->target->flags & MF_JUSTHIT) && P_Random(actor) > 128)));
 	}
+
+	 /* killough 7/18/98: friendly monsters don't attack other friendly
+	 * monsters or players (except when attacked, and then only once)
+	 */
+	if (actor->flags & MF_FRIEND && P_IsFriendlyThing(actor, actor->target))
+		return false;
 
 	if (actor->reactiontime)
 		return false;	// do not attack yet
@@ -297,7 +330,6 @@ bool P_CheckMissileRange (AActor *actor)
 	return true;
 }
 
-
 //
 // P_Move
 // Move in the current direction,
@@ -305,7 +337,7 @@ bool P_CheckMissileRange (AActor *actor)
 //
 extern	std::vector<line_t*> spechit;
 
-bool P_Move (AActor *actor)
+bool P_Move (AActor *actor, int dropoff = 0)
 {
 	fixed_t tryx, tryy, deltax, deltay, origx, origy;
 	bool try_ok;
@@ -349,21 +381,19 @@ bool P_Move (AActor *actor)
 		speed = speed + (speed / 2);
 	}
 
-#if 0	// [RH] I'm not so sure this is such a good idea
 	// killough 10/98: make monsters get affected by ice and sludge too:
-	movefactor = P_GetMoveFactor (actor, &friction);
+	if (co_monsterfriction)
+		movefactor = P_GetMoveFactor (actor, &friction);
 
 	if (friction < ORIG_FRICTION &&		// sludge
 		!(speed = ((ORIG_FRICTION_FACTOR - (ORIG_FRICTION_FACTOR-movefactor)/2)
 		   * speed) / ORIG_FRICTION_FACTOR))
 		speed = 1;	// always give the monster a little bit of speed
-#endif
 
 	tryx = (origx = actor->x) + (deltax = speed * xspeed[actor->movedir]);
 	tryy = (origy = actor->y) + (deltay = speed * yspeed[actor->movedir]);
 
-	// killough 3/15/98: don't jump over dropoffs:
-	try_ok = P_TryMove (actor, tryx, tryy, false);
+	try_ok = P_TryMove(actor, tryx, tryy, dropoff);
 
 	if (try_ok && friction > ORIG_FRICTION)
 	{
@@ -399,6 +429,7 @@ bool P_Move (AActor *actor)
 			return false;
 
 		actor->movedir = DI_NODIR;
+
 		good = false;
 		while (!spechit.empty())
 		{
@@ -419,12 +450,56 @@ bool P_Move (AActor *actor)
 		actor->flags &= ~MF_INFLOAT;
 	}
 
-	if (!co_zdoomphys && !(actor->flags & MF_FLOAT))
+	if (!(actor->flags & MF_FLOAT) && !felldown && !co_zdoomphys)
 		actor->z = actor->floorz;
 
 	return true;
 }
 
+/*
+ * P_SmartMove
+ *
+ * killough 9/12/98: Same as P_Move, except smarter
+ */
+
+bool P_SmartMove(AActor* actor)
+{
+	AActor* target = actor->target;
+	bool on_lift, under_damage = false;
+	int dropoff = 0;
+
+	/* killough 9/12/98: Stay on a lift if target is on one */
+	on_lift = co_staylift && target && target->health > 0 &&
+	          target->subsector->sector->tag == actor->subsector->sector->tag &&
+	          P_IsOnLift(actor);
+
+	under_damage = co_avoidhazards && P_IsUnderDamage(actor); // e6y
+
+	// killough 10/98: allow dogs to drop off of taller ledges sometimes.
+	// dropoff==1 means always allow it, dropoff==2 means only up to 128 high,
+	// and only if the target is immediately on the other side of the line.
+
+	// allow all friends to jump down instead of just dogs
+
+	if (actor->flags & MF_FRIEND && target && co_dogjumping && P_AllowDropOff() &&
+	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
+	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
+	    P_Random(actor) < 235)
+		dropoff = 2;
+
+	if (!P_Move(actor, dropoff))
+		return false;
+
+	// killough 9/9/98: avoid crushing ceilings or other damaging areas
+	if ((on_lift && P_Random(actor) < 230 && // Stay on lift
+	     !P_IsOnLift(actor)) ||
+	    (co_avoidhazards && !under_damage && // e6y  // Get away from damage
+	     (under_damage = P_IsUnderDamage(actor)) &&
+	     (under_damage < 0 || P_Random(actor) < 200)))
+		actor->movedir = DI_NODIR; // avoid the area (most of the time anyway)
+
+	return true;
+}
 
 //
 // TryWalk
@@ -439,7 +514,7 @@ bool P_Move (AActor *actor)
 //
 bool P_TryWalk (AActor *actor)
 {
-	if (!P_Move (actor))
+	if (!P_SmartMove (actor))
 	{
 		return false;
 	}
@@ -514,61 +589,143 @@ bool P_IsOnLift(const AActor* actor)
 	return false;
 }
 
-void P_NewChaseDir (AActor *actor)
+//
+// A_FaceTarget
+//
+void A_FaceTarget(AActor* actor)
 {
-	fixed_t 	deltax;
-	fixed_t 	deltay;
-
-	dirtype_t	d[3];
-
-	int			tdir;
-	dirtype_t	olddir;
-
-	dirtype_t	turnaround;
-
 	if (!actor->target)
-		I_Error("P_NewChaseDir: called with no target");
+		return;
 
-	olddir = (dirtype_t)actor->movedir;
-	turnaround = opposite[olddir];
+	actor->flags &= ~MF_AMBUSH;
 
-	deltax = actor->target->x - actor->x;
-	deltay = actor->target->y - actor->y;
+	actor->angle = P_PointToAngle(actor->x, actor->y, actor->target->x, actor->target->y);
 
-	if (monster_backing)
+	if (actor->target->flags & MF_SHADOW)
+		actor->angle += P_RandomDiff(actor) << 21;
+}
+
+//=============================================================================
+//
+// P_HitFriend()
+//
+// killough 12/98
+// This function tries to prevent shooting at friends that get in the line of fire
+//
+//=============================================================================
+bool P_HitFriend(AActor* self)
+{
+	if (self->flags & MF_FRIEND && self->target != NULL)
 	{
-		fixed_t dist = P_AproxDistance(deltax, deltay);
-		if (actor->flags & actor->target->flags & MF_FRIEND &&
-		    distfriend << FRACBITS > dist && !P_IsOnLift(actor) &&
-		    !P_IsUnderDamage(actor))
+		angle_t angle =
+		    R_PointToAngle2(self->x, self->y, self->target->x, self->target->y);
+		fixed_t dist =
+		    P_AproxDistance(self->x - self->target->x, self->y - self->target->y);
+
+		P_AimLineAttack(self, angle, dist);
+
+		if (linetarget != NULL && linetarget != self->target)
 		{
-			deltax = -deltax, deltay = -deltay;
-		}
-		else if (actor->target->health > 0 &&
-		         (actor->flags ^ actor->target->flags) & MF_FRIEND)
-		{ // Live enemy target
-			if (actor->info->missilestate && actor->type != MT_SKULL &&
-			    ((!actor->target->info->missilestate &&
-			      dist < actor->target->info->meleerange * 2) ||
-			     (actor->target->player &&
-			      dist < actor->target->player->mo->info->meleerange * 3 &&
-			      weaponinfo[actor->target->player->readyweapon].flags & WPF_FLEEMELEE)))
-			{ // Back away from melee attacker
-				deltax = -deltax, deltay = -deltay;
-			}
+			return P_IsFriendlyThing(self, linetarget);
 		}
 	}
+	return false;
+}
 
-	if (deltax>10*FRACUNIT)
-		d[1]= DI_EAST;
-	else if (deltax<-10*FRACUNIT)
-		d[1]= DI_WEST;
+static fixed_t dropoff_deltax, dropoff_deltay, floorz;
+extern fixed_t tmbbox[4];
+
+static bool PIT_AvoidDropoff(line_t* line)
+{
+	if (line->backsector && // Ignore one-sided linedefs
+	    tmbbox[BOXRIGHT] > line->bbox[BOXLEFT] &&
+	    tmbbox[BOXLEFT] < line->bbox[BOXRIGHT] &&
+	    tmbbox[BOXTOP] > line->bbox[BOXBOTTOM] && // Linedef must be contacted
+	    tmbbox[BOXBOTTOM] < line->bbox[BOXTOP] && P_BoxOnLineSide(tmbbox, line) == -1)
+	{
+		fixed_t front = line->frontsector->floorheight;
+		fixed_t back = line->backsector->floorheight;
+		angle_t angle;
+
+		// The monster must contact one of the two floors,
+		// and the other must be a tall dropoff (more than 24).
+
+		if (back == floorz && front < floorz - FRACUNIT * 24)
+			angle = R_PointToAngle2(0, 0, line->dx, line->dy); // front side dropoff
+		else if (front == floorz && back < floorz - FRACUNIT * 24)
+			angle = R_PointToAngle2(line->dx, line->dy, 0, 0); // back side dropoff
+		else
+			return true;
+
+		// Move away from dropoff at a standard speed.
+		// Multiple contacted linedefs are cumulative (e.g. hanging over corner)
+		dropoff_deltax -= finesine[angle >> ANGLETOFINESHIFT] * 32;
+		dropoff_deltay += finecosine[angle >> ANGLETOFINESHIFT] * 32;
+	}
+	return true;
+}
+
+//
+// Driver for above
+//
+
+static fixed_t P_AvoidDropoff(AActor* actor)
+{
+	tmbbox[BOXTOP] = actor->y + actor->radius;
+	tmbbox[BOXBOTTOM] = actor->y - actor->radius;
+	tmbbox[BOXRIGHT] = actor->x + actor->radius;
+	tmbbox[BOXLEFT] = actor->x - actor->radius;
+
+	int yh = tmbbox[BOXTOP] - bmaporgy;
+	int yl = tmbbox[BOXBOTTOM] - bmaporgy;
+	int xh = tmbbox[BOXRIGHT] - bmaporgx;
+	int xl = tmbbox[BOXLEFT] - bmaporgx;
+	int bx, by;
+
+	floorz = actor->z; // remember floor height
+
+	dropoff_deltax = dropoff_deltay = 0;
+
+	// check lines
+
+	validcount++;
+	for (bx = xl; bx <= xh; bx++)
+		for (by = yl; by <= yh; by++)
+			P_BlockLinesIterator(bx, by, PIT_AvoidDropoff); // all contacted lines
+
+	return dropoff_deltax | dropoff_deltay; // Non-zero if movement prescribed
+}
+
+//
+// P_DoNewChaseDir
+//
+// killough 9/8/98:
+//
+// Most of P_NewChaseDir(), except for what
+// determines the new direction to take
+//
+// Uses the new ZDoom chase code
+//
+
+static void P_DoNewChaseDir(AActor* actor, fixed_t deltax, fixed_t deltay)
+{
+	dirtype_t d[3];
+
+	int tdir;
+	dirtype_t olddir = (dirtype_t)actor->movedir;
+
+	dirtype_t turnaround = turnaround = opposite[olddir];
+
+	if (deltax > 10 * FRACUNIT)
+		d[1] = DI_EAST;
+	else if (deltax < -10 * FRACUNIT)
+		d[1] = DI_WEST;
 	else
-		d[1]=DI_NODIR;
+		d[1] = DI_NODIR;
 
-	if (deltay<-10*FRACUNIT)
-		d[2]= DI_SOUTH;
-	else if (deltay>10*FRACUNIT)
+	if (deltay < -10 * FRACUNIT)
+		d[2] = DI_SOUTH;
+	else if (deltay > 10 * FRACUNIT)
 		d[2] = DI_NORTH;
 	else
 		d[2] = DI_NODIR;
@@ -576,13 +733,13 @@ void P_NewChaseDir (AActor *actor)
 	// try direct route
 	if (d[1] != DI_NODIR && d[2] != DI_NODIR)
 	{
-		actor->movedir = diags[((deltay<0)<<1) + (deltax>0)];
+		actor->movedir = diags[((deltay < 0) << 1) + (deltax > 0)];
 		if (actor->movedir != turnaround && P_TryWalk(actor))
 			return;
 	}
 
 	// try other directions
-	if (P_Random (actor) > 200 || abs(deltay) > abs(deltax))
+	if (P_Random(actor) > 200 || abs(deltay) > abs(deltax))
 	{
 		tdir = d[1];
 		d[1] = d[2];
@@ -597,7 +754,7 @@ void P_NewChaseDir (AActor *actor)
 	if (d[1] != DI_NODIR)
 	{
 		actor->movedir = d[1];
-		if (P_TryWalk (actor))
+		if (P_TryWalk(actor))
 		{
 			// either moved forward or attacked
 			return;
@@ -608,7 +765,7 @@ void P_NewChaseDir (AActor *actor)
 	{
 		actor->movedir = d[2];
 
-		if (P_TryWalk (actor))
+		if (P_TryWalk(actor))
 			return;
 	}
 
@@ -618,12 +775,12 @@ void P_NewChaseDir (AActor *actor)
 	{
 		actor->movedir = olddir;
 
-		if (P_TryWalk (actor))
+		if (P_TryWalk(actor))
 			return;
 	}
 
 	// randomly determine direction of search
-	if (P_Random (actor) & 1)
+	if (P_Random(actor) & 1)
 	{
 		for (tdir = DI_EAST; tdir <= DI_SOUTHEAST; tdir++)
 		{
@@ -631,20 +788,20 @@ void P_NewChaseDir (AActor *actor)
 			{
 				actor->movedir = tdir;
 
-				if ( P_TryWalk(actor) )
+				if (P_TryWalk(actor))
 					return;
 			}
 		}
 	}
 	else
 	{
-		for (tdir = DI_SOUTHEAST; tdir != (DI_EAST-1); tdir--)
+		for (tdir = DI_SOUTHEAST; tdir != (DI_EAST - 1); tdir--)
 		{
 			if (tdir != turnaround)
 			{
 				actor->movedir = tdir;
 
-				if ( P_TryWalk(actor) )
+				if (P_TryWalk(actor))
 					return;
 			}
 		}
@@ -652,15 +809,371 @@ void P_NewChaseDir (AActor *actor)
 
 	if (turnaround != DI_NODIR)
 	{
-		actor->movedir =turnaround;
-		if ( P_TryWalk(actor) )
+		actor->movedir = turnaround;
+		if (P_TryWalk(actor))
 			return;
 	}
 
-	actor->movedir = DI_NODIR;	// can not move
+	actor->movedir = DI_NODIR; // can not move
 }
 
+void P_NewChaseDir (AActor *actor)
+{
+	if (!actor->target)
+		I_Error ("P_NewChaseDir: called with no target");
 
+	fixed_t deltax = actor->target->x - actor->x;
+	fixed_t deltay = actor->target->y - actor->y;
+
+	// killough 8/8/98: sometimes move away from target, keeping distance
+	//
+	// 1) Stay a certain distance away from a friend, to avoid being in their way
+	// 2) Take advantage over an enemy without missiles, by keeping distance
+
+	actor->strafecount = 0;
+
+	if (P_IsMBFCompatMode())
+	{
+		if (actor->floorz - actor->dropoffz > FRACUNIT * 24 &&
+		    actor->z <= actor->floorz && !(actor->flags & (MF_DROPOFF | MF_FLOAT)) &&
+		    !P_AllowDropOff() && P_AvoidDropoff(actor)) /* Move away from dropoff */
+		{
+			P_DoNewChaseDir(actor, dropoff_deltax, dropoff_deltay);
+
+			// If moving away from dropoff, set movecount to 1 so that
+			// small steps are taken to get monster away from dropoff.
+
+			actor->movecount = 1;
+			return;
+		}
+		else
+		{
+			fixed_t dist = P_AproxDistance(deltax, deltay);
+
+			if (actor->flags & actor->target->flags & MF_FRIEND &&
+			    P_IsFriendlyThing(actor, actor->target) &&
+			    co_distfriend.asInt() << FRACBITS > dist && !P_IsOnLift(actor) &&
+			    !P_IsUnderDamage(actor))
+			{
+				deltax = -deltax, deltay = -deltay;
+			}
+			else if (actor->target->health > 0 &&
+			         (actor->flags ^ actor->target->flags) & MF_FRIEND)
+			{ // Live enemy target
+				if (co_monsterbacking &&
+						actor->info->missilestate &&
+						actor->type != MT_SKULL &&
+				    ((!actor->target->info->missilestate &&
+				      dist < actor->target->info->meleerange * 2) ||
+				     (actor->target->player &&
+				      dist < actor->target->player->mo->info->meleerange * 3 &&
+				      weaponinfo[actor->target->player->readyweapon].flags &
+				          WPF_FLEEMELEE)))
+				{ // Back away from melee attacker
+					actor->strafecount = P_Random(actor) & 15;
+					deltax = -deltax, deltay = -deltay;
+				}
+			}
+		}
+	}
+
+	P_DoNewChaseDir(actor, deltax, deltay);
+
+	// If strafing, set movecount to strafecount so that old Doom
+	// logic still works the same, except in the strafing part
+
+	if (actor->strafecount)
+		actor->movecount = actor->strafecount;
+}
+
+static bool P_IsVisible(AActor* actor, AActor* mo, bool allaround)
+{
+	if (!allaround)
+	{
+		angle_t an = R_PointToAngle2(actor->x, actor->y, mo->x, mo->y) - actor->angle;
+		if (an > ANG90 && an < ANG270 &&
+		    P_AproxDistance(mo->x - actor->x, mo->y - actor->y) > WAKEUPRANGE)
+			return false;
+	}
+	return P_CheckSight(actor, mo);
+}
+
+//
+// P_HelpFriend
+//
+// killough 9/8/98: Help friends in danger of dying
+//
+
+static bool P_HelpFriend(AActor* actor)
+{
+	int killcount = 0;
+	AActor* it;
+	TThinkerIterator<AActor> iterator;
+
+	// If less than 33% health, self-preservation rules
+	if (actor->health * 3 < actor->info->spawnhealth)
+		return false;
+
+
+	while ((it = iterator.Next()))
+	{
+		if (P_IsFriendlyThing(actor, it))
+		{
+			// Possibly help a friend under 50% health
+			if (it->health * 2 >= it->info->spawnhealth)
+			{
+				if (P_Random(actor) < 180)
+					break;
+			}
+			else if (it->flags & MF_JUSTHIT && it->target &&
+			         it->target != actor->target)
+			{
+				AActor* enemy = P_RoughTargetSearch(actor, FixedToAngle(INT2FIXED(90)),
+				                                    896, RoughMonsterCheck);
+
+				if (!enemy)
+				{
+					// Ignore any attacking monsters, while searching for friend
+					actor->threshold = BASETHRESHOLD;
+					return true;
+				}
+				else
+				{
+					actor->target = enemy->ptr();
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+//============================================================================
+//
+// P_LookForMonsters
+//
+// Selects a live enemy monster
+//
+//============================================================================
+
+bool P_LookForMonsters(AActor* actor, bool allaround)
+{
+	if (!P_IsMBFCompatMode())
+		return false;
+
+	// Use last known enemy if no hatee sighted -- killough 2/15/98:
+	if (actor->lastenemy && actor->lastenemy->health > 0 &&
+	    !(actor->lastenemy->flags & actor->flags & MF_FRIEND))
+	{
+		actor->target = actor->lastenemy;
+		actor->lastenemy = AActor::AActorPtr();
+		return true;
+	}
+	else
+	{
+		actor->lastenemy = AActor::AActorPtr();
+	}
+
+	// This is NOT MBF behavior
+	// But we want a smarter monster check for friendlies and hostiles attacking friendlies.
+	AActor* enemy = P_RoughTargetSearch(actor, FixedToAngle(INT2FIXED(180)), 7, RoughMonsterCheck);
+
+	if (enemy)
+	{
+		actor->target = enemy->ptr();
+		return true;
+	}
+
+	if (!actor->target)
+	{
+		// [RH] use goal as target
+		if (actor->goal)
+		{
+			actor->target = actor->goal;
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * @brief Spawn a helper. (borrowed from SpawnMonster from horde)
+ *
+ * @param point Spawn point of the monster.
+ * @param recipe Recipe of a monster to spawn.
+ * @param offset Offset from the spawn point to spawn at.
+ * @param target Player to target.
+ * @return Actor pointer we just spawned, or NULL if the spawn failed.
+ */
+AActor::AActorPtr SpawnHelper(const MapThing SpawnPoint, mobjtype_t SpawnType, const AActor* origin)
+{
+	AActor* mo = new AActor(
+	    SpawnPoint.x << FRACBITS, SpawnPoint.y << FRACBITS,
+	    (level.flags & LEVEL_USEPLAYERSTARTZ ? SpawnPoint.z << FRACBITS : ONFLOORZ),
+	    SpawnType);
+	if (mo)
+	{
+		if (P_TestMobjLocation(mo))
+		{
+			mo->flags |= MF_FRIEND;
+
+			mo->angle = ANG45 * (SpawnPoint.angle / 45);
+
+			P_GiveFriendlyOwnerInfo(mo, origin);
+
+#ifdef CLIENT_APP
+			if (cl_showfriends && validplayer(displayplayer()) && displayplayer().mo &&
+			    P_IsFriendlyThing(displayplayer().mo, mo))
+			{
+				mo->effects = FX_FRIENDHEARTS;
+				mo->translation = translationref_t(&friendtable[0]);
+			}
+#endif
+
+			SV_SpawnMobj(mo);
+
+			// Spawn a teleport fog if it's not an ambush.
+			if ((SpawnPoint.flags & MF_AMBUSH) == 0)
+			{
+				AActor* tele =
+				    new AActor(SpawnPoint.x << FRACBITS, SpawnPoint.y << FRACBITS,
+				    (level.flags & LEVEL_USEPLAYERSTARTZ ? SpawnPoint.z << FRACBITS : ONFLOORZ) + INT2FIXED(gameinfo.telefogHeight),
+				    MT_TFOG);
+				SV_SpawnMobj(tele);
+				S_NetSound(tele, CHAN_VOICE, "misc/teleport", ATTN_NORM);
+			}
+
+			return mo->ptr();
+		}
+		else
+		{
+			// Spawn blocked.
+			mo->Destroy();
+		}
+	}
+
+	return AActor::AActorPtr();
+}
+
+void P_ClearHelpers()
+{
+	helperspawns.clear();
+}
+
+void P_SetupHelpers()
+{
+	if (!serverside)
+		return;
+
+	for (Players::iterator it = players.begin(); it != players.end(); ++it)
+	{
+		if (!(it->ingame()))
+			continue;
+
+		for (int i = 0; i < co_playerhelpers.asInt(); i++)
+		{
+
+			mobjtype_t monstertype = P_INameToMobj(co_helpertype.str());
+
+			if (monstertype == MT_NULL)
+				monstertype = MT_DOGS;
+
+			HelperSpawns helper = {monstertype, it->id};
+
+			helperspawns.push_back(helper);
+		}
+	}
+}
+
+void P_RunHelperTics()
+{
+	if (::helperspawns.empty())
+	{
+		// nothing to do
+		return;
+	}
+
+	std::vector<HelperSpawns>::const_iterator i = ::helperspawns.begin();
+
+	while (i != ::helperspawns.end())
+	{
+		// Remove any disconnected player helpers in the queue
+		// before spawning
+
+		auto it = std::find_if(::players.begin(), ::players.end(),
+			[&](const player_s& p) { return p.id == i->playerid; });
+
+		if (it == players.end() || !it->ingame())
+		{
+			i = ::helperspawns.erase(i);
+			continue;
+		}
+
+		bool spawned = false;
+
+		if (G_UsesCoopSpawns())
+		{
+			// Spawn at coop player spawns
+			for (const auto& spawn : ::playerstarts)
+			{
+				AActor::AActorPtr mo = SpawnHelper(spawn, i->helpertype, it->mo);
+
+				if (!mo)
+				{
+					continue;
+				}
+				else
+				{
+					spawned = true;
+					break;
+				}
+			}
+		}
+		else if (G_IsTeamGame())
+		{
+			// Spawn at player's team starts
+			TeamInfo* teamInfo = GetTeamInfo(it->userinfo.team);
+
+			for (const auto& spawn : teamInfo->Starts)
+			{
+				AActor::AActorPtr mo = SpawnHelper(spawn, i->helpertype, it->mo);
+
+				if (!mo)
+				{
+					continue;
+				}
+				else
+				{
+					spawned = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Spawn at deathmatch spawns
+			for (const auto& spawn : ::DeathMatchStarts)
+			{
+				AActor::AActorPtr mo = SpawnHelper(spawn, i->helpertype, it->mo);
+
+				if (!mo)
+				{
+					continue;
+				}
+				else
+				{
+					spawned = true;
+					break;
+				}
+			}
+		}
+
+		if (spawned)
+			i = ::helperspawns.erase(i);
+		else
+			i++;
+	}
+}
 
 //
 // P_LookForPlayers
@@ -690,6 +1203,36 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
 	sector_t* sector = actor->subsector->sector;
 	if (!sector)
 		return false;
+
+	if (actor->flags & MF_FRIEND)
+	{ // killough 9/9/98: friendly monsters go about players differently
+		// Go back to a player, no matter whether it's visible or not
+		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		{
+			if (it->id == actor->friend_playerid && !it->spectator && it->health > 0)
+			{
+				if (it->ingame() && it->playerstate == PST_LIVE && !it->spectator &&
+				    it->mo && it->mo->health > 0 && P_IsFriendlyThing(it->mo, actor) &&
+				    P_IsVisible(actor, it->mo, allaround))
+				{
+					actor->target = it->mo;
+
+					// killough 12/98:
+					// get out of refiring loop, to avoid hitting player accidentally
+
+					if (actor->info->missilestate)
+					{
+						P_SetMobjState(actor, actor->info->seestate);
+						actor->flags &= ~MF_JUSTHIT;
+					}
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 
 	// Construct our table of ingame players
 	// [AM] TODO: Have the Players container handle this instead of having to
@@ -760,24 +1303,10 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
 		if (!player->mo)
 			continue; // out of game
 
-		if (!P_CheckSight(actor, player->mo))
+		if (!P_IsVisible(actor, player->mo, allaround))
 		{
 			sightcheckfailed[actor->lastlook] = true;
-			continue; // out of sight
-		}
-
-		if (!allaround)
-		{
-			angle_t an = P_PointToAngle(actor->x, actor->y,
-			                            player->mo->x, player->mo->y) - actor->angle;
-			if (an > ANG90 && an < ANG270)
-			{
-				fixed_t dist = P_AproxDistance(player->mo->x - actor->x,
-				                               player->mo->y - actor->y);
-				// if real close, react anyway
-				if (dist > MELEERANGE)
-					continue; // behind back
-			}
+			continue;
 		}
 
 		// [RH] Need to be sure the reactiontime is 0 if the monster is
@@ -790,6 +1319,19 @@ bool P_LookForPlayers(AActor *actor, bool allaround)
 	}
 
 	return false;
+}
+
+//
+// P_LookForTargets
+//
+// killough 9/5/98: look for targets to go after, depending on kind of monster
+//
+
+static bool P_LookForTargets(AActor* actor, bool allaround)
+{
+	return actor->flags & MF_FRIEND
+	           ? P_LookForMonsters(actor, allaround) || P_LookForPlayers(actor, allaround)
+	           : P_LookForPlayers(actor, allaround)  || P_LookForMonsters(actor, allaround);
 }
 
 
@@ -825,6 +1367,135 @@ void A_KeenDie (AActor *actor)
 //
 
 //
+// P_NewRandomDir
+//
+// villsa [STRIFE] new function
+//
+// haleyjd: Almost identical to the tail-end of P_NewChaseDir, this function
+// finds a purely random direction for an object to walk. Called from
+// A_RandomWalk.
+//
+// Shockingly similar to the RandomWalk pointer in Eternity :)
+//
+void P_NewRandomDir(AActor* actor)
+{
+	int dir = 0;
+	int omovedir = opposite[actor->movedir]; // haleyjd 20110223: nerfed this...
+
+	// randomly determine direction of search
+	if (P_Random(actor) & 1)
+	{
+		// Try all non-reversal directions forward, first
+		for (dir = 0; dir < DI_NODIR; dir++)
+		{
+			if (dir != omovedir)
+			{
+				actor->movedir = dir;
+				if (P_Random(actor) & 1)
+				{
+					if (P_TryWalk(actor))
+						break;
+				}
+			}
+		}
+
+		// haleyjd 20110223: logic missing entirely:
+		// failed all non-reversal directions? try reversing
+		if (dir > DI_SOUTHEAST)
+		{
+			if (omovedir == DI_NODIR)
+			{
+				actor->movedir = DI_NODIR;
+				return;
+			}
+			actor->movedir = omovedir;
+			if (P_TryWalk(actor))
+				return;
+			else
+			{
+				actor->movedir = DI_NODIR;
+				return;
+			}
+		}
+	}
+	else
+	{
+		// Try directions one at a time in backward order
+		dir = DI_SOUTHEAST;
+		while (1)
+		{
+			// haleyjd 09/05/10: missing random code.
+			if (dir != omovedir)
+			{
+				actor->movedir = dir;
+
+				// villsa 09/06/10: un-inlined code
+				if (P_TryWalk(actor))
+					return;
+			}
+
+			// Ran out of non-reversal directions to try? Reverse.
+			if (--dir == -1)
+			{
+				if (omovedir == DI_NODIR)
+				{
+					actor->movedir = DI_NODIR;
+					return;
+				}
+				actor->movedir = omovedir;
+				// villsa 09/06/10: un-inlined code
+				if (P_TryWalk(actor))
+					return;
+				else
+				{
+					actor->movedir = DI_NODIR;
+					return;
+				}
+			} // end if(--dir == -1)
+		} // end while(1)
+	} // end else
+}
+
+//
+// A_RandomWalk
+//
+// [STRIFE] New function.
+// haleyjd 09/05/10: Action routine used to meander about.
+//
+void A_RandomWalk(AActor* actor)
+{
+	// Standing actors do not wander.
+	//if (actor->flags & MF_STAND)
+	//	return;
+
+	if (actor->reactiontime)
+		actor->reactiontime--; // count down reaction time
+	else
+	{
+		// turn to a new angle
+		if (actor->movedir < DI_NODIR)
+		{
+			int delta;
+
+			actor->angle &= (7 << 29);
+			delta = actor->angle - (actor->movedir << 29);
+
+			if (delta < 0)
+				actor->angle += ANG90 / 2;
+			else if (delta > 0)
+				actor->angle -= ANG90 / 2;
+		}
+
+		// try moving
+		if (--actor->movecount < 0 || !P_SmartMove(actor))
+		{
+			P_NewRandomDir(actor);
+			actor->movecount += 5;
+		}
+	}
+}
+
+//
 // A_Look
 // Stay in state until a player is sighted.
 // [RH] Will also leave state to move to goal.
@@ -852,6 +1523,13 @@ void A_Look (AActor *actor)
 	if (targ && targ->player && (targ->player->cheats & CF_NOTARGET))
 		return;
 
+	 /* killough 7/18/98:
+	 * Friendly monsters go after other monsters first, but
+	 * also return to player, without attacking them, if they
+	 * cannot find any targets. A marine's best friend :)
+	 */
+	actor->pursuecount = 0;
+
 	// GhostlyDeath -- can't hear spectators
 	if (targ && targ->player && targ->player->spectator)
 	{
@@ -865,15 +1543,15 @@ void A_Look (AActor *actor)
 
 		if (actor->flags & MF_AMBUSH)
 		{
-			if (P_CheckSight(actor, actor->target))
+		if (P_CheckSight(actor, actor->target))
 				goto seeyou;
 		}
 		else
-			goto seeyou;
+		goto seeyou;
 	}
 
 
-	if (!P_LookForPlayers (actor, false))
+	if (!P_LookForTargets (actor, false))
 		return;
 
 	// go into chase state
@@ -946,8 +1624,13 @@ void A_Chase (AActor *actor)
 			actor->threshold--;
 	}
 
-	// turn towards movement direction if not there yet
-	if (actor->movedir < 8)
+	/* turn towards movement direction if not there yet
+	 * killough 9/7/98: keep facing towards target if strafing or backing out
+	 */
+
+	if (actor->strafecount)
+		A_FaceTarget(actor);
+	else if (actor->movedir < 8)
 	{
 		actor->angle &= (angle_t)(7<<29);
 		delta = actor->angle - (actor->movedir << 29);
@@ -958,20 +1641,35 @@ void A_Chase (AActor *actor)
 			actor->angle += ANG90/2;
 	}
 
-	// [RH] If the target is dead (and not a goal), stop chasing it.
+	// [RH] If the target is dead or a friend (and not a goal), stop chasing it.
 	if (actor->target && actor->target != actor->goal && actor->target->health <= 0)
 		actor->target = AActor::AActorPtr();
 
 	if (!actor->target || !(actor->target->flags & MF_SHOOTABLE))
 	{
 		// look for a new target
-		if (P_LookForPlayers (actor, true) && actor->target != actor->goal)
+		if (P_LookForTargets (actor, true) && actor->target != actor->goal)
 			return; 	// got a new target
 
 		if (!actor->target)
 		{
-			P_SetMobjState (actor, actor->info->spawnstate, true); // denis - todo - this sometimes leads to a stack overflow due to infinite recursion: A_Chase->SetMobjState->A_Look->SetMobjState
-			return;
+			if (actor->flags & MF_FRIEND)
+			{
+				A_Look(actor);
+				if (!actor->target)
+				{
+					A_RandomWalk(actor);
+					return;
+				}
+			}
+			else
+			{
+				P_SetMobjState(actor, actor->info->spawnstate,
+				               true); // denis - todo - this sometimes leads to a stack
+				                      // overflow due to infinite recursion:
+				                      // A_Chase->SetMobjState->A_Look->SetMobjState
+				return;
+			}
 		}
 	}
 
@@ -1035,16 +1733,61 @@ void A_Chase (AActor *actor)
 	// ?
   nomissile:
 	// possibly choose another target
-	if (multiplayer
-		&& !actor->threshold
-		&& !P_CheckSight(actor, actor->target))
+	if (!actor->threshold)
 	{
-		if (P_LookForPlayers(actor,true))
-			return; 	// got a new target
+		if (!(actor->flags & MF_FRIEND) && !co_pursuit)
+		{
+			if (multiplayer && !P_CheckSight(actor, actor->target) &&
+			    P_LookForPlayers(actor, true))
+			{
+				return; // got a new target
+			}
+		}
+		else if (co_helpfriends && P_HelpFriend(actor))
+		{
+			return;
+		}
+		else if (actor->pursuecount)
+		{
+			actor->pursuecount--;
+		}
+		else
+		{
+			/* Our pursuit time has expired. We're going to think about
+			 * changing targets */
+			actor->pursuecount = BASETHRESHOLD;
+
+			// look for new target, unless conditions are met
+			if (!(actor->target &&                     // have a target
+			      actor->target->health > 0 &&         // and the target is alive
+			        (!P_IsFriendlyThing(actor, actor->target) ||
+			         !(actor->flags & MF_FRIEND)) &&   // and the target is not friendly
+			        P_CheckSight(actor, actor->target) // and we can see it
+			     ) &&
+			    P_LookForTargets(actor, true))
+				return;
+
+			/* (Current target was good, or no new target was found.)
+			 *
+			 * If monster is a missile-less friend, give up pursuit and
+			 * return to player, if no attacks have occurred recently.
+			 */
+
+			if (!actor->info->missilestate && actor->flags & MF_FRIEND)
+			{
+				if (actor->flags & MF_JUSTHIT)          /* if recent action, */
+					actor->flags &= ~MF_JUSTHIT;        /* keep fighting */
+				else if (P_LookForPlayers(actor, true)) /* else return to player */
+					return;
+			}
+		}
 	}
 
+	if (actor->strafecount)
+		actor->strafecount--;
+
 	// chase towards player
-	if (--actor->movecount < 0 || !P_Move (actor))
+	if (--actor->movecount < 0 || !P_SmartMove (actor))
 	{
 		P_NewChaseDir (actor);
 	}
@@ -1054,26 +1797,6 @@ void A_Chase (AActor *actor)
 	{
 		S_Sound (actor, CHAN_VOICE, actor->info->activesound, 1, ATTN_IDLE);
 	}
-}
-
-
-//
-// A_FaceTarget
-//
-void A_FaceTarget (AActor *actor)
-{
-	if (!actor->target)
-		return;
-
-	actor->flags &= ~MF_AMBUSH;
-
-	actor->angle = P_PointToAngle (actor->x,
-									actor->y,
-									actor->target->x,
-									actor->target->y);
-
-	if (actor->target->flags & MF_SHADOW)
-		actor->angle += P_RandomDiff(actor)<<21;
 }
 
 //
@@ -1181,13 +1904,20 @@ void A_CPosRefire (AActor *actor)
 	// keep firing unless target got out of sight
 	A_FaceTarget (actor);
 
+	bool stop = false;
+
 	if (P_Random (actor) < 40)
 		return;
+
+	/* killough 12/98: Stop firing if a friend has gotten in the way */
+	if (actor->flags & MF_FRIEND &&	P_HitFriend(actor))
+		stop = true;
 
 	if (!actor->target
 		|| (actor->target->player && actor->target->player->spectator)
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
+		|| stop
         )
 	{
 		P_SetMobjState (actor, actor->info->seestate, true);
@@ -1200,13 +1930,20 @@ void A_SpidRefire (AActor *actor)
 	// keep firing unless target got out of sight
 	A_FaceTarget (actor);
 
+	bool stop = false;
+
 	if (P_Random (actor) < 10)
 		return;
+
+	/* killough 12/98: Stop firing if a friend has gotten in the way */
+	if (actor->flags & MF_FRIEND && P_HitFriend(actor))
+		stop = true;
 
 	if (!actor->target
 		|| (actor->target->player && actor->target->player->spectator)
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
+		|| stop
         )
 	{
 		P_SetMobjState (actor, actor->info->seestate, true);
@@ -1293,6 +2030,14 @@ void A_CyberAttack (AActor *actor)
 	}
 }
 
+void P_GiveFriendlyOwnerInfo(AActor* friendly, const AActor* origin)
+{
+	if (origin->player && friendly->flags & MF_FRIEND)
+	{
+		friendly->friend_playerid = origin->player->id;
+		friendly->friend_teamid = origin->player->userinfo.team;
+	}
+}
 
 void A_BruisAttack (AActor *actor)
 {
@@ -1519,92 +2264,8 @@ bool PIT_VileCheck (AActor *thing)
 //
 void A_VileChase (AActor *actor)
 {
-	if(!serverside)
-	{
-		// Return to normal attack.
-		A_Chase (actor);
-		return;
-	}
-
-	int 				xl;
-	int 				xh;
-	int 				yl;
-	int 				yh;
-
-	int 				bx;
-	int 				by;
-
-	mobjinfo_t* 		info;
-	AActor::AActorPtr 	temp;
-
-	if (actor->movedir != DI_NODIR)
-	{
-		// check for corpses to raise
-		viletryx = actor->x + actor->info->speed * xspeed[actor->movedir];
-		viletryy = actor->y + actor->info->speed * yspeed[actor->movedir];
-
-		xl = (viletryx - bmaporgx - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-		xh = (viletryx - bmaporgx + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-		yl = (viletryy - bmaporgy - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-		yh = (viletryy - bmaporgy + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-
-		vileobj = actor;
-
-		viletryradius = mobjinfo[MT_VILE].radius;
-
-		for (bx=xl ; bx<=xh ; bx++)
-		{
-			for (by=yl ; by<=yh ; by++)
-			{
-				// Call PIT_VileCheck to check
-				// whether object is a corpse
-				// that canbe raised.
-				if (!P_BlockThingsIterator(bx,by,PIT_VileCheck))
-				{
-					// got one!
-					temp = actor->target;
-					actor->target = corpsehit->ptr();
-					A_FaceTarget (actor);
-					actor->target = temp;
-
-					P_SetMobjState (actor, S_VILE_HEAL1, true);
-
-					if (!clientside)
-						SV_Sound(corpsehit, CHAN_BODY, "vile/raise", ATTN_IDLE);
-					else
-						S_Sound(corpsehit, CHAN_BODY, "vile/raise", 1, ATTN_IDLE);
-
-					info = corpsehit->info;
-
-					if (serverside)
-					{
-						level.respawned_monsters++;
-						SV_UpdateMonsterRespawnCount();
-					}
-
-					P_SetMobjState (corpsehit,info->raisestate);
-					SV_SendRaiseMobj(actor, corpsehit);
-
-					// [Nes] - Classic demo compatability: Ghost monster bug.
-					if ((co_novileghosts)) {
-						corpsehit->height = P_ThingInfoHeight(info);	// [RH] Use real mobj height
-						corpsehit->radius = info->radius;	// [RH] Use real radius
-					} else {
-						corpsehit->height <<= 2;
-					}
-
-					corpsehit->flags = info->flags;
-					corpsehit->health = info->spawnhealth;
-					corpsehit->target = AActor::AActorPtr();
-
-					return;
-				}
-			}
-		}
-	}
-
-	// Return to normal attack.
-	A_Chase (actor);
+	if (!P_HealCorpse(actor, mobjinfo[MT_VILE].radius, S_VILE_HEAL1, 31)) //dsslop
+		A_Chase(actor); // Return to normal attack.
 }
 
 
@@ -1968,10 +2629,11 @@ void A_SpawnObject(AActor* actor)
 		}
 	}
 
-	SV_UpdateMobj(mo);
+	mo->flags = (mo->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
 
-	// [XA] don't bother with the dont-inherit-friendliness hack
-	// that exists in A_Spawn, 'cause WTF is that about anyway?
+	P_GiveFriendlyOwnerInfo(mo, actor);
+
+	SV_UpdateMobj(mo);
 }
 
 //
@@ -2062,7 +2724,7 @@ void A_MonsterBulletAttack(AActor* actor)
 
 	for (i = 0; i < numbullets; i++)
 	{
-		damage = (P_Random() % damagemod + 1) * damagebase;
+		damage = (P_Random(actor) % damagemod + 1) * damagebase;
 		angle = (int)actor->angle + P_RandomHitscanAngle(hspread);
 		slope = aimslope + P_RandomHitscanSlope(vspread);
 
@@ -2101,7 +2763,7 @@ void A_MonsterMeleeAttack(AActor* actor)
 
 	S_Sound(actor, CHAN_WEAPON, SoundMap[hitsound].c_str(), 1, ATTN_NORM);
 
-	damage = (P_Random() % damagemod + 1) * damagebase;
+	damage = (P_Random(actor) % damagemod + 1) * damagebase;
 	P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
 }
 
@@ -2141,7 +2803,7 @@ void A_HealChase(AActor* actor)
 {
 	int state, sound;
 
-	if (!actor)
+	if (!actor || !serverside)
 		return;
 
 	state = actor->state->args[0];
@@ -2206,10 +2868,18 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 
 					info = corpsehit->info;
 
+					corpsehit->flags =
+					    (info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
+					P_GiveFriendlyOwnerInfo(corpsehit, actor);
+
 					if (serverside)
 					{
-						level.respawned_monsters++;
-						SV_UpdateMonsterRespawnCount();
+						if (!(actor->flags & MF_FRIEND))
+						{
+							level.respawned_monsters++;
+							SV_UpdateMonsterRespawnCount();
+						}
 					}
 
 					P_SetMobjState(corpsehit, info->raisestate);
@@ -2227,8 +2897,8 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 						corpsehit->height <<= 2;
 					}
 
-					corpsehit->flags = info->flags;
 					corpsehit->health = info->spawnhealth;
+					corpsehit->lastenemy = AActor::AActorPtr();
 					corpsehit->target = AActor::AActorPtr();
 
 					return true;
@@ -2289,7 +2959,7 @@ void A_FindTracer(AActor* actor)
 	fov = FixedToAngle(actor->state->args[0]);
 	dist = (actor->state->args[1]);
 
-	AActor* tracer = P_RoughTargetSearch(actor, fov, dist);
+	AActor* tracer = P_RoughTargetSearch(actor, fov, dist, RoughTracerCheck);
 
 	if (!tracer || tracer->health <= 0)
 		return;
@@ -2508,6 +3178,38 @@ void A_Stop(AActor* actor)
 	actor->momx = actor->momy = actor->momz = 0;
 }
 
+// P_FriendlyEffects
+void P_FriendlyEffects()
+{
+	TThinkerIterator<AActor> iterator;
+	AActor* other;
+
+	while ((other = iterator.Next()))
+	{
+		if (other->health <= 0)
+		{
+			other->effects = 0;
+			continue;
+		}
+
+		if (other->player || !(other->flags & MF_FRIEND) || other->health <= 0 ||
+		    (other->oflags & MFO_BOSSPOOL))
+			continue;
+
+		if (validplayer(displayplayer()) && displayplayer().mo &&
+		    P_IsFriendlyThing(displayplayer().mo, other))
+		{
+			other->effects = FX_FRIENDHEARTS;
+			other->translation = translationref_t(&friendtable[0]);
+		}
+		else
+		{
+			other->effects = 0;
+			other->translation = 0;
+		}
+	}
+}
+
 // P_RemoveSoulLimit
 bool P_RemoveSoulLimit()
 {
@@ -2586,6 +3288,12 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 		return;														//   |
 	}																// phares
 	 */
+
+	/* killough 7/20/98: PEs shoot lost souls with the same friendliness */
+	other->flags = (other->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+
+	P_GiveFriendlyOwnerInfo(other, actor);
+
 	// Check for movements.
 	if (!P_TryMove(other, x, y, false))
 	{
@@ -2685,7 +3393,7 @@ void A_Fall (AActor *actor)
 	// Remove any sort of boss effect on kill
 	// OFlags hack because of client issues
 	// Only remove the sparkling fountain, keep the transition
-	if (actor->type != MT_PLAYER && (actor->oflags & hordeBossModMask))
+	if (actor->type != MT_PLAYER && actor->effects)
 	{
 		actor->effects = 0;
 	}
@@ -2960,6 +3668,10 @@ void A_BrainSpit (AActor *mo)
 		newmobj->target = targ->ptr();
 		newmobj->reactiontime =
 			((targ->y - mo->y)/newmobj->momy) / newmobj->state->tics;
+		// killough 7/18/98: brain friendliness is transferred
+		newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+
+		P_GiveFriendlyOwnerInfo(newmobj, mo);
 	}
 
 	S_Sound (mo, CHAN_WEAPON, "brain/spit", 1, ATTN_NONE);
@@ -3030,7 +3742,13 @@ void A_SpawnFly (AActor *mo)
 		type = MT_BRUISER;
 
 	newmobj = new AActor (targ->x, targ->y, targ->z, type);
-	if (P_LookForPlayers (newmobj, true))
+
+	/* killough 7/18/98: brain friendliness is transferred */
+	newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+
+	P_GiveFriendlyOwnerInfo(newmobj, mo);
+
+	if (P_LookForTargets (newmobj, true))
 		P_SetMobjState (newmobj, newmobj->info->seestate, true);
 
 	// telefrag anything in this spot
@@ -3108,8 +3826,9 @@ void A_Spawn(AActor* mo)
 		newmobj = new AActor(mo->x, mo->y, (mo->state->misc2 << FRACBITS) + mo->z,
 			                    (mobjtype_t)(mo->state->misc1 - 1));
 
-		// newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
-		// // TODO !!!
+		newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+
+		P_GiveFriendlyOwnerInfo(newmobj, mo);
 	}
 }
 

@@ -375,7 +375,7 @@ static void WI_updateAnimation(bool enteringcondition)
 	{
 		animation.states = &animation.exiting_states;
 	}
-	else if (enteranim)
+	else if (enteringcondition && enteranim)
 	{
 		animation.states = &animation.entering_states;
 	}

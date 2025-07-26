@@ -57,6 +57,7 @@ EXTERN_CVAR(sv_monsterdamage)
 EXTERN_CVAR(sv_fraglimit)
 EXTERN_CVAR(sv_fragexitswitch) // [ML] 04/4/06: Added compromise for older exit method
 EXTERN_CVAR(sv_friendlyfire)
+EXTERN_CVAR(sv_friendlymonsterfire)
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
@@ -64,6 +65,7 @@ EXTERN_CVAR(co_zdoomphys)
 EXTERN_CVAR(cl_predictpickup)
 EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(co_globalsound)
+EXTERN_CVAR(co_helpfriends)
 EXTERN_CVAR(g_lives)
 
 // sapientlion - experimental
@@ -255,8 +257,6 @@ int P_GetDeathCount(const player_t* player)
 // mbf21: take into account new weapon autoswitch flags
 static ItemEquipVal P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int oldammo)
 {
-	int i;
-
 	// Keep the original behaviour while playbacking demos only.
 	if (demoplayback)
 	{
@@ -299,13 +299,13 @@ static ItemEquipVal P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int 
 		if (weaponinfo[player->readyweapon].flags & WPF_AUTOSWITCHFROM &&
 		    player->ammo[weaponinfo[player->readyweapon].ammotype] != ammo)
 		{
-			for (i = NUMWEAPONS - 1; i > player->readyweapon; --i)
+			for (int i = NUMWEAPONS - 1; i > player->readyweapon; --i)
 			{
 				if (player->weaponowned[i] &&
 				    !(weaponinfo[i].flags & WPF_NOAUTOSWITCHTO) &&
 				    weaponinfo[i].ammotype == ammo &&
-				    weaponinfo[i].ammouse > oldammo &&
-				    weaponinfo[i].ammouse <= player->ammo[ammo])
+				    weaponinfo[i].ammopershot > oldammo &&
+				    weaponinfo[i].ammopershot <= player->ammo[ammo])
 				{
 					player->pendingweapon = (weapontype_t)i;
 					break;
@@ -577,6 +577,78 @@ ItemEquipVal P_GivePower(player_t *player, int /*powertype_t*/ power)
 }
 
 #include "v_textcolors.h"
+
+	/*
+ * @brief Player grabbed a resurrect player powerup
+ */
+static void P_ResurrectPlayerPowerUp(player_t* player)
+{
+	// Not lives game? Nothing to do.
+	if (!G_IsLivesGame())
+		return;
+
+	if (!player)
+		return;
+
+	// Grab all the players in game, make a list of their ids, then pick one at random
+	PlayersView ingame = PlayerQuery().notHasLives().execute().players;
+	std::vector<int> ingameplayers;
+	for (const auto& p : ingame)
+	{
+		if (p->id != player->id)
+			ingameplayers.push_back(p->id);
+	}
+
+	if (ingameplayers.empty())
+	{
+		SV_BroadcastPrintFmt("{} tried to resurrect someone, but everyone is alive!\n",
+		                   player->userinfo.netname);
+		return;
+	}
+
+	int arrayindex = M_RandomInt(ingameplayers.size());
+
+	int playerid = ingameplayers.at(arrayindex);
+
+	player_t* pl = &idplayer(playerid);
+
+	if (!validplayer(*pl))
+		return;
+
+	pl->lives += 1;
+	pl->playerstate = PST_REBORN;
+
+	SV_BroadcastPrintFmt("{} has brought {} back into the fight!\n",
+	                   player->userinfo.netname, pl->userinfo.netname);
+
+	// Send a res sound directly to this player.
+	MSG_WriteSVC(&pl->client.reliablebuf, SVC_PlayerInfo(*pl));
+	S_PlayerSound(pl, NULL, CHAN_INTERFACE, "misc/plraise", ATTN_NONE);
+
+	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*pl, SVC_PM_LIVES),
+	                 playerid);
+}
+
+/*
+ * @brief Player grabbed an extra life powerup
+ */
+static void P_AwardExtraLifePowerUp(player_t* player)
+{
+	// Not lives game? Nothing to do.
+	if (!G_IsLivesGame())
+		return;
+
+	if (!player)
+		return;
+
+	SV_BroadcastPrintFmt("{} was awarded an extra life!\n",
+	                   player->userinfo.netname);
+
+	player->lives += 1;
+	MSG_WriteSVC(&player->client.reliablebuf, SVC_PlayerInfo(*player));
+	MSG_BroadcastSVC(CLBUF_RELIABLE, SVC_PlayerMembers(*player, SVC_PM_LIVES),
+	                 player->id);
+}
 
 /**
  * @brief Give the player a care package.
@@ -1121,6 +1193,18 @@ void P_GiveSpecial(player_t *player, AActor *special)
 			P_GiveCarePack(player);
 		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_CAREPACKAGE, false);
 			break;
+
+		case SPR_LIVE:
+		    // Award an extra life to the player who collects this
+		    P_AwardExtraLifePowerUp(player);
+		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_EXTRALIFE, false);
+		    break;
+
+		case SPR_RSTM:
+		    // Resurrect a player with this power up
+		    P_ResurrectPlayerPowerUp(player);
+		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_RESTEAMMATE, false);
+		    break;
 
 		// weapons
 	    case SPR_BFUG:
@@ -1996,7 +2080,7 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 	}
 }
 
-static bool P_InfightingImmune(AActor* target, AActor* source)
+bool P_InfightingImmune(AActor* target, AActor* source)
 {
 	return // not default behaviour, and same group
 		mobjinfo[target->type].infighting_group != IG_DEFAULT &&
@@ -2047,9 +2131,19 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
     }
 
 	// [AM] Target is invulnerable to infighting from any non-player source.
-	if (source && source->player == NULL && target->oflags & MFO_INFIGHTINVUL)
+	// Unless it is friendly (and thus hostile to bosses)
+	if (source && target->oflags & MFO_INFIGHTINVUL && (source->player == NULL && P_IsFriendlyThing(source, target)))
 	{
 		return;
+	}
+
+	// No damage with sv_friendlymonsterfire
+	if (!sv_friendlymonsterfire && source && target != source && mod != MOD_TELEFRAG)
+	{
+		if (source->flags & MF_FRIEND && P_IsFriendlyThing(source, target))
+		{
+			return;
+		}
 	}
 
 	MeansOfDeath = mod;
@@ -2108,8 +2202,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		// make fall forwards sometimes
 		if (damage < 40
 			&& damage > target->health
-			&& target->z - inflictor->z > 64 * FRACUNIT
-			&& (P_Random() & 1))
+			&& target->z - inflictor->z > 64 * FRACUNIT && (P_Random(target) & 1))
 		{
 			ang += ANG180;
 			thrust *= 4;
@@ -2118,6 +2211,10 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		ang >>= ANGLETOFINESHIFT;
 		target->momx += FixedMul(thrust, finecosine[ang]);
 		target->momy += FixedMul(thrust, finesine[ang]);
+
+		/* killough 11/98: thrust objects hanging off ledges */
+		if (target->oflags & MFO_FALLING && target->gear >= MAXGEAR)
+			target->gear = 0;
 	}
 
 	// player specific
@@ -2329,9 +2426,15 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		return;
 	}
 
-    if (!(target->flags2 & MF2_DORMANT))
+	 /* If target is a player, set player's target to source,
+	 * so that a friend can tell who's hurting a player
+	 */
+	if (source && player && co_helpfriends)
+		target->target = source->ptr();
+
+  if (!(target->flags2 & MF2_DORMANT))
 	{
-		int pain = P_Random();
+		int pain = P_Random(target);
 
 		if (target->oflags & MFO_UNFLINCHING)
 		{
