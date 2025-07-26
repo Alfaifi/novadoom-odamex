@@ -216,6 +216,7 @@ argb_t translationRGB[MAXPLAYERS+1][16];
 byte *Ranges;
 static byte *translationtablesmem = NULL;
 byte bosstable[256];
+byte friendtable[256];
 byte greentable[MAXPLAYERS + 1][256];
 byte redtable[MAXPLAYERS + 1][256];
 
@@ -401,6 +402,18 @@ void R_InitTranslationTables()
 		                 SoftLight(bot.getb(), ytop.getb()));
 
 		::bosstable[i] = V_BestColor(V_GetDefaultPalette()->basecolors, mul);
+	}
+
+	// Friend translation is a pink tint.
+	const argb_t ptop(0xff, 0x70, 0xB9);
+	for (size_t i = 0; i < ARRAY_LENGTH(::friendtable); i++)
+	{
+		const argb_t bot = V_GetDefaultPalette()->basecolors[i];
+		const argb_t mul(SoftLight(bot.getr(), ptop.getr()),
+		                 SoftLight(bot.getg(), ptop.getg()),
+		                 SoftLight(bot.getb(), ptop.getb()));
+
+		::friendtable[i] = V_BestColor(V_GetDefaultPalette()->basecolors, mul);
 	}
 
 	translationtablesmem = new byte[256*(MAXPLAYERS+3+22)+255]; // denis - fixme - magic numbers?

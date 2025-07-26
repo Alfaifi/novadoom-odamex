@@ -125,6 +125,7 @@ EXTERN_CVAR(hud_extendedinfo)
 
 // [Ralphis - Menu] Compatibility Menu
 EXTERN_CVAR (co_allowdropoff)
+EXTERN_CVAR (co_pursuit)
 EXTERN_CVAR (co_realactorheight)
 EXTERN_CVAR (co_zdoomphys)
 EXTERN_CVAR (co_zdoomsound)
@@ -134,6 +135,14 @@ EXTERN_CVAR (cl_deathcam)
 EXTERN_CVAR (co_fineautoaim)
 EXTERN_CVAR (co_nosilentspawns)
 EXTERN_CVAR (co_boomphys)			// [ML] Roll-up of various compat options
+EXTERN_CVAR (co_helpfriends)
+EXTERN_CVAR (co_monsterbacking)
+EXTERN_CVAR (co_monsterfriction)
+EXTERN_CVAR (co_avoidhazards)
+EXTERN_CVAR (co_monkeys)
+EXTERN_CVAR (co_staylift)
+EXTERN_CVAR (co_dogjumping)
+EXTERN_CVAR (co_distfriend)
 EXTERN_CVAR (co_removesoullimit)
 EXTERN_CVAR (co_blockmapfix)
 EXTERN_CVAR (co_globalsound)
@@ -693,7 +702,16 @@ static menuitem_t CompatItems[] ={
 	{yellowtext, "Engine Compatibility",				{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "BOOM actor/sector/line checks",  {&co_boomphys},			 {2.0}, {0.0}, {0.0}, {OnOff}},
 	{svdiscrete, "ZDOOM 1.23 physics",             {&co_zdoomphys},         {2.0}, {0.0}, {0.0}, {OnOff}},
-	{svdiscrete, "ZDOOM 1.23 ammo checks",         {&co_zdoomammo},         {2.0}, {0.0}, {0.0}, {OnOff}},
+  {svdiscrete, "ZDOOM 1.23 ammo checks",         {&co_zdoomammo},         {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "MBF Monster target selection",{&co_pursuit},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Monsters help friends (MBF)",{&co_helpfriends},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Monsters strafe (MBF)",{&co_monsterbacking},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Monster wind/friction (MBF)",{&co_monsterfriction},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Monsters avoid crushers (MBF)",{&co_avoidhazards},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Monsters climb (MBF)",{&co_monkeys},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Monsters stay on lifts (MBF)",{&co_staylift},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "Friends can drop off (MBF)",{&co_dogjumping},      {2.0}, {0.0}, {0.0}, {OnOff}},
+	{slider,		 "Friend distance (MBF)", {&co_distfriend}, {0.0}, {2048.0}, {64.0}, {NULL}},
 	{redtext,   " ",								{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{yellowtext, "Sound",							{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "Fix silent west spawns",         {&co_nosilentspawns},    {2.0}, {0.0}, {0.0}, {OnOff}},

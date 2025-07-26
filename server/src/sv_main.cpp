@@ -3760,6 +3760,24 @@ void SV_Cheat(player_t &player)
 			SV_SendMobjToClient(actor, cl);
 		}
 	}
+	else if (cheatType == 3)
+	{
+		const char* wantsummon = MSG_ReadString();
+
+		if (!CHEAT_AreCheatsEnabled())
+			return;
+
+		AActor* actor = CHEAT_Summon(&player, wantsummon, true);
+
+		if (actor == NULL)
+			return;
+
+		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		{
+			client_t* cl = &it->client;
+			SV_SendMobjToClient(actor, cl);
+		}
+	}
 }
 
 void SV_WantWad(player_t &player)

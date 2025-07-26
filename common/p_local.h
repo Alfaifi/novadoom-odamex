@@ -66,6 +66,10 @@
 #define USERANGE		(64*FRACUNIT)
 #define MISSILERANGE	(32*64*FRACUNIT)
 
+// a couple of explicit constants for non-melee things that used to use MELEERANGE
+#define WAKEUPRANGE (64 * FRACUNIT)
+#define SNEAKRANGE (128 * FRACUNIT)
+
 #define WATER_SINK_FACTOR		3
 #define WATER_SINK_SMALL_FACTOR	4
 #define WATER_SINK_SPEED		(FRACUNIT/2)
@@ -189,7 +193,10 @@ fixed_t P_AproxDistance2 (const AActor *mo, fixed_t x, fixed_t y);
 fixed_t P_AproxDistance2 (const AActor *a, const AActor *b);
 
 bool P_ActorInFOV(const AActor* origin, const AActor* mo , float f, fixed_t dist);
-AActor* P_RoughTargetSearch(AActor* mo, angle_t fov, int distance);
+AActor* P_RoughTargetSearch(AActor* mo, angle_t fov, int distance,
+                            AActor* (*searchFunc)(AActor*, int, angle_t));
+AActor* RoughTracerCheck(AActor* mo, int index, angle_t fov);
+AActor* RoughMonsterCheck(AActor* mo, int index, angle_t fov);
 
 int 	P_PointOnLineSide (fixed_t x, fixed_t y, const line_t *line);
 int 	P_PointOnDivlineSide (fixed_t x, fixed_t y, const divline_t *line);
@@ -231,7 +238,8 @@ angle_t P_PointToAngle(fixed_t xo, fixed_t yo, fixed_t x, fixed_t y);
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-extern bool				floatok;
+extern int				floatok;
+extern int				felldown;
 extern fixed_t			tmfloorz;
 extern fixed_t			tmceilingz;
 extern msecnode_t		*sector_list;		// phares 3/16/98
@@ -252,7 +260,7 @@ bool	P_CheckPosition (AActor *thing, fixed_t x, fixed_t y);
 AActor	*P_CheckOnmobj (AActor *thing);
 void	P_FakeZMovement (AActor *mo);
 bool	P_CheckSlopeWalk (AActor *actor, fixed_t &xmove, fixed_t &ymove);
-bool	P_TryMove (AActor* thing, fixed_t x, fixed_t y, bool dropoff, bool onfloor = false);
+bool	P_TryMove (AActor* thing, fixed_t x, fixed_t y, int dropoff, bool onfloor = false);
 bool	P_TeleportMove (AActor* thing, fixed_t x, fixed_t y, fixed_t z, bool telefrag);	// [RH] Added z and telefrag parameters
 void	P_SlideMove (AActor* mo);
 bool	P_CheckSight (const AActor* t1, const AActor* t2);
@@ -495,8 +503,13 @@ bool PO_Busy (int polyobj);
 
 bool P_CheckFov(AActor* t1, AActor* t2, angle_t fov);
 bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest);
-bool P_IsTeamMate(AActor* actor, AActor* player);
 bool P_IsVoodooDoll(const AActor* mo);
+void P_FriendlyEffects();
+void P_GiveFriendlyOwnerInfo(AActor* friendly, const AActor* origin);
+bool P_ProjectileImmune(AActor* target, AActor* source);
+void P_SetupHelpers();
+void P_ClearHelpers();
+void P_RunHelperTics();
 
 
 //

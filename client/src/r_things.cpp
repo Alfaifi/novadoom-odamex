@@ -1167,10 +1167,19 @@ void R_ProjectParticle (particle_t *particle, const sector_t *sector, int fakesi
 	fixed_t x = particle->x;
 	fixed_t y = particle->y;
 	fixed_t z = particle->z;
-	fixed_t height = particle->size*(FRACUNIT/4);
-	fixed_t width = particle->size*(FRACUNIT/4);
+	fixed_t height = particle->size * (FRACUNIT / 4);
+	fixed_t width = particle->size * (FRACUNIT / 4);
 	fixed_t topoffs = height;
 	fixed_t sideoffs = width >> 1;
+
+	if (particle->sprite != NO_PARTICLE)
+	{
+		patch_t* patch = W_CachePatch(particle->sprite);
+		height = patch->height() << FRACBITS;
+		width = patch->width() << FRACBITS;
+		topoffs = patch->topoffset();
+		sideoffs = patch->leftoffset();
+	}
 
 	vissprite_t* vis = R_GenerateVisSprite(sector, fakeside, x, y, z, height, width, topoffs, sideoffs, false);
 
@@ -1178,12 +1187,22 @@ void R_ProjectParticle (particle_t *particle, const sector_t *sector, int fakesi
 		return;
 
 	vis->translation = translationref_t();
-	vis->startfrac = particle->color;
-	vis->patch = NO_PARTICLE;
-	vis->mobjflags = particle->trans;
+	vis->translucency = 65535;
 	vis->statusflags = 0;
 	vis->mo = NULL;
 	vis->spectator = false;
+
+	if (particle->sprite == NO_PARTICLE)
+	{
+		vis->startfrac = particle->color;
+		vis->patch = NO_PARTICLE;
+		vis->mobjflags = particle->trans;
+	}
+	else
+	{
+		vis->patch = particle->sprite;
+		vis->translucency = (particle->trans + 1) << 8;
+	}
 
 	// get light level
 	if (fixedcolormap.isValid())

@@ -155,6 +155,7 @@ EXTERN_CVAR (mute_enemies)
 EXTERN_CVAR (cl_autoaim)
 
 EXTERN_CVAR (cl_interp)
+EXTERN_CVAR (cl_showfriends)
 EXTERN_CVAR (cl_serverdownload)
 EXTERN_CVAR (cl_forcedownload)
 
@@ -587,6 +588,9 @@ void CL_SpyCycle(Iterator begin, Iterator end)
 				consoleplayer_id = player.id;
 				ST_ForceRefresh();
 			}
+
+			if (cl_showfriends)
+				P_FriendlyEffects(); // Mark any new friendly monsters with an effect
 
 			return;
 		}
@@ -1405,6 +1409,9 @@ void CL_SpectatePlayer(player_t& player, bool spectate)
 	{
 		R_ForceViewWindowResize();		// toggline spectator mode affects status bar visibility
 
+		if (cl_showfriends)
+			P_FriendlyEffects(); // Mark any new friendly monsters with an effect
+
 		if (player.spectator)
 		{
 			player.playerstate = PST_LIVE;				// Resurrect dead spectators
@@ -2161,6 +2168,16 @@ void CL_SendSummonCheat(const char* summon)
 {
 	MSG_WriteMarker(&net_buffer, clc_cheat);
 	MSG_WriteByte(&net_buffer, 2);
+	MSG_WriteString(&net_buffer, summon);
+}
+
+//
+// CL_SendSummonFriendCheat
+//
+void CL_SendSummonFriendCheat(const char* summon)
+{
+	MSG_WriteMarker(&net_buffer, clc_cheat);
+	MSG_WriteByte(&net_buffer, 3);
 	MSG_WriteString(&net_buffer, summon);
 }
 

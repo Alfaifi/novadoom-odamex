@@ -57,6 +57,7 @@ EXTERN_CVAR(sv_monsterdamage)
 EXTERN_CVAR(sv_fraglimit)
 EXTERN_CVAR(sv_fragexitswitch) // [ML] 04/4/06: Added compromise for older exit method
 EXTERN_CVAR(sv_friendlyfire)
+EXTERN_CVAR(sv_friendlymonsterfire)
 EXTERN_CVAR(sv_allowexit)
 EXTERN_CVAR(sv_forcerespawn)
 EXTERN_CVAR(sv_forcerespawntime)
@@ -64,6 +65,7 @@ EXTERN_CVAR(co_zdoomphys)
 EXTERN_CVAR(cl_predictpickup)
 EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(co_globalsound)
+EXTERN_CVAR(co_helpfriends)
 EXTERN_CVAR(g_lives)
 
 // sapientlion - experimental
@@ -2078,7 +2080,7 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 	}
 }
 
-static bool P_InfightingImmune(AActor* target, AActor* source)
+bool P_InfightingImmune(AActor* target, AActor* source)
 {
 	return // not default behaviour, and same group
 		mobjinfo[target->type]->infighting_group != IG_DEFAULT &&
@@ -2129,9 +2131,19 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
     }
 
 	// [AM] Target is invulnerable to infighting from any non-player source.
-	if (source && source->player == NULL && target->oflags & MFO_INFIGHTINVUL)
+	// Unless it is friendly (and thus hostile to bosses)
+	if (source && target->oflags & MFO_INFIGHTINVUL && (source->player == NULL && P_IsFriendlyThing(source, target)))
 	{
 		return;
+	}
+
+	// No damage with sv_friendlymonsterfire
+	if (!sv_friendlymonsterfire && source && target != source && mod != MOD_TELEFRAG)
+	{
+		if (source->flags & MF_FRIEND && P_IsFriendlyThing(source, target))
+		{
+			return;
+		}
 	}
 
 	MeansOfDeath = mod;
@@ -2190,8 +2202,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		// make fall forwards sometimes
 		if (damage < 40
 			&& damage > target->health
-			&& target->z - inflictor->z > 64 * FRACUNIT
-			&& (P_Random() & 1))
+			&& target->z - inflictor->z > 64 * FRACUNIT && (P_Random(target) & 1))
 		{
 			ang += ANG180;
 			thrust *= 4;
@@ -2200,6 +2211,10 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		ang >>= ANGLETOFINESHIFT;
 		target->momx += FixedMul(thrust, finecosine[ang]);
 		target->momy += FixedMul(thrust, finesine[ang]);
+
+		/* killough 11/98: thrust objects hanging off ledges */
+		if (target->oflags & MFO_FALLING && target->gear >= MAXGEAR)
+			target->gear = 0;
 	}
 
 	// player specific
@@ -2411,9 +2426,15 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		return;
 	}
 
-    if (!(target->flags2 & MF2_DORMANT))
+	 /* If target is a player, set player's target to source,
+	 * so that a friend can tell who's hurting a player
+	 */
+	if (source && player && co_helpfriends)
+		target->target = source->ptr();
+
+  if (!(target->flags2 & MF2_DORMANT))
 	{
-		int pain = P_Random();
+		int pain = P_Random(target);
 
 		if (target->oflags & MFO_UNFLINCHING)
 		{
