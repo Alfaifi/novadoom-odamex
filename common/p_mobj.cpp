@@ -162,7 +162,7 @@ AActor::AActor(const AActor& other)
       translucency(other.translucency), waterlevel(other.waterlevel), gear(other.gear),
       onground(other.onground), touching_sectorlist(other.touching_sectorlist),
       deadtic(other.deadtic), oldframe(other.oldframe), rndindex(other.rndindex),
-      netid(other.netid), tid(other.tid), 
+      netid(other.netid), tid(other.tid),
       friend_playerid(other.friend_playerid),
       friend_teamid(other.friend_teamid), pursuecount(other.pursuecount),
       strafecount(other.strafecount),
@@ -3036,13 +3036,26 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 	// [CMB] find the value in the mobjinfo table if we asked for a specific type; otherwise check the spawn table
 	mobjinfo_t* info = nullptr;
-	int32_t spawn_idx = type == -1 ? mthing->type : type;
-	auto mobj_it = spawn_map.find(spawn_idx);
-	if (mobj_it != spawn_map.end())
+	if (type == -1)
 	{
-		info = mobj_it->second;
-		// set this for further down
-		type = info->type;
+		int32_t spawn_idx = type == -1 ? mthing->type : type;
+		auto spawn_it = spawn_map.find(spawn_idx);
+		if (spawn_it != spawn_map.end())
+		{
+			info = spawn_it->second;
+			// set this for further down
+			type = info->type;
+		}
+	}
+	else
+	{
+		auto mobj_it = mobjinfo.find(type);
+		if (mobj_it != mobjinfo.end())
+		{
+			info = &mobj_it->second;
+			// set this for further down
+			type = info->type;
+		}
 	}
 
 	if (info == nullptr)
