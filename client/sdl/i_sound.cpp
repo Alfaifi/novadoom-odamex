@@ -40,10 +40,6 @@
 #include "m_misc.h"
 #include "w_wad.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 #define NUM_CHANNELS 32
 
 static int mixer_freq;
@@ -363,16 +359,16 @@ int I_StartSound(int id, float vol, int sep, int pitch, bool loop)
 	// the last channel we used
 	int channel = nextchannel;
 
-	do
+	while (channel_in_use[channel])
 	{
 		channel = (channel + 1) % NUM_CHANNELS;
 
 		if (channel == nextchannel)
 		{
-			fprintf(stderr, "No free sound channels left.\n");
+			fmt::print(stderr, "No free sound channels left.\n");
 			return -1;
 		}
-	} while (channel_in_use[channel]);
+	}
 
 	nextchannel = channel;
 
@@ -398,6 +394,41 @@ void I_StopSound (int handle)
 	Mix_HaltChannel(handle);
 }
 
+void I_PauseSound(int handle)
+{
+	if (!sound_initialized)
+	{
+		return;
+	}
+
+	if (channel_in_use[handle])
+	{
+		Mix_Pause(handle);
+	}
+}
+
+void I_ResumeSound(int handle)
+{
+	if (!sound_initialized)
+	{
+		return;
+	}
+
+	if (channel_in_use[handle])
+	{
+		Mix_Resume(handle);
+	}
+}
+
+int I_SoundIsPaused(int handle)
+{
+	if (!sound_initialized)
+	{
+		return 0;
+	}
+
+	return Mix_Paused(handle);
+}
 
 
 int I_SoundIsPlaying (int handle)
@@ -438,7 +469,7 @@ void I_LoadSound (sfxinfo_struct *sfx)
 
 	if (!sfx->data)
 	{
-		DPrintf ("loading sound \"%s\" (%d)\n", sfx->name, sfx->lumpnum);
+		DPrintFmt("loading sound \"{}\" ({})\n", sfx->name, sfx->lumpnum);
 		getsfx (sfx);
 	}
 }
@@ -448,14 +479,7 @@ void I_InitSound()
 	if (I_IsHeadless() || Args.CheckParm("-nosound"))
 		return;
 
-    #if defined(SDL12)
-    const char *driver = getenv("SDL_AUDIODRIVER");
-
-	if(!driver)
-		driver = "default";
-
-    Printf(PRINT_HIGH, "I_InitSound: Initializing SDL's sound subsystem (%s)\n", driver);
-    #elif defined(SDL20)
+    #if defined(SDL20)
     Printf("I_InitSound: Initializing SDL's sound subsystem\n");
     #endif
 

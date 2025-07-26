@@ -30,16 +30,6 @@
 #include "sv_main.h"
 #include "v_textcolors.h"
 
-int D_GenderToInt (const char *gender)
-{
-	if (!stricmp (gender, "female"))
-		return GENDER_FEMALE;
-	else if (!stricmp (gender, "cyborg"))
-		return GENDER_NEUTER;
-	else
-		return GENDER_MALE;
-}
-
 bool SetServerVar (const char *name, const char *value)
 {
 	cvar_t *dummy;
@@ -60,7 +50,7 @@ bool SetServerVar (const char *name, const char *value)
 void D_SendServerInfoChange (const cvar_t *cvar, const char *value)
 {
 	SetServerVar(cvar->name(), value);
-	SV_BroadcastPrintf("%s%s has been modified to %s!\n", TEXTCOLOR_YELLOW, cvar->name(), (char*)value);
+	SV_BroadcastPrintFmt("{}{} has been modified to {}!\n", TEXTCOLOR_YELLOW, cvar->name(), value);
 	SV_ServerSettingChange ();
 }
 

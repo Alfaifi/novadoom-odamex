@@ -255,8 +255,6 @@ int P_GetDeathCount(const player_t* player)
 // mbf21: take into account new weapon autoswitch flags
 static ItemEquipVal P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int oldammo)
 {
-	int i;
-
 	// Keep the original behaviour while playbacking demos only.
 	if (demoplayback)
 	{
@@ -299,13 +297,13 @@ static ItemEquipVal P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int 
 		if (weaponinfo[player->readyweapon].flags & WPF_AUTOSWITCHFROM &&
 		    player->ammo[weaponinfo[player->readyweapon].ammotype] != ammo)
 		{
-			for (i = NUMWEAPONS - 1; i > player->readyweapon; --i)
+			for (int i = NUMWEAPONS - 1; i > player->readyweapon; --i)
 			{
 				if (player->weaponowned[i] &&
 				    !(weaponinfo[i].flags & WPF_NOAUTOSWITCHTO) &&
 				    weaponinfo[i].ammotype == ammo &&
-				    weaponinfo[i].ammouse > oldammo &&
-				    weaponinfo[i].ammouse <= player->ammo[ammo])
+				    weaponinfo[i].ammopershot > oldammo &&
+				    weaponinfo[i].ammopershot <= player->ammo[ammo])
 				{
 					player->pendingweapon = (weapontype_t)i;
 					break;
@@ -325,7 +323,7 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 
 	if (ammotype < 0 || ammotype > NUMAMMO)
     {
-		I_Error("P_GiveAmmo: bad type %i", ammotype);
+		I_Error("P_GiveAmmo: bad type {}", ammotype);
     }
 
 	if (player->ammo[ammotype] == player->maxammo[ammotype])
@@ -387,7 +385,8 @@ ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, bool dropped)
 	bool gaveweapon;
 
 	// [RH] Don't get the weapon if no graphics for it
-	state_t *state = states + weaponinfo[weapon].readystate;
+	// state_t* state = states + weaponinfo[weapon].readystate;
+	state_t* state = states[weaponinfo[weapon].readystate];
 	if ((state->frame & FF_FRAMEMASK) >= sprites[state->sprite].numframes)
 	{
 		return IEV_NotEquipped;
@@ -1414,27 +1413,21 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 // SexMessage: Replace parts of strings with gender-specific pronouns
 //
 // The following expansions are performed:
-//		%g -> he/she/it
-//		%h -> him/her/it
-//		%p -> his/her/its
+//		%g -> he/she/it/they
+//		%h -> him/her/it/them
+//		%p -> his/her/its/their
 //		%o -> other (victim)
 //		%k -> killer
 //
-void SexMessage (const char *from, char *to, int gender, const char *victim, const char *killer)
+void SexMessage (const char *from, char *to, gender_t gender, std::string_view victim, std::string_view killer)
 {
-	static const char *genderstuff[3][3] =
+	static constexpr std::string_view genderstuff[4][3] =
 	{
 		{ "he",  "him", "his" },
 		{ "she", "her", "her" },
-		{ "it",  "it",  "its" }
+		{ "it",  "it",  "its" },
+		{ "they",  "them",  "their" },
 	};
-	static constexpr int gendershift[3][3] =
-	{
-		{ 2, 3, 3 },
-		{ 3, 3, 3 },
-		{ 2, 2, 3 }
-	};
-	const char *subst = NULL;
 
 	do
 	{
@@ -1445,6 +1438,7 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 		else
 		{
 			int gendermsg = -1;
+			std::string_view subst{};
 
 			switch (from[1])
 			{
@@ -1454,13 +1448,11 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 			case 'o':	subst = victim;	break;
 			case 'k':	subst = killer;	break;
 			}
-			if (subst != NULL)
+			if (!subst.empty())
 			{
-				size_t len = strlen (subst);
-				memcpy (to, subst, len);
-				to += len;
+				strncpy(to, subst.data(), subst.length());
+				to += subst.length();
 				from++;
-				subst = NULL;
 			}
 			else if (gendermsg < 0)
 			{
@@ -1468,8 +1460,8 @@ void SexMessage (const char *from, char *to, int gender, const char *victim, con
 			}
 			else
 			{
-				strcpy (to, genderstuff[gender][gendermsg]);
-				to += gendershift[gender][gendermsg];
+				strncpy(to, genderstuff[gender][gendermsg].data(), genderstuff[gender][gendermsg].length());
+				to += genderstuff[gender][gendermsg].length();
 				from++;
 			}
 		}
@@ -1491,7 +1483,7 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	if (!G_CanShowObituary() || gamestate != GS_LEVEL)
 		return;
 
-	int gender = self->player->userinfo.gender;
+	gender_t gender = self->player->userinfo.gender;
 
 	// Treat voodoo dolls as unknown deaths
 	if (inflictor && inflictor->player == self->player)
@@ -1667,9 +1659,9 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 
 	if (message)
 	{
-		SexMessage(message, gendermessage, gender, self->player->userinfo.netname.c_str(),
-		           self->player->userinfo.netname.c_str());
-		SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+		SexMessage(message, gendermessage, gender, self->player->userinfo.netname,
+		           self->player->userinfo.netname);
+		SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 		toast_t toast;
 		toast.flags = toast_t::ICON | toast_t::RIGHT_PID;
@@ -1743,9 +1735,9 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 
 	if (message && attacker && attacker->player)
 	{
-		SexMessage(message, gendermessage, gender, self->player->userinfo.netname.c_str(),
-		           attacker->player->userinfo.netname.c_str());
-		SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+		SexMessage(message, gendermessage, gender, self->player->userinfo.netname,
+		           attacker->player->userinfo.netname);
+		SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 		toast_t toast;
 		toast.flags = toast_t::LEFT_PID | toast_t::ICON | toast_t::RIGHT_PID;
@@ -1757,9 +1749,9 @@ static void ClientObituary(AActor* self, AActor* inflictor, AActor* attacker)
 	}
 
 	SexMessage(GStrings(OB_DEFAULT), gendermessage, gender,
-	           self->player->userinfo.netname.c_str(),
-	           self->player->userinfo.netname.c_str());
-	SV_BroadcastPrintf(PRINT_OBITUARY, "%s\n", gendermessage);
+	           self->player->userinfo.netname,
+	           self->player->userinfo.netname);
+	SV_BroadcastPrintFmt(PRINT_OBITUARY, "{}\n", gendermessage);
 
 	toast_t toast;
 	toast.flags = toast_t::ICON | toast_t::RIGHT_PID;
@@ -1985,8 +1977,8 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 
 	// [AM] Save the "out of lives" message until after the obit.
 	if (g_lives && tplayer && tplayer->lives <= 0)
-		SV_BroadcastPrintf("%s is out of lives.\n",
-		                   tplayer->userinfo.netname.c_str());
+		SV_BroadcastPrintFmt("{} is out of lives.\n",
+		                     tplayer->userinfo.netname.c_str());
 
 	// Check sv_fraglimit.
 	if (source && source->player && target->player && level.time)
@@ -2089,9 +2081,9 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 static bool P_InfightingImmune(AActor* target, AActor* source)
 {
 	return // not default behaviour, and same group
-		mobjinfo[target->type].infighting_group != IG_DEFAULT &&
-		mobjinfo[target->type].infighting_group ==
-		mobjinfo[source->type].infighting_group;
+		mobjinfo[target->type]->infighting_group != IG_DEFAULT &&
+		mobjinfo[target->type]->infighting_group ==
+		mobjinfo[source->type]->infighting_group;
 }
 
 //
@@ -2457,7 +2449,10 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 		    !(source->flags3 & MF3_DMGIGNORED) &&
 		    !(source->oflags & MFO_INFIGHTINVUL) &&
 		    (!target->threshold || target->flags3 & MF3_NOTHRESHOLD) &&
-		    !P_InfightingImmune(target, source))
+		    !P_InfightingImmune(target, source) &&
+		    !((level.flags2 & LEVEL2_INFIGHTINGMASK) ?
+			    level.flags2 & LEVEL2_NOINFIGHTING :
+			    G_GetCurrentSkill().flags & SKILL_NOINFIGHTING))
 		{
 			// if not intent on another player, chase after this one
 			// [AM] Infight invul monsters will never provoke attacks.
@@ -2473,7 +2468,7 @@ void P_DamageMobj(AActor *target, AActor *inflictor, AActor *source, int damage,
 
 			target->target = source->ptr();
 			target->threshold = BASETHRESHOLD;
-			if (target->state == &states[target->info->spawnstate]
+			if (target->state == states[target->info->spawnstate]
 				&& target->info->seestate != S_NULL)
             {
 				P_SetMobjState(target, target->info->seestate);
@@ -2541,7 +2536,7 @@ void P_HealMobj(AActor* mo, int num)
 	}
 	else
 	{
-		int max = mobjinfo[mo->type].spawnhealth;
+		int max = mobjinfo[mo->type]->spawnhealth;
 
 		mo->health += num;
 		if (mo->health > max)

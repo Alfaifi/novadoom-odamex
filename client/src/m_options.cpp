@@ -128,6 +128,7 @@ EXTERN_CVAR (co_allowdropoff)
 EXTERN_CVAR (co_realactorheight)
 EXTERN_CVAR (co_zdoomphys)
 EXTERN_CVAR (co_zdoomsound)
+EXTERN_CVAR (co_zdoomammo)
 EXTERN_CVAR (co_fixweaponimpacts)
 EXTERN_CVAR (cl_deathcam)
 EXTERN_CVAR (co_fineautoaim)
@@ -147,9 +148,17 @@ EXTERN_CVAR (m_side)
 EXTERN_CVAR (m_forward)
 
 // [Ralphis - Menu] Sound Menu
-EXTERN_CVAR (snd_midireset)
-EXTERN_CVAR (snd_musicsystem)
 EXTERN_CVAR (snd_musicvolume)
+EXTERN_CVAR (snd_musicsystem)
+EXTERN_CVAR (snd_nomusic)
+EXTERN_CVAR (snd_midireset)
+EXTERN_CVAR (snd_midifallback)
+EXTERN_CVAR (snd_mididelay)
+EXTERN_CVAR (snd_midisysex)
+EXTERN_CVAR (snd_oplcore)
+EXTERN_CVAR (snd_oplpan)
+EXTERN_CVAR (snd_oplchips)
+EXTERN_CVAR (snd_oplbank)
 EXTERN_CVAR (snd_announcervolume)
 EXTERN_CVAR (snd_sfxvolume)
 EXTERN_CVAR (snd_crossover)
@@ -279,7 +288,6 @@ static void CompatOptions (void);
 static void NetworkOptions (void);
 static void WeaponOptions (void);
 static void GoToConsole (void);
-static void GoToConsole (void);
 void Reset2Defaults (void);
 void Reset2Saved (void);
 
@@ -326,7 +334,7 @@ menu_t OptionMenu = {
  *=======================================*/
 
 static menuitem_t ControlsItems[] = {
-#ifdef _XBOX
+#ifdef GCONSOLE
 	{ whitetext,"A to change, START to clear", {NULL}, {0.0}, {0.0}, {0.0}, {NULL} },
 #else
 	{ whitetext,"ENTER to change, BACKSPACE to clear", {NULL}, {0.0}, {0.0}, {0.0}, {NULL} },
@@ -507,14 +515,6 @@ static menuitem_t JoystickItems[] =
 	{ slider	,	"Turn Sensitivity"						, {&joy_sensitivity},	{1.0},		{30.0},		{1.0},		{NULL}						},
 	{ slider	,	"Alt. Turn Sensitivity"					, {&joy_fastsensitivity},	{1.0},		{30.0},		{1.0},		{NULL}						},
 	{ slider	,	"Joystick Deadzone"						, {&joy_deadzone},		{0.0},		{0.75},		{0.05},		{NULL}						},
-#ifdef SDL12
-	{ redtext	,	" "										, {NULL},				{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ whitetext	,	"Press ENTER to change"					, {NULL}, 				{0.0}, 		{0.0}, 		{0.0}, 		{NULL} 						},
-	{ joyaxis	,	"Walk Analog Axis"						, {&joy_forwardaxis},	{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ joyaxis	,	"Strafe Analog Axis"					, {&joy_strafeaxis},	{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ joyaxis	,	"Turn Analog Axis"						, {&joy_turnaxis},		{0.0},		{0.0},		{0.0},		{NULL}						},
-	{ joyaxis	,	"Look Analog Axis"						, {&joy_lookaxis},		{0.0},		{0.0},		{0.0},		{NULL}						},
-#endif
 };
 
 menu_t JoystickMenu = {
@@ -535,14 +535,16 @@ menu_t JoystickMenu = {
   *=======================================*/
 
 static value_t MusSys[] = {
+	#ifndef _WIN32
 	{ MS_SDLMIXER,	"SDL Mixer"},
+	#endif
+	{ MS_LIBADLMIDI,"libADLMIDI (OPL3 FM)"},
 	#ifdef OSX
 	{ MS_AUDIOUNIT,	"AudioUnit"},
 	#endif	// OSX
 	#ifdef PORTMIDI
 	{ MS_PORTMIDI,	"PortMidi"},
 	#endif	// PORTMIDI
-	{ MS_NONE,		"No Music"}
 };
 
 static value_t MidiReset[] = {
@@ -550,6 +552,18 @@ static value_t MidiReset[] = {
 	{ 1.0,			"GM" },
 	{ 2.0,			"GS" },
 	{ 3.0,			"XG" }
+};
+
+static value_t OplCore[] = {
+	{ 0.0,			"Fast (Dosbox)"},
+	{ 1.0,			"Balanced (Nuked 1.74)"},
+	{ 2.0,			"Accurate (Nuked 1.8)"}
+};
+
+static value_t OplBank[] = {
+	{ 0.0,			"Doom"},
+	{ 1.0,			"Doom II"},
+	{ 2.0,			"DMXOPL3"}
 };
 
 static value_t VoxType[] = {
@@ -564,30 +578,88 @@ static value_t ChatSndType[] = {
 	{ 2.0,			"Teamchat only" }
 };
 
-static float num_mussys = static_cast<float>(ARRAY_LENGTH(MusSys));
+static void AdvMidiOptions (void);
+static void LibAdlMidiOptions (void);
+
+static constexpr float num_mussys = static_cast<float>(ARRAY_LENGTH(MusSys));
 
 EXTERN_CVAR(cl_chatsounds)
 
-static menuitem_t SoundItems[] = {
-    { redtext,	" ",					{NULL},	{0.0}, {0.0}, {0.0}, {NULL} },
-	{ yellowtext ,   "Sound Levels"                      , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
-	{ slider    ,	"Music Volume"                      , {&snd_musicvolume},	{0.0},      	{1.0},	    {0.015625},      {NULL} },
-	{ slider    ,	"Sound Volume"                      , {&snd_sfxvolume},		{0.0},      	{1.0},	    {0.015625},      {NULL} },
-	{ slider    ,	"Announcer Volume"             		, {&snd_announcervolume},	{0.0},      {1.0},	    {0.015625},      {NULL} },
-	{ discrete  ,   "Stereo Switch"                     , {&snd_crossover},	    {2.0},			{0.0},		{0.0},		{OnOff} },
-	{ redtext   ,	" "                                 , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
-	{ yellowtext ,   "Music Options"                     , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
-	{ discrete	,	"Music System Backend"				, {&snd_musicsystem},	{num_mussys},	{0.0},		{0.0},		{MusSys} },
-	{ discrete	,	"MIDI Reset"						, {&snd_midireset},		{4.0},			{0.0},		{0.0},		{MidiReset} },
-	{ redtext   ,	" "                                 , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
-	{ yellowtext ,   "Sound Options"                     , {NULL},	            {0.0},      	{0.0},      {0.0},      {NULL} },
-	{ discrete  ,   "Game SFX"                          , {&snd_gamesfx},		{2.0},			{0.0},		{0.0},		{OnOff} },
-	{ discrete  ,   "Announcer Type"                    , {&snd_voxtype},		{3.0},			{0.0},		{0.0},		{VoxType} },
-	{ discrete  ,   "Player Connect Alert"              , {&cl_connectalert},	{2.0},			{0.0},		{0.0},		{OnOff} },
-	{ discrete  ,   "Player Disconnect Alert"           , {&cl_disconnectalert},{2.0},			{0.0},		{0.0},		{OnOff} },
-    { discrete  ,	"Chat sounds"						, {&cl_chatsounds},		{3.0},			{0.0},		{0.0},		{ChatSndType}},
+static menuitem_t AdvMidiItems[] = {
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ yellowtext, "Advanced MIDI Options" , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ discrete  , "MIDI Instrument Fallback", {&snd_midifallback}, {4.0}, {0.0}, {0.0}, {OnOff} },
+	{ slider    , "MIDI Reset Delay (ms)", {&snd_mididelay}, {0.0}, {2000.0}, {50.0}, {NULL} },
+	#ifdef PORTMIDI
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ yellowtext, "PortMidi Options", {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ discrete  , "MIDI Reset"      , {&snd_midireset}, {4.0}, {0.0}, {0.0}, {MidiReset} },
+	{ discrete  , "Read MIDI SysEx" , {&snd_midisysex}, {4.0}, {0.0}, {0.0}, {OnOff} },
+	#endif
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ redtext   , " "               , {NULL}          , {0.0}, {0.0}, {0.0}, {NULL} },
+	{yellowtext, "! ! ! NOTICE ! ! !", {NULL}, {0.0}, {0.0}, {0.0}, {NULL}},
+    {orangetext, "Modifying these settings may cause", {NULL},{0.0}, {0.0}, {0.0}, {NULL}},
+    {orangetext, "unwanted behavior during MIDI playback!", {NULL}, {0.0}, {0.0}, {0.0}, {NULL}},
+};
 
- };
+ static menuitem_t LibAdlMidiItems[] = {
+	{ redtext   , " "                   , {NULL}         , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ yellowtext, "OPL FM Synth Options", {NULL}         , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ redtext   , " "                   , {NULL}         , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ discrete  , "OPL quality"         , {&snd_oplcore} , {3.0}, {0.0}, {0.0}, {OplCore} },
+	{ discrete  , "Full OPL panning"    , {&snd_oplpan}  , {2.0}, {0.0}, {0.0}, {OnOff} },
+	{ slider    , "# of OPL chips"      , {&snd_oplchips}, {1.0}, {8.0}, {1.0}, {NULL} },
+	{ discrete  , "OPL instruments"     , {&snd_oplbank} , {3.0}, {0.0}, {0.0}, {OplBank} },
+};
+
+static menuitem_t SoundItems[] = {
+	{ redtext   ,   " "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ yellowtext,   "Sound Levels"             , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ slider    ,	"Music Volume"             , {&snd_musicvolume},    {0.0},        {1.0}, {0.015625}, {NULL} },
+	{ slider    ,	"Sound Volume"             , {&snd_sfxvolume},      {0.0},        {1.0}, {0.015625}, {NULL} },
+	{ slider    ,	"Announcer Volume"         , {&snd_announcervolume},{0.0},        {1.0}, {0.015625}, {NULL} },
+	{ discrete  ,   "Stereo Switch"            , {&snd_crossover},      {2.0},        {0.0}, {0.0},      {OnOff} },
+	{ redtext   ,	" "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ yellowtext,   "Music Options"            , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ discrete  ,   "Midi Synth"               , {&snd_musicsystem},    {num_mussys}, {0.0}, {0.0},      {MusSys} },
+	{ discrete  ,   "Disable Music"            , {&snd_nomusic},        {2.0},        {0.0}, {0.0},      {YesNo} },
+	{ redtext   ,	" "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ more      ,   "OPL FM Synth Options"     , {NULL},                {0.0},        {0.0}, {0.0},      {(value_t *)LibAdlMidiOptions}},
+	{ more      ,   "Advanced MIDI Options"    , {NULL},                {0.0},        {0.0}, {0.0},      {(value_t *)AdvMidiOptions}},
+	{ redtext   ,   " "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ yellowtext,   "Sound Options"            , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
+	{ discrete  ,   "Game SFX"                 , {&snd_gamesfx},        {2.0},        {0.0}, {0.0},      {OnOff} },
+	{ discrete  ,   "Announcer Type"           , {&snd_voxtype},        {3.0},        {0.0}, {0.0},      {VoxType} },
+	{ discrete  ,   "Player Connect Alert"     , {&cl_connectalert},    {2.0},        {0.0}, {0.0},      {OnOff} },
+	{ discrete  ,   "Player Disconnect Alert"  , {&cl_disconnectalert}, {2.0},        {0.0}, {0.0},      {OnOff} },
+	{ discrete  ,   "Chat sounds"              , {&cl_chatsounds},      {3.0},        {0.0}, {0.0},      {ChatSndType}},
+};
+
+menu_t AdvMidiMenu = {
+	"M_SOUND",
+	3,
+	ARRAY_LENGTH(AdvMidiItems),
+	177,
+	AdvMidiItems,
+	0,
+	0,
+	NULL
+};
+
+menu_t LibAdlMidiMenu = {
+	"M_SOUND",
+	3,
+	ARRAY_LENGTH(LibAdlMidiItems),
+	177,
+	LibAdlMidiItems,
+	0,
+	0,
+	NULL
+};
 
 menu_t SoundMenu = {
 	"M_SOUND",
@@ -621,6 +693,7 @@ static menuitem_t CompatItems[] ={
 	{yellowtext, "Engine Compatibility",				{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "BOOM actor/sector/line checks",  {&co_boomphys},			 {2.0}, {0.0}, {0.0}, {OnOff}},
 	{svdiscrete, "ZDOOM 1.23 physics",             {&co_zdoomphys},         {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "ZDOOM 1.23 ammo checks",         {&co_zdoomammo},         {2.0}, {0.0}, {0.0}, {OnOff}},
 	{redtext,   " ",								{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{yellowtext, "Sound",							{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "Fix silent west spawns",         {&co_nosilentspawns},    {2.0}, {0.0}, {0.0}, {OnOff}},
@@ -760,6 +833,7 @@ EXTERN_CVAR (am_classicmapstring)
 EXTERN_CVAR (am_usecustomcolors)
 EXTERN_CVAR (st_scale)
 EXTERN_CVAR (r_stretchsky)
+EXTERN_CVAR (r_linearsky)
 EXTERN_CVAR (r_skypalette)
 EXTERN_CVAR (r_wipetype)
 EXTERN_CVAR (r_drawplayersprites)
@@ -843,6 +917,7 @@ static menuitem_t VideoItems[] = {
 	{ redtext,	" ",					    {NULL},					{0.0}, {0.0},	{0.0},  {NULL} },
 	{ discrete, "See killer on Death",			{&cl_deathcam},   {2.0}, {0.0}, {0.0}, {OnOff}},
 	{ discrete, "Stretch short skies",	    {&r_stretchsky},	   	{3.0}, {0.0},	{0.0},  {OnOffAuto} },
+	{ discrete, "Linear Skies",			    {&r_linearsky},	   		{2.0}, {0.0},	{0.0},  {OnOff} },
 	{ discrete, "Invuln changes skies",		{&r_skypalette},		{2.0}, {0.0},	{0.0},	{OnOff} },
 	{ discrete, "Use softer invuln effect", {&r_softinvulneffect},	{2.0}, {0.0},	{0.0},	{OnOff} },
 	{ discrete, "Screen wipe style",	    {&r_wipetype},			{4.0}, {0.0},	{0.0},  {Wipes} },
@@ -1126,7 +1201,7 @@ void M_RestoreVideoMode()
 
 static value_t Depths[22];
 
-#ifdef _XBOX
+#ifdef GCONSOLE
 static const char VMEnterText[] = "Press A to set mode";
 static const char VMTestText[] = "Press X to test mode for 5 seconds";
 #else
@@ -2390,7 +2465,7 @@ void M_OptResponder (event_t *ev)
 		}
 		else
 		{
-#ifdef _XBOX
+#ifdef GCONSOLE
 		if (ev->data3 == 't' || ev->data1 == OKEY_JOY3)
 #else
 		if (ev->data3 == 't')
@@ -2493,7 +2568,6 @@ static void PlayerSetup (void)
 BEGIN_COMMAND (menu_keys)
 {
 	M_StartControlPanel ();
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	OptionsActive = true;
 	CustomizeControls();
 }
@@ -2502,6 +2576,16 @@ END_COMMAND (menu_keys)
 static void VideoOptions (void)
 {
 	M_SwitchMenu (&VideoMenu);
+}
+
+void AdvMidiOptions (void)
+{
+	M_SwitchMenu (&AdvMidiMenu);
+}
+
+void LibAdlMidiOptions (void)
+{
+	M_SwitchMenu (&LibAdlMidiMenu);
 }
 
 void SoundOptions (void) // [Ralphis] for sound menu
@@ -2527,7 +2611,6 @@ void WeaponOptions (void)
 BEGIN_COMMAND (menu_display)
 {
 	M_StartControlPanel ();
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	OptionsActive = true;
 	M_SwitchMenu (&VideoMenu);
 }
@@ -2537,7 +2620,6 @@ END_COMMAND (menu_display)
 BEGIN_COMMAND (menu_video)
 {
 	M_StartControlPanel ();
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	OptionsActive = true;
 	SetVidMode ();
 }

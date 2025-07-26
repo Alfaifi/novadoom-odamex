@@ -182,7 +182,7 @@ size_t P_HordePickDefine(const int current, const int total)
 {
 	if (::WAVE_DEFINES.empty())
 	{
-		I_Error("%s: No wave defines found.\n", __FUNCTION__);
+		I_Error("{}: No wave defines found.\n", __FUNCTION__);
 	}
 
 	if (total > 0)
@@ -249,7 +249,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 	const hordeDefine_t::monConfig_t* config = &monster->config;
 
 	int outCount = 0;
-	const int health = ::mobjinfo[outType].spawnhealth;
+	const int health = ::mobjinfo[outType]->spawnhealth;
 
 	// Maximum health.
 	int maxHealth = -1;

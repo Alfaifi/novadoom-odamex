@@ -92,6 +92,7 @@ void A_Fall (AActor *actor);
 
 
 void SV_UpdateMonsterRespawnCount();
+void SV_SendRaiseMobj(AActor* source, AActor* corpse);
 void SV_UpdateMobj(AActor* mo);
 void SV_Sound(AActor* mo, byte channel, const char* name, byte attenuation);
 
@@ -338,7 +339,7 @@ bool P_Move (AActor *actor)
 	}
 
 	if ((unsigned)actor->movedir >= 8)
-		I_Error ("Weird actor->movedir!");
+		I_Error("Weird actor->movedir!");
 
 	speed = actor->info->speed;
 
@@ -526,7 +527,7 @@ void P_NewChaseDir (AActor *actor)
 	dirtype_t	turnaround;
 
 	if (!actor->target)
-		I_Error ("P_NewChaseDir: called with no target");
+		I_Error("P_NewChaseDir: called with no target");
 
 	olddir = (dirtype_t)actor->movedir;
 	turnaround = opposite[olddir];
@@ -894,13 +895,13 @@ void A_Look (AActor *actor)
 	{
 		char sound[MAX_SNDNAME];
 
-		strcpy (sound, actor->info->seesound);
+		M_StringCopy(sound, actor->info->seesound, MAX_SNDNAME);
 
-		if (sound[strlen(sound)-1] == '1')
+		if (sound[strlen(sound) - 1] == '1')
 		{
-			sound[strlen(sound)-1] = P_Random(actor)%3 + '1';
+			sound[strlen(sound) - 1] = P_Random(actor)%3 + '1';
 			if (S_FindSound (sound) == -1)
-				sound[strlen(sound)-1] = '1';
+				sound[strlen(sound) - 1] = '1';
 		}
 
 		if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
@@ -1184,6 +1185,7 @@ void A_CPosRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator)
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1202,6 +1204,7 @@ void A_SpidRefire (AActor *actor)
 		return;
 
 	if (!actor->target
+		|| (actor->target->player && actor->target->player->spectator)
 		|| actor->target->health <= 0
 		|| !P_CheckSight(actor, actor->target)
         )
@@ -1477,9 +1480,33 @@ bool PIT_VileCheck (AActor *thing)
 
 	corpsehit = thing;
 	corpsehit->momx = corpsehit->momy = 0;
-	corpsehit->height <<= 2;
-	check = P_CheckPosition (corpsehit, corpsehit->x, corpsehit->y);
-	corpsehit->height >>= 2;
+
+	if (P_AllowPassover())
+		corpsehit->flags |= MF_SOLID;
+
+	if (co_novileghosts)
+	{
+		int height, radius;
+
+		corpsehit->flags |= MF_SOLID;
+		height = corpsehit->height; // save temporarily
+		radius = corpsehit->radius; // save temporarily
+		corpsehit->height = P_ThingInfoHeight(corpsehit->info);
+		corpsehit->radius = corpsehit->info->radius;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height = height; // restore
+		corpsehit->radius = radius; // restore
+		corpsehit->flags &= ~MF_SOLID;
+	}
+	else
+	{
+		corpsehit->height <<= 2;
+		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+		corpsehit->height >>= 2;
+	}
+
+	if (P_AllowPassover())
+		corpsehit->flags &= ~MF_SOLID;
 
 	return !check;
 }
@@ -1523,7 +1550,7 @@ void A_VileChase (AActor *actor)
 
 		vileobj = actor;
 
-		viletryradius = mobjinfo[MT_VILE].radius;
+		viletryradius = mobjinfo[MT_VILE]->radius;
 
 		for (bx=xl ; bx<=xh ; bx++)
 		{
@@ -1555,7 +1582,8 @@ void A_VileChase (AActor *actor)
 						SV_UpdateMonsterRespawnCount();
 					}
 
-					P_SetMobjState (corpsehit,info->raisestate, true);
+					P_SetMobjState (corpsehit,info->raisestate);
+					SV_SendRaiseMobj(actor, corpsehit);
 
 					// [Nes] - Classic demo compatability: Ghost monster bug.
 					if ((co_novileghosts)) {
@@ -1940,6 +1968,8 @@ void A_SpawnObject(AActor* actor)
 		}
 	}
 
+	SV_UpdateMobj(mo);
+
 	// [XA] don't bother with the dont-inherit-friendliness hack
 	// that exists in A_Spawn, 'cause WTF is that about anyway?
 }
@@ -1997,6 +2027,8 @@ void A_MonsterProjectile(AActor* actor)
 	// always set the 'tracer' field, so this pointer
 	// can be used to fire seeker missiles at will.
 	mo->tracer = actor->target;
+
+	SV_UpdateMobj(mo);
 }
 
 //
@@ -2180,7 +2212,8 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 						SV_UpdateMonsterRespawnCount();
 					}
 
-					P_SetMobjState(corpsehit, info->raisestate, true);
+					P_SetMobjState(corpsehit, info->raisestate);
+					SV_SendRaiseMobj(actor, corpsehit);
 
 					// [Nes] - Classic demo compatability: Ghost monster bug.
 					if ((co_novileghosts))
@@ -2436,13 +2469,14 @@ void A_JumpIfFlagsSet(AActor* actor)
 //
 void A_AddFlags(AActor* actor)
 {
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	const int flags = actor->state->args[0];
+	const int flags2 = actor->state->args[1];
+
+	if (flags & MF_TRANSLUCENT)
+		actor->translucency = TRANSLUC66;
 
 	actor->flags |= flags;
 	actor->flags2 |= flags2;
@@ -2456,13 +2490,14 @@ void A_AddFlags(AActor* actor)
 //
 void A_RemoveFlags(AActor* actor)
 {
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	const int flags = actor->state->args[0];
+	const int flags2 = actor->state->args[1];
+
+	if (flags & MF_TRANSLUCENT)
+		actor->translucency = FRACUNIT;
 
 	actor->flags &= ~flags;
 	actor->flags2 &= ~flags2;
@@ -2522,7 +2557,7 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 	// okay, there's room for another one
 	an = angle >> ANGLETOFINESHIFT;
 
-	prestep = 4*FRACUNIT + 3*(actor->info->radius + mobjinfo[MT_SKULL].radius)/2;
+	prestep = 4*FRACUNIT + 3*(actor->info->radius + mobjinfo[MT_SKULL]->radius)/2;
 
 	x = actor->x + FixedMul (prestep, finecosine[an]);
 	y = actor->y + FixedMul (prestep, finesine[an]);
@@ -2601,19 +2636,19 @@ void A_Scream (AActor *actor)
         return;
 
 
-	strcpy (sound, actor->info->deathsound);
+	M_StringCopy(sound, actor->info->deathsound, MAX_SNDNAME);
 
     if (stricmp(sound, "grunt/death1") == 0 ||
         stricmp(sound, "shotguy/death1") == 0 ||
         stricmp(sound, "chainguy/death1") == 0)
     {
-        sound[strlen(sound)-1] = P_Random(actor) % 3 + '1';
+        sound[strlen(sound) - 1] = P_Random(actor) % 3 + '1';
     }
 
     if (stricmp(sound, "imp/death1") == 0 ||
         stricmp(sound, "imp/death2") == 0)
     {
-        sound[strlen(sound)-1] = P_Random(actor) % 2 + '1';
+        sound[strlen(sound) - 1] = P_Random(actor) % 2 + '1';
     }
 
 	if (!co_zdoomsound && (actor->flags2 & MF2_BOSS || actor->flags3 & MF3_FULLVOLSOUNDS))
@@ -2821,7 +2856,7 @@ void P_SpawnBrainTargets (void)	// killough 3/26/98: renamed old function
 		{	// killough 2/7/98: remove limit on icon landings:
 			if (numbraintargets >= numbraintargets_alloc)
 			{
-				braintargets = (AActor **)Realloc (braintargets,
+				braintargets = (AActor **)M_Realloc (braintargets,
 					(numbraintargets_alloc = numbraintargets_alloc ?
 					 numbraintargets_alloc*2 : 32) *sizeof *braintargets);
 			}
@@ -3109,14 +3144,20 @@ void A_PlaySound(AActor* mo)
 	// Play the sound from the SoundMap
 
 	int sndmap = mo->state->misc1;
+	char* snd;
 
-	if (sndmap >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
+	auto soundIt = SoundMap.find(sndmap);
+	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Sound ID is beyond the array of the Sound Map!\n");
-		sndmap = 0;
+		DPrintFmt("Warning: Sound ID is beyond the array of the Sound Map!\n");
+		snd = nullptr;
+	}
+	else
+	{
+		snd = (char*)soundIt->second;
 	}
 
-	S_Sound(mo, CHAN_BODY, SoundMap[sndmap], 1,
+	S_Sound(mo, CHAN_BODY, snd, 1,
 		        (mo->state->misc2 ? ATTN_NONE : ATTN_NORM));
 }
 
@@ -3132,8 +3173,8 @@ void A_RandomJump(AActor* mo)
 
 void A_LineEffect(AActor* mo)
 {
-	/* [AM] Not implemented...yet.
-	if (!(mo->intflags & MIF_LINEDONE))                // Unless already used up
+	/* [AM] Not implemented...yet. */
+	if (!(mo->flags & MF_LINEDONE))                // Unless already used up
 	{
 		line_t junk = *lines;                          // Fake linedef set to 1st
 		if ((junk.special = (short)mo->state->misc1))  // Linedef type
@@ -3143,15 +3184,14 @@ void A_LineEffect(AActor* mo)
 			player_t* oldplayer = mo->player;          // Remember player status
 			mo->player = &player;                      // Fake player
 			player.health = 100;                       // Alive player
-			junk.tag = (short)mo->state->misc2;        // Sector tag for linedef
-			if (!P_UseSpecialLine(mo, &junk, 0))       // Try using it
-			    P_CrossSpecialLine(&junk, 0, mo);        // Try crossing it
+			junk.id = (short)mo->state->misc2;        // Sector tag for linedef
+			if (!P_UseSpecialLine(mo, &junk, 0, mo->flags & MF2_BOSS))       // Try using it
+				P_CrossSpecialLine(&junk, 0, mo, mo->flags & MF2_BOSS); // Try crossing it
 			if (!junk.special)                         // If type cleared,
-			    mo->intflags |= MIF_LINEDONE;            // no more for this thing
+			    mo->flags |= MF_LINEDONE;            // no more for this thing
 			mo->player = oldplayer;                    // Restore player status
 		}
 	}
-	*/
 }
 
 VERSION_CONTROL (p_enemy_cpp, "$Id$")

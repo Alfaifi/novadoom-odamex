@@ -151,7 +151,8 @@ enum SectorPropChanges
 	SPC_Scale = 64,
 	SPC_Rotation = 128,
 	SPC_AlignBase = 256,
-	SPC_Max = 512,
+	SPC_Special = 512,
+	SPC_Max = 1024,
 };
 
 enum SideDefPropChanges
@@ -718,7 +719,7 @@ typedef vissprite_s vissprite_t;
 // Some sprites will only have one picture used
 // for all views: NNNNF0
 //
-struct spriteframe_t
+struct spriteframe_s
 {
     // If false use 0 for any position.
     // Note: as eight entries are available,
@@ -737,16 +738,18 @@ struct spriteframe_t
 	fixed_t		topoffset[16];
 	fixed_t		offset[16];
 };
+typedef spriteframe_s spriteframe_t;
 
 //
 // A sprite definition:
 //	a number of animation frames.
 //
-struct spritedef_t
+typedef struct spritedef_s
 {
 	int 			numframes;
 	spriteframe_t	*spriteframes;
-};
+	int32_t spritenum;
+} spritedef_t;
 
 //
 // The infamous visplane

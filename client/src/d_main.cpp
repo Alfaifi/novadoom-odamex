@@ -84,15 +84,11 @@
 #include "g_horde.h"
 #include "w_ident.h"
 #include "gui_boot.h"
+#include "sprite.h"
+#include "mobjinfo.h"
+#include "state.h"
+#include "odamex_objects.h"
 #include "g_episode.h"
-
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
 
 extern size_t got_heapsize;
 
@@ -160,9 +156,9 @@ void D_SetPlatform(void)
 #ifdef GCONSOLE
 	#ifdef _XBOX
 		platform = PF_XBOX;
-	#elif GEKKO
+	#elif defined(GEKKO)
 		platform = PF_WII;
-	#elif __SWITCH__
+	#elif defined(__SWITCH__)
 		platform = PF_SWITCH;
 	#else
 		platform = PF_UNKNOWN;
@@ -455,6 +451,8 @@ void D_AdvanceDemo (void)
 //
 void D_DoAdvanceDemo (void)
 {
+	S_StopAmbientSound();
+
 	OLumpName pagename;
 
 	consoleplayer().playerstate = PST_LIVE;	// not reborn
@@ -471,13 +469,17 @@ void D_DoAdvanceDemo (void)
     else
         demosequence = (demosequence+1)%6;
 
+#if defined(_DEBUG)
+	PrintFmt_Bold("D_DoAdvanceDemo:: Checking for DEMO: {}\n", demosequence);
+#endif
+
     switch (demosequence)
     {
         case 0:
             pagetic = gameinfo.titleTime * TICRATE;
 
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.titlePage;
+		    pagename = gameinfo.titlePage;
 
             currentmusic = gameinfo.titleMusic.c_str();
 
@@ -491,7 +493,7 @@ void D_DoAdvanceDemo (void)
         case 2:
             pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.creditPages[0];
+		    pagename = gameinfo.creditPages[0];
 
             break;
         case 3:
@@ -513,7 +515,7 @@ void D_DoAdvanceDemo (void)
             else
             {
                 pagetic = gameinfo.pageTime * TICRATE;
-                pagename = gameinfo.creditPages[1];
+			    pagename = gameinfo.creditPages[1];
             }
 
             break;
@@ -524,7 +526,7 @@ void D_DoAdvanceDemo (void)
         case 6:
             pagetic = gameinfo.pageTime * TICRATE;
             gamestate = GS_DEMOSCREEN;
-            pagename = gameinfo.creditPages[1];
+		    pagename = gameinfo.creditPages[1];
 
             break;
         case 7:
@@ -617,17 +619,8 @@ void D_Init()
 
 	M_ClearRandom();
 
-	// start the Zone memory manager
-	Z_Init();
-	if (first_time)
-		Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
-
 	// Load palette and set up colormaps
 	V_Init();
-
-//	if (first_time)
-//		Printf(PRINT_HIGH, "Res_InitTextureManager: Init image resource management.\n");
-//	Res_InitTextureManager();
 
 	// init the renderer
 	if (first_time)
@@ -666,8 +659,6 @@ void D_Init()
 	}
 	S_Init(snd_sfxvolume, snd_musicvolume);
 
-//	R_InitViewBorder();
-
 	// init the status bar
 	if (first_time)
 		Printf(PRINT_HIGH, "ST_Init: Init status bar.\n");
@@ -700,6 +691,7 @@ void STACK_ARGS D_Shutdown()
 	// stop sound effects and music
 	S_Stop();
 	S_Deinit();
+	S_ClearSoundLumps();
 
 	// shutdown automap
 	AM_Stop();
@@ -742,7 +734,7 @@ void STACK_ARGS D_Shutdown()
 
 
 void C_DoCommand(const char *cmd, uint32_t key);
-void D_Init_DEHEXTRA_Frames(void);
+void D_Init_Nightmare_Flags(void);
 
 //
 // D_DoomMain
@@ -761,10 +753,11 @@ void D_DoomMain()
 
 	W_SetupFileIdentifiers();
 
-	// [RH] Initialize items. Still only used for the give command. :-(
-	InitItems();
-	// Initialize all extra frames
-	D_Init_DEHEXTRA_Frames();
+	// start the Zone memory manager
+	Z_Init();
+	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
+
+	D_Initialize_Doom_Objects();
 
 	M_FindResponseFile();		// [ML] 23/1/07 - Add Response file support back in
 
@@ -855,6 +848,7 @@ void D_DoomMain()
 	D_AddWadCommandLineFiles(newwadfiles);
 	D_AddDehCommandLineFiles(newpatchfiles);
 
+    // do the deh processing
 	D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
 	Printf(PRINT_HIGH, "I_Init: Init hardware.\n");
@@ -864,6 +858,7 @@ void D_DoomMain()
 
 	// [SL] Call init routines that need to be reinitialized every time WAD changes
 	atterm(D_Shutdown);
+	// initialize
 	D_Init();
 
 	atterm(I_Endoom);

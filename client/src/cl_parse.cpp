@@ -64,6 +64,7 @@
 #include "infomap.h"
 #include "cl_replay.h"
 #include "r_interp.h"
+#include "doom_obj_container.h"
 
 // Extern data from other files.
 
@@ -84,6 +85,7 @@ EXTERN_CVAR(hud_revealsecrets)
 EXTERN_CVAR(mute_enemies)
 EXTERN_CVAR(mute_spectators)
 EXTERN_CVAR(show_messages)
+EXTERN_CVAR(co_novileghosts)
 
 extern std::string digest;
 extern bool forcenetdemosplit;
@@ -108,7 +110,7 @@ void G_PlayerReborn(player_t& p); // [Toke - todo] clean this function
 void P_DestroyButtonThinkers();
 void P_ExplodeMissile(AActor* mo);
 void P_PlayerLeavesGame(player_s* player);
-void P_SetPsprite(player_t* player, int position, statenum_t stnum);
+void P_SetPsprite(player_t* player, int position, int32_t stnum);
 void P_SetButtonTexture(line_t* line, short texture);
 
 /**
@@ -273,6 +275,11 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo* msg)
 	}
 
 	P_SetPlayerPowerupStatuses(&p, p.powers);
+
+	// Sync mo health with player health
+	// For crosshaircolor, etc.
+	if (p.mo)
+		p.mo->health = p.health;
 
 	if (!p.spectator)
 		p.cheats = msg->player().cheats();
@@ -499,7 +506,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 	mobjtype_t type = static_cast<mobjtype_t>(msg->current().type());
 	statenum_t state = static_cast<statenum_t>(msg->current().statenum());
 
-	if (type < MT_PLAYER || type >= NUMMOBJTYPES)
+	if (type < MT_PLAYER || type >= ::num_mobjinfo_types())
 		return;
 
 	P_ClearId(netid);
@@ -622,7 +629,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			mo->tics = 1;
 	}
 
-	if (state >= S_NULL && state < NUMSTATES)
+    if(state >= S_NULL && states.find(state) != states.end())
 	{
 		P_SetMobjState(mo, state);
 	}
@@ -690,7 +697,8 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			tics = -1;
 
 		// already spawned as gibs?
-		if (!mo || mo->state - states == S_GIBS)
+		state_t* s_gibs_state = states[S_GIBS];
+		if (!mo || mo->state == s_gibs_state)
 			return;
 
 		if ((frame & FF_FRAMEMASK) >= sprites[mo->sprite].numframes)
@@ -953,7 +961,7 @@ static void CL_UserInfo(const odaproto::svc::UserInfo* msg)
 
 	p->userinfo.gender = static_cast<gender_t>(msg->gender());
 	if (p->userinfo.gender < 0 || p->userinfo.gender >= NUMGENDER)
-		p->userinfo.gender = GENDER_NEUTER;
+		p->userinfo.gender = GENDER_OTHER;
 
 	p->userinfo.color[0] = 255;
 	p->userinfo.color[1] = msg->color().r();
@@ -1300,6 +1308,48 @@ static void CL_KillMobj(const odaproto::svc::KillMobj* msg)
 	P_KillMobj(source, target, inflictor, joinkill);
 }
 
+//
+// CL_RaiseMobj
+//
+static void CL_RaiseMobj(const odaproto::svc::RaiseMobj* msg)
+{
+	uint32_t srcid = msg->source_netid();
+	uint32_t cpsid = msg->corpse().netid();
+
+	AActor* source = P_FindThingById(srcid);
+	AActor* corpsehit = P_FindThingById(cpsid);
+
+	if (!corpsehit)
+		return;
+
+	corpsehit->x = msg->corpse().pos().x();
+	corpsehit->y = msg->corpse().pos().y();
+	corpsehit->z = msg->corpse().pos().z();
+	corpsehit->angle = msg->corpse().angle();
+	corpsehit->momx = msg->corpse().mom().x();
+	corpsehit->momy = msg->corpse().mom().y();
+	corpsehit->momz = msg->corpse().mom().z();
+
+	mobjinfo_t* info = corpsehit->info;
+
+	P_SetMobjState(corpsehit, info->raisestate);
+
+	// [Nes] - Classic demo compatability: Ghost monster bug.
+	if (co_novileghosts)
+	{
+		corpsehit->height = P_ThingInfoHeight(info); // [RH] Use real mobj height
+		corpsehit->radius = info->radius;            // [RH] Use real radius
+	}
+	else
+	{
+		corpsehit->height <<= 2;
+	}
+
+	corpsehit->flags = info->flags;
+	corpsehit->health = info->spawnhealth;
+	corpsehit->target = AActor::AActorPtr();
+}
+
 ///////////////////////////////////////////////////////////
 ///// CL_Fire* called when someone uses a weapon  /////////
 ///////////////////////////////////////////////////////////
@@ -1322,7 +1372,7 @@ static void CL_FireWeapon(const odaproto::svc::FireWeapon* msg)
 
 	if (firedweap != p->readyweapon)
 	{
-		DPrintf("CL_FireWeapon: weapon misprediction\n");
+		DPrintFmt("CL_FireWeapon: weapon misprediction\n");
 		A_ForceWeaponFire(p->mo, firedweap, servertic);
 
 		// Request the player's ammo status from the server
@@ -2157,8 +2207,8 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 	{
 		if (i < msg->player().psprites_size())
 		{
-			unsigned int state = msg->player().psprites().Get(i).statenum();
-			if (state >= NUMSTATES)
+			int state = msg->player().psprites().Get(i).statenum();
+            if (states.find(state) == states.end())
 			{
 				continue;
 			}
@@ -2391,6 +2441,8 @@ static void CL_SectorProperties(const odaproto::svc::SectorProperties* msg)
 			sector->base_ceiling_yoffs = msg->sector().base_ceiling_yoffs();
 			sector->base_floor_angle = msg->sector().base_floor_angle();
 			sector->base_floor_yoffs = msg->sector().base_floor_yoffs();
+		case SPC_Special:
+			sector->special = msg->sector().special();
 		default:
 			break;
 		}
@@ -2442,7 +2494,7 @@ static void CL_SetMobjState(const odaproto::svc::MobjState* msg)
 	AActor* mo = P_FindThingById(msg->netid());
 	int s = msg->mostate();
 
-	if (mo == NULL || s < 0 || s >= NUMSTATES)
+    if (mo == NULL || states.find(s) == states.end())
 		return;
 
 	P_SetMobjState(mo, static_cast<statenum_t>(s));
@@ -3001,6 +3053,7 @@ parseError_e CL_ParseCommand()
 		SV_MSG(svc_spawnplayer, CL_SpawnPlayer, odaproto::svc::SpawnPlayer);
 		SV_MSG(svc_damageplayer, CL_DamagePlayer, odaproto::svc::DamagePlayer);
 		SV_MSG(svc_killmobj, CL_KillMobj, odaproto::svc::KillMobj);
+		SV_MSG(svc_raisemobj, CL_RaiseMobj, odaproto::svc::RaiseMobj);
 		SV_MSG(svc_fireweapon, CL_FireWeapon, odaproto::svc::FireWeapon);
 		SV_MSG(svc_updatesector, CL_UpdateSector, odaproto::svc::UpdateSector);
 		SV_MSG(svc_print, CL_Print, odaproto::svc::Print);

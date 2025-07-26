@@ -27,7 +27,6 @@
 #include <sstream>
 #include <algorithm>
 #include <ctime>
-#include <map>
 
 #include "cmdlib.h"
 #include "c_console.h"
@@ -111,7 +110,7 @@ public:
 	{
 		ActionKeyListTable::iterator it = mTable.find(action);
 		if (it == mTable.end())
-			it = mTable.insert(std::make_pair(action, ActionKeyList())).first;
+			it = mTable.emplace(action, ActionKeyList()).first;
 		ActionKeyList* action_key_list = &it->second;
 
 		if (std::find(action_key_list->begin(), action_key_list->end(), key) != action_key_list->end())
@@ -241,15 +240,16 @@ void C_DoCommand(const char *cmd, uint32_t key)
 	if (check == -1)
 	{
 		argc = 1;
-		argsize = strlen (com_token) + 1;
+		argsize = strlen(com_token) + 1;
 
-		realargs = new char[strlen (data) + 1];
-		strcpy (realargs, data);
+		size_t datalen = strlen(data) + 1;
+		realargs = new char[datalen];
+		M_StringCopy(realargs, data, datalen);
 
-		while ( (data = ParseString (data)) )
+		while (data = ParseString(data))
 		{
 			argc++;
-			argsize += strlen (com_token) + 1;
+			argsize += strlen(com_token) + 1;
 		}
 
 		args = new char[argsize];
@@ -258,12 +258,12 @@ void C_DoCommand(const char *cmd, uint32_t key)
 		arg = args;
 		data = cmd;
 		argsize = 0;
-		while ( (data = ParseString (data)) )
+		while (data = ParseString(data))
 		{
-			strcpy (arg, com_token);
+			size_t tokenlen = strlen(com_token) + 1;
+			M_StringCopy(arg, com_token, tokenlen);
 			argv[argsize] = arg;
-			arg += strlen (arg);
-			*arg++ = 0;
+			arg += tokenlen;
 			argsize++;
 		}
 
@@ -434,33 +434,48 @@ BEGIN_COMMAND (exec)
 	static std::vector<std::string> exec_stack;
 	static std::vector<bool>	tag_stack;
 
-	if(std::find(exec_stack.begin(), exec_stack.end(), argv[1]) != exec_stack.end())
+	std::string found = M_FindUserFileName(argv[1], ".cfg");
+	if (found.empty())
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", argv[1]);
+		const char* cfgdir = Args.CheckValue("-cfgdir");
+		if (!cfgdir)
+		{
+			Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+			return;
+		}
+
+		found = M_CleanPath(M_JoinPath(cfgdir, argv[1]));
+		if (!M_FileExists(found))
+		{
+			found += ".cfg";
+			if (!M_FileExists(found))
+			{
+				Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+				return;
+			}
+		}
+	}
+
+	if(std::find(exec_stack.begin(), exec_stack.end(), found) != exec_stack.end())
+	{
+		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
 		return;
 	}
 
 	if(exec_stack.size() >= MAX_EXEC_DEPTH)
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", argv[1]);
+		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
 		return;
 	}
 
-	std::string found = M_FindUserFileName(argv[1], ".cfg");
-	if (found.empty())
-	{
-		Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
-		return;
-	}
-
-	std::ifstream ifs(argv[1]);
+	std::ifstream ifs(found);
 	if(ifs.fail())
 	{
-		Printf(PRINT_WARNING, "Could not open \"%s\"\n", argv[1]);
+		Printf(PRINT_WARNING, "Could not open \"%s\"\n", found);
 		return;
 	}
 
-	exec_stack.push_back(argv[1]);
+	exec_stack.push_back(found);
 
 	while(ifs)
 	{
@@ -670,7 +685,7 @@ const char *ParseString (const char *data)
 		{
 			if ( (var = cvar_t::FindCVar (&com_token[1], &dummy)) )
 			{
-				strcpy (com_token, var->cstring());
+				M_StringCopy(com_token, var->cstring(), 8192);
 			}
 		}
 	}
@@ -691,7 +706,7 @@ DConsoleCommand::DConsoleCommand (const char *name)
 		// Add all the action commands for tab completion
 		for (i = 0; i < NUM_ACTIONS; i++)
 		{
-			strcpy (&tname[1], actionbits[i].name);
+			M_StringCopy(&tname[1], actionbits[i].name, 15);
 			tname[0] = '+';
 			C_AddTabCommand (tname);
 			tname[0] = '-';
@@ -848,7 +863,7 @@ static int DumpHash (bool aliases)
 
 void DConsoleAlias::Archive(FILE *f)
 {
-	fprintf(f, "alias %s %s\n", C_QuoteString(m_Name).c_str(), C_QuoteString(m_Command).c_str());
+	fmt::print(f, "alias {} {}\n", C_QuoteString(m_Name), C_QuoteString(m_Command));
 }
 
 void DConsoleAlias::C_ArchiveAliases (FILE *f)
@@ -973,7 +988,7 @@ BEGIN_COMMAND (actorlist)
 	Printf (PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type]->name, mo->x, mo->y, mo->z, mo->angle, mo->state->statenum, mo->tics);
 	}
 }
 END_COMMAND(actorlist)

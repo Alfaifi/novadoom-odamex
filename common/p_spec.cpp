@@ -461,6 +461,7 @@ void DPusher::Serialize (FArchive &arc)
 	else
 	{
 		arc >> m_Type;
+		// [CMB] copy ctr and assignment operator to m_Source was previously causing an unlinking issue resulting in a nullptr
 		DObject* temp = nullptr;
 		arc.ReadObject(temp, DPusher::StaticType());
 		m_Source = temp ? static_cast<AActor*>(temp)->ptr() : AActor::AActorPtr();
@@ -841,7 +842,7 @@ void P_InitPicAnims (void)
 			if (lastanim >= anims + maxanims)
 			{
 				size_t newmax = maxanims ? maxanims*2 : MAXANIMS;
-				anims = (anim_t *)Realloc(anims, newmax*sizeof(*anims));   // killough
+				anims = (anim_t*) M_Realloc(anims, newmax*sizeof(*anims));   // killough
 				lastanim = anims + maxanims;
 				maxanims = newmax;
 			}

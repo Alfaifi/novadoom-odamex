@@ -155,7 +155,7 @@ static void ActivateMonsters(AActors& mobjs)
 		{
 			char sound[MAX_SNDNAME];
 
-			strcpy(sound, mo->info->seesound);
+			M_StringCopy(sound, mo->info->seesound, MAX_SNDNAME);
 
 			if (sound[strlen(sound) - 1] == '1')
 			{
@@ -214,7 +214,7 @@ class HordeState
 		if (m_state == HS_WANTBOSS)
 		{
 			// Do the boss intro fanfare.
-			SV_BroadcastPrintf("The floor trembles as the boss of the wave arrives.\n");
+			SV_BroadcastPrintFmt("The floor trembles as the boss of the wave arrives.\n");
 			S_NetSound(NULL, CHAN_GAMEINFO, "misc/horde/boss", ATTN_NONE);
 			m_bossTime = ::level.time;
 		}
@@ -253,8 +253,8 @@ class HordeState
 		// Avoid printing wave name on boot and map switch.
 		if (printWave)
 		{
-			SV_BroadcastPrintf("Wave %d: \"%s\"\n", m_wave,
-			                   G_HordeDefine(m_defineID).name.c_str());
+			SV_BroadcastPrintFmt("Wave {}: \"{}\"\n", m_wave,
+			                     G_HordeDefine(m_defineID).name);
 		}
 	}
 
@@ -274,9 +274,10 @@ class HordeState
 				// Dead players are reborn with a message.
 				if (player->lives <= 0)
 				{
+					G_ResetLastPlayer();
 					player->playerstate = PST_REBORN;
-					SV_BroadcastPrintf("%s gets a new lease on life.\n",
-					                   player->userinfo.netname.c_str());
+					SV_BroadcastPrintFmt("{} gets a new lease on life.\n",
+					                     player->userinfo.netname);
 
 					// Send a res sound directly to this player.
 					S_PlayerSound(player, NULL, CHAN_INTERFACE, "misc/plraise",
@@ -347,8 +348,8 @@ class HordeState
 		m_bossRecipe.clear();
 		m_corpses.startWave();
 
-		SV_BroadcastPrintf("Wave %d: \"%s\"\n", m_wave,
-		                   G_HordeDefine(m_defineID).name.c_str());
+		SV_BroadcastPrintFmt("Wave {}: \"{}\"\n", m_wave,
+		                     G_HordeDefine(m_defineID).name);
 	}
 
 	/**
@@ -374,8 +375,8 @@ class HordeState
 		m_bossRecipe.clear();
 		m_corpses.startWave();
 
-		SV_BroadcastPrintf("Wave %d: \"%s\"\n", m_wave,
-		                   G_HordeDefine(m_defineID).name.c_str());
+		SV_BroadcastPrintFmt("Wave {}: \"{}\"\n", m_wave,
+		                     G_HordeDefine(m_defineID).name);
 		return true;
 	}
 
@@ -644,13 +645,13 @@ void HordeState::tick()
 			if (spawn == NULL)
 			{
 				Printf(PRINT_WARNING, "%s: Can't find a place to spawn %s.\n",
-				       __FUNCTION__, ::mobjinfo[recipe.type].name);
+				       __FUNCTION__, ::mobjinfo[recipe.type]->name);
 				return;
 			}
 
-			const int hp = ::mobjinfo[recipe.type].spawnhealth * recipe.count;
-			DPrintf("Spawning %d %s (%d hp) at a %s spawn\n", recipe.count,
-			        ::mobjinfo[recipe.type].name, hp, HordeThingStr(spawn->type));
+			const int hp = ::mobjinfo[recipe.type]->spawnhealth * recipe.count;
+			DPrintFmt("Spawning {} {} ({} hp) at a {} spawn\n", recipe.count,
+			          ::mobjinfo[recipe.type]->name, hp, HordeThingStr(spawn->type));
 
 			AActors mobjs = P_HordeSpawn(*spawn, recipe);
 			ActivateMonsters(mobjs);
@@ -693,7 +694,7 @@ void HordeState::tick()
 			if (spawn == NULL)
 			{
 				Printf(PRINT_WARNING, "%s: Can't find a place to spawn %s.\n",
-				       __FUNCTION__, ::mobjinfo[recipe.type].name);
+				       __FUNCTION__, ::mobjinfo[recipe.type]->name);
 				break;
 			}
 
@@ -778,12 +779,12 @@ void P_AddHealthPool(AActor* mo)
 	// Mark as part of the health pool for cleanup later
 	mo->oflags |= MFO_HEALTHPOOL;
 
-	::g_HordeDirector.addSpawnHealth(::mobjinfo[mo->type].spawnhealth);
+	::g_HordeDirector.addSpawnHealth(::mobjinfo[mo->type]->spawnhealth);
 
 	// Bosses also have health added to a separate pool for display purposes.
 	if (mo->oflags & MFO_BOSSPOOL)
 	{
-		::g_HordeDirector.addBossHealth(::mobjinfo[mo->type].spawnhealth);
+		::g_HordeDirector.addBossHealth(::mobjinfo[mo->type]->spawnhealth);
 	}
 }
 
@@ -796,7 +797,7 @@ void P_RemoveHealthPool(AActor* mo)
 	// Unset the flag - we only get one try.
 	mo->oflags &= ~MFO_HEALTHPOOL;
 
-	::g_HordeDirector.addKilledHealth(::mobjinfo[mo->type].spawnhealth);
+	::g_HordeDirector.addKilledHealth(::mobjinfo[mo->type]->spawnhealth);
 }
 
 void P_AddDamagePool(AActor* mo, const int damage)
