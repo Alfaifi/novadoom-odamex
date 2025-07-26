@@ -60,8 +60,10 @@
 #define STOPSPEED						0x1000
 #define FRICTION						0xe800
 
-#define USERANGE		(64*FRACUNIT)
+#ifndef MELEERANGE // TODO: only have a single spot this is defined
 #define MELEERANGE		(64*FRACUNIT)
+#endif
+#define USERANGE		(64*FRACUNIT)
 #define MISSILERANGE	(32*64*FRACUNIT)
 
 // a couple of explicit constants for non-melee things that used to use MELEERANGE
@@ -122,7 +124,7 @@ extern int				iquetail;
 void 	P_ThrustMobj (AActor *mo, angle_t angle, fixed_t move);
 void	P_RespawnSpecials (void);
 
-bool	P_SetMobjState (AActor* mobj, statenum_t state, bool cl_update = false);
+bool	P_SetMobjState (AActor* mobj, int32_t state, bool cl_update = false);
 
 void	P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage);
 AActor* P_SpawnMissile (AActor* source, AActor* dest, mobjtype_t type);

@@ -41,9 +41,11 @@
 
 #include "m_wdlstats.h"
 #include "g_gametype.h"
+#include "g_skill.h"
 #include "p_mapformat.h"
 // State.
 #include "r_state.h"
+#include "r_sky.h"
 
 #include "z_zone.h"
 #include "p_unlag.h"
@@ -604,15 +606,15 @@ bool P_ShouldClipPlayer(AActor* projectile, AActor* player)
 bool P_ProjectileImmune(AActor* target, AActor* source)
 {
 	return ( // PG_GROUPLESS means no immunity, even to own species
-	           mobjinfo[target->type].projectile_group != PG_GROUPLESS ||
+	           mobjinfo[target->type]->projectile_group != PG_GROUPLESS ||
 	           target == source) &&
 	       (( // target type has default behaviour, and things are the same type
-	            mobjinfo[target->type].projectile_group == PG_DEFAULT &&
+	            mobjinfo[target->type]->projectile_group == PG_DEFAULT &&
 	            source->type == target->type) ||
 	        ( // target type has special behaviour, and things have the same group
-	            mobjinfo[target->type].projectile_group != PG_DEFAULT &&
-	            mobjinfo[target->type].projectile_group ==
-	                mobjinfo[source->type].projectile_group));
+	            mobjinfo[target->type]->projectile_group != PG_DEFAULT &&
+	            mobjinfo[target->type]->projectile_group ==
+	                mobjinfo[source->type]->projectile_group));
 }
 
 static bool PIT_CheckThing (AActor *thing)
@@ -707,8 +709,12 @@ static bool PIT_CheckThing (AActor *thing)
 		if (tmthing->z+tmthing->height < thing->z)
 			return true;				// underneath
 
-		// Check with projectiles owner if we can explode
-		if (tmthing->target && P_ProjectileImmune(thing, tmthing->target))
+    // Check with projectiles owner if we can explode
+		if (tmthing->target &&
+			(P_ProjectileImmune(thing, tmthing->target) &&
+		    !((level.flags2 & LEVEL2_INFIGHTINGMASK) ?
+			    level.flags2 & LEVEL2_TOTALINFIGHTING :
+			    G_GetCurrentSkill().flags & SKILL_TOTALINFIGHTING)))
 		{
 			// Don't hit same species as originator
 			if (thing == tmthing->target)
@@ -1244,6 +1250,12 @@ bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 				bool onfloor) // [RH] Let P_TryMove keep the thing on the floor
 {
 	fixed_t		testz = thing->z;
+
+	if(!thing->subsector)
+	{
+		I_Error("Thing {type: %d, info->type: %d} subsector should not be NULL!", thing->type, thing->info->type);
+	}
+
 	sector_t*	oldsec = thing->subsector->sector;	// [RH] for sector actions
 
 	felldown = floatok = false;
@@ -2239,8 +2251,8 @@ bool P_ShootLine(intercept_t* in)
 
 	// definitely hit the solid part of the line
 
-	bool skyceiling1 = sec1->ceilingpic == skyflatnum;
-	bool skyceiling2 = sec2 && sec2->ceilingpic == skyflatnum;
+	bool skyceiling1 = R_IsSkyFlat(sec1->ceilingpic);
+	bool skyceiling2 = sec2 && R_IsSkyFlat(sec2->ceilingpic);
 
 	// sky wall hack
 	if (skyceiling1 && skyceiling2)
@@ -2254,7 +2266,7 @@ bool P_ShootLine(intercept_t* in)
 		return false;
 
 	// check for shooting sky floors
-	if (precise && sec1->floorpic == skyflatnum && z < floorheight1)
+	if (precise && R_IsSkyFlat(sec1->floorpic) && z < floorheight1)
 		return false;
 
 	v3fixed_t lineorg, linedir, puffpos;
@@ -2516,7 +2528,7 @@ void P_LineAttack (AActor *t1, angle_t angle, fixed_t distance,
 		fixed_t z = shootz + FixedMul (distance, slope);
 		int updown;
 
-		opentop -= mobjinfo[MT_PUFF].height;
+		opentop -= mobjinfo[MT_PUFF]->height;
 		if (z < openbottom) {
 			// hit floor
 			frac = FixedDiv (openbottom - shootz, z - shootz);
@@ -2688,7 +2700,7 @@ bool PTR_RailTraverse (intercept_t *in)
 	if (NumRailHits >= MaxRailHits)
 	{
 		MaxRailHits = MaxRailHits ? MaxRailHits * 2 : 16;
-		RailHits = (SRailHit *)Realloc (RailHits, sizeof(*RailHits) * MaxRailHits);
+		RailHits = (SRailHit *) M_Realloc(RailHits, sizeof(*RailHits) * MaxRailHits);
 	}
 	RailHits[NumRailHits].hitthing = th;
 	RailHits[NumRailHits].x = x;
@@ -3041,8 +3053,8 @@ CVAR_FUNC_IMPL(sv_splashfactor)
 static bool P_SplashImmune(AActor* target, AActor* spot)
 {
 	return // not default behaviour and same group
-	    mobjinfo[target->type].splash_group != SG_DEFAULT &&
-	    mobjinfo[target->type].splash_group == mobjinfo[spot->type].splash_group;
+	    mobjinfo[target->type]->splash_group != SG_DEFAULT &&
+	    mobjinfo[target->type]->splash_group == mobjinfo[spot->type]->splash_group;
 }
 
 static bool PIT_DoomRadiusAttack(AActor* thing)
@@ -3471,7 +3483,7 @@ msecnode_t *P_AddSecnode (sector_t *s, AActor *thing, msecnode_t *nextnode)
 	msecnode_t *node;
 
 	if (s == NULL)
-		I_FatalError("AddSecnode of 0 for %s\n", thing->_StaticType.Name);
+		I_FatalError("AddSecnode of 0 for {}\n", thing->_StaticType.Name);
 
 	node = nextnode;
 	while (node)

@@ -41,10 +41,6 @@
 // For __BIG_ENDIAN__ macro, requires forceinline
 #include "m_swap.h"
 
-#ifdef GEKKO
-	#include <gctypes.h>
-#endif
-
 typedef unsigned char byte;
 typedef unsigned int uint;
 
@@ -57,7 +53,7 @@ using OByteSpan = nonstd::span<byte>;
 #endif
 
 // Predefined with some OS.
-#if !defined(UNIX) && !defined(_WIN32) && !defined(GEKKO)
+#if !defined(UNIX) && !defined(_WIN32)
 	#include <limits.h>
 	#include <float.h>
 #endif
@@ -70,7 +66,7 @@ using OByteSpan = nonstd::span<byte>;
 	#define __int64 long
 #endif
 
-#if (defined _XBOX || defined _MSC_VER)
+#if defined _MSC_VER
 	#define DBL_EPSILON 2.2204460492503131e-016
 	#define FLT_EPSILON 1.192092896e-07F
 #else
@@ -172,7 +168,7 @@ typedef uint64_t			dtime_t;
  * @param a Low bit in the mask.
  * @param b High bit in the mask.
  */
-static inline uint32_t BIT_MASK(uint32_t a, uint32_t b)
+static constexpr uint32_t BIT_MASK(uint32_t a, uint32_t b)
 {
     return (static_cast<uint32_t>(-1) >> (31 - b)) & ~(BIT(a) - 1);
 }

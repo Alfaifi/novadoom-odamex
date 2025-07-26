@@ -33,43 +33,17 @@ void SV_BasePrintButPlayer(const int printlevel, const int player_id, const std:
 size_t C_BasePrint(const int printlevel, const char* color_code, const std::string& str);
 
 template <typename... ARGS>
+[[deprecated("Please use PrintFmt() instead.")]]
 size_t Printf(const fmt::string_view format, const ARGS&... args)
 {
 	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_NORMAL, fmt::sprintf(format, args...));
 }
 
 template <typename... ARGS>
+[[deprecated("Please use PrintFmt() instead.")]]
 size_t Printf(const int printlevel, const fmt::string_view format, const ARGS&... args)
 {
 	return C_BasePrint(printlevel, TEXTCOLOR_NORMAL, fmt::sprintf(format, args...));
-}
-
-template <typename... ARGS>
-size_t PrintFmt_Bold(const fmt::string_view format, const ARGS&... args)
-{
-	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_BOLD, fmt::format(format, args...));
-}
-
-template <typename... ARGS>
-size_t DPrintf(const fmt::string_view format, const ARGS&... args)
-{
-	if (::developer || ::devparm)
-	{
-		return C_BasePrint(PRINT_WARNING, TEXTCOLOR_NORMAL, fmt::sprintf(format, args...));
-	}
-
-	return 0;
-}
-
-template <typename... ARGS>
-size_t DPrintFmt(const fmt::string_view format, const ARGS&... args)
-{
-	if (::developer || ::devparm)
-	{
-		return C_BasePrint(PRINT_WARNING, TEXTCOLOR_NORMAL, fmt::format(format, args...));
-	}
-
-	return 0;
 }
 
 template <typename... ARGS>
@@ -84,6 +58,23 @@ size_t PrintFmt(const int printlevel, const fmt::string_view format, const ARGS&
 	return C_BasePrint(printlevel, TEXTCOLOR_NORMAL, fmt::format(format, args...));
 }
 
+template <typename... ARGS>
+size_t PrintFmt_Bold(const fmt::string_view format, const ARGS&... args)
+{
+	return C_BasePrint(PRINT_HIGH, TEXTCOLOR_BOLD, fmt::format(format, args...));
+}
+
+template <typename... ARGS>
+size_t DPrintFmt(const fmt::string_view format, const ARGS&... args)
+{
+	if (::developer || ::devparm)
+	{
+		return C_BasePrint(PRINT_WARNING, TEXTCOLOR_NORMAL, fmt::format(format, args...));
+	}
+
+	return 0;
+}
+
 /**
  * @brief Print to all clients in a server, or to the local player offline.
  *
@@ -94,12 +85,12 @@ size_t PrintFmt(const int printlevel, const fmt::string_view format, const ARGS&
  * @param args printf-style arguments.
  */
 template <typename... ARGS>
-void SV_BroadcastPrintf(int printlevel, const fmt::string_view format, const ARGS&... args)
+void SV_BroadcastPrintFmt(int printlevel, const fmt::string_view format, const ARGS&... args)
 {
 	if (!serverside)
 		return;
 
-	std::string string = fmt::sprintf(format, args...);
+	std::string string = fmt::format(format, args...);
 	C_BasePrint(printlevel, TEXTCOLOR_NORMAL, string);
 
 	#ifdef SERVER_APP
@@ -120,16 +111,16 @@ void SV_BroadcastPrintf(int printlevel, const fmt::string_view format, const ARG
  * @param args printf-style arguments.
  */
 template <typename... ARGS>
-void SV_BroadcastPrintf(const fmt::string_view format, const ARGS&... args)
+void SV_BroadcastPrintFmt(const fmt::string_view format, const ARGS&... args)
 {
-	SV_BroadcastPrintf(PRINT_NORCON, format, args...);
+	SV_BroadcastPrintFmt(PRINT_NORCON, format, args...);
 }
 
 #ifdef SERVER_APP
 template <typename... ARGS>
-void SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const fmt::string_view format, const ARGS&... args)
+void SV_BroadcastPrintFmtButPlayer(int printlevel, int player_id, const fmt::string_view format, const ARGS&... args)
 {
-	std::string string = fmt::sprintf(format, args...);
+	std::string string = fmt::format(format, args...);
 	C_BasePrint(printlevel, TEXTCOLOR_NORMAL, string); // print to the console
 
 	// Hacky code to display messages as normal ones to clients
@@ -139,3 +130,47 @@ void SV_BroadcastPrintfButPlayer(int printlevel, int player_id, const fmt::strin
 	SV_BasePrintButPlayer(printlevel, player_id, string);
 }
 #endif
+
+namespace OUtil
+{
+
+// Wrapper for easy iteration over containers in reverse with ranged for loops
+template <typename T>
+struct reverse_wrapper
+{
+    T& iterable;
+    inline auto begin() { return std::rbegin(iterable); }
+    inline auto end() { return std::rend(iterable); }
+};
+
+/**
+ * @brief Reverse the iteration in a range-based for loop
+ */
+template <typename T>
+inline reverse_wrapper<T> reverse(T&& iterable) { return { iterable }; }
+
+// Wrapper for skipping the first N elements in a range-based for loop
+template <typename T>
+struct drop_wrapper
+{
+    T& iterable;
+    size_t count;
+
+    auto begin() {
+        auto it = std::begin(iterable);
+        auto end_it = std::end(iterable);
+        for (size_t i = 0; i < count && it != end_it; ++i)
+            ++it;
+        return it;
+    }
+
+    inline auto end() { return std::end(iterable); }
+};
+
+/**
+ * @brief Skip the first `count` elements in a range-based for loop
+ */
+template <typename T>
+inline drop_wrapper<T> drop(T&& iterable, std::size_t count) { return { iterable, count }; }
+
+}

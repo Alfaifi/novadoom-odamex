@@ -111,15 +111,6 @@ void G_DeferedReset() {
 
 BEGIN_COMMAND (wad) // denis - changes wads
 {
-	std::string lastmap = argv[argc-1];
-	if (lastmap.rfind("lastmap=", 0) == 0)
-	{
-		lastmap = lastmap.substr(8);
-		argc--;
-	}
-	else
-		lastmap = "";
-
 	// [Russell] print out some useful info
 	if (argc == 1)
 	{
@@ -135,13 +126,13 @@ BEGIN_COMMAND (wad) // denis - changes wads
 	if (paused)
 	{
 		paused = false;
-		S_ResumeSound ();
+		S_ResumeMusic();
 	}
 
 	C_HideConsole();
 
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
-	G_LoadWadString(wadstr, lastmap);
+	G_LoadWadString(wadstr);
 
 	D_StartTitle ();
 	CL_QuitNetGame(NQ_SILENT);
@@ -220,7 +211,7 @@ void G_InitNew (const char *mapname)
 	if (paused)
 	{
 		paused = false;
-		S_ResumeSound ();
+		S_ResumeMusic();
 	}
 
 	// If were in chasecam mode, clear out // [Toke - fix]
@@ -232,7 +223,7 @@ void G_InitNew (const char *mapname)
 	// [RH] If this map doesn't exist, bomb out
 	if (W_CheckNumForName (mapname) == -1)
 	{
-		I_Error ("Could not find map %s\n", mapname);
+		I_Error("Could not find map {}\n", mapname);
 	}
 
 	const bool wantFast = sv_fastmonsters || G_GetCurrentSkill().fast_monsters;
@@ -240,38 +231,42 @@ void G_InitNew (const char *mapname)
 	{
 		if (wantFast)
 		{
-			for (i = 0; i < NUMSTATES; i++)
+			for (const auto& it : states)
 			{
-				if (states[i].flags & STATEF_SKILL5FAST &&
-				    (states[i].tics != 1 || demoplayback))
-					states[i].tics >>= 1; // don't change 1->0 since it causes cycles
+				state_t* state = it.second;
+				if (state->flags & STATEF_SKILL5FAST &&
+				    (state->tics != 1 || demoplayback))
+					state->tics >>= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (i = 0; i < NUMMOBJTYPES; ++i)
+			for (const auto& it : mobjinfo)
 			{
-				if (mobjinfo[i].altspeed != NO_ALTSPEED)
+				mobjinfo_t* minfo = it.second;
+				if (minfo->altspeed != NO_ALTSPEED)
 				{
-					int swap = mobjinfo[i].speed;
-					mobjinfo[i].speed = mobjinfo[i].altspeed;
-					mobjinfo[i].altspeed = swap;
+					int swap = minfo->speed;
+					minfo->speed = minfo->altspeed;
+					minfo->altspeed = swap;
 				}
 			}
 		}
 		else
 		{
-			for (i = 0; i < NUMSTATES; i++)
+			for (const auto& it : states)
 			{
-				if (states[i].flags & STATEF_SKILL5FAST)
-					states[i].tics <<= 1; // don't change 1->0 since it causes cycles
+				state_t* state = it.second;
+				if (state->flags & STATEF_SKILL5FAST)
+					state->tics <<= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (i = 0; i < NUMMOBJTYPES; ++i)
+			for (const auto& it : mobjinfo)
 			{
-				if (mobjinfo[i].altspeed != NO_ALTSPEED)
+				mobjinfo_t* minfo = it.second;
+				if (minfo->altspeed != NO_ALTSPEED)
 				{
-					int swap = mobjinfo[i].altspeed;
-					mobjinfo[i].altspeed = mobjinfo[i].speed;
-					mobjinfo[i].speed = swap;
+					int swap = minfo->altspeed;
+					minfo->altspeed = minfo->speed;
+					minfo->speed = swap;
 				}
 			}
 		}

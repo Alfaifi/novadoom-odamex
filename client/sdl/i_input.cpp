@@ -42,15 +42,11 @@
 #include "i_system.h"
 #include "hu_stuff.h"
 
-#ifdef _XBOX
-	#include "i_xbox.h"
-#elif __SWITCH__
+#ifdef __SWITCH__
 	#include "nx_io.h"
 #endif
 
-#if defined(SDL12)
-#include "i_input_sdl12.h"
-#elif defined(SDL20)
+#if defined(SDL20)
 #include "i_input_sdl20.h"
 #endif
 
@@ -594,9 +590,7 @@ bool I_InitInput()
 
 	atterm(I_ShutdownInput);
 
-	#if defined(SDL12)
-	input_subsystem = new ISDL12InputSubsystem();
-	#elif defined(SDL20)
+	#ifdef SDL20
 	input_subsystem = new ISDL20InputSubsystem();
 	#endif
 
@@ -819,7 +813,7 @@ static int I_GetEventRepeaterKey(const event_t* ev)
 void IInputSubsystem::addToEventRepeaters(event_t& ev)
 {
 	// Check if the event needs to be added/removed from the list of repeatable events
-	int key = I_GetEventRepeaterKey(&ev);
+	const int key = I_GetEventRepeaterKey(&ev);
 	if (ev.type == ev_keydown && key)
 	{
 		// If there is an existing repeater event for "key",
@@ -833,7 +827,7 @@ void IInputSubsystem::addToEventRepeaters(event_t& ev)
 		repeater.event = ev;
 		repeater.repeating = false;		// start off waiting for mRepeatDelay before repeating
 		repeater.last_time = I_GetTime();
-		mEventRepeaters.insert(std::make_pair(key, repeater));
+		mEventRepeaters.emplace(key, repeater);
 	}
 	else if (ev.type == ev_keyup && key)
 	{

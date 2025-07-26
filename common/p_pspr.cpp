@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #include "odamex.h"
 
 #include <stdlib.h>
@@ -57,6 +56,7 @@ EXTERN_CVAR(sv_infiniteammo)
 EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_allowpwo)
 EXTERN_CVAR(co_fineautoaim)
+EXTERN_CVAR(co_zdoomammo)
 EXTERN_CVAR(cl_centerbobonfire)
 
 const char *weaponnames[] =
@@ -174,7 +174,7 @@ fixed_t P_CalculateWeaponBobY(player_t* player, float scale_amount)
 //
 // P_SetPsprite
 //
-void P_SetPspritePtr(player_t* player, pspdef_t* psp, statenum_t stnum)
+void P_SetPspritePtr(player_t* player, pspdef_t* psp, int32_t stnum)
 {
 	do
 	{
@@ -185,10 +185,10 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, statenum_t stnum)
 			break;
 		}
 
-		if (stnum >= NUMSTATES)
+		if (states.find(stnum) == states.end())
 			return;
 
-		psp->state = &states[stnum];
+		psp->state = states[stnum];
 		psp->tics = psp->state->tics;		// could be 0
 
 		if (psp->state->misc1)
@@ -203,7 +203,11 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, statenum_t stnum)
 		if (psp->state->action)
 		{
 			if (!player->spectator && player->mo != NULL)
+			{
+				// [CMB] calculate psprnum here using the present psp and length of psprites
+				player->psprnum = psp - player->psprites;
 				psp->state->action(player->mo);
+			}
 
 			if (!psp->state)
 				break;
@@ -215,8 +219,9 @@ void P_SetPspritePtr(player_t* player, pspdef_t* psp, statenum_t stnum)
 	// an initial state of 0 could cycle through
 }
 
-void P_SetPsprite(player_t* player, int position, statenum_t stnum)
+void P_SetPsprite(player_t* player, int position, int32_t stnum)
 {
+	// TODO [CMB] set psprnum here to the correct position in the sprites
 	P_SetPspritePtr(player, &player->psprites[position], stnum);
 }
 
@@ -264,8 +269,11 @@ bool P_EnoughAmmo(player_t *player, weapontype_t weapon, bool switching = false)
 	ammotype_t		ammotype = weaponinfo[weapon].ammotype;
 	int				count = 1;	// default amount of ammo for most weapons
 
-	// [SL] Fix for when DeHackEd doesn't patch minammo
-	count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
+	if (co_zdoomammo || deh.ZDAmmo)
+		// [SL] Fix for when DeHackEd doesn't patch minammo
+		count = MAX(weaponinfo[weapon].minammo, weaponinfo[weapon].ammouse);
+	else
+		count = weaponinfo[weapon].ammopershot;
 
 	// Vanilla Doom requires > 40 cells to switch to BFG and > 2 shells to
 	// switch to SSG when current weapon is out of ammo due to a bug.
@@ -434,7 +442,7 @@ bool P_CheckAmmo (player_t *player)
 // example, it is possible to make a weapon that decreases the max
 // number of ammo for another weapon.  Emulate this.
 
-static void DecreaseAmmo(player_t *player)
+static void DecreaseAmmo(player_t *player, int amount = 1)
 {
 	// [SL] 2012-06-17 - Don't decrease ammo for players we are viewing
 	// The server will send the correct ammo
@@ -444,7 +452,11 @@ static void DecreaseAmmo(player_t *player)
 	if (!sv_infiniteammo)
 	{
 		ammotype_t ammonum = weaponinfo[player->readyweapon].ammotype;
-		int amount = weaponinfo[player->readyweapon].ammouse;
+		if (co_zdoomammo || deh.ZDAmmo)
+			amount = weaponinfo[player->readyweapon].ammouse;
+		else if (weaponinfo[player->readyweapon].internalflags & WIF_ENABLEAPS)
+			amount = weaponinfo[player->readyweapon].ammopershot;
+
 
 		if (ammonum < NUMAMMO)
 			player->ammo[ammonum] -= amount;
@@ -464,10 +476,12 @@ void P_FireWeapon(player_t* player)
 
 	// [tm512] Send the client the weapon they just fired so
 	// that they can fix any weapon desyncs that they get - apr 14 2012
+#if defined(SERVER_APP)
 	if (serverside && !clientside)
 	{
 		MSG_WriteSVC(&player->client.reliablebuf, SVC_FireWeapon(*player));
 	}
+#endif
 
 	P_SetMobjState(player->mo, S_PLAY_ATK1);
 	statenum_t newstatenum = weaponinfo[player->readyweapon].atkstate;
@@ -500,10 +514,10 @@ void A_WeaponReady(AActor* mo)
     struct pspdef_s* psp = &player->psprites[player->psprnum];
 
 	// get out of attack state
-	if (player->mo->state == &states[S_PLAY_ATK1] || player->mo->state == &states[S_PLAY_ATK2])
+	if (player->mo->state == states[S_PLAY_ATK1] || player->mo->state == states[S_PLAY_ATK2])
 		P_SetMobjState(player->mo, S_PLAY);
 
-	if (player->readyweapon == wp_chainsaw && psp->state == &states[S_SAW])
+	if (player->readyweapon == wp_chainsaw && psp->state == states[S_SAW])
 		A_FireSound(player, "weapons/sawidle");
 
 	// check for change -  if player is dead, put the weapon away
@@ -776,7 +790,7 @@ void A_FireBFG(AActor* mo)
 	angle_t storedpitch = player->mo->pitch;
 	int storedaimdist = player->userinfo.aimdist;
 
-	DecreaseAmmo(player);
+	DecreaseAmmo(player, deh.BFGCells);
 
 	player->mo->pitch = 0;
 	player->userinfo.aimdist = 81920000;
@@ -896,7 +910,7 @@ void A_CheckAmmo(AActor* mo)
 	if (psp->state->args[1] != 0)
 		amount = psp->state->args[1];
 	else
-		amount = weaponinfo[player->readyweapon].ammouse;
+		amount = weaponinfo[player->readyweapon].ammopershot;
 
 	if (player->ammo[type] < amount)
 		P_SetPspritePtr(player, psp, (statenum_t)psp->state->args[0]);
@@ -929,7 +943,7 @@ void A_ConsumeAmmo(AActor* mo)
 	if (psp->state->args[0] != 0)
 		amount = psp->state->args[0];
 	else
-		amount = weaponinfo[player->readyweapon].ammouse;
+		amount = weaponinfo[player->readyweapon].ammopershot;
 
 	// subtract ammo, but don't let it get below zero
 	if (player->ammo[type] >= amount)
@@ -1092,10 +1106,17 @@ void A_WeaponMeleeAttack(AActor* mo)
 	hitsound = psp->state->args[3];
 	range = psp->state->args[4];
 
-	if (hitsound >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
+	char* snd;
+
+	auto soundIt = SoundMap.find(hitsound);
+	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
-		hitsound = 0;
+		DPrintFmt("Warning: Weapon Melee Hitsound ID is beyond the array of the Sound Map!\n");
+		snd = nullptr;
+	}
+	else
+	{
+		snd = (char*)soundIt->second;
 	}
 
 	if (range <= 0)
@@ -1124,7 +1145,7 @@ void A_WeaponMeleeAttack(AActor* mo)
 		return;
 
 	// un-missed!
-	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, SoundMap[hitsound],
+	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, snd,
 	                    ATTN_NORM);
 
 	// turn to face target
@@ -1147,14 +1168,20 @@ void A_WeaponSound(AActor *mo)
 		return;
 
 	int sndmap = psp->state->args[0];
+	char* snd;
 
-	if (sndmap >= static_cast<int>(ARRAY_LENGTH(SoundMap)))
+	auto soundIt = SoundMap.find(sndmap);
+	if (soundIt == SoundMap.end())
 	{
-		DPrintf("Warning: Weapon Sound ID is beyond the array of the Sound Map!\n");
-		sndmap = 0;
+		DPrintFmt("Warning: Weapon sound ID is beyond the array of the Sound Map!\n");
+		snd = nullptr;
+	}
+	else
+	{
+		snd = (char*)soundIt->second;
 	}
 
-	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, SoundMap[sndmap],
+	UV_SoundAvoidPlayer(player->mo, CHAN_WEAPON, snd,
 	                    (psp->state->args[1] ? ATTN_NONE : ATTN_NORM));
 }
 
@@ -1199,7 +1226,7 @@ void A_FireRailgun(AActor* mo)
 	int damage;
 
     player_t *player = mo->player;
-	DecreaseAmmo(player);
+	DecreaseAmmo(player, 10);
 
 	P_SetPsprite (player,
 				  ps_flash,
@@ -1409,7 +1436,7 @@ void A_FireShotgun2(AActor* mo)
 	A_FireSound (player, "weapons/sshotf");
 	P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-	DecreaseAmmo(player);
+	DecreaseAmmo(player, 2);
 
 	P_SetPsprite (player,
 				  ps_flash,
@@ -1427,7 +1454,7 @@ void A_FireShotgun2(AActor* mo)
 void A_FireCGun(AActor* mo)
 {
     player_t *player = mo->player;
-    struct pspdef_s *psp = &player->psprites[player->psprnum];
+	pspdef_s *psp = &player->psprites[player->psprnum];
 
 	A_FireSound (player, "weapons/chngun");
 
@@ -1439,11 +1466,8 @@ void A_FireCGun(AActor* mo)
 
 	DecreaseAmmo(player);
 
-	P_SetPsprite (player,
-				  ps_flash,
-				  (statenum_t)(weaponinfo[player->readyweapon].flashstate
-				  + psp->state
-				  - &states[S_CHAIN1]) );
+	// [CMB] this is expecting to calculate a very specific state based on the pointer arthmetic
+	P_SetPsprite (player, ps_flash, (statenum_t)(weaponinfo[player->readyweapon].flashstate + psp->state->statenum - states[S_CHAIN1]->statenum) );
 
 	spreadtype_t accuracy = player->refire ? SPREAD_NORMAL : SPREAD_NONE;
 	P_FireHitscan(player, 1, accuracy);

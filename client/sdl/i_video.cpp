@@ -33,9 +33,7 @@
 #include "i_video.h"
 #include "v_video.h"
 
-#if defined(SDL12)
-#include "i_video_sdl12.h"
-#elif defined(SDL20)
+#if defined(SDL20)
 #include "i_video_sdl20.h"
 #else
 #error "no video subsystem selected"
@@ -51,7 +49,7 @@
 
 // [Russell] - Just for windows, display the icon in the system menu and
 // alt-tab display
-#if defined(_WIN32) && !defined(_XBOX)
+#if defined(_WIN32)
 	#include "win32inc.h"
     #include "SDL_syswm.h"
     #include "resource.h"
@@ -879,12 +877,12 @@ void I_SetVideoMode(const IVideoMode& requested_mode)
 	assert(I_VideoInitialized());
 
 	if (window->getVideoMode() != requested_mode)
-		DPrintf("I_SetVideoMode: could not set video mode to %s. Using %s instead.\n",
-						I_GetVideoModeString(requested_mode).c_str(),
-						I_GetVideoModeString(window->getVideoMode()).c_str());
+		DPrintFmt("I_SetVideoMode: could not set video mode to {}. Using {} instead.\n",
+						I_GetVideoModeString(requested_mode),
+						I_GetVideoModeString(window->getVideoMode()));
 	else
-		DPrintf("I_SetVideoMode: set video mode to %s\n",
-					I_GetVideoModeString(window->getVideoMode()).c_str());
+		DPrintFmt("I_SetVideoMode: set video mode to {}\n",
+					I_GetVideoModeString(window->getVideoMode()));
 
 	const argb_t* palette = V_GetGamePalette()->colors;
 	if (matted_surface)
@@ -934,9 +932,7 @@ void I_InitHardware()
 	}
 	else
 	{
-		#if defined(SDL12)
-		video_subsystem = new ISDL12VideoSubsystem();
-		#elif defined(SDL20)
+		#if defined(SDL20)
 		video_subsystem = new ISDL20VideoSubsystem();
 		#endif
 		assert(video_subsystem != NULL);

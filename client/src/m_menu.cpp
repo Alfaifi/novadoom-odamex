@@ -55,10 +55,6 @@
 #include "g_skill.h"
 #include "m_fileio.h"
 
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
-
 EXTERN_CVAR(g_resetinvonexit)
 
 // temp for screenblocks (0-9)
@@ -197,6 +193,28 @@ bool M_DemoNoPlay;
 static IWindowSurface* fire_surface;
 static constexpr int fire_surface_width = 72;
 static constexpr int fire_surface_height = 77;
+
+static void M_PauseSound(void)
+{
+	if (paused || gamestate != GS_LEVEL || multiplayer || demoplayback ||
+	    netdemo.isPlaying())
+	{
+		return;
+	}
+
+	S_PauseSound();
+}
+
+static void M_ResumeSound(void)
+{
+	if (paused || gamestate != GS_LEVEL || multiplayer || demoplayback ||
+	    netdemo.isPlaying())
+	{
+		return;
+	}
+
+	S_ResumeSound();
+}
 
 //
 // DOOM MENU
@@ -510,7 +528,6 @@ oldmenu_t SaveDef =
 // through console commands.
 BEGIN_COMMAND (menu_main)
 {
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_SetupNextMenu (&MainDef);
 	PSetupDepth = 2;
@@ -520,7 +537,6 @@ END_COMMAND (menu_main)
 BEGIN_COMMAND (menu_help)
 {
     // F1
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_ReadThis(0);
 }
@@ -529,7 +545,6 @@ END_COMMAND (menu_help)
 BEGIN_COMMAND (menu_save)
 {
     // F2
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_SaveGame (0);
 	//Printf (PRINT_WARNING, "Saving is not available at this time.\n");
@@ -539,7 +554,6 @@ END_COMMAND (menu_save)
 BEGIN_COMMAND (menu_load)
 {
     // F3
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_LoadGame (0);
 	//Printf (PRINT_WARNING, "Loading is not available at this time.\n");
@@ -549,7 +563,6 @@ END_COMMAND (menu_load)
 BEGIN_COMMAND (menu_options)
 {
     // F4
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
     M_StartControlPanel ();
 	M_Options(0);
 	PSetupDepth = 1;
@@ -559,7 +572,6 @@ END_COMMAND (menu_options)
 BEGIN_COMMAND (quicksave)
 {
     // F6
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_QuickSave ();
 	//Printf (PRINT_WARNING, "Saving is not available at this time.\n");
@@ -568,7 +580,6 @@ END_COMMAND (quicksave)
 
 BEGIN_COMMAND (menu_endgame)
 {	// F7
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_EndGame(0);
 }
@@ -577,7 +588,6 @@ END_COMMAND (menu_endgame)
 BEGIN_COMMAND (quickload)
 {
     // F9
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_QuickLoad ();
 	//Printf (PRINT_WARNING, "Loading is not available at this time.\n");
@@ -586,7 +596,6 @@ END_COMMAND (quickload)
 
 BEGIN_COMMAND (menu_quit)
 {	// F10
-	S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_QuitDOOM(0);
 }
@@ -594,7 +603,6 @@ END_COMMAND (menu_quit)
 
 BEGIN_COMMAND (menu_player)
 {
-    S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 	M_StartControlPanel ();
 	M_PlayerSetup(0);
 	PSetupDepth = 0;
@@ -630,7 +638,7 @@ void M_ReadSaveStrings()
 		FILE* handle = fopen(name.c_str(), "rb");
 		if (handle == NULL)
 		{
-			strcpy (&savegamestrings[i][0], GStrings(EMPTYSTRING));
+			M_StringCopy(&savegamestrings[i][0], GStrings(EMPTYSTRING), SAVESTRINGSIZE);
 			LoadSavegameMenu[i].status = 0;
 		}
 		else
@@ -638,7 +646,7 @@ void M_ReadSaveStrings()
 			const size_t readlen = fread (&savegamestrings[i], SAVESTRINGSIZE, 1, handle);
 			if (readlen < 1)
 			{
-				printf("M_Read_SaveStrings(): Failed to read handle.\n");
+				fmt::print("M_Read_SaveStrings(): Failed to read handle.\n");
 				fclose(handle);
 				return;
 			}
@@ -670,7 +678,7 @@ void M_LoadSelect (int choice)
 	std::string name;
 
 	G_BuildSaveName (name, choice);
-	G_LoadGame(name.c_str());
+	G_LoadGame(name);
 	gamestate = gamestate == GS_FULLCONSOLE ? GS_HIDECONSOLE : gamestate;
 	M_ClearMenus ();
 	if (quickSaveSlot == -2)
@@ -721,7 +729,7 @@ void M_DrawSave()
 //
 void M_DoSave (int slot)
 {
-	G_SaveGame (slot,savegamestrings[slot]);
+	G_SaveGame (slot, { savegamestrings[slot], 24 });
 	M_ClearMenus ();
 		// PICK QUICKSAVE SLOT YET?
 	if (quickSaveSlot == -2)
@@ -744,7 +752,7 @@ void M_SaveSelect (int choice)
 	genStringLen = SAVESTRINGSIZE-1;
 
 	saveSlot = choice;
-	strcpy(saveOldString,savegamestrings[choice]);
+	M_StringCopy(saveOldString, savegamestrings[choice], SAVESTRINGSIZE);
 
 	// If on a game console, auto-fill with date and time to save name
 
@@ -1194,6 +1202,7 @@ void M_EndGameResponse(int ch)
 	}
 
 	currentMenu->lastOn = itemOn;
+	S_StopAmbientSound();
 	M_ClearMenus ();
 	D_StartTitle ();
 	CL_QuitNetGame(NQ_SILENT);
@@ -1248,7 +1257,8 @@ void M_QuitDOOM(int choice)
 {
 	// We pick index 0 which is language sensitive,
 	//  or one at random, between 1 and maximum number.
-	static std::string endstring =
+	static std::string endstring;
+	endstring =
 		fmt::sprintf("%s\n\n%s",
 		             GStrings.getIndex(GStrings.toIndex(QUITMSG) + (gametic % NUM_QUITMESSAGES)),
 		             GStrings(DOSY));
@@ -1262,7 +1272,7 @@ void M_QuitDOOM(int choice)
 
 void M_DrawSlider(int x, int y, float leftval, float rightval, float cur, float step);
 
-static const char *genders[3] = { "male", "female", "cyborg" };
+static const char *genders[4] = { "male", "female", "cyborg", "other" };
 // Acts 19 quiz the order must match d_netinf.h
 static const char *colorpresets[11] = { "custom", "blue", "indigo", "green", "brown", "red", "gold", "jungle green", "purple", "white", "black" };
 static state_t *PlayerState;
@@ -1280,9 +1290,9 @@ EXTERN_CVAR (cl_autoaim)
 
 void M_PlayerSetup(int choice)
 {
-	strcpy(savegamestrings[0], cl_name.cstring());
+	M_StringCopy(savegamestrings[0], cl_name.cstring(), SAVESTRINGSIZE);
 	M_SetupNextMenu (&PSetupDef);
-	PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
+	PlayerState = states[mobjinfo[MT_PLAYER]->seestate];
 	PlayerTics = PlayerState->tics;
 
 	if (fire_surface == NULL)
@@ -1300,9 +1310,9 @@ static void M_PlayerSetupTicker()
 		return;
 
 	if (PlayerState->tics == -1 || PlayerState->nextstate == S_NULL)
-		PlayerState = &states[mobjinfo[MT_PLAYER].seestate];
+		PlayerState = states[mobjinfo[MT_PLAYER]->seestate];
 	else
-		PlayerState = &states[PlayerState->nextstate];
+		PlayerState = states[PlayerState->nextstate];
 	PlayerTics = PlayerState->tics;
 }
 
@@ -1526,7 +1536,7 @@ static void M_PlayerSetupDrawer()
 		}
 	}
 	{
-		const int spritenum = states[mobjinfo[MT_PLAYER].spawnstate].sprite;
+		const int spritenum = states[mobjinfo[MT_PLAYER]->spawnstate]->sprite;
 		const spriteframe_t* sprframe = &sprites[spritenum].spriteframes[PlayerState->frame & FF_FRAMEMASK];
 
 		// [Nes] Color of player preview uses the unused translation table (player 0), instead
@@ -1629,12 +1639,13 @@ void M_ChangeTeam (int choice) // [Toke - Teams]
 
 static void M_ChangeGender (int choice)
 {
+	static constexpr int MAX_GENDER = ARRAY_LENGTH(genders) - 1;
 	int gender = D_GenderByName(cl_gender.cstring());
 
 	if (!choice)
-		gender = (gender == 0) ? 2 : gender - 1;
+		gender = (gender == 0) ? MAX_GENDER : gender - 1;
 	else
-		gender = (gender == 2) ? 0 : gender + 1;
+		gender = (gender == MAX_GENDER) ? 0 : gender + 1;
 
 	cl_gender = genders[gender];
 }
@@ -1669,13 +1680,14 @@ static void M_ChangeAutoAim (int choice)
 
 static void M_ChangeColorPreset (int choice)
 {
+	static constexpr int MAX_PRESET = ARRAY_LENGTH(colorpresets) - 1;
 	int colorpreset = D_ColorPreset(cl_colorpreset.cstring());
 	argb_t customcolor = V_GetColorFromString(cl_customcolor);
 
 	if (!choice)
-		colorpreset = (colorpreset == 0) ? 10 : colorpreset - 1;
+		colorpreset = (colorpreset == 0) ? MAX_PRESET : colorpreset - 1;
 	else
-		colorpreset = (colorpreset == 10) ? 0 : colorpreset + 1;
+		colorpreset = (colorpreset == MAX_PRESET) ? 0 : colorpreset + 1;
 
 	cl_colorpreset = colorpresets[colorpreset];
 
@@ -1716,8 +1728,8 @@ static void M_EditPlayerName (int choice)
 	genStringLen = MAXPLAYERNAME;
 
 	saveSlot = 0;
-	strcpy(saveOldString,savegamestrings[0]);
-	if (!strcmp(savegamestrings[0],GStrings(EMPTYSTRING)))
+	M_StringCopy(saveOldString, savegamestrings[0], SAVESTRINGSIZE);
+	if (!strcmp(savegamestrings[0], GStrings(EMPTYSTRING)))
 		savegamestrings[0][0] = 0;
 	saveCharIndex = strlen(savegamestrings[0]);
 }
@@ -1940,7 +1952,7 @@ bool M_Responder (event_t* ev)
 			if (genStringEnter == oldmenustring_t::SAVEGAME)
 				M_ClearMenus();
 			genStringEnter = oldmenustring_t::NONE;
-			strcpy(&savegamestrings[saveSlot][0], saveOldString);
+			M_StringCopy(&savegamestrings[saveSlot][0], saveOldString, SAVESTRINGSIZE);
 		}
 		else if (Key_IsAcceptKey(ch))
 		{
@@ -1985,6 +1997,7 @@ bool M_Responder (event_t* ev)
 		}
 
 		menuactive = false;
+		M_ResumeSound();
 		S_Sound (CHAN_INTERFACE, "switches/exitbutn", 1, ATTN_NONE);
 		return true;
 	}
@@ -2134,6 +2147,8 @@ void M_StartControlPanel()
 	currentMenu = &MainDef;
 	itemOn = currentMenu->lastOn;
 	OptionsActive = false;			// [RH] Make sure none of the options menus appear.
+	M_PauseSound();
+	S_Sound(CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 }
 
 
@@ -2220,6 +2235,7 @@ void M_ClearMenus()
 	menuactive = false;
 	drawSkull = true;
 	M_DemoNoPlay = false;
+    M_ResumeSound();
 }
 
 
@@ -2261,7 +2277,6 @@ void M_PopMenuStack()
 		M_ClearMenus ();
 		if (currentMenu == &PSetupDef && PSetupDepth > 0)			// hack for PlayerSetup
 		{
-			S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 			M_StartControlPanel();
 			if (PSetupDepth == 2)
 				M_SetupNextMenu(&MainDef);

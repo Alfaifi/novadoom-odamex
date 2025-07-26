@@ -31,7 +31,6 @@
 
 #include <ctime>
 #include <functional>
-#include <map>
 #include <sstream>
 
 #include "win32inc.h"
@@ -41,10 +40,6 @@
 
 #include "fmt/ranges.h"
 
-#ifdef GEKKO
-#include "i_wii.h"
-#endif
-
 #ifdef __SWITCH__
 #include "nx_system.h"
 #endif
@@ -53,13 +48,36 @@
 char		com_token[8192];
 bool		com_eof;
 
+// Safe string copy function that works like OpenBSD's strlcpy().
+// Returns true if the string was not truncated.
+// from Chocolate Doom m_misc.cpp
+
+bool M_StringCopy(char *dest, const char *src, size_t dest_size)
+{
+    size_t len;
+
+    if (dest_size >= 1)
+    {
+        dest[dest_size - 1] = '\0';
+        strncpy(dest, src, dest_size - 1);
+    }
+    else
+    {
+        return false;
+    }
+
+    len = strlen(dest);
+    return src[len] == '\0';
+}
+
 char *copystring (const char *s)
 {
 	char *b;
 	if (s)
 	{
-		b = new char[strlen(s)+1];
-		strcpy (b, s);
+		size_t len = strlen(s) + 1;
+		b = new char[len];
+		M_StringCopy(b, s, len);
 	}
 	else
 	{
@@ -166,7 +184,7 @@ int ParseHex(const char* hex)
 		else if (*str >= 'A' && *str <= 'F')
 			num += 10 + *str-'A';
 		else {
-			DPrintf("Bad hex number: %s\n",hex);
+			DPrintFmt("Bad hex number: {}\n",hex);
 			return 0;
 		}
 		str++;
@@ -269,13 +287,13 @@ size_t StdStringFind(const std::string& haystack, const std::string& needle,
 }
 
 size_t StdStringFind(const std::string& haystack, const std::string& needle,
-    size_t pos = 0, size_t n = std::string::npos, bool CIS = false)
+    size_t pos, size_t n, bool CIS)
 {
     return StdStringFind(haystack, needle, pos, n, CIS, false);
 }
 
 size_t StdStringRFind(const std::string& haystack, const std::string& needle,
-    size_t pos = 0, size_t n = std::string::npos, bool CIS = false)
+    size_t pos, size_t n, bool CIS)
 {
     return StdStringFind(haystack, needle, pos, n, CIS, true);
 }
@@ -345,7 +363,7 @@ StringTokens TokenizeString(const std::string& str, const std::string& delim) {
 	while (delimPos != std::string::npos) {
 		delimPos = str.find(delim, prevDelim);
 		tokens.push_back(str.substr(prevDelim, delimPos - prevDelim));
-		prevDelim = delimPos + 1;
+		prevDelim = delimPos + delim.length();
 	}
 
 	return tokens;

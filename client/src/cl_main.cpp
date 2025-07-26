@@ -70,15 +70,10 @@
 #include "cl_replay.h"
 
 #include <bitset>
-#include <map>
 #include <set>
 #include <sstream>
 
 #include "server.pb.h"
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
 
 #if _MSC_VER == 1310
 #pragma optimize("",off)
@@ -303,7 +298,7 @@ void M_Ticker(void);
 size_t P_NumPlayersInGame();
 void G_PlayerReborn (player_t &player);
 void P_KillMobj (AActor *source, AActor *target, AActor *inflictor, bool joinkill);
-void P_SetPsprite (player_t *player, int position, statenum_t stnum);
+void P_SetPsprite (player_t *player, int position, int32_t stnum);
 void P_ExplodeMissile (AActor* mo);
 void P_CalcHeight (player_t *player);
 bool P_CheckMissileSpawn (AActor* th);
@@ -383,7 +378,7 @@ void CL_QuitNetGame2(const netQuitReason_e reason, const char* file, const int l
 	if (paused)
 	{
 		paused = false;
-		S_ResumeSound ();
+		S_ResumeMusic();
 	}
 
 	memset (&serveraddr, 0, sizeof(serveraddr));
@@ -1138,6 +1133,8 @@ CVAR_FUNC_IMPL (cl_netdemoname)
 		var.RestoreDefault();
 }
 
+EXTERN_CVAR(cl_netdemodir)
+
 //
 // CL_GenerateNetDemoFileName
 //
@@ -1146,7 +1143,7 @@ std::string CL_GenerateNetDemoFileName(const std::string &filename = cl_netdemon
 {
 	const std::string expanded_filename(M_ExpandTokens(filename));
 	std::string newfilename(expanded_filename);
-	newfilename = M_GetUserFileName(newfilename);
+	newfilename = M_GetNetDemoFileName(newfilename, cl_netdemodir);
 
 	// keep trying to find a filename that doesn't yet exist
 	if (!M_FindFreeName(newfilename, "odd"))

@@ -41,6 +41,10 @@
 #include "p_mobj.h"
 #include "p_unlag.h"
 
+#ifndef STATE_NUM
+#define STATE_NUM(mo) (statenum_t)(mo->state->statenum)
+#endif
+
 /**
  * @brief Pack an array of booleans into a bitfield.
  */
@@ -344,7 +348,7 @@ odaproto::svc::SpawnMobj SVC_SpawnMobj(AActor* mo)
 	cur->set_netid(mo->netid);
 
 	// denis - sending state fixes monster ghosts appearing under doors
-	cur->set_statenum(mo->state - states);
+	cur->set_statenum(STATE_NUM(mo));
 
 	if (mo->type == MT_FOUNTAIN)
 	{
@@ -358,7 +362,7 @@ odaproto::svc::SpawnMobj SVC_SpawnMobj(AActor* mo)
 	}
 
 	// denis - check type as that is what the client will be spawning
-	if (mo->flags & MF_MISSILE || mobjinfo[mo->type].flags & MF_MISSILE)
+	if (mo->flags & MF_MISSILE || mobjinfo[mo->type]->flags & MF_MISSILE)
 	{
 		msg.set_target_netid(mo->target ? mo->target->netid : 0);
 	}
@@ -376,7 +380,7 @@ odaproto::svc::SpawnMobj SVC_SpawnMobj(AActor* mo)
 	}
 
 	// animating corpses
-	if ((mo->flags & MF_CORPSE) && mo->state - states != S_GIBS)
+	if ((mo->flags & MF_CORPSE) && STATE_NUM(mo) != S_GIBS)
 	{
 		// This sets off some additional logic on the client.
 		spawnFlags |= SVC_SM_CORPSE;
@@ -632,6 +636,37 @@ odaproto::svc::KillMobj SVC_KillMobj(AActor* source, AActor* target, AActor* inf
 	tgtmom->set_x(target->momx);
 	tgtmom->set_y(target->momy);
 	tgtmom->set_z(target->momz);
+
+	return msg;
+}
+
+/**
+ * @brief Resurrect a mobj.
+ */
+odaproto::svc::RaiseMobj SVC_RaiseMobj(AActor* source, AActor* corpse)
+{
+	odaproto::svc::RaiseMobj msg;
+
+	odaproto::Actor* cps = msg.mutable_corpse();
+
+	// corpse netid
+	cps->set_netid(corpse->netid);
+
+	cps->set_rndindex(corpse->rndindex);
+
+	odaproto::Vec3* cpspos = cps->mutable_pos();
+	cpspos->set_x(corpse->x);
+	cpspos->set_y(corpse->y);
+	cpspos->set_z(corpse->z);
+
+	cps->set_angle(corpse->angle);
+
+	odaproto::Vec3* cpsmom = cps->mutable_mom();
+	cpsmom->set_x(corpse->momx);
+	cpsmom->set_y(corpse->momy);
+	cpsmom->set_z(corpse->momz);
+
+	msg.set_source_netid(source ? source->netid : 0);
 
 	return msg;
 }
@@ -986,7 +1021,8 @@ odaproto::svc::PlayerState SVC_PlayerState(player_t& player)
 	for (int i = 0; i < NUMPSPRITES; i++)
 	{
 		pspdef_t* psp = &player.psprites[i];
-		unsigned int state = psp->state - states;
+		unsigned int state =
+		    (psp->state != NULL) ? (statenum_t)(psp->state->statenum) : 0;
 		odaproto::Player_Psp* plpsp = pl->add_psprites();
 		plpsp->set_statenum(state);
 	}
@@ -1270,6 +1306,9 @@ odaproto::svc::SectorProperties SVC_SectorProperties(sector_t& sector)
 			secmsg->set_base_floor_angle(sector.base_floor_angle);
 			secmsg->set_base_floor_yoffs(sector.base_floor_yoffs);
 			break;
+		case SPC_Special:
+			secmsg->set_special(sector.special);
+			break;
 		default:
 			break;
 		}
@@ -1317,7 +1356,7 @@ odaproto::svc::MobjState SVC_MobjState(AActor* mo)
 {
 	odaproto::svc::MobjState msg;
 
-	statenum_t mostate = static_cast<statenum_t>(mo->state - states);
+	statenum_t mostate = static_cast<statenum_t>((mo->state->statenum));
 
 	msg.set_netid(mo->netid);
 	msg.set_mostate(mostate);
@@ -1512,8 +1551,8 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status,
 			const uint32_t mapidx = indexer.getIndex(map);
 			row->set_map(mapidx);
 
-			const std::string& lastmap = entry->lastmap;
-			const uint32_t lastmapidx = indexer.getIndex(lastmap);
+			const std::string lastmaps = fmt::format("{}", entry->lastmaps);
+			const uint32_t lastmapidx = indexer.getIndex(lastmaps);
 			row->set_lastmap(lastmapidx);
 
 			for (const auto& wad : entry->wads)

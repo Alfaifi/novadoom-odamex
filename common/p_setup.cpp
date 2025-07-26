@@ -29,6 +29,7 @@
 #include <math.h>
 #include <set>
 #include <zlib.h>
+#include <nonstd/scope.hpp>
 
 #include "m_alloc.h"
 #include "m_vectors.h"
@@ -51,6 +52,7 @@
 #include "p_setup.h"
 #include "p_hordespawn.h"
 #include "p_mapformat.h"
+#include "r_sky.h"
 
 void SV_PreservePlayer(player_t &player);
 void P_SpawnMapThing (mapthing2_t *mthing, int position);
@@ -186,7 +188,7 @@ void P_LoadSegsHelper(int side, short angle, int linedef, seg_t *li)
 	li->angle = (angle)<<16;
 
 	if(linedef < 0 || linedef >= numlines)
-		I_Error("P_LoadSegsHelper: invalid linedef %d", linedef);
+		I_Error("P_LoadSegsHelper: invalid linedef {}", linedef);
 
 	ldef = &lines[linedef];
 	li->linedef = ldef;
@@ -254,14 +256,14 @@ void P_LoadSegs (int lump, bool isdeepbsp = false)
 			v = LELONG(ml->v1);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v1 = &vertexes[v];
 
 			v = LELONG(ml->v2);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v2 = &vertexes[v];
 
@@ -275,14 +277,14 @@ void P_LoadSegs (int lump, bool isdeepbsp = false)
 			v = LESHORT(ml->v1);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v1 = &vertexes[v];
 
 			v = LESHORT(ml->v2);
 
 			if(v >= numvertexes)
-				I_Error("P_LoadSegs: invalid vertex %d", v);
+				I_Error("P_LoadSegs: invalid vertex {}", v);
 			else
 				li->v2 = &vertexes[v];
 
@@ -418,7 +420,7 @@ void P_LoadSectors (int lump)
 		bool fog = level.outsidefog_color[0] != 0xFF || level.outsidefog_color[1] != 0 ||
 					level.outsidefog_color[2] != 0 || level.outsidefog_color[3] != 0;
 
-		if (fog && ss->ceilingpic == skyflatnum)
+		if (fog && R_IsSkyFlat(ss->ceilingpic))
 			ss->colormap = GetSpecialLights(255, 255, 255,
 									level.outsidefog_color[1], level.outsidefog_color[2], level.outsidefog_color[3]);
 		else
@@ -583,8 +585,8 @@ bool P_LoadXNOD(int lump)
 		if (err != Z_STREAM_END)
 			I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression!");
 
-		fprintf(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio %.3f\n",
-				(float)zstream->total_out/zstream->total_in);
+		fmt::print(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio {:.3f}\n",
+		           (float)zstream->total_out/zstream->total_in);
 
 		len = zstream->total_out;
 
@@ -728,22 +730,20 @@ enum nodetype_t {
 
 nodetype_t P_CheckNodeType(int lump) {
 	byte *data = (byte *) W_CacheLumpNum(lump, PU_STATIC);
+	nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
 
 	if (memcmp(data, "xNd4\0\0\0\0", 8) == 0)
 	{
-		Z_Free(data);
 		return NT_DEEP;
 	}
 
 	if (memcmp(data, "XNOD", 4) == 0)
 	{
-		Z_Free(data);
 		return NT_XNOD;
 	}
 
 	if (memcmp(data, "ZNOD", 4) == 0)
 	{
-		Z_Free(data);
 		return NT_ZNOD;
 	}
 
@@ -1072,14 +1072,14 @@ void P_LoadLineDefs (const int lump)
 		unsigned short v = LESHORT(mld->v1);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs: invalid vertex {}", v);
 		else
 			ld->v1 = &vertexes[v];
 
 		v = LESHORT(mld->v2);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs: invalid vertex {}", v);
 		else
 			ld->v2 = &vertexes[v];
 
@@ -1127,14 +1127,14 @@ void P_LoadLineDefs2 (int lump)
 		unsigned short v = LESHORT(mld->v1);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs2: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs2: invalid vertex {}", v);
 		else
 			ld->v1 = &vertexes[v];
 
 		v = LESHORT(mld->v2);
 
 		if(v >= numvertexes)
-			I_Error("P_LoadLineDefs2: invalid vertex %d", v);
+			I_Error("P_LoadLineDefs2: invalid vertex {}", v);
 		else
 			ld->v2 = &vertexes[v];
 
@@ -1725,7 +1725,7 @@ void P_GroupLines (void)
 	for (i = 0; i < numsubsectors; i++)
 	{
 		if (subsectors[i].firstline >= (unsigned int)numsegs)
-			I_Error("subsector[%d].firstline exceeds numsegs (%u)", i, numsegs);
+			I_Error("subsector[{}].firstline exceeds numsegs (%u)", i, numsegs);
 		subsectors[i].sector = segs[subsectors[i].firstline].sidedef->sector;
 	}
 
@@ -1771,7 +1771,7 @@ void P_GroupLines (void)
 			}
 		}
 		if (linebuffer - sector->lines != sector->linecount)
-			I_Error ("P_GroupLines: miscounted");
+			I_Error("P_GroupLines: miscounted");
 
 		// set the soundorg to the middle of the bounding box
 		sector->soundorg[0] = (bbox.Right()+bbox.Left())/2;
@@ -2046,7 +2046,7 @@ void P_SetupLevel (const char *lumpname, int position)
 		// calling P_CheckSight
 		if (W_LumpLength(lumpnum + ML_REJECT) < ((unsigned int)ceil((float)(numsectors * numsectors / 8))))
 		{
-			DPrintf("Reject matrix is not valid and will be ignored.\n");
+			DPrintFmt("Reject matrix is not valid and will be ignored.\n");
 			rejectempty = true;
 		}
 	}
@@ -2111,6 +2111,23 @@ void P_SetupLevel (const char *lumpname, int position)
 	g_ValidLevel = true;
 }
 
+// c++11 semantics moves vector on return
+static std::vector<spriteinfo_t*> P_GetSpriteInfos ()
+{
+	std::vector<spriteinfo_t*> infos;
+	for(auto it = sprnames.begin();it != sprnames.end();++it)
+	{
+		spriteinfo_t* spriteinfo = (spriteinfo_t*) Z_Malloc(sizeof(spriteinfo_t), PU_STATIC, nullptr);
+		spriteinfo->sprite = Z_StrDup(it->second, PU_STATIC);
+		spriteinfo->spritenum = it->first;
+		infos.push_back(spriteinfo);
+	}
+	std::sort(infos.begin(), infos.end(), [](spriteinfo_t* lhs, spriteinfo_t* rhs) {
+		return lhs->spritenum < rhs->spritenum;
+	});
+	return infos;
+}
+
 //
 // P_Init
 //
@@ -2118,7 +2135,9 @@ void P_Init (void)
 {
 	P_InitSwitchList ();
 	P_InitPicAnims ();
-	R_InitSprites (sprnames);
+	// code below ASSUMES the sprites are in-order rather than passing an order down-ward
+	std::vector<spriteinfo_t*> infos = P_GetSpriteInfos ();
+	R_InitSprites(infos);
 	InitTeamInfo();
 	P_InitHorde();
 }

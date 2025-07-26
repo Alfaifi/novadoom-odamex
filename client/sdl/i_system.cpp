@@ -41,27 +41,22 @@
 
 #include "win32inc.h"
 #ifdef _WIN32
-#include <direct.h>
-#include <io.h>
-#include <process.h>
-
-#ifdef _XBOX
-#include <xtl.h>
-#else
-#include <shlwapi.h>
-#include <winsock2.h>
-#include <mmsystem.h>
-#include <shlobj.h>
-#endif // !_XBOX
+	#include <direct.h>
+	#include <io.h>
+	#include <process.h>
+	#include <shlwapi.h>
+	#include <winsock2.h>
+	#include <mmsystem.h>
+	#include <shlobj.h>
 #endif // WIN32
 
 #ifdef UNIX
 // for getuid and geteuid
-#include <unistd.h>
-#include <sys/types.h>
-#include <limits.h>
-#include <time.h>
-#include <pwd.h>
+	#include <unistd.h>
+	#include <sys/types.h>
+	#include <limits.h>
+	#include <time.h>
+	#include <pwd.h>
 #endif
 
 #include <sstream>
@@ -93,14 +88,6 @@
 #include "m_fileio.h"
 #include "txt_main.h"
 
-#ifdef _XBOX
-	#include "i_xbox.h"
-#endif
-
-#ifdef GEKKO
-	#include "i_wii.h"
-#endif
-
 #ifndef GCONSOLE // I will add this back later -- Hyper_Eye
 	// For libtextscreen to link properly
 	extern "C"
@@ -109,7 +96,7 @@
 	}
 	#define ENDOOM_W 80
 	#define ENDOOM_H 25
-#endif // _XBOX
+#endif // GCONSOLE
 
 EXTERN_CVAR (r_loadicon)
 EXTERN_CVAR (r_showendoom)
@@ -196,7 +183,7 @@ void *I_ZoneBase (size_t *size)
 	// Die if the system has insufficient memory
 	if (got_heapsize < min_heapsize)
 		I_FatalError("I_ZoneBase: Insufficient memory available! Minimum size "
-					 "is %lu MB but got %lu MB instead",
+					 "is {} MB but got {} MB instead",
 					 min_heapsize,
 					 got_heapsize);
 
@@ -230,12 +217,12 @@ dtime_t I_GetTime()
 	mach_port_deallocate(mach_task_self(), cclock);
 	return mts.tv_sec * 1000LL * 1000LL * 1000LL + mts.tv_nsec;
 
-#elif defined UNIX && !defined GEKKO
+#elif defined UNIX
 	timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return ts.tv_sec * 1000LL * 1000LL * 1000LL + ts.tv_nsec;
 
-#elif defined WIN32 && !defined _XBOX
+#elif defined WIN32
 	static bool initialized = false;
 	static LARGE_INTEGER initial_count;
 	static double nanoseconds_per_count;
@@ -319,7 +306,7 @@ void I_Sleep(dtime_t sleep_time)
 #if defined UNIX
 	usleep(sleep_time / 1000LL);
 
-#elif defined(WIN32) && !defined(_XBOX)
+#elif defined(WIN32)
 	Sleep(sleep_time / 1000000LL);
 
 #else
@@ -352,7 +339,7 @@ void I_WaitVBL(int count)
 //
 // SubsetLanguageIDs
 //
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 static void SubsetLanguageIDs (LCID id, LCTYPE type, int idx)
 {
 	char buf[8];
@@ -381,7 +368,7 @@ void SetLanguageIDs()
 
 	if (strcmp(langid, "auto") == 0)
 	{
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 		memset(LanguageIDs, 0, sizeof(LanguageIDs));
 		SubsetLanguageIDs(LOCALE_USER_DEFAULT, LOCALE_ILANGUAGE, 0);
 		SubsetLanguageIDs(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTLANGUAGE, 1);
@@ -686,7 +673,7 @@ std::string I_GetClipboardText()
 		if (!bytes_left)
 		{
 			XDestroyWindow(dis, WindowEvents);
-			DPrintf("I_GetClipboardText: Len was: %lu", len);
+			DPrintFmt("I_GetClipboardText: Len was: {}", len);
 			XUnlockDisplay(dis);
 			XCloseDisplay(dis);
 			return "";
@@ -714,7 +701,7 @@ std::string I_GetClipboardText()
 	return ret;
 #endif
 
-#if defined _WIN32 && !defined _XBOX
+#if defined _WIN32
 	std::string ret;
 
 	if(!IsClipboardFormatAvailable(CF_TEXT))
@@ -978,7 +965,7 @@ void I_ErrorMessageBox(const char* message)
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, ODAMEX_ERROR_TITLE, message, NULL);
 }
 
-#elif defined(WIN32) && !defined(_XBOX)
+#elif defined(WIN32)
 
 void I_ErrorMessageBox(const char* message)
 {
@@ -1000,7 +987,7 @@ void I_ErrorMessageBox(const char* message)
 
 void I_ErrorMessageBox(const char* message)
 {
-	fprintf(stderr, "%s\n%s\n", ODAMEX_ERROR_TITLE, message);
+	fmt::print(stderr, "{}\n{}\n", ODAMEX_ERROR_TITLE, message);
 }
 
 #endif
@@ -1011,7 +998,7 @@ BEGIN_COMMAND(debug_userfilename)
 {
 	if (argc < 2)
 	{
-		Printf("debug_userfilename: needs a path to check.\n");
+		PrintFmt("debug_userfilename: needs a path to check.\n");
 		return;
 	}
 

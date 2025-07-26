@@ -477,8 +477,8 @@ void CHEAT_DoCheat(player_t* player, int cheat, bool silentmsg)
 		}
 
 #ifdef SERVER_APP
-		SV_BroadcastPrintfButPlayer(PRINT_HIGH, player->id, "%s is a cheater: %s\n",
-		                            player->userinfo.netname.c_str(), msg.c_str());
+		SV_BroadcastPrintFmtButPlayer(PRINT_HIGH, player->id, "{} is a cheater: {}\n",
+		                            player->userinfo.netname, msg);
 #endif
 	}
 }
@@ -516,13 +516,13 @@ AActor* CHEAT_Summon(player_s* player, const std::string& sum, bool friendly)
 				return entity;
 		}
 
-		fixed_t x = source->x + FixedMul(mobjinfo[mobjtype].radius * 2 + source->radius,
+		fixed_t x = source->x + FixedMul(mobjinfo[mobjtype]->radius * 2 + source->radius,
 		                                 finecosine[source->angle >> ANGLETOFINESHIFT]);
-		fixed_t y = source->y + FixedMul(mobjinfo[mobjtype].radius * 2 + source->radius,
+		fixed_t y = source->y + FixedMul(mobjinfo[mobjtype]->radius * 2 + source->radius,
 		                                 finesine[source->angle >> ANGLETOFINESHIFT]);
 		fixed_t z = source->z + 8 * FRACUNIT;
 
-		if (mobjinfo[mobjtype].flags & MF_MISSILE)
+		if (mobjinfo[mobjtype]->flags & MF_MISSILE)
 		{
 			entity = P_SpawnPlayerMissile(source, mobjtype);
 		}

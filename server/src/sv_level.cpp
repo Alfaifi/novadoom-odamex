@@ -75,7 +75,7 @@ EXTERN_CVAR (sv_teamsinplay)
 EXTERN_CVAR(g_resetinvonexit)
 
 extern int mapchange;
-extern std::string forcedlastmap;
+extern maplist_lastmaps_t forcedlastmaps;
 
 // [AM] Stores the reset snapshot
 FLZOMemFile	*reset_snapshot = NULL;
@@ -152,15 +152,6 @@ const char* GetBase(const char* in)
 
 BEGIN_COMMAND (wad) // denis - changes wads
 {
-	std::string lastmap = argv[argc-1];
-	if (lastmap.rfind("lastmap=", 0) == 0)
-	{
-		lastmap = lastmap.substr(8);
-		argc--;
-	}
-	else
-		lastmap = "";
-
 	// [Russell] print out some useful info
 	if (argc == 1)
 	{
@@ -173,8 +164,21 @@ BEGIN_COMMAND (wad) // denis - changes wads
 	    return;
 	}
 
+	std::string lastmap = argv[argc-1];
+	maplist_lastmaps_t lastmaps;
+	if (lastmap.rfind("lastmap=", 0) == 0)
+	{
+		auto lastmap_result = maplist_lastmaps_t::parse(lastmap.substr(8));
+		if (!lastmap_result) {
+			PrintFmt(PRINT_HIGH, "Failed to parse lastmap: {}\n", lastmap_result.error());
+			return;
+		}
+		lastmaps = lastmap_result.value();
+		argc--;
+	}
+
 	std::string wadstr = C_EscapeWadList(VectorArgs(argc, argv));
-	G_LoadWadString(wadstr, "", lastmap);
+	G_LoadWadString(wadstr, "", lastmaps);
 }
 END_COMMAND (wad)
 
@@ -184,7 +188,12 @@ EXTERN_CVAR(sv_shufflemaplist)
 
 bool isLastMap()
 {
-	return level.nextmap == "" || level.mapname == forcedlastmap;
+	return level.nextmap.empty() ||
+		std::any_of(
+			forcedlastmaps.entries.begin(), forcedlastmaps.entries.end(),
+			[&](const auto& entry) {
+				return entry.first == level.mapname && (entry.second.empty() || entry.second == level.nextmap);
+		});
 }
 
 // Returns the next map, assuming there is no maplist.
@@ -193,7 +202,7 @@ OLumpName G_NextMap()
 {
 	OLumpName next = level.nextmap;
 
-	if (gamestate == GS_STARTUP || (sv_gametype != GM_COOP && forcedlastmap.empty()) || next.empty())
+	if (gamestate == GS_STARTUP || (sv_gametype != GM_COOP && forcedlastmaps.empty()) || next.empty())
 	{
 		// if not coop, and lastmap is not specified, stay on same level
 		// [ML] 1/25/10: OR if next is empty
@@ -207,9 +216,9 @@ OLumpName G_NextMap()
 
 	// NES - exiting a Doom 1 episode moves to the next episode,
 	// rather than always going back to E1M1
-	if (level.nextmap == "" || level.mapname == forcedlastmap ||
-			(next.substr(0, 7) == "EndGame") ||
-			(gamemode == retail_chex && (level.nextmap == "E1M6")))
+	if (isLastMap() ||
+		(next.substr(0, 7) == "EndGame") ||
+		(gamemode == retail_chex && (level.nextmap == "E1M6")))
 	{
 		if (gameinfo.flags & GI_MAPxx || gamemode == shareware ||
 			(((gamemode == registered && level.cluster == 3) ||
@@ -242,12 +251,12 @@ void G_ChangeMap()
 		if (!Maplist::instance().lobbyempty())
 		{
 			std::string wadstr = C_EscapeWadList(lobby_entry.wads);
-			G_LoadWadString(wadstr, "", lobby_entry.map);
+			G_LoadWadString(wadstr, lobby_entry.map);
 		}
 		else
 		{
 			size_t next_index;
-			if ((!forcedlastmap.empty() && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
+			if ((!forcedlastmaps.empty() && !isLastMap()) || !Maplist::instance().get_next_index(next_index))
 			{
 				// We don't have a maplist, so grab the next 'natural' map lump.
 				G_DeferedInitNew(G_NextMap());
@@ -258,7 +267,7 @@ void G_ChangeMap()
 				Maplist::instance().get_map_by_index(next_index, maplist_entry);
 
 				std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-				G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
+				G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmaps);
 
 				// Set the new map as the current map
 				Maplist::instance().set_index(next_index);
@@ -284,7 +293,7 @@ void G_ChangeMap(size_t index) {
 	}
 
 	std::string wadstr = C_EscapeWadList(maplist_entry.wads);
-	G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmap);
+	G_LoadWadString(wadstr, maplist_entry.map, maplist_entry.lastmaps);
 
 	// Set the new map as the current map
 	Maplist::instance().set_index(index);
@@ -390,8 +399,6 @@ void SV_ServerSettingChange();
 
 void G_InitNew(const char *mapname)
 {
-	size_t i;
-
 	DWORD previousLevelFlags = level.flags;
 
 	if (!savegamerestore)
@@ -425,7 +432,7 @@ void G_InitNew(const char *mapname)
 	// [RH] If this map doesn't exist, bomb out
 	if (W_CheckNumForName (mapname) == -1)
 	{
-		I_Error ("Could not find map %s\n", mapname);
+		I_Error("Could not find map {}\n", mapname);
 	}
 
 	const bool wantFast = sv_fastmonsters || G_GetCurrentSkill().fast_monsters;
@@ -433,38 +440,42 @@ void G_InitNew(const char *mapname)
 	{
 		if (wantFast)
 		{
-			for (i = 0; i < NUMSTATES; i++)
+			for (const auto& it : states)
 			{
-				if (states[i].flags & STATEF_SKILL5FAST &&
-				    (states[i].tics != 1 || demoplayback))
-					states[i].tics >>= 1; // don't change 1->0 since it causes cycles
+				state_t* state = it.second;
+				if (state->flags & STATEF_SKILL5FAST &&
+				    (state->tics != 1 || demoplayback))
+					state->tics >>= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (i = 0; i < NUMMOBJTYPES; ++i)
+			for (const auto& it : mobjinfo)
 			{
-				if (mobjinfo[i].altspeed != NO_ALTSPEED)
+				mobjinfo_t* minfo = it.second;
+				if (minfo->altspeed != NO_ALTSPEED)
 				{
-					int swap = mobjinfo[i].speed;
-					mobjinfo[i].speed = mobjinfo[i].altspeed;
-					mobjinfo[i].altspeed = swap;
+					int swap = minfo->speed;
+					minfo->speed = minfo->altspeed;
+					minfo->altspeed = swap;
 				}
 			}
 		}
 		else
 		{
-			for (i = 0; i < NUMSTATES; i++)
+			for (const auto& it : states)
 			{
-				if (states[i].flags & STATEF_SKILL5FAST)
-					states[i].tics <<= 1; // don't change 1->0 since it causes cycles
+				state_t* state = it.second;
+				if (state->flags & STATEF_SKILL5FAST)
+					state->tics <<= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (i = 0; i < NUMMOBJTYPES; ++i)
+			for (const auto& it : mobjinfo)
 			{
-				if (mobjinfo[i].altspeed != NO_ALTSPEED)
+				mobjinfo_t* minfo = it.second;
+				if (minfo->altspeed != NO_ALTSPEED)
 				{
-					int swap = mobjinfo[i].altspeed;
-					mobjinfo[i].altspeed = mobjinfo[i].speed;
-					mobjinfo[i].speed = swap;
+					int swap = minfo->altspeed;
+					minfo->altspeed = minfo->speed;
+					minfo->speed = swap;
 				}
 			}
 		}
@@ -635,7 +646,7 @@ void G_DoResetLevel(bool full_reset)
 	if (reset_snapshot == NULL)
 	{
 		// No saved state to reload to
-		DPrintf("G_DoResetLevel: No saved state to reload.");
+		DPrintFmt("G_DoResetLevel: No saved state to reload.");
 		return;
 	}
 
@@ -899,7 +910,7 @@ void G_DoLoadLevel (int position)
 			if (!teamInfo->FlagData.flaglocated)
 			{
 				const char* teamColor = teamInfo->ColorString.c_str();
-				SV_BroadcastPrintf(PRINT_WARNING, "WARNING: %s flag pedestal not found! No %s flags in game.\n", teamColor, teamColor);
+				SV_BroadcastPrintFmt(PRINT_WARNING, "WARNING: {} flag pedestal not found! No {} flags in game.\n", teamColor, teamColor);
 			}
 		}
 	}

@@ -23,7 +23,6 @@
 
 #include "odamex.h"
 
-#include <map>
 #include <sstream>
 
 #include "c_maplist.h"
@@ -193,10 +192,10 @@ void MaplistCache::ev_tic() {
 		break;
 	case MAPLIST_TIMEOUT:
 		this->error = "Maplist update timed out.";
-		DPrintf("MaplistCache::ev_tic: Maplist Cache Update Timeout.\n");
-		DPrintf("- Successfully Cached Maps: %lu\n", this->maplist.size());
-		DPrintf("- Destination Maplist Size: %lu\n", this->size);
-		DPrintf("- Valid Indexes: %d\n", this->valid_indexes);
+		DPrintFmt("MaplistCache::ev_tic: Maplist Cache Update Timeout.\n");
+		DPrintFmt("- Successfully Cached Maps: {}\n", this->maplist.size());
+		DPrintFmt("- Destination Maplist Size: {}\n", this->size);
+		DPrintFmt("- Valid Indexes: {}\n", this->valid_indexes);
 		break;
 	case MAPLIST_THROTTLED:
 		this->error = "Server refused to send the maplist.";
@@ -288,7 +287,7 @@ void MaplistCache::status_handler(maplist_status_t status) {
 		this->status = status;
 		break;
 	default:
-		DPrintf("MaplistCache::status_handler: Unknown status %d from server.\n", status);
+		DPrintFmt("MaplistCache::status_handler: Unknown status {} from server.\n", status);
 		return;
 	}
 }
@@ -306,7 +305,7 @@ bool MaplistCache::update_status_handler(maplist_status_t status) {
 	case MAPLIST_OUTDATED:
 		return true;
 	default:
-		DPrintf("MaplistCache::status_handler: Unknown status %d from server.\n", status);
+		DPrintFmt("MaplistCache::status_handler: Unknown status {} from server.\n", status);
 		return true;
 	}
 }
@@ -381,22 +380,22 @@ void CMD_MaplistCallback(const maplist_qrows_t &result) {
 	bool show_this_map = MaplistCache::instance().get_this_index(this_index);
 	MaplistCache::instance().get_next_index(next_index);
 	for (const auto& [index, entry] : result) {
-		const auto& [map, lastmap, wads] = *entry;
+		const auto& [map, lastmap, _, wads] = *entry;
 		char flag = ' ';
 		if (show_this_map && index == this_index) {
 			flag = '*';
 		} else if (index == next_index) {
 			flag = '+';
 		}
-		Printf(PRINT_HIGH, "%c%lu. %s %s%s\n", flag, index + 1,
+		PrintFmt(PRINT_HIGH, "{}{}. {} {}{}\n", flag, index + 1,
 			   JoinStrings(wads, " "), map,
-			   lastmap.empty() ? "" : fmt::sprintf(" lastmap=%s", lastmap));
+			   lastmap.empty() ? "" : fmt::format(" lastmap={}", lastmap));
 	}
 }
 
 // Clientside maplist query errback.
 void CMD_MaplistErrback(const std::string &error) {
-	Printf(PRINT_HIGH, "%s\n", error);
+	PrintFmt(PRINT_HIGH, "{}\n", error);
 }
 
 // Clientside maplist query.

@@ -43,30 +43,33 @@
 #include <stdlib.h>
 #include <time.h>
 
-
-#include "m_random.h"
-#include "minilzo.h"
+#include "c_dispatch.h"
+#include "d_dehacked.h"
+#include "d_main.h"
+#include "g_game.h"
+#include "g_horde.h"
+#include "g_mapinfo.h"
+#include "gi.h"
 #include "gstrings.h"
-#include "z_zone.h"
-#include "w_wad.h"
-#include "v_video.h"
+#include "i_system.h"
 #include "m_argv.h"
 #include "m_fileio.h"
 #include "m_misc.h"
-#include "c_dispatch.h"
-#include "i_system.h"
-#include "g_game.h"
+#include "m_random.h"
+#include "minilzo.h"
+#include "mobjinfo.h"
+#include "odamex_objects.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
-#include "d_main.h"
-#include "d_dehacked.h"
 #include "s_sound.h"
-#include "gi.h"
-#include "g_mapinfo.h"
-#include "sv_main.h"
+#include "sprite.h"
+#include "state.h"
 #include "sv_banlist.h"
-#include "g_horde.h"
+#include "sv_main.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "z_zone.h"
 
 #include "w_ident.h"
 
@@ -146,17 +149,9 @@ void D_Init()
 	// [AM] Init rand() PRNG, needed for non-deterministic maplist shuffling.
 	srand(time(NULL));
 
-	// start the Zone memory manager
-	Z_Init();
-	if (first_time)
-		Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
-
 	// Load palette and set up colormaps
 	V_InitPalette("PLAYPAL");
 	R_InitColormaps();
-
-	// [RH] Initialize localizable strings.
-	::GStrings.loadStrings(false);
 
 	// init the renderer
 	if (first_time)
@@ -193,6 +188,7 @@ void STACK_ARGS D_Shutdown()
 
 	// stop sound effects and music
 	S_Stop();
+	S_ClearSoundLumps();
 
 	DThinker::DestroyAllThinkers();
 
@@ -202,6 +198,7 @@ void STACK_ARGS D_Shutdown()
 	W_Close();
 
 	R_ShutdownColormaps();
+	R_ClearSkyDefs();
 
 	// reset the Zone memory manager
 	Z_Close();
@@ -214,7 +211,7 @@ void STACK_ARGS D_Shutdown()
 	NormalLight.next = NULL;
 }
 
-void D_Init_DEHEXTRA_Frames(void);
+void D_Init_Nightmare_Flags(void);
 
 //
 // D_DoomMain
@@ -230,10 +227,11 @@ void D_DoomMain()
 
 	W_SetupFileIdentifiers();
 
-	// [RH] Initialize items. Still only used for the give command. :-(
-	InitItems();
-	// Initialize all extra frames
-	D_Init_DEHEXTRA_Frames();
+	// start the Zone memory manager
+	Z_Init();
+	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
+
+	D_Initialize_Doom_Objects();
 
 	M_FindResponseFile();		// [ML] 23/1/07 - Add Response file support back in
 
@@ -246,6 +244,7 @@ void D_DoomMain()
 	if (!LOG.is_open())
 		C_DoCommand("logfile");
 
+
 	OWantFiles newwadfiles, newpatchfiles;
 
 	const char* iwad_filename_cstr = Args.CheckValue("-iwad");
@@ -255,8 +254,6 @@ void D_DoomMain()
 		OWantFile::make(file, iwad_filename_cstr, OFILE_WAD);
 		newwadfiles.push_back(file);
 	}
-
-
 
 	D_AddWadCommandLineFiles(newwadfiles);
 	D_AddDehCommandLineFiles(newpatchfiles);
@@ -291,7 +288,7 @@ void D_DoomMain()
 	devparm = Args.CheckParm("-devparm");
 
 	if (devparm)
-		DPrintf ("%s", GStrings(D_DEVSTR));		// D_DEVSTR
+		DPrintFmt("{}", GStrings(D_DEVSTR));		// D_DEVSTR
 
 	// Nomonsters
 	if (Args.CheckParm("-nomonsters"))
