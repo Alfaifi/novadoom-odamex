@@ -1889,7 +1889,7 @@ static int PatchPointer(int ptrNum)
 {
 	int result;
 
-	if (ptrNum >= 0 && ptrNum < 448)
+	if (ptrNum >= 0 && ptrNum < ARRAY_LENGTH(codepconv))
 	{
 #if defined _DEBUG
 		DPrintFmt("Pointer {}\n", ptrNum);
