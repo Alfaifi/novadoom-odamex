@@ -40,6 +40,7 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "w_wad.h"
+#include "infomap.h"
 
 // These are the original heights of every Doom 2 thing. They are used if a patch
 // specifies that a thing should be hanging from the ceiling but doesn't specify
@@ -2316,9 +2317,36 @@ static int PatchStrings(int dummy)
 		} while (Line2 && *Line2);
 
 		i = GStrings.toIndex(Line1);
-		if (i == -1)
+		if (strncmp("DEHTHING_", Line1, 9) == 0)
 		{
-			PrintFmt(PRINT_HIGH, "Unknown string: {}\n", Line1);
+			try {
+				int32_t type = std::stoi(holdstring);
+				type--;
+				P_MapDehThing(static_cast<mobjtype_t>(type), Line1);
+				GStrings.setString(Line1, holdstring);
+				DPrintFmt("{} set to:\n{}\n", Line1, holdstring);
+			}
+			catch (const std::invalid_argument&)
+			{
+				PrintFmt(PRINT_HIGH, "Invalid thing type {} for {}\n", holdstring, Line1);
+			}
+			catch (const std::out_of_range&)
+			{
+				PrintFmt(PRINT_HIGH, "Invalid thing type {} for {}\n", holdstring, Line1);
+			}
+		}
+		else if (i == -1)
+		{
+			if (strncmp("USER_", Line1, 5) == 0)
+			{
+				ReplaceSpecialChars(holdstring);
+				GStrings.setString(Line1, holdstring);
+				DPrintFmt("{} set to:\n{}\n", Line1, holdstring);
+			}
+			else
+			{
+				PrintFmt(PRINT_HIGH, "Unknown string: {}\n", Line1);
+			}
 		}
 		else
 		{

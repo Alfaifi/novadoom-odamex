@@ -59,6 +59,7 @@
 #include "w_ident.h"
 #include "m_resfile.h"
 #include "odainfo.h"
+#include "infomap.h"
 
 OResFiles wadfiles;
 OResFiles patchfiles;
@@ -558,6 +559,8 @@ static void LoadResolvedFiles(const OResFiles& newwadfiles,
 	// [SL] It is necessary to load the strings here since a dehacked patch
 	// might change the strings
 	::GStrings.loadStrings(false);
+
+	P_InitMobjNameMap();
 
 	// Apply DEH patches.
 	D_LoadResolvedPatches();
