@@ -384,7 +384,7 @@ CVAR_RANGE(sv_countdown, "5",
 					"Use MBF monster_friction behavior -- monster movement is affected by ice and sludge.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
-	CVAR_RANGE(co_distfriend, "128",
+	CVAR_RANGE(co_friend_distance, "128",
 					"Use MBF distfriend behavior -- friendlies will try to maintain this distance in mapblocks.",
 					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE, 0.0f, 2048.0f)
 
@@ -392,7 +392,7 @@ CVAR_RANGE(sv_countdown, "5",
 					"Use MBF monster_avoid_hazards behavior -- monsters will avoid some damaging sectors and crushers.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
-	CVAR(			co_monkeys, "0",
+	CVAR(			co_monstersclimbsteep, "0",
 					"Use MBF monkeys behavior -- monsters will step up or down to 24 units.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
@@ -400,18 +400,18 @@ CVAR_RANGE(sv_countdown, "5",
 					"Use MBF comp_staylift behavior -- monsters will try to stay on the same lift their target is on.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
-	CVAR(			co_dogjumping, "0",
+	CVAR(			co_friend_ledgejumping, "0",
 					"Use MBF dog_jumping behavior -- friendly monsters will drop off high ledges "
 					"if the target is immediately on the other side.",
 					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
-	CVAR_RANGE(co_playerhelpers, "0",
+	CVAR_RANGE(co_friend_playerhelpers, "0",
 					"Use MBF player_helpers behavior -- amount of friendly things to spawn at map start.\n" \
 					"If in an online game, dogs spawn only once on map start per helper per player.\n" \
-					"The helper type is defined in BEX or through the cvar co_helpertype.",
+					"The helper type is defined in BEX or through the cvar co_friend_helpertype.",
 					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 64.0f)
 
-		CVAR(co_helpertype, "", 
+		CVAR(co_friend_helpertype, "", 
 					"Name of the actor type to spawn as a helper.\n" \
 					"Spawnable actors can be found using the ccmd `dumpactors`\n" \
 					"If empty, it uses the defined default friend in Dehacked (BEX).\n" \
