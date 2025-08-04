@@ -408,11 +408,11 @@ jobs:
         asset_content_type: application/x-xz
   update-winget:
     name: Update WinGet package
-    needs: package-and-upload
+    needs: package-and-upload-windows
     runs-on: windows-latest
     steps:
       - uses: vedantmgoyal9/winget-releaser@main
-        if: ${{ github.repository_owner }} == 'odamex'
+        if: ${{ github.repository_owner == 'odamex' && secrets.WINGET_TOKEN != '' }}
         with:
           identifier: Odamex.Odamex
           token: ${{ secrets.WINGET_TOKEN }}
