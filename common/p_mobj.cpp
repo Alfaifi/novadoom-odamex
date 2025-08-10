@@ -1031,7 +1031,7 @@ int P_ThingInfoHeight(mobjinfo_t *mi)
 // [AM] Taken from Crispy Doom, with a smaller limit - 10,000 iterations
 //      still seems like a lot to me.
 
-#define MOBJ_CYCLE_LIMIT 64
+#define MOBJ_CYCLE_LIMIT 128
 
 // P_SetMobjState
 //
@@ -1085,7 +1085,7 @@ bool P_SetMobjState(AActor *mobj, int32_t state, bool cl_update)
 		if (cycle_counter++ > MOBJ_CYCLE_LIMIT)
 		{
 			I_Error("P_SetMobjState: Infinite state cycle detected for {} at state {}.",
-			        mobj->info->name, state);
+			        mobj->info->name ? mobj->info->name : fmt::format("thing {}", mobj->info->type), state);
 		}
 	} while (!mobj->tics);
 
