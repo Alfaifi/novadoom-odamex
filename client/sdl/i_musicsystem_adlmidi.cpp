@@ -161,6 +161,8 @@ void AdlMidiMusicSystem::_StopSong()
 	if (!m_isPlaying)
 		return;
 
+	m_isPlaying = false;
+
 	Mix_HookMusic(nullptr, nullptr);
 }
 
