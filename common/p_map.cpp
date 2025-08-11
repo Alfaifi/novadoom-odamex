@@ -106,7 +106,7 @@ EXTERN_CVAR (sv_friendlyfire)
 EXTERN_CVAR (sv_friendlymonsterfire)
 EXTERN_CVAR (sv_unblockplayers)
 EXTERN_CVAR (sv_unblockfriendly)
-EXTERN_CVAR (co_monkeys)
+EXTERN_CVAR (co_monstersclimbsteep)
 
 CVAR_FUNC_IMPL (sv_gravity)
 {
@@ -1355,7 +1355,7 @@ bool P_TryMove (AActor *thing, fixed_t x, fixed_t y,
 				                 (tmfloorz - tmdropoffz > 128 * FRACUNIT ||
 				                  !thing->target || thing->target->z > tmdropoffz)))
 				{
-					if (!co_monkeys || !P_IsMBFCompatMode()
+					if (!co_monstersclimbsteep || !P_IsMBFCompatMode()
 					        ? tmfloorz - tmdropoffz > 24 * FRACUNIT
 					        : thing->floorz - tmfloorz > 24 * FRACUNIT ||
 					              thing->dropoffz - tmdropoffz > 24 * FRACUNIT)

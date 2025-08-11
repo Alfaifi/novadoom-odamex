@@ -1135,9 +1135,9 @@ mobjinfo_t odamobjinfo[] = {
         S_NULL,        // xdeathstate
         NULL,          // deathsound
         0,             // speed
-        20 * FRACUNIT, // radius
-        48 * FRACUNIT, // height
-        48 * FRACUNIT, // cdheight
+        0,             // radius
+        0,             // height
+        0,             // cdheight
         100,           // mass
         0,             // damage
         NULL,          // activesound
@@ -1177,9 +1177,9 @@ mobjinfo_t odamobjinfo[] = {
         S_NULL,        // xdeathstate
         NULL,          // deathsound
         0,             // speed
-        20 * FRACUNIT, // radius
-        48 * FRACUNIT, // height
-        48 * FRACUNIT, // cdheight
+        0,             // radius
+        0,             // height
+        0,             // cdheight
         100,           // mass
         0,             // damage
         NULL,          // activesound
@@ -2038,9 +2038,9 @@ mobjinfo_t odamobjinfo[] = {
         S_NULL,        // xdeathstate
         NULL,          // deathsound
         0,             // speed
-        20 * FRACUNIT, // radius
-        48 * FRACUNIT, // height
-        48 * FRACUNIT, // cdheight
+        0,             // radius
+        0,             // height
+        0,             // cdheight
         100,           // mass
         0,             // damage
         NULL,          // activesound

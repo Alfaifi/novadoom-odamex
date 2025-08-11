@@ -57,15 +57,15 @@ EXTERN_CVAR(co_novileghosts)
 EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(co_pursuit)
 EXTERN_CVAR(co_helpfriends)
-EXTERN_CVAR(co_distfriend)
+EXTERN_CVAR(co_friend_distance)
 EXTERN_CVAR(co_monsterbacking)
 EXTERN_CVAR(co_monsterfriction)
 EXTERN_CVAR(co_avoidhazards)
 EXTERN_CVAR(co_staylift)
-EXTERN_CVAR(co_dogjumping)
+EXTERN_CVAR(co_friend_ledgejumping)
 EXTERN_CVAR(co_removesoullimit)
-EXTERN_CVAR(co_helpertype)
-EXTERN_CVAR(co_playerhelpers)
+EXTERN_CVAR(co_friend_helpertype)
+EXTERN_CVAR(co_friend_playerhelpers)
 
 #ifdef CLIENT_APP
 EXTERN_CVAR(cl_showfriends)
@@ -481,7 +481,7 @@ bool P_SmartMove(AActor* actor)
 
 	// allow all friends to jump down instead of just dogs
 
-	if (actor->flags & MF_FRIEND && target && co_dogjumping && P_AllowDropOff() &&
+	if (actor->flags & MF_FRIEND && target && co_friend_ledgejumping && P_AllowDropOff() &&
 	    !((target->flags ^ actor->flags) & MF_FRIEND) &&
 	    P_AproxDistance(actor->x - target->x, actor->y - target->y) < FRACUNIT * 144 &&
 	    P_Random(actor) < 235)
@@ -852,7 +852,7 @@ void P_NewChaseDir (AActor *actor)
 
 			if (actor->flags & actor->target->flags & MF_FRIEND &&
 			    P_IsFriendlyThing(actor, actor->target) &&
-			    co_distfriend.asInt() << FRACBITS > dist && !P_IsOnLift(actor) &&
+			    co_friend_distance.asInt() << FRACBITS > dist && !P_IsOnLift(actor) &&
 			    !P_IsUnderDamage(actor))
 			{
 				deltax = -deltax, deltay = -deltay;
@@ -1070,10 +1070,10 @@ void P_SetupHelpers()
 		if (!(it->ingame()))
 			continue;
 
-		for (int i = 0; i < co_playerhelpers.asInt(); i++)
+		for (int i = 0; i < co_friend_playerhelpers.asInt(); i++)
 		{
 
-			mobjtype_t monstertype = P_INameToMobj(co_helpertype.str());
+			mobjtype_t monstertype = P_INameToMobj(co_friend_helpertype.str());
 
 			if (monstertype == MT_NULL)
 				monstertype = MT_DOGS;
