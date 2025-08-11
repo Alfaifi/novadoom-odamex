@@ -61,6 +61,10 @@ int 			firstflat;
 int 			lastflat;
 int				numflats;
 
+// for TX_START/TX_END
+int 			first_tx;
+int 			last_tx;
+
 int 			firstspritelump;
 int 			lastspritelump;
 int				numspritelumps;
@@ -484,6 +488,25 @@ byte* R_GetTextureColumnData(int texnum, int colnum)
 // Initializes the texture list
 //	with the textures from the world map.
 //
+static inline void RegisterTexture(texture_t* texture, int i, byte scalex = 0, byte scaley = 0)
+{
+	texturecolumnofs[i] = new unsigned int[texture->width];
+
+	int j;
+	for (j = 1; j*2 <= texture->width; j <<= 1)
+		;
+	texturewidthmask[i] = j-1;
+
+	textureheight[i] = texture->height << FRACBITS;
+
+	// [RH] Special for beta 29: Values of 0 will use the tx/ty cvars
+	// to determine scaling instead of defaulting to 8. I will likely
+	// remove this once I finish the betas, because by then, users
+	// should be able to actually create scaled textures.
+	texturescalex[i] = scalex ? scalex << (FRACBITS - 3) : FRACUNIT;
+	texturescaley[i] = scaley ? scaley << (FRACBITS - 3) : FRACUNIT;
+}
+
 void R_InitTextures (void)
 {
 	maptexture_t*		mtexture;
@@ -499,6 +522,7 @@ void R_InitTextures (void)
 	int*				maptex1;
 
 	int*				patchlookup;
+	int 				numpatches;
 
 	int					nummappatches;
 	int 				offset;
@@ -506,6 +530,7 @@ void R_InitTextures (void)
 	int 				maxoff2;
 	int					numtextures1;
 	int					numtextures2;
+	int					tx_numtextures;
 
 	int*				directory;
 
@@ -518,7 +543,15 @@ void R_InitTextures (void)
 		char *name_p = names+4;
 
 		nummappatches = LELONG ( *((int *)names) );
-		patchlookup = new int[nummappatches];
+		numpatches = nummappatches;
+		first_tx = W_CheckNumForName("TX_START") + 1;
+		last_tx  = W_CheckNumForName("TX_END") - 1;
+		tx_numtextures = last_tx - first_tx + 1;
+		if (tx_numtextures > 0)
+		{
+			numpatches += tx_numtextures;
+		}
+		patchlookup = new int[numpatches];
 
 		for (i = 0; i < nummappatches; i++)
 		{
@@ -578,6 +611,15 @@ void R_InitTextures (void)
 
 	numtextures = numtextures1 + numtextures2;
 
+	if (tx_numtextures > 0)
+	{
+		for (int p = 0; p < tx_numtextures ; p++)
+		{
+			patchlookup[nummappatches + p] = first_tx + p;
+		}
+		numtextures += tx_numtextures;
+	}
+
 	textures = new texture_t *[numtextures];
 	texturecolumnofs = new unsigned int *[numtextures];
 	texturecomposite = new byte *[numtextures];
@@ -587,7 +629,7 @@ void R_InitTextures (void)
 	texturescalex = new fixed_t[numtextures];
 	texturescaley = new fixed_t[numtextures];
 
-	for (i = 0; i < numtextures; i++, directory++)
+	for (i=0 ; i<numtextures1 + numtextures2 ; i++, directory++)
 	{
 		if (i == numtextures1)
 		{
@@ -629,21 +671,35 @@ void R_InitTextures (void)
 				errors++;
 			}
 		}
-		texturecolumnofs[i] = new unsigned int[texture->width];
 
-		for (j = 1; j*2 <= texture->width; j <<= 1)
-			;
-		texturewidthmask[i] = j-1;
-
-		textureheight[i] = texture->height << FRACBITS;
-
-		// [RH] Special for beta 29: Values of 0 will use the tx/ty cvars
-		// to determine scaling instead of defaulting to 8. I will likely
-		// remove this once I finish the betas, because by then, users
-		// should be able to actually create scaled textures.
-		texturescalex[i] = mtexture->scalex ? mtexture->scalex << (FRACBITS - 3) : FRACUNIT;
-		texturescaley[i] = mtexture->scaley ? mtexture->scaley << (FRACBITS - 3) : FRACUNIT;
+		RegisterTexture(texture, i, mtexture->scalex, mtexture->scaley);
 	}
+
+	// TX_ marker (texture namespace) parsed here
+	if (tx_numtextures > 0)
+	{
+		int k;
+		for (i = (numtextures1 + numtextures2), k = 0;
+			i < numtextures;
+			i++, k++)
+		{
+			patch_t* tx_patch = W_CachePatch(first_tx + k, PU_CACHE);
+
+			texture = textures[i] = static_cast<texture_t*>(Z_Malloc(sizeof(texture_t), PU_STATIC, 0));
+
+			texture->name = lumpinfo[first_tx + k].name;
+			texture->width = tx_patch->width();
+			texture->height = tx_patch->height();
+			texture->patchcount = 1;
+
+			texture->patches->patch = patchlookup[nummappatches + k];
+			texture->patches->originx = 0;
+			texture->patches->originy = 0;
+
+			RegisterTexture(texture, i);
+		}
+	}
+
 	delete[] patchlookup;
 
 	Z_Free (maptex1);
