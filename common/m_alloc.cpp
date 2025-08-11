@@ -80,23 +80,8 @@ void *Realloc (void *memblock, size_t size)
 // exiting.
 void M_Free2 (void **memblock)
 {
-    if (*memblock != NULL)
+    if (*memblock != nullptr)
     {
-        free(*memblock);
-        *memblock = NULL;
-    }
-}
-
-//
-// M_Free3
-//
-// Wraps around the standard free() memory function. This variation is slightly 
-// more safer, as it only frees a block if its not NULL and will nullptr it on
-// exiting.
-void M_Free3 (void **memblock)
-{
-    if (*memblock != NULL)
-    {               
         free(*memblock);
         *memblock = nullptr;
     }

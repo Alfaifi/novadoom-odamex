@@ -523,8 +523,6 @@ void R_DrawHitBox(AActor* thing)
 //
 void R_ProjectSprite(AActor *thing, int fakeside)
 {
-	spritedef_t*		sprdef;
-	spriteframe_t*		sprframe;
 	int 				lump;
 	unsigned int		rot;
 	bool 				flip;
@@ -563,16 +561,17 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 		thingz = thing->z;
 	}
 
+	auto it = sprites.find(thing->sprite);
+
 #ifdef RANGECHECK
-	// if (static_cast<unsigned>(thing->sprite) >= static_cast<unsigned>(numsprites))
-	if (sprites.find(thing->sprite) == sprites.end())
+	if (it == sprites.end())
 	{
 		DPrintFmt("R_ProjectSprite: thing ({}: {}): invalid sprite number {}\n on ", thing->type, thing->info->name, thing->sprite);
 		return;
 	}
 #endif
 
-	sprdef = &sprites[thing->sprite];
+	const spritedef_t* sprdef = &it->second;
 
 #ifdef RANGECHECK
 	if ( (thing->frame & FF_FRAMEMASK) >= sprdef->numframes )
@@ -582,7 +581,7 @@ void R_ProjectSprite(AActor *thing, int fakeside)
 	}
 #endif
 
-	sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
+	const spriteframe_t* sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
 	// decide which patch to use for sprite relative to player
 	if (sprframe->rotate)
@@ -705,65 +704,58 @@ void R_AddSprites (sector_t *sec, int lightlevel, int fakeside)
 //
 void R_DrawPSprite(pspdef_t* psp, unsigned flags)
 {
-	fixed_t 			tx;
-	int 				x1;
-	int 				x2;
-	spritedef_t*		sprdef;
-	spriteframe_t*		sprframe;
-	int 				lump;
-	bool 				flip;
-	vissprite_t*		vis;
 	vissprite_t 		avis;
 
 	// decide which patch to use
+	auto it = sprites.find(psp->state->sprite);
 #ifdef RANGECHECK
-	if ( (unsigned)psp->state->sprite >= (unsigned)numsprites) {
+	if (it == sprites.end()) {
 		DPrintFmt("R_DrawPSprite: invalid sprite number {}\n", psp->state->sprite);
 		return;
 	}
 #endif
-	sprdef = &sprites[psp->state->sprite];
+	const spritedef_t* sprdef = &it->second;
 #ifdef RANGECHECK
 	if ( (psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes) {
 		DPrintFmt("R_DrawPSprite: invalid sprite frame {} : {}\n", psp->state->sprite, psp->state->frame);
 		return;
 	}
 #endif
-	sprframe = &sprdef->spriteframes[ psp->state->frame & FF_FRAMEMASK ];
+	const spriteframe_t* sprframe = &sprdef->spriteframes[ psp->state->frame & FF_FRAMEMASK ];
 
-	lump = sprframe->lump[0];
-	flip = sprframe->flip[0];
+	const int32_t lump = sprframe->lump[0];
+	const bool flip = sprframe->flip[0];
 
 	if (sprframe->width[0] == SPRITE_NEEDS_INFO)
 		R_CacheSprite (sprdef);	// [RH] speeds up game startup time
 
 	// calculate edges of the shape
-	tx = bobx - ((320 / 2) << FRACBITS);
+	fixed_t tx = bobx - ((320 / 2) << FRACBITS);
 
 	tx -= sprframe->offset[0];	// [RH] Moved out of spriteoffset[]
-	x1 = (centerxfrac + FixedMul (tx, pspritexscale)) >>FRACBITS;
+	const int32_t x1 = (centerxfrac + FixedMul (tx, pspritexscale)) >>FRACBITS;
 
 	// off the right side
 	if (x1 > viewwidth)
 		return;
 
 	tx += sprframe->width[0];	// [RH] Moved out of spritewidth[]
-	x2 = ((centerxfrac + FixedMul (tx, pspritexscale)) >>FRACBITS) - 1;
+	const int32_t x2 = ((centerxfrac + FixedMul (tx, pspritexscale)) >>FRACBITS) - 1;
 
 	// off the left side
 	if (x2 < 0)
 		return;
 
 	// store information in a vissprite
-	vis = &avis;
+	vissprite_t* vis = &avis;
 	vis->mobjflags = flags;
 	vis->statusflags = camera->player && camera->player->mo ? camera->player->mo->statusflags : 0;
 
-// [RH] +0x6000 helps it meet the screen bottom
-//		at higher resolutions while still being in
-//		the right spot at 320x200.
-// denis - bump to 0x9000
-#define WEAPONTWEAK				(0x9000)
+	// [RH] +0x6000 helps it meet the screen bottom
+	//		at higher resolutions while still being in
+	//		the right spot at 320x200.
+	// denis - bump to 0x9000
+	static constexpr fixed_t WEAPONTWEAK = 0x9000;
 
 	vis->texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 -
 		(boby + WEAPONTWEAK - sprframe->topoffset[0]);	// [RH] Moved out of spritetopoffset[]

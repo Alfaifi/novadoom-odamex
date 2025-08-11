@@ -719,7 +719,7 @@ typedef vissprite_s vissprite_t;
 // Some sprites will only have one picture used
 // for all views: NNNNF0
 //
-struct spriteframe_s
+struct spriteframe_t
 {
     // If false use 0 for any position.
     // Note: as eight entries are available,
@@ -738,18 +738,17 @@ struct spriteframe_s
 	fixed_t		topoffset[16];
 	fixed_t		offset[16];
 };
-typedef spriteframe_s spriteframe_t;
 
 //
 // A sprite definition:
 //	a number of animation frames.
 //
-typedef struct spritedef_s
+struct spritedef_t
 {
 	int 			numframes;
 	spriteframe_t	*spriteframes;
 	int32_t spritenum;
-} spritedef_t;
+};
 
 //
 // The infamous visplane

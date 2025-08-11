@@ -647,7 +647,7 @@ int W_CheckNumForName(const char *name, int namespc)
 	// It has been tuned so that the average chain length never exceeds 2.
 
 	// proff 2001/09/07 - check numlumps==0, this happens when called before WAD loaded
-	int i = (numlumps==0)?(-1):(lumpinfo[W_LumpNameHash(name) % numlumps].index);
+	int i = (numlumps == 0 || name == nullptr)?(-1):(lumpinfo[W_LumpNameHash(name) % numlumps].index);
 
 	// We search along the chain until end, looking for case-insensitive
 	// matches which also match a namespace tag. Separate hash tables are
@@ -669,16 +669,6 @@ int W_CheckNumForName(const char *name, int namespc)
 //
 int W_GetNumForName(const char* name, int namespc)
 {
-	if (name == NULL)
-	{
-		I_Error("W_GetNumForName: NULL name!\n");
-	}
-
-	if (std::string(name).empty())
-	{
-		I_Error("W_GetNumForName: empty name!\n");
-	}
-
 	int i = W_CheckNumForName(name, namespc);
 
 	if (i == -1)
@@ -805,6 +795,14 @@ void W_GetOLumpName(OLumpName& to, unsigned lump)
 		to.clear();
 	else
 		to = lumpinfo[lump].name;
+}
+
+//
+// W_GetOLumpName
+//
+OLumpName W_GetOLumpName(unsigned lump)
+{
+	return lumpinfo[lump].name;
 }
 
 //

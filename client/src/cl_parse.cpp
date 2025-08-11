@@ -64,7 +64,7 @@
 #include "infomap.h"
 #include "cl_replay.h"
 #include "r_interp.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 
 // Extern data from other files.
 
@@ -507,7 +507,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 	mobjtype_t type = static_cast<mobjtype_t>(msg->current().type());
 	statenum_t state = static_cast<statenum_t>(msg->current().statenum());
 
-	if (type < MT_PLAYER || type >= ::num_mobjinfo_types())
+	if (!mobjinfo.contains(type))
 		return;
 
 	P_ClearId(netid);
@@ -637,7 +637,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			mo->tics = 1;
 	}
 
-    if(state >= S_NULL && states.find(state) != states.end())
+    if(state >= S_NULL && states.contains(state))
 	{
 		P_SetMobjState(mo, state);
 	}
@@ -705,8 +705,7 @@ static void CL_SpawnMobj(const odaproto::svc::SpawnMobj* msg)
 			tics = -1;
 
 		// already spawned as gibs?
-		state_t* s_gibs_state = states[S_GIBS];
-		if (!mo || mo->state == s_gibs_state)
+		if (!mo || mo->state == &states[S_GIBS])
 			return;
 
 		if ((frame & FF_FRAMEMASK) >= sprites[mo->sprite].numframes)
@@ -2215,8 +2214,8 @@ static void CL_PlayerState(const odaproto::svc::PlayerState* msg)
 	{
 		if (i < msg->player().psprites_size())
 		{
-			int state = msg->player().psprites().Get(i).statenum();
-            if (states.find(state) == states.end())
+			const int32_t state = msg->player().psprites().Get(i).statenum();
+            if (!states.contains(state))
 			{
 				continue;
 			}
@@ -2502,7 +2501,7 @@ static void CL_SetMobjState(const odaproto::svc::MobjState* msg)
 	AActor* mo = P_FindThingById(msg->netid());
 	int s = msg->mostate();
 
-    if (mo == NULL || states.find(s) == states.end())
+    if (mo == NULL || !states.contains(s))
 		return;
 
 	P_SetMobjState(mo, static_cast<statenum_t>(s));
@@ -3116,3 +3115,5 @@ parseError_e CL_ParseCommand()
 	RecordProto(static_cast<svc_t>(cmd), msg);
 	return PERR_OK;
 }
+
+VERSION_CONTROL (cl_parse_cpp, "$Id$")

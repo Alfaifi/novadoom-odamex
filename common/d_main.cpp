@@ -58,10 +58,8 @@
 #include "gi.h"
 #include "w_ident.h"
 #include "m_resfile.h"
-#include "sprite.h"
-#include "mobjinfo.h"
-#include "state.h"
-#include "odamex_objects.h"
+#include "odainfo.h"
+#include "infomap.h"
 
 OResFiles wadfiles;
 OResFiles patchfiles;
@@ -73,9 +71,6 @@ extern bool step_mode;
 
 bool capfps = true;
 float maxfps = 35.0f;
-
-extern void D_Init_Nightmare_Flags(void);
-
 
 #if defined(_WIN32)
 
@@ -223,21 +218,42 @@ static char *GetRegistryString(registry_value_t *reg_val)
 #endif
 
 //
-// D_Initialize_Doom_Objects()
+// D_InitializeDoomObjectTables()
 // [CMB] Initialize all the doom objects: MobjInfo, SprNames, SoundMap, etc.
 //
-void D_Initialize_Doom_Objects()
+void D_InitializeDoomObjectTables()
 {
 	// [RH] Initialize items. Still only used for the give command. :-(
 	InitItems();
-	D_Initialize_States(boomstates, ::NUMSTATES);
-	D_Initialize_Mobjinfo(doom_mobjinfo, ::NUMMOBJTYPES);
-	D_Initialize_sprnames(doom_sprnames, ::NUMSPRITES, SPR_TROO);
-	D_Initialize_SoundMap(doom_SoundMap, ARRAY_LENGTH(doom_SoundMap));
-	// Initialize all extra frames
-	D_Init_Nightmare_Flags();
-	// Initialize the odamex specific objects
-	D_Initialize_Odamex_Objects();
+	// Initialize states
+	states.clear();
+	states.insert({boomstates, ::NUMSTATES}, S_NULL);
+	states.insert(getOdaStates(), S_GIB0);
+	// Initialize mobjinfo
+	mobjinfo.clear();
+	mobjinfo.insert({doom_mobjinfo, ::NUMMOBJTYPES}, MT_PLAYER);
+	mobjinfo.insert(getOdaMobjinfo(), MT_GIB0);
+	// Initialize sprnames
+	sprnames.clear();
+	sprnames.insert({doom_sprnames, ::NUMSPRITES}, SPR_TROO);
+	sprnames.insert(getOdaSprNames(), SPR_GIB0);
+	// Initialize soundmap
+	SoundMap.clear();
+	SoundMap.insert({doom_SoundMap, ARRAY_LENGTH(doom_SoundMap)}, 0);
+	SoundMap.insert({odamex_SoundMap, ARRAY_LENGTH(odamex_SoundMap)}, 0x80000000);
+	// Initialize spawn map
+	D_BuildSpawnMap();
+
+	states.rebuildMap(
+		[](const state_t& lhs, const state_t& rhs){ return lhs.statenum < rhs.statenum; },
+		[](const state_t& s){ return s.statenum; }
+	);
+	mobjinfo.rebuildMap(
+		[](const mobjinfo_t& lhs, const mobjinfo_t& rhs){
+			return lhs.type < rhs.type || (lhs.type == rhs.type && lhs.doomednum < rhs.doomednum);
+		},
+		[](const mobjinfo_t& m){ return m.type; }
+	);
 }
 
 //
@@ -544,6 +560,8 @@ static void LoadResolvedFiles(const OResFiles& newwadfiles,
 	// might change the strings
 	::GStrings.loadStrings(false);
 
+	P_InitMobjNameMap();
+
 	// Apply DEH patches.
 	D_LoadResolvedPatches();
 }
@@ -823,7 +841,6 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	::lastWadRebootSuccess = false;
 
 	D_Shutdown();
-	D_Initialize_Doom_Objects(); // start from vanilla objects
 
 	gamestate_t oldgamestate = ::gamestate;
 	::gamestate = GS_STARTUP; // prevent console from trying to use nonexistant font
@@ -832,16 +849,8 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 	OResFiles oldwadfiles = ::wadfiles;
 	OResFiles oldpatchfiles = ::patchfiles;
 	std::string failmsg;
-
-	
-	 // [CMB] Zone memory manager already reset by D_Shutdown() calling Z_Close() so this is doing it twice
-	 // Z_Init();
-	 // Printf("Z_Init: D_DoomWadReboot: Using native allocator with OZone "
-	 //      "bookkeeping.\n");
-
 	try
 	{
-
 		D_LoadResourceFiles(newwadfiles, newpatchfiles);
 
 		// get skill / episode / map from parms
@@ -867,7 +876,6 @@ bool D_DoomWadReboot(const OWantFiles& newwadfiles, const OWantFiles& newpatchfi
 		std::string fatalmsg;
 		try
 		{
-
 			LoadResolvedFiles(oldwadfiles, oldpatchfiles);
 
 			// get skill / episode / map from parms
@@ -910,13 +918,9 @@ static void AddCommandLineOptionFiles(OWantFiles& out, const std::string& option
 	DArgs files = Args.GatherFiles(option.c_str());
 	for (size_t i = 0; i < files.NumArgs(); i++)
 	{
-		const char* fileArg = files.GetArg(i);
-		if (!std::string(fileArg).empty())
-		{
-			OWantFile file;
-			OWantFile::make(file, fileArg, type);
+		OWantFile file;
+		if (OWantFile::make(file, files.GetArg(i), type))
 			out.push_back(file);
-		}
 	}
 
 	files.FlushArgs();

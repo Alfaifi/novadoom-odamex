@@ -29,7 +29,7 @@
 
 #include "cmdlib.h"
 #include "d_dehacked.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 #include "d_items.h"
 #include "gstrings.h"
 #include "i_system.h"
@@ -40,9 +40,7 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "w_wad.h"
-#include "sprite.h"
-#include "mobjinfo.h"
-#include "state.h"
+#include "infomap.h"
 
 // These are the original heights of every Doom 2 thing. They are used if a patch
 // specifies that a thing should be hanging from the ceiling but doesn't specify
@@ -118,7 +116,7 @@ static short codepconv[522] = {
 
 static bool BackedUpData = false;
 // This is the original data before it gets replaced by a patch.
-static const char** OrgSprNames;
+static std::string OrgSprNames[::NUMSPRITES];
 static actionf_p1 OrgActionPtrs[::NUMSTATES];
 
 // Functions used in a .bex [CODEPTR] chunk
@@ -433,23 +431,6 @@ static const struct
     {NULL, NULL},
 };
 
-DoomObjectContainer<const char*> SoundMap(ARRAY_LENGTH(doom_SoundMap));
-
-void D_Initialize_SoundMap(const char** source, int count)
-{
-	SoundMap.clear();
-    if (source)
-    {
-		for (int i = 0; i < count; i++)
-		{
-			SoundMap.insert(source[i] ? strdup(source[i]) : nullptr, i);
-		}
-    }
-#if defined _DEBUG
-	Printf(PRINT_HIGH, "D_Allocate_sounds:: allocated %d sounds.\n", count);
-#endif
-}
-
 static int HandleMode(const char* mode, int num);
 static bool HandleKey(const struct Key* keys, void* structure, const char* key, int value,
                       const int structsize = 0);
@@ -513,36 +494,33 @@ static bool HandleKey(const struct Key* keys, void* structure, const char* key, 
 	return true;
 }
 
-typedef struct DoomBackup_s
+struct DoomBackup_t
 {
-	DoomObjectContainer<state_t*, int32_t> backupStates; // boomstates
-	DoomObjectContainer<mobjinfo_t*, int32_t> backupMobjInfo; // doom_mobjinfo
-	DoomObjectContainer<const char*, int32_t> backupSprnames; // doom_sprnames
-	DoomObjectContainer<const char*, int32_t> backupSoundMap; // doom_SoundMap
+	DoomObjectContainer<state_t, int32_t> backupStates; // boomstates
+	DoomObjectContainer<mobjinfo_t, int32_t> backupMobjInfo; // doom_mobjinfo
+	DoomObjectContainer<std::string, int32_t> backupSprnames; // doom_sprnames
+	DoomObjectContainer<std::string, int32_t> backupSoundMap; // doom_SoundMap
 	weaponinfo_t backupWeaponInfo[NUMWEAPONS + 1];
 	int backupMaxAmmo[NUMAMMO];
 	int backupClipAmmo[NUMAMMO];
 	DehInfo backupDeh;
 
-	DoomBackup_s()
-	    : backupStates(NULL, [](state_t* obj) { M_Free(obj); }),
-	      backupMobjInfo(NULL, [](mobjinfo_t* obj) { M_Free(obj); }),
-	      backupSprnames(NULL, [](const char* obj) { M_Free(obj); }),
-	      backupSoundMap(NULL, [](const char* obj) { M_Free(obj); }),
+	DoomBackup_t()
+	    : backupStates(),
+	      backupMobjInfo(),
+	      backupSprnames(),
+	      backupSoundMap(),
 		  backupWeaponInfo(),
 	      backupMaxAmmo(),
 	      backupDeh()
 	{}
-} DoomBackup_t;
-
-
-DoomBackup_t doomBackup;
+} doomBackup;
 
 // [CMB] useful typedefs for iteration over global doom object containers
-typedef DoomObjectContainer<state_t*, int32_t>::const_iterator StatesIterator;
-typedef DoomObjectContainer<mobjinfo_t*, int32_t>::const_iterator MobjIterator;
-typedef DoomObjectContainer<const char*, int32_t>::const_iterator SpriteNamesIterator;
-typedef DoomObjectContainer<const char*, int32_t>::const_iterator SoundMapIterator;
+typedef DoomObjectContainer<state_t, int32_t>::iterator StatesIterator;
+typedef DoomObjectContainer<mobjinfo_t, int32_t>::iterator MobjIterator;
+typedef DoomObjectContainer<std::string, int32_t>::iterator SpriteNamesIterator;
+typedef DoomObjectContainer<std::string, int32_t>::iterator SoundMapIterator;
 
 static void BackupData(void)
 {
@@ -554,56 +532,21 @@ static void BackupData(void)
 	}
 
 	// backup sprites
-	OrgSprNames = (const char**) M_Calloc(::NUMSPRITES + 1, sizeof(char*));
 	for (i = 0; i < ::NUMSPRITES; i++)
 	{
-		OrgSprNames[i] = strdup(sprnames[i]);
+		OrgSprNames[i] = sprnames[i];
 	}
-	OrgSprNames[NUMSPRITES] = NULL;
 
 	// backup action pointers
 	for (i = 0; i < ::NUMSTATES; i++)
 	{
-		OrgActionPtrs[i] = states[i]->action;
+		OrgActionPtrs[i] = states[i].action;
 	}
 
-	// states -- allocate to the heap
-	doomBackup.backupStates.clear();
-	doomBackup.backupStates.reserve(states.size());
-	for (const std::pair<int32_t, state_t*> & it : states)
-	{
-		state_t* newstate = (state_t*) M_Malloc(sizeof(state_t));
-		*newstate = *it.second;
-		doomBackup.backupStates.insert(newstate, it.first);
-	}
-
-	// mobjinfo -- allocate to the heap
-	doomBackup.backupMobjInfo.clear();
-	doomBackup.backupMobjInfo.reserve(mobjinfo.size());
-	for (const std::pair<int32_t, mobjinfo_t*> & it : mobjinfo)
-	{
-		mobjinfo_t* newmobjinfo = (mobjinfo_t*) M_Malloc(sizeof(mobjinfo_t));
-		*newmobjinfo = *it.second;
-		doomBackup.backupMobjInfo.insert(newmobjinfo, it.first);
-	}
-
-	// sprites -- allocate to the heap
-	doomBackup.backupSprnames.clear();
-	doomBackup.backupSprnames.reserve(sprnames.size());
-	for(const std::pair<int32_t, const char*> & it : sprnames)
-	{
-		const char* spr = strdup(it.second);
-		doomBackup.backupSprnames.insert(spr, it.first);
-	}
-
-	// sounds -- allocate to the heap
-	doomBackup.backupSoundMap.clear();
-	doomBackup.backupSoundMap.reserve(SoundMap.size());
-	for(const auto& [idx, mapsound] : SoundMap)
-	{
-		const char* sound = mapsound ? strdup(mapsound) : nullptr;
-		doomBackup.backupSoundMap.insert(sound, idx);
-	}
+	doomBackup.backupStates = states;
+	doomBackup.backupMobjInfo = mobjinfo;
+	doomBackup.backupSprnames = sprnames;
+	doomBackup.backupSoundMap = SoundMap;
 
 	std::copy(weaponinfo, weaponinfo + ::NUMWEAPONS + 1, doomBackup.backupWeaponInfo);
 	std::copy(clipammo, clipammo + ::NUMAMMO, doomBackup.backupClipAmmo);
@@ -622,50 +565,12 @@ void D_UndoDehPatch()
 		return;
 	}
 
-	/*
-		The initialization functions can be re-used to re-initialize doom objects; except OrgSprNames which is used
-		for looking up the original location of a sprite.
-	*/
+	sprnames = std::move(doomBackup.backupSprnames);
+	mobjinfo = std::move(doomBackup.backupMobjInfo);
+	states = std::move(doomBackup.backupStates);
+	SoundMap = std::move(doomBackup.backupSoundMap);
 
-	for (i = 0; i < ::NUMSPRITES; i++)
-	{
-		// hacky but needed for const char*
-		free((char*)OrgSprNames[i]);
-	}
-	M_Free(OrgSprNames);
-
-
-	// [CMB] investigate after using z zone alloc functions
-	sprnames.clear();
-	sprnames.reserve(doomBackup.backupSprnames.size());
-	for (const auto& sprname : doomBackup.backupSprnames)
-	{
-		sprnames.insert(sprname.second, sprname.first);
-	}
-
-	// mobjinfo restore
-    mobjinfo.clear();
-	for(const auto& bmobjit : doomBackup.backupMobjInfo) {
-		mobjinfo_t* newmobjinfo = (mobjinfo_t*) Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
-        // TODO: we need to clear out the previous backup once we are done
-		*newmobjinfo = *bmobjit.second;
-
-		mobjinfo.insert(newmobjinfo, bmobjit.first);
-	}
-
-    states.clear();
-	for(const auto& bstateit : doomBackup.backupStates) {
-		state_t* newstate = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
-        // TODO: we need to clear out the previous backup once we are done
-		*newstate = *bstateit.second;
-
-		states.insert(newstate, bstateit.first);
-	}
-
-	// unsafe usage of data() here but to keep a consistent API
-	// D_Initialize_States(doomBackup.backupStates.data(), static_cast<int>(doomBackup.backupStates.size()));
-	// D_Initialize_Mobjinfo(doomBackup.backupMobjInfo.data(), static_cast<int>(doomBackup.backupMobjInfo.size()));
-	D_Initialize_SoundMap(doomBackup.backupSoundMap.data(), static_cast<int>(doomBackup.backupSoundMap.size()));
+	D_BuildSpawnMap();
 
 	extern bool isFast;
 	isFast = false;
@@ -1062,29 +967,12 @@ static int PatchThing(int thingy)
 	MobjIterator mobjinfo_it = mobjinfo.find(thingNum);
 	if (mobjinfo_it == mobjinfo.end())
 	{
-		auto mobjinfo_t_default = []() -> mobjinfo_t
-		{
-			mobjinfo_t m = {};
-			m.doomednum = -1;
-			m.droppeditem = MT_NULL;
-			m.infighting_group = IG_DEFAULT;
-			m.projectile_group = PG_DEFAULT;
-			m.splash_group = SG_DEFAULT;
-			m.altspeed = NO_ALTSPEED;
-			m.meleerange = MELEERANGE;
-			m.translucency = 0x10000;
-			m.altspeed = NO_ALTSPEED;
-			return m;
-		};
-		mobjinfo_t* mobj = (mobjinfo_t*) Z_Malloc(sizeof(mobjinfo_t), PU_STATIC, NULL);
-		*mobj = mobjinfo_t_default();
-		mobjinfo.insert(mobj, (mobjtype_t) thingNum);
+		info = &mobjinfo.insert(mobjinfo_t{}, (mobjtype_t) thingNum);
 		// set the type
-		mobj->type = thingNum;
-		info = mobj;
+		info->type = thingNum;
 	} else
 	{
-		info = mobjinfo_it->second;
+		info = &mobjinfo_it->second;
 	}
 
 	*ednum = (info->doomednum);
@@ -1136,18 +1024,18 @@ static int PatchThing(int thingy)
 		}
 		else if (stricmp(Line1 + linelen - 6, " sound") == 0)
 		{
-			char* snd;
+			const char* snd;
 
 			// If sound is not yet in SoundMap, store the index to be used in PatchSounds
 			auto soundIt = SoundMap.find(val);
 			if (soundIt == SoundMap.end())
 			{
 				snd = Line2;
-				stripwhite(snd);
+				stripwhite((char*)snd);
 			}
 			else
 			{
-				snd =  (char*)soundIt->second;
+				snd = soundIt->second.c_str();
 			}
 
 			if (!strnicmp(Line1, "Alert", 5))
@@ -1476,6 +1364,10 @@ static int PatchThing(int thingy)
 		else if (stricmp(Line1, "ID #") == 0)
 		{
 			info->doomednum = (SDWORD)val;
+			// update spawn map
+			auto spawn_map_it = spawn_map.find(info->doomednum);
+			if (spawn_map_it == spawn_map.end())
+				spawn_map.insert(info, info->doomednum);
 		}
 		else if (stricmp(Line1, "Mass") == 0)
 		{
@@ -1505,16 +1397,6 @@ static int PatchThing(int thingy)
 		if (!gibhealth && info->spawnhealth && !info->gibhealth)
 		{
 			info->gibhealth = -info->spawnhealth;
-		}
-	}
-
-	// update spawn map
-	if (info->doomednum && info->doomednum != -1)
-	{
-		MobjIterator spawn_map_it = spawn_map.find(info->doomednum);
-		if (spawn_map_it == spawn_map.end())
-		{
-			spawn_map.insert(info, info->doomednum);
 		}
 	}
 
@@ -1605,38 +1487,13 @@ static int PatchFrame(int frameNum)
 	StatesIterator states_it = states.find(frameNum);
 	if(states_it == states.end())
     {
-		auto state_t_default = [](int32_t idx) -> state_t {
-				_state_t s{};
-				s.sprite = SPR_TNT1;
-				s.frame = 0;
-				s.tics = -1;
-				s.action = NULL;
-				s.nextstate = idx;
-				s.misc1 = 0;
-				s.misc2 = 0;
-
-				// mbf21 flags
-				s.flags = STATEF_NONE;
-				s.args[0] = 0;
-				s.args[1] = 0;
-				s.args[2] = 0;
-				s.args[3] = 0;
-				s.args[4] = 0;
-				s.args[5] = 0;
-				s.args[6] = 0;
-				s.args[7] = 0;
-				return s;
-		};
-		state_t* state = (state_t*) Z_Malloc(sizeof(state_t), PU_STATIC, NULL);
-		*state = state_t_default(frameNum);
-		// set the proper state number
-		state->statenum = frameNum;
-		states.insert(state, frameNum);
-		info = state;
+		info = &states.insert(state_t{}, frameNum);
+		info->statenum = frameNum;
+		info->nextstate = frameNum;
 	}
 	else
 	{
-		info = states_it->second;
+		info = &states_it->second;
 	}
 
 
@@ -1704,7 +1561,7 @@ static int PatchFrame(int frameNum)
 	}
 #if defined _DEBUG
 	SpriteNamesIterator sprnames_it = sprnames.find(info->sprite);
-	const char* sprsub = (sprnames_it == sprnames.end()) ? "<No Sprite>" : sprnames_it->second;
+	std::string_view sprsub = (sprnames_it == sprnames.end()) ? "<No Sprite>" : sprnames_it->second;
 	DPrintFmt("FRAME {}: Duration: {}, Next: {}, SprNum: {}({}), SprSub: {}\n", frameNum,
 	          info->tics, info->nextstate, info->sprite, sprsub,
 	          info->frame);
@@ -1746,9 +1603,9 @@ static int PatchSprite(int sprNum)
 		// Calculate offset from beginning of sprite names.
 		offset = (offset - toff[dversion] - 22044) / 8;
 
-		if (offset >= 0 && offset < ::num_spritenum_t_types())
+		if (offset >= 0 && offset < sprnames.size())
 		{
-			sprnames.insert(strdup(OrgSprNames[offset]), (spritenum_t) sprNum);
+			sprnames[sprNum] = OrgSprNames[offset];
 		}
 		else
 		{
@@ -1806,12 +1663,11 @@ static int PatchSprites(int dummy)
 		else
 		{
 			// find the value that matches
-			for (const std::pair<int32_t, const char*> & sprname : sprnames)
+			for (const auto& [idx, sprname] : sprnames)
 			{
-				const char* spr = sprname.second;
-				if (strncmp(zSprIdx, spr, 4) == 0)
+				if (strncmp(zSprIdx, sprname.c_str(), 4) == 0)
 				{
-					sprIdx = sprname.first;
+					sprIdx = idx;
 				}
 			}
 		}
@@ -1823,19 +1679,11 @@ static int PatchSprites(int dummy)
 		SpriteNamesIterator sprnames_it = sprnames.find(sprIdx);
 #if defined _DEBUG
 			const char* prevSprName =
-			    sprnames_it != sprnames.end() ? sprnames_it->second : "No Sprite";
+			    sprnames_it != sprnames.end() ? sprnames_it->second.c_str() : "No Sprite";
 			DPrintFmt("Patching sprite at {} with name {} with new name {}\n",
 			          sprIdx, prevSprName, newSprName);
 #endif
-			// if we find the one in the container - we already strdup'd here - free it and replace it
-			if (sprnames_it != sprnames.end())
-			{
-				const char* found = sprnames_it->second;
-				char* s = const_cast<char*>(found);
-				Z_Free(s); // ozone allocated memory
-			}
-			// [CMB] remember to Z_Free this instead of free(...)
-			sprnames.insert(Z_StrDup(newSprName, PU_STATIC), (spritenum_t) sprIdx);
+		sprnames.insert(newSprName, (spritenum_t) sprIdx);
 	}
 
 	return result;
@@ -1846,7 +1694,7 @@ void IdxToSoundName(const char*& sound)
 	if (sound && sound[0] && IsNum(sound))
 	{
 		auto soundIt = SoundMap.find(atoi(sound));
-		sound = soundIt == SoundMap.end() ? nullptr : soundIt->second;
+		sound = soundIt == SoundMap.end() ? nullptr : soundIt->second.c_str();
 	}
 }
 
@@ -1860,32 +1708,33 @@ static int PatchSounds(int dummy)
 	{
 		char* newname = Line2;
 		stripwhite(newname);
-		OLumpName newnameds = fmt::sprintf("DS%s", newname);
+		OLumpName newnameds = fmt::format("DS{}", newname);
 
 		if (IsNum(Line1))
 		{
+			std::string sndname = fmt::format("dsdhacked/{}", StdStringToLower(newname));
 			int32_t soundIdx = atoi(Line1);
-			SoundMap.insert(strdup(newname), soundIdx);
-			S_AddSound(newname, newnameds.c_str());
+			SoundMap.insert(sndname, soundIdx);
+			S_AddSound(sndname.c_str(), newnameds.c_str());
 		}
 		else
 		{
-			int lumpnum = W_CheckNumForName(fmt::sprintf("DS%s", Line1).c_str());
+			int lumpnum = W_CheckNumForName(fmt::format("DS{}", Line1).c_str());
 			int sndIdx = S_FindSoundByLump(lumpnum);
 			if (sndIdx == -1)
-				I_Error("Sound %s not found.", Line1);
+				I_Error("Sound {} not found.", Line1);
 			S_AddSound(S_sfx[sndIdx].name, newnameds.c_str());
 		}
 	}
 	for (auto& pair : mobjinfo)
 	{
 		auto& info = pair.second;
-		IdxToSoundName(info->seesound);
-		IdxToSoundName(info->attacksound);
-		IdxToSoundName(info->painsound);
-		IdxToSoundName(info->deathsound);
-		IdxToSoundName(info->activesound);
-		IdxToSoundName(info->ripsound);
+		IdxToSoundName(info.seesound);
+		IdxToSoundName(info.attacksound);
+		IdxToSoundName(info.painsound);
+		IdxToSoundName(info.deathsound);
+		IdxToSoundName(info.activesound);
+		IdxToSoundName(info.ripsound);
 	}
 	S_HashSounds();
 	return result;
@@ -2041,7 +1890,7 @@ static int PatchPointer(int ptrNum)
 {
 	int result;
 
-	if (ptrNum >= 0 && ptrNum < 448)
+	if (ptrNum >= 0 && ptrNum < ARRAY_LENGTH(codepconv))
 	{
 #if defined _DEBUG
 		DPrintFmt("Pointer {}\n", ptrNum);
@@ -2068,7 +1917,7 @@ static int PatchPointer(int ptrNum)
 			}
 			else
 			{
-				states[codepconv[ptrNum]]->action = OrgActionPtrs[i];
+				states[codepconv[ptrNum]].action = OrgActionPtrs[i];
 			}
 		}
 		else
@@ -2239,7 +2088,7 @@ static int PatchCodePtrs(int dummy)
 			{
 				int i = 0;
 				char* data;
-				state_t* state = states_it->second;
+				state_t* state = &states_it->second;
 
 				COM_Parse(Line2);
 
@@ -2318,7 +2167,7 @@ static int PatchText(int oldSize)
 
 	if (*temp == 0)
 	{
-		Printf(PRINT_HIGH, "Text chunk is missing size of new string.\n");
+		PrintFmt(PRINT_HIGH, "Text chunk is missing size of new string.\n");
 		return 2;
 	}
 	newSize = atoi(temp);
@@ -2328,7 +2177,7 @@ static int PatchText(int oldSize)
 
 	if (!oldStr || !newStr)
 	{
-		Printf(PRINT_HIGH, "Out of memory.\n");
+		PrintFmt(PRINT_HIGH, "Out of memory.\n");
 		goto donewithtext;
 	}
 
@@ -2339,13 +2188,13 @@ static int PatchText(int oldSize)
 	{
 		delete[] newStr;
 		delete[] oldStr;
-		Printf(PRINT_HIGH, "Unexpected end-of-file.\n");
+		PrintFmt(PRINT_HIGH, "Unexpected end-of-file.\n");
 		return 0;
 	}
 
 	if (includenotext)
 	{
-		Printf(PRINT_HIGH, "Skipping text chunk in included patch.\n");
+		PrintFmt(PRINT_HIGH, "Skipping text chunk in included patch.\n");
 		goto donewithtext;
 	}
 
@@ -2353,14 +2202,11 @@ static int PatchText(int oldSize)
 	good = false;
 
 	// Search through sprite names
-	// for (int i = 0; i < ::num_spritenum_t_types(); i++)
-	for(auto it = sprnames.begin(); it != sprnames.end(); ++it)
+	for(auto& [idx, sprname] : sprnames)
 	{
-		const char* sprname = it->second;
-		if (!strcmp(sprname, oldStr))
+		if (!strcmp(sprname.c_str(), oldStr))
 		{
-			// sprnames[i] = copystring(newStr);
-			sprnames.insert(copystring(newStr), it->first);
+			sprname = newStr;
 			good = true;
 			// See above.
 		}
@@ -2471,9 +2317,36 @@ static int PatchStrings(int dummy)
 		} while (Line2 && *Line2);
 
 		i = GStrings.toIndex(Line1);
-		if (i == -1)
+		if (strncmp("DEHTHING_", Line1, 9) == 0)
 		{
-			Printf(PRINT_HIGH, "Unknown string: %s\n", Line1);
+			try {
+				int32_t type = std::stoi(holdstring);
+				type--;
+				P_MapDehThing(static_cast<mobjtype_t>(type), Line1);
+				GStrings.setString(Line1, holdstring);
+				DPrintFmt("{} set to:\n{}\n", Line1, holdstring);
+			}
+			catch (const std::invalid_argument&)
+			{
+				PrintFmt(PRINT_HIGH, "Invalid thing type {} for {}\n", holdstring, Line1);
+			}
+			catch (const std::out_of_range&)
+			{
+				PrintFmt(PRINT_HIGH, "Invalid thing type {} for {}\n", holdstring, Line1);
+			}
+		}
+		else if (i == -1)
+		{
+			if (strncmp("USER_", Line1, 5) == 0)
+			{
+				ReplaceSpecialChars(holdstring);
+				GStrings.setString(Line1, holdstring);
+				DPrintFmt("{} set to:\n{}\n", Line1, holdstring);
+			}
+			else
+			{
+				PrintFmt(PRINT_HIGH, "Unknown string: {}\n", Line1);
+			}
 		}
 		else
 		{
@@ -2547,13 +2420,13 @@ static int DoInclude(int dummy)
 
 	if (!OWantFile::make(want, com_token, OFILE_DEH))
 	{
-		Printf(PRINT_WARNING, "Could not find BEX include \"%s\"\n", com_token);
+		PrintFmt(PRINT_WARNING, "Could not find BEX include \"{}\"\n", com_token);
 		goto endinclude;
 	}
 
 	if (!M_ResolveWantedFile(res, want))
 	{
-		Printf(PRINT_WARNING, "Could not resolve BEX include \"%s\"\n", com_token);
+		PrintFmt(PRINT_WARNING, "Could not resolve BEX include \"{}\"\n", com_token);
 		goto endinclude;
 	}
 
@@ -2595,7 +2468,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 		FILE* fh = fopen(patchfile->getFullpath().c_str(), "rb+");
 		if (fh == NULL)
 		{
-			Printf(PRINT_WARNING, "Could not open DeHackEd patch \"%s\"\n",
+			PrintFmt(PRINT_WARNING, "Could not open DeHackEd patch \"{}\"\n",
 			       patchfile->getBasename());
 			return false;
 		}
@@ -2638,12 +2511,12 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 			delete[] ::PatchFile;
 			if (patchfile)
 			{
-				Printf(PRINT_WARNING, "\"%s\" is not a DeHackEd patch file\n",
+				PrintFmt(PRINT_WARNING, "\"{}\" is not a DeHackEd patch file\n",
 				       patchfile->getBasename());
 			}
 			else
 			{
-				Printf(PRINT_WARNING, "\"DEHACKED\" is not a DeHackEd patch lump\n");
+				PrintFmt(PRINT_WARNING, "\"DEHACKED\" is not a DeHackEd patch lump\n");
 			}
 			return false;
 		}
@@ -2714,13 +2587,13 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 
 	if (patchfile)
 	{
-		Printf("adding %s\n", patchfile->getFullpath());
+		PrintFmt("adding {}\n", patchfile->getFullpath());
 	}
 	else
 	{
-		Printf("adding DEHACKED lump\n");
+		PrintFmt("adding DEHACKED lump\n");
 	}
-	Printf(" (DeHackEd patch)\n");
+	PrintFmt(" (DeHackEd patch)\n");
 
 	D_PostProcessDeh();
 
@@ -2741,9 +2614,9 @@ void D_PostProcessDeh()
 	int i;
 	const CodePtr* bexptr_match;
 
-	for (const auto& it : states)
+	for (auto& it : states)
 	{
-		state_t* state = it.second;
+		state_t* state = &it.second;
 		bexptr_match = &null_bexptr;
 
 		for (i = 1; CodePtrs[i].func != NULL; ++i)
@@ -2786,7 +2659,10 @@ void D_PostProcessDeh()
 */
 bool CheckIfDehActorDefined(const mobjtype_t mobjtype)
 {
-	const mobjinfo_t mobj = *::mobjinfo[mobjtype];
+	auto it = ::mobjinfo.find(mobjtype);
+	if (it == ::mobjinfo.end())
+		return false;
+	const auto& mobj = it->second;
 	if (mobj.doomednum == -1 &&
 		mobj.spawnstate == S_TNT1 &&
 		mobj.spawnhealth == 0 &&
@@ -2854,8 +2730,8 @@ static void PrintState(int index)
 	}
 
 	// Print this state.
-	state_t& state = *it->second;
-	Printf("%4d | sprite:%s frame:%d tics:%d action:%s m1:%d m2:%d\n", index, ::sprnames[state.sprite],
+	state_t& state = it->second;
+	PrintFmt("{:04d} | sprite:{} frame:{} tics:{} action:{} m1:{} m2:{}\n", index, ::sprnames[state.sprite],
 	       state.frame, state.tics, ActionPtrString(state.action), state.misc1,
 	       state.misc2);
 }
@@ -2872,46 +2748,21 @@ static void PrintMobjinfo(int index)
 		return val == NULL ? "0" : val;
 	};
 
-    mobjinfo_t* mob = it->second;
-    std::stringstream ss;
-    ss << "%4d | ";
-    // doomednum, spawnstate, spawnhealth, seestate, seesound
-    ss << "doomednum: %d, spawnstate: %d, spawnhealth: %d, seestate: %d, seesound: %s\n";
-    // reactiontime, attacksound, painstate, painchance, painsound
-    ss << "reactiontime: %d, attacksound: %s, painstate: %d, painchance: %d, painsound: %s\n";
-    // meleestate, missilestate, deathstate, xdeathstate, deathsound
-    ss << "meleestate: %d, missilestate: %d, deathstate: %d, xdeathstate: %d, deathsound: %s\n";
-    // speed, radius, height, mass, damage
-    ss << "speed: %d, radius: %d, height: %d, mass: %d, damage: %d\n";
-    // activesound, flags, raisestate, droppeditem, flags2
-    ss << "activesound: %s, flags: %ul, raisestate: %d, droppeditem: %d, flags2: %ul\n";
-    // infighting_group, projectile_group, splash_group, ripsound, altspeed, meleerange
-    ss << "infighting_group: %d, projectile_group: %d, splash_group: %d, ripsound: %s, altspeed: %d, meleerange: %d\n";
-    // translucency
-    ss << "translucency: %d\n";
-	Printf(ss.str().c_str(), index, mob->doomednum, mob->spawnstate, mob->spawnhealth,
-	       mob->seestate, getstring(mob->seesound), mob->reactiontime,
-	       getstring(mob->attacksound), mob->painstate, mob->painchance,
-	       getstring(mob->painsound), mob->meleestate, mob->missilestate, mob->deathstate,
-	       mob->xdeathstate, getstring(mob->deathsound),
-		   mob->speed, mob->radius, mob->height, mob->mass, mob->damage, getstring(mob->activesound), mob->flags,
-	       mob->raisestate, mob->droppeditem, mob->flags2, mob->infighting_group,
-	       mob->projectile_group, mob->splash_group, getstring(mob->ripsound),
-	       mob->altspeed, mob->meleerange, mob->translucency);
+	PrintFmt("{}", it->second);
 }
 
 BEGIN_COMMAND(mobinfo)
 {
     if (argc < 2)
     {
-        Printf("Must pass one or two mobjinfo indexes. (0 to %d)\n", ::num_mobjinfo_types() - 1);
+        PrintFmt("Must pass one or two mobjinfo indexes.\n");
         return;
     }
 
     int index1 = atoi(argv[1]);
     if (mobjinfo.find(index1) == mobjinfo.end())
     {
-        Printf("Index 1: Not a valid index.\n");
+        PrintFmt("Index 1: Not a valid index.\n");
         return;
     }
     int index2 = index1;
@@ -2921,7 +2772,7 @@ BEGIN_COMMAND(mobinfo)
         index2 = atoi(argv[2]);
         if (mobjinfo.find(index2) == mobjinfo.end())
         {
-            Printf("Index 2: Not a valid index.\n");
+            PrintFmt("Index 2: Not a valid index.\n");
             return;
         }
     }
@@ -2942,14 +2793,14 @@ BEGIN_COMMAND(stateinfo)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass one or two state indexes. (0 to %d)\n", ::num_state_t_types() - 1);
+		PrintFmt("Must pass one or two state indexes.\n");
 		return;
 	}
 
 	int index1 = atoi(argv[1]);
     if (states.find(index1) == states.end())
 	{
-		Printf("Index 1: Not a valid index.\n");
+		PrintFmt("Index 1: Not a valid index.\n");
 		return;
 	}
 	int index2 = index1;
@@ -2959,7 +2810,7 @@ BEGIN_COMMAND(stateinfo)
 		index2 = atoi(argv[2]);
         if (states.find(index2) == states.end())
 		{
-			Printf("Index 2: Not a valid index.\n");
+			PrintFmt("Index 2: Not a valid index.\n");
 			return;
 		}
 	}
@@ -2984,14 +2835,14 @@ BEGIN_COMMAND(playstate)
 {
 	if (argc < 2)
 	{
-		Printf("Must pass state index. (0 to %d)\n", ::num_state_t_types() - 1);
+		PrintFmt("Must pass state index.\n");
 		return;
 	}
 
 	int index = atoi(argv[1]);
-	if (index < 0 || index >= ::num_state_t_types())
+	if (!states.contains(index))
 	{
-		Printf("Not a valid index.\n");
+		PrintFmt("Not a valid index.\n");
 		return;
 	}
 
@@ -3002,7 +2853,7 @@ BEGIN_COMMAND(playstate)
 		OHashTable<int, bool>::iterator it = visited.find(index);
 		if (it != visited.end())
 		{
-			Printf("Looped back to %d\n", index);
+			PrintFmt("Looped back to {}\n", index);
 			return;
 		}
 
@@ -3012,7 +2863,7 @@ BEGIN_COMMAND(playstate)
 		visited.emplace(index, true);
 
 		// Next state.
-		index = ::states[index]->nextstate;
+		index = ::states[index].nextstate;
 	}
 }
 END_COMMAND(playstate)

@@ -160,6 +160,7 @@ void W_GetLumpName(char* to, unsigned lump);
 
 // Copies the lump name to to
 void W_GetOLumpName(OLumpName& to, unsigned lump);
+OLumpName W_GetOLumpName(unsigned lump);
 
 // [RH] Returns file handle for specified lump
 int W_GetLumpFile (unsigned lump);

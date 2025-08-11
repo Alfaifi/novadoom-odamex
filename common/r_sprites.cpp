@@ -41,18 +41,18 @@
 //
 // INITIALIZATION FUNCTIONS
 //
-std::map<int32_t, spritedef_t> sprites;
+OHashTable<int32_t, spritedef_t> sprites;
 int numsprites;
 
 spriteframe_t sprtemp[MAX_SPRITE_FRAMES];
 int maxframe;
 
 // [CMB] This function assumes that sprnames has the correct sprites in order
-void R_CacheSprite(spritedef_t *sprite)
+void R_CacheSprite(const spritedef_t *sprite)
 {
 	auto it = sprnames.find(sprite->spritenum);
 	DPrintFmt("cache sprite {}\n",
-		it != sprnames.end() ? it->second : "");
+		it != sprnames.end() ? it->second.data() : "");
 	for (int i = 0; i < sprite->numframes; i++)
 	{
 		for (int r = 0; r < 16; r++)
@@ -88,7 +88,7 @@ static void R_InstallSpriteLump(int lump, unsigned frame, unsigned rot, bool fli
 		rotation = (rot >= 17) ? rot - 7 : 17;
 
 	if (frame >= MAX_SPRITE_FRAMES || rotation > 16)
-		I_FatalError("R_InstallSpriteLump: Bad frame characters in lump {}", lump);
+		I_FatalError("R_InstallSpriteLump: Bad frame characters in lump {}: {}", lump, W_GetOLumpName(lump));
 
 	if (static_cast<int>(frame) > maxframe)
 		maxframe = frame;

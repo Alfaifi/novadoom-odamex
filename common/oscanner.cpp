@@ -504,4 +504,4 @@ bool OScanner::compareTokenNoCase(const char* string) const
 	return iequals(m_token, string);
 }
 
-VERSION_CONTROL(sc_oman_cpp, "$Id$")
+VERSION_CONTROL(oscanner_cpp, "$Id$")

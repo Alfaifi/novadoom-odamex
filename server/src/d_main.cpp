@@ -57,14 +57,11 @@
 #include "m_misc.h"
 #include "m_random.h"
 #include "minilzo.h"
-#include "mobjinfo.h"
-#include "odamex_objects.h"
+#include "odainfo.h"
 #include "p_setup.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "s_sound.h"
-#include "sprite.h"
-#include "state.h"
 #include "sv_banlist.h"
 #include "sv_main.h"
 #include "v_video.h"
@@ -149,6 +146,11 @@ void D_Init()
 	// [AM] Init rand() PRNG, needed for non-deterministic maplist shuffling.
 	srand(time(NULL));
 
+	// start the Zone memory manager
+	Z_Init();
+	if (first_time)
+		PrintFmt("Z_Init: Using native allocator with OZone bookkeeping.\n");
+
 	// Load palette and set up colormaps
 	V_InitPalette("PLAYPAL");
 	R_InitColormaps();
@@ -164,7 +166,7 @@ void D_Init()
 	G_ParseHordeDefs();
 
 	if (first_time)
-		Printf(PRINT_HIGH, "P_Init: Init Playloop state.\n");
+		PrintFmt(PRINT_HIGH, "P_Init: Init Playloop state.\n");
 	P_Init();
 
 	first_time = false;
@@ -211,8 +213,6 @@ void STACK_ARGS D_Shutdown()
 	NormalLight.next = NULL;
 }
 
-void D_Init_Nightmare_Flags(void);
-
 //
 // D_DoomMain
 //
@@ -227,11 +227,7 @@ void D_DoomMain()
 
 	W_SetupFileIdentifiers();
 
-	// start the Zone memory manager
-	Z_Init();
-	Printf("Z_Init: Using native allocator with OZone bookkeeping.\n");
-
-	D_Initialize_Doom_Objects();
+	D_InitializeDoomObjectTables();
 
 	M_FindResponseFile();		// [ML] 23/1/07 - Add Response file support back in
 

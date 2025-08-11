@@ -71,7 +71,7 @@ inline constexpr fixed_t DOUBLE2FIXED(double x)
 [[nodiscard]]
 inline constexpr int32_t FIXED2INT(fixed_t x)
 {
-	return (x + FRACUNIT / 2) / FRACUNIT;
+	return (x + FRACUNIT / 2) >> FRACBITS;
 }
 
 [[nodiscard]]

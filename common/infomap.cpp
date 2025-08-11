@@ -50,8 +50,9 @@ static void MapMobj(const mobjtype_t type, const std::string& name, const uint32
 	::g_MonsterMap.emplace(name, type);
 }
 
-static void InitMap()
+void P_InitMobjNameMap()
 {
+	::g_MonsterMap.clear();
 	MapMobj(MT_PLAYER, "DoomPlayer", MC_NONE);
 	MapMobj(MT_POSSESSED, "ZombieMan", MC_NONE);
 	MapMobj(MT_SHOTGUY, "ShotgunGuy", MC_NONE);
@@ -306,18 +307,31 @@ static void InitMap()
 }
 
 /**
+ * @brief Add a new DeHackEd thing to the map (for ID24 DEHTHING_x strings)
+ */
+void P_MapDehThing(const mobjtype_t type, const std::string& name)
+{
+	if (::g_MonsterMap.empty())
+	{
+		P_InitMobjNameMap();
+	}
+
+	MapMobj(type, name, MC_NONE);
+}
+
+/**
  * @brief Convert a UMAPINFO/ZDoom class name to a MT Mobj index.
  */
 mobjtype_t P_NameToMobj(const std::string& name)
 {
 	if (::g_MonsterMap.empty())
 	{
-		InitMap();
+		P_InitMobjNameMap();
 	}
 
 	MobjMap::iterator it = ::g_MonsterMap.find(name);
 
-	if (it == ::g_MonsterMap.end())
+	if (it == ::g_MonsterMap.end() || mobjinfo.find(it->second) == mobjinfo.end())
 	{
 		return MT_NULL;
 	}
@@ -332,12 +346,12 @@ mobjtype_t P_INameToMobj(const std::string& name)
 {
 	if (::g_MonsterMap.empty())
 	{
-		InitMap();
+		P_InitMobjNameMap();
 	}
 
 	for (const auto& [mapname, type] : ::g_MonsterMap)
 	{
-		if (iequals(mapname, name))
+		if (iequals(mapname, name) && mobjinfo.find(type) != mobjinfo.end())
 		{
 			return type;
 		}
@@ -349,7 +363,7 @@ std::string P_MobjToName(const mobjtype_t type)
 {
 	if (::g_MonsterMap.empty())
 	{
-		InitMap();
+		P_InitMobjNameMap();
 	}
 
 	for (const auto& [name, maptype] : ::g_MonsterMap)
@@ -431,7 +445,7 @@ BEGIN_COMMAND(dumpactors)
 {
 	if (::g_MonsterMap.empty())
 	{
-		InitMap();
+		P_InitMobjNameMap();
 	}
 
 	std::vector<MobjPair> infomap = OrderedMobjMap();

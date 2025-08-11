@@ -447,8 +447,7 @@ public:
 	AActor ();
 	AActor (const AActor &other);
 	AActor &operator= (const AActor &other);
-	AActor (fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
-	AActor (fixed_t x, fixed_t y, fixed_t z, mobjinfo_t* info);
+	AActor (fixed_t x, fixed_t y, fixed_t z, int32_t type);
 	void Destroy () override;
 	~AActor () override;
 
@@ -497,7 +496,7 @@ public:
     // If == validcount, already checked.
     int			validcount;
 
-	mobjtype_t		type;
+	int32_t			type;
     mobjinfo_t*		info;	// &mobjinfo[mobj->type]
     int				tics;	// state tic counter
 	state_t			*state;

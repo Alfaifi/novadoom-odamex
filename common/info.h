@@ -28,18 +28,18 @@
 // Needed for action function pointer handling.
 #include "dthinker.h"
 #include "farchive.h"
-#include "doom_obj_container.h"
+#include "m_doomobjcontainer.h"
 
 #define NO_ALTSPEED -1
 #ifndef MELEERANGE // TODO: only have a single spot this is defined
 #define MELEERANGE (64 * FRACUNIT)
 #endif
 
-typedef enum spritenum_e: int32_t
+enum spritenum_t: int32_t
 {
     // ---------------odamex sprites------------------------ //
     // [RH] Gibs
-    SPR_GIB0 = -2147483647,
+    SPR_GIB0 = -2147483648,
     SPR_GIB1,
     SPR_GIB2,
     SPR_GIB3,
@@ -240,19 +240,18 @@ typedef enum spritenum_e: int32_t
 
 	EXTRASPRITES=255,
 
-} spritenum_t;
+};
 
 // id24 spriteinfo_t struct
-typedef struct spriteinfo_s
+struct spriteinfo_t
 {
 	int32_t				spritenum;
-	int32_t				minimumfeatures; // [CMB] use for id24spec
+	int32_t				minimumfeatures; // [CMB] use for id24spec; [EB] just used as part of the auto complevel detection in R&R, do we need this?
 	const char*			sprite;
-} spriteinfo_t;
+};
 
 extern const char* doom_sprnames[];
-extern DoomObjectContainer<const char*> sprnames; // spritenum_t
-extern size_t num_spritenum_t_types();
+inline DoomObjectContainer<std::string> sprnames(::NUMSPRITES); // spritenum_t
 
 inline auto format_as(spritenum_t eSpriteNum)
 {
@@ -262,12 +261,12 @@ inline auto format_as(spritenum_t eSpriteNum)
 inline FArchive &operator<< (FArchive &arc, spritenum_t i) { DWORD out; out = i; return arc << out; }
 inline FArchive &operator>> (FArchive &arc, spritenum_t &i) { DWORD in; arc >> in; i = (spritenum_t)in; return arc; }
 
-typedef enum statenum_e: int32_t
+enum statenum_t: int32_t
 {
 	//------------ odamex states -----------
 
 	// [RH] gibs
-	S_GIB0 = -2147483647,
+	S_GIB0 = -2147483648,
 	S_GIB1,
 	S_GIB2,
 	S_GIB3,
@@ -1397,7 +1396,7 @@ typedef enum statenum_e: int32_t
 	S_MUSHROOM,  // killough 10/98: mushroom explosion effect
 
 	NUMSTATES
-} statenum_t;
+};
 
 inline auto format_as(statenum_t eStateNum)
 {
@@ -1414,29 +1413,29 @@ typedef long statearg_t;
 #define STATEF_NONE 0
 #define STATEF_SKILL5FAST BIT(0) // tics halve on nightmare skill
 
-typedef struct _state_t
+struct state_t
 {
-	int32_t statenum;
-	int32_t	sprite;
-	int			frame;
-	int			tics;
-	actionf_p1 	action;
-	int32_t	nextstate;
-	int			misc1, misc2;
+	int32_t statenum  = -1;
+	int32_t	sprite    = SPR_TNT1;
+	int	frame         = 0;
+	int	tics          = -1;
+	actionf_p1 action = nullptr;
+	int32_t	nextstate = -1;
+	int	misc1         = 0;
+	int misc2         = 0;
 
 	// MBF21
-	statearg_t args[MAXSTATEARGS]; // [XA] mbf21 args
-	int flags;
+	statearg_t args[MAXSTATEARGS] = { 0 }; // [XA] mbf21 args
+	int flags = STATEF_NONE;
 	/*
 	DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate);
 	DState (spritenum_t sprite, int frame, int tics, acp2, statenum_t nextstate, int misc1, int misc2);
 	DState (spritenum_t sprite, int frame, int tics, acp1, statenum_t nextstate);
 	*/
-} state_t;
+};
 
 extern state_t boomstates[];
-extern DoomObjectContainer<state_t*> states; // statenum_t
-extern size_t num_state_t_types(); // [CMB] TODO converted to function to just make code work for now
+inline DoomObjectContainer<state_t> states(::NUMSTATES); // statenum_t
 extern state_t odastates[];
 
 inline FArchive &operator<< (FArchive &arc, state_t *state)
@@ -1451,20 +1450,20 @@ inline FArchive &operator>> (FArchive &arc, state_t *&state)
 {
 	int32_t ofs;
 	arc >> ofs;
-	DoomObjectContainer<state_t*, int32_t>::iterator it = states.find(ofs);
+	DoomObjectContainer<state_t, int32_t>::iterator it = states.find(ofs);
 	if (it != states.end())
-		state = it->second;
+		state = &it->second;
 	else
 		state = NULL;
 	return arc;
 }
 
-typedef enum mobjtype_e: int32_t {
+enum mobjtype_t: int32_t {
 
     // -------------------- odamex things ----------------------------------- //
 
     // [RH] Gibs (code is disabled)
-    MT_GIB0 = -2147483647,
+    MT_GIB0 = -2147483648,
     MT_GIB1,
     MT_GIB2,
     MT_GIB3,
@@ -1707,7 +1706,7 @@ typedef enum mobjtype_e: int32_t {
 
 	NUMMOBJTYPES
 
-} mobjtype_t;
+};
 
 inline auto format_as(mobjtype_t eType)
 {
@@ -1717,77 +1716,104 @@ inline auto format_as(mobjtype_t eType)
 inline FArchive &operator<< (FArchive &arc, mobjtype_t i) { DWORD out; out = i; return arc << out; }
 inline FArchive &operator>> (FArchive &arc, mobjtype_t &i) { DWORD in; arc >> in; i = (mobjtype_t)in; return arc; }
 
-typedef enum
+enum infighting_group_t
 {
 	IG_DEFAULT,
 	// IG_CENTAUR,	// UNUSED
 	IG_END
-} infighting_group_t;
+};
 
-typedef enum
+enum projectile_group_t
 {
 	PG_GROUPLESS = -1,
 	PG_DEFAULT,
 	PG_BARON,
 	PG_END
-} projectile_group_t;
+};
 
-typedef enum
+enum splash_group_t
 {
 	SG_DEFAULT,
 	SG_END
-} splash_group_t;
+};
 
-typedef struct _mobjinfo
+struct mobjinfo_t
 {
-	int32_t type;
-	int doomednum;
-	statenum_t spawnstate;
-	int spawnhealth;
-	int gibhealth;				// Doom Retro's GibHealth feature
-	statenum_t seestate;
-	const char *seesound;		// [RH] not int
-	int reactiontime;
-	const char *attacksound;	// [RH] not int
-	statenum_t painstate;
-	int painchance;
-	const char *painsound;	// [RH] not int
-	statenum_t meleestate;
-	statenum_t missilestate;
-	statenum_t deathstate;
-	statenum_t xdeathstate;
-	const char *deathsound;	// [RH] not int
-	int speed;
-	int radius;
-	int height;
-	int cdheight;
-	int mass;
-	int damage;
-	const char *activesound;	// [RH] not int
-	int flags;
-	int flags2;
-	statenum_t raisestate;
-	int translucency;
-	const char *name;
+	int32_t type            = MT_NULL;
+	int16_t doomednum       = -1;      // only valid range is 16 bits, lets use that
+	statenum_t spawnstate   = S_NULL;
+	int spawnhealth         = 0;
+	int gibhealth           = 0;       // Doom Retro's GibHealth feature
+	statenum_t seestate     = S_NULL;
+	const char *seesound    = nullptr; // [RH] not int
+	int reactiontime        = 0;
+	const char *attacksound = nullptr; // [RH] not int
+	statenum_t painstate    = S_NULL;
+	int painchance          = 0;
+	const char *painsound   = nullptr; // [RH] not int
+	statenum_t meleestate   = S_NULL;
+	statenum_t missilestate = S_NULL;
+	statenum_t deathstate   = S_NULL;
+	statenum_t xdeathstate  = S_NULL;
+	const char *deathsound  = nullptr; // [RH] not int
+	int speed               = 0;
+	int radius              = 0;
+	int height              = 0;
+	int cdheight            = 0;
+	int mass                = 0;
+	int damage              = 0;
+	const char *activesound = nullptr; // [RH] not int
+	int flags               = 0;
+	int flags2              = 0;
+	statenum_t raisestate   = S_NULL;
+	int translucency        = 0x10000;
+	const char *name        = nullptr;
 
 	// MBF21 STUFF HERE
-	int altspeed;
-	int meleerange;
-	int infighting_group;
-	int projectile_group;
-	int splash_group;
-	int flags3;
-	const char* ripsound;
-	mobjtype_t droppeditem;
+	int altspeed            = NO_ALTSPEED;
+	int meleerange          = MELEERANGE;
+	int infighting_group    = IG_DEFAULT;
+	int projectile_group    = PG_DEFAULT;
+	int splash_group        = SG_DEFAULT;
+	int flags3              = 0;
+	const char* ripsound    = nullptr;
+	mobjtype_t droppeditem  = MT_NULL;
+};
 
-} mobjinfo_t;
+inline auto format_as(const mobjinfo_t& info)
+{
+	auto getstring = [](const char* val) -> const char* {
+		return val == nullptr ? "null" : val;
+	};
+	return fmt::format(
+		"{:04d} | doomednum: {}\n"
+		"spawnhealth: {}, speed: {}, altspeed: {}, radius: {}, height: {}, mass: {}, damage: {}\n"
+		"reactiontime: {}, painchance: {}, meleerange: {}, droppeditem: {}, translucency: {}\n"
+		"spawnstate: {}, seestate: {}, painstate: {}, meleestate: {}\n"
+		"missilestate: {}, deathstate: {}, xdeathstate: {}, raisestate: {}\n"
+		"seesound: {}, attacksound: {}, painsound: {}\n"
+		"deathsound: {}, activesound: {}, ripsound: {}\n"
+		"infighting_group: {}, projectile_group: {}, splash_group: {}\n"
+		"flags: {:#010X}, flags2: {:#010X}, flags3: {:#010X}\n",
+		info.type, info.doomednum,
+		info.spawnhealth, info.speed, info.altspeed, info.radius, info.height, info.mass, info.damage,
+		info.reactiontime, info.painchance, info.meleerange, info.droppeditem, info.translucency,
+		info.spawnstate, info.seestate, info.painstate, info.meleestate,
+		info.missilestate, info.deathstate, info.xdeathstate, info.raisestate,
+		getstring(info.seesound), getstring(info.attacksound), getstring(info.painsound),
+		getstring(info.deathsound), getstring(info.activesound), getstring(info.ripsound),
+		info.infighting_group, info.projectile_group, info.splash_group,
+		info.flags, info.flags2, info.flags3
+	);
+}
 
 // [CMB] new types and function to allocate mobjinfo for dsdhacked
 extern mobjinfo_t doom_mobjinfo[];
-extern DoomObjectContainer<mobjinfo_t*> mobjinfo; // mobjtype_t
-extern size_t num_mobjinfo_types();
+inline DoomObjectContainer<mobjinfo_t> mobjinfo(::NUMMOBJTYPES); // mobjtype_t
 // [CMB] spawn map per id24 - the pointer is to the mobjinfo table
-extern DoomObjectContainer<mobjinfo_t*> spawn_map; // int
+inline DoomObjectContainer<mobjinfo_t*> spawn_map; // int
+
+void D_BuildSpawnMap();
 
 inline FArchive &operator<< (FArchive &arc, mobjinfo_t *info)
 {
@@ -1801,9 +1827,9 @@ inline FArchive &operator>> (FArchive &arc, mobjinfo_t *&info)
 {
     int32_t ofs;
     arc >> ofs;
-    DoomObjectContainer<mobjinfo_t*, int32_t>::iterator it = mobjinfo.find(ofs);
+    auto it = mobjinfo.find(ofs);
     if (it != mobjinfo.end())
-        info = it->second;
+        info = &it->second;
     else
         info = NULL;
     return arc;

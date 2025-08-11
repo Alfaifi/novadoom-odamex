@@ -707,7 +707,7 @@ void M_LogWDLItemRespawnEvent(AActor* activator)
 	int az = 0;
 	if (activator != NULL)
 	{
-		itemtype = M_GetWDLItemByMobjType(activator->type);
+		itemtype = M_GetWDLItemByMobjType(static_cast<mobjtype_t>(activator->type));
 
 		// Add the activator's body information.
 		ax = activator->x;

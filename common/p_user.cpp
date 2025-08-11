@@ -637,7 +637,7 @@ void P_MovePlayer (player_t *player)
 			}
 		}
 
-		if (mo->state == states[S_PLAY])
+		if (mo->state == &states[S_PLAY])
 		{
 			// denis - fixme - this function might destoy player->mo without setting it to 0
 			P_SetMobjState (player->mo, S_PLAY_RUN1);
@@ -1206,7 +1206,7 @@ const char* PlayerState(size_t state)
 	}
 }
 
-#define STATE_NUM(mo) (statenum_t)(mo ->state->statenum )
+#define STATE_NUM(mo) (mo->state->statenum)
 
 BEGIN_COMMAND(cheat_players)
 {
@@ -1229,20 +1229,20 @@ BEGIN_COMMAND(cheat_players)
 
 			if (mo->player)
 			{
-				Printf("%.3u: %s\n", mo->player->id,
+				PrintFmt("{:03d}: {}\n", mo->player->id,
 				       mo->player->userinfo.netname);
 			}
 			else
 			{
-				Printf("???: ???\n");
+				PrintFmt("???: ???\n");
 			}
-			Printf("State: %s\n", PlayerState((statenum_t)(mo->state->statenum)));
-			Printf("%f, %f, %f\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
+			PrintFmt("State: {}\n", PlayerState(mo->state->statenum));
+			PrintFmt("{}, {}, {}\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
 			       FIXED2FLOAT(mo->z));
 		}
 	}
 
-	Printf("== Skipped %d dead players ==\n", dead);
+	PrintFmt("== Skipped {} dead players ==\n", dead);
 }
 END_COMMAND(cheat_players)
 

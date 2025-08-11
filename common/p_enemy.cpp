@@ -703,7 +703,7 @@ static fixed_t P_AvoidDropoff(AActor* actor)
 //
 // Most of P_NewChaseDir(), except for what
 // determines the new direction to take
-// 
+//
 // Uses the new ZDoom chase code
 //
 
@@ -716,7 +716,7 @@ static void P_DoNewChaseDir(AActor* actor, fixed_t deltax, fixed_t deltay)
 
 	dirtype_t turnaround = turnaround = opposite[olddir];
 
-	if (deltax > 10 * FRACUNIT)	
+	if (deltax > 10 * FRACUNIT)
 		d[1] = DI_EAST;
 	else if (deltax < -10 * FRACUNIT)
 		d[1] = DI_WEST;
@@ -861,7 +861,7 @@ void P_NewChaseDir (AActor *actor)
 			         (actor->flags ^ actor->target->flags) & MF_FRIEND)
 			{ // Live enemy target
 				if (co_monsterbacking &&
-						actor->info->missilestate && 
+						actor->info->missilestate &&
 						actor->type != MT_SKULL &&
 				    ((!actor->target->info->missilestate &&
 				      dist < actor->target->info->meleerange * 2) ||
@@ -1760,7 +1760,7 @@ void A_Chase (AActor *actor)
 			// look for new target, unless conditions are met
 			if (!(actor->target &&                     // have a target
 			      actor->target->health > 0 &&         // and the target is alive
-			        (!P_IsFriendlyThing(actor, actor->target) || 
+			        (!P_IsFriendlyThing(actor, actor->target) ||
 			         !(actor->flags & MF_FRIEND)) &&   // and the target is not friendly
 			        P_CheckSight(actor, actor->target) // and we can see it
 			     ) &&
@@ -2264,7 +2264,7 @@ bool PIT_VileCheck (AActor *thing)
 //
 void A_VileChase (AActor *actor)
 {
-	if (!P_HealCorpse(actor, mobjinfo[MT_VILE]->radius, S_VILE_HEAL1, 31)) //dsslop
+	if (!P_HealCorpse(actor, mobjinfo[MT_VILE].radius, S_VILE_HEAL1, 31)) //dsslop
 		A_Chase(actor); // Return to normal attack.
 }
 
@@ -2761,7 +2761,7 @@ void A_MonsterMeleeAttack(AActor* actor)
 	if (!P_CheckRange(actor, range))
 		return;
 
-	S_Sound(actor, CHAN_WEAPON, SoundMap[hitsound], 1, ATTN_NORM);
+	S_Sound(actor, CHAN_WEAPON, SoundMap[hitsound].c_str(), 1, ATTN_NORM);
 
 	damage = (P_Random(actor) % damagemod + 1) * damagebase;
 	P_DamageMobj(actor->target, actor, actor, damage, MOD_HIT);
@@ -2862,9 +2862,9 @@ bool P_HealCorpse(AActor* actor, int radius, int healstate, int healsound)
 					P_SetMobjState(actor, (statenum_t)healstate, true);
 
 					if (!clientside)
-						SV_Sound(corpsehit, CHAN_BODY, SoundMap[healsound], ATTN_IDLE);
+						SV_Sound(corpsehit, CHAN_BODY, SoundMap[healsound].c_str(), ATTN_IDLE);
 					else
-						S_Sound(corpsehit, CHAN_BODY, SoundMap[healsound], 1, ATTN_IDLE);
+						S_Sound(corpsehit, CHAN_BODY, SoundMap[healsound].c_str(), 1, ATTN_IDLE);
 
 					info = corpsehit->info;
 
@@ -3259,7 +3259,7 @@ void A_PainShootSkull (AActor *actor, angle_t angle)
 	// okay, there's room for another one
 	an = angle >> ANGLETOFINESHIFT;
 
-	prestep = 4*FRACUNIT + 3*(actor->info->radius + mobjinfo[MT_SKULL]->radius)/2;
+	prestep = 4*FRACUNIT + 3*(actor->info->radius + mobjinfo[MT_SKULL].radius)/2;
 
 	x = actor->x + FixedMul (prestep, finecosine[an]);
 	y = actor->y + FixedMul (prestep, finesine[an]);
@@ -3851,7 +3851,7 @@ void A_Scratch(AActor* mo)
 		if (P_CheckMeleeRange(mo))
 		{
 			if (mo->state->misc2)
-				S_Sound(mo, CHAN_BODY, SoundMap[mo->state->misc2], 1, ATTN_NORM);
+				S_Sound(mo, CHAN_BODY, SoundMap[mo->state->misc2].c_str(), 1, ATTN_NORM);
 
 			P_DamageMobj(mo->target, mo, mo, mo->state->misc1);
 		}
@@ -3863,7 +3863,7 @@ void A_PlaySound(AActor* mo)
 	// Play the sound from the SoundMap
 
 	int sndmap = mo->state->misc1;
-	char* snd;
+	const char* snd;
 
 	auto soundIt = SoundMap.find(sndmap);
 	if (soundIt == SoundMap.end())
@@ -3873,7 +3873,7 @@ void A_PlaySound(AActor* mo)
 	}
 	else
 	{
-		snd = (char*)soundIt->second;
+		snd = soundIt->second.c_str();
 	}
 
 	S_Sound(mo, CHAN_BODY, snd, 1,

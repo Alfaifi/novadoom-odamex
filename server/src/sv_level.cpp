@@ -440,42 +440,38 @@ void G_InitNew(const char *mapname)
 	{
 		if (wantFast)
 		{
-			for (const auto& it : states)
+			for (auto& [_, state] : states)
 			{
-				state_t* state = it.second;
-				if (state->flags & STATEF_SKILL5FAST &&
-				    (state->tics != 1 || demoplayback))
-					state->tics >>= 1; // don't change 1->0 since it causes cycles
+				if (state.flags & STATEF_SKILL5FAST &&
+				    (state.tics != 1 || demoplayback))
+					state.tics >>= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (const auto& it : mobjinfo)
+			for (auto& [_, minfo] : mobjinfo)
 			{
-				mobjinfo_t* minfo = it.second;
-				if (minfo->altspeed != NO_ALTSPEED)
+				if (minfo.altspeed != NO_ALTSPEED)
 				{
-					int swap = minfo->speed;
-					minfo->speed = minfo->altspeed;
-					minfo->altspeed = swap;
+					int swap = minfo.speed;
+					minfo.speed = minfo.altspeed;
+					minfo.altspeed = swap;
 				}
 			}
 		}
 		else
 		{
-			for (const auto& it : states)
+			for (auto& [_, state] : states)
 			{
-				state_t* state = it.second;
-				if (state->flags & STATEF_SKILL5FAST)
-					state->tics <<= 1; // don't change 1->0 since it causes cycles
+				if (state.flags & STATEF_SKILL5FAST)
+					state.tics <<= 1; // don't change 1->0 since it causes cycles
 			}
 
-			for (const auto& it : mobjinfo)
+			for (auto& [_, minfo] : mobjinfo)
 			{
-				mobjinfo_t* minfo = it.second;
-				if (minfo->altspeed != NO_ALTSPEED)
+				if (minfo.altspeed != NO_ALTSPEED)
 				{
-					int swap = minfo->altspeed;
-					minfo->altspeed = minfo->speed;
-					minfo->speed = swap;
+					int swap = minfo.altspeed;
+					minfo.altspeed = minfo.speed;
+					minfo.speed = swap;
 				}
 			}
 		}
@@ -691,7 +687,7 @@ void G_DoResetLevel(bool full_reset)
 		while ((mo = iterator.Next()))
 		{
 			// In sides-based games, destroy objectives that aren't relevant.
-			if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
+			if (mo->netid && !CTF_ShouldSpawnHomeFlag(static_cast<mobjtype_t>(mo->type)))
 			{
 				CTF_ReplaceFlagWithWaypoint(mo);
 			}
@@ -940,7 +936,7 @@ void G_DoLoadLevel (int position)
 		TThinkerIterator<AActor> iterator;
 		while ((mo = iterator.Next()))
 		{
-			if (mo->netid && !CTF_ShouldSpawnHomeFlag(mo->type))
+			if (mo->netid && !CTF_ShouldSpawnHomeFlag(static_cast<mobjtype_t>(mo->type)))
 			{
 				CTF_ReplaceFlagWithWaypoint(mo);
 			}

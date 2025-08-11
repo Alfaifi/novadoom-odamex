@@ -985,10 +985,10 @@ BEGIN_COMMAND (actorlist)
 {
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
-	Printf (PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
+	PrintFmt(PRINT_HIGH, "Actors at level.time == {}:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type]->name, mo->x, mo->y, mo->z, mo->angle, mo->state->statenum, mo->tics);
+		PrintFmt(PRINT_HIGH, "{} ({}, {}, {} | {}) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state->statenum, mo->tics);
 	}
 }
 END_COMMAND(actorlist)

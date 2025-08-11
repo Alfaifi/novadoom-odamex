@@ -3,8 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 1998-2006 by Randy Heit (ZDoom).
 // Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2024-2025 by Christian Bernard.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,27 +17,18 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	Wrappers around the standard memory allocation routines.
+//  info.h for odamex/zdoom/ctf stuff
 //
 //-----------------------------------------------------------------------------
 
-
 #pragma once
 
-#include <stdlib.h>
+#include <nonstd/span.hpp>
 
-// don't use these, use the macros below instead!
-void *Malloc (size_t size);
-void *Calloc (size_t num, size_t size);
-void *Realloc (void *memblock, size_t size);
-void M_Free2 (void **memblock);
+// forward declarations
+struct mobjinfo_t;
+struct state_t;
 
-#define M_Malloc(s) Malloc((size_t)s)
-#define M_Calloc(n,s) Calloc((size_t)n, (size_t)s)
-#define M_Realloc(p,s) Realloc((void *)p, (size_t)s)
-
-#define M_Free(p) \
-    if (1) \
-        M_Free2((void **)&p); \
-    else \
-        (void)0
+nonstd::span<mobjinfo_t> getOdaMobjinfo();
+nonstd::span<state_t> getOdaStates();
+nonstd::span<const char*> getOdaSprNames();
