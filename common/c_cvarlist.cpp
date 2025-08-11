@@ -411,12 +411,15 @@ CVAR_RANGE(sv_countdown, "5",
 					"The helper type is defined in BEX or through the cvar co_friend_helpertype.",
 					CVARTYPE_INT, CVAR_ARCHIVE | CVAR_SERVERINFO | CVAR_LATCH | CVAR_NOENABLEDISABLE, 0.0f, 64.0f)
 
-		CVAR(co_friend_helpertype, "", 
+	CVAR(			co_friend_helpertype, "", 
 					"Name of the actor type to spawn as a helper.\n" \
 					"Spawnable actors can be found using the ccmd `dumpactors`\n" \
 					"If empty, it uses the defined default friend in Dehacked (BEX).\n" \
 					"If the actor name can't be found, an MBF helper dog will be spawned\n",
 					CVARTYPE_STRING, CVAR_ARCHIVE | CVAR_NOENABLEDISABLE)
+
+	CVAR(			co_mbfphys, "0", "Use MBF's movement code. Fixes mancubus fireball clipping and linedef skips.",
+					CVARTYPE_BOOL, CVAR_ARCHIVE | CVAR_SERVERINFO)
 
 
 
