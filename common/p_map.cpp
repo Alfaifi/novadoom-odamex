@@ -40,6 +40,7 @@
 
 #include "m_wdlstats.h"
 #include "g_gametype.h"
+#include "g_skill.h"
 #include "p_mapformat.h"
 // State.
 #include "r_state.h"
@@ -640,7 +641,11 @@ static bool PIT_CheckThing (AActor *thing)
 		if (tmthing->z+tmthing->height < thing->z)
 			return true;				// underneath
 
-		if (tmthing->target && P_ProjectileImmune(thing, tmthing->target))
+		if (tmthing->target &&
+			(P_ProjectileImmune(thing, tmthing->target) &&
+		    !((level.flags2 & LEVEL2_INFIGHTINGMASK) ?
+			    level.flags2 & LEVEL2_TOTALINFIGHTING :
+			    G_GetCurrentSkill().flags & SKILL_TOTALINFIGHTING)))
 		{
 			// Don't hit same species as originator.
 			if (thing == tmthing->target)
