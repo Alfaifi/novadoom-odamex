@@ -31,6 +31,8 @@ if(BUILD_CLIENT OR BUILD_SERVER)
         set(ZLIB_LIBRARY
           "${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}z${libsuffix}")
       endif()
+      set(ZLIB_INCLUDE_DIR
+        "${CMAKE_CURRENT_BINARY_DIR}/local/include" CACHE PATH "" FORCE)
     endif()
 
     lib_buildgen(
