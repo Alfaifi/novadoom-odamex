@@ -11,7 +11,7 @@ if(BUILD_CLIENT OR BUILD_SERVER)
       list(APPEND _CPPTRACE_BUILDGEN_PARAMS
         "-DZLIB_INCLUDE_DIR=${CMAKE_CURRENT_BINARY_DIR}/local/include")
       list(APPEND _CPPTRACE_BUILDGEN_PARAMS
-        "-DZLIB_LIBRARY=${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}zlibstatic${libsuffix}")
+        "-DZLIB_LIBRARY=${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}libzstatic${libsuffix}")
     endif()
 
     lib_buildgen(
