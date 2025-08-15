@@ -19,6 +19,18 @@ if(BUILD_CLIENT OR BUILD_SERVER)
         list(APPEND _CPPTRACE_BUILDGEN_PARAMS
           "-DZLIB_LIBRARY=${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}z${libsuffix}")
       endif()
+      # Set vars so the finder can find them.
+      set(ZLIB_INCLUDE_DIR
+        "${CMAKE_CURRENT_BINARY_DIR}/local/include")
+      set(ZLIB_ROOT
+        "${CMAKE_CURRENT_BINARY_DIR}/local")
+      if(WIN32)
+        set(ZLIB_LIBRARY
+          "${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}zlibstatic${libsuffix}")
+      else()
+        set(ZLIB_LIBRARY
+          "${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}z${libsuffix}")
+      endif()
     endif()
 
     lib_buildgen(
