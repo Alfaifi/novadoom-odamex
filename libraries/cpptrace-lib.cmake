@@ -10,8 +10,13 @@ if(BUILD_CLIENT OR BUILD_SERVER)
     if(USE_INTERNAL_ZLIB)
       list(APPEND _CPPTRACE_BUILDGEN_PARAMS
         "-DZLIB_INCLUDE_DIR=${CMAKE_CURRENT_BINARY_DIR}/local/include")
-      list(APPEND _CPPTRACE_BUILDGEN_PARAMS
-        "-DZLIB_LIBRARY=${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}libzstatic${libsuffix}")
+      if (WIN32)
+        list(APPEND _CPPTRACE_BUILDGEN_PARAMS
+          "-DZLIB_LIBRARY=${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}libzstatic${libsuffix}")
+      else()
+        list(APPEND _CPPTRACE_BUILDGEN_PARAMS
+          "-DZLIB_LIBRARY=${CMAKE_CURRENT_BINARY_DIR}/local/lib/${libprefix}z${libsuffix}")
+      endif()
     endif()
 
     lib_buildgen(
