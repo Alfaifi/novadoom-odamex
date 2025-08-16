@@ -1162,11 +1162,8 @@ static inline void PUTDOTD_THICK (int x, int y, argb_t color)
 	const int thick_sq = thickness * thickness;
 
 	// Cache fb pointer and width
-	argb_t* fbuf = (argb_t*)fb;
-	const int fw = f_w;
-
-	// #define PUTDOTD(xx, yy, cc) *((argb_t*)(fb + (yy)*f_p + ((xx) << 2))) = (cc)
-	// #define PUTDOTP(xx, yy, cc) fb[(yy)*f_p + (xx)] = (cc)
+	argb_t* fbuf = reinterpret_cast<argb_t*>(fb);
+	const int fw = f_p >> 2;
 
 	// Paletted path: map index → pixel once
 	const argb_t fg = color;
@@ -1178,7 +1175,7 @@ static inline void PUTDOTD_THICK (int x, int y, argb_t color)
 
 		argb_t *pix = fbuf + miny * fw + nx;
 
-		for (int ny = miny; ny <= maxy; ++ny, pix += fw)
+		for (int ny = miny; ny <= maxy; ++ny, pix += f_p >> 2)
 		{
 			const int dy = ny - y;
 			if (dx2 + dy * dy > thick_sq) continue;
@@ -1186,6 +1183,14 @@ static inline void PUTDOTD_THICK (int x, int y, argb_t color)
 		}
 	}
 }
+
+		// argb_t* line = reinterpret_cast<argb_t*>(fb);
+		// for (int y = 0; y < f_h; y++)
+		// {
+		// 	for (int x = 0; x < f_w; x++)
+		// 		line[x] = color.rgb;
+		// 	line += f_p >> 2;
+		// }
 
 //
 // Classic Bresenham w/ whatever optimizations needed for speed
