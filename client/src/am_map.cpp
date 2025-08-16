@@ -114,45 +114,104 @@ EXTERN_CVAR(am_ovteleportcolor)
 
 BEGIN_COMMAND(resetcustomcolors)
 {
-	am_backcolor = "00 00 3a";
-	am_yourcolor = "fc e8 d8";
-	am_wallcolor = "00 8b ff";
-	am_tswallcolor = "10 32 7e";
-	am_fdwallcolor = "1a 1a 8a";
-	am_cdwallcolor = "00 00 5a";
-	am_thingcolor = "9f d3 ff";
-	am_thingcolor_item = "navy";
-	am_thingcolor_countitem = "sky blue";
-	am_thingcolor_monster = "74 fc 6c";
-	am_thingcolor_nocountmonster = "yellow";
-	am_thingcolor_friend = "dark green";
-	am_thingcolor_projectile = "orange";
-	am_gridcolor = "44 44 88";
-	am_xhaircolor = "80 80 80";
-	am_notseencolor = "00 22 6e";
-	am_lockedcolor = "bb bb bb";
-	am_exitcolor = "ff ff 00";
-	am_teleportcolor = "ff a3 00";
+	if (argc < 2)
+	{
+		PrintFmt(PRINT_WARNING, "Resets custom automap colors to one of the following defaults.\n");
+		PrintFmt(PRINT_WARNING, "Usage: resetcustomcolors <preset>\n");
+		PrintFmt(PRINT_WARNING, "  odamex      - odamex's classic blue automap\n");
+		PrintFmt(PRINT_WARNING, "  vanillaplus - the automap colors of vanilla Doom plus a few enhancements\n");
+		return;
+	}
 
-	am_ovyourcolor = "fc e8 d8";
-	am_ovwallcolor = "00 8b ff";
-	am_ovtswallcolor = "10 32 7e";
-	am_ovfdwallcolor = "1a 1a 8a";
-	am_ovcdwallcolor = "00 00 5a";
-	am_ovthingcolor = "9f d3 ff";
-	am_ovthingcolor_item = "navy";
-	am_ovthingcolor_countitem = "sky blue";
-	am_ovthingcolor_monster = "74 fc 6c";
-	am_ovthingcolor_nocountmonster = "yellow";
-	am_ovthingcolor_friend = "dark green";
-	am_ovthingcolor_projectile = "orange";
-	am_ovgridcolor = "44 44 88";
-	am_ovxhaircolor = "80 80 80";
-	am_ovnotseencolor = "00 22 6e";
-	am_ovlockedcolor = "bb bb bb";
-	am_ovexitcolor = "ff ff 00";
-	am_ovteleportcolor = "ff a3 00";
-	Printf(PRINT_HIGH, "Custom automap colors reset to default.\n");
+	if (iequals(argv[1], "odamex"))
+	{
+		am_backcolor = "00 00 3a";
+		am_yourcolor = "fc e8 d8";
+		am_wallcolor = "00 8b ff";
+		am_tswallcolor = "10 32 7e";
+		am_fdwallcolor = "1a 1a 8a";
+		am_cdwallcolor = "00 00 5a";
+		am_thingcolor = "9f d3 ff";
+		am_thingcolor_item = "navy";
+		am_thingcolor_countitem = "sky blue";
+		am_thingcolor_monster = "74 fc 6c";
+		am_thingcolor_nocountmonster = "yellow";
+		am_thingcolor_friend = "dark green";
+		am_thingcolor_projectile = "orange";
+		am_gridcolor = "44 44 88";
+		am_xhaircolor = "80 80 80";
+		am_notseencolor = "00 22 6e";
+		am_lockedcolor = "bb bb bb";
+		am_exitcolor = "ff ff 00";
+		am_teleportcolor = "ff a3 00";
+
+		am_ovyourcolor = "fc e8 d8";
+		am_ovwallcolor = "00 8b ff";
+		am_ovtswallcolor = "10 32 7e";
+		am_ovfdwallcolor = "1a 1a 8a";
+		am_ovcdwallcolor = "00 00 5a";
+		am_ovthingcolor = "9f d3 ff";
+		am_ovthingcolor_item = "navy";
+		am_ovthingcolor_countitem = "sky blue";
+		am_ovthingcolor_monster = "74 fc 6c";
+		am_ovthingcolor_nocountmonster = "yellow";
+		am_ovthingcolor_friend = "dark green";
+		am_ovthingcolor_projectile = "orange";
+		am_ovgridcolor = "44 44 88";
+		am_ovxhaircolor = "80 80 80";
+		am_ovnotseencolor = "00 22 6e";
+		am_ovlockedcolor = "bb bb bb";
+		am_ovexitcolor = "ff ff 00";
+		am_ovteleportcolor = "ff a3 00";
+	}
+	else if (iequals(argv[1], "vanillaplus"))
+	{
+		am_backcolor = "00 00 00";
+		am_yourcolor = "ff ff ff";
+		am_wallcolor = "fc 00 00";
+		am_tswallcolor = "80 80 80";
+		am_fdwallcolor = "bc 78 48";
+		am_cdwallcolor = "fc fc 00";
+		am_thingcolor = "dark grey";
+		am_thingcolor_item = "navy";
+		am_thingcolor_countitem = "sky blue";
+		am_thingcolor_monster = "74 fc 6c";
+		am_thingcolor_nocountmonster = "yellow";
+		am_thingcolor_friend = "dark green";
+		am_thingcolor_projectile = "orange";
+		am_gridcolor = "4c 4c 4c";
+		am_xhaircolor = "80 80 80";
+		am_notseencolor = "6c 6c 6c";
+		am_lockedcolor = "ff ff ff";
+		am_exitcolor = "ff ff 00";
+		am_teleportcolor = "ff a3 00";
+
+		am_ovyourcolor = "ff ff ff";
+		am_ovwallcolor = "fc 00 00";
+		am_ovtswallcolor = "80 80 80";
+		am_ovfdwallcolor = "bc 78 48";
+		am_ovcdwallcolor = "fc fc 00";
+		am_ovthingcolor = "dark grey";
+		am_ovthingcolor_item = "navy";
+		am_ovthingcolor_countitem = "sky blue";
+		am_ovthingcolor_monster = "74 fc 6c";
+		am_ovthingcolor_nocountmonster = "yellow";
+		am_ovthingcolor_friend = "dark green";
+		am_ovthingcolor_projectile = "orange";
+		am_ovgridcolor = "4c 4c 4c";
+		am_ovxhaircolor = "80 80 80";
+		am_ovnotseencolor = "6c 6c 6c";
+		am_ovlockedcolor = "ff ff ff";
+		am_ovexitcolor = "ff ff 00";
+		am_ovteleportcolor = "ff a3 00";
+	}
+	else
+	{
+		PrintFmt(PRINT_HIGH, "Unknown automap preset {}", argv[1]);
+		return;
+	}
+
+	PrintFmt(PRINT_HIGH, "Custom automap colors reset to default.\n");
 }
 END_COMMAND(resetcustomcolors)
 
