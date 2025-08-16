@@ -36,6 +36,9 @@ CVAR(					am_followplayer, "1", "",
 CVAR(					am_rotate, "0", "",
 						CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
+CVAR_RANGE(				am_thickness, "1", "Scale the thickness of the automap lines by this value. Set to 0 for auto.",
+						CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 6.0f)
+
 CVAR_RANGE(				am_overlay, "0", "",
 						CVARTYPE_BYTE, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 3.0f)
 
