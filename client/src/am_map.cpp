@@ -1093,7 +1093,7 @@ bool AM_clipMline(mline_t* ml, fline_t* fl)
 }
 #undef DOOUTCODE
 
-
+// [EB] adapted from International Doom am_map.c
 static inline void PUTDOTP_THICK (int x, int y, byte color)
 {
 	// Thin point fast path
@@ -1104,8 +1104,7 @@ static inline void PUTDOTP_THICK (int x, int y, byte color)
 	}
 
 	// Thickness: 0 == auto (depends on resolution)
-	// TODO: implement the auto size
-	const int thickness = (am_thickness == 0) ? (1) : am_thickness.asInt();
+	const int thickness = (am_thickness == 0) ? (CleanXfac >> 2) : am_thickness.asInt() - 1;
 
 	// Clamp bbox once
 	const int fwm1 = f_w - 1, fhm1 = f_h - 1;
@@ -1120,9 +1119,6 @@ static inline void PUTDOTP_THICK (int x, int y, byte color)
 	byte* fbuf = fb;
 	const int fw = f_w;
 
-	// Paletted path: map index → pixel once
-	const byte fg = color;
-
 	for (int nx = minx; nx <= maxx; ++nx)
 	{
 		const int dx  = nx - x;
@@ -1134,7 +1130,7 @@ static inline void PUTDOTP_THICK (int x, int y, byte color)
 		{
 			const int dy = ny - y;
 			if (dx2 + dy * dy > thick_sq) continue;
-			*pix = fg;
+			*pix = color;
 		}
 	}
 }
@@ -1149,8 +1145,7 @@ static inline void PUTDOTD_THICK (int x, int y, argb_t color)
 	}
 
 	// Thickness: 0 == auto (depends on resolution)
-	// TODO: implement the auto size
-	const int thickness = (am_thickness == 0) ? (1) : am_thickness.asInt();
+	const int thickness = (am_thickness == 0) ? (CleanXfac >> 2) : am_thickness.asInt() - 1;
 
 	// Clamp bbox once
 	const int fwm1 = f_w - 1, fhm1 = f_h - 1;
@@ -1165,9 +1160,6 @@ static inline void PUTDOTD_THICK (int x, int y, argb_t color)
 	argb_t* fbuf = reinterpret_cast<argb_t*>(fb);
 	const int fw = f_p >> 2;
 
-	// Paletted path: map index → pixel once
-	const argb_t fg = color;
-
 	for (int nx = minx; nx <= maxx; ++nx)
 	{
 		const int dx  = nx - x;
@@ -1179,18 +1171,10 @@ static inline void PUTDOTD_THICK (int x, int y, argb_t color)
 		{
 			const int dy = ny - y;
 			if (dx2 + dy * dy > thick_sq) continue;
-			*pix = fg;
+			*pix = color;
 		}
 	}
 }
-
-		// argb_t* line = reinterpret_cast<argb_t*>(fb);
-		// for (int y = 0; y < f_h; y++)
-		// {
-		// 	for (int x = 0; x < f_w; x++)
-		// 		line[x] = color.rgb;
-		// 	line += f_p >> 2;
-		// }
 
 //
 // Classic Bresenham w/ whatever optimizations needed for speed
