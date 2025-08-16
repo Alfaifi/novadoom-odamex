@@ -64,6 +64,7 @@ static int lockglow = 0;
 
 EXTERN_CVAR(am_rotate)
 EXTERN_CVAR(am_overlay)
+EXTERN_CVAR(am_thickness)
 EXTERN_CVAR(am_showsecrets)
 EXTERN_CVAR(am_showmonsters)
 EXTERN_CVAR(am_showitems)
@@ -1092,6 +1093,100 @@ bool AM_clipMline(mline_t* ml, fline_t* fl)
 }
 #undef DOOUTCODE
 
+
+static inline void PUTDOTP_THICK (int x, int y, byte color)
+{
+	// Thin point fast path
+	if (am_thickness.asInt() == 1)
+	{
+		PUTDOTP(x, y, color);
+		return;
+	}
+
+	// Thickness: 0 == auto (depends on resolution)
+	// TODO: implement the auto size
+	const int thickness = (am_thickness == 0) ? (1) : am_thickness.asInt();
+
+	// Clamp bbox once
+	const int fwm1 = f_w - 1, fhm1 = f_h - 1;
+	int minx = x - thickness; if (minx < 0)   minx = 0;
+	int maxx = x + thickness; if (maxx > fwm1) maxx = fwm1;
+	int miny = y - thickness; if (miny < 0)   miny = 0;
+	int maxy = y + thickness; if (maxy > fhm1) maxy = fhm1;
+
+	const int thick_sq = thickness * thickness;
+
+	// Cache fb pointer and width
+	byte* fbuf = fb;
+	const int fw = f_w;
+
+	// Paletted path: map index → pixel once
+	const byte fg = color;
+
+	for (int nx = minx; nx <= maxx; ++nx)
+	{
+		const int dx  = nx - x;
+		const int dx2 = dx * dx;
+
+		byte *pix = fbuf + miny * fw + nx;
+
+		for (int ny = miny; ny <= maxy; ++ny, pix += fw)
+		{
+			const int dy = ny - y;
+			if (dx2 + dy * dy > thick_sq) continue;
+			*pix = fg;
+		}
+	}
+}
+
+static inline void PUTDOTD_THICK (int x, int y, argb_t color)
+{
+	// Thin point fast path
+	if (am_thickness.asInt() == 1)
+	{
+		PUTDOTD(x, y, color);
+		return;
+	}
+
+	// Thickness: 0 == auto (depends on resolution)
+	// TODO: implement the auto size
+	const int thickness = (am_thickness == 0) ? (1) : am_thickness.asInt();
+
+	// Clamp bbox once
+	const int fwm1 = f_w - 1, fhm1 = f_h - 1;
+	int minx = x - thickness; if (minx < 0)   minx = 0;
+	int maxx = x + thickness; if (maxx > fwm1) maxx = fwm1;
+	int miny = y - thickness; if (miny < 0)   miny = 0;
+	int maxy = y + thickness; if (maxy > fhm1) maxy = fhm1;
+
+	const int thick_sq = thickness * thickness;
+
+	// Cache fb pointer and width
+	argb_t* fbuf = (argb_t*)fb;
+	const int fw = f_w;
+
+	// #define PUTDOTD(xx, yy, cc) *((argb_t*)(fb + (yy)*f_p + ((xx) << 2))) = (cc)
+	// #define PUTDOTP(xx, yy, cc) fb[(yy)*f_p + (xx)] = (cc)
+
+	// Paletted path: map index → pixel once
+	const argb_t fg = color;
+
+	for (int nx = minx; nx <= maxx; ++nx)
+	{
+		const int dx  = nx - x;
+		const int dx2 = dx * dx;
+
+		argb_t *pix = fbuf + miny * fw + nx;
+
+		for (int ny = miny; ny <= maxy; ++ny, pix += fw)
+		{
+			const int dy = ny - y;
+			if (dx2 + dy * dy > thick_sq) continue;
+			*pix = fg;
+		}
+	}
+}
+
 //
 // Classic Bresenham w/ whatever optimizations needed for speed
 //
@@ -1121,7 +1216,7 @@ void AM_drawFlineP(fline_t* fl, byte color)
 		int d = ay - ax / 2;
 		while (true)
 		{
-			PUTDOTP(x, y, (byte)color);
+			PUTDOTP_THICK(x, y, (byte)color);
 			if (x == fl->b.x)
 				return;
 			if (d >= 0)
@@ -1138,7 +1233,7 @@ void AM_drawFlineP(fline_t* fl, byte color)
 		int d = ax - ay / 2;
 		while (true)
 		{
-			PUTDOTP(x, y, (byte)color);
+			PUTDOTP_THICK(x, y, (byte)color);
 			if (y == fl->b.y)
 				return;
 			if (d >= 0)
@@ -1180,7 +1275,7 @@ void AM_drawFlineD(fline_t* fl, argb_t color)
 
 		while (true)
 		{
-			PUTDOTD(x, y, color);
+			PUTDOTD_THICK(x, y, color);
 			if (x == fl->b.x)
 				return;
 			if (d >= 0)
@@ -1197,7 +1292,7 @@ void AM_drawFlineD(fline_t* fl, argb_t color)
 		d = ax - ay / 2;
 		while (true)
 		{
-			PUTDOTD(x, y, color);
+			PUTDOTD_THICK(x, y, color);
 			if (y == fl->b.y)
 				return;
 			if (d >= 0)
