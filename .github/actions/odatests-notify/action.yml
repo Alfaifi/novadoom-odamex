@@ -73,7 +73,7 @@ runs:
           **Commit Hash:** `${{ steps.short-sha.outputs.short-sha }}`
           **Previous:** `${{ steps.previous.outputs.previous-passes }}/${{ steps.previous.outputs.previous-total }}`
           **Current:** `${{ inputs.demos-passed }}/${{ inputs.demos-run }}`
-
+        embed-footer: |
           🔗 [Commit](<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}>)
           🔁 [Workflow Run](<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>)
 
