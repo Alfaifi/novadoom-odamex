@@ -1,0 +1,75 @@
+name: OdaTests Notifier
+
+inputs:
+  demos-run:
+    description: "Number of demo tests that were run"
+    required: true
+  demos-passed:
+    description: "The number of demo tests that passed"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Get previous run ID"
+      id: get-run
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const runs = await github.rest.actions.listWorkflowRuns({
+            owner: = context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: context.workflow,
+            branch: context.ref.replace("/refs/heads/", ""),
+            status: "success"
+          });
+          if (runs.data.workflow_runs.length > 1) {
+            core.setOutput("run_id", runs.data.workflow_runs[1].id);
+          }
+
+    - name: Download previous run artifact
+      uses: actions/download-artifact@v5
+      with:
+        name: test-data
+        repository: ${{ github.repository }}
+        run-id: ${{ steps.get-run.outputs.run_id }}
+        path: ./test-data
+
+    - name: Load previous run values
+      id: previous
+      shell: bash
+      run: |
+        if [[ -f ./test-data/results.txt ]]; then
+          read -r total passes < ./test-data/results.txt
+          echo "previous-total=$total" >> $GITHUB_OUTPUT
+          echo "previous-passes=$passes" >> $GITHUB_OUTPUT
+        else
+          echo "previous-total=0" >> $GITHUB_OUTPUT
+          echo "previous-passes=0" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Notify discord if values changed
+      if: steps.previous.outputs.previous-total != inputs.demos-run || steps.previous.outputs.previous-passes != inputs.demos-passed
+      uses: tsickert/discord-webhook@7.0.0
+      with:
+        webhook-url: ${{ secrets.WEBHOOK_URL }}
+        content: |
+          🧪 **OdaTests Results Have Changed**
+
+          **Previous:** `${{ steps.previous.outputs.previous-passes }}/${{ steps.previous.outputs.previous-total }}`
+          **Current:** `${{ inputs.demos-passed }}/${{ inputs.demos-run }}`
+
+          🔗 [Commit](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          🔁 [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+    - name: Write current run values
+      shell: bash
+      run: |
+        echo "${{ inputs.demos-run }} ${{ inputs.demos-passed }}" > results.txt
+
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-data
+        path: results.txt
