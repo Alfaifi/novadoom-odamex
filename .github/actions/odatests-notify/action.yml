@@ -56,6 +56,7 @@ runs:
 
     - name: Set short git commit SHA
       id: short-sha
+      shell: bash
       run: |
         calculatedSha=$(git rev-parse --short ${{ github.sha }})
         echo "short-sha=$calculatedSha" >> $GITHUB_OUTPUT
