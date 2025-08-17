@@ -71,6 +71,7 @@ EXTERN_CVAR(am_showitems)
 EXTERN_CVAR(am_showtime)
 EXTERN_CVAR(am_classicmapstring)
 EXTERN_CVAR(am_usecustomcolors)
+EXTERN_CVAR(am_showlocked)
 EXTERN_CVAR(am_ovshare)
 
 EXTERN_CVAR(am_backcolor)
@@ -152,7 +153,8 @@ BEGIN_COMMAND(resetcustomcolors)
 	am_ovlockedcolor = "bb bb bb";
 	am_ovexitcolor = "ff ff 00";
 	am_ovteleportcolor = "ff a3 00";
-	Printf(PRINT_HIGH, "Custom automap colors reset to default.\n");
+
+	PrintFmt(PRINT_HIGH, "Custom automap colors reset to default.\n");
 }
 END_COMMAND(resetcustomcolors)
 
@@ -692,6 +694,12 @@ void AM_initColors(const bool overlayed)
 			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.XHairColor);
 		gameinfo.currentAutomapColors.NotSeenColor =
 			AM_GetColorFromString(palette_colors, gameinfo.defaultAutomapColors.NotSeenColor);
+	}
+
+	if (am_showlocked)
+	{
+		gameinfo.currentAutomapColors.LockedColor =
+			AM_GetColorFromString(palette_colors, "ff ff ff");
 	}
 }
 
@@ -1356,7 +1364,7 @@ void AM_drawWalls()
 						g = gameinfo.currentAutomapColors.LockedColor.rgb.getg();
 						b = gameinfo.currentAutomapColors.LockedColor.rgb.getb();
 
-						if (am_usecustomcolors)
+						if (am_usecustomcolors || am_showlocked)
 						{
 							if (lines[i].args[3] == (zk_blue_card | zk_blue))
 							{
@@ -1404,7 +1412,7 @@ void AM_drawWalls()
 						g = gameinfo.currentAutomapColors.LockedColor.rgb.getg();
 						b = gameinfo.currentAutomapColors.LockedColor.rgb.getb();
 
-						if (am_usecustomcolors)
+						if (am_usecustomcolors || am_showlocked)
 						{
 							if (P_IsCompatibleBlueDoorLine(lines[i].special))
 							{

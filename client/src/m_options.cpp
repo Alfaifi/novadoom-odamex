@@ -842,6 +842,7 @@ EXTERN_CVAR (am_showsecrets)
 EXTERN_CVAR (am_showtime)
 EXTERN_CVAR (am_classicmapstring)
 EXTERN_CVAR (am_usecustomcolors)
+EXTERN_CVAR (am_showlocked)
 EXTERN_CVAR (st_scale)
 EXTERN_CVAR (r_stretchsky)
 EXTERN_CVAR (r_linearsky)
@@ -1166,8 +1167,9 @@ static menuitem_t AutomapItems[] = {
 
 	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
 	{ yellowtext, "Automap Colors",		{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
+	{ discrete, "Highlight locked doors",{&am_showlocked},		{2.0}, {0.0},	{0.0},  {OnOff} },
 	{ discrete, "Custom map colors",	{&am_usecustomcolors},	{2.0}, {0.0},	{0.0},  {OnOff} },
-	{ more,     "Reset custom map colors",  {NULL},             {0.0}, {0.0},   {0.0},  {(value_t *)ResetCustomColors} },
+	{ more,     "Reset custom map colors",  {NULL},    {0.0}, {0.0},   {0.0},  {(value_t *)ResetCustomColors} },
 };
 
 menu_t AutomapMenu = {
