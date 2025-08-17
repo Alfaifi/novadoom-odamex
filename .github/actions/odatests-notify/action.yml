@@ -7,6 +7,9 @@ inputs:
   demos-passed:
     description: "The number of demo tests that passed"
     required: true
+  discord-url:
+    description: "Webhook url for discord"
+    required: true
 
 runs:
   using: "composite"
@@ -59,7 +62,7 @@ runs:
       if: steps.previous.outputs.previous-total != inputs.demos-run || steps.previous.outputs.previous-passes != inputs.demos-passed
       uses: tsickert/discord-webhook@7.0.0
       with:
-        webhook-url: ${{ secrets.WEBHOOK_URL }}
+        webhook-url: ${{ inputs.discord-url }}
         content: |
           🧪 **OdaTests Results Have Changed**
 

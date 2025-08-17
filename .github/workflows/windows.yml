@@ -73,7 +73,8 @@ jobs:
         $output | ForEach-Object { Write-Output $_ }
 
         # Capture the first line
-        $firstLine = $output[0]
+        $firstLine = [string]($output[0])
+        echo $firstLine
 
         $fCount = ($firstLine.ToCharArray() | Where-Object { $_ -eq 'F' }).Count
         $dotCount = ($firstLine.ToCharArray() | Where-Object { $_ -eq '.' }).Count
@@ -93,6 +94,7 @@ jobs:
       with:
         demos-run: ${{ steps.odatests.outputs.tests_total }}
         demos-passed: ${{ steps.odatests.outputs.tests_passed }}
+        discord-url: ${{ secrets.WEBHOOK_URL }}
     - name: Upload artifact to B2
       run: python .\ci\upload-b2.py .\build\archive Win-x64
       env:
