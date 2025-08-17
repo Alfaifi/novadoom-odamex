@@ -15,7 +15,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout odatests-results branch
-      use: actions/checkout@v4
+      uses: actions/checkout@v4
       with:
         ref: odatests-results
         path: ./odatests-results
@@ -43,6 +43,7 @@ runs:
         embed-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         embed-color: 16711680
         embed-description: |
+          **Branch:** `${{ github.ref_name }}`
           **Previous:** `${{ steps.previous.outputs.previous-passes }}/${{ steps.previous.outputs.previous-total }}`
           **Current:** `${{ inputs.demos-passed }}/${{ inputs.demos-run }}`
 

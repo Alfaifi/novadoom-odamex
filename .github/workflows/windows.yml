@@ -90,6 +90,7 @@ jobs:
       working-directory: .\build\demotester
       continue-on-error: true
     - name: Notify Discord
+      # if: github.repository_owner == 'odamex' && contains('stable,protobreak', github.ref_name)
       uses: ./.github/actions/odatests-notify
       with:
         demos-run: ${{ steps.odatests.outputs.tests_total }}
