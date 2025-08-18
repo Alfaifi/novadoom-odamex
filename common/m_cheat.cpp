@@ -83,7 +83,7 @@ bool CHEAT_ChangeLevel(cheatseq_t* cheat)
 	if (gamemode == retail_chex)
 		buf = fmt::format("map 1{}", cheat->Args[1]);
 	else
-		buf = fmt::format("map {}{}\n", cheat->Args[0], cheat->Args[1]);
+		buf = fmt::format("map {:c}{:c}\n", cheat->Args[0], cheat->Args[1]);
 
 	AddCommandString(buf);
 	return true;
