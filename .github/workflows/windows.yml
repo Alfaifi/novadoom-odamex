@@ -79,7 +79,7 @@ jobs:
         echo "tests_passed=$($csvData[0].passed)" >> $env:GITHUB_OUTPUT
       working-directory: .\build\demotester
     - name: Notify Discord
-      # if: env.DISCORD_URL != '' && contains('stable,protobreak', github.ref_name)
+      if: env.DISCORD_URL != '' && contains('stable,protobreak', github.ref_name)
       uses: ./.github/actions/odatests-notify
       with:
         demos-run: ${{ steps.odatests-results.outputs.tests_total }}
