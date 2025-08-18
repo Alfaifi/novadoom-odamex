@@ -99,6 +99,6 @@ runs:
         git config --global user.email "actions@github.com"
 
         git add $jsonPath
-        $commitMsg = "Update CI state for $branchName [ci skip]"
+        $commitMsg = "Update OdaTests results for $branchName [ci skip]"
         git commit -m $commitMsg -a || Write-Host "No changes to commit"
         git push origin odatests-results
