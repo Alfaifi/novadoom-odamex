@@ -78,6 +78,7 @@ jobs:
         echo "tests_total=$($csvData[0].total)" >> $env:GITHUB_OUTPUT
         echo "tests_passed=$($csvData[0].passed)" >> $env:GITHUB_OUTPUT
       working-directory: .\build\demotester
+      continue-on-error: true
     - name: Notify Discord
       if: env.DISCORD_URL != ''
       uses: ./.github/actions/odatests-notify
