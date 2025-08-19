@@ -29,6 +29,10 @@ runs:
           $jsonContent = Get-Content $jsonPath -Raw | ConvertFrom-Json
           echo "previous-total=$($jsonContent.demos_run)" >> $env:GITHUB_OUTPUT
           echo "previous-passes=$($jsonContent.demos_passed)" >> $env:GITHUB_OUTPUT
+        } elseif (Test-Path "odatests-results\stable.json") {
+          $jsonContent = Get-Content "odatests-results\stable.json" -Raw | ConvertFrom-Json
+          echo "previous-total=$($jsonContent.demos_run)" >> $env:GITHUB_OUTPUT
+          echo "previous-passes=$($jsonContent.demos_passed)" >> $env:GITHUB_OUTPUT
         } else {
           echo "previous-total=0" >> $env:GITHUB_OUTPUT
           echo "previous-passes=0" >> $env:GITHUB_OUTPUT
