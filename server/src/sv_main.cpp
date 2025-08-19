@@ -125,7 +125,7 @@ void P_PlayerLeavesGame(player_s* player);
 bool P_LineSpecialMovesSector(short special);
 
 void SV_UpdateShareKeys(player_t& player);
-std::string SV_BuildKillsDeathsStatusString(player_t& player);
+std::string SV_BuildKillsDeathsStatusString(const player_t& player);
 std::string V_GetTeamColor(UserInfo userinfo);
 
 CVAR_FUNC_IMPL (sv_maxclients)
@@ -1938,7 +1938,7 @@ void SV_ConnectClient2(player_t& player)
 //
 // SV_BuildKillsDeathsStatusString
 //
-std::string SV_BuildKillsDeathsStatusString(player_t& player)
+std::string SV_BuildKillsDeathsStatusString(const player_t& player)
 {
 	std::string status;
 
@@ -1950,13 +1950,13 @@ std::string SV_BuildKillsDeathsStatusString(player_t& player)
 	{
 		if (G_IsTeamGame())
 		{
-			status += fmt::format("{} TEAM", GetTeamInfo(player.userinfo.team)->ColorStringUpper);
+			status += fmt::format("{} TEAM, ", GetTeamInfo(player.userinfo.team)->ColorStringUpper);
 		}
 
 		// Points (CTF).
 		if (sv_gametype == GM_CTF)
 		{
-			status += fmt::format("{} POINTS", player.points);
+			status += fmt::format("{} POINTS, ", player.points);
 		}
 
 		// Frags (DM/TDM/CTF) or Kills (Coop).
