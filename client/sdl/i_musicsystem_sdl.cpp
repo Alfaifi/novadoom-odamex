@@ -45,7 +45,7 @@ EXTERN_CVAR(snd_musicvolume)
 
 SdlMixerMusicSystem::SdlMixerMusicSystem() : m_isInitialized(false), m_registeredSong()
 {
-	PrintFmt(PRINT_FILTERCHAT, "I_InitMusic: Music playback enabled using SDL_Mixer.\n");
+	PrintFmt(PRINT_FILTERHIGH, "I_InitMusic: Music playback enabled using SDL_Mixer.\n");
 	m_isInitialized = true;
 }
 

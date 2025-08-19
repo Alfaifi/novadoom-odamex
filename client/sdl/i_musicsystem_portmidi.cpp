@@ -80,7 +80,7 @@ PortMidiMusicSystem::PortMidiMusicSystem()
 		if (!prefdevicename.empty() && iequals(prefdevicename, curdevicename))
 			m_outputDevice = i;
 
-		PrintFmt(PRINT_FILTERCHAT, "{}: {}, {}\n", i, info->interf, info->name);
+		PrintFmt(PRINT_FILTERHIGH, "{}: {}, {}\n", i, info->interf, info->name);
 	}
 
 	if (m_outputDevice == pmNoDevice)
@@ -112,7 +112,7 @@ PortMidiMusicSystem::PortMidiMusicSystem()
 	// Initialize instrument fallback support
 	_InitFallback();
 
-	PrintFmt(PRINT_FILTERCHAT, "I_InitMusic: Music playback enabled using PortMidi.\n");
+	PrintFmt(PRINT_FILTERHIGH, "I_InitMusic: Music playback enabled using PortMidi.\n");
 	m_isInitialized = true;
 }
 

@@ -129,7 +129,7 @@ AuMusicSystem::AuMusicSystem() : m_isInitialized(false)
 		return;
 	}
 
-	PrintFmt(PRINT_FILTERCHAT, "I_InitMusic: Music playback enabled using AudioToolbox\n");
+	PrintFmt(PRINT_FILTERHIGH, "I_InitMusic: Music playback enabled using AudioToolbox\n");
 	m_isInitialized = true;
 	return;
 }
