@@ -4904,7 +4904,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	0,		// speed
 	16*FRACUNIT,		// radius
 	16*FRACUNIT,		// height
-	82*FRACUNIT,	// cdheight
+	68*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -4943,7 +4943,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	0,		// speed
 	16*FRACUNIT,		// radius
 	16*FRACUNIT,		// height
-	82*FRACUNIT,	// cdheight
+	68*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -4982,7 +4982,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	0,		// speed
 	16*FRACUNIT,		// radius
 	16*FRACUNIT,		// height
-	82*FRACUNIT,	// cdheight
+	68*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -5021,7 +5021,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	0,		// speed
 	16*FRACUNIT,		// radius
 	16*FRACUNIT,		// height
-	64*FRACUNIT,	// cdheight
+	37*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -5060,7 +5060,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	0,		// speed
 	16*FRACUNIT,		// radius
 	16*FRACUNIT,		// height
-	64*FRACUNIT,	// cdheight
+	37*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -5099,7 +5099,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	0,		// speed
 	16*FRACUNIT,		// radius
 	16*FRACUNIT,		// height
-	64*FRACUNIT,	// cdheight
+	37*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -7913,8 +7913,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	NULL,		// deathsound
 	0,		// speed
 	20*FRACUNIT,		// radius
-	16*FRACUNIT,		// height
-	16*FRACUNIT,	// cdheight
+	48*FRACUNIT,		// height
+	48*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -7953,8 +7953,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	NULL,		// deathsound
 	0,		// speed
 	20*FRACUNIT,		// radius
-	16*FRACUNIT,		// height
-	16*FRACUNIT,	// cdheight
+	48*FRACUNIT,		// height
+	48*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -7993,8 +7993,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	NULL,		// deathsound
 	0,		// speed
 	20*FRACUNIT,		// radius
-	16*FRACUNIT,		// height
-	16*FRACUNIT,	// cdheight
+	48*FRACUNIT,		// height
+	48*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -8033,8 +8033,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	NULL,		// deathsound
 	0,		// speed
 	20*FRACUNIT,		// radius
-	16*FRACUNIT,		// height
-	16*FRACUNIT,	// cdheight
+	48*FRACUNIT,		// height
+	48*FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -8072,9 +8072,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL,		// xdeathstate
 	NULL,		// deathsound
 	0,		// speed
-	20*FRACUNIT,		// radius
-	16*FRACUNIT,		// height
-	16*FRACUNIT,	// cdheight
+	0,		// radius
+	0,				// height
+	0,			// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -8112,9 +8112,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL,		// xdeathstate
 	NULL,		// deathsound
 	0,		// speed
-	20*FRACUNIT,		// radius
-	16*FRACUNIT,		// height
-	16*FRACUNIT,	// cdheight
+	0,		// radius
+	0,			// height
+	0,		// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -8854,8 +8854,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	NULL,		// deathsound
 	0,		// speed
 	20 * FRACUNIT,		// radius
-	16 * FRACUNIT,		// height
-	16 * FRACUNIT,	// cdheight
+	48 * FRACUNIT,		// height
+	48 * FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -8893,8 +8893,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	NULL,		// deathsound
 	0,		// speed
 	20 * FRACUNIT,		// radius
-	16 * FRACUNIT,		// height
-	16 * FRACUNIT,	// cdheight
+	48 * FRACUNIT,		// height
+	48 * FRACUNIT,	// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound
@@ -8931,9 +8931,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL,		// xdeathstate
 	NULL,		// deathsound
 	0,		// speed
-	20 * FRACUNIT,		// radius
-	16 * FRACUNIT,		// height
-	16 * FRACUNIT,	// cdheight
+	0,		// radius
+	0,				// height
+	0,			// cdheight
 	100,		// mass
 	0,		// damage
 	NULL,		// activesound

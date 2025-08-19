@@ -747,7 +747,6 @@ bool G_Responder (event_t *ev)
                 stricmp (cmd, "stepmode") &&
                 stricmp (cmd, "step")))
 			{
-				S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 				M_StartControlPanel ();
 				return true;
 			}
@@ -1100,9 +1099,15 @@ void G_Ticker (void)
 					case BTS_PAUSE:
 						paused ^= 1;
 						if (paused)
+						{
 							S_PauseSound();
+							S_PauseMusic();
+						}
 						else
+						{
 							S_ResumeSound();
+							S_ResumeMusic();
+						}
 						break;
 					}
 				}
@@ -1119,9 +1124,15 @@ void G_Ticker (void)
 				case BTS_PAUSE:
 					paused ^= 1;
 					if (paused)
+					{
 						S_PauseSound();
+						S_PauseMusic();
+					}
 					else
+					{
 						S_ResumeSound();
+						S_ResumeMusic();
+					}
 					break;
 
 				case BTS_SAVEGAME:

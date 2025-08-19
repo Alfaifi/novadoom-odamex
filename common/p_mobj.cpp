@@ -47,6 +47,7 @@
 #include "m_wdlstats.h"
 #include "p_mapformat.h"
 #include "g_musinfo.h"
+#include "r_sky.h"
 
 #ifdef CLIENT_APP
 #include "hu_speedometer.h"
@@ -77,6 +78,7 @@ EXTERN_CVAR(sv_itemsrespawn)
 EXTERN_CVAR(sv_respawnsuper)
 EXTERN_CVAR(sv_itemrespawntime)
 EXTERN_CVAR(co_zdoomphys)
+EXTERN_CVAR(co_mbfphys)
 EXTERN_CVAR(co_realactorheight)
 EXTERN_CVAR(sv_teamspawns)
 EXTERN_CVAR(sv_nomonsters)
@@ -1168,8 +1170,8 @@ static bool P_ExplodeMissileAgainstWall(AActor* mo)
 				sec2 = ceilingline->frontsector;
 			}
 
-			bool skyceiling1 = sec1->ceilingpic == skyflatnum;
-			bool skyceiling2 = sec2 && sec2->ceilingpic == skyflatnum;
+			bool skyceiling1 = R_IsSkyFlat(sec1->ceilingpic);
+			bool skyceiling2 = sec2 && R_IsSkyFlat(sec2->ceilingpic);
 
 			if (skyceiling2)
 			{
@@ -1351,7 +1353,7 @@ void P_XYMovement(AActor *mo)
 			ptryx = mo->x + xmove;
 			ptryy = mo->y + ymove;
 		}
-		else if (!co_zdoomphys && (xmove > maxmove || ymove > maxmove))
+		else if (!co_zdoomphys && ((xmove > maxmove || ymove > maxmove) || (co_mbfphys && (xmove < -maxmove || ymove < -maxmove))))
 		{
 			ptryx = mo->x + xmove / 2;
 			ptryy = mo->y + ymove / 2;
@@ -1617,7 +1619,7 @@ static bool P_ClipMovementToFloor(AActor* mo)
 		// Explode missiles
 		if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
 		{
-			if (co_fixweaponimpacts && mo->subsector->sector->floorpic == skyflatnum)
+			if (co_fixweaponimpacts && R_IsSkyFlat(mo->subsector->sector->floorpic))
 				mo->Destroy();
 			else if (serverside)
 				P_ExplodeMissile(mo);
@@ -1655,7 +1657,7 @@ static bool P_ClipMovementToCeiling(AActor* mo)
 		// Explode missiles
 		if ((mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
 		{
-			if (co_fixweaponimpacts && mo->subsector->sector->ceilingpic == skyflatnum)
+			if (co_fixweaponimpacts && R_IsSkyFlat(mo->subsector->sector->ceilingpic))
 				mo->Destroy();
 			else if (serverside)
 				P_ExplodeMissile(mo);
@@ -1737,7 +1739,7 @@ void P_ApplyBouncyPhysics(AActor *mo)
 			mo->z = mo->ceilingz - mo->height;
 			if (mo->momz > 0)
 			{
-				if (mo->subsector->sector->ceilingpic != skyflatnum)
+				if (!R_IsSkyFlat(mo->subsector->sector->ceilingpic))
 					mo->momz = -mo->momz; // always bounce off non-sky ceiling
 				else if (mo->flags & MF_MISSILE)
 					mo->Destroy(); // missiles don't bounce off skies
@@ -1760,7 +1762,7 @@ void P_ApplyBouncyPhysics(AActor *mo)
 		if (mo->flags & MF_MISSILE)
 		{
 			if (ceilingline && ceilingline->backsector &&
-			    ceilingline->backsector->ceilingpic == skyflatnum &&
+			    R_IsSkyFlat(ceilingline->backsector->ceilingpic) &&
 			    mo->z > ceilingline->backsector->ceilingheight)
 				mo->Destroy();
 			else
@@ -2749,13 +2751,22 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		P_ShowSpawns(mthing);
 
 	// only servers control spawning of items
-    // EXCEPT the client must spawn Type 14 (teleport exit).
+  // EXCEPT the client must spawn Type 14 (teleport exit).
 	// otherwise teleporters won't work well.
-	// 4/29/2025 also spawn music changers clientside, and only clientside
-	if (mthing->type >= 14100 && mthing->type <= 14165 && !clientside)
+	//
+	// Clients also handle spawning of ambient sounds and music changers
+	//
+	if ((mthing->type >= 14001 && mthing->type <= 14065) || (mthing->type >= 14100 && mthing->type <= 14165))
+	{
+		if (!clientside)
+		{
+			return;
+		}
+	}
+	else if (!serverside && (mthing->type != 14))
+	{
 		return;
-	else if (!serverside && (mthing->type != 14) && !(mthing->type >= 14100 && mthing->type <= 14165))
-		return;
+	}
 
 	// count deathmatch start positions
 	if (mthing->type == 11 || (!sv_teamspawns && mthing->type >= 5080 && mthing->type <= 5082))
