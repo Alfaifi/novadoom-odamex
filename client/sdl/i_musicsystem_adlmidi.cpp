@@ -76,7 +76,7 @@ AdlMidiMusicSystem::AdlMidiMusicSystem() : m_mutex()
 		return;
 	}
 	else
-		PrintFmt("I_InitMusic: Music playback enabled using libADLMIDI.\n");
+		PrintFmt(PRINT_FILTERCHAT, "I_InitMusic: Music playback enabled using libADLMIDI.\n");
 
 	m_isInitialized = true;
 

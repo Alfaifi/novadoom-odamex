@@ -62,7 +62,7 @@ PortMidiMusicSystem::PortMidiMusicSystem()
 
 	if (Pm_Initialize() != pmNoError)
 	{
-		Printf(PRINT_WARNING, "I_InitMusic: PortMidi initialization failed.\n");
+		PrintFmt(PRINT_WARNING, "I_InitMusic: PortMidi initialization failed.\n");
 		return;
 	}
 
@@ -80,12 +80,12 @@ PortMidiMusicSystem::PortMidiMusicSystem()
 		if (!prefdevicename.empty() && iequals(prefdevicename, curdevicename))
 			m_outputDevice = i;
 
-		Printf(PRINT_HIGH, "%d: %s, %s\n", i, info->interf, info->name);
+		PrintFmt(PRINT_FILTERCHAT, "{}: {}, {}\n", i, info->interf, info->name);
 	}
 
 	if (m_outputDevice == pmNoDevice)
 	{
-		Printf(PRINT_WARNING, "I_InitMusic: No PortMidi output devices available.\n");
+		PrintFmt(PRINT_WARNING, "I_InitMusic: No PortMidi output devices available.\n");
 		Pm_Terminate();
 		return;
 	}
@@ -93,7 +93,7 @@ PortMidiMusicSystem::PortMidiMusicSystem()
 	if (Pm_OpenOutput(&m_stream, m_outputDevice, NULL, output_buffer_size, I_PortMidiTime,
 	                  NULL, cLatency) != pmNoError)
 	{
-		Printf(PRINT_WARNING, "I_InitMusic: Failure opening PortMidi output device %d.\n",
+		PrintFmt(PRINT_WARNING, "I_InitMusic: Failure opening PortMidi output device %d.\n",
 		       m_outputDevice);
 		return;
 	}
@@ -112,7 +112,7 @@ PortMidiMusicSystem::PortMidiMusicSystem()
 	// Initialize instrument fallback support
 	_InitFallback();
 
-	Printf(PRINT_HIGH, "I_InitMusic: Music playback enabled using PortMidi.\n");
+	PrintFmt(PRINT_FILTERCHAT, "I_InitMusic: Music playback enabled using PortMidi.\n");
 	m_isInitialized = true;
 }
 
