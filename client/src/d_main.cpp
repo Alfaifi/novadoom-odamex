@@ -612,6 +612,9 @@ EXTERN_CVAR(r_clipmaskedspecial)
 
 void G_ReadCOMPLVL()
 {
+	if (!serverside)
+		return;
+
 	int lumpnum = W_CheckNumForName("COMPLVL");
 	if (lumpnum != -1)
 	{
