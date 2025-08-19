@@ -203,56 +203,11 @@ void SdlMixerMusicSystem::_RegisterSong(byte* data, size_t length)
 		return;
 	}
 
-#ifdef TEMP_MIDI
-	// We're using an older version of SDL and must save the midi data
-	// to a temporary file first
-	FILE* fp = fopen(TEMP_MIDI, "wb+");
-	if (!fp)
-	{
-		Printf(PRINT_WARNING,
-		       "Could not open temporary music file %s, not playing track\n", TEMP_MIDI);
-		return;
-	}
-
-	// Get the size of the music data
-	SDL_RWseek(m_registeredSong.Data, 0, SEEK_END);
-	size_t reglength = SDL_RWtell(m_registeredSong.Data);
-
-	// Write the music data to the temporary file
-	SDL_RWseek(m_registeredSong.Data, 0, SEEK_SET);
-	char buf[1024];
-	while (reglength)
-	{
-		size_t chunksize = reglength > sizeof(buf) ? sizeof(buf) : reglength;
-
-		SDL_RWread(m_registeredSong.Data, buf, chunksize, 1);
-		fwrite(buf, chunksize, 1, fp);
-		reglength -= chunksize;
-	}
-
-	fclose(fp);
-	// Read the midi data from the temporary file
-	m_registeredSong.Track = Mix_LoadMUS(TEMP_MIDI);
-	unlink(TEMP_MIDI); // remove the temporary file
-
-	if (!m_registeredSong.Track)
-	{
-		Printf(PRINT_WARNING, "Mix_LoadMUSW: %s\n", Mix_GetError());
-		return;
-	}
-
-#else
-
-// We can read the midi data directly from memory
-#ifdef SDL20
 	m_registeredSong.Track = Mix_LoadMUS_RW(m_registeredSong.Data, 0);
-#endif
 
 	if (!m_registeredSong.Track)
 	{
 		Printf(PRINT_WARNING, "Mix_LoadMUS_RW: %s\n", Mix_GetError());
 		return;
 	}
-
-#endif // TEMP_MIDI
 }
