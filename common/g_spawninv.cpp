@@ -441,10 +441,10 @@ void G_SetupSpawnInventory()
 			StringTokens param = TokenizeString(token, ":");
 			if (param.size() != 2)
 			{
-				Printf(PRINT_WARNING,
-				       "g_spawninv: Unknown parameter \"%s\", falling back to default "
-				       "inventory.\n",
-				       token);
+				PrintFmt(PRINT_WARNING,
+				         "g_spawninv: Unknown parameter \"{}\", falling back to default "
+				         "inventory.\n",
+				         token);
 				::gSpawnInv = ::gDefaultInv;
 				return;
 			}
@@ -452,10 +452,10 @@ void G_SetupSpawnInventory()
 			std::string key = StdStringToLower(param.at(0));
 			if (key.empty())
 			{
-				Printf(PRINT_WARNING,
-				       "g_spawninv: Missing key for parameter \"%s\", falling back to "
-				       "default inventory.\n",
-				       token);
+				PrintFmt(PRINT_WARNING,
+				         "g_spawninv: Missing key for parameter \"{}\", falling back to "
+				         "default inventory.\n",
+				         token);
 				::gSpawnInv = ::gDefaultInv;
 				return;
 			}
@@ -463,10 +463,10 @@ void G_SetupSpawnInventory()
 			std::string value = StdStringToLower(param.at(1));
 			if (value.empty())
 			{
-				Printf(PRINT_WARNING,
-				       "g_spawninv: Missing value for parameter \"%s\", falling back to "
-				       "default inventory.\n",
-				       token);
+				PrintFmt(PRINT_WARNING,
+				         "g_spawninv: Missing value for parameter \"{}\", falling back to "
+				         "default inventory.\n",
+				         token);
 				::gSpawnInv = ::gDefaultInv;
 				return;
 			}
@@ -487,10 +487,10 @@ void G_SetupSpawnInventory()
 			{
 				if (!InvSetReadyWeapon(inv, value))
 				{
-					Printf(PRINT_WARNING,
-					       "g_spawninv: Unknown value for parameter \"%s\", falling back "
-					       "to default inventory.\n",
-					       token);
+					PrintFmt(PRINT_WARNING,
+					         "g_spawninv: Unknown value for parameter \"{}\", falling back "
+					         "to default inventory.\n",
+					         token);
 					::gSpawnInv = ::gDefaultInv;
 					return;
 				}
@@ -499,10 +499,10 @@ void G_SetupSpawnInventory()
 			{
 				if (!InvSetWeapons(inv, value))
 				{
-					Printf(PRINT_WARNING,
-					       "g_spawninv: Unknown value for parameter \"%s\", falling back "
-					       "to default inventory.\n",
-					       token);
+					PrintFmt(PRINT_WARNING,
+					         "g_spawninv: Unknown value for parameter \"{}\", falling back "
+					         "to default inventory.\n",
+					         token);
 					::gSpawnInv = ::gDefaultInv;
 					return;
 				}
@@ -720,19 +720,19 @@ BEGIN_COMMAND(spawninv)
 	if (!stricmp(argv[1], "info"))
 	{
 		// Information about our currently-set spawn inventory.
-		PrintFmt("g_spawninv: {:.fsdf}\n", ::g_spawninv.cstring());
-		Printf("serialized: %s\n", SpawnInvSerialize(::gSpawnInv));
+		PrintFmt("g_spawninv: {}\n", ::g_spawninv.cstring());
+		PrintFmt("serialized: {}\n", SpawnInvSerialize(::gSpawnInv));
 
-		Printf("Health: %d\n", ::gSpawnInv.health);
+		PrintFmt("Health: {}\n", ::gSpawnInv.health);
 		if (::gSpawnInv.armortype == 1)
-			Printf("Green Armor: %d\n", ::gSpawnInv.armorpoints);
+			PrintFmt("Green Armor: {}\n", ::gSpawnInv.armorpoints);
 		else if (::gSpawnInv.armortype == 2)
-			Printf("Blue Armor: %d\n", ::gSpawnInv.armorpoints);
+			PrintFmt("Blue Armor: {}\n", ::gSpawnInv.armorpoints);
 
 		if (::gSpawnInv.readyweapon < 0 || ::gSpawnInv.readyweapon >= NUMWEAPONS)
-			Printf("Ready Weapon: None\n");
+			PrintFmt("Ready Weapon: None\n");
 		else
-			Printf("Ready Weapon: %s\n", ::weaponnames[::gSpawnInv.readyweapon]);
+			PrintFmt("Ready Weapon: {}\n", ::weaponnames[::gSpawnInv.readyweapon]);
 
 		StringTokens weapons;
 		for (size_t i = 0; i < ::gSpawnInv.weaponowned.size(); i++)
@@ -741,13 +741,13 @@ BEGIN_COMMAND(spawninv)
 				weapons.push_back(::weaponnames[i]);
 		}
 		if (!weapons.empty())
-			Printf("Weapons: %s\n", JoinStrings(weapons, ", "));
+			PrintFmt("Weapons: {}\n", JoinStrings(weapons, ", "));
 		else
-			Printf("Weapons: None\n");
+			PrintFmt("Weapons: None\n");
 
 		for (size_t i = 0; i < NUMAMMO; i++)
 		{
-			Printf("%s: %d\n", ammonames[i], ::gSpawnInv.ammo[i]);
+			PrintFmt("{}: {}\n", ammonames[i], ::gSpawnInv.ammo[i]);
 		}
 
 		StringTokens other;
@@ -766,7 +766,7 @@ BEGIN_COMMAND(spawninv)
 		}
 		if (!other.empty())
 		{
-			Printf("Other: %s\n", JoinStrings(other, ", "));
+			PrintFmt("Other: {}\n", JoinStrings(other, ", "));
 		}
 
 		return;

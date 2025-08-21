@@ -409,8 +409,8 @@ bool G_LoadWadString(const std::string& str, const std::string& mapname, const m
 		OWantFile file;
 		if (!OWantFile::make(file, ::com_token, OFILE_UNKNOWN))
 		{
-			Printf(PRINT_WARNING, "Could not parse \"%s\" into file, skipping...\n",
-			       ::com_token);
+			PrintFmt(PRINT_WARNING, "Could not parse \"{}\" into file, skipping...\n",
+			         ::com_token);
 			continue;
 		}
 
@@ -421,9 +421,9 @@ bool G_LoadWadString(const std::string& str, const std::string& mapname, const m
 		{
 			if (!OWantFile::make(file, ::com_token, OFILE_DEH))
 			{
-				Printf(PRINT_WARNING,
-				       "Could not parse \"%s\" into patch file, skipping...\n",
-				       ::com_token);
+				PrintFmt(PRINT_WARNING,
+				         "Could not parse \"{}\" into patch file, skipping...\n",
+				         ::com_token);
 				continue;
 			}
 
@@ -438,9 +438,9 @@ bool G_LoadWadString(const std::string& str, const std::string& mapname, const m
 		{
 			if (!OWantFile::make(file, ::com_token, OFILE_WAD))
 			{
-				Printf(PRINT_WARNING,
-				       "Could not parse \"%s\" into WAD file, skipping...\n",
-				       ::com_token);
+				PrintFmt(PRINT_WARNING,
+				         "Could not parse \"{}\" into WAD file, skipping...\n",
+				         ::com_token);
 				continue;
 			}
 
@@ -929,7 +929,7 @@ void G_InitLevelLocals()
 
 static void MapinfoHelp()
 {
-	Printf(PRINT_HIGH,
+	PrintFmt(PRINT_HIGH,
 		"mapinfo - Looks up internal information about levels\n\n"
 		"Usage:\n"
 		"  ] mapinfo mapname <LUMPNAME>\n"
@@ -954,7 +954,7 @@ BEGIN_COMMAND(mapinfo)
 	LevelInfos& levels = getLevelInfos();
 	if (stricmp(argv[1], "size") == 0)
 	{
-		Printf(PRINT_HIGH, "%zu maps found\n", levels.size());
+		PrintFmt(PRINT_HIGH, "{} maps found\n", levels.size());
 		return;
 	}
 
@@ -970,7 +970,7 @@ BEGIN_COMMAND(mapinfo)
 		infoptr = &levels.findByName(argv[2]);
 		if (!infoptr->exists())
 		{
-			Printf(PRINT_HIGH, "Map \"%s\" not found\n", argv[2]);
+			PrintFmt(PRINT_HIGH, "Map \"{}\" not found\n", argv[2]);
 			return;
 		}
 	}
@@ -980,7 +980,7 @@ BEGIN_COMMAND(mapinfo)
 		infoptr = &levels.findByNum(levelnum);
 		if (!infoptr->exists())
 		{
-			Printf(PRINT_HIGH, "Map number %d not found\n", levelnum);
+			PrintFmt(PRINT_HIGH, "Map number {} not found\n", levelnum);
 			return;
 		}
 	}
@@ -990,7 +990,7 @@ BEGIN_COMMAND(mapinfo)
 		int id = atoi(argv[2]);
 		if (id < 0 || id >= static_cast<int>(levels.size()))
 		{
-			Printf(PRINT_HIGH, "Map index %d does not exist\n", id);
+			PrintFmt(PRINT_HIGH, "Map index {} does not exist\n", id);
 			return;
 		}
 		infoptr = &levels.at(id);
@@ -1050,16 +1050,16 @@ BEGIN_COMMAND(mapinfo)
 
 	if (flags.length() > 0)
 	{
-		Printf(PRINT_HIGH, "Flags:%s\n", flags);
+		PrintFmt(PRINT_HIGH, "Flags:{}\n", flags);
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "Flags: None\n");
+		PrintFmt(PRINT_HIGH, "Flags: None\n");
 	}
 
-	Printf(PRINT_HIGH, "Cluster: %d\n", info.cluster);
-	Printf(PRINT_HIGH, "Snapshot? %s\n", info.snapshot ? "Yes" : "No");
-	Printf(PRINT_HIGH, "ACS defereds? %s\n", info.defered ? "Yes" : "No");
+	PrintFmt(PRINT_HIGH, "Cluster: {}\n", info.cluster);
+	PrintFmt(PRINT_HIGH, "Snapshot? {}\n", info.snapshot ? "Yes" : "No");
+	PrintFmt(PRINT_HIGH, "ACS defereds? {}\n", info.defered ? "Yes" : "No");
 }
 END_COMMAND(mapinfo)
 
@@ -1068,14 +1068,14 @@ BEGIN_COMMAND(clusterinfo)
 {
 	if (argc < 2)
 	{
-		Printf(PRINT_HIGH, "Usage: clusterinfo <cluster id>\n");
+		PrintFmt(PRINT_HIGH, "Usage: clusterinfo <cluster id>\n");
 		return;
 	}
 
 	cluster_info_t& info = getClusterInfos().findByCluster(std::atoi(argv[1]));
 	if (info.cluster == 0)
 	{
-		Printf(PRINT_HIGH, "Cluster %s not found\n", argv[1]);
+		PrintFmt(PRINT_HIGH, "Cluster {} not found\n", argv[1]);
 		return;
 	}
 
@@ -1084,19 +1084,19 @@ BEGIN_COMMAND(clusterinfo)
 	PrintFmt(PRINT_HIGH, "Message Flat: {}\n", info.finaleflat);
 	if (!info.exittext.empty())
 	{
-		Printf(PRINT_HIGH, "- = Exit Text = -\n%s\n- = = = -\n", info.exittext);
+		PrintFmt(PRINT_HIGH, "- = Exit Text = -\n{}\n- = = = -\n", info.exittext);
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "Exit Text: None\n");
+		PrintFmt(PRINT_HIGH, "Exit Text: None\n");
 	}
 	if (!info.entertext.empty())
 	{
-		Printf(PRINT_HIGH, "- = Enter Text = -\n%s\n- = = = -\n", info.entertext);
+		PrintFmt(PRINT_HIGH, "- = Enter Text = -\n{}\n- = = = -\n", info.entertext);
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "Enter Text: None\n");
+		PrintFmt(PRINT_HIGH, "Enter Text: None\n");
 	}
 
 	// Stringify the set cluster flags.
@@ -1106,11 +1106,11 @@ BEGIN_COMMAND(clusterinfo)
 
 	if (flags.length() > 0)
 	{
-		Printf(PRINT_HIGH, "Flags:%s\n", flags);
+		PrintFmt(PRINT_HIGH, "Flags:{}\n", flags);
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "Flags: None\n");
+		PrintFmt(PRINT_HIGH, "Flags: None\n");
 	}
 }
 END_COMMAND(clusterinfo)

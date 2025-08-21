@@ -145,7 +145,7 @@ void init_upnp (void)
 	memset(&urls, 0, sizeof(struct UPNPUrls));
 	memset(&data, 0, sizeof(struct IGDdatas));
 
-	Printf(PRINT_HIGH, "UPnP: Discovering router (max 1 unit supported)\n");
+	PrintFmt(PRINT_HIGH, "UPnP: Discovering router (max 1 unit supported)\n");
 
 #if MINIUPNPC_API_VERSION < 14
 	devlist = upnpDiscover(sv_upnp_discovertimeout.asInt(), NULL, NULL, 0, 0, &res);
@@ -156,7 +156,7 @@ void init_upnp (void)
 
 	if (!devlist || res != UPNPDISCOVER_SUCCESS)
     {
-		Printf(PRINT_WARNING, "UPnP: Router not found or timed out, error %d\n",
+		PrintFmt(PRINT_WARNING, "UPnP: Router not found or timed out, error {}\n",
             res);
 
 		is_upnp_ok = false;
@@ -200,14 +200,14 @@ void init_upnp (void)
 
 	if (r != 0)
 	{
-		Printf(PRINT_HIGH,
+		PrintFmt(PRINT_HIGH,
 			"UPnP: Router found but unable to get external IP address\n");
 
 		is_upnp_ok = false;
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "UPnP: Router found, external IP address is: %s\n",
+		PrintFmt(PRINT_HIGH, "UPnP: Router found, external IP address is: {}\n",
 			IPAddress);
 
 		// Store ip address just in case admin wants it
@@ -330,20 +330,20 @@ void BindToLocalPort (SOCKET s, u_short wanted)
     {
         sv_upnp_internalip.Set(ip.c_str());
 
-        Printf(PRINT_HIGH, "UPnP: Internal IP address is: %s\n", ip);
+        PrintFmt(PRINT_HIGH, "UPnP: Internal IP address is: {}\n", ip);
 
         upnp_add_redir(ip.c_str(), next - 1);
     }
     else
     {
-        Printf(PRINT_HIGH, "UPnP: Could not get first internal IP address, "
+        PrintFmt(PRINT_HIGH, "UPnP: Could not get first internal IP address, "
             "UPnP will not function\n");
 
         is_upnp_ok = false;
     }
 #endif
 
-	Printf(PRINT_HIGH, "Bound to local port %d\n", next - 1);
+	PrintFmt(PRINT_HIGH, "Bound to local port {}\n", next - 1);
 }
 
 
@@ -543,12 +543,12 @@ std::string NET_GetLocalAddress (void)
         addr.s_addr = *(u_long *)ent->h_addr_list[0];
 
 		std::string ipstr = inet_ntoa(addr);
-		Printf(PRINT_HIGH, "Bound to IP: %s\n", ipstr);
+		PrintFmt(PRINT_HIGH, "Bound to IP: {}\n", ipstr);
 		return ipstr;
     }
 	else
 	{
-		Printf(PRINT_HIGH, "Could not look up host IP address from hostname\n");
+		PrintFmt(PRINT_HIGH, "Could not look up host IP address from hostname\n");
 		return "";
 	}
 }
@@ -620,9 +620,9 @@ void MSG_WriteSVC(buf_t* b, const google::protobuf::Message& msg)
 	static std::string buffer;
 	if (!msg.SerializeToString(&buffer))
 	{
-		Printf(
+		PrintFmt(
 		    PRINT_WARNING,
-		    "WARNING: Could not serialize message \"%s\".  This is most likely a bug.\n",
+		    "WARNING: Could not serialize message \"{}\".  This is most likely a bug.\n",
 		    msg.GetDescriptor()->full_name());
 		return;
 	}
@@ -635,15 +635,15 @@ void MSG_WriteSVC(buf_t* b, const google::protobuf::Message& msg)
 	svc_t header = SVC_ResolveDescriptor(msg.GetDescriptor());
 	if (header == svc_noop)
 	{
-		Printf(PRINT_WARNING,
-		       "WARNING: Could not find svc header for message \"%s\".  This is most "
-		       "likely a bug.\n",
-		       msg.GetDescriptor()->full_name());
+		PrintFmt(PRINT_WARNING,
+		         "WARNING: Could not find svc header for message \"{}\".  This is most "
+		         "likely a bug.\n",
+		         msg.GetDescriptor()->full_name());
 		return;
 	}
 
 #if 0
-	Printf("%s (%d)\n, %s\n",
+	PrintFmt("{} ({})\n, {}\n",
 		::svc_info[header].getName(), msg.ByteSize(),
 		msg.ShortDebugString());
 #endif
@@ -669,9 +669,9 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message& ms
 	static std::string buffer;
 	if (!msg.SerializeToString(&buffer))
 	{
-		Printf(
+		PrintFmt(
 		    PRINT_WARNING,
-		    "WARNING: Could not serialize message \"%s\".  This is most likely a bug.\n",
+		    "WARNING: Could not serialize message \"{}\".  This is most likely a bug.\n",
 		    msg.GetDescriptor()->full_name());
 		return;
 	}
@@ -679,10 +679,10 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message& ms
 	svc_t header = SVC_ResolveDescriptor(msg.GetDescriptor());
 	if (header == svc_noop)
 	{
-		Printf(PRINT_WARNING,
-		       "WARNING: Could not find svc header for message \"%s\".  This is most "
-		       "likely a bug.\n",
-		       msg.GetDescriptor()->full_name());
+		PrintFmt(PRINT_WARNING,
+		         "WARNING: Could not find svc header for message \"{}\".  This is most "
+		         "likely a bug.\n",
+		         msg.GetDescriptor()->full_name());
 		return;
 	}
 
@@ -864,7 +864,7 @@ bool MSG_DecompressMinilzo ()
 
 	if(r != LZO_E_OK)
 	{
-		Printf(PRINT_HIGH, "Error: minilzo packet decompression failed with error %X\n", r);
+		PrintFmt(PRINT_HIGH, "Error: minilzo packet decompression failed with error {:X}\n", r);
 		return false;
 	}
 
