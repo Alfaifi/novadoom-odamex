@@ -969,7 +969,7 @@ void M_CommitWDLLog()
 	if (fh == NULL)
 	{
 		::wdlstate.recording = false;
-		PrintFmt(PRINT_HIGH, "wdlstats: Could not save\"%s\" for writing.\n",
+		PrintFmt(PRINT_HIGH, "wdlstats: Could not save\"{}\" for writing.\n",
 		         filename);
 		return;
 	}

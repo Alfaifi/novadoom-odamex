@@ -26,7 +26,6 @@
 
 #include "p_local.h"
 #include "sv_main.h"
-#include "huffman.h"
 #include "i_net.h"
 
 #ifdef SIMULATE_LATENCY
@@ -267,8 +266,6 @@ void SV_AcknowledgePacket(player_t &player)
 	client_t *cl = &player.client;
 
 	int sequence = MSG_ReadLong();
-
-	cl->compressor.packet_acked(sequence);
 
 	// packet is missed
 	if (sequence - cl->last_sequence > 1)

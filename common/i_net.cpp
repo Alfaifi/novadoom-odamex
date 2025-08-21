@@ -908,60 +908,6 @@ bool MSG_CompressMinilzo (buf_t &buf, size_t start_offset, size_t write_gap)
 	return true;
 }
 
-//
-// MSG_DecompressAdaptive
-//
-bool MSG_DecompressAdaptive (huffman &huff)
-{
-	// decompress back onto the receive buffer
-	size_t left = MSG_BytesLeft();
-
-	if(decompressed.maxsize() < net_message.maxsize())
-		decompressed.resize(net_message.maxsize());
-
-	size_t newlen = net_message.maxsize();
-
-	bool r = huff.decompress (net_message.ptr() + net_message.BytesRead(), left, decompressed.ptr(), newlen);
-
-	if(!r)
-		return false;
-
-	net_message.clear();
-	memcpy(net_message.ptr(), decompressed.ptr(), newlen);
-
-	net_message.cursize = newlen;
-
-	return true;
-}
-
-//
-// MSG_CompressAdaptive
-//
-bool MSG_CompressAdaptive (huffman &huff, buf_t &buf, size_t start_offset, size_t write_gap)
-{
-	size_t outlen = OUT_LEN(buf.maxsize() - start_offset - write_gap);
-	size_t total_len = outlen + start_offset + write_gap;
-
-	if(compressed.maxsize() < total_len)
-		compressed.resize(total_len);
-
-	bool r = huff.compress (buf.ptr() + start_offset,
-							  buf.size() - start_offset,
-							  compressed.ptr() + start_offset + write_gap,
-							  outlen);
-
-	// worth the effort?
-	if(!r || outlen >= (buf.size() - start_offset - write_gap))
-		return false;
-
-	memcpy(compressed.ptr(), buf.ptr(), start_offset);
-
-	SZ_Clear(&buf);
-	MSG_WriteChunk(&buf, compressed.ptr(), outlen + start_offset + write_gap);
-
-	return true;
-}
-
 int MSG_ReadShort (void)
 {
     return net_message.ReadShort();

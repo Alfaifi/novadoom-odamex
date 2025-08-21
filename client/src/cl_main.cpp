@@ -125,9 +125,6 @@ static int packetseq[256];
 // denis - unique session key provided by the server
 std::string digest;
 
-// denis - clientside compressor, used for decompression
-huffman_client compressor;
-
 std::string server_host = "";	// hostname of server
 
 // [SL] 2011-06-27 - Class to record and playback network recordings
@@ -1764,8 +1761,6 @@ bool CL_Connect()
 	MSG_WriteLong(&net_buffer, 0);
 	NET_SendPacket(::net_buffer, ::serveraddr);
 	Printf("Requesting server state...\n");
-
-	compressor.reset();
 
 	connected = true;
     multiplayer = true;

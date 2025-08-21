@@ -47,7 +47,6 @@
 
 #include "d_netinf.h"
 #include "i_net.h"
-#include "huffman.h"
 
 #include "p_snapshot.h"
 #include "d_netcmd.h"
@@ -310,8 +309,6 @@ public:
 		bool        allow_rcon;     // allow remote admin
 		bool		displaydisconnect; // display disconnect message when disconnecting
 
-		huffman_server	compressor;	// denis - adaptive huffman compression
-
 		struct download_t
 		{
 			std::string name = "";
@@ -347,9 +344,8 @@ public:
 			digest = "";
 			allow_rcon = false;
 			displaydisconnect = true;
-		/*
-		huffman_server	compressor;	// denis - adaptive huffman compression*/
 		}
+
 		client_t(const client_t &other)
 			: address(other.address),
 			netbuf(other.netbuf),
@@ -368,7 +364,6 @@ public:
 			digest(other.digest),
 			allow_rcon(false),
 			displaydisconnect(true),
-			compressor(other.compressor),
 			download(other.download)
 		{
 			for (size_t i = 0; i < ARRAY_LENGTH(oldpackets); i++)
