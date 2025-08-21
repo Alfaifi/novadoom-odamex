@@ -274,8 +274,8 @@ struct level_locals_t
 	// the channel layout be platform neutral in case the pixel format changes
 	// after the level has been loaded (eg, toggling full-screen on certain OSX version).
 	// The color channels are ordered: A, R, G, B
-	byte			fadeto_color[4];		// The color the palette fades to (usually black)
-	byte			outsidefog_color[4];	// The fog for sectors with sky ceilings
+	std::array<byte, 4>	fadeto_color;		// The color the palette fades to (usually black)
+	std::array<byte, 4>	outsidefog_color;	// The fog for sectors with sky ceilings
 
 	OLumpName		music;
 	OLumpName		skypic;

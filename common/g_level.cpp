@@ -761,8 +761,7 @@ EXTERN_CVAR (sv_freelook)
 
 void G_InitLevelLocals()
 {
-	byte old_fadeto_color[4];
-	memcpy(old_fadeto_color, level.fadeto_color, 4);
+	const std::array<byte, 4> old_fadeto_color = level.fadeto_color;
 
 	R_ExitLevel();
 
@@ -783,7 +782,7 @@ void G_InitLevelLocals()
 	// [SL] 2012-03-19 - Add sky2 back
 	::level.info = (level_info_t*)&info;
 	::level.skypic2 = info.skypic2;
-	memcpy(::level.fadeto_color, info.fadeto_color, 4);
+	::level.fadeto_color = info.fadeto_color;
 
 	if (::level.fadeto_color[0] || ::level.fadeto_color[1] || ::level.fadeto_color[2] || ::level.fadeto_color[3])
 	{
@@ -794,7 +793,7 @@ void G_InitLevelLocals()
 		R_ForceDefaultColormap(info.fadetable.c_str());
 	}
 
-	memcpy(::level.outsidefog_color, info.outsidefog_color, 4);
+	::level.outsidefog_color = info.outsidefog_color;
 
 	::level.flags |= LEVEL_DEFINEDINMAPINFO;
 	if (info.gravity != 0.f)
@@ -899,7 +898,7 @@ void G_InitLevelLocals()
 
 //	memset (level.vars, 0, sizeof(level.vars));
 
-	if (memcmp(::level.fadeto_color, old_fadeto_color, 4) != 0)
+	if (::level.fadeto_color != old_fadeto_color)
 	{
 		V_RefreshColormaps();
 	}
