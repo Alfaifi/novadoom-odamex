@@ -74,7 +74,7 @@ jobs:
       working-directory: .\build\demotester
       continue-on-error: true
     - name: Read OdaTests results
-      if: steps.odatests.outcome == 'success'
+      if: steps.odatests.conclusion == 'success'
       id: odatests-results
       shell: pwsh
       run: |
@@ -83,7 +83,7 @@ jobs:
         echo "tests_passed=$($csvData[0].passed)" >> $env:GITHUB_OUTPUT
       working-directory: .\build\demotester
     - name: Notify Discord
-      if: env.DISCORD_URL != '' && steps.odatests.outcome == 'success'
+      if: env.DISCORD_URL != '' && steps.odatests.conclusion == 'success'
       uses: ./.github/actions/odatests-notify
       with:
         demos-run: ${{ steps.odatests-results.outputs.tests_total }}
