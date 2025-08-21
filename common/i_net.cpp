@@ -628,8 +628,8 @@ void MSG_WriteSVC(buf_t* b, const google::protobuf::Message& msg)
 	}
 
 	// Do we actaully have room for this upcoming message?
-	const size_t MAX_HEADER_SIZE = 4; // header + 3 bytes for varint size.
-	if (b->cursize + MAX_HEADER_SIZE + msg.ByteSize() >= MAX_UDP_SIZE)
+	static constexpr size_t MAX_HEADER_SIZE = 4; // header + 3 bytes for varint size.
+	if (b->cursize + MAX_HEADER_SIZE + msg.ByteSizeLong() >= MAX_UDP_SIZE)
 		SV_SendPackets();
 
 	svc_t header = SVC_ResolveDescriptor(msg.GetDescriptor());
@@ -698,8 +698,8 @@ void MSG_BroadcastSVC(const clientBuf_e buf, const google::protobuf::Message& ms
 		buf_t* b = buf == CLBUF_RELIABLE ? &player.client.reliablebuf : &player.client.netbuf;
 
 		// Do we actaully have room for this upcoming message?
-		const size_t MAX_HEADER_SIZE = 4; // header + 3 bytes for varint size.
-		if (b->cursize + MAX_HEADER_SIZE + msg.ByteSize() >= MAX_UDP_SIZE)
+		static constexpr size_t MAX_HEADER_SIZE = 4; // header + 3 bytes for varint size.
+		if (b->cursize + MAX_HEADER_SIZE + msg.ByteSizeLong() >= MAX_UDP_SIZE)
 			SV_SendPackets();
 
 		b->WriteByte(header);
