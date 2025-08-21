@@ -338,8 +338,8 @@ struct baseline_t
 	static constexpr uint32_t MOMZ = BIT(11);
 
 	baseline_t()
-	    : angle(0), targetid(0), tracerid(0), movecount(0), movedir(0), rndindex(0),
-	      pos(0, 0, 0), mom(0, 0, 0)
+	    : pos(0, 0, 0), mom(0, 0, 0),
+	      angle(0), targetid(0), tracerid(0), movecount(0), movedir(0), rndindex(0)
 	{
 	}
 
