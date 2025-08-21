@@ -247,7 +247,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
 		realargs = new char[datalen];
 		M_StringCopy(realargs, data, datalen);
 
-		while (data = ParseString(data))
+		while ((data = ParseString(data)))
 		{
 			argc++;
 			argsize += strlen(com_token) + 1;
@@ -259,7 +259,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
 		arg = args;
 		data = cmd;
 		argsize = 0;
-		while (data = ParseString(data))
+		while ((data = ParseString(data)))
 		{
 			size_t tokenlen = strlen(com_token) + 1;
 			M_StringCopy(arg, com_token, tokenlen);
