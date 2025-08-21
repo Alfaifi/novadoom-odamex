@@ -22,4 +22,5 @@ if (!([String]::IsNullOrWhiteSpace($env:DEMOTESTER_URL)) -and !([String]::IsNull
 else
 {
 	Write-Output "OdaTests URL or OdaTests Resources URL missing, skipping..."
+	exit 1
 }
