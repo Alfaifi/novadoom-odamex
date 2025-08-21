@@ -1929,7 +1929,7 @@ void P_SetupLevel (const char *lumpname, int position)
 	level.total_monsters = level.respawned_monsters = level.total_items = level.total_secrets =
 		level.killed_monsters = level.found_items = level.found_secrets =
 		wminfo.maxfrags = 0;
-	ArrayInit(level.level_fingerprint, 0);
+	level.level_fingerprint.clear();
 	wminfo.partime = 180;
 
 	if (!savegamerestore)

@@ -107,6 +107,16 @@ struct fhfprint_t
 
 	bool operator==(std::string_view other)
 	{
+		return other == this->toString();
+	}
+
+	void clear()
+	{
+		fingerprint.fill(0);
+	}
+
+	std::string toString()
+	{
 		// [Blair] Serialize the hashes before reading.
 		const uint64_t reconsthash1 = (uint64_t)(fingerprint[0]) |
 		                              (uint64_t)(fingerprint[1]) << 8 |
@@ -126,7 +136,7 @@ struct fhfprint_t
 		                              (uint64_t)(fingerprint[14]) << 48 |
 		                              (uint64_t)(fingerprint[15]) << 56;
 
-		return other == fmt::format("{:016x}{:016x}", reconsthash1, reconsthash2);
+		return fmt::format("{:016x}{:016x}", reconsthash1, reconsthash2);
 	}
 };
 

@@ -1432,9 +1432,9 @@ player_s::player_s() :
 	ArrayInit(powers, 0);
 	ArrayInit(cards, false);
 	ArrayInit(flags, false);
-	ArrayInit(weaponowned, false);
-	ArrayInit(ammo, false);
-	ArrayInit(maxammo, false);
+	weaponowned.fill(false);
+	ammo.fill(false);
+	maxammo.fill(false);
 
 	// Can't put this in initializer list?
 	attacker = AActor::AActorPtr();
@@ -1489,9 +1489,9 @@ player_s &player_s::operator =(const player_s &other)
 	pendingweapon = other.pendingweapon;
 	readyweapon = other.readyweapon;
 
-	ArrayCopy(weaponowned, other.weaponowned);
-	ArrayCopy(ammo, other.ammo);
-	ArrayCopy(maxammo, other.maxammo);
+	weaponowned = other.weaponowned;
+	ammo = other.ammo;
+	maxammo = other.maxammo;
 
 	attackdown = other.attackdown;
 	usedown = other.usedown;
