@@ -483,7 +483,7 @@ BEGIN_COMMAND (map)
 
 			if (W_CheckNumForName (mapname) == -1)
 			{ // Still no luck, oh well.
-				Printf (PRINT_WARNING, "Map %s not found.\n", argv[1]);
+				PrintFmt(PRINT_WARNING, "Map {} not found.\n", argv[1]);
 			}
 			else
 			{ // Success
@@ -497,7 +497,7 @@ BEGIN_COMMAND (map)
 			// Ch0wW - Map was still not found, so don't bother trying loading the map.
 			if (W_CheckNumForName (argv[1]) == -1)
 			{
-				Printf (PRINT_WARNING, "Map %s not found.\n", argv[1]);
+				PrintFmt(PRINT_WARNING, "Map {} not found.\n", argv[1]);
 			}
 			else
 			{
@@ -739,7 +739,7 @@ void G_DoWorldDone()
 	{
 		// Don't die if no next map is given,
 		// just repeat the current one.
-		Printf (PRINT_WARNING, "No next map specified.\n");
+		PrintFmt(PRINT_WARNING, "No next map specified.\n");
 	}
 	else
 	{

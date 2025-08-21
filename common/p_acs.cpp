@@ -3969,7 +3969,7 @@ void P_DoDeferedScripts (void)
 				P_GetScriptGoing (gomo, NULL, def->script, scriptdata, 0, def->arg0, def->arg1, def->arg2, def->type == acsdefered_t::defexealways, true);
 
 			} else
-				Printf (PRINT_HIGH,"P_DoDeferredScripts: Unknown script %d\n", def->script);
+				PrintFmt(PRINT_HIGH,"P_DoDeferredScripts: Unknown script {}\n", def->script);
 			break;
 
 		case acsdefered_t::defsuspend:
@@ -4029,7 +4029,7 @@ bool P_StartScript (AActor *who, line_t *where, int script, const char *map, int
 		}
 		else
 		{
-			Printf (PRINT_HIGH,"P_StartScript: Unknown script %d\n", script);
+			PrintFmt(PRINT_HIGH,"P_StartScript: Unknown script {}\n", script);
 		}
 	}
 	else
@@ -4179,7 +4179,7 @@ BEGIN_COMMAND (scriptstat)
 {
 	if (DACSThinker::ActiveThinker == NULL)
 	{
-		Printf (PRINT_HIGH,"No scripts are running.\n");
+		PrintFmt(PRINT_HIGH,"No scripts are running.\n");
 	}
 	else
 	{
@@ -4205,7 +4205,7 @@ void DACSThinker::DumpScriptStatus ()
 
 	while (script != NULL)
 	{
-		Printf (PRINT_HIGH,"%d: %s\n", script->script, stateNames[script->state]);
+		PrintFmt(PRINT_HIGH,"{}: {}\n", script->script, stateNames[script->state]);
 		script = script->next;
 	}
 }

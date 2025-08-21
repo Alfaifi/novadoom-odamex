@@ -558,11 +558,11 @@ void HU_Drawer()
 		mousegraph.draw(hud_mousegraph);
 
 	if (idmypos && gamestate == GS_LEVEL)
-		Printf (PRINT_HIGH, "ang=%d;x,y,z=(%d,%d,%d)\n",
-				displayplayer().camera->angle/FRACUNIT,
-				displayplayer().camera->x/FRACUNIT,
-				displayplayer().camera->y/FRACUNIT,
-				displayplayer().camera->z/FRACUNIT);
+		PrintFmt(PRINT_HIGH, "ang={};x,y,z=({},{},{})\n",
+			     displayplayer().camera->angle/FRACUNIT,
+			     displayplayer().camera->x/FRACUNIT,
+			     displayplayer().camera->y/FRACUNIT,
+			     displayplayer().camera->z/FRACUNIT);
 
 	// Draw Netdemo info
 	hud::drawNetdemo();

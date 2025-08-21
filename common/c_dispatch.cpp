@@ -148,8 +148,8 @@ static int ListActionCommands (void)
 
 	for (i = 0; i < NUM_ACTIONS; i++)
 	{
-		Printf (PRINT_HIGH, "+%s\n", actionbits[i].name);
-		Printf (PRINT_HIGH, "-%s\n", actionbits[i].name);
+		PrintFmt(PRINT_HIGH, "+{}\n", actionbits[i].name);
+		PrintFmt(PRINT_HIGH, "-{}\n", actionbits[i].name);
 	}
 	return NUM_ACTIONS * 2;
 }
@@ -287,7 +287,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
 			}
 			else
 			{
-				Printf (PRINT_HIGH, "Not a cvar command \"%s\"\n", argv[0]);
+				PrintFmt(PRINT_HIGH, "Not a cvar command \"{}\"\n", argv[0]);
 			}
 		}
 		else
@@ -309,7 +309,7 @@ void C_DoCommand(const char *cmd, uint32_t key)
 						com->Run(key);
 					}
 					else
-						Printf(PRINT_HIGH, "set command not found\n");
+						PrintFmt(PRINT_HIGH, "set command not found\n");
 				}
 				else
 				{
@@ -323,13 +323,13 @@ void C_DoCommand(const char *cmd, uint32_t key)
 						com->Run();
 					}
 					else
-						Printf(PRINT_WARNING, "get command not found\n");
+						PrintFmt(PRINT_WARNING, "get command not found\n");
 				}
 			}
 			else
 			{
 				// We don't know how to handle this command
-				Printf (PRINT_WARNING, "Unknown command \"%s\"\n", argv[0]);
+				PrintFmt(PRINT_WARNING, "Unknown command \"{}\"\n", argv[0]);
 			}
 		}
 		delete[] argv;
@@ -459,20 +459,20 @@ BEGIN_COMMAND (exec)
 
 	if(std::find(exec_stack.begin(), exec_stack.end(), found) != exec_stack.end())
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
+		PrintFmt(PRINT_HIGH, "Ignoring recursive exec \"{}\"\n", found);
 		return;
 	}
 
 	if(exec_stack.size() >= MAX_EXEC_DEPTH)
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
+		PrintFmt(PRINT_HIGH, "Ignoring recursive exec \"{}\"\n", found);
 		return;
 	}
 
 	std::ifstream ifs(found);
 	if(ifs.fail())
 	{
-		Printf(PRINT_WARNING, "Could not open \"%s\"\n", found);
+		PrintFmt(PRINT_WARNING, "Could not open \"{}\"\n", found);
 		return;
 	}
 
@@ -889,8 +889,8 @@ BEGIN_COMMAND (alias)
 {
 	if (argc == 1)
 	{
-		Printf (PRINT_HIGH, "Current alias commands:\n");
-		DumpHash (true);
+		PrintFmt(PRINT_HIGH, "Current alias commands:\n");
+		DumpHash(true);
 	}
 	else
 	{
@@ -930,9 +930,9 @@ BEGIN_COMMAND (cmdlist)
 {
 	int count;
 
-	count = ListActionCommands ();
-	count += DumpHash (false);
-	Printf (PRINT_HIGH, "%d commands\n", count);
+	count = ListActionCommands();
+	count += DumpHash(false);
+	PrintFmt(PRINT_HIGH, "{} commands\n", count);
 }
 END_COMMAND (cmdlist)
 
@@ -986,10 +986,10 @@ BEGIN_COMMAND (actorlist)
 {
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
-	Printf (PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
+	PrintFmt(PRINT_HIGH, "Actors at level.time == {}:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+		PrintFmt(PRINT_HIGH, "{} ({:x}, {:x}, {:x} | {:x}) state: {} tics: {}\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
 	}
 }
 END_COMMAND(actorlist)
@@ -1043,7 +1043,7 @@ BEGIN_COMMAND (stoplog)
 	if (LOG.is_open()) {
 		time (&rawtime);
     	timeinfo = localtime (&rawtime);
-		Printf (PRINT_HIGH, "Logging to file %s stopped %s\n", LOG_FILE, asctime (timeinfo));
+		PrintFmt(PRINT_HIGH, "Logging to file {} stopped {}\n", LOG_FILE, asctime (timeinfo));
 		LOG.close();
 	}
 }
@@ -1055,7 +1055,7 @@ bool P_StartScript (AActor *who, line_t *where, int script, const char *map, int
 BEGIN_COMMAND (puke)
 {
 	if (argc < 2 || argc > 5) {
-		Printf (PRINT_HIGH, " puke <script> [arg1] [arg2] [arg3]\n");
+		PrintFmt(PRINT_HIGH, " puke <script> [arg1] [arg2] [arg3]\n");
 	} else {
 		int script = atoi (argv[1]);
 		int arg0=0, arg1=0, arg2=0;

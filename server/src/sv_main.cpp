@@ -474,7 +474,7 @@ void SV_InitNetwork (void)
     if (v)
     {
        localport = atoi (v);
-       Printf (PRINT_HIGH, "using alternate port %i\n", localport);
+       PrintFmt(PRINT_HIGH, "using alternate port {}\n", localport);
     }
 	else
 	   localport = SERVERPORT;
@@ -682,7 +682,7 @@ void SV_Sound (AActor *mo, byte channel, const char *name, byte attenuation)
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
-		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
+		PrintFmt(PRINT_HIGH, "SV_StartSound: range error. Sfx_id = {}\n", sfx_id);
 		return;
 	}
 
@@ -702,7 +702,7 @@ void SV_Sound(player_t& pl, AActor* mo, const byte channel, const char* name,
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
-		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
+		PrintFmt(PRINT_HIGH, "SV_StartSound: range error. Sfx_id = {}\n", sfx_id);
 		return;
 	}
 
@@ -727,7 +727,7 @@ void UV_SoundAvoidPlayer (AActor *mo, byte channel, const char *name, byte atten
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
-		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
+		PrintFmt(PRINT_HIGH, "SV_StartSound: range error. Sfx_id = {}\n", sfx_id);
 		return;
 	}
 
@@ -775,7 +775,7 @@ void SV_Sound (fixed_t x, fixed_t y, byte channel, const char *name, byte attenu
 
 	if (sfx_id >= static_cast<int>(S_sfx.size()) || sfx_id < 0)
 	{
-		Printf (PRINT_HIGH, "SV_StartSound: range error. Sfx_id = %d\n", sfx_id);
+		PrintFmt(PRINT_HIGH, "SV_StartSound: range error. Sfx_id = {}\n", sfx_id);
 		return;
 	}
 
@@ -1019,7 +1019,7 @@ void SV_ForceSetTeam (player_t &who, team_t team)
 	client_t *cl = &who.client;
 
 	who.userinfo.team = team;
-	Printf (PRINT_HIGH, "Forcing %s to %s team\n", who.userinfo.netname.c_str(), team == TEAM_NONE ? "NONE" : V_GetTeamColor(team).c_str());
+	PrintFmt(PRINT_HIGH, "Forcing {} to {} team\n", who.userinfo.netname.c_str(), team == TEAM_NONE ? "NONE" : V_GetTeamColor(team).c_str());
 
 	MSG_WriteSVC(&cl->reliablebuf, SVC_ForceTeam(team));
 }
@@ -3785,7 +3785,7 @@ void SV_ParseCommands(player_t &player)
 {
 	 while(validplayer(player))
 	 {
-		clc_t cmd = (clc_t)MSG_ReadByte();
+		clc_t cmd = static_cast<clc_t>(MSG_ReadByte());
 
 		if(cmd == (clc_t)-1)
 			break;
@@ -3839,7 +3839,7 @@ void SV_ParseCommands(player_t &player)
 
 				if (player.client.allow_rcon)
 				{
-					Printf(PRINT_HIGH, "RCON command from %s - %s -> %s",
+					PrintFmt(PRINT_HIGH, "RCON command from {} - {} -> {}",
 							player.userinfo.netname, NET_AdrToString(net_from), str);
 					AddCommandString(str);
 				}
@@ -3911,15 +3911,15 @@ void SV_ParseCommands(player_t &player)
 			break;
 
 		default:
-			Printf("SV_ParseCommands: Unknown client message %d.\n", (int)cmd);
+			PrintFmt("SV_ParseCommands: Unknown client message {}.\n", cmd);
 			SV_DropClient(player);
 			return;
 		}
 
 		if (net_message.overflowed)
 		{
-			Printf ("SV_ReadClientMessage: badread %d(%s)\n",
-					    (int)cmd,
+			PrintFmt("SV_ReadClientMessage: badread {}({})\n",
+					    cmd,
 					    clc_info[cmd].getName());
 			SV_DropClient(player);
 			return;
@@ -4156,7 +4156,7 @@ BEGIN_COMMAND (playerinfo)
 
 		if (!validplayer(p))
 		{
-			Printf (PRINT_HIGH, "Bad player number.\n");
+			PrintFmt(PRINT_HIGH, "Bad player number.\n");
 			return;
 		}
 		else
@@ -4164,14 +4164,14 @@ BEGIN_COMMAND (playerinfo)
 	}
 	else
 	{
-		Printf("Usage : playerinfo <#playerid>\n");
-		Printf("Gives additional infos about the selected player (use \"playerlist\" to display player IDs).\n");
+		PrintFmt("Usage : playerinfo <#playerid>\n");
+		PrintFmt("Gives additional infos about the selected player (use \"playerlist\" to display player IDs).\n");
 		return;
 	}
 
 	if (!validplayer(*player))
 	{
-		Printf("Not a valid player\n");
+		PrintFmt("Not a valid player\n");
 		return;
 	}
 

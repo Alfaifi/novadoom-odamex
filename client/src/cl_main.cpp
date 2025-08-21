@@ -851,7 +851,7 @@ BEGIN_COMMAND (kill)
     if (sv_allowcheats || G_IsCoopGame())
         MSG_WriteMarker(&net_buffer, clc_kill);
     else
-        Printf ("You must run the server with '+set sv_allowcheats 1' or disable sv_keepkeys to enable this command.\n");
+        PrintFmt("You must run the server with '+set sv_allowcheats 1' or disable sv_keepkeys to enable this command.\n");
 }
 END_COMMAND (kill)
 
@@ -884,7 +884,7 @@ BEGIN_COMMAND (serverinfo)
 	std::sort(server_cvars.begin(), server_cvars.end());
 
     // Heading
-    Printf ("\n%*s - Value\n", static_cast<int>(MaxFieldLength), "Name");
+    PrintFmt("\n{:>{}} - Value\n", MaxFieldLength, "Name");
 
     // Data
 	for (const auto& varname : server_cvars)
@@ -892,13 +892,13 @@ BEGIN_COMMAND (serverinfo)
 		cvar_t *dummy;
 		Cvar = cvar_t::FindCVar(varname.c_str(), &dummy);
 
-		Printf( "%*s - %s\n",
-				static_cast<int>(MaxFieldLength),
-				Cvar->name(),
-				Cvar->str());
+		PrintFmt("{:>{}} - {}\n",
+			     MaxFieldLength,
+			     Cvar->name(),
+			     Cvar->str());
 	}
 
-    Printf ("\n");
+    PrintFmt("\n");
 }
 END_COMMAND (serverinfo)
 
@@ -1807,7 +1807,7 @@ void CL_InitNetwork (void)
     if (v)
     {
 		localport = atoi (v);
-		Printf (PRINT_HIGH, "using alternate port %i\n", localport);
+		PrintFmt(PRINT_HIGH, "using alternate port {}\n", localport);
     }
     else
 		localport = CLIENTPORT;
@@ -2177,7 +2177,7 @@ void PickupMessage (AActor *toucher, const char *message)
 	{
 		lastmessagetic = gametic;
 		lastmessage = message;
-		Printf (PRINT_PICKUP, "%s\n", message);
+		PrintFmt(PRINT_PICKUP, "{}\n", message);
 	}
 }
 

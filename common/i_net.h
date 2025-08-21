@@ -296,6 +296,11 @@ enum clc_t
 	clc_privmsg, // [AM] Targeted chat to a specific player.
 };
 
+inline auto format_as(clc_t clc)
+{
+	return fmt::underlying(clc);
+}
+
 static constexpr size_t clc_max = 255;
 
 extern msg_info_t clc_info[clc_max + 1];
@@ -655,7 +660,7 @@ public:
 			{
 				clear();
 				overflowed = true;
-				Printf (PRINT_HIGH, "buf_t::resize(): overflow\n");
+				PrintFmt(PRINT_HIGH, "buf_t::resize(): overflow\n");
 			}
 		}
 		else
@@ -673,7 +678,7 @@ public:
 			clear();
 			overflowed = true;
 #if defined(ODAMEX_DEBUG)
-			Printf (PRINT_HIGH, "SZ_GetSpace: overflow\n");
+			PrintFmt(PRINT_HIGH, "SZ_GetSpace: overflow\n");
 #endif
 		}
 

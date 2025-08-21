@@ -88,7 +88,7 @@ BEGIN_COMMAND (stat)
 {
 	if (argc != 2)
 	{
-		Printf (PRINT_HIGH, "Usage: stat <statistics>\n");
+		PrintFmt(PRINT_HIGH, "Usage: stat <statistics>\n");
 		FStat::dumpstat ();
 	}
 	else

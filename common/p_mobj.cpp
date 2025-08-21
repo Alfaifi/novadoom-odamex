@@ -2897,7 +2897,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 
 		if (type > 63)
 		{
-			Printf (PRINT_WARNING, "Sound sequence %d out of range\n", type);
+			PrintFmt(PRINT_WARNING, "Sound sequence {} out of range\n", type);
 		}
 		else
 		{
@@ -2949,7 +2949,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	if (i >= NUMMOBJTYPES || i < 0)
 	{
 		// [RH] Don't die if the map tries to spawn an unknown thing
-		Printf (PRINT_WARNING, "Unknown type %i at (%i, %i)\n",
+		PrintFmt(PRINT_WARNING, "Unknown type {} at ({}, {})\n",
 			mthing->type,
 			mthing->x, mthing->y);
 		i = MT_UNKNOWNTHING;
@@ -2958,7 +2958,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 	//		it to the unknown thing.
 	else if (sprites[states[mobjinfo[i].spawnstate].sprite].numframes == 0)
 	{
-		Printf (PRINT_WARNING, "Type %i at (%i, %i) has no frames\n",
+		PrintFmt(PRINT_WARNING, "Type {} at ({}, {}) has no frames\n",
 				mthing->type, mthing->x, mthing->y);
 		i = MT_UNKNOWNTHING;
 	}

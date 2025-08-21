@@ -378,9 +378,9 @@ BEGIN_COMMAND(bumpgamma)
 	V_IncrementGammaLevel();
 
 	if (gammalevel.value() == 0.0f)
-	    Printf (PRINT_HIGH, "Gamma correction off\n");
+	    PrintFmt(PRINT_HIGH, "Gamma correction off\n");
 	else
-	    Printf (PRINT_HIGH, "Gamma correction level %g\n", gammalevel.value());
+	    PrintFmt(PRINT_HIGH, "Gamma correction level {:g}\n", gammalevel.value());
 }
 END_COMMAND(bumpgamma)
 
@@ -870,7 +870,7 @@ BEGIN_COMMAND (testblend)
 {
 	if (argc < 3)
 	{
-		Printf (PRINT_HIGH, "testblend <color> <amount>\n");
+		PrintFmt(PRINT_HIGH, "testblend <color> <amount>\n");
 	}
 	else
 	{
@@ -886,7 +886,7 @@ BEGIN_COMMAND (testfade)
 {
 	if (argc < 2)
 	{
-		Printf (PRINT_HIGH, "testfade <color>\n");
+		PrintFmt(PRINT_HIGH, "testfade <color>\n");
 	}
 	else
 	{
@@ -1064,7 +1064,7 @@ BEGIN_COMMAND (testcolor)
 {
 	if (argc < 2)
 	{
-		Printf (PRINT_HIGH, "testcolor <color>\n");
+		PrintFmt(PRINT_HIGH, "testcolor <color>\n");
 	}
 	else
 	{

@@ -455,12 +455,12 @@ int NET_GetPacket (void)
 
 		if (errno == WSAEMSGSIZE)
 		{
-			 Printf (PRINT_HIGH, "Warning:  Oversize packet from %s\n",
+			 PrintFmt(PRINT_HIGH, "Warning:  Oversize packet from {}\n",
 							 NET_AdrToString (net_from));
 			 return false;
 		}
 
-		Printf (PRINT_HIGH, "NET_GetPacket: %s\n", strerror(errno));
+		PrintFmt(PRINT_HIGH, "NET_GetPacket: {}\n", strerror(errno));
 		return false;
 #else
 		if (errno == EWOULDBLOCK)
@@ -468,7 +468,7 @@ int NET_GetPacket (void)
 		if (errno == ECONNREFUSED)
 			return false;
 
-		Printf (PRINT_HIGH, "NET_GetPacket: %s\n", strerror(errno));
+		PrintFmt(PRINT_HIGH, "NET_GetPacket: {}\n", strerror(errno));
 		return false;
 #endif
 	}
@@ -514,7 +514,7 @@ int NET_SendPacket (buf_t &buf, netadr_t &to)
 			  return 0;
 		  if (errno == ECONNREFUSED)
 			  return 0;
-		  Printf (PRINT_HIGH, "NET_SendPacket: %s\n", strerror(errno));
+		  PrintFmt(PRINT_HIGH, "NET_SendPacket: {}\n", strerror(errno));
 #endif
 	}
 
@@ -802,7 +802,7 @@ void MSG_WriteHexString(buf_t *b, const char *s)
 
     if (numdigits > ARRAY_LENGTH(output))
     {
-        Printf (PRINT_HIGH, "MSG_WriteHexString: too many digits\n");
+        PrintFmt(PRINT_HIGH, "MSG_WriteHexString: too many digits\n");
         return;
     }
 
@@ -1106,9 +1106,9 @@ CVAR_FUNC_IMPL(net_rcvbuf)
 {
 	int n = var.asInt();
 	if (setsockopt(inet_socket, SOL_SOCKET, SO_RCVBUF, SETSOCKOPTCAST(&n), (int) sizeof(n)) == -1) {
-		Printf(PRINT_HIGH, "setsockopt SO_RCVBUF: %s", strerror(errno));
+		PrintFmt(PRINT_HIGH, "setsockopt SO_RCVBUF: {}", strerror(errno));
 	} else {
-		Printf(PRINT_HIGH, "net_rcvbuf set to %d\n", n);
+		PrintFmt(PRINT_HIGH, "net_rcvbuf set to {}\n", n);
 	}
 }
 
@@ -1116,9 +1116,9 @@ CVAR_FUNC_IMPL(net_sndbuf)
 {
 	int n = var.asInt();
 	if (setsockopt(inet_socket, SOL_SOCKET, SO_SNDBUF, SETSOCKOPTCAST(&n), (int) sizeof(n)) == -1) {
-		Printf (PRINT_HIGH, "setsockopt SO_SNDBUF: %s", strerror(errno));
+		PrintFmt(PRINT_HIGH, "setsockopt SO_SNDBUF: {}", strerror(errno));
 	} else {
-		Printf(PRINT_HIGH, "net_sndbuf set to %d\n", n);
+		PrintFmt(PRINT_HIGH, "net_sndbuf set to {}\n", n);
 	}
 }
 

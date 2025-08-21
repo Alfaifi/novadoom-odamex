@@ -157,7 +157,7 @@ BEGIN_COMMAND (history)
 
 	while (hist)
 	{
-		Printf (PRINT_HIGH, "   %s\n", hist->String);
+		PrintFmt(PRINT_HIGH, "   {}\n", hist->String);
 		hist = hist->Newer;
 	}
 }

@@ -305,8 +305,8 @@ BEGIN_COMMAND (turnspeeds)
 {
 	if (argc == 1)
 	{
-		Printf (PRINT_HIGH, "Current turn speeds: %d %d %d\n",
-				angleturn[0], angleturn[1], angleturn[2]);
+		PrintFmt(PRINT_HIGH, "Current turn speeds: {} {} {}\n",
+				 angleturn[0], angleturn[1], angleturn[2]);
 	}
 	else
 	{
@@ -841,7 +841,7 @@ int outrate;
 
 BEGIN_COMMAND(netstat)
 {
-    Printf (PRINT_HIGH, "in = %d  out = %d \n", netin, netout);
+    PrintFmt(PRINT_HIGH, "in = {}  out = {} \n", netin, netout);
 }
 END_COMMAND(netstat)
 
@@ -1572,7 +1572,7 @@ void G_DoLoadGame (void)
 	FILE *stdfile = fopen (savename.c_str(), "rb");
 	if (stdfile == NULL)
 	{
-		Printf (PRINT_HIGH, "Could not read savegame '%s'\n", savename);
+		PrintFmt(PRINT_HIGH, "Could not read savegame '{}'\n", savename);
 		return;
 	}
 
@@ -1580,13 +1580,13 @@ void G_DoLoadGame (void)
 	size_t readlen = fread (text, 16, 1, stdfile);
 	if (readlen < 1)
 	{
-		Printf (PRINT_HIGH, "Failed to read savegame '%s'\n", savename);
+		PrintFmt(PRINT_HIGH, "Failed to read savegame '{}'\n", savename);
 		fclose(stdfile);
 		return;
 	}
 	if (strncmp (text, SAVESIG, 16))
 	{
-		Printf (PRINT_HIGH, "Savegame '%s' is from a different version\n", savename);
+		PrintFmt(PRINT_HIGH, "Savegame '{}' is from a different version\n", savename);
 
 		fclose(stdfile);
 
@@ -1595,7 +1595,7 @@ void G_DoLoadGame (void)
 	readlen = fread (text, 8, 1, stdfile);
 	if (readlen < 1)
 	{
-		Printf (PRINT_HIGH, "Failed to read savegame '%s'\n", savename);
+		PrintFmt(PRINT_HIGH, "Failed to read savegame '{}'\n", savename);
 		fclose(stdfile);
 		return;
 	}
@@ -1606,9 +1606,9 @@ void G_DoLoadGame (void)
 	FLZOFile savefile (stdfile, FFile::EReading);
 
 	if (!savefile.IsOpen ())
-		I_Error ("Savegame '{}' is corrupt\n", savename);
+		I_Error("Savegame '{}' is corrupt\n", savename);
 
-	Printf (PRINT_HIGH, "Loading savegame '%s'...\n", savename);
+	PrintFmt(PRINT_HIGH, "Loading savegame '{}'...\n", savename);
 
 	CL_QuitNetGame(NQ_SILENT);
 
@@ -1726,7 +1726,7 @@ void G_DoSaveGame()
 	xbox_WriteSaveMeta(name.substr(0, name.rfind(PATHSEPCHAR)), description.c_str());
 #endif
 
-	Printf (PRINT_HIGH, "Saving game to '%s'...\n", name);
+	PrintFmt(PRINT_HIGH, "Saving game to '{}'...\n", name);
 
 	fwrite (description.c_str(), SAVESTRINGSIZE, 1, stdfile);
 	fwrite (SAVESIG, 16, 1, stdfile);
@@ -1781,7 +1781,7 @@ void G_DoSaveGame()
 	gameaction = ga_nothing;
 	savedescription[0] = 0;
 
-	Printf (PRINT_HIGH, "%s\n", GStrings(GGSAVED));
+	PrintFmt(PRINT_HIGH, "{}\n", GStrings(GGSAVED));
 	arc.Close ();
 
     if (level.info->snapshot != NULL)
@@ -2172,7 +2172,7 @@ bool G_CheckDemoStatus (void)
 				return false;
 			}
 			else
-				Printf (PRINT_HIGH, "Demo ended.\n");
+				PrintFmt(PRINT_HIGH, "Demo ended.\n");
 
 			demoplayback = false;
 			gameaction = ga_fullconsole;
