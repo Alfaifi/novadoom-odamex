@@ -371,6 +371,32 @@ public:
 				oldpackets[i] = other.oldpackets[i];
 			}
 		}
+
+		client_t& operator=(const client_t& other)
+		{
+			address = other.address;
+			netbuf = other.netbuf;
+			reliablebuf = other.reliablebuf;
+			version = other.version;
+			packedversion = other.packedversion;
+			sequence = other.sequence;
+			last_sequence = other.last_sequence;
+			packetnum = other.packetnum;
+			rate = other.rate;
+			reliable_bps = other.reliable_bps;
+			unreliable_bps = other.unreliable_bps;
+			last_received = other.last_received;
+			lastcmdtic = other.lastcmdtic;
+			lastclientcmdtic = other.lastclientcmdtic;
+			digest = other.digest;
+			allow_rcon = false;
+			displaydisconnect = true;
+			download = other.download;
+			for (size_t i = 0; i < ARRAY_LENGTH(oldpackets); i++)
+			{
+				oldpackets[i] = other.oldpackets[i];
+			}
+		}
 	} client;
 
 	struct ticcmd_t netcmds[BACKUPTICS];
