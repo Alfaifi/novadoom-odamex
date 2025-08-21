@@ -474,7 +474,7 @@ public:
     fixed_t		floorz;
     fixed_t		ceilingz;
 	fixed_t		dropoffz;
-	sector_t	*floorsector;
+	struct sector_t	*floorsector;
 
     // For movement checking.
     fixed_t		radius;

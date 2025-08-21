@@ -183,6 +183,7 @@ class DSectorEffect;
 
 struct sector_t
 {
+	// FIXME: set the real default values instead of 0 for everything. this was just to replace memsetting the struct for now
 	fixed_t 	floorheight = 0;
 	fixed_t 	ceilingheight = 0;
 	short		floorpic = 0;
@@ -248,10 +249,10 @@ struct sector_t
 	fixed_t base_floor_angle = 0, base_floor_yoffs = 0;
 
 	// killough 3/7/98: support flat heights drawn at another sector's heights
-	sector_t *heightsec = false;		// other sector, or NULL if no other sector
+	sector_t *heightsec = nullptr;		// other sector, or NULL if no other sector
 
 	// killough 4/11/98: support for lightlevels coming from another sector
-	sector_t *floorlightsec = false, *ceilinglightsec = false;
+	sector_t *floorlightsec = nullptr, *ceilinglightsec = nullptr;
 
 	argb_t bottommap = 0, midmap = 0, topmap = 0; // killough 4/4/98: dynamic colormaps
 											// [RH] these can also be blend values if

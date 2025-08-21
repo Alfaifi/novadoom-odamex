@@ -2144,7 +2144,11 @@ bool G_CheckDemoStatus (void)
 			AActor *mo = idplayer(1).mo;
 
 			if (mo)
-				PrintFmt(PRINT_HIGH, "demotest:{:x} {:x} {:x} {:x}\n", mo->angle, mo->x, mo->y, mo->z);
+				PrintFmt(PRINT_HIGH, "demotest:{:x} {:x} {:x} {:x}\n",
+					static_cast<uint32_t>(mo->angle),
+					static_cast<uint32_t>(mo->x),
+					static_cast<uint32_t>(mo->y),
+					static_cast<uint32_t>(mo->z));
 			else
 				PrintFmt(PRINT_WARNING, "demotest:no player\n");
 

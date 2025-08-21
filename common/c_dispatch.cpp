@@ -989,7 +989,9 @@ BEGIN_COMMAND (actorlist)
 	PrintFmt(PRINT_HIGH, "Actors at level.time == {}:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		PrintFmt(PRINT_HIGH, "{} ({:x}, {:x}, {:x} | {:x}) state: {} tics: {}\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+		PrintFmt(PRINT_HIGH, "{} ({:x}, {:x}, {:x} | {:x}) state: {} tics: {}\n", mobjinfo[mo->type].name,
+			static_cast<uint32_t>(mo->x), static_cast<uint32_t>(mo->y), static_cast<uint32_t>(mo->z),
+			static_cast<uint32_t>(mo->angle), mo->state - states, mo->tics);
 	}
 }
 END_COMMAND(actorlist)
