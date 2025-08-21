@@ -208,7 +208,7 @@ bool SV_SendPacket(player_t &pl)
 
 	if (log_packetdebug)
 	{
-		Printf(PRINT_HIGH, "ply %03u, pkt %06u, size %04lu, tic %07u, time %011llu\n",
+		PrintFmt(PRINT_HIGH, "ply {:03}, pkt {:06}, size {:04}, tic {:07}, time {:011}\n",
 			   pl.id, cl->sequence - 1, sendd.cursize, gametic, I_MSTime());
 	}
 

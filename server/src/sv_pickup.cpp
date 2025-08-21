@@ -147,18 +147,18 @@ BEGIN_COMMAND (randpickup) {
 
 	size_t num_players;
 	if (!CMD_RandpickupCheck(arguments, error, num_players)) {
-		Printf(PRINT_HIGH, "%s\n", error);
+		PrintFmt(PRINT_HIGH, "{}\n", error);
 		return;
 	}
 
 	if (!Pickup_DistributePlayers(num_players, error)) {
-		Printf(PRINT_HIGH, "%s\n", error);
+		PrintFmt(PRINT_HIGH, "{}\n", error);
 	}
 } END_COMMAND (randpickup)
 
 BEGIN_COMMAND (randcaps) {
 	std::string error;
 	if (!Pickup_DistributePlayers(2, error)) {
-		Printf(PRINT_HIGH, "%s\n", error);
+		PrintFmt(PRINT_HIGH, "{}\n", error);
 	}
 } END_COMMAND (randcaps)
