@@ -374,6 +374,9 @@ public:
 
 		client_t& operator=(const client_t& other)
 		{
+			if (this == &other)
+				return *this;
+
 			address = other.address;
 			netbuf = other.netbuf;
 			reliablebuf = other.reliablebuf;
@@ -396,6 +399,8 @@ public:
 			{
 				oldpackets[i] = other.oldpackets[i];
 			}
+
+			return *this;
 		}
 	} client;
 
