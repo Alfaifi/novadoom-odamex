@@ -25,17 +25,22 @@ runs:
       run: |
         $branchName = "${{ github.ref_name }}" -replace '/', '_'
         $jsonPath = "odatests-results\$branchName.json"
+        if (-not (Test-Path $jsonPath)) {
+          $jsonPath = "odatests-results\stable.json"
+        }
         if (Test-Path $jsonPath) {
           $jsonContent = Get-Content $jsonPath -Raw | ConvertFrom-Json
           echo "previous-total=$($jsonContent.demos_run)" >> $env:GITHUB_OUTPUT
           echo "previous-passes=$($jsonContent.demos_passed)" >> $env:GITHUB_OUTPUT
-        } elseif (Test-Path "odatests-results\stable.json") {
-          $jsonContent = Get-Content "odatests-results\stable.json" -Raw | ConvertFrom-Json
-          echo "previous-total=$($jsonContent.demos_run)" >> $env:GITHUB_OUTPUT
-          echo "previous-passes=$($jsonContent.demos_passed)" >> $env:GITHUB_OUTPUT
+          if (git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}) {
+            echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
+          }
         } else {
           echo "previous-total=0" >> $env:GITHUB_OUTPUT
           echo "previous-passes=0" >> $env:GITHUB_OUTPUT
+          echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
         }
 
     - name: Determine embed color
@@ -68,7 +73,8 @@ runs:
     - name: Notify discord if values changed
       if: >
         (steps.previous.outputs.previous-total != inputs.demos-run || steps.previous.outputs.previous-passes != inputs.demos-passed) &&
-        (steps.previous.outputs.previous-total != 0 || steps.previous.outputs.previous-passes != 0)
+        (steps.previous.outputs.previous-total != 0 || steps.previous.outputs.previous-passes != 0) &&
+        steps.previous.outputs.previous-commit-ancestor == 'true'
       uses: tsickert/discord-webhook@v7.0.0
       with:
         webhook-url: ${{ inputs.discord-url }}
@@ -85,6 +91,7 @@ runs:
           🔁 [Workflow Run](<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>)
 
     - name: Write current run values
+      if: steps.previous.outputs.previous-commit-ancestor != 'false'
       shell: pwsh
       run: |
         $branchName = "${{ github.ref_name }}" -replace '/', '_'
@@ -94,6 +101,7 @@ runs:
           demos_run = ${{ inputs.demos-run }}
           demos_passed = ${{ inputs.demos-passed }}
           updated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+          commit = ${{ github.sha }}
         }
 
         $jsonContent = $obj | ConvertTo-Json -Depth 3

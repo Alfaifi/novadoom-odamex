@@ -46,12 +46,14 @@ jobs:
     - name: Stage artifacts for testing
       run: .\ci\win-prepare-demotest.ps1
     - name: Download OdaTests and Testing Resources
+      id: get-odatests
       run: .\ci\win-get-demotester.ps1
       env:
         DEMOTESTER_URL: ${{ vars.DEMOTESTER_DOWNLOAD_URL }}
         DEMORESOURCES_URL: ${{ vars.DEMORESOURCES_DOWNLOAD_URL }}
       continue-on-error: true
     - name: Decrypt IWADs
+      if: steps.get-odatests.outcome == 'success'
       run: |
         python .\secret.py decrypt plutonia
         python .\secret.py decrypt tnt
@@ -61,16 +63,16 @@ jobs:
       env:
         SECRET_KEY: ${{ secrets.DEMOTESTER_IWAD_KEY }}
       working-directory: .\build\demotester
-      continue-on-error: true
     - name: Run OdaTests
+      if: steps.get-odatests.outcome == 'success'
       shell: pwsh
       run: |
         python .\odatestcases.py
       env:
         ODAMEX_BIN: ..\demotest\odamex.exe
       working-directory: .\build\demotester
-      continue-on-error: true
     - name: Read OdaTests results
+      if: steps.get-odatests.outcome == 'success'
       id: odatests-results
       shell: pwsh
       run: |
@@ -78,7 +80,6 @@ jobs:
         echo "tests_total=$($csvData[0].total)" >> $env:GITHUB_OUTPUT
         echo "tests_passed=$($csvData[0].passed)" >> $env:GITHUB_OUTPUT
       working-directory: .\build\demotester
-      continue-on-error: true
     - name: Notify Discord
       if: env.DISCORD_URL != ''
       uses: ./.github/actions/odatests-notify
