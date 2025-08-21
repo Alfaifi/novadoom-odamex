@@ -960,7 +960,7 @@ END_COMMAND (playerteam)
 BEGIN_COMMAND (changeteams)
 {
 	int iTeam = (int)consoleplayer().userinfo.team;
-	iTeam = ++iTeam % sv_teamsinplay.asInt();
+	iTeam = (iTeam + 1) % sv_teamsinplay.asInt();
 	cl_team.Set(GetTeamInfo((team_t)iTeam)->ColorStringUpper.c_str());
 }
 END_COMMAND (changeteams)
