@@ -169,23 +169,23 @@ struct level_info_t
 struct level_pwad_info_t
 {
 	// level_info_t
-	OLumpName		mapname;
-	int				levelnum;
-	int				mapnum;
-	int				episodenum;
-	std::string		level_name;
-	fhfprint_t		level_fingerprint;
-	OLumpName		pname;
-	OLumpName		nextmap;
-	OLumpName		secretmap;
-	int				partime;
-	OLumpName		skypic;
-	OLumpName		music;
-	levelFlags_t	flags;
-	levelFlags_t	flags2;
-	int				cluster;
-	FLZOMemFile*	snapshot;
-	acsdefered_s*	defered;
+	OLumpName		mapname    = "";
+	int				levelnum   = 0;
+	int				mapnum     = 0;
+	int				episodenum = 0;
+	std::string		level_name = 0;
+	fhfprint_t		level_fingerprint{};
+	OLumpName		pname      = "";
+	OLumpName		nextmap    = "";
+	OLumpName		secretmap  = "";
+	int				partime    = 0;
+	OLumpName		skypic     = "";
+	OLumpName		music      = "";
+	levelFlags_t	flags      = 0;
+	levelFlags_t	flags2     = 0;
+	int				cluster    = 0;
+	FLZOMemFile*	snapshot   = nullptr;
+	acsdefered_s*	defered    = nullptr;
 
 	// level_pwad_info_t
 
@@ -194,121 +194,53 @@ struct level_pwad_info_t
 	// the channel layout be platform neutral in case the pixel format changes
 	// after the level has been loaded (eg, toggling full-screen on certain OSX version).
 	// The color channels are ordered: A, R, G, B
-	byte			fadeto_color[4];
-	byte			outsidefog_color[4];
+	std::array<byte, 4>	fadeto_color = { 0, 0, 0, 0 };
+	std::array<byte, 4>	outsidefog_color = { 0xFF /* special token signaling to not handle it specially */, 0, 0, 0 };
 
-	OLumpName		fadetable;
-	OLumpName		skypic2;
-	float			gravity;
-	float			aircontrol;
-	int				airsupply;
+	OLumpName		fadetable  = "COLORMAP";
+	OLumpName		skypic2    = "";
+	float			gravity    = 0.0f;
+	float			aircontrol = 0.0f;
+	int				airsupply  = 10;
 
 	// The following are necessary for UMAPINFO compatibility
-	OLumpName		exitpic;
-	OLumpName		enterpic;
-	OLumpName		exitscript;
-	OLumpName		enterscript;
-	OLumpName		exitanim;
-	OLumpName		enteranim;
-	OLumpName		endpic;
+	OLumpName		exitpic     = "";
+	OLumpName		enterpic    = "";
+	OLumpName		exitscript  = "";
+	OLumpName		enterscript = "";
+	OLumpName		exitanim    = "";
+	OLumpName		enteranim   = "";
+	OLumpName		endpic      = "";
 
-	std::string		intertext;
-	std::string		intertextsecret;
-	OLumpName		interbackdrop;
-	OLumpName		intermusic;
-	OLumpName		zintermusic;
+	std::string		intertext       = "";
+	std::string		intertextsecret = 0;
+	OLumpName		interbackdrop   = 0;
+	OLumpName		intermusic      = 0;
+	OLumpName		zintermusic     = 0;
 
-	fixed_t			sky1ScrollDelta;
-	fixed_t			sky2ScrollDelta;
+	fixed_t			sky1ScrollDelta = 0;
+	fixed_t			sky2ScrollDelta = 0;
 
-	std::vector<bossaction_t> bossactions;
+	std::vector<bossaction_t> bossactions{};
 
-	std::string		label;
-	bool			clearlabel;
-	std::string		author;
+	std::string		label      = "";
+	bool			clearlabel = false;
+	std::string		author     = "";
 
-	level_pwad_info_t()
-	    : mapname(""), levelnum(0), mapnum(0), episodenum(0), level_name(""), level_fingerprint(), pname(""), nextmap(""), secretmap(""),
-	      partime(0), skypic(""), music(""), flags(0), flags2(0), cluster(0), snapshot(NULL),
-	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
-	      aircontrol(0.0f), airsupply(10),
-	      exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""), endpic(""), intertext(""),
-	      intertextsecret(""), interbackdrop(""), intermusic(""), zintermusic(""),
-	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(""),
-	      clearlabel(false), author()
-	{
-		ArrayInit(fadeto_color, 0);
-		ArrayInit(outsidefog_color, 0);
-		outsidefog_color[0] = 0xFF; // special token signaling to not handle it specially
-	}
+	level_pwad_info_t() = default;
 
 	level_pwad_info_t(const level_info_t& other)
 	    : mapname(other.mapname), levelnum(other.levelnum), mapnum(other.mapnum), episodenum(other.episodenum),
 	      level_name(other.level_name), level_fingerprint(other.level_fingerprint), pname(other.pname), nextmap(other.nextmap),
 	      secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
 	      music(other.music), flags(other.flags), flags2(other.flags2), cluster(other.cluster),
-	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
-	      skypic2(""), gravity(0.0f), aircontrol(0.0f), airsupply(10),
-	      exitpic(""), enterpic(""), exitscript(""), enterscript(""), exitanim(""), enteranim(""),
-	      endpic(""), intertext(""), intertextsecret(""), interbackdrop(""), intermusic(""), zintermusic(""),
-	      sky1ScrollDelta(0), sky2ScrollDelta(0), bossactions(), label(""),
-	      clearlabel(false), author()
+	      snapshot(other.snapshot), defered(other.defered)
 	{
-		ArrayInit(fadeto_color, 0);
-		ArrayInit(outsidefog_color, 0);
-		outsidefog_color[0] = 0xFF; // special token signaling to not handle it specially
 	}
 
-	level_pwad_info_t& operator=(const level_pwad_info_t& other)
-	{
-		if (this == &other)
-			return *this;
+	level_pwad_info_t& operator=(const level_pwad_info_t& other) = default;
 
-		mapname = other.mapname;
-		levelnum = other.levelnum;
-		level_name = other.level_name;
-		pname = other.pname;
-		nextmap = other.nextmap;
-		secretmap = other.secretmap;
-		partime = other.partime;
-		skypic = other.skypic;
-		music = other.music;
-		flags = other.flags;
-		flags2 = other.flags2;
-		cluster = other.cluster;
-		snapshot = other.snapshot;
-		defered = other.defered;
-		ArrayCopy(fadeto_color, other.fadeto_color);
-		ArrayCopy(outsidefog_color, other.outsidefog_color);
-		level_fingerprint = other.level_fingerprint;
-		fadetable = other.fadetable;
-		skypic2 = other.skypic2;
-		gravity = other.gravity;
-		aircontrol = other.aircontrol;
-		airsupply = other.airsupply;
-		exitpic = other.exitpic;
-		exitscript = other.exitscript;
-		exitanim = other.exitanim;
-		enterpic = other.enterpic;
-		enterscript = other.enterscript;
-		enteranim = other.enteranim;
-		endpic = other.endpic;
-		intertext = other.intertext;
-		intertextsecret = other.intertextsecret;
-		interbackdrop = other.interbackdrop;
-		intermusic = other.intermusic;
-		zintermusic = other.zintermusic;
-		sky1ScrollDelta = other.sky1ScrollDelta;
-		sky2ScrollDelta = other.sky2ScrollDelta;
-		bossactions.clear();
-		std::copy(other.bossactions.begin(), other.bossactions.end(),
-		          bossactions.begin());
-		label = other.label;
-		clearlabel = other.clearlabel;
-		author = other.author;
-
-		return *this;
-	}
+	level_pwad_info_t(const level_pwad_info_t& other) = default;
 
 	bool exists() const
 	{
