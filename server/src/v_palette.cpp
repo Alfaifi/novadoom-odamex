@@ -67,8 +67,8 @@ void V_InitPalette(const char* lumpname)
 	if (!initialized)
 	{
 		// construct a valid palette_t so we don't get crashes
-		memset(default_palette.basecolors, 0, 256 * sizeof(*default_palette.basecolors));
-		memset(default_palette.colors, 0, 256 * sizeof(*default_palette.colors));
+		std::fill(std::begin(default_palette.basecolors), std::end(default_palette.basecolors), argb_t{0});
+		std::fill(std::begin(default_palette.colors), std::end(default_palette.colors), argb_t{0});
 
 		default_palette.maps.colormap = NULL;
 		default_palette.maps.shademap = NULL;
