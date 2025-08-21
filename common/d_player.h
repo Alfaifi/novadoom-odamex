@@ -280,12 +280,6 @@ public:
 			{
 				data.resize(0);
 			}
-
-			oldPacket_t(const oldPacket_t& other)
-			{
-				sequence = other.sequence;
-				data = other.data;
-			}
 		};
 
 		netadr_t    address;

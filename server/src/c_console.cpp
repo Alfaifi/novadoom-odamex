@@ -99,7 +99,7 @@ char *TimeStamp()
 	return stamp;
 }
 
-static int PrintString(int printlevel, const std::string& str)
+static size_t PrintString(int printlevel, const std::string& str)
 {
 	std::string sanitized_str(str);
 	StripColorCodes(sanitized_str);

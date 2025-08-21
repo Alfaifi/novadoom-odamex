@@ -86,10 +86,6 @@ translationref_t::translationref_t() : m_table(NULL), m_player_id(-1)
 {
 }
 
-translationref_t::translationref_t(const translationref_t &other) : m_table(other.m_table), m_player_id(other.m_player_id)
-{
-}
-
 translationref_t::translationref_t(const byte *table) : m_table(table), m_player_id(-1)
 {
 }

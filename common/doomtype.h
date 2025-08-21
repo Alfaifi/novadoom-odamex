@@ -434,7 +434,6 @@ class translationref_t
 
 public:
 	translationref_t();
-	translationref_t(const translationref_t &other);
 	translationref_t(const palindex_t *table);
 	translationref_t(const palindex_t *table, const int player_id);
 
