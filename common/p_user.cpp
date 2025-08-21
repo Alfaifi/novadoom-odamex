@@ -934,7 +934,7 @@ void P_SetPlayerPowerupStatuses(player_t* player, int powers[NUMPOWERS])
 	else
 		player->mo->statusflags &= ~SF_IRONFEET;
 
-		if (powers[pw_allmap])
+	if (powers[pw_allmap])
 		player->mo->statusflags |= SF_ALLMAP;
 	else
 		player->mo->statusflags &= ~SF_ALLMAP;

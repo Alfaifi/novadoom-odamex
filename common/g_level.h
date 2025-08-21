@@ -173,7 +173,7 @@ struct level_pwad_info_t
 	int				levelnum   = 0;
 	int				mapnum     = 0;
 	int				episodenum = 0;
-	std::string		level_name = 0;
+	std::string		level_name = "";
 	fhfprint_t		level_fingerprint{};
 	OLumpName		pname      = "";
 	OLumpName		nextmap    = "";
@@ -213,10 +213,10 @@ struct level_pwad_info_t
 	OLumpName		endpic      = "";
 
 	std::string		intertext       = "";
-	std::string		intertextsecret = 0;
-	OLumpName		interbackdrop   = 0;
-	OLumpName		intermusic      = 0;
-	OLumpName		zintermusic     = 0;
+	std::string		intertextsecret = "";
+	OLumpName		interbackdrop   = "";
+	OLumpName		intermusic      = "";
+	OLumpName		zintermusic     = "";
 
 	fixed_t			sky1ScrollDelta = 0;
 	fixed_t			sky2ScrollDelta = 0;

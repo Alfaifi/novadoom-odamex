@@ -272,7 +272,7 @@ static bool CheckWideModeAdjustment()
 	if (vid_widescreen.asInt() > 0 && allow_widescreen != using_widescreen)
 		return true;
 
-	if (vid_widescreen.asInt() > 0 != using_widescreen)
+	if ((vid_widescreen.asInt() > 0) != using_widescreen)
 		return true;
 
 	return false;
