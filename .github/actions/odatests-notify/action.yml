@@ -35,7 +35,7 @@ runs:
           if (-not $jsonContent.commit) {
             echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
           } else {
-            git merge-base --is-ancestor $commit $env:GITHUB_SHA
+            git merge-base --is-ancestor $commit ${{ github.sha }}
             if ($LASTEXITCODE -eq 0) {
               echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
             } else {
@@ -106,7 +106,7 @@ runs:
           demos_run = ${{ inputs.demos-run }}
           demos_passed = ${{ inputs.demos-passed }}
           updated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-          commit = ${{ github.sha }}
+          commit = "${{ github.sha }}"
         }
 
         $jsonContent = $obj | ConvertTo-Json -Depth 3
