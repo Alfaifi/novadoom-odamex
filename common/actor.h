@@ -378,22 +378,22 @@ class AActor : public DThinker
 
 		AActorPtrCounted() {}
 
-		AActorPtr &operator= (AActorPtr other)
+		AActorPtr &operator= (const AActorPtr& other)
 		{
 			if(ptr)
 				ptr->refCount--;
 			if(other)
-				other->refCount++;
+				const_cast<AActorPtr&>(other)->refCount++; // TODO: should refCount maybe be declared as mutable?
 			ptr = other;
 			return ptr;
 		}
 
-		AActorPtr &operator= (AActorPtrCounted other)
+		AActorPtr &operator= (const AActorPtrCounted& other)
 		{
 			if(ptr)
 				ptr->refCount--;
 			if(other)
-				other->refCount++;
+				const_cast<AActorPtrCounted&>(other)->refCount++; // TODO: should refCount maybe be declared as mutable?
 			ptr = other.ptr;
 			return ptr;
 		}
