@@ -196,13 +196,13 @@ public:
 	static void STACK_ARGS StaticShutdown ();
 
 private:
-	static TArray<DObject *> Objects;
-	static TArray<size_t> FreeIndices;
-	static TArray<DObject *> ToDestroy;
+	static inline TArray<DObject *> Objects;
+	static inline TArray<size_t> FreeIndices;
+	static inline std::vector<DObject*> ToDestroy;
 
 	void RemoveFromArray ();
 
-	static bool Inactive;
+	static inline bool Inactive;
 	size_t Index;
 };
 

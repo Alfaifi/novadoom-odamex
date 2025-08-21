@@ -63,11 +63,6 @@ const TypeInfo *TypeInfo::FindType (const char *name)
 
 TypeInfo DObject::_StaticType("DObject", NULL, sizeof(DObject));
 
-TArray<DObject *> DObject::Objects;
-TArray<size_t> DObject::FreeIndices;
-TArray<DObject *> DObject::ToDestroy;
-bool DObject::Inactive;
-
 DObject::DObject ()
 {
 	ObjectFlags = 0;
@@ -90,11 +85,11 @@ DObject::~DObject ()
 			// object is queued for deletion, but is not being deleted
 			// by the destruction process, so remove it from the
 			// ToDestroy array and do other necessary stuff.
-			for (size_t i = ToDestroy.Size() - 1; i >= 0; i--)
+			for (auto& obj : OUtil::reverse(ToDestroy))
 			{
-				if (ToDestroy[i] == this)
+				if (obj == this)
 				{
-					ToDestroy[i] = NULL;
+					obj = nullptr;
 					break;
 				}
 			}
@@ -110,7 +105,7 @@ void DObject::Destroy ()
 		{
 			RemoveFromArray ();
 			ObjectFlags |= OF_MassDestruction;
-			ToDestroy.Push (this);
+			ToDestroy.push_back(this);
 		}
 	}
 	else
@@ -123,13 +118,11 @@ void DObject::BeginFrame ()
 
 void DObject::EndFrame ()
 {
-	DObject *obj;
-
-	if (ToDestroy.Size ())
+	if (!ToDestroy.empty())
 	{
 		//Printf (PRINT_HIGH, "Destroyed %d objects\n", ToDestroy.Size());
 
-		while (ToDestroy.Pop (obj))
+		for (DObject* obj : ToDestroy)
 		{
 			if (obj)
 			{
@@ -137,6 +130,8 @@ void DObject::EndFrame ()
 				delete obj;
 			}
 		}
+
+		ToDestroy.clear();
 	}
 }
 
