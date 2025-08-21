@@ -1683,7 +1683,7 @@ BEGIN_COMMAND (snd_soundlinks)
 {
 	for (const auto& sfx : S_sfx)
 		if (sfx.link != static_cast<int>(sfxinfo_t::NO_LINK))
-			Printf(PRINT_HIGH, "%s -> %s\n", sfx.name, S_sfx[sfx.link].name);
+			PrintFmt(PRINT_HIGH, "{} -> {}\n", sfx.name, S_sfx[sfx.link].name);
 }
 END_COMMAND (snd_soundlinks)
 
@@ -1698,11 +1698,11 @@ BEGIN_COMMAND (changemus)
 {
 	if (argc == 1)
 	{
-	    Printf(PRINT_HIGH, "Usage: changemus lumpname [loop]");
-	    Printf(PRINT_HIGH, "\n");
-	    Printf(PRINT_HIGH, "Plays music from an internal lump, loop\n");
-	    Printf(PRINT_HIGH, "parameter determines if the music should play\n");
-	    Printf(PRINT_HIGH, "continuously or not, (1 or 0, default: 1)\n");
+	    PrintFmt(PRINT_HIGH, "Usage: changemus lumpname [loop]");
+	    PrintFmt(PRINT_HIGH, "\n");
+	    PrintFmt(PRINT_HIGH, "Plays music from an internal lump, loop\n");
+	    PrintFmt(PRINT_HIGH, "parameter determines if the music should play\n");
+	    PrintFmt(PRINT_HIGH, "continuously or not, (1 or 0, default: 1)\n");
 
 	    return;
 	}

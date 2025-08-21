@@ -324,8 +324,8 @@ void R_DrawVisSprite (vissprite_t *vis, int x1, int x2)
 #if 0
 	if ((colfrac - vis->xiscale) >> FRACBITS != end)
 	{
-		Printf(PRINT_WARNING, "Bad vissprite bounds check! (pw:%d  ex:%d  act:%d)\n",
-		       patchWidth, end, colfrac >> FRACBITS);
+		PrintFmt(PRINT_WARNING, "Bad vissprite bounds check! (pw:{}  ex:{}  act:{})\n",
+		         patchWidth, end, colfrac >> FRACBITS);
 	}
 #endif
 
