@@ -1240,7 +1240,7 @@ static AActor* RoughBlockCheck(AActor* mo, int index, angle_t fov)
 
 		// [Blair] Don't target teammates
 		if (mo->target->player && link->player &&
-			P_AreTeammates((player_t&)mo->target->player, (player_t&)link->player))
+			P_AreTeammates(*mo->target->player, *link->player))
 		{
 			link = link->snext;
 			continue;
