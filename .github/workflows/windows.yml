@@ -64,6 +64,7 @@ jobs:
         SECRET_KEY: ${{ secrets.DEMOTESTER_IWAD_KEY }}
       working-directory: .\build\demotester
     - name: Run OdaTests
+      id: odatests
       if: steps.get-odatests.outcome == 'success'
       shell: pwsh
       run: |
@@ -71,8 +72,9 @@ jobs:
       env:
         ODAMEX_BIN: ..\demotest\odamex.exe
       working-directory: .\build\demotester
+      continue-on-error: true
     - name: Read OdaTests results
-      if: steps.get-odatests.outcome == 'success'
+      if: steps.odatests.outcome == 'success'
       id: odatests-results
       shell: pwsh
       run: |
@@ -81,7 +83,7 @@ jobs:
         echo "tests_passed=$($csvData[0].passed)" >> $env:GITHUB_OUTPUT
       working-directory: .\build\demotester
     - name: Notify Discord
-      if: env.DISCORD_URL != ''
+      if: env.DISCORD_URL != '' && steps.odatests.outcome == 'success'
       uses: ./.github/actions/odatests-notify
       with:
         demos-run: ${{ steps.odatests-results.outputs.tests_total }}
