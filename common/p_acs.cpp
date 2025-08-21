@@ -75,10 +75,10 @@ struct FBehavior::ArrayInfo
 
 static void DoClearInv(player_t* player)
 {
-	memset(player->weaponowned, 0, sizeof(player->weaponowned));
+	player->weaponowned.fill(0);
 	memset(player->powers, 0, sizeof(player->powers));
 	memset(player->cards, 0, sizeof(player->cards));
-	memset(player->ammo, 0, sizeof(player->ammo));
+	player->ammo.fill(0);
 
 	if (player->backpack)
 	{

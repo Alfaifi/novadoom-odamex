@@ -188,9 +188,9 @@ public:
 	weapontype_t	pendingweapon;
 	weapontype_t	readyweapon;
 
-	bool		weaponowned[NUMWEAPONS+1];
-	int			ammo[NUMAMMO];
-	int			maxammo[NUMAMMO];
+	std::array<bool, NUMWEAPONS+1> weaponowned;
+	std::array<int, NUMAMMO> ammo;
+	std::array<int, NUMAMMO> maxammo;
 
     // True if button down last tic.
 	int			attackdown, usedown;

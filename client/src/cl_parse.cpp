@@ -212,7 +212,7 @@ static void CL_PlayerInfo(const odaproto::svc::PlayerInfo* msg)
 	player_t& p = consoleplayer();
 
 	uint32_t weaponowned = msg->player().weaponowned();
-	UnpackBoolArray(p.weaponowned, NUMWEAPONS, weaponowned);
+	UnpackBoolArray(p.weaponowned.data(), NUMWEAPONS, weaponowned);
 
 	uint32_t cards = msg->player().cards();
 	UnpackBoolArray(p.cards, NUMCARDS, cards);

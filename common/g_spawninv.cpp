@@ -806,8 +806,9 @@ void G_GiveSpawnInventory(player_t& player)
 	player.armorpoints = inv.armorpoints;
 	player.armortype = inv.armortype;
 	player.readyweapon = player.pendingweapon = inv.readyweapon;
-	ArrayCopy(player.weaponowned, inv.weaponowned);
-	ArrayCopy(player.ammo, inv.ammo);
+	for (size_t i = 0; i < inv.weaponowned.size(); i++)
+		player.weaponowned[i] = inv.weaponowned[i];
+	player.ammo = inv.ammo;
 
 	if (inv.berserk)
 	{
@@ -817,7 +818,7 @@ void G_GiveSpawnInventory(player_t& player)
 	if (inv.backpack)
 	{
 		player.backpack = true;
-		for (size_t i = 0; i < ARRAY_LENGTH(player.maxammo); i++)
+		for (size_t i = 0; i < player.maxammo.size(); i++)
 		{
 			player.maxammo[i] *= 2;
 		}
