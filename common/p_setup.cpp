@@ -350,7 +350,6 @@ void P_LoadSectors (int lump)
 
 	// denis - properly construct sectors so that smart pointers they contain don't get screwed
 	sectors = new sector_t[numsectors];
-	memset(sectors, 0, sizeof(sector_t)*numsectors);
 
 	byte* data = (byte*)W_CacheLumpNum(lump, PU_STATIC);
 

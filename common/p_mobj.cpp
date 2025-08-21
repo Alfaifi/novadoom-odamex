@@ -135,10 +135,9 @@ AActor::AActor()
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
+      rndindex(0), netid(0), tid(0), baseline(), baseline_set(false), bmapnode(this)
 {
 	memset(args, 0, sizeof(args));
-	memset(&baseline, 0, sizeof(baseline));
 	self.init(this);
 }
 
@@ -254,7 +253,7 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
       reactiontime(0), threshold(0), player(NULL), lastlook(0), special(0), inext(NULL),
       iprev(NULL), translation(translationref_t()), translucency(0), waterlevel(0),
       gear(0), onground(false), touching_sectorlist(NULL), deadtic(0), oldframe(0),
-      rndindex(0), netid(0), tid(0), baseline_set(false), bmapnode(this)
+      rndindex(0), netid(0), tid(0), baseline(), baseline_set(false), bmapnode(this)
 {
 	// Fly!!! fix it in P_RespawnSpecial
 	if ((unsigned int)itype >= NUMMOBJTYPES)
@@ -327,7 +326,6 @@ AActor::AActor(fixed_t ix, fixed_t iy, fixed_t iz, mobjtype_t itype)
 
 	spawnpoint.type = 0;
 	memset(args, 0, sizeof(args));
-	memset(&baseline, 0, sizeof(baseline));
 }
 
 
