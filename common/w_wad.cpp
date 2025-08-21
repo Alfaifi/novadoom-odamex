@@ -301,11 +301,11 @@ void AddFile(const OResFile& file)
 
 	if ( (handle = fopen(filename.c_str(), "rb")) == NULL)
 	{
-		Printf(PRINT_WARNING, "couldn't open %s\n", filename);
+		PrintFmt(PRINT_WARNING, "couldn't open {}\n", filename);
 		return;
 	}
 
-	Printf(PRINT_HIGH, "adding %s", filename);
+	PrintFmt(PRINT_HIGH, "adding {}", filename);
 
 	size_t newlumps;
 
@@ -313,7 +313,7 @@ void AddFile(const OResFile& file)
 	size_t readlen = fread(&header, sizeof(header), 1, handle);
 	if ( readlen < 1 )
 	{
-		Printf(PRINT_HIGH, "failed to read %s.\n", filename);
+		PrintFmt(PRINT_HIGH, "failed to read {}.\n", filename);
 		fclose(handle);
 		return;
 	}
@@ -331,7 +331,7 @@ void AddFile(const OResFile& file)
 		std::transform(lumpname.c_str(), lumpname.c_str() + 8, fileinfo->name, toupper);
 
 		newlumps = 1;
-		Printf(PRINT_HIGH, " (single lump)\n");
+		PrintFmt(PRINT_HIGH, " (single lump)\n");
 	}
 	else
 	{
@@ -342,7 +342,7 @@ void AddFile(const OResFile& file)
 
 		if (length > (unsigned)M_FileLength(handle))
 		{
-			Printf(PRINT_WARNING, "\nbad number of lumps for %s\n", filename);
+			PrintFmt(PRINT_WARNING, "\nbad number of lumps for {}\n", filename);
 			fclose(handle);
 			return;
 		}
@@ -352,7 +352,7 @@ void AddFile(const OResFile& file)
 		readlen = fread(fileinfo, length, 1, handle);
 		if (readlen < 1)
 		{
-			Printf(PRINT_HIGH, "failed to read file info in %s\n", filename);
+			PrintFmt(PRINT_HIGH, "failed to read file info in {}\n", filename);
 			fclose(handle);
 			return;
 		}
@@ -366,7 +366,7 @@ void AddFile(const OResFile& file)
 		}
 
 		newlumps = header.numlumps;
-		Printf(PRINT_HIGH, " (%d lumps)\n", header.numlumps);
+		PrintFmt(PRINT_HIGH, " ({} lumps)\n", header.numlumps);
 	}
 
 	W_AddLumps(handle, fileinfo, newlumps, false);

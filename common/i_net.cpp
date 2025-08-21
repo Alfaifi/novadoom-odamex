@@ -1172,11 +1172,11 @@ bool NetWaitOrTimeout(size_t ms)
 	#ifdef _WIN32
 		// handle SOCKET_ERROR
 		if(ret == SOCKET_ERROR)
-			Printf(PRINT_HIGH, "select returned SOCKET_ERROR: %d\n", WSAGetLastError());
+			PrintFmt(PRINT_HIGH, "select returned SOCKET_ERROR: {}\n", WSAGetLastError());
 	#else
 		// handle -1
 		if(ret == -1 && ret != EINTR)
-			Printf(PRINT_HIGH, "select returned -1: %s\n", strerror(errno));
+			PrintFmt(PRINT_HIGH, "select returned -1: {}\n", strerror(errno));
 	#endif
 
 	return false;

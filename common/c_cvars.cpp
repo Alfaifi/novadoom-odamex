@@ -355,7 +355,7 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 		{
 			if (array_size <= 0)
 			{
-				Printf(PRINT_WARNING, "Warning: Saved Cvars exceed %lu bytes, no more cvars will be written.\n", array_size);
+				PrintFmt(PRINT_WARNING, "Warning: Saved Cvars exceed {} bytes, no more cvars will be written.\n", array_size);
 				return;
 			}
 
@@ -374,9 +374,9 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 			{
 				if (array_size <= 0)
 				{
-					Printf(PRINT_WARNING, "Saved Cvars exceed %lu bytes, no more "
-					       "cvars will be written.\n",
-					       array_size);
+					PrintFmt(PRINT_WARNING, "Saved Cvars exceed {} bytes, no more "
+					         "cvars will be written.\n",
+					         array_size);
 					return;
 				}
 
@@ -697,7 +697,7 @@ BEGIN_COMMAND (set)
 		{
 			// if new value is different from current value and latched value
 			if (strcmp(var->cstring(), argv[2]) && strcmp(var->latched(), argv[2]) && gamestate == GS_LEVEL)
-				Printf(PRINT_HIGH, "%s will be changed for next game.\n", argv[1]);
+				PrintFmt(PRINT_HIGH, "{} will be changed for next game.\n", argv[1]);
 		}
 
 		var->Set(argv[2]);
@@ -825,7 +825,7 @@ END_COMMAND(fatalout)
 BEGIN_COMMAND(exceptout)
 {
 	std::string crashma = "What's crashma?";
-	Printf("%crashma game, lmao.\n", crashma.at(std::string::npos));
+	fmt::sprintf("%crashma game, lmao.\n", crashma.at(std::string::npos));
 }
 END_COMMAND(exceptout)
 

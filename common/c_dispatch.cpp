@@ -441,7 +441,7 @@ BEGIN_COMMAND (exec)
 		const char* cfgdir = Args.CheckValue("-cfgdir");
 		if (!cfgdir)
 		{
-			Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+			PrintFmt(PRINT_WARNING, "Could not find \"{}\"\n", argv[1]);
 			return;
 		}
 
@@ -451,7 +451,7 @@ BEGIN_COMMAND (exec)
 			found += ".cfg";
 			if (!M_FileExists(found))
 			{
-				Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+				PrintFmt(PRINT_WARNING, "Could not find \"{}\"\n", argv[1]);
 				return;
 			}
 		}
@@ -500,7 +500,7 @@ BEGIN_COMMAND (exec)
 		if(line.substr(0, 5) == "#else")
 		{
 			if(tag_stack.empty())
-				Printf(PRINT_HIGH, "Ignoring stray #else\n");
+				PrintFmt(PRINT_HIGH, "Ignoring stray #else\n");
 			else
 				tag_stack.back() = !tag_stack.back();
 
@@ -511,7 +511,7 @@ BEGIN_COMMAND (exec)
 		if(line.substr(0, 6) == "#endif")
 		{
 			if(tag_stack.empty())
-				Printf(PRINT_HIGH, "Ignoring stray #endif\n");
+				PrintFmt(PRINT_HIGH, "Ignoring stray #endif\n");
 			else
 				tag_stack.pop_back();
 
@@ -543,7 +543,7 @@ BEGIN_COMMAND (if)
 
 	if (!var)
 	{
-		Printf(PRINT_HIGH, "if: no cvar named %s\n", argv[1]);
+		PrintFmt(PRINT_HIGH, "if: no cvar named {}\n", argv[1]);
 		return;
 	}
 
@@ -559,8 +559,8 @@ BEGIN_COMMAND (if)
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "if: no operator %s\n", argv[2]);
-		Printf(PRINT_HIGH, "if: operators are eq, ne\n");
+		PrintFmt(PRINT_HIGH, "if: no operator {}\n", argv[2]);
+		PrintFmt(PRINT_HIGH, "if: operators are eq, ne\n");
 		return;
 	}
 
@@ -760,7 +760,7 @@ void DConsoleAlias::Run(uint32_t key)
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "warning: ignored recursive alias");
+		PrintFmt(PRINT_HIGH, "warning: ignored recursive alias");
 	}
 }
 
@@ -906,13 +906,13 @@ BEGIN_COMMAND (alias)
 			}
 			else
 			{
-				Printf(PRINT_HIGH, "%s: is a command, can not become an alias\n", argv[1]);
+				PrintFmt(PRINT_HIGH, "{}: is a command, can not become an alias\n", argv[1]);
 				return;
 			}
 		}
 		else if(argc == 2)
 		{
-			Printf(PRINT_HIGH, "%s: not an alias\n", argv[1]);
+			PrintFmt(PRINT_HIGH, "{}: not an alias\n", argv[1]);
 			return;
 		}
 
@@ -1006,13 +1006,13 @@ BEGIN_COMMAND(logfile)
 		if ((argc == 1 && ::LOG_FILE == default_logname) ||
 		    (argc > 1 && ::LOG_FILE == argv[1]))
 		{
-			Printf("Log file %s already in use\n", ::LOG_FILE.c_str());
+			PrintFmt("Log file {} already in use\n", ::LOG_FILE.c_str());
 			return;
 		}
 
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		Printf("Log file %s closed on %s\n", ::LOG_FILE, asctime(timeinfo));
+		PrintFmt("Log file {} closed on {}\n", ::LOG_FILE, asctime(timeinfo));
 		::LOG.close();
 	}
 
@@ -1021,7 +1021,7 @@ BEGIN_COMMAND(logfile)
 
 	if (!::LOG.is_open())
 	{
-		Printf(PRINT_HIGH, "Unable to create logfile: %s\n", ::LOG_FILE);
+		PrintFmt(PRINT_HIGH, "Unable to create logfile: {}\n", ::LOG_FILE);
 	}
 	else
 	{
@@ -1029,8 +1029,8 @@ BEGIN_COMMAND(logfile)
 		timeinfo = localtime(&rawtime);
 		::LOG.flush();
 		::LOG << std::endl;
-		Printf(PRINT_HIGH, "Logging in file %s started %s\n", ::LOG_FILE,
-		       asctime(timeinfo));
+		PrintFmt(PRINT_HIGH, "Logging in file {} started {}\n", ::LOG_FILE,
+		         asctime(timeinfo));
 	}
 }
 END_COMMAND(logfile)

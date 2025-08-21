@@ -1210,7 +1210,7 @@ const char* PlayerState(size_t state)
 
 BEGIN_COMMAND(cheat_players)
 {
-	Printf("== PLAYERS ==");
+	PrintFmt("== PLAYERS ==");
 
 	int dead = 0;
 
@@ -1229,20 +1229,20 @@ BEGIN_COMMAND(cheat_players)
 
 			if (mo->player)
 			{
-				Printf("%.3u: %s\n", mo->player->id,
-				       mo->player->userinfo.netname);
+				PrintFmt("{:03d}: {}\n", mo->player->id,
+				         mo->player->userinfo.netname);
 			}
 			else
 			{
-				Printf("???: ???\n");
+				PrintFmt("???: ???\n");
 			}
-			Printf("State: %s\n", PlayerState(mo->state - states));
-			Printf("%f, %f, %f\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
-			       FIXED2FLOAT(mo->z));
+			PrintFmt("State: {}\n", PlayerState(mo->state - states));
+			PrintFmt("{}, {}, {}\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
+			         FIXED2FLOAT(mo->z));
 		}
 	}
 
-	Printf("== Skipped %d dead players ==\n", dead);
+	PrintFmt("== Skipped {} dead players ==\n", dead);
 }
 END_COMMAND(cheat_players)
 

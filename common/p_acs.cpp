@@ -359,7 +359,7 @@ static void DoGiveInv(player_t* player, const char* type, int amount)
 	}
 
 	// Unknown item.
-	Printf(PRINT_HIGH, "I don't know what %s is\n", type);
+	PrintFmt(PRINT_HIGH, "I don't know what {} is\n", type);
 }
 
 static void GiveInventory(AActor* activator, const char* type, int amount)
@@ -2389,14 +2389,14 @@ void DLevelScript::RunScript ()
 			func = level.behavior->GetFunction(funcnum);
 			if (func == NULL)
 			{
-				Printf(PRINT_HIGH, "Function %d in script %d out of range\n", funcnum,
+				PrintFmt(PRINT_HIGH, "Function {} in script {} out of range\n", funcnum,
 				       script);
 				state = SCRIPT_PleaseRemove;
 				break;
 			}
 			if (sp + func->LocalCount + 32 > STACK_SIZE)
 			{ // 32 is the margin for the function's working space
-				Printf(PRINT_HIGH, "Out of stack space in script %d\n", script);
+				PrintFmt(PRINT_HIGH, "Out of stack space in script {}\n", script);
 				state = SCRIPT_PleaseRemove;
 				break;
 			}

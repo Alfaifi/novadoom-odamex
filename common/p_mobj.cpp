@@ -3270,7 +3270,7 @@ BEGIN_COMMAND(cheat_mobjs)
 {
 	if (argc < 2)
 	{
-		Printf("Missing MT_* mobj type\n");
+		PrintFmt("Missing MT_* mobj type\n");
 		return;
 	}
 
@@ -3288,11 +3288,11 @@ BEGIN_COMMAND(cheat_mobjs)
 
 	if (mobj_index < 0)
 	{
-		Printf("Unknown MT_* mobj type\n");
+		PrintFmt("Unknown MT_* mobj type\n");
 		return;
 	}
 
-	Printf("== %s ==", mobj_type);
+	PrintFmt("== {} ==", mobj_type);
 
 	AActor* mo;
 	TThinkerIterator<AActor> iterator;
@@ -3300,9 +3300,9 @@ BEGIN_COMMAND(cheat_mobjs)
 	{
 		if (mo->type == mobj_index)
 		{
-			Printf("ID: %d\n", mo->netid);
-			Printf("  %.1f, %.1f, %.1f\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
-			       FIXED2FLOAT(mo->z));
+			PrintFmt("ID: {}\n", mo->netid);
+			PrintFmt("  {:.1f}, {:.1f}, {:.1f}\n", FIXED2FLOAT(mo->x), FIXED2FLOAT(mo->y),
+			         FIXED2FLOAT(mo->z));
 		}
 	}
 }
