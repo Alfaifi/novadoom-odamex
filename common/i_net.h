@@ -590,10 +590,11 @@ public:
 
                 readpos += offset;
             }
+			break;
 
             case BT_SEND:
             {
-                if ((int)(readpos-offset) < 0)
+                if (offset > readpos)
                 {
                     // lies, an underflow occured
                     overflowed = true;
@@ -602,6 +603,7 @@ public:
 
                 readpos -= offset;
             }
+			break;
         }
 
         return readpos;
