@@ -529,10 +529,10 @@ void G_SetupSpawnInventory()
 			}
 			else
 			{
-				Printf(PRINT_WARNING,
-				       "g_spawninv: Unknown parameter \"%s\", falling back to default "
-				       "inventory.\n",
-				       token);
+				PrintFmt(PRINT_WARNING,
+				         "g_spawninv: Unknown parameter \"{}\", falling back to default "
+				         "inventory.\n",
+				         token);
 				::gSpawnInv = ::gDefaultInv;
 				return;
 			}
@@ -550,101 +550,100 @@ CVAR_FUNC_IMPL(g_spawninv)
 
 static void SpawninvHelp()
 {
-	Printf("Commands:\n");
-	Printf("  info\n");
-	Printf("    Show the current spawn inventory settings.\n");
-	Printf("  default\n");
-	Printf("    Reset to default settings.\n");
-	Printf("Inventory Commands:");
-	Printf("  health <HEALTH>\n");
-	Printf("  armor1 <POINTS>\n");
-	Printf("  armor2 <POINTS>\n");
-	Printf("  rweapon <WEAPON>\n");
-	Printf("  weapons <WEAPS>\n");
-	Printf("  bullets <BULLETS>\n");
-	Printf("  shells <SHELLS>\n");
-	Printf("  rockets <ROCKETS>\n");
-	Printf("  cells <CELLS>\n");
-	Printf("  berserk <Y/N>\n");
-	Printf("  backpack <Y/N>\n");
-	Printf("  invul <DURATION>\n");
-	Printf("    Inventory commands show an explanation of their parameter if you omit "
-	       "it.\n");
+	PrintFmt("Commands:\n");
+	PrintFmt("  info\n");
+	PrintFmt("    Show the current spawn inventory settings.\n");
+	PrintFmt("  default\n");
+	PrintFmt("    Reset to default settings.\n");
+	PrintFmt("Inventory Commands:");
+	PrintFmt("  health <HEALTH>\n");
+	PrintFmt("  armor1 <POINTS>\n");
+	PrintFmt("  armor2 <POINTS>\n");
+	PrintFmt("  rweapon <WEAPON>\n");
+	PrintFmt("  weapons <WEAPS>\n");
+	PrintFmt("  bullets <BULLETS>\n");
+	PrintFmt("  shells <SHELLS>\n");
+	PrintFmt("  rockets <ROCKETS>\n");
+	PrintFmt("  cells <CELLS>\n");
+	PrintFmt("  berserk <Y/N>\n");
+	PrintFmt("  backpack <Y/N>\n");
+	PrintFmt("  invul <DURATION>\n");
+	PrintFmt("    Inventory commands show an explanation of their parameter if you omit "
+	         "it.\n");
 }
 
 static void SpawninvCommandHelp(const char* cmd)
 {
 	if (!stricmp(cmd, "health"))
 	{
-		Printf("health <HEALTH>\n");
-		Printf("  Set initial health to HEALTH.\n");
+		PrintFmt("health <HEALTH>\n");
+		PrintFmt("  Set initial health to HEALTH.\n");
 	}
 	else if (!stricmp(cmd, "armor1"))
 	{
-		Printf("armor1 <POINTS>\n");
-		Printf("  Set initial armor to POINTS points of green armor.\n");
+		PrintFmt("armor1 <POINTS>\n");
+		PrintFmt("  Set initial armor to POINTS points of green armor.\n");
 	}
 	else if (!stricmp(cmd, "armor2"))
 	{
-		Printf("armor2 <POINTS>\n");
-		Printf("  Set initial armor to POINTS points of blue armor.\n");
+		PrintFmt("armor2 <POINTS>\n");
+		PrintFmt("  Set initial armor to POINTS points of blue armor.\n");
 	}
 	else if (!stricmp(cmd, "rweapon"))
 	{
-		Printf("rweapon <WEAPON>\n");
-		Printf("  Set starting weapon to WEAPON.\n");
-		Printf("  Valid values are 1-7, A(Saw), and C(SSG).\n");
+		PrintFmt("rweapon <WEAPON>\n");
+		PrintFmt("  Set starting weapon to WEAPON.\n");
+		PrintFmt("  Valid values are 1-7, A(Saw), and C(SSG).\n");
 	}
 	else if (!stricmp(cmd, "weapons"))
 	{
-		Printf("weapons <WEAPS>\n");
-		Printf("  Set starting inventory of weapons to contain WEAPS.\n");
-		Printf("  Valid values are 1-7, A(Saw), and C(SSG).\n");
-		Printf(
-		    "  Multiple weapons are passed as a single block of letters and numbers.\n");
-		Printf("  (example: \"1A23\" gives you fist, saw, pistol, shotgun)\n");
+		PrintFmt("weapons <WEAPS>\n");
+		PrintFmt("  Set starting inventory of weapons to contain WEAPS.\n");
+		PrintFmt("  Valid values are 1-7, A(Saw), and C(SSG).\n");
+		PrintFmt("  Multiple weapons are passed as a single block of letters and numbers.\n");
+		PrintFmt("  (example: \"1A23\" gives you fist, saw, pistol, shotgun)\n");
 	}
 	else if (!stricmp(cmd, "bullets"))
 	{
-		Printf("bullets <BULLETS>\n");
-		Printf("  Set initial bullet count to BULLETS.\n");
+		PrintFmt("bullets <BULLETS>\n");
+		PrintFmt("  Set initial bullet count to BULLETS.\n");
 	}
 	else if (!stricmp(cmd, "shells"))
 	{
-		Printf("shells <SHELLS>\n");
-		Printf("  Set initial shell count to SHELLS.\n");
+		PrintFmt("shells <SHELLS>\n");
+		PrintFmt("  Set initial shell count to SHELLS.\n");
 	}
 	else if (!stricmp(cmd, "rockets"))
 	{
-		Printf("rockets <ROCKETS>\n");
-		Printf("  Set initial rocket count to ROCKETS.\n");
+		PrintFmt("rockets <ROCKETS>\n");
+		PrintFmt("  Set initial rocket count to ROCKETS.\n");
 	}
 	else if (!stricmp(cmd, "cells"))
 	{
-		Printf("cells <CELLS>\n");
-		Printf("  Set initial cell count to CELLS.\n");
+		PrintFmt("cells <CELLS>\n");
+		PrintFmt("  Set initial cell count to CELLS.\n");
 	}
 	else if (!stricmp(cmd, "berserk"))
 	{
-		Printf("berserk <Y/N>\n");
-		Printf("  Give or take away berserk.\n");
+		PrintFmt("berserk <Y/N>\n");
+		PrintFmt("  Give or take away berserk.\n");
 	}
 	else if (!stricmp(cmd, "backpack"))
 	{
-		Printf("backpack <Y/N>\n");
-		Printf("  Give or take away backpack.\n");
-		Printf("  Having a backpack doubles your max ammo and gives you a backpack "
-		       "inventory item.\n");
-		Printf("  It does not double \"spawninv\" ammo counts.\n");
+		PrintFmt("backpack <Y/N>\n");
+		PrintFmt("  Give or take away backpack.\n");
+		PrintFmt("  Having a backpack doubles your max ammo and gives you a backpack "
+		         "inventory item.\n");
+		PrintFmt("  It does not double \"spawninv\" ammo counts.\n");
 	}
 	else if (!stricmp(cmd, "invul"))
 	{
-		Printf("invul <DURATION>\n");
-		Printf("  Give DURATION seconds worth of invulnerability.\n");
+		PrintFmt("invul <DURATION>\n");
+		PrintFmt("  Give DURATION seconds worth of invulnerability.\n");
 	}
 	else
 	{
-		Printf(PRINT_WARNING, "spawninv: Unknown subcommand \"%s\".", cmd);
+		PrintFmt(PRINT_WARNING, "spawninv: Unknown subcommand \"{}\".", cmd);
 	}
 }
 
@@ -700,7 +699,7 @@ static void SpawninvCommand(const std::string& cmd, const std::string& param)
 	}
 	else
 	{
-		Printf(PRINT_WARNING, "spawninv: Unknown subcommand \"%s\".", param);
+		PrintFmt(PRINT_WARNING, "spawninv: Unknown subcommand \"{}\".", param);
 		return;
 	}
 
