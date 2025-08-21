@@ -493,7 +493,6 @@ public:
 
 public:
 	shaderef_t();
-	shaderef_t(const shaderef_t &other);
 	shaderef_t(const shademap_t * const colors, const int mapnum);
 
 	// Determines if m_colors is NULL

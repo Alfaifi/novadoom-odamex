@@ -110,12 +110,6 @@ shaderef_t::shaderef_t() :
 {
 }
 
-shaderef_t::shaderef_t(const shaderef_t &other) :
-	m_colors(other.m_colors), m_mapnum(other.m_mapnum),
-	m_colormap(other.m_colormap), m_shademap(other.m_shademap), m_dyncolormap(other.m_dyncolormap)
-{
-}
-
 shaderef_t::shaderef_t(const shademap_t* const colors, const int mapnum) :
 	m_colors(colors), m_mapnum(mapnum)
 {
