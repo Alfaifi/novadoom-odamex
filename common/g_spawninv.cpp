@@ -40,34 +40,16 @@ extern const char* weaponnames[];
  */
 struct spawnInventory_t
 {
-	bool isdefault;
-	int health;
-	int armorpoints;
-	int armortype;
-	weapontype_t readyweapon;
-	bool weaponowned[NUMWEAPONS];
-	int ammo[NUMAMMO];
-	bool berserk;
-	bool backpack;
-	int invul;
-
-	spawnInventory_t()
-	    : isdefault(false), health(100), armorpoints(0), armortype(0),
-	      readyweapon(NUMWEAPONS), berserk(false), backpack(false), invul(0)
-	{
-		ArrayInit(weaponowned, false);
-		ArrayInit(ammo, 0);
-	}
-
-	spawnInventory_t(const spawnInventory_t& other)
-	    : isdefault(other.isdefault), health(other.health),
-	      armorpoints(other.armorpoints), armortype(other.armortype),
-	      readyweapon(other.readyweapon), berserk(other.berserk),
-	      backpack(other.backpack), invul(other.invul)
-	{
-		ArrayCopy(weaponowned, other.weaponowned);
-		ArrayCopy(ammo, other.ammo);
-	}
+	bool isdefault = false;
+	int health = 100;
+	int armorpoints = 0;
+	int armortype = 0;
+	weapontype_t readyweapon = NUMWEAPONS;
+	std::array<bool, NUMWEAPONS> weaponowned = { false };
+	std::array<int, NUMAMMO> ammo = { 0 };
+	bool berserk = false;
+	bool backpack = false;
+	int invul = 0;
 };
 
 // Berserk time that prevents showing any red.  If you want to show a teensy
@@ -170,8 +152,8 @@ static std::string InvReadyWeaponStr(const spawnInventory_t& inv)
 static std::string InvWeaponsStr(const spawnInventory_t& inv)
 {
 	std::string rvo;
-	rvo.reserve(ARRAY_LENGTH(inv.weaponowned));
-	for (size_t i = 0; i < ARRAY_LENGTH(inv.weaponowned); i++)
+	rvo.reserve(inv.weaponowned.size());
+	for (size_t i = 0; i < inv.weaponowned.size(); i++)
 	{
 		if (!inv.weaponowned[i])
 			continue;
@@ -753,7 +735,7 @@ BEGIN_COMMAND(spawninv)
 			Printf("Ready Weapon: %s\n", ::weaponnames[::gSpawnInv.readyweapon]);
 
 		StringTokens weapons;
-		for (size_t i = 0; i < ARRAY_LENGTH(::gSpawnInv.weaponowned); i++)
+		for (size_t i = 0; i < ::gSpawnInv.weaponowned.size(); i++)
 		{
 			if (::gSpawnInv.weaponowned[i])
 				weapons.push_back(::weaponnames[i]);
