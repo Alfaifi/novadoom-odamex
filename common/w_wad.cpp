@@ -216,11 +216,11 @@ OMD5Hash W_MD5(const std::string& filename)
  *
  * @param lumpdata byte array pointer to the lump (or lumps) that needs to be fingerprinted.
  * @param size of the byte array pointer in bytes.
- * @return fhfprint_s - struct containing 16-byte array of fingerprint.
+ * @return fhfprint_t - struct containing 16-byte array of fingerprint.
  */
-fhfprint_s W_FarmHash128(const byte* lumpdata, int length)
+fhfprint_t W_FarmHash128(const byte* lumpdata, int length)
 {
-	fhfprint_s fhfngprnt;
+	fhfprint_t fhfngprnt;
 
 	if (!lumpdata)
 		return fhfngprnt;

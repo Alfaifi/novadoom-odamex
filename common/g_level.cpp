@@ -812,7 +812,7 @@ void G_InitLevelLocals()
 	::level.flags = info.flags;
 	::level.flags2 = info.flags2;
 	::level.levelnum = info.levelnum;
-	ArrayCopy(::level.level_fingerprint, info.level_fingerprint);
+	::level.level_fingerprint = info.level_fingerprint;
 
 	// Only copy the level name if there's a valid level name to be copied.
 

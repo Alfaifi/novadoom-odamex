@@ -1043,30 +1043,9 @@ void P_LoadLineDefs (const int lump)
 	// E2M7 has flags masked in that interfere with MBF21 flags.
 	// Boom fixes this with the comp flag comp_reservedlineflag
 	// We'll fix this for now by just checking for the E2M7 FarmHash
-	const std::string e2m7hash = "43ffa244f5ae923b7df59dbf511c0468";
+	static constexpr std::string_view e2m7hash = "43ffa244f5ae923b7df59dbf511c0468";
 
-	// [Blair] Serialize the hashes before reading.
-	uint64_t reconsthash1 = (uint64_t)(::level.level_fingerprint[0]) |
-	                        (uint64_t)(::level.level_fingerprint[1]) << 8 |
-	                        (uint64_t)(::level.level_fingerprint[2]) << 16 |
-	                        (uint64_t)(::level.level_fingerprint[3]) << 24 |
-	                        (uint64_t)(::level.level_fingerprint[4]) << 32 |
-	                        (uint64_t)(::level.level_fingerprint[5]) << 40 |
-	                        (uint64_t)(::level.level_fingerprint[6]) << 48 |
-	                        (uint64_t)(::level.level_fingerprint[7]) << 56;
-
-	uint64_t reconsthash2 = (uint64_t)(::level.level_fingerprint[8]) |
-	                        (uint64_t)(::level.level_fingerprint[9]) << 8 |
-	                        (uint64_t)(::level.level_fingerprint[10]) << 16 |
-	                        (uint64_t)(::level.level_fingerprint[11]) << 24 |
-	                        (uint64_t)(::level.level_fingerprint[12]) << 32 |
-	                        (uint64_t)(::level.level_fingerprint[13]) << 40 |
-	                        (uint64_t)(::level.level_fingerprint[14]) << 48 |
-	                        (uint64_t)(::level.level_fingerprint[15]) << 56;
-
-	std:: string levelHash = fmt::sprintf("%16llx%16llx", reconsthash1, reconsthash2);
-
-	bool isE2M7 = (levelHash == e2m7hash);
+	bool isE2M7 = (::level.level_fingerprint == e2m7hash);
 
 	ld = lines;
 	for (i=0 ; i<numlines ; i++, ld++)
@@ -1716,9 +1695,9 @@ void P_GenerateUniqueMapFingerPrint(int maplumpnum)
 			 W_LumpLength(maplumpnum + ML_SEGS) + W_LumpLength(maplumpnum + ML_SSECTORS) +
 			 W_LumpLength(maplumpnum + ML_SECTORS);
 
-	fhfprint_s fingerprint = W_FarmHash128(levellumps.data(), length);
+	fhfprint_t fingerprint = W_FarmHash128(levellumps.data(), length);
 
-	ArrayCopy(::level.level_fingerprint, fingerprint.fingerprint);
+	::level.level_fingerprint = fingerprint;
 }
 //
 // P_GroupLines

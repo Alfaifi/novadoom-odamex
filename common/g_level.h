@@ -101,7 +101,7 @@ struct level_info_t
 	int           mapnum     = 0;
 	int           episodenum = 0;
 	std::string   level_name = "";
-	byte          level_fingerprint[16] = { 0 };
+	fhfprint_t    level_fingerprint{};
 	OLumpName     pname      = "";
 	OLumpName     nextmap    = "";
 	OLumpName     secretmap  = "";
@@ -121,18 +121,38 @@ struct level_info_t
 };
 
 // struct that contains a FarmHash 128-bit fingerprint.
-struct fhfprint_s
+struct fhfprint_t
 {
-	byte fingerprint[16];
+	std::array<byte, 16> fingerprint = { 0 };
 
-	fhfprint_s() : fingerprint()
-	{
-		ArrayInit(fingerprint, 0);
-	}
 	[[nodiscard]]
-	bool operator==(const fhfprint_s& other)
+	bool operator==(const fhfprint_t& other)
 	{
 		return fingerprint == other.fingerprint;
+	}
+
+	bool operator==(std::string_view other)
+	{
+		// [Blair] Serialize the hashes before reading.
+		const uint64_t reconsthash1 = (uint64_t)(fingerprint[0]) |
+		                              (uint64_t)(fingerprint[1]) << 8 |
+		                              (uint64_t)(fingerprint[2]) << 16 |
+		                              (uint64_t)(fingerprint[3]) << 24 |
+		                              (uint64_t)(fingerprint[4]) << 32 |
+		                              (uint64_t)(fingerprint[5]) << 40 |
+		                              (uint64_t)(fingerprint[6]) << 48 |
+		                              (uint64_t)(fingerprint[7]) << 56;
+
+		const uint64_t reconsthash2 = (uint64_t)(fingerprint[8]) |
+		                              (uint64_t)(fingerprint[9]) << 8 |
+		                              (uint64_t)(fingerprint[10]) << 16 |
+		                              (uint64_t)(fingerprint[11]) << 24 |
+		                              (uint64_t)(fingerprint[12]) << 32 |
+		                              (uint64_t)(fingerprint[13]) << 40 |
+		                              (uint64_t)(fingerprint[14]) << 48 |
+		                              (uint64_t)(fingerprint[15]) << 56;
+
+		return other == fmt::format("{:016x}{:016x}", reconsthash1, reconsthash2);
 	}
 };
 
@@ -144,7 +164,7 @@ struct level_pwad_info_t
 	int				mapnum;
 	int				episodenum;
 	std::string		level_name;
-	byte			level_fingerprint[16] = { 0 };
+	fhfprint_t		level_fingerprint;
 	OLumpName		pname;
 	OLumpName		nextmap;
 	OLumpName		secretmap;
@@ -198,7 +218,7 @@ struct level_pwad_info_t
 	std::string		author;
 
 	level_pwad_info_t()
-	    : mapname(""), levelnum(0), mapnum(0), episodenum(0), level_name(""), pname(""), nextmap(""), secretmap(""),
+	    : mapname(""), levelnum(0), mapnum(0), episodenum(0), level_name(""), level_fingerprint(), pname(""), nextmap(""), secretmap(""),
 	      partime(0), skypic(""), music(""), flags(0), flags2(0), cluster(0), snapshot(NULL),
 	      defered(NULL), fadetable("COLORMAP"), skypic2(""), gravity(0.0f),
 	      aircontrol(0.0f), airsupply(10),
@@ -208,14 +228,13 @@ struct level_pwad_info_t
 	      clearlabel(false), author()
 	{
 		ArrayInit(fadeto_color, 0);
-		ArrayInit(level_fingerprint, 0);
 		ArrayInit(outsidefog_color, 0);
 		outsidefog_color[0] = 0xFF; // special token signaling to not handle it specially
 	}
 
 	level_pwad_info_t(const level_info_t& other)
 	    : mapname(other.mapname), levelnum(other.levelnum), mapnum(other.mapnum), episodenum(other.episodenum),
-	      level_name(other.level_name), pname(other.pname), nextmap(other.nextmap),
+	      level_name(other.level_name), level_fingerprint(other.level_fingerprint), pname(other.pname), nextmap(other.nextmap),
 	      secretmap(other.secretmap), partime(other.partime), skypic(other.skypic),
 	      music(other.music), flags(other.flags), flags2(other.flags2), cluster(other.cluster),
 	      snapshot(other.snapshot), defered(other.defered), fadetable("COLORMAP"),
@@ -227,7 +246,6 @@ struct level_pwad_info_t
 	{
 		ArrayInit(fadeto_color, 0);
 		ArrayInit(outsidefog_color, 0);
-		ArrayInit(level_fingerprint, 0);
 		outsidefog_color[0] = 0xFF; // special token signaling to not handle it specially
 	}
 
@@ -252,7 +270,7 @@ struct level_pwad_info_t
 		defered = other.defered;
 		ArrayCopy(fadeto_color, other.fadeto_color);
 		ArrayCopy(outsidefog_color, other.outsidefog_color);
-		ArrayCopy(level_fingerprint, other.level_fingerprint);
+		level_fingerprint = other.level_fingerprint;
 		fadetable = other.fadetable;
 		skypic2 = other.skypic2;
 		gravity = other.gravity;
@@ -300,7 +318,7 @@ struct level_locals_t
 	int				cluster;
 	int				levelnum;
 	char			level_name[64];			// the descriptive name (Outer Base, etc)
-	byte			level_fingerprint[16];	// [Blair] 128-bit FarmHash fingerprint generated for the level to describe it uniquely
+	fhfprint_t		level_fingerprint;	    // [Blair] 128-bit FarmHash fingerprint generated for the level to describe it uniquely
 											// so it can besingled out if it's out of its host wad, like in a compilation wad. Contains a 16-byte array.
 	OLumpName		mapname;                // the server name (base1, etc)
 	OLumpName		nextmap;				// go here when sv_fraglimit is hit
