@@ -312,15 +312,11 @@ public:
 
 		huffman_server	compressor;	// denis - adaptive huffman compression
 
-		class download_t
+		struct download_t
 		{
-		public:
-			std::string name;
-			std::string md5;
-			unsigned int next_offset;
-
-			download_t() : name(""), md5(""), next_offset(0) {}
-			download_t(const download_t& other) : name(other.name), md5(other.md5), next_offset(other.next_offset) {}
+			std::string name = "";
+			std::string md5  = "";
+			unsigned int next_offset = 0;
 		} download;
 
 		client_t()
