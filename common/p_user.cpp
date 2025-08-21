@@ -1452,6 +1452,9 @@ player_s::player_s() :
 
 player_s &player_s::operator =(const player_s &other)
 {
+	if (this == &other)
+		return *this;
+
 	id = other.id;
 	playerstate = other.playerstate;
 	mo = other.mo;
