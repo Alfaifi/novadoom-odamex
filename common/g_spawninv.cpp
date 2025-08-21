@@ -45,8 +45,8 @@ struct spawnInventory_t
 	int armorpoints = 0;
 	int armortype = 0;
 	weapontype_t readyweapon = NUMWEAPONS;
-	std::array<bool, NUMWEAPONS> weaponowned = { false };
-	std::array<int, NUMAMMO> ammo = { 0 };
+	std::array<bool, NUMWEAPONS> weaponowned{};
+	std::array<int, NUMAMMO> ammo{};
 	bool berserk = false;
 	bool backpack = false;
 	int invul = 0;

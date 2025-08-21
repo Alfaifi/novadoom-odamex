@@ -94,36 +94,10 @@ struct acsdefered_s;
 class FBehavior;
 struct bossaction_t;
 
-struct level_info_t
-{
-	OLumpName     mapname    = "";
-	int           levelnum   = 0;
-	int           mapnum     = 0;
-	int           episodenum = 0;
-	std::string   level_name = "";
-	fhfprint_t    level_fingerprint{};
-	OLumpName     pname      = "";
-	OLumpName     nextmap    = "";
-	OLumpName     secretmap  = "";
-	int           partime    = 0;
-	OLumpName     skypic     = "";
-	OLumpName     music      = "";
-	levelFlags_t  flags      = 0;
-	levelFlags_t  flags2     = 0;
-	int           cluster    = 0;
-	FLZOMemFile*  snapshot   = nullptr;
-	acsdefered_s* defered    = nullptr;
-
-	bool exists() const
-	{
-		return !this->mapname.empty();
-	}
-};
-
 // struct that contains a FarmHash 128-bit fingerprint.
 struct fhfprint_t
 {
-	std::array<byte, 16> fingerprint = { 0 };
+	std::array<byte, 16> fingerprint{};
 
 	[[nodiscard]]
 	bool operator==(const fhfprint_t& other)
@@ -153,6 +127,32 @@ struct fhfprint_t
 		                              (uint64_t)(fingerprint[15]) << 56;
 
 		return other == fmt::format("{:016x}{:016x}", reconsthash1, reconsthash2);
+	}
+};
+
+struct level_info_t
+{
+	OLumpName     mapname    = "";
+	int           levelnum   = 0;
+	int           mapnum     = 0;
+	int           episodenum = 0;
+	std::string   level_name = "";
+	fhfprint_t    level_fingerprint{};
+	OLumpName     pname      = "";
+	OLumpName     nextmap    = "";
+	OLumpName     secretmap  = "";
+	int           partime    = 0;
+	OLumpName     skypic     = "";
+	OLumpName     music      = "";
+	levelFlags_t  flags      = 0;
+	levelFlags_t  flags2     = 0;
+	int           cluster    = 0;
+	FLZOMemFile*  snapshot   = nullptr;
+	acsdefered_s* defered    = nullptr;
+
+	bool exists() const
+	{
+		return !this->mapname.empty();
 	}
 };
 
