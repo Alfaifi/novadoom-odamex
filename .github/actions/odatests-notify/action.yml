@@ -37,25 +37,33 @@ runs:
           echo "previous-passes=$($jsonContent.demos_passed)" >> $env:GITHUB_OUTPUT
           if (-not $jsonContent.commit) {
             echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
+            echo "previous-commit-descendant=missing" >> $env:GITHUB_OUTPUT
           } else {
             Set-Location odatests-results
-            try {
-              git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
-              if ($LASTEXITCODE -eq 0) {
-                echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
-              } else {
-                echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
-              }
-            } catch {
+            git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
+            if ($LASTEXITCODE -eq 0) {
+              echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
+            } elseif ($LASTEXITCODE -eq 1) {
               echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
-            } finally {
-              Set-Location ..
+            } else {
+              echo "previous-commit-ancestor=error" >> $env:GITHUB_OUTPUT
             }
+            git merge-base --is-ancestor ${{ github.sha }} $jsonContent.commit
+            if ($LASTEXITCODE -eq 0) {
+              echo "previous-commit-descendant=true" >> $env:GITHUB_OUTPUT
+            } elseif ($LASTEXITCODE -eq 1) {
+              echo "previous-commit-descendant=false" >> $env:GITHUB_OUTPUT
+            } else {
+              echo "previous-commit-descendant=error" >> $env:GITHUB_OUTPUT
+            }
+            $global:LASTEXITCODE = 0
+            Set-Location ..
           }
         } else {
           echo "previous-total=0" >> $env:GITHUB_OUTPUT
           echo "previous-passes=0" >> $env:GITHUB_OUTPUT
           echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
+          echo "previous-commit-descendant=missing" >> $env:GITHUB_OUTPUT
         }
 
     - name: Determine embed color
@@ -106,7 +114,7 @@ runs:
           🔁 [Workflow Run](<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}>)
 
     - name: Write current run values
-      if: steps.previous.outputs.previous-commit-ancestor != 'false'
+      if: steps.previous.outputs.previous-commit-descendant != 'true'
       shell: pwsh
       run: |
         $branchName = "${{ github.ref_name }}" -replace '/', '_'
