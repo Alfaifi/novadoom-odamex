@@ -19,6 +19,8 @@ runs:
       with:
         ref: odatests-results
         path: ./odatests-results
+        submodules: false
+        fetch-depth: 0
     - name: Load previous run values
       id: previous
       shell: pwsh
@@ -35,12 +37,14 @@ runs:
           if (-not $jsonContent.commit) {
             echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
           } else {
-            git merge-base --is-ancestor $commit ${{ github.sha }}
+            Set-Location odatests-results
+            git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
             if ($LASTEXITCODE -eq 0) {
               echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
             } else {
               echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
             }
+            Set-Location ..
           }
         } else {
           echo "previous-total=0" >> $env:GITHUB_OUTPUT
