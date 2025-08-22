@@ -39,18 +39,14 @@ runs:
             echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
           } else {
             Set-Location odatests-results
-            try {
-              git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
-              if ($LASTEXITCODE -eq 0) {
-                echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
-              } else {
-                echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
-              }
-            } catch {
+            git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
+            if ($LASTEXITCODE -eq 0) {
+              echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
+            } else {
               echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
-            } finally {
-              Set-Location ..
             }
+            $global:LASTEXITCODE = 0
+            Set-Location ..
           }
         } else {
           echo "previous-total=0" >> $env:GITHUB_OUTPUT
