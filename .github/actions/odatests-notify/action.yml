@@ -35,7 +35,7 @@ runs:
           if (-not $jsonContent.commit) {
             echo "previous-commit-ancestor=missing" >> $env:GITHUB_OUTPUT
           } else {
-            git merge-base --is-ancestor $commit ${{ github.sha }}
+            git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
             if ($LASTEXITCODE -eq 0) {
               echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
             } else {
