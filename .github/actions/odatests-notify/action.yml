@@ -25,6 +25,7 @@ runs:
       id: previous
       shell: pwsh
       run: |
+        Set-PSDebug -Trace 1
         $branchName = "${{ github.ref_name }}" -replace '/', '_'
         $jsonPath = "odatests-results\$branchName.json"
         if (-not (Test-Path $jsonPath)) {
