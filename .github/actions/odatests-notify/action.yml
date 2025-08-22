@@ -43,7 +43,7 @@ runs:
             git merge-base --is-ancestor $jsonContent.commit ${{ github.sha }}
             if ($LASTEXITCODE -eq 0) {
               echo "previous-commit-ancestor=true" >> $env:GITHUB_OUTPUT
-            } else if ($LASTEXITCODE -eq 1) {
+            } elseif ($LASTEXITCODE -eq 1) {
               echo "previous-commit-ancestor=false" >> $env:GITHUB_OUTPUT
             } else {
               echo "previous-commit-ancestor=error" >> $env:GITHUB_OUTPUT
@@ -51,7 +51,7 @@ runs:
             git merge-base --is-ancestor ${{ github.sha }} $jsonContent.commit
             if ($LASTEXITCODE -eq 0) {
               echo "previous-commit-descendant=true" >> $env:GITHUB_OUTPUT
-            } else if ($LASTEXITCODE -eq 1) {
+            } elseif ($LASTEXITCODE -eq 1) {
               echo "previous-commit-descendant=false" >> $env:GITHUB_OUTPUT
             } else {
               echo "previous-commit-descendant=error" >> $env:GITHUB_OUTPUT
