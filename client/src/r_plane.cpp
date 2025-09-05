@@ -311,6 +311,7 @@ visplane_t *R_FindPlane (const plane_t &secplane, int picnum, int lightlevel,
 	if (R_IsSkyFlat(picnum) || picnum & PL_SKYFLAT)  // killough 10/98
 	{
 			lightlevel = 0;		// most skies map together
+			isskybox = (picnum == skyflatnum) && (skybox != NULL) && !r_InSkyBox;
 	}
 	else
 	{
