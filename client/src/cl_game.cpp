@@ -5,7 +5,7 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -55,6 +55,7 @@
 #include "gstrings.h"
 #include "r_sky.h"
 #include "r_draw.h"
+#include "r_interp.h"
 #include "g_game.h"
 #include "cl_main.h"
 #include "cl_demo.h"
@@ -75,7 +76,7 @@
 
 #define TURN180_TICKS	9				// [RH] # of ticks to complete a turn180
 
-BOOL	G_CheckDemoStatus (void);
+bool	G_CheckDemoStatus (void);
 void	G_ReadDemoTiccmd ();
 void	G_WriteDemoTiccmd ();
 void	G_PlayerReborn (player_t &player);
@@ -90,6 +91,9 @@ bool	C_DoNetDemoKey(event_t *ev);
 bool	C_DoSpectatorKey(event_t *ev);
 
 void	CL_QuitCommand();
+
+fixed_t P_TickWeaponBobX();
+fixed_t P_TickWeaponBobY();
 
 EXTERN_CVAR (sv_skill)
 EXTERN_CVAR (novert)
@@ -107,29 +111,32 @@ EXTERN_CVAR (chasedemo)
 gameaction_t	gameaction;
 gamestate_t 	gamestate = GS_STARTUP;
 
-BOOL 			paused;
-BOOL 			sendpause;				// send a pause event next tic
-BOOL			sendsave;				// send a save event next tic
-BOOL 			usergame;				// ok to save / end game
-BOOL			sendcenterview;			// send a center view event next tic
+bool 			paused;
+bool 			sendpause;				// send a pause event next tic
+bool			sendsave;				// send a save event next tic
+bool 			usergame;				// ok to save / end game
+bool			sendcenterview;			// send a center view event next tic
 
 bool			timingdemo; 			// if true, exit with report on completion
 bool			longtics;				// don't quantize yaw for classic vanilla demos
 bool 			nodrawers;				// for comparative timing purposes
 bool 			noblit; 				// for comparative timing purposes
 
-BOOL	 		viewactive;
+bool	 		viewactive;
 
 // Describes if a network game is being played
-BOOL			network_game;
+bool			network_game;
 // Describes if this is a multiplayer game or not
-BOOL			multiplayer;
+bool			multiplayer;
 // The player vector, contains all player information
 Players			players;
 
 byte			consoleplayer_id;			// player taking events and displaying
 byte			displayplayer_id;			// view being displayed
 int 			gametic;
+
+extern fixed_t bobx;
+extern fixed_t boby;
 
 enum demoversion_t
 {
@@ -150,6 +157,7 @@ EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_fastmonsters)
 EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(sv_allowjump)
+EXTERN_CVAR(sv_showplayerpowerups)
 EXTERN_CVAR(co_zdoomphys)
 EXTERN_CVAR(co_fixweaponimpacts)
 EXTERN_CVAR(co_blockmapfix)
@@ -190,18 +198,18 @@ CVAR_FUNC_IMPL(cl_mouselook)
 }
 
 char			demoname[256];
-BOOL 			demoplayback;
+bool 			demoplayback;
 
 extern bool		simulated_connection;
 
 int				iffdemover;
 byte*			demobuffer;
 byte			*demo_p, *demo_e;
-BOOL 			singledemo; 			// quit after playing a demo from cmdline
+bool 			singledemo; 			// quit after playing a demo from cmdline
 int				demostartgametic;
 FILE*			recorddemo_fp;
 
-BOOL 			precache = true;		// if true, load all graphics at start
+bool 			precache = true;		// if true, load all graphics at start
 
 wbstartstruct_t wminfo; 				// parms for world map / intermission
 
@@ -245,7 +253,7 @@ EXTERN_CVAR (joy_invert)
 EXTERN_CVAR (joy_freelook)
 
 int 			savegameslot;
-char			savedescription[32];
+std::string		savedescription;
 
 player_t		&consoleplayer()
 {
@@ -297,7 +305,7 @@ BEGIN_COMMAND (turnspeeds)
 {
 	if (argc == 1)
 	{
-		Printf (PRINT_HIGH, "Current turn speeds: %ld %ld %ld\n",
+		Printf (PRINT_HIGH, "Current turn speeds: %d %d %d\n",
 				angleturn[0], angleturn[1], angleturn[2]);
 	}
 	else
@@ -337,6 +345,15 @@ BEGIN_COMMAND (weapprev)
 		Impulse = int(newweapon) + 50;
 }
 END_COMMAND (weapprev)
+
+BEGIN_COMMAND (togglerun)
+{
+	cl_run.Set(!cl_run.value());
+
+	Printf(PRINT_HIGH, "Always run %s\n",
+			cl_run.value() ? "on" : "off");
+}
+END_COMMAND (togglerun)
 
 extern constate_e ConsoleState;
 
@@ -379,18 +396,18 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 	// let movement keys cancel each other out
 	if (strafe)
 	{
-		if (in_autosr50)
-		{
-			if (Actions[ACTION_MOVERIGHT])
-				side += sidemove[speed];
-			if (Actions[ACTION_MOVELEFT])
-				side -= sidemove[speed];
-		}
-		else
+		if (Actions[ACTION_RIGHT] || Actions[ACTION_LEFT])
 		{
 			if (Actions[ACTION_RIGHT])
 				side += sidemove[speed];
 			if (Actions[ACTION_LEFT])
+				side -= sidemove[speed];
+		}
+		else if (in_autosr50)
+		{
+			if (Actions[ACTION_MOVERIGHT])
+				side += sidemove[speed];
+			if (Actions[ACTION_MOVELEFT])
 				side -= sidemove[speed];
 		}
 	}
@@ -455,7 +472,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 	}
 
 	// Joystick analog look -- Hyper_Eye
-	if (joy_freelook && sv_freelook || consoleplayer().spectator)
+	if ((joy_freelook && sv_freelook) || consoleplayer().spectator)
 	{
 		if (joy_invert)
 			look += (int)(((float)joylook / (float)SHRT_MAX) * lookspeed[speed]);
@@ -540,7 +557,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 		forward -= (int)(((float)joyforward / (float)SHRT_MAX) * forwardmove[speed]);
 	}
 
-	if (!consoleplayer().spectator 
+	if (!consoleplayer().spectator
 		&& !Actions[ACTION_MLOOK] && !cl_mouselook && novert == 0)		// [Toke - Mouse] acts like novert.exe
 	{
 		forward += (int)(float(mousey) * m_forward);
@@ -588,7 +605,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 		::localview.skipangle = true;
 	}
 
-	if (sendcenterview)
+	if (sendcenterview && ConsoleState == c_up && !menuactive)
 	{
 		sendcenterview = false;
 		cmd->pitch = CENTERVIEW;
@@ -598,7 +615,7 @@ void G_BuildTiccmd(ticcmd_t *cmd)
 		// [AM] LocalViewPitch is an offset on look.
 		cmd->pitch = look + (::localview.pitch >> 16);
 	}
-	
+
 	if (::localview.setangle)
 	{
 		// [AM] LocalViewAngle is a global angle, only pave over the existing
@@ -703,7 +720,7 @@ bool G_ShouldIgnoreMouseInput()
 // G_Responder
 // Get info needed to make ticcmd_ts for the players.
 //
-BOOL G_Responder (event_t *ev)
+bool G_Responder (event_t *ev)
 {
 	// any other key pops up menu if in demos
 	// [RH] But only if the key isn't bound to a "special" command
@@ -729,7 +746,6 @@ BOOL G_Responder (event_t *ev)
                 stricmp (cmd, "stepmode") &&
                 stricmp (cmd, "step")))
 			{
-				S_Sound (CHAN_INTERFACE, "switches/normbutn", 1, ATTN_NONE);
 				M_StartControlPanel ();
 				return true;
 			}
@@ -829,6 +845,33 @@ BEGIN_COMMAND(netstat)
 }
 END_COMMAND(netstat)
 
+void P_BobTicker()
+{
+	bobx = P_TickWeaponBobX();
+	boby = P_TickWeaponBobY();
+}
+
+void P_CheckInterpPause()
+{
+	// Game pauses when in the menu and not online/demo
+	OInterpolation &oi = OInterpolation::getInstance();
+	if (paused || (!multiplayer && !demoplayback &&
+		(menuactive || ConsoleState == c_down || ConsoleState == c_falling)))
+	{
+		if (oi.enabled())
+		{
+			oi.disable();
+		}
+	}
+	else
+	{
+		if (!oi.enabled())
+		{
+			oi.enable();
+		}
+	}
+}
+
 void P_MovePlayer (player_t *player);
 void P_CalcHeight (player_t *player);
 void P_DeathThink (player_t *player);
@@ -849,22 +892,22 @@ void G_Ticker (void)
 	//      through every mobj every tic would be incredibly time-consuming.
 	if (!serverside)
 	{
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->mo)
-				it->mo->oflags &= ~MFO_NOSNAPZ;
+			if (player.mo)
+				player.mo->oflags &= ~MFO_NOSNAPZ;
 		}
 	}
 
 	// do player reborns if needed
 	if(serverside)
-		for (Players::iterator it = players.begin();it != players.end();++it)
+		for (auto& player : players)
 		{
-			if (it->ingame() && (it->playerstate == PST_REBORN || it->playerstate == PST_ENTER))
+			if (player.ingame() && (player.playerstate == PST_REBORN || player.playerstate == PST_ENTER))
 			{
-				if (it->playerstate == PST_REBORN)	
-					it->doreborn = true;			// State only our will to lose the whole inventory in case of a reborn.
-				G_DoReborn(*it);
+				if (player.playerstate == PST_REBORN)
+					player.doreborn = true;			// State only our will to lose the whole inventory in case of a reborn.
+				G_DoReborn(player);
 			}
 		}
 
@@ -911,7 +954,7 @@ void G_Ticker (void)
 			if (demoplayback)
 				G_CheckDemoStatus();
 
-			extern BOOL advancedemo;
+			extern bool advancedemo;
 			advancedemo = false;
 
 			if (gamestate != GS_STARTUP)
@@ -939,9 +982,9 @@ void G_Ticker (void)
 	// [Blair] From all players in a demo playback.
 	if (demoplayback)
 	{
-		for (Players::iterator it = ::players.begin(); it != players.end(); ++it)
+		for (auto& player : players)
 		{
-			memcpy(&it->cmd, &it->netcmds[buf], sizeof(ticcmd_t));
+			memcpy(&player.cmd, &player.netcmds[buf], sizeof(ticcmd_t));
 		}
 	}
 	else
@@ -1046,18 +1089,24 @@ void G_Ticker (void)
 		// Otherwise we might miss a pause and desync!
 		if (demoplayback)
 		{
-			for (Players::iterator it = ::players.begin(); it != players.end(); ++it)
+			for (const auto& player : players)
 			{
-				if (it->cmd.buttons & BT_SPECIAL)
+				if (player.cmd.buttons & BT_SPECIAL)
 				{
-					switch (it->cmd.buttons & BT_SPECIALMASK)
+					switch (player.cmd.buttons & BT_SPECIALMASK)
 					{
 					case BTS_PAUSE:
 						paused ^= 1;
 						if (paused)
+						{
 							S_PauseSound();
+							S_PauseMusic();
+						}
 						else
+						{
 							S_ResumeSound();
+							S_ResumeMusic();
+						}
 						break;
 					}
 				}
@@ -1074,14 +1123,20 @@ void G_Ticker (void)
 				case BTS_PAUSE:
 					paused ^= 1;
 					if (paused)
+					{
 						S_PauseSound();
+						S_PauseMusic();
+					}
 					else
+					{
 						S_ResumeSound();
+						S_ResumeMusic();
+					}
 					break;
 
 				case BTS_SAVEGAME:
-					if (!savedescription[0])
-						strcpy(savedescription, "NET GAME");
+					if (savedescription.empty())
+						savedescription = "NET GAME";
 					savegameslot = (player.cmd.buttons & BTS_SAVEMASK) >> BTS_SAVESHIFT;
 					gameaction = ga_savegame;
 					break;
@@ -1106,7 +1161,7 @@ void G_Ticker (void)
 				consoleplayer().mo = consoleplayer().camera = mobj->ptr();
 				consoleplayer().mo->player = &consoleplayer();
 				G_PlayerReborn(consoleplayer());
-				DPrintf("Did not receive spawn for consoleplayer.\n");
+				DPrintFmt("Did not receive spawn for consoleplayer.\n");
 			}
 
 			CL_SimulateWorld();
@@ -1115,7 +1170,9 @@ void G_Ticker (void)
 			// Replay item pickups if the items arrived now.
 			ClientReplay::getInstance().itemReplay();
 		}
+		P_CheckInterpPause();
 		P_Ticker ();
+		P_BobTicker();
 		ST_Ticker ();
 		AM_Ticker ();
 		break;
@@ -1184,7 +1241,7 @@ void G_PlayerReborn (player_t &p) // [Toke - todo] clean this function
 		p.weaponowned[i] = false;
 
 	if (!sv_keepkeys && !sv_sharekeys)
-		P_ClearPlayerCards(p); 
+		P_ClearPlayerCards(p);
 
 	P_ClearPlayerPowerups(p);
 
@@ -1317,7 +1374,7 @@ bool G_CheckSpot (player_t &player, mapthing2_t *mthing)
 			}
 		}
 
-		mo = new AActor (x+20*xa, y+20*ya, z, MT_TFOG);
+		mo = new AActor(x + 20 * xa, y + 20 * ya, z + INT2FIXED(gameinfo.telefogHeight), MT_TFOG);
 
 		if (level.time)
 			S_Sound (mo, CHAN_VOICE, "misc/teleport", 1, ATTN_NORM);	// don't start sound on first frame
@@ -1396,7 +1453,7 @@ static mapthing2_t *SelectRandomDeathmatchSpot (player_t &player, int selections
 
 void G_DeathMatchSpawnPlayer (player_t &player)
 {
-	int selections;
+	size_t selections;
 	mapthing2_t *spot;
 
 	if(!serverside || G_UsesCoopSpawns())
@@ -1408,7 +1465,7 @@ void G_DeathMatchSpawnPlayer (player_t &player)
 		I_Error ("No deathmatch starts");
 
 	// [Toke - dmflags] Old location of DF_SPAWN_FARTHEST
-	spot = SelectRandomDeathmatchSpot (player, selections);
+	spot = SelectRandomDeathmatchSpot (player, static_cast<int>(selections));
 
 	if (!spot && !playerstarts.empty())
 	{
@@ -1465,11 +1522,11 @@ void G_DoReborn (player_t &player)
 	}
 
 	// try to spawn at one of the other players' spots
-	for (size_t i = 0; i < playerstarts.size(); i++)
+	for (auto& playerstart : playerstarts)
 	{
-		if (G_CheckSpot (player, &playerstarts[i]) )
+		if (G_CheckSpot (player, &playerstart) )
 		{
-			P_SpawnPlayer (player, &playerstarts[i]);
+			P_SpawnPlayer (player, &playerstart);
 			return;
 		}
 	}
@@ -1496,11 +1553,11 @@ void G_ScreenShot(const char* filename)
 // G_InitFromSavegame
 // Can be called by the startup code or the menu task.
 //
-char savename[256];
+std::string savename;
 
-void G_LoadGame (char* name)
+void G_LoadGame (const std::string& name)
 {
-	strcpy (savename, name);
+	savename = name;
 	gameaction = ga_loadgame;
 }
 
@@ -1512,7 +1569,7 @@ void G_DoLoadGame (void)
 
 	gameaction = ga_nothing;
 
-	FILE *stdfile = fopen (savename, "rb");
+	FILE *stdfile = fopen (savename.c_str(), "rb");
 	if (stdfile == NULL)
 	{
 		Printf (PRINT_HIGH, "Could not read savegame '%s'\n", savename);
@@ -1549,7 +1606,7 @@ void G_DoLoadGame (void)
 	FLZOFile savefile (stdfile, FFile::EReading);
 
 	if (!savefile.IsOpen ())
-		I_Error ("Savegame '%s' is corrupt\n", savename);
+		I_Error ("Savegame '{}' is corrupt\n", savename);
 
 	Printf (PRINT_HIGH, "Loading savegame '%s'...\n", savename);
 
@@ -1577,7 +1634,7 @@ void G_DoLoadGame (void)
 	// load a base level
 	savegamerestore = true;		// Use the player actors in the savegame
 	serverside = true;
-	G_InitNew (text);
+	G_InitNew(text);
 	displayplayer_id = consoleplayer_id = 1;
 	savegamerestore = false;
 
@@ -1585,10 +1642,30 @@ void G_DoLoadGame (void)
 
 
 	for (i = 0; i < NUM_WORLDVARS; i++)
+	{
 		arc >> ACS_WorldVars[i];
+		int size, k, v;
+		arc >> size;
+		for (int j = 0; j < size; j++)
+		{
+			arc >> k;
+			arc >> v;
+			ACS_WorldArrays[i][k] = v;
+		}
+	}
 
 	for (i = 0; i < NUM_GLOBALVARS; i++)
+	{
 		arc >> ACS_GlobalVars[i];
+		int size, k, v;
+		arc >> size;
+		for (int j = 0; j < size; j++)
+		{
+			arc >> k;
+			arc >> v;
+			ACS_GlobalArrays[i][k] = v;
+		}
+	}
 
 	arc >> text[9];
 
@@ -1606,16 +1683,16 @@ void G_DoLoadGame (void)
 // Called by the menu task.
 // Description is a 24 byte text string
 //
-void G_SaveGame (int slot, char *description)
+void G_SaveGame (int slot, std::string_view description)
 {
 	savegameslot = slot;
-	strcpy (savedescription, description);
+	savedescription = description;
 	sendsave = true;
 }
 
 /**
  * @brief Create a filename for a savegame.
- * 
+ *
  * @param name Output string.
  * @param slot Slot number.
  */
@@ -1624,16 +1701,14 @@ void G_BuildSaveName(std::string &name, int slot)
 #ifdef _XBOX
 	std::string path = xbox_GetSavePath(name, slot);
 #else
-	std::string path = M_GetUserFileName(name.c_str());
+	std::string path = M_GetUserFileName(name);
 #endif
-	StrFormat(name, "%s" PATHSEP "odasv%d.ods", path.c_str(), slot);
+	name = fmt::sprintf("%s" PATHSEP "odasv%d.ods", path, slot);
 }
 
 void G_DoSaveGame()
 {
-	std::string name;
-	char *description;
-	int i;
+	std::string name, description;
 
 	G_SnapshotLevel ();
 
@@ -1648,12 +1723,12 @@ void G_DoSaveGame()
 	}
 
 #ifdef _XBOX
-	xbox_WriteSaveMeta(name.substr(0, name.rfind(PATHSEPCHAR)), description);
+	xbox_WriteSaveMeta(name.substr(0, name.rfind(PATHSEPCHAR)), description.c_str());
 #endif
 
-	Printf (PRINT_HIGH, "Saving game to '%s'...\n", name.c_str());
+	Printf (PRINT_HIGH, "Saving game to '%s'...\n", name);
 
-	fwrite (description, SAVESTRINGSIZE, 1, stdfile);
+	fwrite (description.c_str(), SAVESTRINGSIZE, 1, stdfile);
 	fwrite (SAVESIG, 16, 1, stdfile);
 	fwrite (level.mapname.c_str(), 8, 1, stdfile);
 
@@ -1664,7 +1739,7 @@ void G_DoSaveGame()
 		byte vars[4096], *vars_p;
 		vars_p = vars;
 
-		cvar_t::C_WriteCVars (&vars_p, CVAR_SERVERINFO);
+		cvar_t::C_WriteCVars (&vars_p, CVAR_SERVERINFO, 4096);
 		arc.WriteCount (vars_p - vars);
 		arc.Write (vars, vars_p - vars);
 	}
@@ -1676,11 +1751,29 @@ void G_DoSaveGame()
 
 	arc << level.time;
 
-	for (i = 0; i < NUM_WORLDVARS; i++)
+	for (int i = 0; i < NUM_WORLDVARS; i++)
+	{
 		arc << ACS_WorldVars[i];
+		ACSWorldGlobalArray worldarr = ACS_WorldArrays[i];
+		arc << worldarr.size();
+		for (const auto [key, val] : worldarr)
+		{
+			arc << key;
+			arc << val;
+		}
+	}
 
-	for (i = 0; i < NUM_GLOBALVARS; i++)
+	for (int i = 0; i < NUM_GLOBALVARS; i++)
+	{
 		arc << ACS_GlobalVars[i];
+		ACSWorldGlobalArray globalarr = ACS_GlobalArrays[i];
+		arc << globalarr.size();
+		for (const auto [key, val] : globalarr)
+		{
+			arc << key;
+			arc << val;
+		}
+	}
 
 
 	arc << (BYTE)0x1d;			// consistancy marker
@@ -1713,7 +1806,7 @@ void G_ReadDemoTiccmd()
 	{
 		int demostep = (demoversion == LMP_DOOM_1_9_1) ? 5 : 4;
 
-		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		for (auto& player : players)
 		{
 			if ((demo_e - demo_p < demostep) || (*demo_p == DEMOMARKER))
 			{
@@ -1722,19 +1815,19 @@ void G_ReadDemoTiccmd()
 				return;
 			}
 
-			it->cmd.forwardmove = ((signed char)*demo_p++) << 8;
-			it->cmd.sidemove = ((signed char)*demo_p++) << 8;
+			player.cmd.forwardmove = ((signed char)*demo_p++) << 8;
+			player.cmd.sidemove = ((signed char)*demo_p++) << 8;
 
 			if (demoversion == LMP_DOOM_1_9)
 			{
-				it->cmd.yaw = ((unsigned char)*demo_p++) << 8;
+				player.cmd.yaw = ((unsigned char)*demo_p++) << 8;
 			}
 			else
 			{
-				it->cmd.yaw = ((unsigned short)*demo_p++);
-				it->cmd.yaw |= ((unsigned short)*demo_p++) << 8;
+				player.cmd.yaw = ((unsigned short)*demo_p++);
+				player.cmd.yaw |= ((unsigned short)*demo_p++) << 8;
 			}
-			it->cmd.buttons = (unsigned char)*demo_p++;
+			player.cmd.buttons = (unsigned char)*demo_p++;
 		}
 	}
 }
@@ -1814,7 +1907,7 @@ void G_DoPlayDemo(bool justStreamInput)
 	gameaction = ga_nothing;
 	int bytelen;
 
-	int demolump = W_CheckNumForName(defdemoname.c_str());
+	int demolump = W_CheckNumForName(defdemoname);
 	if (demolump != -1)
 	{
 		demobuffer = demo_p = (byte*)W_CacheLumpNum(demolump, PU_STATIC);
@@ -1823,10 +1916,10 @@ void G_DoPlayDemo(bool justStreamInput)
 	else
 	{
 		// [RH] Allow for demos not loaded as lumps
-		std::string found = M_FindUserFileName(::defdemoname, ".lmp"); 
+		std::string found = M_FindUserFileName(::defdemoname, ".lmp");
 		if (found.empty())
 		{
-			Printf(PRINT_WARNING, "Could not find demo %s\n", ::defdemoname.c_str());
+			Printf(PRINT_WARNING, "Could not find demo %s\n", ::defdemoname);
 			gameaction = ga_fullconsole;
 			return;
 		}
@@ -1857,7 +1950,7 @@ void G_DoPlayDemo(bool justStreamInput)
 		demo_p[0] == DOOM_1_9p_DEMO ||
 		demo_p[0] == DOOM_1_9_1_DEMO)
 	{
-		Printf(PRINT_HIGH, "Playing DOOM demo %s\n", defdemoname.c_str());
+		Printf(PRINT_HIGH, "Playing DOOM demo %s\n", defdemoname);
 
 		demostartgametic = gametic;
 		demoversion = *demo_p++ == DOOM_1_9_1_DEMO ? LMP_DOOM_1_9_1 : LMP_DOOM_1_9;
@@ -1866,11 +1959,9 @@ void G_DoPlayDemo(bool justStreamInput)
 
 		byte episode = *demo_p++;
 		byte map = *demo_p++;
-		char mapname[32];
-		if (gameinfo.flags & GI_MAPxx)
-			sprintf(mapname, "MAP%02d", map);
-		else
-			sprintf(mapname, "E%dM%d", episode, map);
+		const OLumpName mapname = gameinfo.flags & GI_MAPxx ?
+			fmt::format("MAP{:02d}", map) :
+			fmt::format("E{}M{}", episode, map);
 
 		int deathmatch = *demo_p++;
 		bool monstersrespawn = *demo_p++;
@@ -1885,10 +1976,9 @@ void G_DoPlayDemo(bool justStreamInput)
 		{
 			if (*demo_p++ && !justStreamInput)
 			{
-				players.push_back(player_t());
-				player_t* player = &players.back();
+				player_t* player = &players.emplace_back();
 				player->playerstate = PST_REBORN;
-				player->id = i + 1;
+				player->id = (byte)i + 1;
 			}
 		}
 
@@ -1901,7 +1991,7 @@ void G_DoPlayDemo(bool justStreamInput)
 			if (!validplayer(con))
 			{
 				Z_Free(demobuffer);
-				Printf(PRINT_HIGH, "DOOM Demo: invalid console player %d of %d\n", who + 1, players.size());
+				Printf(PRINT_HIGH, "DOOM Demo: invalid console player %d of %lu\n", who + 1, players.size());
 				gameaction = ga_fullconsole;
 				return;
 			}
@@ -1912,7 +2002,7 @@ void G_DoPlayDemo(bool justStreamInput)
 				multiplayer = true;
 			else
 				multiplayer = false;
-	
+
 			serverside = true;
 
 			// [SL] 2012-12-26 - Backup any cvars that need to be set to default to
@@ -1954,19 +2044,17 @@ void G_DoPlayDemo(bool justStreamInput)
 		}
 
 		// Set up the colors and names for the demo players
-		for (Players::iterator it = players.begin(); it != players.end(); ++it)
+		for (auto& player : players)
 		{
-			R_BuildClassicPlayerTranslation(it->id, it->id - 1);
-			argb_t color(translationRGB[it->id][0]);
+			R_BuildClassicPlayerTranslation(player.id, player.id - 1);
+			argb_t color(translationRGB[player.id][0]);
 
-			it->userinfo.color[0] = color.geta();
-			it->userinfo.color[1] = color.getr();
-			it->userinfo.color[2] = color.getg();
-			it->userinfo.color[3] = color.getb();
+			player.userinfo.color[0] = color.geta();
+			player.userinfo.color[1] = color.getr();
+			player.userinfo.color[2] = color.getg();
+			player.userinfo.color[3] = color.getb();
 
-			char tmpname[16];
-			sprintf(tmpname, "Player %i", it->id);
-			it->userinfo.netname = tmpname;
+			player.userinfo.netname = fmt::format("Players {}", player.id);
 		}
 
 		if (!justStreamInput)
@@ -1993,7 +2081,7 @@ void G_TimeDemo(const char* name)
 	defdemoname = name;
 	gameaction = ga_playdemo;
 
-	IWindow* window = I_GetWindow();	
+	IWindow* window = I_GetWindow();
 	if (noblit)
 		window->disableRefresh();
 	else
@@ -2044,7 +2132,7 @@ void G_CleanupDemo()
 ===================
 */
 
-BOOL G_CheckDemoStatus (void)
+bool G_CheckDemoStatus (void)
 {
 	if (demoplayback)
 	{

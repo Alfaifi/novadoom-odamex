@@ -1,10 +1,10 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2020 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -32,6 +32,7 @@
 #include "r_plane.h"
 #include "r_draw.h"
 #include "r_things.h"
+#include "r_sky.h"
 #include "p_local.h"
 #include "m_vectors.h"
 
@@ -95,11 +96,11 @@ void R_ReallocDrawSegs(void)
 		unsigned pos = ds_p - drawsegs;	// jff 8/9/98 fix from ZDOOM1.14a
 		unsigned firstofs = firstdrawseg - drawsegs;
 		unsigned newmax = maxdrawsegs ? maxdrawsegs*2 : 128; // killough
-		drawsegs = (drawseg_t*)Realloc(drawsegs, newmax*sizeof(*drawsegs));
+		drawsegs = (drawseg_t*)M_Realloc(drawsegs, newmax*sizeof(*drawsegs));
 		firstdrawseg = drawsegs + firstofs;
 		ds_p = drawsegs + pos;				// jff 8/9/98 fix from ZDOOM1.14a
 		maxdrawsegs = newmax;
-		DPrintf("MaxDrawSegs increased to %d\n", maxdrawsegs);
+		DPrintFmt("MaxDrawSegs increased to {}\n", maxdrawsegs);
 	}
 }
 
@@ -136,7 +137,7 @@ static void R_ClipWallSegment(int first, int last, bool makesolid)
 			// if all columns remaining are solid, we're done
 			byte* p = (byte*)memchr(solidcol + first, 0, last - first + 1);
 			if (p == NULL)
-				return; 
+				return;
 
 			first = p - solidcol;
 		}
@@ -230,7 +231,8 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec,
 		return sec;
 
 	const sector_t* s = sec->heightsec;
-	sector_t *heightsec = camera->subsector->sector->heightsec;
+
+	sector_t* heightsec = viewsector->heightsec;
 
 	bool underwater = r_fakingunderwater ||
 		(heightsec && viewz <= P_FloorHeight(viewx, viewy, heightsec));
@@ -311,7 +313,7 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec,
 			// will any columns of this window be visible or will they be blocked
 			// by 1s lines and closed doors?
 			if (memchr(solidcol + rw_start, 0, rw_stop - rw_start + 1) != NULL)
-			{	
+			{
 				doorunderwater = true;
 				r_fakingunderwater = true;
 			}
@@ -342,7 +344,7 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec,
 		tempsec->ceilingplane		= s->floorplane;
 		P_InvertPlane(&tempsec->ceilingplane);
 		P_ChangeCeilingHeight(tempsec, -1);
-		if (s->ceilingpic == skyflatnum)
+		if (R_IsSkyFlat(s->ceilingpic))
 		{
 			tempsec->floorplane			= tempsec->ceilingplane;
 			P_InvertPlane(&tempsec->floorplane);
@@ -406,7 +408,7 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec,
 		tempsec->base_floor_angle	= tempsec->base_ceiling_angle	= s->base_ceiling_angle;
 		tempsec->base_floor_yoffs	= tempsec->base_ceiling_yoffs	= s->base_ceiling_yoffs;
 
-		if (s->floorpic != skyflatnum)
+		if (!R_IsSkyFlat(s->floorpic))
 		{
 			tempsec->ceilingplane	= sec->ceilingplane;
 			tempsec->floorpic		= s->floorpic;
@@ -502,11 +504,11 @@ void R_AddLine (seg_t *line)
 
 		// if door is closed because back is shut:
 		((rw_backcz1 <= rw_backfz1 && rw_backcz2 <= rw_backfz2) &&
-		
+
 		// preserve a kind of transparent door/lift special effect:
 		((rw_backcz1 >= rw_frontcz1 && rw_backcz2 >= rw_frontcz2) ||
 		 line->sidedef->toptexture) &&
-		
+
 		((rw_backfz1 <= rw_frontfz1 && rw_backfz2 <= rw_frontfz2) ||
 		 line->sidedef->bottomtexture) &&
 
@@ -560,7 +562,7 @@ void R_AddLine (seg_t *line)
 }
 
 
-static const int checkcoord[12][4] = // killough -- static const
+static constexpr int checkcoord[12][4] = // killough -- static const
 {
 	{3,0,2,1},
 	{3,0,2,0},
@@ -625,7 +627,7 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
 	{
 		v2fixed_t p1 = box_pts[i][0];
 		v2fixed_t p2 = box_pts[i][1];
-		
+
 		if (R_PointOnLine(0, 0, p1.x, p1.y, p2.x, p2.y))
 			return true;
 
@@ -637,7 +639,7 @@ static bool R_CheckBBox(const fixed_t *bspcoord)
 			int x2 = R_ProjectPointX(p2.x, p2.y) - 1;
 			if (R_CheckProjectionX(x1, x2))
 			{
-				if (memchr(solidcol + x1, 0, x2 - x1 + 1) != NULL)	
+				if (memchr(solidcol + x1, 0, x2 - x1 + 1) != NULL)
 					return true;
 			}
 		}
@@ -663,9 +665,9 @@ void R_Subsector (int num)
 
 #ifdef RANGECHECK
     if (num>=numsubsectors)
-		I_Error ("R_Subsector: ss %i with numss = %i",
-				 num,
-				 numsubsectors);
+		I_Error("R_Subsector: ss {} with numss = {}",
+				num,
+				numsubsectors);
 #endif
 
 	sub = &subsectors[num];
@@ -679,13 +681,13 @@ void R_Subsector (int num)
 
 	basecolormap = frontsector->colormap->maps;
 
-	ceilingplane = P_CeilingHeight(camera) > viewz ||
-		frontsector->ceilingpic == skyflatnum ||
-		(frontsector->heightsec && 
-		!(frontsector->heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC) && 
-		frontsector->heightsec->floorpic == skyflatnum) ?
+	ceilingplane = P_CeilingHeight(viewx, viewy, frontsector) > viewz ||
+		R_IsSkyFlat(frontsector->ceilingpic) ||
+		(frontsector->heightsec &&
+		!(frontsector->heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC) &&
+		R_IsSkyFlat(frontsector->heightsec->floorpic)) ?
 		R_FindPlane(frontsector->ceilingplane,		// killough 3/8/98
-					frontsector->ceilingpic == skyflatnum &&  // killough 10/98
+					R_IsSkyFlat(frontsector->ceilingpic) &&  // killough 10/98
 						frontsector->sky & PL_SKYFLAT ? frontsector->sky :
 						frontsector->ceilingpic,
 					ceilinglightlevel,				// killough 4/11/98
@@ -700,12 +702,12 @@ void R_Subsector (int num)
 	// killough 3/7/98: Add (x,y) offsets to flats, add deep water check
 	// killough 3/16/98: add floorlightlevel
 	// killough 10/98: add support for skies transferred from sidedefs
-	floorplane = P_FloorHeight(camera) < viewz || // killough 3/7/98
+	floorplane = P_FloorHeight(viewx, viewy, frontsector) < viewz || // killough 3/7/98
 		(frontsector->heightsec &&
 		!(frontsector->heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC) &&
-		frontsector->heightsec->ceilingpic == skyflatnum) ?
+		R_IsSkyFlat(frontsector->heightsec->ceilingpic)) ?
 		R_FindPlane(frontsector->floorplane,
-					frontsector->floorpic == skyflatnum &&  // killough 10/98
+					R_IsSkyFlat(frontsector->floorpic) &&  // killough 10/98
 						frontsector->sky & PL_SKYFLAT ? frontsector->sky :
 						frontsector->floorpic,
 					floorlightlevel,				// killough 3/16/98
@@ -732,7 +734,7 @@ void R_Subsector (int num)
 	{
 		for (WORD i = ParticlesInSubsec[num]; i != NO_PARTICLE; i = Particles[i].nextinsubsector)
 			R_ProjectParticle(Particles + i, subsectors[num].sector, FakeSide);
-	}		
+	}
 
 	if (sub->poly)
 	{ // Render the polyobj in the subsector first
@@ -741,7 +743,7 @@ void R_Subsector (int num)
 		while (polyCount--)
 			R_AddLine (*polySeg++);
 	}
-	
+
 	while (count--)
 		R_AddLine (line++);
 }
