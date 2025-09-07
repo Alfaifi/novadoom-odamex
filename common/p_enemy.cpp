@@ -311,7 +311,6 @@ bool P_CheckMissileRange (AActor *actor)
 	{
 		if (dist < 196)
 			return false;		// close for fist attack
-		dist >>= 1;
 	}
 
 
