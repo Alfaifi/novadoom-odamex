@@ -427,6 +427,7 @@ jobs:
         if: steps.check.outputs.run == 'true'
         with:
           identifier: Odamex.Odamex
+          fork-user: ${{ vars.WINGET_USER }}
           token: ${{ secrets.WINGET_TOKEN }}
   pr-to-stable:
     name: Create Pull Request to stable
