@@ -129,7 +129,7 @@ public:
 
 	[[nodiscard]] const char *cstring() const {return m_String.c_str(); }
 	[[nodiscard]] const std::string& str() const { return m_String; }
-	[[nodiscard]] const char *name() const { return m_Name.c_str(); }
+	[[nodiscard]] const std::string& name() const { return m_Name; }
 	[[nodiscard]] const char *helptext() const {return m_HelpText.c_str(); }
 	[[nodiscard]] const char *latched() const { return m_LatchedString.c_str(); }
 	[[nodiscard]] float value() const { return m_Value; }
@@ -182,7 +182,7 @@ public:
 	static void C_RestoreCVars (void);
 
 	// Finds a named cvar
-	static cvar_t *FindCVar (const char *var_name, cvar_t **prev);
+	static cvar_t *FindCVar (std::string_view var_name, cvar_t **prev);
 
 	// Called from G_InitNew()
 	static void UnlatchCVars (void);
@@ -196,7 +196,7 @@ public:
 	// the filtering.
 	static void C_SetCVarsToDefaults (unsigned int bitflag = 0xFFFFFFFF);
 
-	static bool SetServerVar (const char *name, const char *value);
+	static bool SetServerVar (std::string_view name, const char *value);
 
 	static void FilterCompactCVars (std::vector<cvar_t *> &cvars, DWORD filter);
 

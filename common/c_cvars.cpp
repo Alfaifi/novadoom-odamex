@@ -372,7 +372,7 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 				}
 
 				chars = snprintf((char*)ptr, array_size, "\\%s\\%s",
-								cvar->name(), cvar->cstring());
+								cvar->name().c_str(), cvar->cstring());
 
 				ptr += chars;
 				array_size -= chars;
@@ -500,7 +500,7 @@ void cvar_t::C_RestoreCVars (void)
 	UnlatchCVars();
 }
 
-cvar_t *cvar_t::FindCVar (const char *var_name, cvar_t **prev)
+cvar_t *cvar_t::FindCVar (std::string_view var_name, cvar_t **prev)
 {
 	cvar_t *var;
 
@@ -574,8 +574,8 @@ void cvar_t::C_ArchiveCVars (void *f)
 		if ((baseapp == client && (cvar->m_Flags & CVAR_CLIENTARCHIVE))
 			|| (baseapp == server && (cvar->m_Flags & CVAR_SERVERARCHIVE)))
 		{
-			fprintf ((FILE *)f, "// %s\n", cvar->helptext());
-			fprintf ((FILE *)f, "set %s %s\n\n", C_QuoteString(cvar->name()).c_str(), C_QuoteString(cvar->cstring()).c_str());
+			fmt::print((FILE *)f, "// {}\n", cvar->helptext());
+			fmt::print((FILE *)f, "set {} {}\n\n", C_QuoteString(cvar->name()), C_QuoteString(cvar->str()));
 		}
 		cvar = cvar->m_Next;
 	}

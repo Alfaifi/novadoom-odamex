@@ -265,9 +265,9 @@ bool IsRealNum(const char* str)
 
 // [Russell] Returns 0 if strings are the same, optional parameter for case
 // sensitivity
-bool iequals(const std::string& s1, const std::string& s2)
+bool iequals(std::string_view s1, std::string_view s2)
 {
-	return stricmp(s1.c_str(), s2.c_str()) == 0;
+	return stricmp(s1.data(), s2.data()) == 0;
 }
 
 size_t StdStringFind(const std::string& haystack, const std::string& needle,

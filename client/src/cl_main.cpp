@@ -871,7 +871,7 @@ BEGIN_COMMAND (serverinfo)
 	{
         if (Cvar->flags() & CVAR_SERVERINFO)
         {
-            size_t FieldLength = strlen(Cvar->name());
+            size_t FieldLength = Cvar->name().length();
 
             if (FieldLength > MaxFieldLength)
                 MaxFieldLength = FieldLength;
