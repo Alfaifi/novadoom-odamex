@@ -283,7 +283,10 @@ jobs:
       run: ls
     - name: Install setup compiler
       shell: pwsh
-      run: choco install innosetup -y --no-progress
+      run: |
+        if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) {
+          choco install innosetup -y --no-progress
+        }
     - name: Stage and run setup compiler
       shell: pwsh
       run: |
