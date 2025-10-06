@@ -445,27 +445,20 @@ void P_LoadNodes (int lump)
 		    "P_LoadNodes: NODES lump is empty - levels without nodes are not supported.");
 	}
 
-	byte*		data;
-	int 		i;
-	int 		j;
-	int 		k;
-	mapnode_t*	mn;
-	node_t* 	no;
-
 	numnodes = W_LumpLength (lump) / sizeof(mapnode_t);
 	nodes = (node_t *)Z_Malloc (numnodes*sizeof(node_t), PU_LEVEL, 0);
-	data = (byte *)W_CacheLumpNum (lump, PU_STATIC);
+	byte* data = (byte *)W_CacheLumpNum (lump, PU_STATIC);
 
-	mn = (mapnode_t *)data;
-	no = nodes;
+	mapnode_t* mn = (mapnode_t *)data;
+	node_t* no = nodes;
 
-	for (i = 0; i < numnodes; i++, no++, mn++)
+	for (int i = 0; i < numnodes; i++, no++, mn++)
 	{
 		no->x = LESHORT(mn->x)<<FRACBITS;
 		no->y = LESHORT(mn->y)<<FRACBITS;
 		no->dx = LESHORT(mn->dx)<<FRACBITS;
 		no->dy = LESHORT(mn->dy)<<FRACBITS;
-		for (j = 0; j < 2; j++)
+		for (int j = 0; j < 2; j++)
 		{
 			// account for children's promotion to 32 bits
 			unsigned int child = (unsigned short)LESHORT(mn->children[j]);
@@ -477,7 +470,7 @@ void P_LoadNodes (int lump)
 
 			no->children[j] = child;
 
-			for (k = 0; k < 4; k++)
+			for (int k = 0; k < 4; k++)
 				no->bbox[j][k] = LESHORT(mn->bbox[j][k]) << FRACBITS;
 		}
 	}
@@ -527,6 +520,50 @@ void P_LoadNodes_DeePBSP(int lump)
 	Z_Free (data - 8);
 }
 
+static byte* decompressNodes(byte* data, size_t len) {
+	byte* output = nullptr;
+	int outlen, err;
+	z_stream *zstream;
+
+	// first estimate for compression rate:
+	// output buffer size == 2.5 * input size
+	outlen = 2.5 * len;
+	output = (byte*)Z_Malloc(outlen, PU_STATIC, 0);
+
+	// initialize stream state for decompression
+	zstream = (z_stream*)M_Malloc(sizeof(*zstream));
+	memset(zstream, 0, sizeof(*zstream));
+	zstream->next_in = data + 4;
+	zstream->avail_in = len - 4;
+	zstream->next_out = output;
+	zstream->avail_out = outlen;
+
+	if (inflateInit(zstream) != Z_OK)
+		I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression initialization!");
+
+	// resize if output buffer runs full
+	while ((err = inflate(zstream, Z_SYNC_FLUSH)) == Z_OK)
+	{
+		int outlen_old = outlen;
+		outlen = 2 * outlen_old;
+		output = (byte*)M_Realloc(output, outlen);
+		zstream->next_out = output + outlen_old;
+		zstream->avail_out = outlen - outlen_old;
+	}
+
+	if (err != Z_STREAM_END)
+		I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression!");
+
+	fmt::print(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio {:.3f}\n",
+	           (float)zstream->total_out/zstream->total_in);
+
+	if (inflateEnd(zstream) != Z_OK)
+		I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression shut-down!");
+
+	M_Free(zstream);
+	return output;
+}
+
 //
 // P_LoadXNOD - load ZDBSP extended nodes
 // returns false if nodes are not extended to fall back to original nodes
@@ -534,12 +571,16 @@ void P_LoadNodes_DeePBSP(int lump)
 bool P_LoadXNOD(int lump)
 {
 	size_t len = W_LumpLength(lump);
-	byte *data = (byte *) W_CacheLumpNum(lump, PU_STATIC);
-	byte* output = NULL;
+	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
+	byte* output = nullptr;
+
+	nonstd::make_scope_exit([&]{
+		Z_Free(data);
+		Z_Free(output);
+	});
 
 	if (len < 4)
 	{
-		Z_Free(data);
 		return false;
 	}
 
@@ -550,48 +591,7 @@ bool P_LoadXNOD(int lump)
 	// adapted from Crispy Doom
 	if (compressed)
 	{
-		int outlen, err;
-		z_stream *zstream;
-
-		// first estimate for compression rate:
-		// output buffer size == 2.5 * input size
-		outlen = 2.5 * len;
-		output = (byte*)Z_Malloc(outlen, PU_STATIC, 0);
-
-		// initialize stream state for decompression
-		zstream = (z_stream*)M_Malloc(sizeof(*zstream));
-		memset(zstream, 0, sizeof(*zstream));
-		zstream->next_in = data + 4;
-		zstream->avail_in = len - 4;
-		zstream->next_out = output;
-		zstream->avail_out = outlen;
-
-		if (inflateInit(zstream) != Z_OK)
-			I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression initialization!");
-
-		// resize if output buffer runs full
-		while ((err = inflate(zstream, Z_SYNC_FLUSH)) == Z_OK)
-		{
-			int outlen_old = outlen;
-			outlen = 2 * outlen_old;
-			output = (byte*)M_Realloc(output, outlen);
-			zstream->next_out = output + outlen_old;
-			zstream->avail_out = outlen - outlen_old;
-		}
-
-		if (err != Z_STREAM_END)
-			I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression!");
-
-		fmt::print(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio {:.3f}\n",
-		           (float)zstream->total_out/zstream->total_in);
-
-		len = zstream->total_out;
-
-		if (inflateEnd(zstream) != Z_OK)
-			I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression shut-down!");
-
-		M_Free(zstream);
-		p = output;
+		p = output = decompressNodes(data, len);
 	}
 	else
 	{
@@ -712,8 +712,152 @@ bool P_LoadXNOD(int lump)
 		}
 	}
 
-	Z_Free(data);
-	Z_Free(output);
+	return true;
+}
+
+bool P_LoadXGLN(int lump)
+{
+	size_t len = W_LumpLength(lump);
+	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
+	byte* output = nullptr;
+
+	nonstd::make_scope_exit([&]{
+		Z_Free(data);
+		Z_Free(output);
+	});
+
+	if (len < 4)
+	{
+		return false;
+	}
+
+	bool compressed = memcmp(data, "ZGLN", 4) == 0;
+
+	byte *p;
+	// [EB] decompress compressed nodes
+	// adapted from Crispy Doom
+	if (compressed)
+	{
+		p = output = decompressNodes(data, len);
+	}
+	else
+	{
+		p = data + 4; // skip the magic number
+	}
+
+	// Load vertices
+	unsigned int numorgvert = LELONG(*(unsigned int *)p); p += 4;
+	unsigned int numnewvert = LELONG(*(unsigned int *)p); p += 4;
+
+	vertex_t *newvert = (vertex_t *) Z_Malloc((numorgvert + numnewvert)*sizeof(*newvert), PU_LEVEL, 0);
+
+	memcpy(newvert, vertexes, numorgvert*sizeof(*newvert));
+	memset(&newvert[numorgvert], 0, numnewvert * sizeof(*newvert));
+
+	for (unsigned int i = 0; i < numnewvert; i++)
+	{
+		vertex_t *v = &newvert[numorgvert+i];
+		v->x = LELONG(*(int *)p); p += 4;
+		v->y = LELONG(*(int *)p); p += 4;
+	}
+
+	// Adjust linedefs - since we reallocated the vertex array,
+	// all vertex pointers in linedefs must be updated
+
+	for (int i = 0; i < numlines; i++)
+	{
+		lines[i].v1 = newvert + (lines[i].v1 - vertexes);
+		lines[i].v2 = newvert + (lines[i].v2 - vertexes);
+	}
+
+	// nuke the old list, update globals to point to the new list
+	Z_Free(vertexes);
+	vertexes = newvert;
+	numvertexes = numorgvert + numnewvert;
+
+	// Load subsectors
+
+	numsubsectors = LELONG(*(unsigned int *)p); p += 4;
+	subsectors = (subsector_t *) Z_Malloc(numsubsectors * sizeof(*subsectors), PU_LEVEL, 0);
+	memset(subsectors, 0, numsubsectors * sizeof(*subsectors));
+
+	unsigned int first_seg = 0;
+
+	for (int i = 0; i < numsubsectors; i++)
+	{
+		subsectors[i].firstline = first_seg;
+		subsectors[i].numlines = LELONG(*(unsigned int *)p); p += 4;
+		first_seg += subsectors[i].numlines;
+	}
+
+	// Load segs
+
+	numsegs = LELONG(*(unsigned int *)p); p += 4;
+	segs = (seg_t *) Z_Malloc(numsegs * sizeof(*segs), PU_LEVEL, 0);
+	memset(segs, 0, numsegs * sizeof(*segs));
+
+	for (int i = 0; i < numsegs; i++)
+	{
+		unsigned int v1 = LELONG(*(unsigned int *)p); p += 4;
+		unsigned int v2 = LELONG(*(unsigned int *)p); p += 4;
+		unsigned short ld = LESHORT(*(unsigned short *)p); p += 2;
+		unsigned char side = *(unsigned char *)p; p += 1;
+
+		if (side != 0 && side != 1)
+			side = 1;
+
+		seg_t *seg = &segs[i];
+		line_t *line = &lines[ld];
+
+		seg->v1 = &vertexes[v1];
+		seg->v2 = &vertexes[v2];
+
+		seg->linedef = line;
+		seg->sidedef = &sides[line->sidenum[side]];
+
+		seg->frontsector = seg->sidedef->sector;
+		if (line->flags & ML_TWOSIDED && line->sidenum[side^1] != R_NOSIDE)
+			seg->backsector = sides[line->sidenum[side^1]].sector;
+		else
+			seg->backsector = NULL;
+
+		seg->angle = R_PointToAngle2(seg->v1->x, seg->v1->y, seg->v2->x, seg->v2->y);
+
+		// a short version of the offset calculation in P_LoadSegs
+		vertex_t *origin = (side == 0) ? line->v1 : line->v2;
+		float dx = FIXED2FLOAT(seg->v1->x - origin->x);
+		float dy = FIXED2FLOAT(seg->v1->y - origin->y);
+		seg->offset = FLOAT2FIXED(sqrt(dx * dx + dy * dy));
+	}
+
+	// Load nodes
+
+	numnodes = LELONG(*(unsigned int *)p); p += 4;
+	nodes = (node_t *) Z_Malloc(numnodes * sizeof(*nodes), PU_LEVEL, 0);
+	memset(nodes, 0, numnodes * sizeof(*nodes));
+
+	for (int i = 0; i < numnodes; i++)
+	{
+		node_t *node = &nodes[i];
+
+		node->x = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+		node->y = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+		node->dx = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+		node->dy = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+
+		for (int j = 0; j < 2; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				node->bbox[j][k] = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+			}
+		}
+
+		for (int j = 0; j < 2; j++)
+		{
+			node->children[j] = LELONG(*(unsigned int *)p); p += 4;
+		}
+	}
 
 	return true;
 }
@@ -2028,10 +2172,19 @@ void P_SetupLevel (const char *lumpname, int position)
 	P_FinishLoadingLineDefs ();
 	P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
 
-	switch (P_CheckNodeType(lumpnum+ML_NODES)) {
+	const nodetype_t nodetype = W_LumpLength(lumpnum+ML_NODES) > 0 ?
+	                            P_CheckNodeType(lumpnum+ML_NODES) :
+	                            P_CheckNodeType(lumpnum+ML_SSECTORS);
+
+	switch (nodetype) {
 		case nodetype_t::XNOD:
 		case nodetype_t::ZNOD:
 			P_LoadXNOD(lumpnum+ML_NODES);
+			break;
+
+		case nodetype_t::XGLN:
+		case nodetype_t::ZGLN:
+			P_LoadXGLN(lumpnum+ML_SSECTORS);
 			break;
 
 		case nodetype_t::DEEP:
