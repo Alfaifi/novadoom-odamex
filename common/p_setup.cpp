@@ -933,6 +933,20 @@ nodetype_t P_CheckNodeType(int lump) {
 	return nodetype_t::STANDARD;
 }
 
+static bool isCompressedNodeType(nodetype_t type)
+{
+	switch (type)
+	{
+		case nodetype_t::ZNOD:
+		case nodetype_t::ZGLN:
+		case nodetype_t::ZGL2:
+		case nodetype_t::ZGL3:
+			return true;
+		default:
+			return false;
+	}
+}
+
 //
 // P_LoadThings
 //
@@ -2205,12 +2219,12 @@ void P_SetupLevel (const char *lumpname, int position)
 	switch (nodetype) {
 		case nodetype_t::XNOD:
 		case nodetype_t::ZNOD:
-			P_LoadXNOD(lumpnum+ML_NODES, nodetype == nodetype_t::ZNOD);
+			P_LoadXNOD(lumpnum+ML_NODES, isCompressedNodeType(nodetype));
 			break;
 
 		case nodetype_t::XGLN:
 		case nodetype_t::ZGLN:
-			P_LoadXGLN(lumpnum+ML_SSECTORS, nodetype == nodetype_t::ZGLN);
+			P_LoadXGLN(lumpnum+ML_SSECTORS, isCompressedNodeType(nodetype));
 			break;
 
 		case nodetype_t::DEEP:
