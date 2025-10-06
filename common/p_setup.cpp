@@ -888,6 +888,187 @@ bool P_LoadXGLN(int lump, bool compressed)
 	return true;
 }
 
+bool P_LoadXGL3(int lump, bool compressed)
+{
+	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
+	byte* output = nullptr;
+
+	nonstd::make_scope_exit([&]{
+		Z_Free(data);
+		Z_Free(output);
+	});
+
+	byte *p;
+	// [EB] decompress compressed nodes
+	// adapted from Crispy Doom
+	if (compressed)
+	{
+		p = output = decompressNodes(data, W_LumpLength(lump));
+	}
+	else
+	{
+		p = data + 4; // skip the magic number
+	}
+
+	// Load vertices
+	unsigned int numorgvert = LELONG(*(unsigned int *)p); p += 4;
+	unsigned int numnewvert = LELONG(*(unsigned int *)p); p += 4;
+
+	vertex_t *newvert = (vertex_t *) Z_Malloc((numorgvert + numnewvert)*sizeof(*newvert), PU_LEVEL, 0);
+
+	memcpy(newvert, vertexes, numorgvert*sizeof(*newvert));
+	memset(&newvert[numorgvert], 0, numnewvert * sizeof(*newvert));
+
+	for (unsigned int i = 0; i < numnewvert; i++)
+	{
+		vertex_t *v = &newvert[numorgvert+i];
+		v->x = LELONG(*(int *)p); p += 4;
+		v->y = LELONG(*(int *)p); p += 4;
+	}
+
+	// Adjust linedefs - since we reallocated the vertex array,
+	// all vertex pointers in linedefs must be updated
+
+	for (int i = 0; i < numlines; i++)
+	{
+		lines[i].v1 = newvert + (lines[i].v1 - vertexes);
+		lines[i].v2 = newvert + (lines[i].v2 - vertexes);
+	}
+
+	// nuke the old list, update globals to point to the new list
+	Z_Free(vertexes);
+	vertexes = newvert;
+	numvertexes = numorgvert + numnewvert;
+
+	// Load subsectors
+
+	numsubsectors = LELONG(*(unsigned int *)p); p += 4;
+	subsectors = (subsector_t *) Z_Malloc(numsubsectors * sizeof(*subsectors), PU_LEVEL, 0);
+	memset(subsectors, 0, numsubsectors * sizeof(*subsectors));
+
+	unsigned int first_seg = 0;
+
+	for (int i = 0; i < numsubsectors; i++)
+	{
+		subsectors[i].firstline = first_seg;
+		subsectors[i].numlines = LELONG(*(unsigned int *)p); p += 4;
+		first_seg += subsectors[i].numlines;
+	}
+
+	// Load segs
+
+	numsegs = LELONG(*(unsigned int *)p); p += 4;
+	segs = (seg_t *) Z_Malloc(numsegs * sizeof(*segs), PU_LEVEL, 0);
+	memset(segs, 0, numsegs * sizeof(*segs));
+
+	for (int i = 0; i < numsubsectors; i++)
+	{
+		for (int j = 0; j < subsectors[i].numlines; j++)
+		{
+			uint32_t v1 = LELONG(*(unsigned int *)p); p += 4;
+			uint32_t partner = LELONG(*(unsigned int *)p); p += 4;
+			uint32_t line = LELONG(*(unsigned int *)p); p += 4;
+			uint8_t side = *(unsigned char *)p; p += 1;
+
+			seg_t* seg = &segs[subsectors[i].firstline + j];
+
+			seg->v1 = &vertexes[v1];
+			if (j == 0)
+				seg[subsectors[i].numlines - 1].v2 = seg->v1;
+			else
+				seg[-1].v2 = seg->v1;
+
+			if (line != 0xffffffff)
+			{
+				if (line >= numlines)
+				{
+					I_Error("P_LoadXGLN: idk man bad seg or smth");
+				}
+
+				line_t* linedef = &lines[line];
+				seg->linedef = linedef;
+
+				if (side != 0 && side != 1)
+				{
+					I_Error("fasfasdf");
+				}
+
+				seg->sidedef = &sides[linedef->sidenum[side]];
+
+				if (linedef->sidenum[side] != NO_INDEX)
+				{
+					seg->frontsector = sides[linedef->sidenum[side]].sector;
+				}
+				else
+				{
+					seg->frontsector = nullptr;
+					fmt::print(stderr, "");
+				}
+
+				if ((linedef->flags & ML_TWOSIDED) &&
+				    (linedef->sidenum[side ^ 1] != NO_INDEX))
+					seg->backsector = sides[linedef->sidenum[side ^ 1]].sector;
+				else
+					seg->backsector = nullptr;
+
+				// a short version of the offset calculation in P_LoadSegs
+				vertex_t *origin = (side == 0) ? linedef->v1 : linedef->v2;
+				float dx = FIXED2FLOAT(seg->v1->x - origin->x);
+				float dy = FIXED2FLOAT(seg->v1->y - origin->y);
+				seg->offset = FLOAT2FIXED(sqrt(dx * dx + dy * dy));
+			}
+			else
+			{
+				seg->angle = 0;
+				seg->offset = 0;
+				seg->sidedef = nullptr;
+				seg->linedef = nullptr;
+				seg->frontsector = segs[subsectors[i].firstline].frontsector;
+				seg->backsector = seg->frontsector;
+			}
+		}
+
+		for (int j = 0; j < subsectors[i].numlines; j++)
+		{
+			seg_t* seg = &segs[subsectors[i].firstline + j];
+
+			if (seg->linedef)
+				seg->angle = R_PointToAngle2(seg->v1->x, seg->v1->y, seg->v2->x, seg->v2->y);
+		}
+	}
+
+	// Load nodes
+
+	numnodes = LELONG(*(unsigned int *)p); p += 4;
+	nodes = (node_t *) Z_Malloc(numnodes * sizeof(*nodes), PU_LEVEL, 0);
+	memset(nodes, 0, numnodes * sizeof(*nodes));
+
+	for (int i = 0; i < numnodes; i++)
+	{
+		node_t *node = &nodes[i];
+
+		node->x = LELONG(*(int *)p); p += 4;
+		node->y = LELONG(*(int *)p); p += 4;
+		node->dx = LELONG(*(int *)p); p += 4;
+		node->dy = LELONG(*(int *)p); p += 4;
+
+		for (int j = 0; j < 2; j++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				node->bbox[j][k] = LELONG(*(int *)p); p += 4;
+			}
+		}
+
+		for (int j = 0; j < 2; j++)
+		{
+			node->children[j] = LELONG(*(unsigned int *)p); p += 4;
+		}
+	}
+
+	return true;
+}
+
 enum class nodetype_t {
 	XNOD,
 	ZNOD,
@@ -2225,6 +2406,11 @@ void P_SetupLevel (const char *lumpname, int position)
 		case nodetype_t::XGLN:
 		case nodetype_t::ZGLN:
 			P_LoadXGLN(lumpnum+ML_SSECTORS, isCompressedNodeType(nodetype));
+			break;
+
+		case nodetype_t::XGL3:
+		case nodetype_t::ZGL3:
+			P_LoadXGL3(lumpnum+ML_SSECTORS, isCompressedNodeType(nodetype));
 			break;
 
 		case nodetype_t::DEEP:
