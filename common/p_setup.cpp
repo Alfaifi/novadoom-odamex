@@ -718,33 +718,49 @@ bool P_LoadXNOD(int lump)
 	return true;
 }
 
-enum nodetype_t {
-	NT_XNOD,
-	NT_ZNOD,
-	NT_DEEP,
-	NT_STANDARD
+enum class nodetype_t {
+	XNOD,
+	ZNOD,
+	DEEP,
+	XGLN,
+	XGL2,
+	XGL3,
+	ZGLN,
+	ZGL2,
+	ZGL3,
+	STANDARD
 };
 
 nodetype_t P_CheckNodeType(int lump) {
 	byte *data = (byte *) W_CacheLumpNum(lump, PU_STATIC);
 	nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
 
-	if (memcmp(data, "xNd4\0\0\0\0", 8) == 0)
-	{
-		return NT_DEEP;
+	static constexpr struct {
+        std::string_view bytes;
+        nodetype_t type;
+    } node_types[] = {
+        {"xNd4\0\0\0\0", nodetype_t::DEEP},
+        {"XNOD", nodetype_t::XNOD},
+        {"ZNOD", nodetype_t::ZNOD},
+        {"XGLN", nodetype_t::XGLN},
+        {"XGL2", nodetype_t::XGL2},
+        {"XGL3", nodetype_t::XGL3},
+        {"ZGLN", nodetype_t::ZGLN},
+        {"ZGL2", nodetype_t::ZGL2},
+        {"ZGL3", nodetype_t::ZGL3},
+    };
+
+	const auto it = std::find_if(
+		std::begin(node_types), std::end(node_types),
+		[&](const auto& nodetype) {
+			return memcmp(data, nodetype.bytes.data(), nodetype.bytes.size()) == 0;
+	});
+
+	if (it != std::end(node_types)) {
+		return it->type;
 	}
 
-	if (memcmp(data, "XNOD", 4) == 0)
-	{
-		return NT_XNOD;
-	}
-
-	if (memcmp(data, "ZNOD", 4) == 0)
-	{
-		return NT_ZNOD;
-	}
-
-	return NT_STANDARD;
+	return nodetype_t::STANDARD;
 }
 
 //
@@ -2013,12 +2029,12 @@ void P_SetupLevel (const char *lumpname, int position)
 	P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
 
 	switch (P_CheckNodeType(lumpnum+ML_NODES)) {
-		case NT_XNOD:
-		case NT_ZNOD:
+		case nodetype_t::XNOD:
+		case nodetype_t::ZNOD:
 			P_LoadXNOD(lumpnum+ML_NODES);
 			break;
 
-		case NT_DEEP:
+		case nodetype_t::DEEP:
 			P_LoadSubsectors(lumpnum+ML_SSECTORS, true);
 			P_LoadNodes_DeePBSP(lumpnum+ML_NODES);
 			P_LoadSegs(lumpnum+ML_SEGS, true);
