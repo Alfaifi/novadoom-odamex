@@ -568,9 +568,8 @@ static byte* decompressNodes(byte* data, size_t len) {
 // P_LoadXNOD - load ZDBSP extended nodes
 // returns false if nodes are not extended to fall back to original nodes
 //
-bool P_LoadXNOD(int lump)
+bool P_LoadXNOD(int lump, bool compressed)
 {
-	size_t len = W_LumpLength(lump);
 	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
 	byte* output = nullptr;
 
@@ -579,19 +578,12 @@ bool P_LoadXNOD(int lump)
 		Z_Free(output);
 	});
 
-	if (len < 4)
-	{
-		return false;
-	}
-
-	bool compressed = memcmp(data, "ZNOD", 4) == 0;
-
 	byte *p;
 	// [EB] decompress compressed nodes
 	// adapted from Crispy Doom
 	if (compressed)
 	{
-		p = output = decompressNodes(data, len);
+		p = output = decompressNodes(data, W_LumpLength(lump));
 	}
 	else
 	{
@@ -715,9 +707,8 @@ bool P_LoadXNOD(int lump)
 	return true;
 }
 
-bool P_LoadXGLN(int lump)
+bool P_LoadXGLN(int lump, bool compressed)
 {
-	size_t len = W_LumpLength(lump);
 	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
 	byte* output = nullptr;
 
@@ -726,19 +717,12 @@ bool P_LoadXGLN(int lump)
 		Z_Free(output);
 	});
 
-	if (len < 4)
-	{
-		return false;
-	}
-
-	bool compressed = memcmp(data, "ZGLN", 4) == 0;
-
 	byte *p;
 	// [EB] decompress compressed nodes
 	// adapted from Crispy Doom
 	if (compressed)
 	{
-		p = output = decompressNodes(data, len);
+		p = output = decompressNodes(data, W_LumpLength(lump));
 	}
 	else
 	{
@@ -796,38 +780,80 @@ bool P_LoadXGLN(int lump)
 	segs = (seg_t *) Z_Malloc(numsegs * sizeof(*segs), PU_LEVEL, 0);
 	memset(segs, 0, numsegs * sizeof(*segs));
 
-	for (int i = 0; i < numsegs; i++)
+	for (int i = 0; i < numsubsectors; i++)
 	{
-		unsigned int v1 = LELONG(*(unsigned int *)p); p += 4;
-		unsigned int v2 = LELONG(*(unsigned int *)p); p += 4;
-		unsigned short ld = LESHORT(*(unsigned short *)p); p += 2;
-		unsigned char side = *(unsigned char *)p; p += 1;
+		for (int j = 0; j < subsectors[i].numlines; j++)
+		{
+			uint32_t v1 = LELONG(*(unsigned int *)p); p += 4;
+			uint32_t partner = LELONG(*(unsigned int *)p); p += 4;
+			uint16_t line = LESHORT(*(unsigned short *)p); p += 2;
+			uint8_t side = *(unsigned char *)p; p += 1;
 
-		if (side != 0 && side != 1)
-			side = 1;
+			seg_t* seg = &segs[subsectors[i].firstline + j];
 
-		seg_t *seg = &segs[i];
-		line_t *line = &lines[ld];
+			seg->v1 = &vertexes[v1];
+			if (j == 0)
+				seg[subsectors[i].numlines - 1].v2 = seg->v1;
+			else
+				seg[-1].v2 = seg->v1;
 
-		seg->v1 = &vertexes[v1];
-		seg->v2 = &vertexes[v2];
+			if (line != 0xffff)
+			{
+				if (line >= numlines)
+				{
+					I_Error("P_LoadXGLN: idk man bad seg or smth");
+				}
 
-		seg->linedef = line;
-		seg->sidedef = &sides[line->sidenum[side]];
+				line_t* linedef = &lines[line];
+				seg->linedef = linedef;
 
-		seg->frontsector = seg->sidedef->sector;
-		if (line->flags & ML_TWOSIDED && line->sidenum[side^1] != R_NOSIDE)
-			seg->backsector = sides[line->sidenum[side^1]].sector;
-		else
-			seg->backsector = NULL;
+				if (side != 0 && side != 1)
+				{
+					I_Error("fasfasdf");
+				}
 
-		seg->angle = R_PointToAngle2(seg->v1->x, seg->v1->y, seg->v2->x, seg->v2->y);
+				seg->sidedef = &sides[linedef->sidenum[side]];
 
-		// a short version of the offset calculation in P_LoadSegs
-		vertex_t *origin = (side == 0) ? line->v1 : line->v2;
-		float dx = FIXED2FLOAT(seg->v1->x - origin->x);
-		float dy = FIXED2FLOAT(seg->v1->y - origin->y);
-		seg->offset = FLOAT2FIXED(sqrt(dx * dx + dy * dy));
+				if (linedef->sidenum[side] != NO_INDEX)
+				{
+					seg->frontsector = sides[linedef->sidenum[side]].sector;
+				}
+				else
+				{
+					seg->frontsector = nullptr;
+					fmt::print(stderr, "");
+				}
+
+				if ((linedef->flags & ML_TWOSIDED) &&
+				    (linedef->sidenum[side ^ 1] != NO_INDEX))
+					seg->backsector = sides[linedef->sidenum[side ^ 1]].sector;
+				else
+					seg->backsector = nullptr;
+
+				// a short version of the offset calculation in P_LoadSegs
+				vertex_t *origin = (side == 0) ? linedef->v1 : linedef->v2;
+				float dx = FIXED2FLOAT(seg->v1->x - origin->x);
+				float dy = FIXED2FLOAT(seg->v1->y - origin->y);
+				seg->offset = FLOAT2FIXED(sqrt(dx * dx + dy * dy));
+			}
+			else
+			{
+				seg->angle = 0;
+				seg->offset = 0;
+				seg->sidedef = nullptr;
+				seg->linedef = nullptr;
+				seg->frontsector = segs[subsectors[i].firstline].frontsector;
+				seg->backsector = seg->frontsector;
+			}
+		}
+
+		for (int j = 0; j < subsectors[i].numlines; j++)
+		{
+			seg_t* seg = &segs[subsectors[i].firstline + j];
+
+			if (seg->linedef)
+				seg->angle = R_PointToAngle2(seg->v1->x, seg->v1->y, seg->v2->x, seg->v2->y);
+		}
 	}
 
 	// Load nodes
@@ -2179,12 +2205,12 @@ void P_SetupLevel (const char *lumpname, int position)
 	switch (nodetype) {
 		case nodetype_t::XNOD:
 		case nodetype_t::ZNOD:
-			P_LoadXNOD(lumpnum+ML_NODES);
+			P_LoadXNOD(lumpnum+ML_NODES, nodetype == nodetype_t::ZNOD);
 			break;
 
 		case nodetype_t::XGLN:
 		case nodetype_t::ZGLN:
-			P_LoadXGLN(lumpnum+ML_SSECTORS);
+			P_LoadXGLN(lumpnum+ML_SSECTORS, nodetype == nodetype_t::ZGLN);
 			break;
 
 		case nodetype_t::DEEP:
