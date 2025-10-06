@@ -573,7 +573,7 @@ bool P_LoadXNOD(int lump, bool compressed)
 	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
 	byte* output = nullptr;
 
-	nonstd::make_scope_exit([&]{
+	auto guard = nonstd::make_scope_exit([&]{
 		Z_Free(data);
 		Z_Free(output);
 	});
@@ -712,7 +712,7 @@ bool P_LoadXGLN(int lump, bool compressed)
 	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
 	byte* output = nullptr;
 
-	nonstd::make_scope_exit([&]{
+	auto guard = nonstd::make_scope_exit([&]{
 		Z_Free(data);
 		Z_Free(output);
 	});
@@ -893,7 +893,7 @@ bool P_LoadXGL3(int lump, bool compressed)
 	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
 	byte* output = nullptr;
 
-	nonstd::make_scope_exit([&]{
+	auto guard = nonstd::make_scope_exit([&]{
 		Z_Free(data);
 		Z_Free(output);
 	});
@@ -1056,7 +1056,7 @@ bool P_LoadXGL3(int lump, bool compressed)
 		{
 			for (int k = 0; k < 4; k++)
 			{
-				node->bbox[j][k] = LELONG(*(int *)p); p += 4;
+				node->bbox[j][k] = LESHORT(*(short *)p)<<FRACBITS; p += 2;
 			}
 		}
 
@@ -1084,7 +1084,7 @@ enum class nodetype_t {
 
 nodetype_t P_CheckNodeType(int lump) {
 	byte *data = (byte *) W_CacheLumpNum(lump, PU_STATIC);
-	nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
+	auto guard = nonstd::make_scope_exit([&]{ Z_ChangeTag(data, PU_CACHE); });
 
 	static constexpr struct {
         std::string_view bytes;
