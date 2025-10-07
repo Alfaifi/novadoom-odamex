@@ -719,7 +719,7 @@ BEGIN_COMMAND(spawninv)
 	if (!stricmp(argv[1], "info"))
 	{
 		// Information about our currently-set spawn inventory.
-		PrintFmt("g_spawninv: {}\n", ::g_spawninv.cstring());
+		PrintFmt("g_spawninv: {}\n", ::g_spawninv.str());
 		PrintFmt("serialized: {}\n", SpawnInvSerialize(::gSpawnInv));
 
 		PrintFmt("Health: {}\n", ::gSpawnInv.health);

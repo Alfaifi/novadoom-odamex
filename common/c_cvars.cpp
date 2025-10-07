@@ -311,7 +311,8 @@ void cvar_t::EnableCallbacks ()
 
 static int STACK_ARGS sortcvars (const void *a, const void *b)
 {
-	return strcmp (((*(cvar_t **)a))->name(), ((*(cvar_t **)b))->name());
+	// yes this is horribly ugly - its also easier to search for in the future and fix it rather than the c-style casts it was using before
+	return (*static_cast<cvar_t *const *>(a))->name().compare((*static_cast<cvar_t *const *>(b))->name());
 }
 
 void cvar_t::FilterCompactCVars (TArray<cvar_t *> &cvars, DWORD filter)
@@ -381,7 +382,7 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 				}
 
 				chars = snprintf((char*)ptr, array_size, "\\%s\\%s",
-								cvar->name(), cvar->cstring());
+								cvar->name().c_str(), cvar->cstring());
 
 				ptr += chars;
 				array_size -= chars;
@@ -585,7 +586,7 @@ void cvar_t::C_ArchiveCVars (void *f)
 			|| (baseapp == server && (cvar->m_Flags & CVAR_SERVERARCHIVE)))
 		{
 			fmt::print((FILE *)f, "// {}\n", cvar->helptext());
-			fmt::print((FILE *)f, "set {} {}\n\n", C_QuoteString(cvar->name()).c_str(), C_QuoteString(cvar->cstring()).c_str());
+			fmt::print((FILE *)f, "set {} {}\n\n", C_QuoteString(cvar->name()), C_QuoteString(cvar->cstring()));
 		}
 		cvar = cvar->m_Next;
 	}
@@ -611,7 +612,7 @@ void cvar_t::cvarlist()
 					flags & CVAR_LATCH ? 'L' :
 					flags & CVAR_UNSETTABLE ? '*' : ' ',
 				var->name(),
-				var->cstring());
+				var->str());
 		var = var->m_Next;
 	}
 	PrintFmt(PRINT_HIGH, "{} cvars\n", count);
@@ -728,11 +729,11 @@ BEGIN_COMMAND (get)
 		// [Russell] - Don't make the user feel inadequate, tell
 		// them its either enabled, disabled or its other value
 		PrintFmt(PRINT_HIGH, "\"{}\" is {}{}.\n",
-				 var->name(), C_GetValueString(var), control);
+		         var->name(), C_GetValueString(var), control);
 
 		if (var->flags() & CVAR_LATCH && var->flags() & CVAR_MODIFIED)
 			PrintFmt(PRINT_HIGH, "\"{}\" will be changed to {}.\n",
-					 var->name(), C_GetLatchedValueString(var));
+			         var->name(), C_GetLatchedValueString(var));
 	}
 	else
 	{
@@ -772,11 +773,11 @@ BEGIN_COMMAND (toggle)
 		// [Russell] - Don't make the user feel inadequate, tell
 		// them its either enabled, disabled or its other value
 		PrintFmt(PRINT_HIGH, "\"{}\" is {}.\n",
-				 var->name(), C_GetValueString(var));
+		         var->name(), C_GetValueString(var));
 
 		if (var->flags() & CVAR_LATCH && var->flags() & CVAR_MODIFIED)
 			PrintFmt(PRINT_HIGH, "\"{}\" will be changed to {}.\n",
-					 var->name(), C_GetLatchedValueString(var));
+			         var->name(), C_GetLatchedValueString(var));
 	}
 }
 END_COMMAND (toggle)

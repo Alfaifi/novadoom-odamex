@@ -2295,16 +2295,15 @@ CVAR_FUNC_IMPL (sv_forcewater)
 {
 	if (gamestate == GS_LEVEL)
 	{
-		int i;
 		byte set = var ? 2 : 0;
 
-		for (i = 0; i < numsectors; i++)
+		for (sector_t& sector : R_GetSectors())
 		{
-			if (sectors[i].heightsec &&
-				!(sectors[i].heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC) &&
-				sectors[i].heightsec->waterzone != 1)
+			if (sector.heightsec &&
+				!(sector.heightsec->MoreFlags & SECF_IGNOREHEIGHTSEC) &&
+				sector.heightsec->waterzone != 1)
 
-				sectors[i].heightsec->waterzone = set;
+				sector.heightsec->waterzone = set;
 		}
 	}
 }
@@ -2316,14 +2315,10 @@ CVAR_FUNC_IMPL (sv_forcewater)
 */
 void P_SetupWorldState(void)
 {
-	sector_t* sector;
-	int i;
-
 	//	Init special SECTORs.
-	sector = sectors;
-	for (i = 0; i < numsectors; i++, sector++)
+	for (sector_t& sector : R_GetSectors())
 	{
-		map_format.init_sector_special(sector);
+		map_format.init_sector_special(&sector);
 	}
 
 	// Init other misc stuff
@@ -2664,10 +2659,9 @@ DScroller::DScroller (fixed_t dx, fixed_t dy, const line_t *l,
 // Initialize the scrollers
 static void P_SpawnScrollers(void)
 {
-	int i;
 	line_t *l = lines;
 
-	for (i = 0; i < numlines; i++, l++)
+	for (int i = 0; i < numlines; i++, l++)
 	{
 		map_format.spawn_scroller(l, i);
 	}
@@ -2738,12 +2732,9 @@ bool P_ArgToCrushType(byte arg)
 
 static void P_SpawnFriction(void)
 {
-	int i;
-	line_t *l = lines;
-
-	for (i = 0 ; i < numlines ; i++,l++)
+	for (line_t& l : R_GetLines())
 	{
-		map_format.spawn_friction(l);
+		map_format.spawn_friction(&l);
 	}
 }
 
@@ -3079,12 +3070,9 @@ AActor *P_GetPushThing (int s)
 
 static void P_SpawnPushers(void)
 {
-	int i;
-	line_t *l = lines;
-
-	for (i = 0; i < numlines; i++, l++)
+	for (line_t& l : R_GetLines())
 	{
-		map_format.spawn_pusher(l);
+		map_format.spawn_pusher(&l);
 	}
 }
 
