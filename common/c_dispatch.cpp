@@ -149,8 +149,8 @@ static int ListActionCommands (void)
 
 	for (i = 0; i < NUM_ACTIONS; i++)
 	{
-		Printf (PRINT_HIGH, "+%s\n", actionbits[i].name);
-		Printf (PRINT_HIGH, "-%s\n", actionbits[i].name);
+		PrintFmt(PRINT_HIGH, "+{}\n", actionbits[i].name);
+		PrintFmt(PRINT_HIGH, "-{}\n", actionbits[i].name);
 	}
 	return NUM_ACTIONS * 2;
 }
@@ -241,7 +241,7 @@ void C_DoCommand(std::string_view cmd, uint32_t key)
 	const char *realargs = data.data();
 	data = cmd;
 
-	while (token = ParseString(data))
+	while ((token = ParseString(data)))
 	{
 		args.push_back(*token);
 		argc++;
@@ -420,7 +420,7 @@ BEGIN_COMMAND (exec)
 		const char* cfgdir = Args.CheckValue("-cfgdir");
 		if (!cfgdir)
 		{
-			Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+			PrintFmt(PRINT_WARNING, "Could not find \"{}\"\n", argv[1]);
 			return;
 		}
 
@@ -430,7 +430,7 @@ BEGIN_COMMAND (exec)
 			found += ".cfg";
 			if (!M_FileExists(found))
 			{
-				Printf(PRINT_WARNING, "Could not find \"%s\"\n", argv[1]);
+				PrintFmt(PRINT_WARNING, "Could not find \"{}\"\n", argv[1]);
 				return;
 			}
 		}
@@ -438,20 +438,20 @@ BEGIN_COMMAND (exec)
 
 	if(std::find(exec_stack.begin(), exec_stack.end(), found) != exec_stack.end())
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
+		PrintFmt(PRINT_HIGH, "Ignoring recursive exec \"{}\"\n", found);
 		return;
 	}
 
 	if(exec_stack.size() >= MAX_EXEC_DEPTH)
 	{
-		Printf (PRINT_HIGH, "Ignoring recursive exec \"%s\"\n", found);
+		PrintFmt(PRINT_HIGH, "Ignoring recursive exec \"{}\"\n", found);
 		return;
 	}
 
 	std::ifstream ifs(found);
 	if(ifs.fail())
 	{
-		Printf(PRINT_WARNING, "Could not open \"%s\"\n", found);
+		PrintFmt(PRINT_WARNING, "Could not open \"{}\"\n", found);
 		return;
 	}
 
@@ -479,7 +479,7 @@ BEGIN_COMMAND (exec)
 		if(line.substr(0, 5) == "#else")
 		{
 			if(tag_stack.empty())
-				Printf(PRINT_HIGH, "Ignoring stray #else\n");
+				PrintFmt(PRINT_HIGH, "Ignoring stray #else\n");
 			else
 				tag_stack.back() = !tag_stack.back();
 
@@ -490,7 +490,7 @@ BEGIN_COMMAND (exec)
 		if(line.substr(0, 6) == "#endif")
 		{
 			if(tag_stack.empty())
-				Printf(PRINT_HIGH, "Ignoring stray #endif\n");
+				PrintFmt(PRINT_HIGH, "Ignoring stray #endif\n");
 			else
 				tag_stack.pop_back();
 
@@ -522,7 +522,7 @@ BEGIN_COMMAND (if)
 
 	if (!var)
 	{
-		Printf(PRINT_HIGH, "if: no cvar named %s\n", argv[1]);
+		PrintFmt(PRINT_HIGH, "if: no cvar named {}\n", argv[1]);
 		return;
 	}
 
@@ -538,8 +538,8 @@ BEGIN_COMMAND (if)
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "if: no operator %s\n", argv[2]);
-		Printf(PRINT_HIGH, "if: operators are eq, ne\n");
+		PrintFmt(PRINT_HIGH, "if: no operator {}\n", argv[2]);
+		PrintFmt(PRINT_HIGH, "if: operators are eq, ne\n");
 		return;
 	}
 
@@ -719,7 +719,7 @@ void DConsoleAlias::Run(uint32_t key)
 	}
 	else
 	{
-		Printf(PRINT_HIGH, "warning: ignored recursive alias");
+		PrintFmt(PRINT_HIGH, "warning: ignored recursive alias");
 	}
 }
 
@@ -848,8 +848,8 @@ BEGIN_COMMAND (alias)
 {
 	if (argc == 1)
 	{
-		Printf (PRINT_HIGH, "Current alias commands:\n");
-		DumpHash (true);
+		PrintFmt(PRINT_HIGH, "Current alias commands:\n");
+		DumpHash(true);
 	}
 	else
 	{
@@ -865,13 +865,13 @@ BEGIN_COMMAND (alias)
 			}
 			else
 			{
-				Printf(PRINT_HIGH, "%s: is a command, can not become an alias\n", argv[1]);
+				PrintFmt(PRINT_HIGH, "{}: is a command, can not become an alias\n", argv[1]);
 				return;
 			}
 		}
 		else if(argc == 2)
 		{
-			Printf(PRINT_HIGH, "%s: not an alias\n", argv[1]);
+			PrintFmt(PRINT_HIGH, "{}: not an alias\n", argv[1]);
 			return;
 		}
 
@@ -889,9 +889,9 @@ BEGIN_COMMAND (cmdlist)
 {
 	int count;
 
-	count = ListActionCommands ();
-	count += DumpHash (false);
-	Printf (PRINT_HIGH, "%d commands\n", count);
+	count = ListActionCommands();
+	count += DumpHash(false);
+	PrintFmt(PRINT_HIGH, "{} commands\n", count);
 }
 END_COMMAND (cmdlist)
 
@@ -945,10 +945,12 @@ BEGIN_COMMAND (actorlist)
 {
 	AActor *mo;
 	TThinkerIterator<AActor> iterator;
-	Printf (PRINT_HIGH, "Actors at level.time == %d:\n", level.time);
+	PrintFmt(PRINT_HIGH, "Actors at level.time == {}:\n", level.time);
 	while ( (mo = iterator.Next ()) )
 	{
-		Printf (PRINT_HIGH, "%s (%x, %x, %x | %x) state: %zd tics: %d\n", mobjinfo[mo->type].name, mo->x, mo->y, mo->z, mo->angle, mo->state - states, mo->tics);
+		PrintFmt(PRINT_HIGH, "{} ({:x}, {:x}, {:x} | {:x}) state: {} tics: {}\n", mobjinfo[mo->type].name,
+			static_cast<uint32_t>(mo->x), static_cast<uint32_t>(mo->y), static_cast<uint32_t>(mo->z),
+			static_cast<uint32_t>(mo->angle), mo->state - states, mo->tics);
 	}
 }
 END_COMMAND(actorlist)
@@ -965,13 +967,13 @@ BEGIN_COMMAND(logfile)
 		if ((argc == 1 && ::LOG_FILE == default_logname) ||
 		    (argc > 1 && ::LOG_FILE == argv[1]))
 		{
-			Printf("Log file %s already in use\n", ::LOG_FILE.c_str());
+			PrintFmt("Log file {} already in use\n", ::LOG_FILE.c_str());
 			return;
 		}
 
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		Printf("Log file %s closed on %s\n", ::LOG_FILE, asctime(timeinfo));
+		PrintFmt("Log file {} closed on {}\n", ::LOG_FILE, asctime(timeinfo));
 		::LOG.close();
 	}
 
@@ -980,7 +982,7 @@ BEGIN_COMMAND(logfile)
 
 	if (!::LOG.is_open())
 	{
-		Printf(PRINT_HIGH, "Unable to create logfile: %s\n", ::LOG_FILE);
+		PrintFmt(PRINT_HIGH, "Unable to create logfile: {}\n", ::LOG_FILE);
 	}
 	else
 	{
@@ -988,8 +990,8 @@ BEGIN_COMMAND(logfile)
 		timeinfo = localtime(&rawtime);
 		::LOG.flush();
 		::LOG << std::endl;
-		Printf(PRINT_HIGH, "Logging in file %s started %s\n", ::LOG_FILE,
-		       asctime(timeinfo));
+		PrintFmt(PRINT_HIGH, "Logging in file {} started {}\n", ::LOG_FILE,
+		         asctime(timeinfo));
 	}
 }
 END_COMMAND(logfile)
@@ -1002,7 +1004,7 @@ BEGIN_COMMAND (stoplog)
 	if (LOG.is_open()) {
 		time (&rawtime);
     	timeinfo = localtime (&rawtime);
-		Printf (PRINT_HIGH, "Logging to file %s stopped %s\n", LOG_FILE, asctime (timeinfo));
+		PrintFmt(PRINT_HIGH, "Logging to file {} stopped {}\n", LOG_FILE, asctime (timeinfo));
 		LOG.close();
 	}
 }
@@ -1014,7 +1016,7 @@ bool P_StartScript (AActor *who, line_t *where, int script, const char *map, int
 BEGIN_COMMAND (puke)
 {
 	if (argc < 2 || argc > 5) {
-		Printf (PRINT_HIGH, " puke <script> [arg1] [arg2] [arg3]\n");
+		PrintFmt(PRINT_HIGH, " puke <script> [arg1] [arg2] [arg3]\n");
 	} else {
 		int script = atoi (argv[1]);
 		int arg0=0, arg1=0, arg2=0;

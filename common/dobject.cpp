@@ -63,8 +63,6 @@ const TypeInfo *TypeInfo::FindType (const char *name)
 
 TypeInfo DObject::_StaticType("DObject", NULL, sizeof(DObject));
 
-bool DObject::Inactive;
-
 DObject::DObject ()
 {
 	ObjectFlags = 0;
@@ -95,8 +93,7 @@ DObject::~DObject ()
 			// object is queued for deletion, but is not being deleted
 			// by the destruction process, so remove it from the
 			// ToDestroy array and do other necessary stuff.
-			// does this need to be in reverse?
-			for (DObject*& obj : OUtil::reverse(ToDestroy))
+			for (auto& obj : OUtil::reverse(ToDestroy))
 			{
 				if (obj == this)
 				{
@@ -129,11 +126,15 @@ void DObject::BeginFrame ()
 
 void DObject::EndFrame ()
 {
-	for (DObject* obj : ToDestroy) {
-		if (obj) {
+	for (DObject* obj : ToDestroy)
+  {
+		if (obj)
+    {
 			obj->ObjectFlags |= OF_Cleanup;
 			delete obj;
 		}
+
+		ToDestroy.clear();
 	}
 	ToDestroy.clear();
 }

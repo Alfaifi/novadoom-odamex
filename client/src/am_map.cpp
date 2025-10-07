@@ -270,21 +270,21 @@ void AM_minOutWindowScale();
 BEGIN_COMMAND(am_grid)
 {
 	grid = !grid;
-	Printf(PRINT_HIGH, "%s\n", grid ? GStrings(AMSTR_GRIDON) : GStrings(AMSTR_GRIDOFF));
+	PrintFmt(PRINT_HIGH, "{}\n", grid ? GStrings(AMSTR_GRIDON) : GStrings(AMSTR_GRIDOFF));
 }
 END_COMMAND(am_grid)
 
 BEGIN_COMMAND(am_setmark)
 {
 	AM_addMark();
-	Printf(PRINT_HIGH, "%s %d\n", GStrings(AMSTR_MARKEDSPOT), markpointnum);
+	PrintFmt(PRINT_HIGH, "{} {}\n", GStrings(AMSTR_MARKEDSPOT), markpointnum);
 }
 END_COMMAND(am_setmark)
 
 BEGIN_COMMAND(am_clearmarks)
 {
 	AM_clearMarks();
-	Printf(PRINT_HIGH, "%s\n", GStrings(AMSTR_MARKSCLEARED));
+	PrintFmt(PRINT_HIGH, "{}\n", GStrings(AMSTR_MARKSCLEARED));
 }
 END_COMMAND(am_clearmarks)
 
@@ -305,8 +305,8 @@ BEGIN_COMMAND(am_togglefollow)
 {
 	am_followplayer = !am_followplayer;
 	f_oldloc.x = MAXINT;
-	Printf(PRINT_HIGH, "%s\n",
-	       am_followplayer ? GStrings(AMSTR_FOLLOWON) : GStrings(AMSTR_FOLLOWOFF));
+	PrintFmt(PRINT_HIGH, "{}\n",
+	         am_followplayer ? GStrings(AMSTR_FOLLOWON) : GStrings(AMSTR_FOLLOWOFF));
 }
 END_COMMAND(am_togglefollow)
 
