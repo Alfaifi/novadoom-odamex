@@ -590,7 +590,7 @@ static byte* P_DecompressNodes(byte* data, size_t len) {
 	{
 		int outlen_old = outlen;
 		outlen = 2 * outlen_old;
-		output = (byte*)M_Realloc(output, outlen);
+		output = (byte*)Z_Realloc(output, outlen, PU_STATIC, 0);
 		zstream->next_out = output + outlen_old;
 		zstream->avail_out = outlen - outlen_old;
 	}
