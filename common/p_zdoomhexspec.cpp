@@ -876,7 +876,7 @@ void P_SpawnZDoomScroller(line_t* l, int i)
 		else
 		{
 			if (l->id == 0)
-				Printf(PRINT_HIGH, "Line %d is missing a tag!", i);
+				PrintFmt(PRINT_HIGH, "Line {} is missing a tag!", i);
 
 			if (l->args[0] > 1024)
 				control = sides[*l->sidenum].sector - sectors;

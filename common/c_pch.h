@@ -25,7 +25,6 @@
 #include "farchive.h"
 #include "gi.h"
 #include "g_game.h"
-#include "huffman.h"
 #include "info.h"
 #include "i_net.h"
 #include "i_system.h"

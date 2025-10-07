@@ -1507,12 +1507,12 @@ void M_ChangeMessages (void)
 {
 	if (show_messages)
 	{
-		Printf (128, "%s\n", GStrings(MSGOFF));
+		PrintFmt(128, "{}\n", GStrings(MSGOFF));
 		show_messages.Set (0.0f);
 	}
 	else
 	{
-		Printf (128, "%s\n", GStrings(MSGON));
+		PrintFmt(128, "{}\n", GStrings(MSGON));
 		show_messages.Set (1.0f);
 	}
 }

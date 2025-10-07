@@ -96,11 +96,6 @@ translationref_t::translationref_t() :
 {
 }
 
-translationref_t::translationref_t(const translationref_t &other) :
-	m_table(other.m_table), m_player_id(other.m_player_id)
-{
-}
-
 translationref_t::translationref_t(const byte *table) :
 	m_table(table), m_player_id(-1)
 {
@@ -113,12 +108,6 @@ translationref_t::translationref_t(const byte *table, const int player_id) :
 
 shaderef_t::shaderef_t() :
 	m_colors(NULL), m_mapnum(-1), m_colormap(NULL), m_shademap(NULL)
-{
-}
-
-shaderef_t::shaderef_t(const shaderef_t &other) :
-	m_colors(other.m_colors), m_mapnum(other.m_mapnum),
-	m_colormap(other.m_colormap), m_shademap(other.m_shademap), m_dyncolormap(other.m_dyncolormap)
 {
 }
 
@@ -390,9 +379,9 @@ BEGIN_COMMAND(bumpgamma)
 	V_IncrementGammaLevel();
 
 	if (gammalevel.value() == 0.0f)
-	    Printf (PRINT_HIGH, "Gamma correction off\n");
+	    PrintFmt(PRINT_HIGH, "Gamma correction off\n");
 	else
-	    Printf (PRINT_HIGH, "Gamma correction level %g\n", gammalevel.value());
+	    PrintFmt(PRINT_HIGH, "Gamma correction level {:g}\n", gammalevel.value());
 }
 END_COMMAND(bumpgamma)
 
@@ -882,7 +871,7 @@ BEGIN_COMMAND (testblend)
 {
 	if (argc < 3)
 	{
-		Printf (PRINT_HIGH, "testblend <color> <amount>\n");
+		PrintFmt(PRINT_HIGH, "testblend <color> <amount>\n");
 	}
 	else
 	{
@@ -898,7 +887,7 @@ BEGIN_COMMAND (testfade)
 {
 	if (argc < 2)
 	{
-		Printf (PRINT_HIGH, "testfade <color>\n");
+		PrintFmt(PRINT_HIGH, "testfade <color>\n");
 	}
 	else
 	{
@@ -1076,7 +1065,7 @@ BEGIN_COMMAND (testcolor)
 {
 	if (argc < 2)
 	{
-		Printf (PRINT_HIGH, "testcolor <color>\n");
+		PrintFmt(PRINT_HIGH, "testcolor <color>\n");
 	}
 	else
 	{

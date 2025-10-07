@@ -201,7 +201,7 @@ private:
 
 	void RemoveFromArray ();
 
-	static bool Inactive;
+	static inline bool Inactive;
 	size_t Index;
 };
 

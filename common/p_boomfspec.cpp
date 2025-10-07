@@ -1807,7 +1807,7 @@ void P_SpawnCompatibleScroller(line_t* l, int i)
 	case 1024: // special 255 with tag control
 	case 2084:
 		if (l->id == 0)
-			Printf(PRINT_HIGH, "Line %d is missing a tag!", i);
+			PrintFmt(PRINT_HIGH, "Line {} is missing a tag!", i);
 
 		if (special == 1026 || special == 2086)
 			accel = 1;
