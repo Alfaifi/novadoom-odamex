@@ -504,11 +504,11 @@ cvar_t *cvar_t::FindCVar (std::string_view var_name, cvar_t **prev)
 {
 	cvar_t *var;
 
-	if (var_name == NULL)
-		return NULL;
+	if (var_name.empty())
+		return nullptr;
 
 	var = ad.GetCVars();
-	*prev = NULL;
+	*prev = nullptr;
 	while (var)
 	{
 		if (iequals(var->m_Name, var_name))
