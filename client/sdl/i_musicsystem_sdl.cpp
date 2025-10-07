@@ -223,8 +223,8 @@ void SdlMixerMusicSystem::_RegisterSong(byte* data, size_t length)
 	FILE* fp = fopen(TEMP_MIDI, "wb+");
 	if (!fp)
 	{
-		Printf(PRINT_WARNING,
-		       "Could not open temporary music file %s, not playing track\n", TEMP_MIDI);
+		PrintFmt(PRINT_WARNING,
+		         "Could not open temporary music file {}, not playing track\n", TEMP_MIDI);
 		return;
 	}
 
@@ -251,7 +251,7 @@ void SdlMixerMusicSystem::_RegisterSong(byte* data, size_t length)
 
 	if (!m_registeredSong.Track)
 	{
-		Printf(PRINT_WARNING, "Mix_LoadMUSW: %s\n", Mix_GetError());
+		PrintFmt(PRINT_WARNING, "Mix_LoadMUSW: {}\n", Mix_GetError());
 		return;
 	}
 
