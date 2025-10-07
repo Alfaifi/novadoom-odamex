@@ -59,8 +59,8 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position);
 void P_SpawnAvatars();
 void P_TranslateTeleportThings();
 
-unsigned int P_TranslateCompatibleLineFlags(const unsigned int flags, const bool reserved);
-unsigned int P_TranslateZDoomLineFlags(const unsigned int flags);
+uint32_t P_TranslateCompatibleLineFlags(const uint32_t flags, const bool reserved);
+uint32_t P_TranslateZDoomLineFlags(const uint32_t flags);
 void P_SpawnCompatibleSectorSpecial(sector_t* sector);
 
 static void P_SetupLevelFloorPlane(sector_t *sector);
@@ -319,16 +319,16 @@ void P_LoadSubsectors(int lump, bool isdeepbsp = false)
 	if (isdeepbsp) {
 		for (i = 0; i < numsubsectors; i++)
 		{
-			subsectors[i].numlines = LESHORT(((mapsubsector_deepbsp_t *)data)[i].numsegs);
-			subsectors[i].firstline = (unsigned int)LELONG(((mapsubsector_deepbsp_t *)data)[i].firstseg);
+			subsectors[i].numlines = (uint32_t)LESHORT(((mapsubsector_deepbsp_t *)data)[i].numsegs);
+			subsectors[i].firstline = (uint32_t)LELONG(((mapsubsector_deepbsp_t *)data)[i].firstseg);
 		}
 	}
 	else
 	{
 		for (i = 0; i < numsubsectors; i++)
 		{
-			subsectors[i].numlines = (unsigned short)LESHORT(((mapsubsector_t *)data)[i].numsegs);
-			subsectors[i].firstline = (unsigned short)LESHORT(((mapsubsector_t *)data)[i].firstseg);
+			subsectors[i].numlines = (uint16_t)LESHORT(((mapsubsector_t *)data)[i].numsegs);
+			subsectors[i].firstline = (uint16_t)LESHORT(((mapsubsector_t *)data)[i].firstseg);
 		}
 	}
 
@@ -578,7 +578,7 @@ static byte* P_DecompressNodes(byte* data, size_t len) {
 	zstream = (z_stream*)M_Malloc(sizeof(*zstream));
 	memset(zstream, 0, sizeof(*zstream));
 	zstream->next_in = data + 4;
-	zstream->avail_in = len - 4;
+	zstream->avail_in = static_cast<uInt>(len - 4);
 	zstream->next_out = output;
 	zstream->avail_out = outlen;
 
@@ -609,16 +609,16 @@ static byte* P_DecompressNodes(byte* data, size_t len) {
 }
 
 byte* P_LoadSegs_XNOD(byte* p) {
-	numsegs = LELONG(*(unsigned int *)p); p += 4;
+	numsegs = LELONG(*(uint32_t *)p); p += 4;
 	segs = (seg_t *) Z_Malloc(numsegs * sizeof(*segs), PU_LEVEL, 0);
 	memset(segs, 0, numsegs * sizeof(*segs));
 
 	for (int i = 0; i < numsegs; i++)
 	{
-		unsigned int v1 = LELONG(*(unsigned int *)p); p += 4;
-		unsigned int v2 = LELONG(*(unsigned int *)p); p += 4;
-		unsigned short ld = LESHORT(*(unsigned short *)p); p += 2;
-		unsigned char side = *(unsigned char *)p; p += 1;
+		uint32_t v1 = LELONG(*(uint32_t *)p); p += 4;
+		uint32_t v2 = LELONG(*(uint32_t *)p); p += 4;
+		uint16_t ld = LESHORT(*(uint16_t *)p); p += 2;
+		uint8_t side = *(uint8_t *)p; p += 1;
 
 		if (side != 0 && side != 1)
 			side = 1;
@@ -658,7 +658,7 @@ byte* P_LoadSegs_XGL(byte* p)
         "P_LoadSegs_XGL can only be instantiated with uint16_t or uint32_t"
     );
 
-	numsegs = LELONG(*(unsigned int *)p); p += 4;
+	numsegs = LELONG(*(uint32_t *)p); p += 4;
 	segs = (seg_t *) Z_Malloc(numsegs * sizeof(*segs), PU_LEVEL, 0);
 	memset(segs, 0, numsegs * sizeof(*segs));
 
@@ -666,18 +666,18 @@ byte* P_LoadSegs_XGL(byte* p)
 	{
 		for (int j = 0; j < subsectors[i].numlines; j++)
 		{
-			uint32_t v1 = LELONG(*(unsigned int *)p); p += 4;
-			uint32_t partner = LELONG(*(unsigned int *)p); p += 4;
-			LineType line;
+			uint32_t v1 = LELONG(*(uint32_t *)p); p += 4;
+			uint32_t partner = LELONG(*(uint32_t *)p); p += 4;
+			LineType ld;
 			if constexpr (std::is_same_v<LineType, uint32_t>)
 			{
-				line = LELONG(*(unsigned int *)p); p += 4;
+				ld = LELONG(*(uint32_t *)p); p += 4;
 			}
 			else
 			{
-				line = LESHORT(*(unsigned short *)p); p += 2;
+				ld = LESHORT(*(uint16_t *)p); p += 2;
 			}
-			uint8_t side = *(unsigned char *)p; p += 1;
+			uint8_t side = *(uint8_t *)p; p += 1;
 
 			seg_t* seg = &segs[subsectors[i].firstline + j];
 
@@ -687,26 +687,26 @@ byte* P_LoadSegs_XGL(byte* p)
 			else
 				seg[-1].v2 = seg->v1;
 
-			if (line != std::numeric_limits<LineType>::max())
+			if (ld != std::numeric_limits<LineType>::max())
 			{
-				if (line >= numlines)
+				if (ld >= numlines)
 				{
-					I_Error("P_LoadSegs_XGL: seg {}, {} references a non-existent linedef {}", i, j, line);
+					I_Error("P_LoadSegs_XGL: seg {}, {} references a non-existent linedef {}", i, j, ld);
 				}
 
-				line_t* linedef = &lines[line];
-				seg->linedef = linedef;
+				line_t* line = &lines[ld];
+				seg->linedef = line;
 
 				if (side != 0 && side != 1)
 				{
 					I_Error("P_LoadSegs_XGL: seg {}, {} references a non-existent sidedef {}", i, j, side);
 				}
 
-				seg->sidedef = &sides[linedef->sidenum[side]];
+				seg->sidedef = &sides[line->sidenum[side]];
 
-				if (linedef->sidenum[side] != NO_INDEX)
+				if (line->sidenum[side] != NO_INDEX)
 				{
-					seg->frontsector = sides[linedef->sidenum[side]].sector;
+					seg->frontsector = sides[line->sidenum[side]].sector;
 				}
 				else
 				{
@@ -714,14 +714,14 @@ byte* P_LoadSegs_XGL(byte* p)
 					fmt::print(stderr, "P_LoadSegs_XGL: front of seg {}, {} has no sidedef\n", i, j);
 				}
 
-				if ((linedef->flags & ML_TWOSIDED) &&
-				    (linedef->sidenum[side ^ 1] != NO_INDEX))
-					seg->backsector = sides[linedef->sidenum[side ^ 1]].sector;
+				if ((line->flags & ML_TWOSIDED) &&
+				    (line->sidenum[side ^ 1] != NO_INDEX))
+					seg->backsector = sides[line->sidenum[side ^ 1]].sector;
 				else
 					seg->backsector = nullptr;
 
 				// a short version of the offset calculation in P_LoadSegs
-				vertex_t *origin = (side == 0) ? linedef->v1 : linedef->v2;
+				vertex_t *origin = (side == 0) ? line->v1 : line->v2;
 				float dx = FIXED2FLOAT(seg->v1->x - origin->x);
 				float dy = FIXED2FLOAT(seg->v1->y - origin->y);
 				seg->offset = FLOAT2FIXED(sqrt(dx * dx + dy * dy));
@@ -787,19 +787,19 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 	}
 
 	// Load vertices
-	unsigned int numorgvert = LELONG(*(unsigned int *)p); p += 4;
-	unsigned int numnewvert = LELONG(*(unsigned int *)p); p += 4;
+	uint32_t numorgvert = LELONG(*(uint32_t *)p); p += 4;
+	uint32_t numnewvert = LELONG(*(uint32_t *)p); p += 4;
 
 	vertex_t *newvert = (vertex_t *) Z_Malloc((numorgvert + numnewvert)*sizeof(*newvert), PU_LEVEL, 0);
 
 	memcpy(newvert, vertexes, numorgvert*sizeof(*newvert));
 	memset(&newvert[numorgvert], 0, numnewvert * sizeof(*newvert));
 
-	for (unsigned int i = 0; i < numnewvert; i++)
+	for (uint32_t i = 0; i < numnewvert; i++)
 	{
 		vertex_t *v = &newvert[numorgvert+i];
-		v->x = LELONG(*(int *)p); p += 4;
-		v->y = LELONG(*(int *)p); p += 4;
+		v->x = LELONG(*(int32_t *)p); p += 4;
+		v->y = LELONG(*(int32_t *)p); p += 4;
 	}
 
 	// Adjust linedefs - since we reallocated the vertex array,
@@ -818,16 +818,16 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 
 	// Load subsectors
 
-	numsubsectors = LELONG(*(unsigned int *)p); p += 4;
+	numsubsectors = LELONG(*(uint32_t *)p); p += 4;
 	subsectors = (subsector_t *) Z_Malloc(numsubsectors * sizeof(*subsectors), PU_LEVEL, 0);
 	memset(subsectors, 0, numsubsectors * sizeof(*subsectors));
 
-	unsigned int first_seg = 0;
+	uint32_t first_seg = 0;
 
 	for (int i = 0; i < numsubsectors; i++)
 	{
 		subsectors[i].firstline = first_seg;
-		subsectors[i].numlines = LELONG(*(unsigned int *)p); p += 4;
+		subsectors[i].numlines = LELONG(*(uint32_t *)p); p += 4;
 		first_seg += subsectors[i].numlines;
 	}
 
@@ -842,7 +842,7 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 
 	// Load nodes
 
-	numnodes = LELONG(*(unsigned int *)p); p += 4;
+	numnodes = LELONG(*(uint32_t *)p); p += 4;
 	nodes = (node_t *) Z_Malloc(numnodes * sizeof(*nodes), PU_LEVEL, 0);
 	memset(nodes, 0, numnodes * sizeof(*nodes));
 
@@ -852,30 +852,30 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 
 		if (nodetype == nodetype_t::XGL3 || nodetype == nodetype_t::ZGL3)
 		{
-			node->x = LELONG(*(int *)p); p += 4;
-			node->y = LELONG(*(int *)p); p += 4;
-			node->dx = LELONG(*(int *)p); p += 4;
-			node->dy = LELONG(*(int *)p); p += 4;
+			node->x = LELONG(*(int32_t *)p); p += 4;
+			node->y = LELONG(*(int32_t *)p); p += 4;
+			node->dx = LELONG(*(int32_t *)p); p += 4;
+			node->dy = LELONG(*(int32_t *)p); p += 4;
 		}
 		else
 		{
-			node->x = LESHORT(*(short *)p)<<FRACBITS; p += 2;
-			node->y = LESHORT(*(short *)p)<<FRACBITS; p += 2;
-			node->dx = LESHORT(*(short *)p)<<FRACBITS; p += 2;
-			node->dy = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+			node->x = LESHORT(*(int16_t *)p)<<FRACBITS; p += 2;
+			node->y = LESHORT(*(int16_t *)p)<<FRACBITS; p += 2;
+			node->dx = LESHORT(*(int16_t *)p)<<FRACBITS; p += 2;
+			node->dy = LESHORT(*(int16_t *)p)<<FRACBITS; p += 2;
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
 			for (int k = 0; k < 4; k++)
 			{
-				node->bbox[j][k] = LESHORT(*(short *)p)<<FRACBITS; p += 2;
+				node->bbox[j][k] = LESHORT(*(int16_t *)p)<<FRACBITS; p += 2;
 			}
 		}
 
 		for (int j = 0; j < 2; j++)
 		{
-			node->children[j] = LELONG(*(unsigned int *)p); p += 4;
+			node->children[j] = LELONG(*(uint32_t *)p); p += 4;
 		}
 	}
 }
