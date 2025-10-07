@@ -176,7 +176,7 @@ class OZone
 		block.fileLine.file = fileline.file;
 		block.fileLine.line = fileline.line;
 
-		m_heap.insert(std::make_pair(ptr, block));
+		m_heap.emplace(ptr, block);
 		if (block.user != NULL)
 		{
 			*block.user = ptr;
