@@ -767,11 +767,11 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 		}
 	}();
 	byte *data = static_cast<byte *>(W_CacheLumpNum(lump, PU_STATIC));
-	byte* output = nullptr;
+	byte* data_decompressed = nullptr;
 
 	auto guard = nonstd::make_scope_exit([&]{
 		Z_Free(data);
-		Z_Free(output);
+		Z_Free(data_decompressed);
 	});
 
 	byte *p;
@@ -779,7 +779,7 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 	// adapted from Crispy Doom
 	if (compressed)
 	{
-		p = output = P_DecompressNodes(data, W_LumpLength(lump));
+		p = data_decompressed = P_DecompressNodes(data, W_LumpLength(lump));
 	}
 	else
 	{
