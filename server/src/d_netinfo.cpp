@@ -40,7 +40,7 @@ int D_GenderToInt (const char *gender)
 		return GENDER_MALE;
 }
 
-bool SetServerVar (const char *name, const char *value)
+bool SetServerVar (std::string_view name, const char *value)
 {
 	cvar_t *dummy;
 	cvar_t *var = cvar_t::FindCVar (name, &dummy);

@@ -309,25 +309,16 @@ void cvar_t::EnableCallbacks ()
 	}
 }
 
-static int STACK_ARGS sortcvars (const void *a, const void *b)
-{
-	// yes this is horribly ugly - its also easier to search for in the future and fix it rather than the c-style casts it was using before
-	return (*static_cast<cvar_t *const *>(a))->name().compare((*static_cast<cvar_t *const *>(b))->name());
-}
-
-void cvar_t::FilterCompactCVars (TArray<cvar_t *> &cvars, DWORD filter)
+void cvar_t::FilterCompactCVars (std::vector<cvar_t *> &cvars, DWORD filter)
 {
 	cvar_t *cvar = ad.GetCVars();
 	while (cvar)
 	{
 		if (cvar->m_Flags & filter)
-			cvars.Push (cvar);
+			cvars.push_back(cvar);
 		cvar = cvar->m_Next;
 	}
-	if (cvars.Size () > 0)
-	{
-		qsort (&cvars[0], cvars.Size (), sizeof(cvar_t *), sortcvars);
-	}
+	std::sort(cvars.begin(), cvars.end(), [](const cvar_t* a, const cvar_t* b){ return a->name().compare(b->name()); });
 }
 
 // Uses snprintf's return value (number of chars written) to advance
@@ -339,24 +330,23 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 	if (array_size <= 0)
 		return;
 
-	cvar_t *cvar = ad.GetCVars();
 	byte *ptr = *demo_p;
 	int chars;
 
 	if (compact)
 	{
-		TArray<cvar_t *> cvars;
+		std::vector<cvar_t *> cvars;
 		chars = snprintf((char*)ptr, array_size, "\\\\%ux", (unsigned int)filter);
 
 		ptr += chars;
 		array_size -= chars;
 
-		FilterCompactCVars (cvars, filter);
-		while (cvars.Pop (cvar))
+		FilterCompactCVars(cvars, filter);
+		for (const cvar_t* cvar : cvars)
 		{
 			if (array_size <= 0)
 			{
-				Printf(PRINT_WARNING, "Warning: Saved Cvars exceed %lu bytes, no more cvars will be written.\n", array_size);
+				PrintFmt(PRINT_WARNING, "Warning: Saved Cvars exceed {} bytes, no more cvars will be written.\n", array_size);
 				return;
 			}
 
@@ -368,16 +358,16 @@ void cvar_t::C_WriteCVars (byte **demo_p, DWORD filter, size_t array_size, bool 
 	}
 	else
 	{
-		cvar = ad.GetCVars();
+		cvar_t *cvar = ad.GetCVars();
 		while (cvar)
 		{
 			if (cvar->m_Flags & filter)
 			{
 				if (array_size <= 0)
 				{
-					Printf(PRINT_WARNING, "Saved Cvars exceed %lu bytes, no more "
-					       "cvars will be written.\n",
-					       array_size);
+					PrintFmt(PRINT_WARNING, "Saved Cvars exceed {} bytes, no more "
+					         "cvars will be written.\n",
+					         array_size);
 					return;
 				}
 
@@ -404,8 +394,7 @@ void cvar_t::C_ReadCVars (byte **demo_p)
 
 	if (*ptr == '\\')
 	{	// compact mode
-		TArray<cvar_t *> cvars;
-		cvar_t *cvar;
+		std::vector<cvar_t *> cvars;
 		DWORD filter;
 
 		ptr++;
@@ -417,7 +406,7 @@ void cvar_t::C_ReadCVars (byte **demo_p)
 
 		FilterCompactCVars (cvars, filter);
 
-		while (cvars.Pop (cvar))
+		for (cvar_t* cvar : cvars)
 		{
 			breakpt = strchr (ptr, '\\');
 			if (breakpt)
@@ -511,7 +500,7 @@ void cvar_t::C_RestoreCVars (void)
 	UnlatchCVars();
 }
 
-cvar_t *cvar_t::FindCVar (const char *var_name, cvar_t **prev)
+cvar_t *cvar_t::FindCVar (std::string_view var_name, cvar_t **prev)
 {
 	cvar_t *var;
 
@@ -585,8 +574,8 @@ void cvar_t::C_ArchiveCVars (void *f)
 		if ((baseapp == client && (cvar->m_Flags & CVAR_CLIENTARCHIVE))
 			|| (baseapp == server && (cvar->m_Flags & CVAR_SERVERARCHIVE)))
 		{
-			fprintf ((FILE *)f, "// %s\n", cvar->helptext());
-			fprintf ((FILE *)f, "set %s %s\n\n", C_QuoteString(cvar->name()).c_str(), C_QuoteString(cvar->str()).c_str());
+			fmt::print((FILE *)f, "// {}\n", cvar->helptext());
+			fmt::print((FILE *)f, "set {} {}\n\n", C_QuoteString(cvar->name()), C_QuoteString(cvar->str()));
 		}
 		cvar = cvar->m_Next;
 	}

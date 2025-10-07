@@ -58,7 +58,7 @@ bool	IsRealNum(const char* str);
 
 // [Russell] Returns 0 if strings are the same, optional parameter for case
 // sensitivity
-bool iequals(const std::string &, const std::string &);
+bool iequals(std::string_view, std::string_view);
 
 size_t  StdStringFind(const std::string& haystack, const std::string& needle,
     size_t pos = 0, size_t n = std::string::npos, bool CIS = false);
