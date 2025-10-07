@@ -66,10 +66,18 @@ TypeInfo DObject::_StaticType("DObject", NULL, sizeof(DObject));
 DObject::DObject ()
 {
 	ObjectFlags = 0;
-	if (FreeIndices.Pop (Index))
+
+	if (!FreeIndices.empty())
+	{
+		Index = FreeIndices.back();
 		Objects[Index] = this;
+		FreeIndices.pop_back();
+	}
 	else
-		Index = Objects.Push (this);
+	{
+		Index = Objects.size();
+		Objects.push_back(this);
+	}
 }
 
 DObject::~DObject ()
@@ -118,21 +126,17 @@ void DObject::BeginFrame ()
 
 void DObject::EndFrame ()
 {
-	if (!ToDestroy.empty())
-	{
-		//Printf (PRINT_HIGH, "Destroyed %d objects\n", ToDestroy.Size());
-
-		for (DObject* obj : ToDestroy)
-		{
-			if (obj)
-			{
-				obj->ObjectFlags |= OF_Cleanup;
-				delete obj;
-			}
+	for (DObject* obj : ToDestroy)
+  {
+		if (obj)
+    {
+			obj->ObjectFlags |= OF_Cleanup;
+			delete obj;
 		}
 
 		ToDestroy.clear();
 	}
+	ToDestroy.clear();
 }
 
 void DObject::RemoveFromArray ()
@@ -142,15 +146,14 @@ void DObject::RemoveFromArray ()
 	if(Inactive)
 		return;
 
-	if (Objects.Size () == Index + 1)
+	if (Objects.size () == Index + 1)
 	{
-		DObject *dummy;
-		Objects.Pop (dummy);
+		Objects.pop_back();
 	}
-	else if (Objects.Size() > Index + 1)
+	else if (Objects.size() > Index + 1)
 	{
 		Objects[Index] = NULL;
-		FreeIndices.Push (Index);
+		FreeIndices.push_back(Index);
 	}
 }
 

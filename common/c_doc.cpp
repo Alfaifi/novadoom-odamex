@@ -208,11 +208,6 @@ static void HTMLFooter(std::string& out)
 	      "</html>";
 }
 
-static bool CvarCmp(const cvar_t* a, const cvar_t* b)
-{
-	return a->name().compare(b->name()) < 0;
-}
-
 /**
  * @brief Return a "view" of Cvars sorted by name.
  */
@@ -227,7 +222,7 @@ static CvarView GetSortedCvarView()
 		var = var->GetNext();
 	}
 
-	std::sort(view.begin(), view.end(), CvarCmp);
+	std::sort(view.begin(), view.end(), [](const cvar_t* a, const cvar_t* b){ return a->name().compare(b->name()) < 0; });
 	return view;
 }
 
