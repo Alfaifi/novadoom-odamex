@@ -63,9 +63,12 @@ uint32_t P_TranslateCompatibleLineFlags(const uint32_t flags, const bool reserve
 uint32_t P_TranslateZDoomLineFlags(const uint32_t flags);
 void P_SpawnCompatibleSectorSpecial(sector_t* sector);
 
-static void P_SetupLevelFloorPlane(sector_t *sector);
-static void P_SetupLevelCeilingPlane(sector_t *sector);
-static void P_SetupSlopes();
+namespace {
+void P_SetupLevelFloorPlane(sector_t *sector);
+void P_SetupLevelCeilingPlane(sector_t *sector);
+void P_SetupSlopes();
+}
+
 void P_InvertPlane(plane_t *plane);
 void P_SetupWorldState();
 int P_TranslateSectorSpecial(int special);
@@ -144,8 +147,10 @@ std::vector<mapthing2_t> DeathMatchStarts;
 std::vector<mapthing2_t> playerstarts;
 std::vector<mapthing2_t> voodoostarts;
 
+namespace {
+
 // For sorting player starts
-static bool cmpPlayerNum(mapthing2_t i, mapthing2_t j)
+bool cmpPlayerNum(mapthing2_t i, mapthing2_t j)
 {
 	return P_GetMapThingPlayerNumber(&i) < P_GetMapThingPlayerNumber(&j);
 }
@@ -564,7 +569,7 @@ void P_LoadNodes_DeePBSP(int lump)
 	Z_Free (data - 8);
 }
 
-static byte* P_DecompressNodes(byte* data, size_t len) {
+byte* P_DecompressNodes(byte* data, size_t len) {
 	byte* output = nullptr;
 	int outlen, err;
 	z_stream *zstream;
@@ -1297,7 +1302,7 @@ void P_LoadSideDefs (int lump)
 // The texture name should contain 4 hexadecimal byte values
 // in the following order: alpha, red, green, blue.
 //
-static argb_t P_GetColorFromTextureName(const char* name)
+argb_t P_GetColorFromTextureName(const char* name)
 {
 	// work around name not being a properly terminated string
 	const OLumpName name2 = name;
@@ -1310,85 +1315,6 @@ static argb_t P_GetColorFromTextureName(const char* name)
 	const int b = value & 0xFF;
 
 	return argb_t(a, r, g, b);
-}
-
-
-//
-// P_SetTransferHeightBlends
-//
-// Reads the texture name from the mapsidedef for the given side. If the
-// texture name matches the name of a valid Boom colormap lump, the
-// sidedef's texture value is cleared and the colormap's blend color
-// value is used for the appropriate sector blend. If the texture name
-// is an ARGB value in hexadecimal, that value is used for the appropriate
-// sector blend.
-//
-void P_SetTransferHeightBlends(side_t* sd, const mapsidedef_t* msd)
-{
-	sector_t* sec = &sectors[LESHORT(msd->sector)];
-
-	// for each of the texture tiers (bottom, middle, and top)
-	for (int i = 0; i < 3; i++)
-	{
-		short* texture_num;
-		argb_t* blend_color;
-		const char* texture_name;
-
-		if (i == 0)				// bottom textures
-		{
-			texture_num = &sd->bottomtexture;
-			blend_color = &sec->bottommap;
-			texture_name = msd->bottomtexture;
-		}
-		else if (i == 1)		// mid textures
-		{
-			texture_num = &sd->midtexture;
-			blend_color = &sec->midmap;
-			texture_name = msd->midtexture;
-		}
-		else					// top textures
-		{
-			texture_num = &sd->toptexture;
-			blend_color = &sec->topmap;
-			texture_name = msd->toptexture;
-		}
-
-		*blend_color = argb_t(0, 255, 255, 255);
-		*texture_num = 0;
-
-		int colormap_index = R_ColormapNumForName(texture_name);
-		if (colormap_index != 0)
-		{
-			*blend_color = R_BlendForColormap(colormap_index);
-		}
-		else
-		{
-			*texture_num = R_CheckTextureNumForName(texture_name);
-			if (*texture_num == -1)
-			{
-				*texture_num = 0;
-				if (strnicmp(texture_name, "WATERMAP", 8) == 0)
-					*blend_color = argb_t(0x80, 0, 0x4F, 0xA5);
-				else
-					*blend_color = P_GetColorFromTextureName(texture_name);
-			}
-		}
-	}
-}
-
-//
-
-
-void SetTextureNoErr (short *texture, unsigned int *color, char *name)
-{
-	if ((*texture = R_CheckTextureNumForName (name)) == -1) {
-		char name2[9];
-		char *stop;
-		strncpy (name2, name, 8);
-		name2[8] = 0;
-		*color = strtoul (name2, &stop, 16);
-		*texture = 0;
-	}
 }
 
 // killough 4/4/98: delay using texture names until
@@ -1443,7 +1369,7 @@ typedef struct linelist_t        // type used to list lines in each block
 // It simply returns if the line is already in the block
 //
 
-static void AddBlockLine
+void AddBlockLine
 (
 	linelist_t **lists,
 	int *count,
@@ -1969,7 +1895,7 @@ void P_GroupLines (void)
 // Firelines (TM) is a Rezistered Trademark of MBF Productions
 //
 
-static void P_RemoveSlimeTrails()
+void P_RemoveSlimeTrails()
 {
 	byte* hit = (byte *)Z_Malloc(numvertexes, PU_LEVEL, 0);
 	memset(hit, 0, numvertexes * sizeof(byte));
@@ -2022,13 +1948,8 @@ void P_LoadBehavior (int lumpnum)
 	}
 }
 
-//
-// P_SetupLevel
-//
-extern polyblock_t **PolyBlockMap;
-
 // Hash the sector tags across the sectors and linedefs.
-static void P_InitTagLists(void)
+void P_InitTagLists(void)
 {
 	int i;
 
@@ -2052,6 +1973,143 @@ static void P_InitTagLists(void)
 		lines[j].firstid = i;
 	}
 }
+
+
+void P_SetupLevelFloorPlane(sector_t *sector)
+{
+	if (!sector)
+		return;
+
+	sector->floorplane.a = sector->floorplane.b = 0;
+	sector->floorplane.c = sector->floorplane.invc = FRACUNIT;
+	sector->floorplane.d = -sector->floorheight;
+	sector->floorplane.texx = sector->floorplane.texy = 0;
+	sector->floorplane.sector = sector;
+}
+
+void P_SetupLevelCeilingPlane(sector_t *sector)
+{
+	if (!sector)
+		return;
+
+	sector->ceilingplane.a = sector->ceilingplane.b = 0;
+	sector->ceilingplane.c = sector->ceilingplane.invc = -FRACUNIT;
+	sector->ceilingplane.d = sector->ceilingheight;
+	sector->ceilingplane.texx = sector->ceilingplane.texy = 0;
+	sector->ceilingplane.sector = sector;
+}
+
+//
+// P_SetupPlane()
+//
+// Takes a line with the special property Plane_Align and its facing sector
+// and calculates the planar equation for the slope formed by the floor or
+// ceiling of this sector.  The equation coefficients are stored in a plane_t
+// structure and saved either to the sector's ceilingplan or floorplane.
+//
+void P_SetupPlane(sector_t* sec, line_t* line, bool floor)
+{
+	if (!sec || !line || !line->backsector)
+		return;
+
+	// Find the vertex comprising the sector that is farthest from the
+	// slope's reference line
+
+	int bestdist = 0;
+	line_t** probe = sec->lines;
+	vertex_t *refvert = (*sec->lines)->v1;
+
+	for (int i = sec->linecount*2; i > 0; i--)
+	{
+		int dist;
+		vertex_t *vert;
+
+		// Do calculations with only the upper bits, because the lower ones
+		// are all zero, and we would overflow for a lot of distances if we
+		// kept them around.
+
+		if (i & 1)
+			vert = (*probe++)->v2;
+		else
+			vert = (*probe)->v1;
+		dist = abs (((line->v1->y - vert->y) >> FRACBITS) * (line->dx >> FRACBITS) -
+					((line->v1->x - vert->x) >> FRACBITS) * (line->dy >> FRACBITS));
+
+		if (dist > bestdist)
+		{
+			bestdist = dist;
+			refvert = vert;
+		}
+	}
+
+	const sector_t* refsec = line->frontsector == sec ? line->backsector : line->frontsector;
+	plane_t* srcplane = floor ? &sec->floorplane : &sec->ceilingplane;
+	fixed_t srcheight = floor ? sec->floorheight : sec->ceilingheight;
+	fixed_t destheight = floor ? refsec->floorheight : refsec->ceilingheight;
+
+	v3float_t p, v1, v2, cross;
+	M_SetVec3f(&p, line->v1->x, line->v1->y, destheight);
+	M_SetVec3f(&v1, line->dx, line->dy, 0);
+	M_SetVec3f(&v2, refvert->x - line->v1->x, refvert->y - line->v1->y, srcheight - destheight);
+
+	M_CrossProductVec3f(&cross, &v1, &v2);
+	M_NormalizeVec3f(&cross, &cross);
+
+	// Fix backward normals
+	if ((cross.z < 0 && floor == true) || (cross.z > 0 && floor == false))
+	{
+		cross.x = -cross.x;
+		cross.y = -cross.y;
+		cross.z = -cross.z;
+	}
+
+	srcplane->a = FLOAT2FIXED(cross.x);
+	srcplane->b = FLOAT2FIXED(cross.y);
+	srcplane->c = FLOAT2FIXED(cross.z);
+	srcplane->invc = FLOAT2FIXED(1.f/cross.z);
+	srcplane->d = -FixedMul(srcplane->a, line->v1->x) - FixedMul(srcplane->b, line->v1->y) - FixedMul(srcplane->c, destheight);
+	srcplane->texx = refvert->x;
+	srcplane->texy = refvert->y;
+}
+
+void P_SetupSlopes()
+{
+	for (int i = 0; i < numlines; i++)
+	{
+		line_t *line = &lines[i];
+
+		if ((map_format.getZDoom() && line->special == Plane_Align) ||
+		    (line->special >= 340 && line->special <= 347))
+		{
+			line->special = 0;
+			line->id = line->args[2];
+
+			// Floor plane?
+			int align_side = line->args[0] & 3;
+			if (align_side == 1)
+				P_SetupPlane(line->frontsector, line, true);
+			else if (align_side == 2)
+				P_SetupPlane(line->backsector, line, true);
+
+			// Ceiling plane?
+			align_side = line->args[1] & 3;
+			if (align_side == 0)
+				align_side = (line->args[0] >> 2) & 3;
+
+			if (align_side == 1)
+				P_SetupPlane(line->frontsector, line, false);
+			else if (align_side == 2)
+				P_SetupPlane(line->backsector, line, false);
+		}
+	}
+}
+
+} // namespace
+
+//
+// P_SetupLevel
+//
+extern polyblock_t **PolyBlockMap;
 
 // [RH] position indicates the start spot to spawn at
 void P_SetupLevel (const char *lumpname, int position)
@@ -2258,6 +2316,83 @@ void P_Init (void)
 	P_InitHorde();
 }
 
+//
+// P_SetTransferHeightBlends
+//
+// Reads the texture name from the mapsidedef for the given side. If the
+// texture name matches the name of a valid Boom colormap lump, the
+// sidedef's texture value is cleared and the colormap's blend color
+// value is used for the appropriate sector blend. If the texture name
+// is an ARGB value in hexadecimal, that value is used for the appropriate
+// sector blend.
+//
+void P_SetTransferHeightBlends(side_t* sd, const mapsidedef_t* msd)
+{
+	sector_t* sec = &sectors[LESHORT(msd->sector)];
+
+	// for each of the texture tiers (bottom, middle, and top)
+	for (int i = 0; i < 3; i++)
+	{
+		short* texture_num;
+		argb_t* blend_color;
+		const char* texture_name;
+
+		if (i == 0)				// bottom textures
+		{
+			texture_num = &sd->bottomtexture;
+			blend_color = &sec->bottommap;
+			texture_name = msd->bottomtexture;
+		}
+		else if (i == 1)		// mid textures
+		{
+			texture_num = &sd->midtexture;
+			blend_color = &sec->midmap;
+			texture_name = msd->midtexture;
+		}
+		else					// top textures
+		{
+			texture_num = &sd->toptexture;
+			blend_color = &sec->topmap;
+			texture_name = msd->toptexture;
+		}
+
+		*blend_color = argb_t(0, 255, 255, 255);
+		*texture_num = 0;
+
+		int colormap_index = R_ColormapNumForName(texture_name);
+		if (colormap_index != 0)
+		{
+			*blend_color = R_BlendForColormap(colormap_index);
+		}
+		else
+		{
+			*texture_num = R_CheckTextureNumForName(texture_name);
+			if (*texture_num == -1)
+			{
+				*texture_num = 0;
+				if (strnicmp(texture_name, "WATERMAP", 8) == 0)
+					*blend_color = argb_t(0x80, 0, 0x4F, 0xA5);
+				else
+					*blend_color = P_GetColorFromTextureName(texture_name);
+			}
+		}
+	}
+}
+
+//
+
+void SetTextureNoErr (short *texture, unsigned int *color, char *name)
+{
+	if ((*texture = R_CheckTextureNumForName (name)) == -1) {
+		char name2[9];
+		char *stop;
+		strncpy (name2, name, 8);
+		name2[8] = 0;
+		*color = strtoul (name2, &stop, 16);
+		*texture = 0;
+	}
+}
+
 CVAR_FUNC_IMPL(sv_intermissionlimit)
 {
 	if (G_IsCoopGame() && var < 10) {
@@ -2268,136 +2403,5 @@ CVAR_FUNC_IMPL(sv_intermissionlimit)
 
 	level.inttimeleft = var;
 }
-
-
-static void P_SetupLevelFloorPlane(sector_t *sector)
-{
-	if (!sector)
-		return;
-
-	sector->floorplane.a = sector->floorplane.b = 0;
-	sector->floorplane.c = sector->floorplane.invc = FRACUNIT;
-	sector->floorplane.d = -sector->floorheight;
-	sector->floorplane.texx = sector->floorplane.texy = 0;
-	sector->floorplane.sector = sector;
-}
-
-static void P_SetupLevelCeilingPlane(sector_t *sector)
-{
-	if (!sector)
-		return;
-
-	sector->ceilingplane.a = sector->ceilingplane.b = 0;
-	sector->ceilingplane.c = sector->ceilingplane.invc = -FRACUNIT;
-	sector->ceilingplane.d = sector->ceilingheight;
-	sector->ceilingplane.texx = sector->ceilingplane.texy = 0;
-	sector->ceilingplane.sector = sector;
-}
-
-//
-// P_SetupPlane()
-//
-// Takes a line with the special property Plane_Align and its facing sector
-// and calculates the planar equation for the slope formed by the floor or
-// ceiling of this sector.  The equation coefficients are stored in a plane_t
-// structure and saved either to the sector's ceilingplan or floorplane.
-//
-void P_SetupPlane(sector_t* sec, line_t* line, bool floor)
-{
-	if (!sec || !line || !line->backsector)
-		return;
-
-	// Find the vertex comprising the sector that is farthest from the
-	// slope's reference line
-
-	int bestdist = 0;
-	line_t** probe = sec->lines;
-	vertex_t *refvert = (*sec->lines)->v1;
-
-	for (int i = sec->linecount*2; i > 0; i--)
-	{
-		int dist;
-		vertex_t *vert;
-
-		// Do calculations with only the upper bits, because the lower ones
-		// are all zero, and we would overflow for a lot of distances if we
-		// kept them around.
-
-		if (i & 1)
-			vert = (*probe++)->v2;
-		else
-			vert = (*probe)->v1;
-		dist = abs (((line->v1->y - vert->y) >> FRACBITS) * (line->dx >> FRACBITS) -
-					((line->v1->x - vert->x) >> FRACBITS) * (line->dy >> FRACBITS));
-
-		if (dist > bestdist)
-		{
-			bestdist = dist;
-			refvert = vert;
-		}
-	}
-
-	const sector_t* refsec = line->frontsector == sec ? line->backsector : line->frontsector;
-	plane_t* srcplane = floor ? &sec->floorplane : &sec->ceilingplane;
-	fixed_t srcheight = floor ? sec->floorheight : sec->ceilingheight;
-	fixed_t destheight = floor ? refsec->floorheight : refsec->ceilingheight;
-
-	v3float_t p, v1, v2, cross;
-	M_SetVec3f(&p, line->v1->x, line->v1->y, destheight);
-	M_SetVec3f(&v1, line->dx, line->dy, 0);
-	M_SetVec3f(&v2, refvert->x - line->v1->x, refvert->y - line->v1->y, srcheight - destheight);
-
-	M_CrossProductVec3f(&cross, &v1, &v2);
-	M_NormalizeVec3f(&cross, &cross);
-
-	// Fix backward normals
-	if ((cross.z < 0 && floor == true) || (cross.z > 0 && floor == false))
-	{
-		cross.x = -cross.x;
-		cross.y = -cross.y;
-		cross.z = -cross.z;
-	}
-
-	srcplane->a = FLOAT2FIXED(cross.x);
-	srcplane->b = FLOAT2FIXED(cross.y);
-	srcplane->c = FLOAT2FIXED(cross.z);
-	srcplane->invc = FLOAT2FIXED(1.f/cross.z);
-	srcplane->d = -FixedMul(srcplane->a, line->v1->x) - FixedMul(srcplane->b, line->v1->y) - FixedMul(srcplane->c, destheight);
-	srcplane->texx = refvert->x;
-	srcplane->texy = refvert->y;
-}
-
-static void P_SetupSlopes()
-{
-	for (int i = 0; i < numlines; i++)
-	{
-		line_t *line = &lines[i];
-
-		if ((map_format.getZDoom() && line->special == Plane_Align) ||
-		    (line->special >= 340 && line->special <= 347))
-		{
-			line->special = 0;
-			line->id = line->args[2];
-
-			// Floor plane?
-			int align_side = line->args[0] & 3;
-			if (align_side == 1)
-				P_SetupPlane(line->frontsector, line, true);
-			else if (align_side == 2)
-				P_SetupPlane(line->backsector, line, true);
-
-			// Ceiling plane?
-			align_side = line->args[1] & 3;
-			if (align_side == 0)
-				align_side = (line->args[0] >> 2) & 3;
-
-			if (align_side == 1)
-				P_SetupPlane(line->frontsector, line, false);
-			else if (align_side == 2)
-				P_SetupPlane(line->backsector, line, false);
-		}
-	}
-}
-
 
 VERSION_CONTROL (p_setup_cpp, "$Id$")
