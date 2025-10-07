@@ -564,7 +564,7 @@ void P_LoadNodes_DeePBSP(int lump)
 	Z_Free (data - 8);
 }
 
-byte* decompressNodes(byte* data, size_t len) {
+static byte* P_DecompressNodes(byte* data, size_t len) {
 	byte* output = nullptr;
 	int outlen, err;
 	z_stream *zstream;
@@ -583,7 +583,7 @@ byte* decompressNodes(byte* data, size_t len) {
 	zstream->avail_out = outlen;
 
 	if (inflateInit(zstream) != Z_OK)
-		I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression initialization!");
+		I_Error("P_DecompressNodes: Error during ZDBSP nodes decompression initialization!");
 
 	// resize if output buffer runs full
 	while ((err = inflate(zstream, Z_SYNC_FLUSH)) == Z_OK)
@@ -596,13 +596,13 @@ byte* decompressNodes(byte* data, size_t len) {
 	}
 
 	if (err != Z_STREAM_END)
-		I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression!");
+		I_Error("P_DecompressNodes: Error during ZDBSP nodes decompression!");
 
-	fmt::print(stderr, "P_LoadXNOD: ZDBSP nodes compression ratio {:.3f}\n",
+	fmt::print(stderr, "P_DecompressNodes: ZDBSP nodes compression ratio {:.3f}\n",
 	           (float)zstream->total_out/zstream->total_in);
 
 	if (inflateEnd(zstream) != Z_OK)
-		I_Error("P_LoadXNOD: Error during ZDBSP nodes decompression shut-down!");
+		I_Error("P_DecompressNodes: Error during ZDBSP nodes decompression shut-down!");
 
 	M_Free(zstream);
 	return output;
@@ -691,7 +691,7 @@ byte* P_LoadSegs_XGL(byte* p)
 			{
 				if (line >= numlines)
 				{
-					I_Error("P_LoadXGLN: idk man bad seg or smth");
+					I_Error("P_LoadSegs_XGL: seg {}, {} references a non-existent linedef {}", i, j, line);
 				}
 
 				line_t* linedef = &lines[line];
@@ -699,7 +699,7 @@ byte* P_LoadSegs_XGL(byte* p)
 
 				if (side != 0 && side != 1)
 				{
-					I_Error("fasfasdf");
+					I_Error("P_LoadSegs_XGL: seg {}, {} references a non-existent sidedef {}", i, j, side);
 				}
 
 				seg->sidedef = &sides[linedef->sidenum[side]];
@@ -711,7 +711,7 @@ byte* P_LoadSegs_XGL(byte* p)
 				else
 				{
 					seg->frontsector = nullptr;
-					fmt::print(stderr, "");
+					fmt::print(stderr, "P_LoadSegs_XGL: front of seg {}, {} has no sidedef\n", i, j);
 				}
 
 				if ((linedef->flags & ML_TWOSIDED) &&
@@ -779,7 +779,7 @@ void P_LoadExtendedNodes(int lump, nodetype_t nodetype)
 	// adapted from Crispy Doom
 	if (compressed)
 	{
-		p = output = decompressNodes(data, W_LumpLength(lump));
+		p = output = P_DecompressNodes(data, W_LumpLength(lump));
 	}
 	else
 	{
