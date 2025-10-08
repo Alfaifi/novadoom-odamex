@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 			static constexpr std::string_view protocol = "odamex://";
 			std::string_view uri = argv[1];
 
-			if(uri.substr(0, protocol.size()) == protocol)
+			if(uri.substr(0, protocol.length()) == protocol)
 			{
 				std::string_view location = uri.substr(protocol.length());
 				size_t term = location.find_first_of('/');
