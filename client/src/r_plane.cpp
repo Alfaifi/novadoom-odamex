@@ -781,6 +781,7 @@ void R_DrawSkyBoxes()
 		R_ClearPlanes(false);
 		R_ClearClipSegs();
 
+		// Set up ceiling/floor clip arrays for this visplane.
 		for (i = pl->minx; i <= pl->maxx; i++)
 		{
 			if (pl->top[i] == (unsigned int)viewheight)
@@ -795,20 +796,21 @@ void R_DrawSkyBoxes()
 			}
 		}
 		
-		// Create a drawseg to clip sprites to the sky plane
+		// Create a drawseg to clip sprites to the sky plane.
 		R_ReallocDrawSegs();
-		ds_p->x1 = pl->minx;
-		ds_p->x2 = pl->maxx;
+		ds_p->x1 = 0;
+		ds_p->x2 = viewwidth - 1;
 		ds_p->silhouette = SIL_BOTH;
-		int count = pl->maxx - pl->minx + 1;
-		ds_p->sprbottomclip = sprclip_pool.alloc(count) - pl->minx;
-		ds_p->sprtopclip = sprclip_pool.alloc(count) - pl->minx;
 		ds_p->midposts = NULL;
 		ds_p->curline = NULL;
-		memcpy(ds_p->sprbottomclip + pl->minx, floorclip + pl->minx,
-		       (count) * sizeof(*ds_p->sprbottomclip));
-		memcpy(ds_p->sprtopclip + pl->minx, ceilingclip + pl->minx,
-		       (count) * sizeof(*ds_p->sprtopclip));
+
+		// [RK] Allocate full width clip arrays.
+		ds_p->sprbottomclip = sprclip_pool.alloc(viewwidth);
+		ds_p->sprtopclip = sprclip_pool.alloc(viewwidth);
+
+		// [RK] Copy visplane clip values into the arrays.
+		memcpy(ds_p->sprbottomclip, floorclip, viewwidth * sizeof(*ds_p->sprbottomclip));
+		memcpy(ds_p->sprtopclip, ceilingclip, viewwidth * sizeof(*ds_p->sprtopclip));
 		
 		firstvissprite = vissprite_p;
 		firstdrawseg = ds_p++;
