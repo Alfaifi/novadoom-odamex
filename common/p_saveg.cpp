@@ -229,7 +229,7 @@ void P_SerializeWorld (FArchive &arc)
 			arc >> sec.alwaysfake
 				>> sec.waterzone
 				>> SecActTarget
-				>> SkyBox
+				>> Skybox
 				>> sec.MoreFlags;
 
 			sec.floorplane.invc = FixedDiv(FRACUNIT, sec.floorplane.c);

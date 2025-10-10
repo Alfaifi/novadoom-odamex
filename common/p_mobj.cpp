@@ -3131,7 +3131,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 				}
 				else
 				{
-					Printf ("Can't find SkyViewpoint %d for sector %d\n", mthing->args[0],
+					PrintFmt ("Can't find SkyViewpoint {} for sector {}\n", mthing->args[0],
 				           sector - sectors);
 				}
 			}
