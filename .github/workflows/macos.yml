@@ -11,6 +11,7 @@ on:
     - 3RD-PARTY-LICENSES
     - config-samples/*
     - documentation/**
+    - tools/**
   pull_request:
 
 jobs:
