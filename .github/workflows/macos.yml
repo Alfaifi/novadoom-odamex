@@ -1,6 +1,17 @@
 name: macOS
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+    - "**/*.md"
+    - README
+    - LICENSE
+    - MAINTAINERS
+    - CHANGELOG
+    - 3RD-PARTY-LICENSES
+    - config-samples/*
+    - documentation/**
+  pull_request:
 
 jobs:
   pre_job:
