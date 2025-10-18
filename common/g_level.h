@@ -90,6 +90,7 @@ constexpr static levelFlags_t LEVEL2_NORMALINFIGHTING = BIT(0);
 constexpr static levelFlags_t LEVEL2_NOINFIGHTING = BIT(1);
 constexpr static levelFlags_t LEVEL2_TOTALINFIGHTING = BIT(2);
 constexpr static levelFlags_t LEVEL2_INFIGHTINGMASK = BIT_MASK(0, 2);
+constexpr static levelFlags_t LEVEL2_COMPAT_CROSSDROPOFF = BIT(18);
 
 struct acsdefered_s;
 class FBehavior;
