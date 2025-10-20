@@ -268,13 +268,6 @@ void P_RemoveDefereds()
 	::getLevelInfos().zapDeferreds();
 }
 
-// [ML] Not sure where to put this for now...
-// 	G_ParseMusInfo
-void G_ParseMusInfo()
-{
-	// Nothing yet...
-}
-
 //
 // G_LoadWad
 //
@@ -922,6 +915,8 @@ void G_InitLevelLocals()
 	::level.label = info.label;
 	::level.clearlabel = info.clearlabel;
 	::level.author = info.author;
+
+	::level.musinfo_map = info.musinfo_map;
 
 	::level.detected_gametype = GM_COOP;
 

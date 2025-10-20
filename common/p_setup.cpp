@@ -52,6 +52,7 @@
 #include "p_setup.h"
 #include "p_hordespawn.h"
 #include "p_mapformat.h"
+#include "g_musinfo.h"
 #include "r_sky.h"
 
 void SV_PreservePlayer(player_t &player);
@@ -2137,6 +2138,8 @@ void P_SetupLevel (const char *lumpname, int position)
 
 	// Make sure all sounds are stopped before Z_FreeTags.
 	S_Start ();
+
+	S_ClearMusInfo();
 
 	// [RH] Clear all ThingID hash chains.
 	AActor::ClearTIDHashes ();

@@ -67,6 +67,7 @@
 #include "sv_main.h"
 #include "sv_banlist.h"
 #include "g_horde.h"
+#include "g_musinfo.h"
 
 #include "w_ident.h"
 
