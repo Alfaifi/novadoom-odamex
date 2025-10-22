@@ -219,10 +219,10 @@ BEGIN_COMMAND(summonfriend)
 
 	if (!CHEAT_ValidSummonActor(mobname.c_str()))
 	{
-		Printf(PRINT_HIGH,
-		       "Invalid summon argument: %s. Please use `dumpactors` for a valid list of "
-		       "actor names.\n",
-		       mobname.c_str());
+		PrintFmt(PRINT_HIGH,
+		         "Invalid summon argument: {}. Please use `dumpactors` for a valid list of "
+		         "actor names.\n",
+		         mobname);
 		return;
 	}
 

@@ -88,8 +88,6 @@ extern line_t*			lines;
 extern int				numsides;
 extern side_t*			sides;
 
-inline nonstd::span<spritedef_t> R_GetSprites() { return nonstd::span(sprites, numsprites); }
-
 inline nonstd::span<vertex_t>    R_GetVertices() { return nonstd::span(vertexes, numvertexes); }
 
 inline nonstd::span<seg_t>       R_GetSegs() { return nonstd::span(segs, numsegs); }
