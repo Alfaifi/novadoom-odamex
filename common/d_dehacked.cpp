@@ -1101,13 +1101,19 @@ static int PatchThing(int thingy)
 		}
 		else if (stricmp(Line1, "Dropped item") == 0)
 		{
-			//if (val - 1 < 0 || val - 1 >= ::num_mobjinfo_types())
-			int validx = val;
-			if (mobjinfo.find(validx) == mobjinfo.end())
+			if (val == 0)
 			{
-				I_Error("Dropped item out of range. Check your DEHACKED.\n");
+				info->droppeditem = MT_NULL;
 			}
-			info->droppeditem = (mobjtype_t)(int)(val - 1); // deh is mobj + 1
+			else
+			{
+				int validx = val;
+				if (mobjinfo.find(validx) == mobjinfo.end())
+				{
+					I_Error("Dropped item out of range. Check your DEHACKED.\n");
+				}
+				info->droppeditem = static_cast<mobjtype_t>(val - 1); // deh is mobj + 1
+			}
 		}
 		else if (stricmp(Line1, "Splash group") == 0)
 		{
