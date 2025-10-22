@@ -2469,7 +2469,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 		if (fh == NULL)
 		{
 			PrintFmt(PRINT_WARNING, "Could not open DeHackEd patch \"{}\"\n",
-			       patchfile->getBasename());
+			         patchfile->getBasename());
 			return false;
 		}
 
@@ -2512,7 +2512,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 			if (patchfile)
 			{
 				PrintFmt(PRINT_WARNING, "\"{}\" is not a DeHackEd patch file\n",
-				       patchfile->getBasename());
+				         patchfile->getBasename());
 			}
 			else
 			{
@@ -2731,7 +2731,7 @@ static void PrintState(int index)
 
 	// Print this state.
 	state_t& state = it->second;
-	PrintFmt("{:04d} | sprite:{} frame:{} tics:{} action:{} m1:{} m2:{}\n", index, ::sprnames[state.sprite],
+	PrintFmt("{:>4d} | sprite:{} frame:{} tics:{} action:{} m1:{} m2:{}\n", index, ::sprnames[state.sprite],
 	       state.frame, state.tics, ActionPtrString(state.action), state.misc1,
 	       state.misc2);
 }
