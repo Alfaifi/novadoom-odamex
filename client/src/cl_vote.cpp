@@ -37,7 +37,7 @@
 
 #include "s_sound.h"
 #include "c_cvars.h"
-EXTERN_CVAR(cl_vote_sounds)
+EXTERN_CVAR(snd_votesfx)
 
 //////// VOTING STATE ////////
 
@@ -70,7 +70,7 @@ void VoteState::set(const vote_state_t& vote_state)
 	const bool votestring_changed = (prev_votestring != vote_state.votestring);
 	if (!was_visible || votestring_changed)
 	{
-		if (cl_vote_sounds)
+		if (snd_votesfx)
 			S_Sound(CHAN_INTERFACE, "ui/vote/start", 1.0f, ATTN_NONE);
 	}
 
@@ -80,13 +80,13 @@ void VoteState::set(const vote_state_t& vote_state)
 		switch (vote_state.result)
 		{
 		case VOTE_YES:
-			if (cl_vote_sounds)
+			if (snd_votesfx)
 				S_Sound(CHAN_INTERFACE, "ui/vote/pass", 1.0f, ATTN_NONE);
 			break;
 		case VOTE_NO:
 		case VOTE_INTERRUPT:
 		case VOTE_ABANDON:
-			if (cl_vote_sounds)
+			if (snd_votesfx)
 				S_Sound(CHAN_INTERFACE, "ui/vote/fail", 1.0f, ATTN_NONE);
 			break;
 		default:
@@ -289,7 +289,7 @@ BEGIN_COMMAND(vote_yes)
 	MSG_WriteByte(&net_buffer, 1);
 	MSG_WriteString(&net_buffer, "yes");
 
-	if (cl_vote_sounds)
+	if (snd_votesfx)
 		S_Sound(CHAN_INTERFACE, "ui/vote/yes", 1.0f, ATTN_NONE);
 }
 END_COMMAND(vote_yes)
@@ -310,7 +310,7 @@ BEGIN_COMMAND(vote_no)
 	MSG_WriteByte(&net_buffer, 1);
 	MSG_WriteString(&net_buffer, "no");
 
-	if (cl_vote_sounds)
+	if (snd_votesfx)
 		S_Sound(CHAN_INTERFACE, "ui/vote/no", 1.0f, ATTN_NONE);
 }
 END_COMMAND(vote_no)

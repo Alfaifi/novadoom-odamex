@@ -167,7 +167,7 @@ EXTERN_CVAR (snd_gamesfx)
 EXTERN_CVAR (snd_voxtype)
 EXTERN_CVAR (cl_connectalert)
 EXTERN_CVAR (cl_disconnectalert)
-EXTERN_CVAR (cl_vote_sounds)
+EXTERN_CVAR (snd_votesfx)
 
 // Joystick menu -- Hyper_Eye
 void JoystickSetup (void);
@@ -647,7 +647,7 @@ static menuitem_t SoundItems[] = {
 	{ discrete  ,   "Player Connect Alert"     , {&cl_connectalert},    {2.0},        {0.0}, {0.0},      {OnOff} },
 	{ discrete  ,   "Player Disconnect Alert"  , {&cl_disconnectalert}, {2.0},        {0.0}, {0.0},      {OnOff} },
 	{ discrete  ,   "Chat sounds"              , {&cl_chatsounds},      {3.0},        {0.0}, {0.0},      {ChatSndType}},
-     {discrete	,   "Voting Sounds"            , {&cl_vote_sounds},		{2.0},        {0.0}, {0.0},	     {OnOff}},
+     {discrete	,   "Voting Sounds"            , {&snd_votesfx},		{2.0},        {0.0}, {0.0},	     {OnOff}},
  };
 
 menu_t AdvMidiMenu = {

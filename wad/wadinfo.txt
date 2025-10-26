@@ -73,6 +73,11 @@ DVBFM
 DVBFR
 DVBFT
 DVBS
+DSVTSTRT
+DSVTNO
+DSVTYES
+DSVTPASS
+DSVTFAIL
 
 # List of Pictures (with insertion point)
 
