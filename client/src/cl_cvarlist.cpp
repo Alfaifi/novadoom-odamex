@@ -640,6 +640,8 @@ CVAR_RANGE(		snd_voxtype, "2", "Voice announcer type",
 
 CVAR(			snd_gamesfx, "1", "Game SFX", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
+CVAR(			snd_votesfx, "1", "Enable vote UI sounds", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
+
 CVAR(			snd_crossover, "0", "Stereo switch",	CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_RANGE_FUNC_DECL(snd_samplerate, "44100", "Audio samplerate",
