@@ -40,6 +40,8 @@ EXTERN_CVAR(joy_deadzone)
 EXTERN_CVAR(joy_lefttrigger_deadzone)
 EXTERN_CVAR(joy_righttrigger_deadzone)
 
+EXTERN_CVAR(m_rawmouse)
+
 // ============================================================================
 //
 // SDL 2.x Implementation
@@ -433,12 +435,30 @@ void ISDL20MouseInputDevice::resume()
 {
 	mActive = true;
 	reset();
+
+	// [RV] Add these unscaled relative mouse hints to ensure motion deltas are true device deltas.
+	// This was implemented so that motion deltas aren't scaled by desktop DPI or resolution.
+	// tl;dr keeps mouse sensitivity the same across all video modes and resolutions.
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+	if (m_rawmouse)
+	{
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SYSTEM_SCALE, "0");
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SCALING, "0");
+	}
+	else
+	{
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SYSTEM_SCALE, "1");
+		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SCALING, "1");
+	}
+#endif
+	// -------------------------------------------
+
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+
 	SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_ENABLE);
 	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_ENABLE);
 }
-
 
 //
 // ISDL20MouseInputDevice::gatherEvents
