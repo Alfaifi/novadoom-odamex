@@ -518,8 +518,6 @@ CVAR(			hud_mousegraph, "0", "Display mouse values",
 CVAR(			idmypos, "0", "Shows current player position on map",
 				CVARTYPE_BOOL, CVAR_NULL)
 
-CVAR(			m_rawmouse, "1", "Use raw, unscaled relative mouse input (consistent across resolutions)", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
-
 // Heads up display
 // ----------------
 CVAR(hud_bigfont, "0",
