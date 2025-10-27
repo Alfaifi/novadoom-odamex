@@ -2560,14 +2560,9 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 	{
 		::dversion = 1;
 	}
-	else if (::dversion == 21)
+	else if (::dversion == 21 || ::dversion == 2021 || ::dversion == 2024)
 	{
 		::dversion = 4;
-	}
-	else if (::dversion == 2021)
-	{
-		// [CMB] 'Doom version = 2021'; Patch format = 6
-		::dversion = 6;
 	}
 	else
 	{
