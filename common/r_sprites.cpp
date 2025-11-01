@@ -231,7 +231,7 @@ static void R_InitSpriteDefs(std::vector<spriteinfo_t*>& namelist)
 		//	filling in the frames for whatever is found
 		for (int l = lastspritelump; l >= firstspritelump; l--)
 		{
-			if (*(int*)lumpinfo[l].name == intname && lumpinfo[l].size > 0)
+			if (*(int*)lumpinfo[l].name.c_str() == intname && lumpinfo[l].size > 0)
 			{
 				R_InstallSpriteLump (l,
 									 lumpinfo[l].name[4] - 'A', // denis - fixme - security
