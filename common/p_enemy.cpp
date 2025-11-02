@@ -2035,6 +2035,10 @@ void P_GiveFriendlyOwnerInfo(AActor* friendly, const AActor* origin)
 	{
 		friendly->friend_playerid = origin->player->id;
 		friendly->friend_teamid = origin->player->userinfo.team;
+	} else if (origin->flags & MF_FRIEND)
+	{
+		friendly->friend_playerid = origin->friend_playerid;
+		friendly->friend_teamid = origin->friend_teamid;
 	}
 }
 
@@ -2631,6 +2635,15 @@ void A_SpawnObject(AActor* actor)
 	mo->flags = (mo->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
 
 	P_GiveFriendlyOwnerInfo(mo, actor);
+
+	CLIENT_ONLY(
+		if (cl_showfriends && validplayer(displayplayer()) && displayplayer().mo &&
+		    P_IsFriendlyThing(displayplayer().mo, mo))
+		{
+			mo->effects = FX_FRIENDHEARTS;
+			mo->translation = translationref_t(&friendtable[0]);
+		}
+	)
 
 	SV_UpdateMobj(mo);
 }
@@ -3828,6 +3841,15 @@ void A_Spawn(AActor* mo)
 		newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
 
 		P_GiveFriendlyOwnerInfo(newmobj, mo);
+
+		CLIENT_ONLY (
+			if (cl_showfriends && validplayer(displayplayer()) && displayplayer().mo &&
+			    P_IsFriendlyThing(displayplayer().mo, newmobj))
+			{
+				newmobj->effects = FX_FRIENDHEARTS;
+				newmobj->translation = translationref_t(&friendtable[0]);
+			}
+		)
 	}
 }
 
