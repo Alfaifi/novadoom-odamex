@@ -2035,7 +2035,8 @@ void P_GiveFriendlyOwnerInfo(AActor* friendly, const AActor* origin)
 	{
 		friendly->friend_playerid = origin->player->id;
 		friendly->friend_teamid = origin->player->userinfo.team;
-	} else if (origin->flags & MF_FRIEND)
+	}
+	else if (origin->flags & MF_FRIEND)
 	{
 		friendly->friend_playerid = origin->friend_playerid;
 		friendly->friend_teamid = origin->friend_teamid;
