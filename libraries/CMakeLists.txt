@@ -144,6 +144,8 @@ include(fltk-lib.cmake)
 
 include(fmt-lib.cmake)
 
+include(scnlib-lib.cmake)
+
 include(jsoncpp-lib.cmake)
 
 include(miniupnp-lib.cmake)

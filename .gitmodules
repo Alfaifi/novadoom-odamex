@@ -31,3 +31,6 @@
 [submodule "libraries/cpptrace"]
 	path = libraries/cpptrace
 	url = https://github.com/jeremy-rifkin/cpptrace.git
+[submodule "libraries/scnlib"]
+	path = libraries/scnlib
+	url = git@github.com:eliaskosunen/scnlib.git

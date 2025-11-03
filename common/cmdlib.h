@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <optional>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4244)     // MIPS
@@ -53,7 +54,9 @@ struct OTimespan
 
 int		ParseHex(const char *str);
 int 	ParseNum(const char *str);
+std::optional<int> ParseNum(std::string_view str);
 bool	IsNum(const char* str);		// [RH] added
+bool	IsNum(std::string_view str);
 bool	IsRealNum(const char* str);
 
 // [Russell] Returns 0 if strings are the same, optional parameter for case
@@ -77,11 +80,6 @@ std::string &TrimStringEnd(std::string &s);
 
 bool ValidString(const std::string&);
 bool IsHexString(const std::string& str, const size_t len);
-
-char	*COM_Parse (char *data);
-
-extern	char	com_token[8192];
-extern	bool	com_eof;
 
 char	*copystring(const char *s);
 bool M_StringCopy(char *dest, const char *src, size_t dest_size);

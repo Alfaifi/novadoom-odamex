@@ -21,13 +21,15 @@
 
 #include "odamex.h"
 
+#include <scn/scan.h>
+
 #include "g_episode.h"
 #include "oscanner.h"
 #include "w_wad.h"
 #include "infomap.h"
 #include "g_mapinfo.h" // G_MapNameToLevelNum
 
-int ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NULL)
+bool ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NULL)
 {
 	// Check if the given map name can be expressed as a gameepisode/gamemap pair and be
 	// reconstructed from it.
@@ -36,16 +38,29 @@ int ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NULL
 
 	if (gamemode != commercial)
 	{
-		if (sscanf(mapname.c_str(), "E%dM%d", &epi, &map) != 2)
-			return 0;
-		lumpname = fmt::format("E{}M{}", epi, map);
+		if (auto result = scn::scan<int, int>(std::string_view(mapname), "E{}M{}"))
+		{
+			std::tie(epi, map) = result->values();
+			lumpname = fmt::format("E{}M{}", epi, map);
+		}
+		else
+		{
+			return false;
+		}
+
 	}
 	else
 	{
-		if (sscanf(mapname.c_str(), "MAP%d", &map) != 1)
-			return 0;
-		lumpname = fmt::format("MAP{:02d}", map);
-		epi = 1;
+		if (auto result = scn::scan<int>(std::string_view(mapname), "MAP{}"))
+		{
+			std::tie(map) = result->values();
+			lumpname = fmt::format("MAP{:02d}", map);
+			epi = 1;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	if (pEpi)
 		*pEpi = epi;
