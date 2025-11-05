@@ -1005,7 +1005,7 @@ BEGIN_COMMAND(mapinfo)
 	PrintFmt(PRINT_HIGH, "Intermission Graphic: {}\n", info.pname);
 	PrintFmt(PRINT_HIGH, "Next Map: {}\n", info.nextmap);
 	PrintFmt(PRINT_HIGH, "Secret Map: {}\n", info.secretmap);
-	PrintFmt(PRINT_HIGH, "Par Time: %d\n", info.partime);
+	PrintFmt(PRINT_HIGH, "Par Time: {}\n", info.partime);
 	PrintFmt(PRINT_HIGH, "Sky: {}\n", info.skypic);
 	PrintFmt(PRINT_HIGH, "Music: {}\n", info.music);
 
