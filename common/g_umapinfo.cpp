@@ -53,7 +53,7 @@ bool ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NUL
 	{
 		if (auto result = scn::scan<int>(std::string_view(mapname), "MAP{}"))
 		{
-			std::tie(map) = result->values();
+			map = result->value();
 			lumpname = fmt::format("MAP{:02d}", map);
 			epi = 1;
 		}
