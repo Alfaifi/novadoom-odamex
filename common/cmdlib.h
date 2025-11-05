@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <ctime>
 #include <optional>
+#include <charconv>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4244)     // MIPS
@@ -54,10 +55,27 @@ struct OTimespan
 
 int		ParseHex(const char *str);
 int 	ParseNum(const char *str);
-std::optional<int> ParseNum(std::string_view str);
 bool	IsNum(const char* str);		// [RH] added
 bool	IsNum(std::string_view str);
 bool	IsRealNum(const char* str);
+
+template<typename T>
+std::optional<T> ParseNum(std::string_view str)
+{
+    T out;
+	int base = 10;
+	if (str[0] == '$')
+	{
+		str.remove_prefix(1);
+		base = 16;
+	}
+    const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.size(), out, base);
+    if (result.ec != std::errc())
+    {
+        return std::nullopt;
+    }
+    return out;
+}
 
 // [Russell] Returns 0 if strings are the same, optional parameter for case
 // sensitivity

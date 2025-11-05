@@ -32,7 +32,6 @@
 #include <ctime>
 #include <functional>
 #include <sstream>
-#include <charconv>
 
 #include "win32inc.h"
 
@@ -121,23 +120,6 @@ int ParseNum(const char* str)
 	if (str[0] == '0' && str[1] == 'x')
 		return ParseHex(str+2);
 	return atol(str);
-}
-
-std::optional<int> ParseNum(std::string_view str)
-{
-    int out;
-	int base = 10;
-	if (str[0] == '$')
-	{
-		str.remove_prefix(1);
-		base = 16;
-	}
-    const std::from_chars_result result = std::from_chars(str.data(), str.data() + str.size(), out, base);
-    if (result.ec != std::errc())
-    {
-        return std::nullopt;
-    }
-    return out;
 }
 
 // [RH] Returns true if the specified string is a valid decimal number
