@@ -129,7 +129,7 @@ OString::OString(std::string_view str, size_t pos, size_t len) :
 	mId(mEmptyStringId)
 {
 	startup();
-	str = str.substr(pos, len)
+	str = str.substr(pos, len);
 	assign(str.data(), str.length());
 }
 
