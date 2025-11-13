@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id$
@@ -28,9 +28,7 @@
 #include "sv_main.h"
 #include "c_console.h"
 
-bool SV_AddMaster (const char *masterip);
 void SV_InitMasters();
-bool SV_AddMaster(const char *masterip);
 void SV_ListMasters ();
 bool SV_RemoveMaster (const char *masterip);
 void SV_UpdateMasterServers(void);
