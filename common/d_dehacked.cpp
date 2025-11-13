@@ -2035,9 +2035,6 @@ static void PatchCodePtrs(int dummy, DehScanner& scanner)
 			const int32_t frame = frameOpt.value();
 			std::string_view data = value;
 
-			// TODO: CHECK WHY COM_Parse was used HERE INSTEAD OF skipwhite
-			// stripwhite(dp.Line2);
-
 			if ((value[0] == 'A' || value[0] == 'a') && value[1] == '_')
 				data.remove_prefix(2);
 
@@ -2355,7 +2352,7 @@ static int DoInclude(std::string_view include)
 	if (include.empty())
 	{
 		DPrintFmt("Include directive is missing filename\n");
-		return;
+		return 0;
 	}
 
 	if (include.front() == '\"')
