@@ -28,6 +28,7 @@
 #include <variant>
 #include <string.h>
 #include <nonstd/scope.hpp>
+#include <nonstd/span.hpp>
 #include <scn/scan.h>
 
 #include "cmdlib.h"
@@ -370,7 +371,7 @@ static constexpr CodePtr CodePtrs[] = {
 
 struct Key
 {
-	const char* name;
+	std::string_view name;
 	ptrdiff_t offset;
 };
 
@@ -442,35 +443,9 @@ static constexpr struct
 	{"[HELPER]", PatchHelper},
 };
 
-static bool HandleKey(const struct Key* keys, void* structure, std::string_view key, int value,
+static bool HandleKey(nonstd::span<const Key> keys, void* structure, std::string_view key, int value,
                       const int structsize);
 static void BackupData(void);
-
-static size_t filelen = 0; // Be quiet, gcc TODO: delete this
-
-static char* skipwhite(char* str)
-{
-	if (str)
-	{
-		while (*str && isspace(*str))
-		{
-			str++;
-		}
-	}
-	return str;
-}
-
-static void stripwhite(char* str)
-{
-	char* end = str + strlen(str) - 1;
-
-	while (end >= str && isspace(*end))
-	{
-		end--;
-	}
-
-	end[1] = '\0';
-}
 
 class DehScanner
 {
@@ -704,23 +679,23 @@ static void HandleMode(std::string_view header, DehScanner& scanner)
 	while (scanner.getNextKeyValue());
 }
 
-static bool HandleKey(const Key* keys, void* structure, std::string_view key, int value,
+static bool HandleKey(nonstd::span<const Key> keys, void* structure, std::string_view key, int value,
                       const int structsize)
 {
-	while (keys->name && !iequals(keys->name, key))
-		keys++;
-
-	if (structsize && keys->offset + (int)sizeof(int) > structsize)
+	for (const auto& keyit : keys)
 	{
-		// Handle unknown or unimplemented data
-		DPrintFmt("DeHackEd: Cannot apply key {}, offset would overrun.\n", keys->name);
-		return true;
-	}
+		if (iequals(keyit.name, key))
+		{
+			if (structsize && keyit.offset + (int)sizeof(int) > structsize)
+			{
+				// Handle unknown or unimplemented data
+				DPrintFmt("DeHackEd: Cannot apply key {}, offset would overrun.\n", keyit.name);
+				return true;
+			}
 
-	if (keys->name)
-	{
-		*((int*)(((byte*)structure) + keys->offset)) = value;
-		return false;
+			*((int*)(((byte*)structure) + keyit.offset)) = value;
+			return false;
+		}
 	}
 
 	return true;
@@ -1459,8 +1434,7 @@ static void PatchFrame(int frameNum, DehScanner& scanner)
 	                               {"Args5", offsetof(state_t, args[4])},
 	                               {"Args6", offsetof(state_t, args[5])},
 	                               {"Args7", offsetof(state_t, args[6])},
-	                               {"Args8", offsetof(state_t, args[7])},
-	                               {NULL, 0}};
+	                               {"Args8", offsetof(state_t, args[7])}};
 	state_t *info;
 
     static const struct
@@ -1727,8 +1701,7 @@ static void PatchWeapon(int weapNum, DehScanner& scanner)
 	    {"Select frame", offsetof(weaponinfo_t, downstate)},
 	    {"Bobbing frame", offsetof(weaponinfo_t, readystate)},
 	    {"Shooting frame", offsetof(weaponinfo_t, atkstate)},
-	    {"Firing frame", offsetof(weaponinfo_t, flashstate)},
-	    {NULL, 0}};
+	    {"Firing frame", offsetof(weaponinfo_t, flashstate)}};
 
 	static constexpr struct
 	{
@@ -1904,8 +1877,7 @@ static void PatchMisc(int dummy, DehScanner& scanner)
 	    {"IDKFA Armor", offsetof(DehInfo, KFAArmor)},
 	    {"IDKFA Armor Class", offsetof(DehInfo, KFAAC)},
 	    {"BFG Cells/Shot", offsetof(DehInfo, BFGCells)},
-	    {"Monsters Infight", offsetof(DehInfo, Infight)},
-	    {NULL, 0}};
+	    {"Monsters Infight", offsetof(DehInfo, Infight)}};
 	gitem_t* item;
 #if defined _DEBUG
 	DPrintFmt("Misc\n");
