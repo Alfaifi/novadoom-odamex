@@ -1072,7 +1072,10 @@ void P_SetupHelpers()
 		for (int i = 0; i < co_friend_playerhelpers.asInt(); i++)
 		{
 
-			mobjtype_t monstertype = P_INameToMobj(co_friend_helpertype.str());
+			mobjtype_t monstertype = static_cast<mobjtype_t>(deh.helper);
+
+			if (!co_friend_helpertype.str().empty())
+				monstertype = P_INameToMobj(co_friend_helpertype.str());
 
 			if (monstertype == MT_NULL)
 				monstertype = MT_DOGS;
