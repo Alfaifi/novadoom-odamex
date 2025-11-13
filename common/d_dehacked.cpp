@@ -393,13 +393,13 @@ static void PatchPars(int, DehScanner&);
 static void PatchCodePtrs(int, DehScanner&);
 static void PatchMusic(int, DehScanner&);
 static void PatchHelper(int, DehScanner&);
-// static void DoInclude(int, DehScanner&);
+static int DoInclude(std::string_view);
 
 static int ParsePointerHeader(std::string_view header);
 static int ParseTextHeader(std::string_view header);
 static int ParseClassicHeader(std::string_view header)
 {
-	if (auto result = scn::scan<scn::discard<std::string>, int>(header, "{} {}"))
+	if (auto result = scn::scan<scn::discard<std::string_view>, int>(header, "{} {}"))
 	{
 		return std::get<1>(result->values());
 	}
@@ -430,7 +430,7 @@ static constexpr struct
     {"Misc", PatchMisc},
     // {"Text", PatchText, ParseTextHeader},
     // These appear in .bex files
-    // {"include", DoInclude},
+    {"include", [](int, DehScanner&){}, DoInclude},
     {"[STRINGS]", PatchStrings},
     {"[PARS]", PatchPars},
     {"[CODEPTR]", PatchCodePtrs},
@@ -578,12 +578,15 @@ public:
 
 	std::optional<Line> getNextLine()
 	{
+		// todo: this should really not always return a header line
+		// but realistically the only time this is called is inside [PARS]
 		if (m_unscan)
 		{
 			std::string_view header = trimSpace(m_currentLine);
 			m_unscan = false;
 			return header;
 		}
+
 		while (peekLine())
 		{
 			if (isCommentLine() || isEmptyLine())
@@ -673,10 +676,10 @@ public:
 struct DehParserState
 {
 	size_t textOffsetIdx;
-	bool including, includenotext;
+	bool includenotext;
 	std::vector<int32_t> droppedItems;
 	std::vector<std::pair<const char**, int>> soundMapIndices;
-	std::vector<std::pair<int32_t, const CodePtr*>> codePtrs; // todo see if const is allowed here
+	std::vector<std::pair<int32_t, const CodePtr*>> codePtrs;
 } dp;
 
 static void PrintUnknown(std::string_view key, const char* loc, const size_t idx)
@@ -2326,70 +2329,68 @@ static void PatchStrings(int dummy, DehScanner& scanner)
 
 std::optional<std::string> ParseString2(std::string_view& data);
 
-// static int DoInclude(int dummy, DehScanner& scanner)
-// {
-// 	const char* data;
-// 	int savedversion;
-// 	char *savepatchfile, *savepatchpt;
-// 	OWantFile want;
-// 	OResFile res;
-// 	auto guard = nonstd::make_scope_exit([]{
-// 		dp.including = false;
-// 		dp.includenotext = false;
-// 	});
+static int DoInclude(std::string_view include)
+{
+	bool notext = false;
+	OWantFile want;
+	OResFile res;
 
-// 	// TODO: FIX THIS, this was COM_PARSE
-// 	StringTokens idk = TokenizeString(dp.Line2, " ");
+	const auto trimFront = [](std::string_view& s)
+	{
+		while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front())))
+            s.remove_prefix(1);
+		return s;
+	};
 
-// 	if (dp.including)
-// 	{
-// 		DPrintFmt("Sorry, can't nest includes\n");
-// 		return dp.GetLine();
-// 	}
+	include.remove_prefix(7); // length of "include"
+	trimFront(include);
 
+	if (iequals(include, "notext"))
+	{
+		notext = true;
+		include.remove_prefix(6);
+		trimFront(include);
+	}
 
-// 	data = idk[0].c_str();
-// 	if (!stricmp(data, "notext"))
-// 	{
-// 		dp.includenotext = true;
-// 		data = idk[1].c_str();
-// 	}
+	if (include.empty())
+	{
+		DPrintFmt("Include directive is missing filename\n");
+		return;
+	}
 
-// 	if (!data[0])
-// 	{
-// 		dp.includenotext = false;
-// 		DPrintFmt("Include directive is missing filename\n");
-// 		return dp.GetLine();
-// 	}
-// #if defined _DEBUG
-// 	DPrintFmt("Including {}\n", data);
-// #endif
-// 	savepatchfile = dp.PatchFile;
-// 	savepatchpt = dp.PatchPt;
-// 	savedversion = dp.textOffsetIdx;
-// 	dp.including = true;
+	if (include.front() == '\"')
+	{
+		const size_t endquote = include.find('\"', 1);
+		if (endquote == std::string_view::npos)
+		{
+			PrintFmt(PRINT_WARNING, "Unclosed quote in BEX include \"{}\"\n", include);
+			return 0;
+		}
+		include = include.substr(1, endquote);
+	}
 
-// 	if (!OWantFile::make(want, data, OFILE_DEH))
-// 	{
-// 		PrintFmt(PRINT_WARNING, "Could not find BEX include \"{}\"\n", data);
-// 		return dp.GetLine();
-// 	}
+#if defined _DEBUG
+	DPrintFmt("Including {}\n", include);
+#endif
 
-// 	if (!M_ResolveWantedFile(res, want))
-// 	{
-// 		PrintFmt(PRINT_WARNING, "Could not resolve BEX include \"{}\"\n", data);
-// 		return dp.GetLine();
-// 	}
+	if (!OWantFile::make(want, std::string(include), OFILE_DEH))
+	{
+		PrintFmt(PRINT_WARNING, "Could not find BEX include \"{}\"\n", include);
+		return 0;
+	}
 
-// 	D_DoDehPatch(&res, -1);
+	if (!M_ResolveWantedFile(res, want))
+	{
+		PrintFmt(PRINT_WARNING, "Could not resolve BEX include \"{}\"\n", include);
+		return 0;
+	}
 
-// 	DPrintFmt("Done with include\n");
-// 	dp.PatchFile = savepatchfile;
-// 	dp.PatchPt = savepatchpt;
-// 	dp.textOffsetIdx = savedversion;
+	D_DoDehPatch(&res, -1, notext);
 
-// 	return dp.GetLine();
-// }
+	DPrintFmt("Done with include\n");
+
+	return 0;
+}
 
 void D_PostProcessDeh(const DehParserState& dp);
 
@@ -2399,7 +2400,7 @@ void D_PostProcessDeh(const DehParserState& dp);
  * @param patchfile File to attempt to load, NULL if not a file.
  * @param lump Lump index to load, -1 if not a lump.
  */
-bool D_DoDehPatch(const OResFile* patchfile, const int lump)
+bool D_DoDehPatch(const OResFile* patchfile, const int lump, bool notext)
 {
 	BackupData();
 
@@ -2444,6 +2445,7 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump)
 	dp.droppedItems.clear();
 	dp.soundMapIndices.clear();
 	dp.codePtrs.clear();
+	dp.includenotext = notext;
 
 	// Load english strings to match against.
 	::ENGStrings.loadStrings(true);
