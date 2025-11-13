@@ -30,6 +30,7 @@
 
 void SV_InitMasters();
 void SV_ListMasters ();
+bool SV_AddMaster(std::string_view masterip);
 bool SV_RemoveMaster (const char *masterip);
 void SV_UpdateMasterServers(void);
 void SV_UpdateMaster(void);
