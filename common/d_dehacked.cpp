@@ -841,56 +841,57 @@ void D_UndoDehPatch()
 
 static void ReplaceSpecialChars(std::string& str)
 {
-	char *p = str;
+	char *read = str.data();
+	char *write = str.data();
 
-	while (char c = *p++)
+	while (char c = *read++)
 	{
 		if (c != '\\')
 		{
-			*str++ = c;
+			*write++ = c;
 		}
 		else
 		{
-			switch (*p)
+			switch (*read)
 			{
 			case 'n':
 			case 'N':
-				*str++ = '\n';
+				*write++ = '\n';
 				break;
 			case 't':
 			case 'T':
-				*str++ = '\t';
+				*write++ = '\t';
 				break;
 			case 'r':
 			case 'R':
-				*str++ = '\r';
+				*write++ = '\r';
 				break;
 			case 'x':
 			case 'X':
 				c = 0;
-				p++;
+				read++;
 				for (int i = 0; i < 2; i++)
 				{
 					c <<= 4;
-					if (*p >= '0' && *p <= '9')
+					if (*read >= '0' && *read <= '9')
 					{
-						c += *p - '0';
+						c += *read - '0';
 					}
-					else if (*p >= 'a' && *p <= 'f')
+					else if (*read >= 'a' && *read <= 'f')
 					{
-						c += 10 + *p - 'a';
+						c += 10 + *read - 'a';
 					}
-					else if (*p >= 'A' && *p <= 'F')
+					else if (*read >= 'A' && *read <= 'F')
 					{
-						c += 10 + *p - 'A';
+						c += 10 + *read - 'A';
 					}
 					else
 					{
 						break;
 					}
-					p++;
+					read++;
 				}
-				*str++ = c;
+				*write++ = c;
 				break;
 			case '0':
 			case '1':
@@ -904,26 +905,27 @@ static void ReplaceSpecialChars(std::string& str)
 				for (int i = 0; i < 3; i++)
 				{
 					c <<= 3;
-					if (*p >= '0' && *p <= '7')
+					if (*read >= '0' && *read <= '7')
 					{
-						c += *p - '0';
+						c += *read - '0';
 					}
 					else
 					{
 						break;
 					}
-					p++;
+					read++;
 				}
-				*str++ = c;
+				*write++ = c;
 				break;
 			default:
-				*str++ = *p;
+				*write++ = *read;
 				break;
 			}
-			p++;
+			read++;
 		}
 	}
-	*str = 0;
+	*write = 0;
+	str.resize(write - str.data());
 }
 
 static auto SplitBexBits(std::string_view str, std::string_view delims)
