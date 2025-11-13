@@ -484,11 +484,11 @@ class DehScanner
         if (m_remainingData.empty())
             return;
 
-        size_t pos = m_remainingData.find('\n');
-        if (pos == std::string_view::npos)
+        size_t len = m_currentLine.length();
+        if (len >= m_remainingData.length())
             m_remainingData = std::string_view{};
         else
-            m_remainingData.remove_prefix(pos + 1);
+            m_remainingData.remove_prefix(len + 1);
     }
 
 	bool peekLine()
@@ -693,7 +693,7 @@ static void HandleMode(std::string_view header, DehScanner& scanner)
 	{
 		if (!strnicmp(name.data(), header.data(), name.size()))
 		{
-			parsebody(parseheader(header.data()), scanner);
+			parsebody(parseheader(header), scanner);
 			return;
 		}
 	}
