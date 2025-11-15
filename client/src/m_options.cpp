@@ -167,6 +167,7 @@ EXTERN_CVAR (snd_gamesfx)
 EXTERN_CVAR (snd_voxtype)
 EXTERN_CVAR (cl_connectalert)
 EXTERN_CVAR (cl_disconnectalert)
+EXTERN_CVAR (snd_votesfx)
 
 // Joystick menu -- Hyper_Eye
 void JoystickSetup (void);
@@ -646,7 +647,8 @@ static menuitem_t SoundItems[] = {
 	{ discrete  ,   "Player Connect Alert"     , {&cl_connectalert},    {2.0},        {0.0}, {0.0},      {OnOff} },
 	{ discrete  ,   "Player Disconnect Alert"  , {&cl_disconnectalert}, {2.0},        {0.0}, {0.0},      {OnOff} },
 	{ discrete  ,   "Chat sounds"              , {&cl_chatsounds},      {3.0},        {0.0}, {0.0},      {ChatSndType}},
-};
+     {discrete	,   "Voting Sounds"            , {&snd_votesfx},		{2.0},        {0.0}, {0.0},	     {OnOff}},
+ };
 
 menu_t AdvMidiMenu = {
 	"M_SOUND",
@@ -1507,12 +1509,12 @@ void M_ChangeMessages (void)
 {
 	if (show_messages)
 	{
-		Printf (128, "%s\n", GStrings(MSGOFF));
+		PrintFmt(128, "{}\n", GStrings(MSGOFF));
 		show_messages.Set (0.0f);
 	}
 	else
 	{
-		Printf (128, "%s\n", GStrings(MSGON));
+		PrintFmt(128, "{}\n", GStrings(MSGON));
 		show_messages.Set (1.0f);
 	}
 }
@@ -1873,7 +1875,7 @@ void M_OptDrawer (void)
 					joyname = "No device detected";
 				else
 				{
-					joyname = item->a.cvar->cstring();
+					joyname = item->a.cvar->str();
 					joyname += ": " + I_GetJoystickNameFromIndex((int)item->a.cvar->value());
 				}
 
@@ -1964,17 +1966,17 @@ void M_OptResponder (event_t *ev)
 				// to make sure we get the one that is intended -- Hyper_Eye
 				if( (ev->data3 > (SHRT_MAX / 2)) || (ev->data3 < (SHRT_MIN / 2)) )
 				{
-					if( (ev->data2 == (int)joy_forwardaxis) &&
-							strcmp(joy_forwardaxis.name(), item->a.cvar->name()) )
+					if ((ev->data2 == joy_forwardaxis.asInt()) &&
+					    joy_forwardaxis.name() != item->a.cvar->name())
 						joy_forwardaxis.Set(item->a.cvar->value());
-					else if( (ev->data2 == (int)joy_strafeaxis) &&
-							strcmp(joy_strafeaxis.name(), item->a.cvar->name()) )
+					else if ((ev->data2 == joy_strafeaxis.asInt()) &&
+					         joy_strafeaxis.name() != item->a.cvar->name())
 						joy_strafeaxis.Set(item->a.cvar->value());
-					else if( (ev->data2 == (int)joy_turnaxis) &&
-							strcmp(joy_turnaxis.name(), item->a.cvar->name()) )
+					else if ((ev->data2 == joy_turnaxis.asInt()) &&
+					         joy_turnaxis.name() != item->a.cvar->name())
 						joy_turnaxis.Set(item->a.cvar->value());
-					else if( (ev->data2 == (int)joy_lookaxis) &&
-							strcmp(joy_lookaxis.name(), item->a.cvar->name()) )
+					else if ((ev->data2 == joy_lookaxis.asInt()) &&
+					         joy_lookaxis.name() != item->a.cvar->name())
 						joy_lookaxis.Set(item->a.cvar->value());
 
 					item->a.cvar->Set(ev->data2);

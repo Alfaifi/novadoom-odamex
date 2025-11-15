@@ -315,7 +315,7 @@ CVAR (joy_turnaxis, "2", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLED
 CVAR (joy_lookaxis, "3", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 CVAR (joy_sensitivity, "10.0", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 CVAR (joy_fastsensitivity, "15.0", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
-CVAR (joy_freelook, "0", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE)
+CVAR_FUNC_DECL (joy_freelook, "0", "Look up or down with the joystick", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 CVAR (joy_invert, "0", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE)
 
 CVAR_RANGE (joy_deadzone, "0.20", "", CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE,  0.0f, 0.75f)
@@ -640,6 +640,8 @@ CVAR_RANGE(		snd_voxtype, "2", "Voice announcer type",
 
 CVAR(			snd_gamesfx, "1", "Game SFX", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
+CVAR(			snd_votesfx, "1", "Enable vote UI sounds", CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
+
 CVAR(			snd_crossover, "0", "Stereo switch",	CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
 
 CVAR_RANGE_FUNC_DECL(snd_samplerate, "44100", "Audio samplerate",
@@ -737,6 +739,9 @@ CVAR(			r_flashhom, "0", "Draws flashing colors where there is HOM",
 				CVARTYPE_BOOL, CVAR_NULL)
 
 CVAR(			r_drawflat, "0", "Disables all texturing of walls, floors and ceilings",
+				CVARTYPE_BOOL, CVAR_NULL)
+
+CVAR(			r_clipmaskedspecial, "1", "Vertically clip masked midtextures when surrounding sectors have differing specials (mimics Hexen and DSDA-Doom behavior)",
 				CVARTYPE_BOOL, CVAR_NULL)
 
 #if 0
