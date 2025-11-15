@@ -1037,7 +1037,7 @@ END_COMMAND (puke)
 BEGIN_COMMAND (error)
 {
 	std::string text = C_ArgCombine(argc - 1, (const char **)(argv + 1));
-	I_Error (text);
+	I_Error ("{}", text);
 }
 END_COMMAND (error)
 
