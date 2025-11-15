@@ -562,10 +562,10 @@ std::optional<std::string> ParseString2(std::string_view& data)
 {
 	std::string token;
 
-	const auto white = data.find_first_not_of(' ');
-	if (white != std::string_view::npos)
-		data.remove_prefix(white);
-	else
+	while (!data.empty() && data[0] <= ' ')
+		data.remove_prefix(1);
+
+	if (data.empty())
 		return std::nullopt;
 
 	// Ch0wW : If having a comment, break immediately the line!
