@@ -30,6 +30,7 @@
 #include "v_palette.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "oscanner.h"
 
 #include "c_dispatch.h"
 #include "cl_demo.h"
@@ -469,37 +470,23 @@ void AM_initVariables()
 	ADD_TO_VEC(thinrectangle_guy, -1, -1, -1,  1)
 	ADD_TO_VEC(thinrectangle_guy, -1,  1,  1,  1)
 
-	ADD_TO_VEC(hordeboss_guy, -0.875, -0.75, -0.625, -0.75)
-	ADD_TO_VEC(hordeboss_guy, -0.625, -0.75, -0.375, -1.25)
-	ADD_TO_VEC(hordeboss_guy, -0.375, -1.25, -0.125, -0.75)
-	ADD_TO_VEC(hordeboss_guy, -0.125, -0.75,  0.125, -0.75)
-	ADD_TO_VEC(hordeboss_guy,  0.125, -0.75,  0.375, -1.25)
-	ADD_TO_VEC(hordeboss_guy,  0.375, -1.25,  0.625, -0.75)
-	ADD_TO_VEC(hordeboss_guy,  0.625, -0.75,  0.875, -0.75)
-
-	ADD_TO_VEC(hordeboss_guy,  0.875, -0.75,  1.375, -0.5)
-	ADD_TO_VEC(hordeboss_guy,  1.375,  -0.5,  1.375, 0.25)
-	ADD_TO_VEC(hordeboss_guy,  1.375,  0.25,  2.125, 0.5)
-	ADD_TO_VEC(hordeboss_guy,  2.125,   0.5,  2.625, 1.25)
-	ADD_TO_VEC(hordeboss_guy,  2.625,  1.25,  2.125, 0.75)
-	ADD_TO_VEC(hordeboss_guy,  2.125,  0.75,  1.125, 0.75)
-	ADD_TO_VEC(hordeboss_guy,  1.125,  0.75,  0.625, 1)
-	ADD_TO_VEC(hordeboss_guy,  0.625,     1, -0.625, 1)
-	ADD_TO_VEC(hordeboss_guy, -0.625,     1, -1.125, 0.75)
-	ADD_TO_VEC(hordeboss_guy, -1.125,  0.75, -2.125, 0.75)
-	ADD_TO_VEC(hordeboss_guy, -2.125,  0.75, -2.625, 1.25)
-	ADD_TO_VEC(hordeboss_guy, -2.625,  1.25, -2.125, 0.5)
-	ADD_TO_VEC(hordeboss_guy, -2.125,   0.5, -1.375, 0.25)
-	ADD_TO_VEC(hordeboss_guy, -1.375,  0.25, -1.375, -0.5)
-	ADD_TO_VEC(hordeboss_guy, -1.375,  -0.5, -0.875, -0.75)
-
-	ADD_TO_VEC(hordeboss_guy, 0.625, 0.25, 0.375, 0)
-	ADD_TO_VEC(hordeboss_guy, 0.375,    0, 0.875, 0)
-	ADD_TO_VEC(hordeboss_guy, 0.875,    0, 0.625, 0.25)
-
-	ADD_TO_VEC(hordeboss_guy, -0.625, 0.25, -0.375, 0)
-	ADD_TO_VEC(hordeboss_guy, -0.375,    0, -0.875, 0)
-	ADD_TO_VEC(hordeboss_guy, -0.875,    0, -0.625, 0.25)
+	static const OLumpName bossicon = "OBOSSMAP";
+	const auto hordeboss_lines = AM_ParseVectorLump(bossicon);
+	if (!hordeboss_lines)
+	{
+		switch (hordeboss_lines.error())
+		{
+			case am_lump_parse_error_t::LUMP_NOT_FOUND:
+				DPrintFmt("Horde boss automap icon lump \"{}\" could not be found", bossicon);
+				break;
+			default:
+				DPrintFmt("Error while parsing horde boss automap icon lump \"{}\"", bossicon);
+		}
+	}
+	else
+	{
+		hordeboss_guy = hordeboss_lines.value();
+	}
 
 #undef ADD_TO_VEC
 #undef L
