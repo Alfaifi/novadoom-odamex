@@ -2296,8 +2296,6 @@ static void PatchStrings(int dummy, DehScanner& scanner)
 	}
 }
 
-std::optional<std::string> ParseString2(std::string_view& data);
-
 static int DoInclude(std::string_view include)
 {
 	bool notext = false;
@@ -2310,6 +2308,8 @@ static int DoInclude(std::string_view include)
             s.remove_prefix(1);
 		return s;
 	};
+
+	// TODO: use parsestring for quote handling
 
 	include.remove_prefix(7); // length of "include"
 	trimFront(include);

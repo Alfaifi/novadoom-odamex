@@ -380,8 +380,6 @@ bool G_LoadWad(const OWantFiles& newwadfiles, const OWantFiles& newpatchfiles,
 	return true;
 }
 
-std::optional<std::string> ParseString2(std::string_view& data);
-
 //
 // G_LoadWadString
 //
@@ -396,9 +394,8 @@ bool G_LoadWadString(const std::string& str, const std::string& mapname, const m
 	OWantFiles newwadfiles;
 	OWantFiles newpatchfiles;
 
-	std::string_view data = str;
-	std::optional<std::string> token;
-	while(token = ParseString2(data))
+	auto parser = ParseString(str, false);
+	while(std::optional<std::string> token = parser().token)
 	{
 		OWantFile file;
 		if (!OWantFile::make(file, *token, OFILE_UNKNOWN))

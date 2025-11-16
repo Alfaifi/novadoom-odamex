@@ -26,6 +26,7 @@
 #include "dobject.h"
 
 #include <optional>
+#include <functional>
 
 void C_ExecCmdLineParams (bool onlyset, bool onlylogfile);
 
@@ -33,8 +34,53 @@ void C_ExecCmdLineParams (bool onlyset, bool onlylogfile);
 // for map changing, etc
 void AddCommandString(const std::string &cmd, uint32_t key = 0);
 
+struct parse_string_result_t
+{
+	std::optional<std::string> token;
+	std::string_view rest;
+
+	operator bool() const
+	{
+		return token.has_value();
+	}
+
+	template<std::size_t IDX>
+	auto&& get() &  { return get_helper<IDX>(*this); }
+
+	template<std::size_t IDX>
+	auto&& get() && { return get_helper<IDX>(*this); }
+
+	template<std::size_t IDX>
+	auto&& get() const&  { return get_helper<IDX>(*this); }
+
+	template<std::size_t IDX>
+	auto&& get() const&& { return get_helper<IDX>(*this); }
+private:
+	template<std::size_t IDX, typename T>
+	auto&& get_helper(T&& t)
+	{
+	  static_assert(IDX < 2,
+	    "Index out of bounds for parse_string_result_t");
+	  if constexpr (IDX == 0) return std::forward<T>(t).token;
+	  if constexpr (IDX == 1) return std::forward<T>(t).rest;
+	}
+};
+
+namespace std {
+    template<>
+    struct tuple_size<parse_string_result_t>
+        : std::integral_constant<size_t, 2> {};
+
+    template<size_t IDX>
+    struct tuple_element<IDX, parse_string_result_t>
+		: std::conditional<IDX == 0, std::optional<std::string>, std::string_view>
+	{
+        static_assert(IDX < 2, "Index out of bounds for parse_string_result_t");
+    };
+}
+
 // parse a command string
-std::optional<std::string> ParseString (std::string_view& data);
+std::function<parse_string_result_t()> ParseString(std::string_view data, bool expandVars);
 
 // combine many arguments into one valid argument.
 std::string C_ArgCombine(size_t argc, const char **argv);
