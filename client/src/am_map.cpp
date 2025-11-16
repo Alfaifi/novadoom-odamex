@@ -61,6 +61,7 @@ argb_t CL_GetPlayerColor(player_t*);
 EXTERN_CVAR(am_followplayer)
 
 static int lockglow = 0;
+static int bossglow = 0;
 
 EXTERN_CVAR(am_rotate)
 EXTERN_CVAR(am_overlay)
@@ -194,6 +195,7 @@ typedef struct
 // vector graphics for the automap for things.
 std::vector<mline_t> thintriangle_guy;
 std::vector<mline_t> thinrectangle_guy;
+std::vector<mline_t> hordeboss_guy;
 
 am_default_colors_t AutomapDefaultColors;
 am_colors_t AutomapDefaultCurrentColors;
@@ -446,6 +448,7 @@ void AM_initVariables()
 
 	thintriangle_guy.clear();
 	thinrectangle_guy.clear();
+	hordeboss_guy.clear();
 
 	mline_t ml;
 
@@ -465,6 +468,38 @@ void AM_initVariables()
 	ADD_TO_VEC(thinrectangle_guy,  1, -1, -1, -1)
 	ADD_TO_VEC(thinrectangle_guy, -1, -1, -1,  1)
 	ADD_TO_VEC(thinrectangle_guy, -1,  1,  1,  1)
+
+	ADD_TO_VEC(hordeboss_guy, -0.875, -0.75, -0.625, -0.75)
+	ADD_TO_VEC(hordeboss_guy, -0.625, -0.75, -0.375, -1.25)
+	ADD_TO_VEC(hordeboss_guy, -0.375, -1.25, -0.125, -0.75)
+	ADD_TO_VEC(hordeboss_guy, -0.125, -0.75,  0.125, -0.75)
+	ADD_TO_VEC(hordeboss_guy,  0.125, -0.75,  0.375, -1.25)
+	ADD_TO_VEC(hordeboss_guy,  0.375, -1.25,  0.625, -0.75)
+	ADD_TO_VEC(hordeboss_guy,  0.625, -0.75,  0.875, -0.75)
+
+	ADD_TO_VEC(hordeboss_guy,  0.875, -0.75,  1.375, -0.5)
+	ADD_TO_VEC(hordeboss_guy,  1.375,  -0.5,  1.375, 0.25)
+	ADD_TO_VEC(hordeboss_guy,  1.375,  0.25,  2.125, 0.5)
+	ADD_TO_VEC(hordeboss_guy,  2.125,   0.5,  2.625, 1.25)
+	ADD_TO_VEC(hordeboss_guy,  2.625,  1.25,  2.125, 0.75)
+	ADD_TO_VEC(hordeboss_guy,  2.125,  0.75,  1.125, 0.75)
+	ADD_TO_VEC(hordeboss_guy,  1.125,  0.75,  0.625, 1)
+	ADD_TO_VEC(hordeboss_guy,  0.625,     1, -0.625, 1)
+	ADD_TO_VEC(hordeboss_guy, -0.625,     1, -1.125, 0.75)
+	ADD_TO_VEC(hordeboss_guy, -1.125,  0.75, -2.125, 0.75)
+	ADD_TO_VEC(hordeboss_guy, -2.125,  0.75, -2.625, 1.25)
+	ADD_TO_VEC(hordeboss_guy, -2.625,  1.25, -2.125, 0.5)
+	ADD_TO_VEC(hordeboss_guy, -2.125,   0.5, -1.375, 0.25)
+	ADD_TO_VEC(hordeboss_guy, -1.375,  0.25, -1.375, -0.5)
+	ADD_TO_VEC(hordeboss_guy, -1.375,  -0.5, -0.875, -0.75)
+
+	ADD_TO_VEC(hordeboss_guy, 0.625, 0.25, 0.375, 0)
+	ADD_TO_VEC(hordeboss_guy, 0.375,    0, 0.875, 0)
+	ADD_TO_VEC(hordeboss_guy, 0.875,    0, 0.625, 0.25)
+
+	ADD_TO_VEC(hordeboss_guy, -0.625, 0.25, -0.375, 0)
+	ADD_TO_VEC(hordeboss_guy, -0.375,    0, -0.875, 0)
+	ADD_TO_VEC(hordeboss_guy, -0.875,    0, -0.625, 0.25)
 
 #undef ADD_TO_VEC
 #undef L
@@ -934,6 +969,12 @@ void AM_Ticker()
 		lockglow++;
 	else
 		lockglow = 0;
+
+	if (bossglow < 60)
+		bossglow++;
+	else
+		bossglow = 0;
+
 }
 
 //
@@ -1512,7 +1553,7 @@ void AM_rotatePoint(mpoint_t& pt)
 	pt.y += y;
 }
 
-void AM_drawLineCharacter(const std::vector<mline_t>& lineguy, fixed64_t scale,
+void AM_drawLineCharacter(nonstd::span<const mline_t> lineguy, fixed64_t scale,
                           angle_t angle, am_color_t color, fixed64_t x, fixed64_t y)
 {
 	for (const auto& mline : lineguy)
@@ -1711,6 +1752,67 @@ void AM_drawEasyKeys()
 				const am_color_t key_color = AM_getKeyColor(t);
 
 				AM_drawLineCharacter(gameinfo.easyKey, FIXED2FIXED64(t->radius), 0, key_color, p.x, p.y);
+			}
+			t = t->snext;
+		}
+	}
+}
+
+void AM_drawHordeBosses()
+{
+	OInterpolation& oi = OInterpolation::getInstance();
+
+	for (const sector_t& sector : R_GetSectors())
+	{
+		AActor* t = sector.thinglist;
+		while (t)
+		{
+			if (t->oflags & MFO_BOSSPOOL)
+			{
+				fixed_t thingx;
+				fixed_t thingy;
+
+				if (oi.enabled())
+				{
+					thingx = t->prevx + FixedMul(t->x - t->prevx, render_lerp_amount);
+					thingy = t->prevy + FixedMul(t->y - t->prevy, render_lerp_amount);
+				}
+				else
+				{
+					thingx = t->x;
+					thingy = t->y;
+				}
+
+				mpoint_t p;
+				M_SetVec2Fixed64(&p, FIXED2FIXED64(thingx), FIXED2FIXED64(thingy));
+				if (am_rotate)
+					AM_rotatePoint(p);
+
+				const palette_t* palette = V_GetDefaultPalette();
+				am_color_t gold = AM_GetColorFromString(palette->colors, "light goldenrod yellow");
+				auto r = gold.rgb.getr();
+				auto g = gold.rgb.getg();
+				auto b = gold.rgb.getb();
+				float rdif = (255 - r) / 30;
+				float gdif = (0 - g) / 30;
+				float bdif = (0 - b) / 30;
+
+				if (bossglow < 20)
+				{
+					r += static_cast<int>(rdif) * bossglow;
+					g += static_cast<int>(gdif) * bossglow;
+					b += static_cast<int>(bdif) * bossglow;
+				}
+				else if (bossglow < 40)
+				{
+					r += static_cast<int>(rdif) * (40 - bossglow);
+					g += static_cast<int>(gdif) * (40 - bossglow);
+					b += static_cast<int>(bdif) * (40 - bossglow);
+				}
+
+				AM_drawLineCharacter(hordeboss_guy, FIXED2FIXED64(t->radius), 0, AM_BestColor(palette->basecolors, r, g, b),
+				                     p.x, p.y);
+
 			}
 			t = t->snext;
 		}
@@ -1922,6 +2024,10 @@ void AM_Drawer()
 
 	AM_drawWalls();
 	AM_drawPlayers();
+	// FIXME: all 3 of these iterate over all sectors and all things
+	// probably not the best for large maps
+	if (G_IsHordeMode())
+		AM_drawHordeBosses();
 	if (G_GetCurrentSkill().easy_key)
 		AM_drawEasyKeys();
 	if (am_cheating == 2)
