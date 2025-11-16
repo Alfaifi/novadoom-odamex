@@ -30,7 +30,6 @@
 #include "v_palette.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "oscanner.h"
 
 #include "c_dispatch.h"
 #include "cl_demo.h"
