@@ -158,7 +158,8 @@ public: \
 
 enum EObjectFlags
 {
-	OF_Destroyed	= 0x00000001,	// Object has been destroyed but not yet deleted
+	OF_Destroyed = 0x00000001, // Object has been destroyed but not yet deleted
+	OF_Cleanup   = 0x00000002  // Object is being deconstructed as a result of a queued deletion
 };
 
 class DObject
@@ -170,8 +171,8 @@ private: \
 	typedef DObject ThisClass;
 
 public:
-	DObject () {};
-	virtual ~DObject () = 0;
+	DObject ();
+	virtual ~DObject ();
 
 	[[nodiscard]] inline bool IsKindOf (const TypeInfo *base) const
 	{
@@ -186,11 +187,16 @@ public:
 	virtual void Serialize (FArchive &arc) {}
 	virtual void Destroy ();
 
+	static void BeginFrame ();
+	static void EndFrame ();
+
 	DWORD ObjectFlags = 0;
 
 	static void STACK_ARGS StaticShutdown ();
 
 private:
+	static inline std::vector<DObject *> ToDestroy{};
+
 	static inline bool Inactive;
 };
 

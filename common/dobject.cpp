@@ -64,7 +64,26 @@ const TypeInfo *TypeInfo::FindType (const char *name)
 
 TypeInfo DObject::_StaticType("DObject", NULL, sizeof(DObject));
 
-DObject::~DObject() {}
+DObject::~DObject ()
+{
+	if (!Inactive)
+	{
+		if (!(ObjectFlags & OF_Cleanup) && (ObjectFlags & OF_Destroyed))
+		{
+			// object is queued for deletion, but is not being deleted
+			// by the destruction process, so remove it from the
+			// ToDestroy array and do other necessary stuff.
+			for (auto& obj : OUtil::reverse(ToDestroy))
+			{
+				if (obj == this)
+				{
+					obj = nullptr;
+					break;
+				}
+			}
+		}
+	}
+}
 
 void DObject::Destroy ()
 {
@@ -73,10 +92,28 @@ void DObject::Destroy ()
 		if (!(ObjectFlags & OF_Destroyed))
 		{
 			ObjectFlags |= OF_Destroyed;
+			ToDestroy.push_back(this);
 		}
 	}
 	else
 		delete this;
+}
+
+void DObject::BeginFrame ()
+{
+}
+
+void DObject::EndFrame ()
+{
+	for (DObject* obj : ToDestroy)
+	{
+		if (obj)
+		{
+			obj->ObjectFlags |= OF_Cleanup;
+			delete obj;
+		}
+	}
+	ToDestroy.clear();
 }
 
 void STACK_ARGS DObject::StaticShutdown ()

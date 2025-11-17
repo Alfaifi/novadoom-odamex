@@ -4040,6 +4040,8 @@ bool SV_Frozen()
 //
 void SV_StepTics(QWORD count)
 {
+	DObject::BeginFrame();
+
 	// run the newtime tics
 	while (count--)
 	{
@@ -4064,6 +4066,8 @@ void SV_StepTics(QWORD count)
 
 		gametic++;
 	}
+
+	DObject::EndFrame();
 }
 
 //

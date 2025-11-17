@@ -600,6 +600,8 @@ int canceltics = 0;
 
 void CL_StepTics(unsigned int count)
 {
+	DObject::BeginFrame ();
+
 	// run the realtics tics
 	while (count--)
 	{
@@ -632,6 +634,8 @@ void CL_StepTics(unsigned int count)
 		if (netdemo.isPlaying() && !netdemo.isPaused())
 			netdemo.ticker();
 	}
+
+	DObject::EndFrame ();
 }
 
 //
