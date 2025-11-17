@@ -171,8 +171,8 @@ private: \
 	typedef DObject ThisClass;
 
 public:
-	DObject ();
-	virtual ~DObject ();
+	DObject () {};
+	virtual ~DObject () = 0;
 
 	[[nodiscard]] inline bool IsKindOf (const TypeInfo *base) const
 	{
