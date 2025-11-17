@@ -64,24 +64,7 @@ const TypeInfo *TypeInfo::FindType (const char *name)
 
 TypeInfo DObject::_StaticType("DObject", NULL, sizeof(DObject));
 
-DObject::DObject ()
-{
-	ObjectFlags = 0;
-
-	if (!FreeIndices.empty())
-	{
-		Index = FreeIndices.back();
-		if (Index >= Objects.size())
-			I_Error("DObject::DObject: FreeIndices contained invalid index {} (Objects size {})\n{}", Index, Objects.size(), M_GetStacktrace());
-		Objects[Index] = this;
-		FreeIndices.pop_back();
-	}
-	else
-	{
-		Index = Objects.size();
-		Objects.push_back(this);
-	}
-}
+DObject::DObject () {}
 
 DObject::~DObject ()
 {
@@ -89,7 +72,6 @@ DObject::~DObject ()
 	{
 		if (!(ObjectFlags & OF_MassDestruction))
 		{
-			RemoveFromArray ();
 		}
 		else if (!(ObjectFlags & OF_Cleanup))
 		{
@@ -114,7 +96,6 @@ void DObject::Destroy ()
 	{
 		if (!(ObjectFlags & OF_MassDestruction))
 		{
-			RemoveFromArray ();
 			ObjectFlags |= OF_MassDestruction;
 			ToDestroy.push_back(this);
 		}
@@ -140,24 +121,6 @@ void DObject::EndFrame ()
 		ToDestroy.clear();
 	}
 	ToDestroy.clear();
-}
-
-void DObject::RemoveFromArray ()
-{
-	// denis - our array is static, so are some of the objects (eg DArgs)
-	// so there's really no telling which is destroyed first, better to bail
-	if(Inactive)
-		return;
-
-	if (Objects.size () == Index + 1)
-	{
-		Objects.pop_back();
-	}
-	else if (Objects.size() > Index + 1)
-	{
-		Objects[Index] = NULL;
-		FreeIndices.push_back(Index);
-	}
 }
 
 void STACK_ARGS DObject::StaticShutdown ()

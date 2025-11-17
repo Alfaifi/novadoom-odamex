@@ -190,19 +190,14 @@ public:
 	static void BeginFrame ();
 	static void EndFrame ();
 
-	DWORD ObjectFlags;
+	DWORD ObjectFlags = 0;
 
 	static void STACK_ARGS StaticShutdown ();
 
 private:
-	static inline std::vector<DObject *> Objects{};
-	static inline std::vector<size_t> FreeIndices{};
 	static inline std::vector<DObject *> ToDestroy{};
 
-	void RemoveFromArray ();
-
 	static inline bool Inactive;
-	size_t Index;
 };
 
 #include "farchive.h"
