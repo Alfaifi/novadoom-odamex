@@ -159,7 +159,6 @@ public: \
 enum EObjectFlags
 {
 	OF_MassDestruction	= 0x00000001,	// Object is queued for deletion
-	OF_Cleanup			= 0x00000002	// Object is being deconstructed as a result of a queued deletion
 };
 
 class DObject
@@ -171,8 +170,8 @@ private: \
 	typedef DObject ThisClass;
 
 public:
-	DObject ();
-	virtual ~DObject ();
+	DObject () {};
+	virtual ~DObject () = 0;
 
 	[[nodiscard]] inline bool IsKindOf (const TypeInfo *base) const
 	{
@@ -187,16 +186,11 @@ public:
 	virtual void Serialize (FArchive &arc) {}
 	virtual void Destroy ();
 
-	static void BeginFrame ();
-	static void EndFrame ();
-
 	DWORD ObjectFlags = 0;
 
 	static void STACK_ARGS StaticShutdown ();
 
 private:
-	static inline std::vector<DObject *> ToDestroy{};
-
 	static inline bool Inactive;
 };
 

@@ -144,7 +144,6 @@ void DThinker::Destroy ()
 		DThinker *obj = LingerDestroy[i];
 		if(!obj->refCount)
 		{
-			obj->ObjectFlags |= OF_Cleanup;
 			LingerDestroy.erase(LingerDestroy.begin() + i);
 			l--; i--;
 			delete obj;
@@ -167,15 +166,11 @@ void DThinker::DestroyAllThinkers ()
 		currentthinker->Destroy ();
 		currentthinker = next;
 	}
-	DObject::EndFrame ();
 
-	size_t l = LingerDestroy.size();
-	for(size_t i = 0; i < l; i++)
+	for(DThinker *obj : LingerDestroy)
 	{
-		DThinker *obj = LingerDestroy[i];
 //		if(!obj->refCount)
 		{
-			obj->ObjectFlags |= OF_Cleanup;
 			delete obj;
 		}
 	}
@@ -198,7 +193,6 @@ void DThinker::DestroyMostThinkers ()
 		}
 		thinker = next;
 	}
-	DObject::EndFrame ();
 }
 
 //
