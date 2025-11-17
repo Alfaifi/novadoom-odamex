@@ -163,7 +163,7 @@ bool P_SightBlockLinesIterator (int x, int y)
 					intercept_t intercept;
 					intercept.d.line = ld;
 					intercept.isaline = true;
-					intercepts.Push(intercept);
+					intercepts.push_back(intercept);
 				}
 				polyLink->polyobj->validcount = validcount;
 			}
@@ -198,7 +198,7 @@ bool P_SightBlockLinesIterator (int x, int y)
        	intercept_t intercept;
        	intercept.d.line = ld;
 		intercept.isaline = true;
-       	intercepts.Push(intercept);
+       	intercepts.push_back(intercept);
 	}
 
 	return true;			// everything was checked
@@ -214,21 +214,20 @@ bool P_SightBlockLinesIterator (int x, int y)
 
 bool P_SightTraverseIntercepts ( void )
 {
-	size_t  count = intercepts.Size();
+	size_t  count = intercepts.size();
 	fixed_t dist;
-	size_t	scan;
 	intercept_t *in = 0;
 	divline_t dl;
 //
 // calculate intercept distance
 //
-	for (scan = 0 ; scan < intercepts.Size(); scan++)
+	for (intercept_t& intercept : intercepts)
 	{
-		if (!intercepts[scan].isaline)
+		if (!intercept.isaline)
 			I_Error("P_SightTraverseIntercepts: non-line intercept\n");
 
-		P_MakeDivline (intercepts[scan].d.line, &dl);
-		intercepts[scan].frac = P_InterceptVector (&trace, &dl);
+		P_MakeDivline (intercept.d.line, &dl);
+		intercept.frac = P_InterceptVector (&trace, &dl);
 	}
 
 //
@@ -237,11 +236,11 @@ bool P_SightTraverseIntercepts ( void )
 	while (count--)
 	{
 		dist = MAXINT;
-		for (scan = 0 ; scan < intercepts.Size(); scan++)
-			if (intercepts[scan].frac < dist)
+		for (intercept_t& intercept : intercepts)
+			if (intercept.frac < dist)
 			{
-				dist = intercepts[scan].frac;
-				in = &intercepts[scan];
+				dist = intercept.frac;
+				in = &intercept;
 			}
 
 		if ( !PTR_SightTraverse (in) )
@@ -273,7 +272,7 @@ bool P_SightPathTraverse (fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2)
 	int count;
 
 	validcount++;
-	intercepts.Clear();
+	intercepts.clear();
 
 	if ( ((x1-bmaporgx)&(MAPBLOCKSIZE-1)) == 0)
 		x1 += FRACUNIT;							// don't side exactly on a line
@@ -360,7 +359,26 @@ bool P_SightPathTraverse (fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2)
 		if (mapxstep == 0 && mapystep == 0)
 			break;
 
-		if ( (yintercept >> FRACBITS) == mapy)
+		// if vanilla Heretic/Hexen demo playback is ever introduced, this branch needs to be disabled
+		if ((xintercept >> FRACBITS) == mapx && (yintercept >> FRACBITS) == mapy)
+		{
+			// The trace goes directly through the corner of a blockmap block. Need to check other blocks adjacent to the corner
+			if (!P_SightBlockLinesIterator (mapx + mapxstep, mapy) ||
+				!P_SightBlockLinesIterator (mapx, mapy + mapystep))
+			{
+				sightcounts2[1]++;
+				return false;
+			}
+			xintercept += xstep;
+			yintercept += ystep;
+			mapx += mapxstep;
+			mapy += mapystep;
+			if (mapx == xt2)
+				mapxstep = 0;
+			if (mapy == yt2)
+				mapystep = 0;
+		}
+		else if ( (yintercept >> FRACBITS) == mapy)
 		{
 			yintercept += ystep;
 			mapx += mapxstep;

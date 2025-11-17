@@ -76,7 +76,7 @@ odaproto::svc::PlayerInfo SVC_PlayerInfo(player_t& player)
 {
 	odaproto::svc::PlayerInfo msg;
 
-	uint32_t packedweapons = PackBoolArray(player.weaponowned, NUMWEAPONS);
+	uint32_t packedweapons = PackBoolArray(player.weaponowned.data(), NUMWEAPONS);
 	msg.mutable_player()->set_weaponowned(packedweapons);
 
 	uint32_t packedcards = PackBoolArray(player.cards, NUMCARDS);
@@ -1270,6 +1270,9 @@ odaproto::svc::SectorProperties SVC_SectorProperties(sector_t& sector)
 			secmsg->set_base_floor_angle(sector.base_floor_angle);
 			secmsg->set_base_floor_yoffs(sector.base_floor_yoffs);
 			break;
+		case SPC_Special:
+			secmsg->set_special(sector.special);
+			break;
 		default:
 			break;
 		}
@@ -1512,8 +1515,8 @@ odaproto::svc::MaplistUpdate SVC_MaplistUpdate(const maplist_status_t status,
 			const uint32_t mapidx = indexer.getIndex(map);
 			row->set_map(mapidx);
 
-			const std::string& lastmap = entry->lastmap;
-			const uint32_t lastmapidx = indexer.getIndex(lastmap);
+			const std::string lastmaps = fmt::format("{}", entry->lastmaps);
+			const uint32_t lastmapidx = indexer.getIndex(lastmaps);
 			row->set_lastmap(lastmapidx);
 
 			for (const auto& wad : entry->wads)

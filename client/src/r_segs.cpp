@@ -97,6 +97,7 @@ extern float yfoc;
 
 static tallpost_t** masked_midposts;
 
+EXTERN_CVAR(r_clipmaskedspecial)
 
 //
 // R_TexScaleX
@@ -276,7 +277,7 @@ static inline void R_BlastSolidSegColumn(void (*drawfunc)())
 				destpostlen += translen;
 			}
 
-			if (!srcpost->next()->end() && destpostlen >= srcpost->topdelta + srcpost->length)
+			if (!srcpost->end() && !srcpost->next()->end() && destpostlen >= srcpost->topdelta + srcpost->length)
 			{
 				srcpost = srcpost->next();
 			}
@@ -941,6 +942,9 @@ void R_StoreWallRange(int start, int stop)
 
 				// killough 4/17/98: draw floors if different light levels
 				|| backsector->floorlightsec != frontsector->floorlightsec
+
+				// [EB] check for special too for DSDA-compatibility on MBF21
+				|| (r_clipmaskedspecial && backsector->special != frontsector->special)
 
 				// [RH] Add checks for colormaps
 				|| backsector->colormap != frontsector->colormap

@@ -44,6 +44,7 @@ extern fixed_t freelookviewheight;
 
 EXTERN_CVAR(sv_freelook)
 EXTERN_CVAR(cl_mouselook)
+EXTERN_CVAR(joy_freelook)
 EXTERN_CVAR(r_skypalette)
 EXTERN_CVAR(r_linearsky)
 
@@ -292,8 +293,10 @@ void R_InitSkyMap()
 
 	if (fskyheight <= (128 << FRACBITS))
 	{
-		defaultskytexturemid = 200/2*FRACUNIT;
-		skystretch = (r_stretchsky == 1) || consoleplayer().spectator || (r_stretchsky == 2 && sv_freelook && cl_mouselook);
+		defaultskytexturemid = 200 / 2 * FRACUNIT;
+		skystretch = ((r_stretchsky != 0) && consoleplayer().spectator) ||
+		             (r_stretchsky == 1) ||
+		             (r_stretchsky == 2 && sv_freelook && (cl_mouselook || joy_freelook));
 	}
 	else
 	{
@@ -808,7 +811,7 @@ void R_RenderSkyRange(visplane_t* pl)
 		front_offset = (-side->textureoffset) >> 6;
 
 		// Vertical offset allows careful sky positioning.
-		defaultskytexturemid = side->rowoffset - 28*FRACUNIT;
+		sky1mid = side->rowoffset - 28*FRACUNIT;
 
 		// We sometimes flip the picture horizontally.
 		//
@@ -916,7 +919,7 @@ void R_RenderSkyRange(visplane_t* pl)
 					destpostlen += translen;
 				}
 
-				if (!skypost->next()->end() && destpostlen >= skypost->topdelta + skypost->length)
+				if (!skypost->end() && !skypost->next()->end() && destpostlen >= skypost->topdelta + skypost->length)
 				{
 					skypost = skypost->next();
 				}

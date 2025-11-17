@@ -128,11 +128,13 @@ EXTERN_CVAR (co_allowdropoff)
 EXTERN_CVAR (co_realactorheight)
 EXTERN_CVAR (co_zdoomphys)
 EXTERN_CVAR (co_zdoomsound)
+EXTERN_CVAR (co_zdoomammo)
 EXTERN_CVAR (co_fixweaponimpacts)
 EXTERN_CVAR (cl_deathcam)
 EXTERN_CVAR (co_fineautoaim)
 EXTERN_CVAR (co_nosilentspawns)
 EXTERN_CVAR (co_boomphys)			// [ML] Roll-up of various compat options
+EXTERN_CVAR (co_mbfphys)
 EXTERN_CVAR (co_removesoullimit)
 EXTERN_CVAR (co_blockmapfix)
 EXTERN_CVAR (co_globalsound)
@@ -165,6 +167,7 @@ EXTERN_CVAR (snd_gamesfx)
 EXTERN_CVAR (snd_voxtype)
 EXTERN_CVAR (cl_connectalert)
 EXTERN_CVAR (cl_disconnectalert)
+EXTERN_CVAR (snd_votesfx)
 
 // Joystick menu -- Hyper_Eye
 void JoystickSetup (void);
@@ -644,7 +647,8 @@ static menuitem_t SoundItems[] = {
 	{ discrete  ,   "Player Connect Alert"     , {&cl_connectalert},    {2.0},        {0.0}, {0.0},      {OnOff} },
 	{ discrete  ,   "Player Disconnect Alert"  , {&cl_disconnectalert}, {2.0},        {0.0}, {0.0},      {OnOff} },
 	{ discrete  ,   "Chat sounds"              , {&cl_chatsounds},      {3.0},        {0.0}, {0.0},      {ChatSndType}},
-};
+     {discrete	,   "Voting Sounds"            , {&snd_votesfx},		{2.0},        {0.0}, {0.0},	     {OnOff}},
+ };
 
 menu_t AdvMidiMenu = {
 	"M_SOUND",
@@ -699,7 +703,9 @@ static menuitem_t CompatItems[] ={
 	{redtext,   " ",								{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{yellowtext, "Engine Compatibility",				{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "BOOM actor/sector/line checks",  {&co_boomphys},			 {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "MBF movement and collision",  {&co_mbfphys},			 {2.0}, {0.0}, {0.0}, {OnOff}},
 	{svdiscrete, "ZDOOM 1.23 physics",             {&co_zdoomphys},         {2.0}, {0.0}, {0.0}, {OnOff}},
+	{svdiscrete, "ZDOOM 1.23 ammo checks",         {&co_zdoomammo},         {2.0}, {0.0}, {0.0}, {OnOff}},
 	{redtext,   " ",								{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{yellowtext, "Sound",							{NULL},                  {0.0}, {0.0}, {0.0}, {NULL}},
 	{svdiscrete, "Fix silent west spawns",         {&co_nosilentspawns},    {2.0}, {0.0}, {0.0}, {OnOff}},
@@ -831,12 +837,14 @@ void ResetCustomColors (void);
 
 EXTERN_CVAR (am_rotate)
 EXTERN_CVAR (am_overlay)
+EXTERN_CVAR (am_thickness)
 EXTERN_CVAR (am_showmonsters)
 EXTERN_CVAR (am_showitems)
 EXTERN_CVAR (am_showsecrets)
 EXTERN_CVAR (am_showtime)
 EXTERN_CVAR (am_classicmapstring)
 EXTERN_CVAR (am_usecustomcolors)
+EXTERN_CVAR (am_showlocked)
 EXTERN_CVAR (st_scale)
 EXTERN_CVAR (r_stretchsky)
 EXTERN_CVAR (r_linearsky)
@@ -1137,9 +1145,21 @@ static value_t ClassicMapStringTypes[] = {
 	{ 1.0, "Classic" }
 };
 
+static value_t AutomapScales[] = {
+	{ 0.0, "Auto" },
+	{ 1.0, "1X" },
+	{ 2.0, "2X" },
+	{ 3.0, "3X" },
+	{ 4.0, "4X" },
+	{ 5.0, "5X" },
+	{ 6.0, "6X" },
+};
+
 static menuitem_t AutomapItems[] = {
 	{ discrete, "Rotate automap",		{&am_rotate},		   	{2.0}, {0.0},	{0.0},  {OnOff} },
 	{ discrete, "Overlay automap",		{&am_overlay},			{4.0}, {0.0},	{0.0},  {Overlays} },
+	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
+	{ discrete, "Line Thickeness",		{&am_thickness},		{7.0}, {0.0},	{0.0},  {AutomapScales} },
 	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
     { discrete, "Show item count",		{&am_showitems},		{2.0}, {0.0},	{0.0},  {OnOff} },
     { discrete, "Show monster count",	{&am_showmonsters},		{2.0}, {0.0},	{0.0},	{OnOff} },
@@ -1149,8 +1169,9 @@ static menuitem_t AutomapItems[] = {
 
 	{ redtext,	" ",					{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
 	{ yellowtext, "Automap Colors",		{NULL},					{0.0}, {0.0},	{0.0}, {NULL} },
+	{ discrete, "Highlight locked doors",{&am_showlocked},		{2.0}, {0.0},	{0.0},  {OnOff} },
 	{ discrete, "Custom map colors",	{&am_usecustomcolors},	{2.0}, {0.0},	{0.0},  {OnOff} },
-	{ more,     "Reset custom map colors",  {NULL},             {0.0}, {0.0},   {0.0},  {(value_t *)ResetCustomColors} },
+	{ more,     "Reset custom map colors",  {NULL},    {0.0}, {0.0},   {0.0},  {(value_t *)ResetCustomColors} },
 };
 
 menu_t AutomapMenu = {
@@ -1488,12 +1509,12 @@ void M_ChangeMessages (void)
 {
 	if (show_messages)
 	{
-		Printf (128, "%s\n", GStrings(MSGOFF));
+		PrintFmt(128, "{}\n", GStrings(MSGOFF));
 		show_messages.Set (0.0f);
 	}
 	else
 	{
-		Printf (128, "%s\n", GStrings(MSGON));
+		PrintFmt(128, "{}\n", GStrings(MSGON));
 		show_messages.Set (1.0f);
 	}
 }
@@ -1854,7 +1875,7 @@ void M_OptDrawer (void)
 					joyname = "No device detected";
 				else
 				{
-					joyname = item->a.cvar->cstring();
+					joyname = item->a.cvar->str();
 					joyname += ": " + I_GetJoystickNameFromIndex((int)item->a.cvar->value());
 				}
 
@@ -1945,17 +1966,17 @@ void M_OptResponder (event_t *ev)
 				// to make sure we get the one that is intended -- Hyper_Eye
 				if( (ev->data3 > (SHRT_MAX / 2)) || (ev->data3 < (SHRT_MIN / 2)) )
 				{
-					if( (ev->data2 == (int)joy_forwardaxis) &&
-							strcmp(joy_forwardaxis.name(), item->a.cvar->name()) )
+					if ((ev->data2 == joy_forwardaxis.asInt()) &&
+					    joy_forwardaxis.name() != item->a.cvar->name())
 						joy_forwardaxis.Set(item->a.cvar->value());
-					else if( (ev->data2 == (int)joy_strafeaxis) &&
-							strcmp(joy_strafeaxis.name(), item->a.cvar->name()) )
+					else if ((ev->data2 == joy_strafeaxis.asInt()) &&
+					         joy_strafeaxis.name() != item->a.cvar->name())
 						joy_strafeaxis.Set(item->a.cvar->value());
-					else if( (ev->data2 == (int)joy_turnaxis) &&
-							strcmp(joy_turnaxis.name(), item->a.cvar->name()) )
+					else if ((ev->data2 == joy_turnaxis.asInt()) &&
+					         joy_turnaxis.name() != item->a.cvar->name())
 						joy_turnaxis.Set(item->a.cvar->value());
-					else if( (ev->data2 == (int)joy_lookaxis) &&
-							strcmp(joy_lookaxis.name(), item->a.cvar->name()) )
+					else if ((ev->data2 == joy_lookaxis.asInt()) &&
+					         joy_lookaxis.name() != item->a.cvar->name())
 						joy_lookaxis.Set(item->a.cvar->value());
 
 					item->a.cvar->Set(ev->data2);

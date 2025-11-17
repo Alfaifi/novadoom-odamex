@@ -172,7 +172,7 @@ typedef uint64_t			dtime_t;
  * @param a Low bit in the mask.
  * @param b High bit in the mask.
  */
-static inline uint32_t BIT_MASK(uint32_t a, uint32_t b)
+static constexpr uint32_t BIT_MASK(uint32_t a, uint32_t b)
 {
     return (static_cast<uint32_t>(-1) >> (31 - b)) & ~(BIT(a) - 1);
 }
@@ -193,6 +193,7 @@ typedef enum {
 	PRINT_NORCON,		// Do NOT send the message to any rcon client.
 
 	PRINT_FILTERCHAT,	// Filter the message to not be displayed ingame, but only in the console (ugly hack)
+	PRINT_FILTERHIGH,	// Filter the message to not be displayed ingame, but only in the console (ugly hack)
 
 	PRINT_MAXPRINT
 } printlevel_t;
@@ -311,7 +312,7 @@ public:
 	{	a_num = _a; r_num = _r; g_num = _g; b_num = _b;	}
 
 private:
-	static uint8_t a_num, r_num, g_num, b_num;
+	static inline uint8_t a_num, r_num, g_num, b_num;
 
 	union
 	{
@@ -434,7 +435,6 @@ class translationref_t
 
 public:
 	translationref_t();
-	translationref_t(const translationref_t &other);
 	translationref_t(const palindex_t *table);
 	translationref_t(const palindex_t *table, const int player_id);
 
@@ -494,7 +494,6 @@ public:
 
 public:
 	shaderef_t();
-	shaderef_t(const shaderef_t &other);
 	shaderef_t(const shademap_t * const colors, const int mapnum);
 
 	// Determines if m_colors is NULL

@@ -207,7 +207,7 @@ void S_StartMusic(const char *m_id)
 
 // [RH] S_ChangeMusic() now accepts the name of the music lump.
 // It's up to the caller to figure out what that name is.
-void S_ChangeMusic(std::string musicname, bool looping)
+void S_ChangeMusic(std::string musicname, bool looping, int order)
 {
 }
 
@@ -475,7 +475,7 @@ void S_ParseSndInfo()
 					     ambient->periodmin == 0 && ambient->periodmax == 0))
 					{
 						// Ignore bad ambient sounds
-						ambient->type == AMB_TYPE_NONE;
+						ambient->type = AMB_TYPE_NONE;
 					}
 				}
 				else if (os.compareTokenNoCase("map"))
