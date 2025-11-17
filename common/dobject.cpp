@@ -64,6 +64,8 @@ const TypeInfo *TypeInfo::FindType (const char *name)
 
 TypeInfo DObject::_StaticType("DObject", NULL, sizeof(DObject));
 
+DObject::~DObject() {}
+
 void DObject::Destroy ()
 {
 	if (!Inactive)
