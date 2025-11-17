@@ -158,7 +158,7 @@ public: \
 
 enum EObjectFlags
 {
-	OF_MassDestruction	= 0x00000001,	// Object is queued for deletion
+	OF_Destroyed	= 0x00000001,	// Object has been destroyed but not yet deleted
 };
 
 class DObject

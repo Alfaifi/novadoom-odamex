@@ -68,9 +68,9 @@ void DObject::Destroy ()
 {
 	if (!Inactive)
 	{
-		if (!(ObjectFlags & OF_MassDestruction))
+		if (!(ObjectFlags & OF_Destroyed))
 		{
-			ObjectFlags |= OF_MassDestruction;
+			ObjectFlags |= OF_Destroyed;
 		}
 	}
 	else
