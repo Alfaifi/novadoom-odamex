@@ -1965,7 +1965,7 @@ static void PatchPars(int dummy, DehScanner& scanner)
 		// didnt start with par
 		if (!iequals(parline.substr(0, 4), "par "))
 		{
-			// TODO: we've consumed a header by accident, need something like os.unscan
+			// we've consumed a header by accident, need to go back one line
 			scanner.unscan();
 			return;
 		}
@@ -1978,20 +1978,28 @@ static void PatchPars(int dummy, DehScanner& scanner)
 			continue;
 		}
 
-		int episode, map, time;
+		int time;
 		OLumpName mapname;
-		const auto r1 = scn::scan<int, int>(parline, "{} {}");
-		const auto r2 = scn::scan<int>(r1->range(), "{}");
-		if (r1 && r2)
+
+		auto parser = ParseString(parline, false);
+
+		int nums[] = { -1, -1, -1 };
+
+		for (int& num : nums)
 		{
-			std::tie(episode, map) = r1->values();
-			time = r2->value();
-			mapname = fmt::format("E{}M{}", episode, map);
+			if (auto token = parser().token)
+				num = ParseNum<int32_t>(*token).value_or(-1);
 		}
-		else if (r1)
+
+		if (std::all_of(std::begin(nums), std::end(nums), [](int n){ return n > -1; }))
 		{
-			std::tie(map, time) = r1->values();
-			mapname = fmt::format("MAP{:02d}", map);
+			time = nums[2];
+			mapname = fmt::format("E{}M{}", nums[0], nums[1]);
+		}
+		else if (nums[0] > -1 && nums[1] > -1)
+		{
+			time = nums[1];
+			mapname = fmt::format("MAP{:02d}", nums[0]);
 		}
 		else
 		{
