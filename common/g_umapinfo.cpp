@@ -21,8 +21,6 @@
 
 #include "odamex.h"
 
-#include <scn/scan.h>
-
 #include "g_episode.h"
 #include "oscanner.h"
 #include "w_wad.h"
