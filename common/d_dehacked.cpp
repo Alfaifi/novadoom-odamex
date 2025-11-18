@@ -32,6 +32,7 @@
 #include <scn/scan.h>
 
 #include "cmdlib.h"
+#include "c_dispatch.h"
 #include "d_dehacked.h"
 #include "m_doomobjcontainer.h"
 #include "d_items.h"
@@ -2309,48 +2310,45 @@ static int DoInclude(std::string_view include)
 		return s;
 	};
 
-	// TODO: use parsestring for quote handling
+	auto lineParser = ParseString(include, false);
 
-	include.remove_prefix(7); // length of "include"
-	trimFront(include);
+	// skip first token, we already know it has to be "include"
+	lineParser();
 
-	if (iequals(include, "notext"))
-	{
-		notext = true;
-		include.remove_prefix(6);
-		trimFront(include);
-	}
-
-	if (include.empty())
+	auto [token, rest] = lineParser();
+	if (!token)
 	{
 		DPrintFmt("Include directive is missing filename\n");
 		return 0;
 	}
 
-	if (include.front() == '\"')
+	if (iequals(*token, "notext"))
 	{
-		const size_t endquote = include.find('\"', 1);
-		if (endquote == std::string_view::npos)
-		{
-			PrintFmt(PRINT_WARNING, "Unclosed quote in BEX include \"{}\"\n", include);
-			return 0;
-		}
-		include = include.substr(1, endquote);
+		notext = true;
+		token = lineParser().token;
 	}
 
+	if (!token)
+	{
+		DPrintFmt("Include directive is missing filename\n");
+		return 0;
+	}
+
+	std::string filename = *token;
+
 #if defined _DEBUG
-	DPrintFmt("Including {}\n", include);
+	DPrintFmt("Including {}\n", filename);
 #endif
 
-	if (!OWantFile::make(want, std::string(include), OFILE_DEH))
+	if (!OWantFile::make(want, filename, OFILE_DEH))
 	{
-		PrintFmt(PRINT_WARNING, "Could not find BEX include \"{}\"\n", include);
+		PrintFmt(PRINT_WARNING, "Could not find BEX include \"{}\"\n", filename);
 		return 0;
 	}
 
 	if (!M_ResolveWantedFile(res, want))
 	{
-		PrintFmt(PRINT_WARNING, "Could not resolve BEX include \"{}\"\n", include);
+		PrintFmt(PRINT_WARNING, "Could not resolve BEX include \"{}\"\n", filename);
 		return 0;
 	}
 
