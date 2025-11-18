@@ -38,30 +38,18 @@ bool ValidateMapName(const OLumpName& mapname, int* pEpi = NULL, int* pMap = NUL
 
 	if (gamemode != commercial)
 	{
-		if (auto result = scn::scan<int, int>(std::string_view(mapname), "E{}M{}"))
-		{
-			std::tie(epi, map) = result->values();
-			lumpname = fmt::format("E{}M{}", epi, map);
-		}
-		else
-		{
+		if (sscanf(mapname.c_str(), "E%dM%d", &epi, &map) != 2)
 			return false;
-		}
-
+		lumpname = fmt::format("E{}M{}", epi, map);
 	}
 	else
 	{
-		if (auto result = scn::scan<int>(std::string_view(mapname), "MAP{}"))
-		{
-			map = result->value();
-			lumpname = fmt::format("MAP{:02d}", map);
-			epi = 1;
-		}
-		else
-		{
+		if (sscanf(mapname.c_str(), "MAP%d", &map) != 1)
 			return false;
-		}
+		lumpname = fmt::format("MAP{:02d}", map);
+		epi = 1;
 	}
+
 	if (pEpi)
 		*pEpi = epi;
 	if (pMap)

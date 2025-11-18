@@ -29,7 +29,6 @@
 #include <string.h>
 #include <nonstd/scope.hpp>
 #include <nonstd/span.hpp>
-#include <scn/scan.h>
 
 #include "cmdlib.h"
 #include "c_dispatch.h"
@@ -395,15 +394,18 @@ static void PatchPars(int, DehScanner&);
 static void PatchCodePtrs(int, DehScanner&);
 static void PatchMusic(int, DehScanner&);
 static void PatchHelper(int, DehScanner&);
-static int DoInclude(std::string_view);
+static int DoInclude(std::string_view, size_t);
 
-static int ParsePointerHeader(std::string_view header);
-static int ParseTextHeader(std::string_view header);
-static int ParseClassicHeader(std::string_view header)
+static int ParsePointerHeader(std::string_view, size_t);
+static int ParseTextHeader(std::string_view, size_t);
+static int ParseClassicHeader(std::string_view header, size_t length)
 {
-	if (auto result = scn::scan<scn::discard<std::string_view>, int>(header, "{} {}"))
+	std::string_view textNum = header.substr(length);
+	while (!textNum.empty() && std::isspace(static_cast<unsigned char>(textNum.front())))
+		textNum.remove_prefix(1);
+	if (auto num = ParseNum<int32_t>(textNum))
 	{
-		return std::get<1>(result->values());
+		return *num;
 	}
 	else
 	{
@@ -416,7 +418,7 @@ static constexpr struct
 {
 	std::string_view name;
 	void (*parsebody)(int, DehScanner&);
-	int (*parseheader)(std::string_view) = [](std::string_view){ return 0; };
+	int (*parseheader)(std::string_view, size_t) = [](std::string_view, size_t){ return 0; };
 } Modes[] = {
     // https://eternity.youfailit.net/wiki/DeHackEd_/_BEX_Reference
 
@@ -669,7 +671,7 @@ static void HandleMode(std::string_view header, DehScanner& scanner)
 	{
 		if (!strnicmp(name.data(), header.data(), name.size()))
 		{
-			parsebody(parseheader(header), scanner);
+			parsebody(parseheader(header, name.length()), scanner);
 			return;
 		}
 	}
@@ -1798,7 +1800,7 @@ static void PatchWeapon(int weapNum, DehScanner& scanner)
 	}
 }
 
-static int ParsePointerHeader(std::string_view header) {
+static int ParsePointerHeader(std::string_view header, size_t) {
 	auto headerParser = ParseString(header, false);
 	int ptr, frame;
 
@@ -2108,14 +2110,14 @@ static void PatchHelper(int dummy, DehScanner& scanner)
 	}
 }
 
-static int ParseTextHeader(std::string_view header)
-{
-	if (auto result = scn::scan<int, int>(header, "Text {} {}")) {
-		return 1; // TODO: figure out how to actually handle this
-	} else {
-		return -1;
-	}
-}
+// static int ParseTextHeader(std::string_view header, size_t)
+// {
+// 	if (auto result = scn::scan<int, int>(header, "Text {} {}")) {
+// 		return 1; // TODO: figure out how to actually handle this
+// 	} else {
+// 		return -1;
+// 	}
+// }
 
 // static void PatchText(int oldSize, DehScanner& scanner)
 // {
@@ -2332,18 +2334,11 @@ static void PatchStrings(int dummy, DehScanner& scanner)
 	}
 }
 
-static int DoInclude(std::string_view include)
+static int DoInclude(std::string_view include, size_t)
 {
 	bool notext = false;
 	OWantFile want;
 	OResFile res;
-
-	const auto trimFront = [](std::string_view& s)
-	{
-		while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front())))
-            s.remove_prefix(1);
-		return s;
-	};
 
 	auto lineParser = ParseString(include, false);
 
