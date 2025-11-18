@@ -388,7 +388,7 @@ static void PatchWeapon(int, DehScanner&);
 static void PatchPointer(int, DehScanner&);
 static void PatchCheats(int, DehScanner&);
 static void PatchMisc(int, DehScanner&);
-// static void PatchText(int, DehScanner&);
+static void PatchText(int, DehScanner&);
 static void PatchStrings(int, DehScanner&);
 static void PatchPars(int, DehScanner&);
 static void PatchCodePtrs(int, DehScanner&);
@@ -432,7 +432,7 @@ static constexpr struct
     {"Pointer", PatchPointer, ParsePointerHeader},
     {"Cheat", PatchCheats},
     {"Misc", PatchMisc},
-    // {"Text", PatchText, ParseTextHeader},
+    {"Text", PatchText, ParseTextHeader},
     // These appear in .bex files
     {"include", [](int, DehScanner&){}, DoInclude},
     {"[STRINGS]", PatchStrings},
@@ -649,6 +649,29 @@ public:
 
 		return std::nullopt;
 	}
+
+	std::optional<std::string> readTextString(int size)
+	{
+		std::string str;
+
+		while (size--)
+		{
+			if (m_remainingData.empty())
+			{
+				DPrintFmt("");
+				break;
+			}
+
+			if (m_remainingData[0] != '\r')
+				str += m_remainingData[0];
+			else
+			 size++;
+
+			m_remainingData.remove_prefix(1);
+		}
+
+		return str;
+	}
 };
 
 struct DehParserState
@@ -790,35 +813,6 @@ void D_UndoDehPatch()
 
 	BackedUpData = false;
 }
-
-// static bool ReadChars(char** stuff, int size)
-// {
-// 	char* str = *stuff;
-
-// 	if (!size)
-// 	{
-// 		*str = 0;
-// 		return true;
-// 	}
-
-// 	do
-// 	{
-// 		// Ignore carriage returns
-// 		if (*dp.PatchPt != '\r')
-// 		{
-// 			*str++ = *dp.PatchPt;
-// 		}
-// 		else
-// 		{
-// 			size++;
-// 		}
-
-// 		dp.PatchPt++;
-// 	} while (--size);
-
-// 	*str = 0;
-// 	return true;
-// }
 
 static void ReplaceSpecialChars(std::string& str)
 {
@@ -2110,150 +2104,85 @@ static void PatchHelper(int dummy, DehScanner& scanner)
 	}
 }
 
-// static int ParseTextHeader(std::string_view header, size_t)
-// {
-// 	if (auto result = scn::scan<int, int>(header, "Text {} {}")) {
-// 		return 1; // TODO: figure out how to actually handle this
-// 	} else {
-// 		return -1;
-// 	}
-// }
+static int ParseTextHeader(std::string_view header, size_t)
+{
+	std::string_view idk = header.substr(4);
+	auto parser = ParseString(idk, false);
+	int oldsize = -1, newsize = -1;
+	if (auto token = parser().token)
+	{
+		if (auto num = ParseNum<int32_t>(*token))
+		{
+			oldsize = *num;
+		}
+	}
 
-// static void PatchText(int oldSize, DehScanner& scanner)
-// {
-// 	int newSize;
-// 	char* oldStr;
-// 	char* newStr;
-// 	char* temp;
-// 	bool good;
-// 	int result;
-// 	const OString* name = NULL;
+	if (auto token = parser().token)
+	{
+		if (auto num = ParseNum<int32_t>(*token))
+		{
+			newsize = *num;
+		}
+	}
 
-// 	// Skip old size, since we already know it
-// 	temp = dp.Line2;
-// 	while (*temp > ' ')
-// 	{
-// 		temp++;
-// 	}
-// 	while (*temp && *temp <= ' ')
-// 	{
-// 		temp++;
-// 	}
+	if (oldsize == -1 || newsize == -1)
+	{
+		DPrintFmt("Invalid Text header: '{}'\n", header);
+		return -1;
+	}
 
-// 	if (*temp == 0)
-// 	{
-// 		PrintFmt(PRINT_HIGH, "Text chunk is missing size of new string.\n");
-// 		return 2;
-// 	}
-// 	newSize = atoi(temp);
+	// awful hack, but we know that the max size here is only a few hundred
+	return (oldsize << 16) + newsize;
+}
 
-// 	oldStr = new char[oldSize + 1];
-// 	newStr = new char[newSize + 1];
+// TODO: other ports support sound and music replacements here
+// support for changing music here was removed
+// but it appears support for changing sounds never existed
+static void PatchText(int sizes, DehScanner& scanner)
+{
+	if (sizes == -1)
+		return;
 
-// 	if (!oldStr || !newStr)
-// 	{
-// 		PrintFmt(PRINT_HIGH, "Out of memory.\n");
-// 		goto donewithtext;
-// 	}
+	int newSize = (sizes & 0xFFFF);
+	int oldSize = sizes >> 16;
 
-// 	good = ReadChars(&oldStr, oldSize);
-// 	good = ReadChars(&newStr, newSize) || good;
+	const auto oldStr = scanner.readTextString(oldSize);
+	const auto newStr = scanner.readTextString(newSize);
 
-// 	if (!good)
-// 	{
-// 		delete[] newStr;
-// 		delete[] oldStr;
-// 		PrintFmt(PRINT_HIGH, "Unexpected end-of-file.\n");
-// 		// return 0;
-// 		return;
-// 	}
+	if (!oldStr || !newStr)
+	{
+		DPrintFmt("Unexpected-end-of-file");
+		return;
+	}
 
-// 	if (dp.includenotext)
-// 	{
-// 		PrintFmt(PRINT_HIGH, "Skipping text chunk in included patch.\n");
-// 		goto donewithtext;
-// 	}
+	if (dp.includenotext)
+	{
+		PrintFmt(PRINT_HIGH, "Skipping text chunk in included patch.\n");
+		return;
+	}
 
-// 	DPrintFmt("Searching for text:\n{}\n", oldStr);
-// 	good = false;
+	DPrintFmt("Searching for text:\n{}\n", *oldStr);
 
-// 	// Search through sprite names
-// 	for(auto& [idx, sprname] : sprnames)
-// 	{
-// 		if (!strcmp(sprname.c_str(), oldStr))
-// 		{
-// 			sprname = newStr;
-// 			good = true;
-// 			// See above.
-// 		}
-// 	}
+	// Search through sprite names
+	for(auto& [_, sprname] : sprnames)
+	{
+		if (sprname == *oldStr)
+		{
+			sprname = *newStr;
+			return;
+		}
+	}
 
-// 	if (good)
-// 	{
-// 		goto donewithtext;
-// 	}
+	// Search through most other texts
+	const OString& name = ENGStrings.matchString(*oldStr);
+	if (!name.empty())
+	{
+		GStrings.setString(name, *newStr);
+		return;
+	}
 
-// 	// Search through music names.
-// 	// [AM] Disabled because it relies on an extern wadlevelinfos
-// 	/*if (oldSize < 7)
-// 	{		// Music names are never >6 chars
-// 	    char musname[9];
-// 	    snprintf(musname, ARRAY_LENGTH(musname), "D_%s", oldStr);
-
-// 	    for (size_t i = 0; i < levels.size(); i++)
-// 	    {
-// 	        level_pwad_info_t& level = levels.at(0);
-// 	        if (stricmp(level.music, musname) == 0)
-// 	        {
-// 	            good = true;
-// 	            uppercopy(level.music, musname);
-// 	        }
-// 	    }
-// 	}*/
-
-// 	if (good)
-// 	{
-// 		goto donewithtext;
-// 	}
-
-// 	// Search through most other texts
-// 	name = &ENGStrings.matchString(oldStr);
-// 	if (name != NULL && !name->empty())
-// 	{
-// 		GStrings.setString(*name, newStr);
-// 		good = true;
-// 	}
-
-// 	if (!good)
-// 	{
-// 		DPrintFmt("   (Unmatched)\n");
-// 	}
-
-// donewithtext:
-// 	if (newStr)
-// 	{
-// 		delete[] newStr;
-// 	}
-// 	if (oldStr)
-// 	{
-// 		delete[] oldStr;
-// 	}
-
-// 	// Ensure that we've munched the entire line in the case of an incomplete
-// 	// substitution.
-// 	if (!(*dp.PatchPt == '\0' || *dp.PatchPt == '\n'))
-// 	{
-// 		dp.igets();
-// 	}
-
-// 	// Fetch next identifier for main loop
-// 	while ((result = dp.GetLine()) == 1)
-// 	{
-// 	}
-
-// 	// return result;
-// 	return;
-// }
+	DPrintFmt("   (Unmatched)\n");
+}
 
 static void PatchStrings(int dummy, DehScanner& scanner)
 {
@@ -2345,7 +2274,7 @@ static int DoInclude(std::string_view include, size_t)
 	// skip first token, we already know it has to be "include"
 	lineParser();
 
-	auto [token, rest] = lineParser();
+	auto token = lineParser().token;
 	if (!token)
 	{
 		DPrintFmt("Include directive is missing filename\n");
