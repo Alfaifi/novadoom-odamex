@@ -653,6 +653,7 @@ public:
 	std::optional<std::string> readTextString(int size)
 	{
 		std::string str;
+		str.reserve(size);
 
 		while (size--)
 		{
