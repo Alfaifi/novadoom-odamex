@@ -1799,13 +1799,42 @@ static void PatchWeapon(int weapNum, DehScanner& scanner)
 }
 
 static int ParsePointerHeader(std::string_view header) {
+	auto headerParser = ParseString(header, false);
 	int ptr, frame;
-	if (auto result = scn::scan<int, int>(header, "Pointer {} (Frame {})")) {
-		std::tie(ptr, frame) = result->values();
-	} else {
-		DPrintFmt("Pointer block header is invalid: \"{}\"\n", header);
+
+	// skip first token, we already know it's "Pointer"
+	headerParser();
+
+	auto expect_token = [&](std::string_view idk = "") -> std::optional<std::string> {
+		auto t = headerParser().token;
+        if (t && (idk.empty() || iequals(*t, idk))) return *t;
+        DPrintFmt("Pointer block header is invalid: \"{}\"\n", header);
+        return std::nullopt;
+    };
+
+    auto expect_number = [&]() -> std::optional<int> {
+        auto tok = expect_token();
+        if (!tok) return std::nullopt;
+
+        if (auto num = ParseNum<int32_t>(*tok)) return *num;
+
+        DPrintFmt("Pointer block header is invalid: \"{}\"\n", header);
+        return std::nullopt;
+    };
+
+	const auto ptrNum = expect_number();
+	if (!ptrNum)
 		return -1;
-	}
+
+	if (!expect_token("(Frame"))
+		return -1;
+
+	const auto frameNum = expect_number();
+	if (!frameNum)
+		return -1;
+
+	ptr = *ptrNum;
+	frame = *frameNum;
 
 #if defined _DEBUG
 	DPrintFmt("Pointer {}\n", ptr);
@@ -2218,8 +2247,6 @@ static int ParseTextHeader(std::string_view header)
 
 static void PatchStrings(int dummy, DehScanner& scanner)
 {
-	// static size_t maxstrlen = 128;
-	// static char* holdstring;
 #if defined _DEBUG
 	DPrintFmt("[Strings]\n");
 #endif
@@ -2290,7 +2317,7 @@ static void PatchStrings(int dummy, DehScanner& scanner)
 					}
 				}
 			}
-			// [CMB] TODO: Language string table change // what is this comment about??
+			// [CMB] TODO: Language string table change // [EB] what is this comment about??
 			GStrings.setString(key, string);
 			DPrintFmt("{} set to:\n{}\n", key, string);
 		}
