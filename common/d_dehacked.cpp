@@ -1805,9 +1805,9 @@ static int ParsePointerHeader(std::string_view header) {
 	// skip first token, we already know it's "Pointer"
 	headerParser();
 
-	auto expect_token = [&](std::string_view idk = "") -> std::optional<std::string> {
+	auto expect_token = [&](std::string_view match = "") -> std::optional<std::string> {
 		auto t = headerParser().token;
-        if (t && (idk.empty() || iequals(*t, idk))) return *t;
+        if (t && (match.empty() || iequals(*t, match))) return *t;
         DPrintFmt("Pointer block header is invalid: \"{}\"\n", header);
         return std::nullopt;
     };
