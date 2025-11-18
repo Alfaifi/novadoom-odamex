@@ -455,7 +455,7 @@ class DehScanner
 	std::string_view m_remainingData;
 	std::string_view m_currentLine;
 	// TODO: implement this properly
-	bool m_unscan;
+	bool m_unscan = false;
 
     void consumeLine()
     {
@@ -535,7 +535,7 @@ public:
 	using KVLine = std::pair<std::string_view, std::string_view>;
 	using Line = std::variant<KVLine, HeaderLine>;
 
-	explicit DehScanner(std::string_view data) : m_remainingData(data), m_unscan(false) {}
+	explicit DehScanner(std::string_view data) : m_remainingData(data) {}
 
 	bool hasMoreLines() const
 	{
@@ -673,16 +673,16 @@ public:
 
 		return str;
 	}
-};
 
-struct DehParserState
-{
-	size_t textOffsetIdx;
-	bool includenotext;
-	std::vector<int32_t> droppedItems;
-	std::vector<std::pair<const char**, int>> soundMapIndices;
-	std::vector<std::pair<int32_t, const CodePtr*>> codePtrs;
-} dp;
+	struct ParsedState
+	{
+		size_t textOffsetIdx;
+		bool includenotext;
+		std::vector<int32_t> droppedItems;
+		std::vector<std::pair<const char**, int>> soundMapIndices;
+		std::vector<std::pair<int32_t, const CodePtr*>> codePtrs;
+	} m_state;
+};
 
 static void PrintUnknown(std::string_view key, const char* loc, const size_t idx)
 {
@@ -1110,27 +1110,27 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 		{
 			if (starts_with(key, "Alert"))
 			{
-				dp.soundMapIndices.emplace_back(&info->seesound, val);
+				scanner.m_state.soundMapIndices.emplace_back(&info->seesound, val);
 			}
 			else if (starts_with(key, "Attack"))
 			{
-				dp.soundMapIndices.emplace_back(&info->attacksound, val);
+				scanner.m_state.soundMapIndices.emplace_back(&info->attacksound, val);
 			}
 			else if (starts_with(key, "Pain"))
 			{
-				dp.soundMapIndices.emplace_back(&info->painsound, val);
+				scanner.m_state.soundMapIndices.emplace_back(&info->painsound, val);
 			}
 			else if (starts_with(key, "Death"))
 			{
-				dp.soundMapIndices.emplace_back(&info->deathsound, val);
+				scanner.m_state.soundMapIndices.emplace_back(&info->deathsound, val);
 			}
 			else if (starts_with(key, "Action"))
 			{
-				dp.soundMapIndices.emplace_back(&info->activesound, val);
+				scanner.m_state.soundMapIndices.emplace_back(&info->activesound, val);
 			}
 			else if (starts_with(key, "Rip"))
 			{
-				dp.soundMapIndices.emplace_back(&info->ripsound, val);
+				scanner.m_state.soundMapIndices.emplace_back(&info->ripsound, val);
 			}
 		}
 		else if (iequals(key, "Projectile group"))
@@ -1178,7 +1178,7 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 			else
 			{
 				int validx = val - 1;
-				dp.droppedItems.push_back(validx);
+				scanner.m_state.droppedItems.push_back(validx);
 				info->droppeditem = static_cast<mobjtype_t>(validx); // deh is mobj + 1
 			}
 		}
@@ -1551,7 +1551,7 @@ static void PatchSprite(int sprNum, DehScanner& scanner)
 	if (offset > 0 && sprNum != -1)
 	{
 		// Calculate offset from beginning of sprite names.
-		offset = (offset - toff[dp.textOffsetIdx] - 22044) / 8;
+		offset = (offset - toff[scanner.m_state.textOffsetIdx] - 22044) / 8;
 
 		if (offset >= 0 && offset < sprnames.size())
 		{
@@ -2052,11 +2052,11 @@ static void PatchCodePtrs(int dummy, DehScanner& scanner)
 
 			if (it != std::end(CodePtrs))
 			{
-				dp.codePtrs.emplace_back(frame, &*it);
+				scanner.m_state.codePtrs.emplace_back(frame, &*it);
 			}
 			else
 			{
-				dp.codePtrs.emplace_back(frame, nullptr);
+				scanner.m_state.codePtrs.emplace_back(frame, nullptr);
 				DPrintFmt("Unknown code pointer: {}\n", value);
 			}
 		}
@@ -2156,7 +2156,7 @@ static void PatchText(int sizes, DehScanner& scanner)
 		return;
 	}
 
-	if (dp.includenotext)
+	if (scanner.m_state.includenotext)
 	{
 		PrintFmt(PRINT_HIGH, "Skipping text chunk in included patch.\n");
 		return;
@@ -2319,7 +2319,7 @@ static int DoInclude(std::string_view include, size_t)
 	return 0;
 }
 
-void D_PostProcessDeh(const DehParserState& dp);
+static void D_PostProcessDeh(const DehScanner::ParsedState& dp);
 
 /**
  * @brief Attempt to load a DeHackEd file.
@@ -2368,10 +2368,8 @@ bool D_DoDehPatch(const OResFile* patchfile, const int lump, bool notext)
 	}
 
 	DehScanner scanner(buffer);
+	DehScanner::ParsedState& dp = scanner.m_state;
 
-	dp.droppedItems.clear();
-	dp.soundMapIndices.clear();
-	dp.codePtrs.clear();
 	dp.includenotext = notext;
 
 	// Load english strings to match against.
@@ -2481,7 +2479,7 @@ static constexpr CodePtr null_bexptr = {"(NULL)", NULL, 0, {0, 0, 0, 0, 0, 0, 0,
  * (Credit to DSDADoom for the inspiration for this)
  */
 
-void D_PostProcessDeh(const DehParserState& dp)
+static void D_PostProcessDeh(const DehScanner::ParsedState& dp)
 {
 	// resolve states with assigned codeptrs
 	for (auto& [frame, codeptr] : dp.codePtrs)
