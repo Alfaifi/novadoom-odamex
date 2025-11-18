@@ -52,7 +52,7 @@ void R_CacheSprite(const spritedef_t *sprite)
 {
 	auto it = sprnames.find(sprite->spritenum);
 	DPrintFmt("cache sprite {}\n",
-		it != sprnames.end() ? it->second.data() : "");
+		it != sprnames.end() ? it->second : "");
 	for (int i = 0; i < sprite->numframes; i++)
 	{
 		for (int r = 0; r < 16; r++)
@@ -191,6 +191,7 @@ static void R_InstallSprite(const char *name, int32_t num)
 	sprites[num].spriteframes = (spriteframe_t *)
 		Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
 	memcpy (sprites[num].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
+	sprites[num].spritenum = num;
 }
 
 
