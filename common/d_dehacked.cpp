@@ -401,8 +401,6 @@ static int ParseTextHeader(std::string_view, size_t);
 static int ParseClassicHeader(std::string_view header, size_t length)
 {
 	std::string_view textNum = header.substr(length);
-	while (!textNum.empty() && std::isspace(static_cast<unsigned char>(textNum.front())))
-		textNum.remove_prefix(1);
 	if (auto num = ParseNum<int32_t>(textNum))
 	{
 		return *num;
@@ -1209,18 +1207,6 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 		}
 		else if (iequals(key, "MBF21 Bits"))
 		{
-
-			// MBF21 Bitname system
-			flagsystem_t mbf_bitnames[19] = {
-			    {0, 1, "LOGRAV"},         {1, 3, "SHORTMRANGE"},    {2, 3, "DMGIGNORED"},
-			    {3, 3, "NORADIUSDMG"},    {4, 3, "FORCERADIUSDMG"}, {5, 3, "HIGHERMPROB"},
-			    {6, 3, "RANGEHALF"},      {17, 1, "NOTHRESHOLD"},   {8, 3, "LONGMELEE"},
-			    {15, 1, "BOSS"},          {10, 3, "MAP07BOSS1"},    {11, 3, "MAP07BOSS2"},
-			    {12, 3, "E1M8BOSS"},      {13, 3, "E2M8BOSS"},      {14, 3, "E3M8BOSS"},
-			    {15, 3, "E4M6BOSS"},      {16, 3, "E4M8BOSS"},      {8, 1, "RIP"},
-			    {18, 3, "FULLVOLSOUNDS"},
-			};
-
 			static constexpr struct
 			{
 				std::string_view name;
@@ -1251,14 +1237,14 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 				{ "FULLVOLSOUNDS",  &mobjinfo_t::flags3, BIT(18), MF3_FULLVOLSOUNDS },
 			};
 
-			static constexpr auto make_mask = [](auto MemberPtr) -> int32_t
+			static constexpr auto make_mask = [](const auto flagsPtr) -> int32_t
 			{
 			    int32_t mask = 0;
-
-			    for (auto const& e : mbf21flagtranslation)
-			        if (e.flags == MemberPtr)
-			            mask |= e.internalBit;
-
+			    for (const auto& f : mbf21flagtranslation)
+				{
+			        if (f.flags == flagsPtr)
+			            mask |= f.internalBit;
+				}
 			    return mask;
 			};
 
@@ -1268,13 +1254,12 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 			info->flags2 &= ~flags2mask;
 			info->flags3 &= ~flags3mask;
 
-			// TODO: this is broken, we need to overwrite the old flags
 			for (const auto strval : SplitBexBits(value, ",+| \t\f\r"))
 			{
 				if (IsNum(strval))
 				{
 					// TODO: maybe give a warning for out of range bits
-					const uint32_t tempval = ParseNum<int32_t>(strval).value_or(0);
+					const int32_t tempval = ParseNum<int32_t>(strval).value_or(0);
 
 					for (auto& [_, flags, dehflag, internalflag] : mbf21flagtranslation)
 					{
@@ -1284,16 +1269,20 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 				}
 				else
 				{
+					bool found = false;
 					for (auto& [name, flags, _, internalflag] : mbf21flagtranslation)
 					{
 						if (iequals(strval, name))
+						{
 							info->*flags |= internalflag;
+							found = true;
+						}
 					}
 
-					// if (i == ARRAY_LENGTH(mbf_bitnames))
-					// {
-					// 	DPrintFmt("Unknown bit mnemonic {}\n", strval);
-					// }
+					if (!found)
+					{
+						DPrintFmt("Unknown bit mnemonic {}\n", strval);
+					}
 				}
 			}
 		}
