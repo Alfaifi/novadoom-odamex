@@ -64,6 +64,8 @@ std::optional<T> ParseNum(std::string_view str)
 {
     T out;
 	int base = 10;
+	while (!str.empty() && std::isspace(static_cast<unsigned char>(str.front())))
+		str.remove_prefix(1);
 	if (str[0] == '$')
 	{
 		str.remove_prefix(1);
