@@ -932,14 +932,12 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 	};
 
 	// flags can be specified by name (a .bex extension):
-	struct flagsystem_t
+	struct
 	{
 		short Bit;
 		short WhichFlags;
 		const char* Name;
-	};
-
-	flagsystem_t bitnames[73] = {
+	} bitnames[73] = {
 	    {0, 0, "SPECIAL"},
 	    {1, 0, "SOLID"},
 	    {2, 0, "SHOOTABLE"},
@@ -1427,7 +1425,7 @@ static void PatchFrame(int frameNum, DehScanner& scanner)
         short Bit;
         const char* Name;
     } bitnames[] = {
-        {1, "SKILL5FAST"},
+        {0x01, "SKILL5FAST"},
     };
 
 	StatesIterator states_it = states.find(frameNum);
@@ -1473,7 +1471,7 @@ static void PatchFrame(int frameNum, DehScanner& scanner)
 							if (iequals(strval, bitnames[i].Name))
 							{
 								vchanged = true;
-								value |= 1 << (bitnames[i].Bit);
+								value |= bitnames[i].Bit;
 								break;
 							}
 						}
@@ -1693,8 +1691,8 @@ static void PatchWeapon(int weapNum, DehScanner& scanner)
 		short Bit;
 		const char* Name;
 	} bitnames[] = {
-	    {1, "NOTHRUST"},  {2, "SILENT"},          {4, "NOAUTOFIRE"},
-	    {8, "FLEEMELEE"}, {16, "AUTOSWITCHFROM"}, {32, "NOAUTOSWITCHTO"},
+	    {0x01, "NOTHRUST"},  {0x02, "SILENT"},         {0x04, "NOAUTOFIRE"},
+	    {0x08, "FLEEMELEE"}, {0x10, "AUTOSWITCHFROM"}, {0x20, "NOAUTOSWITCHTO"},
 	};
 
 	weaponinfo_t *info, dummy;
@@ -1742,7 +1740,7 @@ static void PatchWeapon(int weapNum, DehScanner& scanner)
 							if (iequals(strval, bitnames[i].Name))
 							{
 								vchanged = true;
-								value |= 1 << (bitnames[i].Bit);
+								value |= bitnames[i].Bit;
 								break;
 							}
 						}
