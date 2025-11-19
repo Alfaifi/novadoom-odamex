@@ -1021,17 +1021,6 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 	    {31, 1, "REFLECTIVE"},
 	};
 
-	// MBF21 Bitname system
-	flagsystem_t mbf_bitnames[19] = {
-	    {0, 1, "LOGRAV"},         {1, 3, "SHORTMRANGE"},    {2, 3, "DMGIGNORED"},
-	    {3, 3, "NORADIUSDMG"},    {4, 3, "FORCERADIUSDMG"}, {5, 3, "HIGHERMPROB"},
-	    {6, 3, "RANGEHALF"},      {17, 1, "NOTHRESHOLD"},   {8, 3, "LONGMELEE"},
-	    {15, 1, "BOSS"},          {10, 3, "MAP07BOSS1"},    {11, 3, "MAP07BOSS2"},
-	    {12, 3, "E1M8BOSS"},      {13, 3, "E2M8BOSS"},      {14, 3, "E3M8BOSS"},
-	    {15, 3, "E4M6BOSS"},      {16, 3, "E4M8BOSS"},      {8, 1, "RIP"},
-	    {18, 3, "FULLVOLSOUNDS"},
-	};
-
 	mobjinfo_t *info;
 	bool hadHeight = false;
 	bool gibhealth = false;
@@ -1220,83 +1209,92 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 		}
 		else if (iequals(key, "MBF21 Bits"))
 		{
-			// TODO: figure out all this vchanged stuff
-			auto lineval = value;
-			int value[4] = {0, 0, 0};
-			bool vchanged[4] = {false, false, false};
+
+			// MBF21 Bitname system
+			flagsystem_t mbf_bitnames[19] = {
+			    {0, 1, "LOGRAV"},         {1, 3, "SHORTMRANGE"},    {2, 3, "DMGIGNORED"},
+			    {3, 3, "NORADIUSDMG"},    {4, 3, "FORCERADIUSDMG"}, {5, 3, "HIGHERMPROB"},
+			    {6, 3, "RANGEHALF"},      {17, 1, "NOTHRESHOLD"},   {8, 3, "LONGMELEE"},
+			    {15, 1, "BOSS"},          {10, 3, "MAP07BOSS1"},    {11, 3, "MAP07BOSS2"},
+			    {12, 3, "E1M8BOSS"},      {13, 3, "E2M8BOSS"},      {14, 3, "E3M8BOSS"},
+			    {15, 3, "E4M6BOSS"},      {16, 3, "E4M8BOSS"},      {8, 1, "RIP"},
+			    {18, 3, "FULLVOLSOUNDS"},
+			};
+
+			static constexpr struct
+			{
+				std::string_view name;
+				int32_t mobjinfo_t::* flags;
+				int32_t dehBit;
+				int32_t internalBit;
+			} mbf21flagtranslation[] = {
+				// flags2
+				{ "LOGRAV",         &mobjinfo_t::flags2, BIT(0),  MF2_LOGRAV },
+				{ "BOSS",           &mobjinfo_t::flags2, BIT(9),  MF2_BOSS },
+				{ "RIP",            &mobjinfo_t::flags2, BIT(17), MF2_RIP },
+				// flags3
+				{ "SHORTMRANGE",    &mobjinfo_t::flags3, BIT(1),  MF3_SHORTMRANGE },
+				{ "DMGIGNORED",     &mobjinfo_t::flags3, BIT(2),  MF3_DMGIGNORED },
+				{ "NORADIUSDMG",    &mobjinfo_t::flags3, BIT(3),  MF3_NORADIUSDMG },
+				{ "FORCERADIUSDMG", &mobjinfo_t::flags3, BIT(4),  MF3_FORCERADIUSDMG },
+				{ "HIGHERMPROB",    &mobjinfo_t::flags3, BIT(5),  MF3_HIGHERMPROB },
+				{ "RANGEHALF",      &mobjinfo_t::flags3, BIT(6),  MF3_RANGEHALF },
+				{ "NOTHRESHOLD",    &mobjinfo_t::flags3, BIT(7),  MF3_NOTHRESHOLD },
+				{ "LONGMELEE",      &mobjinfo_t::flags3, BIT(8),  MF3_LONGMELEE },
+				{ "MAP07BOSS1",     &mobjinfo_t::flags3, BIT(10), MF3_MAP07BOSS1 },
+				{ "MAP07BOSS2",     &mobjinfo_t::flags3, BIT(11), MF3_MAP07BOSS2 },
+				{ "E1M8BOSS",       &mobjinfo_t::flags3, BIT(12), MF3_E1M8BOSS },
+				{ "E2M8BOSS",       &mobjinfo_t::flags3, BIT(13), MF3_E2M8BOSS },
+				{ "E3M8BOSS",       &mobjinfo_t::flags3, BIT(14), MF3_E3M8BOSS },
+				{ "E4M6BOSS",       &mobjinfo_t::flags3, BIT(15), MF3_E4M6BOSS },
+				{ "E4M8BOSS",       &mobjinfo_t::flags3, BIT(16), MF3_E4M8BOSS },
+				{ "FULLVOLSOUNDS",  &mobjinfo_t::flags3, BIT(18), MF3_FULLVOLSOUNDS },
+			};
+
+			static constexpr auto make_mask = [](auto MemberPtr) -> int32_t
+			{
+			    int32_t mask = 0;
+
+			    for (auto const& e : mbf21flagtranslation)
+			        if (e.flags == MemberPtr)
+			            mask |= e.internalBit;
+
+			    return mask;
+			};
+
+			static constexpr int32_t flags2mask = make_mask(&mobjinfo_t::flags2);
+			static constexpr int32_t flags3mask = make_mask(&mobjinfo_t::flags3);
+
+			info->flags2 &= ~flags2mask;
+			info->flags3 &= ~flags3mask;
 
 			// TODO: this is broken, we need to overwrite the old flags
-			for (const auto strval : SplitBexBits(lineval, ",+| \t\f\r"))
+			for (const auto strval : SplitBexBits(value, ",+| \t\f\r"))
 			{
 				if (IsNum(strval))
 				{
 					// TODO: maybe give a warning for out of range bits
 					const uint32_t tempval = ParseNum<int32_t>(strval).value_or(0);
-					static constexpr struct
-					{
-						int32_t mobjinfo_t::* flags;
-						int32_t val;
-					} mbf21flagtranslation[] = {
-						// flags2
-						{ &mobjinfo_t::flags2, MF2_LOGRAV },
-						{ &mobjinfo_t::flags2, MF2_BOSS },
-						// flags3
-						{ &mobjinfo_t::flags3, MF3_SHORTMRANGE },
-						{ &mobjinfo_t::flags3, MF3_DMGIGNORED },
-						{ &mobjinfo_t::flags3, MF3_NORADIUSDMG },
-						{ &mobjinfo_t::flags3, MF3_FORCERADIUSDMG },
-						{ &mobjinfo_t::flags3, MF3_HIGHERMPROB },
-						{ &mobjinfo_t::flags3, MF3_RANGEHALF },
-						{ &mobjinfo_t::flags3, MF3_NOTHRESHOLD },
-						{ &mobjinfo_t::flags3, MF3_LONGMELEE },
-						{ &mobjinfo_t::flags3, MF3_MAP07BOSS1 },
-						{ &mobjinfo_t::flags3, MF3_MAP07BOSS2 },
-						{ &mobjinfo_t::flags3, MF3_E1M8BOSS },
-						{ &mobjinfo_t::flags3, MF3_E2M8BOSS },
-						{ &mobjinfo_t::flags3, MF3_E3M8BOSS },
-						{ &mobjinfo_t::flags3, MF3_E4M6BOSS },
-						{ &mobjinfo_t::flags3, MF3_E4M8BOSS },
-						{ &mobjinfo_t::flags3, MF3_FULLVOLSOUNDS },
-					};
 
-					for (auto& [flags, flag] : mbf21flagtranslation)
+					for (auto& [_, flags, dehflag, internalflag] : mbf21flagtranslation)
 					{
-						if (tempval & flag)
-							info->*flags |= flag;
+						if (tempval & dehflag)
+							info->*flags |= internalflag;
 					}
-
-					if (tempval & BIT(17)) // MBF21 RIP is 1 << 17
-					{
-						info->flags2 |= MF2_RIP;
-					}
-
-					value[3] |= tempval;
-					vchanged[3] = true;
 				}
 				else
 				{
-					size_t i;
-
-					for (i = 0; i < ARRAY_LENGTH(mbf_bitnames); i++)
+					for (auto& [name, flags, _, internalflag] : mbf21flagtranslation)
 					{
-						if (iequals(strval, mbf_bitnames[i].Name))
-						{
-							vchanged[mbf_bitnames[i].WhichFlags] = true;
-							value[mbf_bitnames[i].WhichFlags] |= 1
-							                                     << (mbf_bitnames[i].Bit);
-							break;
-						}
+						if (iequals(strval, name))
+							info->*flags |= internalflag;
 					}
 
-					if (i == ARRAY_LENGTH(mbf_bitnames))
-					{
-						DPrintFmt("Unknown bit mnemonic {}\n", strval);
-					}
+					// if (i == ARRAY_LENGTH(mbf_bitnames))
+					// {
+					// 	DPrintFmt("Unknown bit mnemonic {}\n", strval);
+					// }
 				}
-			}
-			if (vchanged[3])
-			{
-				info->flags3 = value[3];
 			}
 		}
 		else if (iequals(key, "Height"))
