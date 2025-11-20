@@ -1300,8 +1300,8 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 		else if (iequals(key, "Bits"))
 		{
 			auto lineval = value;
-			int value[4] = {0, 0, 0};
-			bool vchanged[4] = {false, false, false};
+			int value[3] = {0, 0, 0};
+			bool vchanged[3] = {false, false, false};
 
 			for (const auto strval : SplitBexBits(lineval, ",+| \t\f\r"))
 			{
@@ -1352,10 +1352,6 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 					else if (value[2] & 4)
 						info->translucency = TRANSLUC75;
 				}
-			}
-			if (vchanged[3])
-			{
-				info->flags3 = value[3];
 			}
 		}
 		else if (iequals(key, "ID #"))
