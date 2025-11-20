@@ -196,10 +196,13 @@ enum mobjflag_t
 	MF_SKULLFLY  = BIT(24),		// skull in flight
 	MF_NOTDMATCH = BIT(25),		// don't spawn in death match (key cards)
 
+	MF_TRANSLATION1 = BIT(26),
+	MF_TRANSLATION2 = BIT(27),
+
 	// Player sprites in multiplayer modes are modified
 	//  using an internal color lookup table for re-indexing.
 	// If 0x4 0x8 or 0xc, use a translation table for player colormaps
-	MF_TRANSLATION = 0xc000000,
+	MF_TRANSLATION = MF_TRANSLATION1 | MF_TRANSLATION2,
 
 	MF_TOUCHY  = BIT(28), // MBF
 	MF_BOUNCES = BIT(29), // MBF
