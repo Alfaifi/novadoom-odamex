@@ -3158,11 +3158,20 @@ void A_AddFlags(AActor* actor)
 	const int flags = actor->state->args[0];
 	const int flags3 = actor->state->args[1];
 
+	bool update_blockmap = ((flags & MF_NOBLOCKMAP) && !(actor->flags & MF_NOBLOCKMAP)) ||
+	                       ((flags & MF_NOSECTOR)   && !(actor->flags & MF_NOSECTOR));
+
 	if (flags & MF_TRANSLUCENT)
 		actor->translucency = TRANSLUC66;
 
+	if (update_blockmap)
+		actor->UnlinkFromWorld();
+
 	actor->flags |= flags;
 	actor->flags3 |= flags3;
+
+	if (update_blockmap)
+		actor->LinkToWorld();
 }
 
 //
@@ -3179,11 +3188,20 @@ void A_RemoveFlags(AActor* actor)
 	const int flags = actor->state->args[0];
 	const int flags3 = actor->state->args[1];
 
+	bool update_blockmap = ((flags & MF_NOBLOCKMAP) && (actor->flags & MF_NOBLOCKMAP)) ||
+	                       ((flags & MF_NOSECTOR)   && (actor->flags & MF_NOSECTOR));
+
 	if (flags & MF_TRANSLUCENT)
 		actor->translucency = FRACUNIT;
 
+	if (update_blockmap)
+		actor->UnlinkFromWorld();
+
 	actor->flags &= ~flags;
 	actor->flags3 &= ~flags3;
+
+	if (update_blockmap)
+		actor->LinkToWorld();
 }
 
 void A_Stop(AActor* actor)
