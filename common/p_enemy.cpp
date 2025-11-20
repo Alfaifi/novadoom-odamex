@@ -3132,17 +3132,14 @@ void A_JumpIfTracerCloser(AActor* actor)
 //
 void A_JumpIfFlagsSet(AActor* actor)
 {
-	int state;
-	int flags, flags2;
-
 	if (!actor)
 		return;
 
-	state = actor->state->args[0];
-	flags = actor->state->args[1];
-	flags2 = actor->state->args[2];
+	const int state = actor->state->args[0];
+	const int flags = actor->state->args[1];
+	const int flags3 = actor->state->args[2];
 
-	if ((actor->flags & flags) == flags && (actor->flags2 & flags2) == flags2)
+	if ((actor->flags & flags) == flags && (actor->flags3 & flags3) == flags3)
 		P_SetMobjState(actor, (statenum_t)state, true);
 }
 
@@ -3159,13 +3156,13 @@ void A_AddFlags(AActor* actor)
 		return;
 
 	const int flags = actor->state->args[0];
-	const int flags2 = actor->state->args[1];
+	const int flags3 = actor->state->args[1];
 
 	if (flags & MF_TRANSLUCENT)
 		actor->translucency = TRANSLUC66;
 
 	actor->flags |= flags;
-	actor->flags2 |= flags2;
+	actor->flags3 |= flags3;
 }
 
 //
@@ -3180,13 +3177,13 @@ void A_RemoveFlags(AActor* actor)
 		return;
 
 	const int flags = actor->state->args[0];
-	const int flags2 = actor->state->args[1];
+	const int flags3 = actor->state->args[1];
 
 	if (flags & MF_TRANSLUCENT)
 		actor->translucency = FRACUNIT;
 
 	actor->flags &= ~flags;
-	actor->flags2 &= ~flags2;
+	actor->flags3 &= ~flags3;
 }
 
 void A_Stop(AActor* actor)
