@@ -3918,7 +3918,7 @@ void A_RandomJump(AActor* mo)
 void A_LineEffect(AActor* mo)
 {
 	/* [AM] Not implemented...yet. */
-	if (!(mo->flags & MF_LINEDONE))                // Unless already used up
+	if (!(mo->oflags & MFO_LINEDONE))                // Unless already used up
 	{
 		line_t junk = *lines;                          // Fake linedef set to 1st
 		if ((junk.special = (short)mo->state->misc1))  // Linedef type
@@ -3932,7 +3932,7 @@ void A_LineEffect(AActor* mo)
 			if (!P_UseSpecialLine(mo, &junk, 0, mo->flags & MF2_BOSS))       // Try using it
 				P_CrossSpecialLine(&junk, 0, mo, mo->flags & MF2_BOSS); // Try crossing it
 			if (!junk.special)                         // If type cleared,
-			    mo->flags |= MF_LINEDONE;            // no more for this thing
+			    mo->oflags |= MFO_LINEDONE;            // no more for this thing
 			mo->player = oldplayer;                    // Restore player status
 		}
 	}
