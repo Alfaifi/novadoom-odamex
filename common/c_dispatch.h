@@ -43,41 +43,7 @@ struct parse_string_result_t
 	{
 		return token.has_value();
 	}
-
-	template<std::size_t IDX>
-	auto&& get() &  { return get_helper<IDX>(*this); }
-
-	template<std::size_t IDX>
-	auto&& get() && { return get_helper<IDX>(*this); }
-
-	template<std::size_t IDX>
-	auto&& get() const&  { return get_helper<IDX>(*this); }
-
-	template<std::size_t IDX>
-	auto&& get() const&& { return get_helper<IDX>(*this); }
-private:
-	template<std::size_t IDX, typename T>
-	auto&& get_helper(T&& t)
-	{
-	  static_assert(IDX < 2,
-	    "Index out of bounds for parse_string_result_t");
-	  if constexpr (IDX == 0) return std::forward<T>(t).token;
-	  if constexpr (IDX == 1) return std::forward<T>(t).rest;
-	}
 };
-
-namespace std {
-    template<>
-    struct tuple_size<parse_string_result_t>
-        : std::integral_constant<size_t, 2> {};
-
-    template<size_t IDX>
-    struct tuple_element<IDX, parse_string_result_t>
-		: std::conditional<IDX == 0, std::optional<std::string>, std::string_view>
-	{
-        static_assert(IDX < 2, "Index out of bounds for parse_string_result_t");
-    };
-}
 
 // parse a command string
 std::function<parse_string_result_t()> ParseString(std::string_view data, bool expandVars);
