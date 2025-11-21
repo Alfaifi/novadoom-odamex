@@ -480,24 +480,17 @@ static void BackupData(void);
 
 class DehScanner
 {
+public:
+	using HeaderLine = std::string_view;
+	using KVLine = std::pair<std::string_view, std::string_view>;
+	using Line = std::variant<KVLine, HeaderLine>;
+
+private:
 	std::string_view m_remainingData;
 	std::string_view m_currentLine;
-	// TODO: implement this properly
-	bool m_unscan = false;
+	std::optional<Line> m_buffer;
 
-    void consumeLine()
-    {
-        if (m_remainingData.empty())
-            return;
-
-        size_t len = m_currentLine.length();
-        if (len >= m_remainingData.length())
-            m_remainingData = std::string_view{};
-        else
-            m_remainingData.remove_prefix(len + 1);
-    }
-
-	bool peekLine()
+	bool readLine()
     {
         if (m_remainingData.empty())
         {
@@ -507,9 +500,15 @@ class DehScanner
 
         size_t pos = m_remainingData.find('\n');
         if (pos == std::string_view::npos)
-            m_currentLine = m_remainingData;
+		{
+			m_currentLine = m_remainingData;
+			m_remainingData = std::string_view{};
+		}
         else
-            m_currentLine = m_remainingData.substr(0, pos);
+		{
+			m_currentLine = m_remainingData.substr(0, pos);
+			m_remainingData.remove_prefix(pos + 1);
+		}
         return true;
     }
 
@@ -542,143 +541,89 @@ class DehScanner
 		return str;
 	}
 
-	enum class LineType { None, Header, KV };
-
-    LineType findNextMeaningfulLine()
+	KVLine parseKV() const
     {
-        while (peekLine())
-        {
-            if (isCommentLine() || isEmptyLine())
-            {
-                consumeLine();
-                continue;
-            }
-            return isKVLine() ? LineType::KV : LineType::Header;
-        }
-        return LineType::None;
+        size_t equalPos = m_currentLine.find('=');
+        auto key = trimSpace(m_currentLine.substr(0, equalPos));
+        auto value = trimSpace(m_currentLine.substr(equalPos + 1));
+        return { key, value };
+    }
+
+    HeaderLine parseHeader() const
+    {
+        return trimSpace(m_currentLine);
+    }
+
+	std::optional<Line> parseCurrentLine() const
+    {
+        if (isKVLine())
+            return Line{ parseKV() };
+        if (!isEmptyLine() && !isCommentLine())
+            return Line{ parseHeader() };
+
+        return std::nullopt;
     }
 
 public:
-	using HeaderLine = std::string_view;
-	using KVLine = std::pair<std::string_view, std::string_view>;
-	using Line = std::variant<KVLine, HeaderLine>;
-
 	explicit DehScanner(std::string_view data) : m_remainingData(data) {}
 
-	bool hasMoreLines() const
-	{
-		return !m_remainingData.empty();
+	[[nodiscard]] bool hasMoreLines() const {
+		return !m_remainingData.empty() || m_buffer.has_value();
 	}
 
 	void unscan()
 	{
-		m_unscan = true;
+		if (!m_buffer)
+            m_buffer = parseCurrentLine();
 	}
 
-	void skipLine()
-	{
-		if (!peekLine())
-            return;
-        consumeLine();
-	}
+	void skipLine() { std::ignore = getNextLine(); }
 
-	std::optional<Line> getNextLine()
+	[[nodiscard]] std::optional<Line> getNextLine()
 	{
-		// todo: this should really not always return a header line
-		// but realistically the only time this is called is inside [PARS]
-		if (m_unscan)
-		{
-			std::string_view header = trimSpace(m_currentLine);
-			m_unscan = false;
-			return header;
-		}
+		if (m_buffer)
+        {
+            auto out = m_buffer;
+            m_buffer.reset();
+            return out;
+        }
 
-		while (peekLine())
+		while (readLine())
 		{
 			if (isCommentLine() || isEmptyLine())
-			{
-				consumeLine();
 				continue;
-			}
 
-			if (isKVLine())
-			{
-				size_t equalPos = m_currentLine.find('=');
-				std::string_view key = trimSpace(m_currentLine.substr(0, equalPos));
-				std::string_view value = trimSpace(m_currentLine.substr(equalPos + 1));
-				consumeLine();
-				return std::make_pair(key, value);
-			}
-			else
-			{
-				std::string_view header = trimSpace(m_currentLine);
-				consumeLine();
-				return header;
-			}
+			return parseCurrentLine();
 		}
 
 		return std::nullopt;
 	}
 
-	std::optional<HeaderLine> getNextHeader()
-	{
-		if (m_unscan)
-		{
-			std::string_view header = trimSpace(m_currentLine);
-			m_unscan = false;
-			return header;
-		}
-		while (peekLine())
-		{
-			if (isCommentLine() || isEmptyLine())
-			{
-				consumeLine();
-				continue;
-			}
+	[[nodiscard]] std::optional<KVLine> getNextKeyValue()
+    {
+        if (auto line = getNextLine())
+        {
+            if (auto kv = std::get_if<KVLine>(&*line))
+                return *kv;
 
-			if (isKVLine())
-			{
-				return std::nullopt;
-			}
-			else
-			{
-				std::string_view header = trimSpace(m_currentLine);
-				consumeLine();
-				return header;
-			}
-		}
+            m_buffer = *line; // put back
+        }
+        return std::nullopt;
+    }
 
-		return std::nullopt;
-	}
+	[[nodiscard]] std::optional<HeaderLine> getNextHeader()
+    {
+        if (auto line = getNextLine())
+        {
+            if (auto header = std::get_if<HeaderLine>(&*line))
+                return *header;
 
-	std::optional<DehScanner::KVLine> getNextKeyValue()
-	{
-		while (peekLine())
-		{
-			if (isCommentLine() || isEmptyLine())
-			{
-				consumeLine();
-				continue;
-			}
+            m_buffer = *line; // put back
+        }
+        return std::nullopt;
+    }
 
-			if (!isKVLine())
-			{
-				return std::nullopt;
-			}
-			else
-			{
-				size_t equalPos = m_currentLine.find('=');
-				std::string_view key = trimSpace(m_currentLine.substr(0, equalPos));
-				std::string_view value = trimSpace(m_currentLine.substr(equalPos + 1));
-				consumeLine();
-				return std::make_pair(key, value);
-			}
-		}
-
-		return std::nullopt;
-	}
-
-	std::optional<std::string> readTextString(int size)
+	[[nodiscard]] std::optional<std::string> readTextString(int size)
 	{
 		std::string str;
 		str.reserve(size);
@@ -687,14 +632,14 @@ public:
 		{
 			if (m_remainingData.empty())
 			{
-				DPrintFmt("");
+				DPrintFmt("Unexpected end of Text data.\n");
 				break;
 			}
 
 			if (m_remainingData[0] != '\r')
 				str += m_remainingData[0];
 			else
-			 size++;
+				size++;
 
 			m_remainingData.remove_prefix(1);
 		}
