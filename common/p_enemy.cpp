@@ -3128,7 +3128,9 @@ void A_JumpIfTracerCloser(AActor* actor)
 // Jumps to a state if caller has the specified thing flags set.
 //   args[0]: State to jump to
 //   args[1]: Standard Flag(s) to check
-//   args[2]: MBF21 Flag(s) to check
+//   args[2] and args[3]: MBF21 Flag(s) to check
+//   DeHackEd args3 is split into args[2] and args[3]
+//   because the MBF21 flags are split across AActor::flags2 and AActor::flags3
 //
 void A_JumpIfFlagsSet(AActor* actor)
 {
@@ -3137,9 +3139,12 @@ void A_JumpIfFlagsSet(AActor* actor)
 
 	const int state = actor->state->args[0];
 	const int flags = actor->state->args[1];
-	const int flags3 = actor->state->args[2];
+	const int flags2 = actor->state->args[2];
+	const int flags3 = actor->state->args[3];
 
-	if ((actor->flags & flags) == flags && (actor->flags3 & flags3) == flags3)
+	if ((actor->flags & flags) == flags &&
+	    (actor->flags2 & flags2) == flags2 &&
+	    (actor->flags3 & flags3) == flags3)
 		P_SetMobjState(actor, (statenum_t)state, true);
 }
 
@@ -3148,7 +3153,9 @@ void A_JumpIfFlagsSet(AActor* actor)
 // A_AddFlags
 // Adds the specified thing flags to the caller.
 //   args[0]: Standard Flag(s) to add
-//   args[1]: MBF21 Flag(s) to add
+//   args[1] and args[2]: MBF21 Flag(s) to add
+//   DeHackEd args2 is split into args[1] and args[2]
+//   because the MBF21 flags are split across AActor::flags2 and AActor::flags3
 //
 void A_AddFlags(AActor* actor)
 {
@@ -3156,10 +3163,12 @@ void A_AddFlags(AActor* actor)
 		return;
 
 	const int flags = actor->state->args[0];
-	const int flags3 = actor->state->args[1];
+	const int flags2 = actor->state->args[1];
+	const int flags3 = actor->state->args[2];
 
-	bool update_blockmap = ((flags & MF_NOBLOCKMAP) && !(actor->flags & MF_NOBLOCKMAP)) ||
-	                       ((flags & MF_NOSECTOR)   && !(actor->flags & MF_NOSECTOR));
+	const bool update_blockmap = 
+		((flags & MF_NOBLOCKMAP) && !(actor->flags & MF_NOBLOCKMAP)) ||
+		((flags & MF_NOSECTOR)   && !(actor->flags & MF_NOSECTOR));
 
 	if (flags & MF_TRANSLUCENT)
 		actor->translucency = TRANSLUC66;
@@ -3168,6 +3177,7 @@ void A_AddFlags(AActor* actor)
 		actor->UnlinkFromWorld();
 
 	actor->flags |= flags;
+	actor->flags2 |= flags2;
 	actor->flags3 |= flags3;
 
 	if (update_blockmap)
@@ -3178,7 +3188,9 @@ void A_AddFlags(AActor* actor)
 // A_RemoveFlags
 // Removes the specified thing flags from the caller.
 //   args[0]: Flag(s) to remove
-//   args[1]: MBF21 Flag(s) to remove
+//   args[1] and args[2]: MBF21 Flag(s) to remove
+//   DeHackEd args2 is split into args[1] and args[2]
+//   because the MBF21 flags are split across AActor::flags2 and AActor::flags3
 //
 void A_RemoveFlags(AActor* actor)
 {
@@ -3186,10 +3198,12 @@ void A_RemoveFlags(AActor* actor)
 		return;
 
 	const int flags = actor->state->args[0];
-	const int flags3 = actor->state->args[1];
+	const int flags2 = actor->state->args[1];
+	const int flags3 = actor->state->args[2];
 
-	bool update_blockmap = ((flags & MF_NOBLOCKMAP) && (actor->flags & MF_NOBLOCKMAP)) ||
-	                       ((flags & MF_NOSECTOR)   && (actor->flags & MF_NOSECTOR));
+	const bool update_blockmap = 
+		((flags & MF_NOBLOCKMAP) && (actor->flags & MF_NOBLOCKMAP)) ||
+		((flags & MF_NOSECTOR)   && (actor->flags & MF_NOSECTOR));
 
 	if (flags & MF_TRANSLUCENT)
 		actor->translucency = FRACUNIT;
@@ -3198,6 +3212,7 @@ void A_RemoveFlags(AActor* actor)
 		actor->UnlinkFromWorld();
 
 	actor->flags &= ~flags;
+	actor->flags2 &= ~flags2;
 	actor->flags3 &= ~flags3;
 
 	if (update_blockmap)

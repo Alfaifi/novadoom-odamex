@@ -369,6 +369,36 @@ static constexpr CodePtr CodePtrs[] = {
     {"GunFlashTo", A_GunFlashTo, 2, {0, 0, 0, 0, 0, 0, 0, 0}},
 };
 
+static constexpr struct
+{
+	std::string_view name;
+	int32_t mobjinfo_t::* flags;
+	int32_t dehBit;
+	int32_t internalBit;
+} mbf21flagtranslation[] = {
+	// flags2
+	{ "LOGRAV",         &mobjinfo_t::flags2, BIT(0),  MF2_LOGRAV },
+	{ "BOSS",           &mobjinfo_t::flags2, BIT(9),  MF2_BOSS },
+	{ "RIP",            &mobjinfo_t::flags2, BIT(17), MF2_RIP },
+	// flags3
+	{ "SHORTMRANGE",    &mobjinfo_t::flags3, BIT(1),  MF3_SHORTMRANGE },
+	{ "DMGIGNORED",     &mobjinfo_t::flags3, BIT(2),  MF3_DMGIGNORED },
+	{ "NORADIUSDMG",    &mobjinfo_t::flags3, BIT(3),  MF3_NORADIUSDMG },
+	{ "FORCERADIUSDMG", &mobjinfo_t::flags3, BIT(4),  MF3_FORCERADIUSDMG },
+	{ "HIGHERMPROB",    &mobjinfo_t::flags3, BIT(5),  MF3_HIGHERMPROB },
+	{ "RANGEHALF",      &mobjinfo_t::flags3, BIT(6),  MF3_RANGEHALF },
+	{ "NOTHRESHOLD",    &mobjinfo_t::flags3, BIT(7),  MF3_NOTHRESHOLD },
+	{ "LONGMELEE",      &mobjinfo_t::flags3, BIT(8),  MF3_LONGMELEE },
+	{ "MAP07BOSS1",     &mobjinfo_t::flags3, BIT(10), MF3_MAP07BOSS1 },
+	{ "MAP07BOSS2",     &mobjinfo_t::flags3, BIT(11), MF3_MAP07BOSS2 },
+	{ "E1M8BOSS",       &mobjinfo_t::flags3, BIT(12), MF3_E1M8BOSS },
+	{ "E2M8BOSS",       &mobjinfo_t::flags3, BIT(13), MF3_E2M8BOSS },
+	{ "E3M8BOSS",       &mobjinfo_t::flags3, BIT(14), MF3_E3M8BOSS },
+	{ "E4M6BOSS",       &mobjinfo_t::flags3, BIT(15), MF3_E4M6BOSS },
+	{ "E4M8BOSS",       &mobjinfo_t::flags3, BIT(16), MF3_E4M8BOSS },
+	{ "FULLVOLSOUNDS",  &mobjinfo_t::flags3, BIT(18), MF3_FULLVOLSOUNDS },
+};
+
 struct Key
 {
 	std::string_view name;
@@ -1205,36 +1235,6 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 		}
 		else if (iequals(key, "MBF21 Bits"))
 		{
-			static constexpr struct
-			{
-				std::string_view name;
-				int32_t mobjinfo_t::* flags;
-				int32_t dehBit;
-				int32_t internalBit;
-			} mbf21flagtranslation[] = {
-				// flags2
-				{ "LOGRAV",         &mobjinfo_t::flags2, BIT(0),  MF2_LOGRAV },
-				{ "BOSS",           &mobjinfo_t::flags2, BIT(9),  MF2_BOSS },
-				{ "RIP",            &mobjinfo_t::flags2, BIT(17), MF2_RIP },
-				// flags3
-				{ "SHORTMRANGE",    &mobjinfo_t::flags3, BIT(1),  MF3_SHORTMRANGE },
-				{ "DMGIGNORED",     &mobjinfo_t::flags3, BIT(2),  MF3_DMGIGNORED },
-				{ "NORADIUSDMG",    &mobjinfo_t::flags3, BIT(3),  MF3_NORADIUSDMG },
-				{ "FORCERADIUSDMG", &mobjinfo_t::flags3, BIT(4),  MF3_FORCERADIUSDMG },
-				{ "HIGHERMPROB",    &mobjinfo_t::flags3, BIT(5),  MF3_HIGHERMPROB },
-				{ "RANGEHALF",      &mobjinfo_t::flags3, BIT(6),  MF3_RANGEHALF },
-				{ "NOTHRESHOLD",    &mobjinfo_t::flags3, BIT(7),  MF3_NOTHRESHOLD },
-				{ "LONGMELEE",      &mobjinfo_t::flags3, BIT(8),  MF3_LONGMELEE },
-				{ "MAP07BOSS1",     &mobjinfo_t::flags3, BIT(10), MF3_MAP07BOSS1 },
-				{ "MAP07BOSS2",     &mobjinfo_t::flags3, BIT(11), MF3_MAP07BOSS2 },
-				{ "E1M8BOSS",       &mobjinfo_t::flags3, BIT(12), MF3_E1M8BOSS },
-				{ "E2M8BOSS",       &mobjinfo_t::flags3, BIT(13), MF3_E2M8BOSS },
-				{ "E3M8BOSS",       &mobjinfo_t::flags3, BIT(14), MF3_E3M8BOSS },
-				{ "E4M6BOSS",       &mobjinfo_t::flags3, BIT(15), MF3_E4M6BOSS },
-				{ "E4M8BOSS",       &mobjinfo_t::flags3, BIT(16), MF3_E4M8BOSS },
-				{ "FULLVOLSOUNDS",  &mobjinfo_t::flags3, BIT(18), MF3_FULLVOLSOUNDS },
-			};
-
 			static constexpr auto make_mask = [](const auto flagsPtr) -> int32_t
 			{
 			    int32_t mask = 0;
@@ -1259,7 +1259,7 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 					// TODO: maybe give a warning for out of range bits
 					const int32_t tempval = ParseNum<int32_t>(strval).value_or(0);
 
-					for (auto& [_, flags, dehflag, internalflag] : mbf21flagtranslation)
+					for (const auto& [_, flags, dehflag, internalflag] : mbf21flagtranslation)
 					{
 						if (tempval & dehflag)
 							info->*flags |= internalflag;
@@ -1268,7 +1268,7 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 				else
 				{
 					bool found = false;
-					for (auto& [name, flags, _, internalflag] : mbf21flagtranslation)
+					for (const auto& [name, flags, _, internalflag] : mbf21flagtranslation)
 					{
 						if (iequals(strval, name))
 						{
@@ -2526,6 +2526,36 @@ static void D_PostProcessDeh(const DehScanner::ParsedState& dp)
 			if (state.args[i] == 0 && bexptr_match->default_args[i])
 			{
 				state.args[i] = bexptr_match->default_args[i];
+			}
+		}
+
+		// remap mbf21 flags to flags2/flags3
+		if (bexptr_match->func == A_AddFlags ||
+		    bexptr_match->func == A_RemoveFlags ||
+		    bexptr_match->func == A_JumpIfFlagsSet)
+		{
+			const int mbf21flags = bexptr_match->func == A_JumpIfFlagsSet ? state.args[2] : state.args[1];
+			int flags2 = 0, flags3 = 0;
+			for (const auto& [_, flags, dehflag, internalflag]  : mbf21flagtranslation)
+			{
+				if (mbf21flags & dehflag)
+				{
+					if (flags == &mobjinfo_t::flags2)
+						flags2 |= internalflag;
+					else if (flags == &mobjinfo_t::flags3)
+						flags3 |= internalflag;
+				}
+			}
+
+			if (bexptr_match->func == A_JumpIfFlagsSet)
+			{
+				state.args[2] = flags2;
+				state.args[3] = flags3;
+			}
+			else
+			{
+				state.args[1] = flags2;
+				state.args[2] = flags3;
 			}
 		}
 	}
