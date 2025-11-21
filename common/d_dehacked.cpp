@@ -2117,9 +2117,6 @@ static int ParseTextHeader(std::string_view header, size_t)
 	return (oldsize << 16) + newsize;
 }
 
-// TODO: other ports support sound and music replacements here
-// support for changing music here was removed
-// but it appears support for changing sounds never existed
 static void PatchText(int sizes, DehScanner& scanner)
 {
 	if (sizes == -1)
@@ -2146,13 +2143,25 @@ static void PatchText(int sizes, DehScanner& scanner)
 	DPrintFmt("Searching for text:\n{}\n", *oldStr);
 
 	// Search through sprite names
-	for(auto& [_, sprname] : sprnames)
+	for (auto& [_, sprname] : sprnames)
 	{
 		if (sprname == *oldStr)
 		{
 			sprname = *newStr;
 			return;
 		}
+	}
+
+	const OLumpName newnameds = fmt::format("DS{}", *newStr);
+	const OLumpName oldnameds = fmt::format("DS{}", *oldStr);
+
+	const int oldlumpnum = W_CheckNumForName(oldnameds);
+	const int sndIdx = S_FindSoundByLump(oldlumpnum);
+	if (sndIdx != -1 && W_CheckNumForName(newnameds) != -1)
+	{
+		S_AddSound(S_sfx[sndIdx].name, newnameds.c_str());
+		S_HashSounds();
+		return;
 	}
 
 	// Search through most other texts
