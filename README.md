@@ -16,7 +16,7 @@ Odamex supports the following features:
 * Full Client/Server multiplayer architecture with network compensation features (unlagged, client interpolation and prediction)
 * Support for up to 255 players
 * Various compatibility settings, to emulate vanilla Doom, Boom, or ZDoom physics and fixes
-* Playback and recording of vanilla demos
+* Playback of vanilla demos
 * A fully-featured client netdemo record system with playback control
 * Removal of most vanilla Doom Static limits
 * Support for most Boom and MBF mapping features
