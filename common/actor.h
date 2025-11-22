@@ -289,6 +289,7 @@ enum mobjflag_t
 	MFO_FALLING			= BIT(10),	// [INTERNAL] for falling
 	MFO_ARMED			= BIT(11),	// [INTERNAL] for TOUCHY (object is armed)
 	MFO_LINEDONE 		= BIT(12),  // [INTERNAL] for A_LineEffect, line special already done
+	// MFO_STEALTH			= BIT(13),	// Andy Baker's stealth monsters
 };
 
 //

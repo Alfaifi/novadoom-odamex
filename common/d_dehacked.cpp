@@ -892,20 +892,6 @@ static auto SplitBexBits(std::string_view str, std::string_view delims)
 
 static void PatchThing(int thingNum, DehScanner& scanner)
 {
-
-	enum
-	{
-		// Boom flags
-		MF_TRANSLATION = 0x0c000000, // if 0x4 0x8 or 0xc, use a translation
-		// MF_TRANSSHIFT = 26,       // table for player colormaps
-		// A couple of Boom flags that don't exist in ZDoom
-		MF_SLIDE = 0x00002000,       // Player: keep info about sliding along walls.
-		MF_TRANSLUCENT = 0x80000000, // Translucent sprite?
-		                             // MBF flags: TOUCHY is remapped to flags6, FRIEND is
-		                             // turned into FRIENDLY, and finally BOUNCES is
-		                             // replaced by bouncetypes with the BOUNCES_MBF bit.
-	};
-
 	// flags can be specified by name (a .bex extension):
 	struct
 	{
@@ -950,12 +936,13 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 	    {29, 0, "BOUNCES"},
 	    {30, 0, "FRIEND"},
 	    {31, 0, "TRANSLUCENT"}, // BOOM compatibility
-	    {30, 0, "STEALTH"}, // TODO: figure this out, likely a zdoom flag
 
 	    // TRANSLUCENT... HACKY BUT HEH.
 	    {0, 2, "TRANSLUC25"},
 	    {1, 2, "TRANSLUC50"},
 	    {2, 2, "TRANSLUC75"},
+		// old zdoom only allowed setting this by mnemonic anyway
+		{3, 2, "STEALTH"}, // UNUSED FOR NOW
 
 	    // Names for flags2
 	    {0, 1, "LOGRAV"},
@@ -1296,6 +1283,10 @@ static void PatchThing(int thingNum, DehScanner& scanner)
 						info->translucency = TRANSLUC50;
 					else if (value[2] & 4)
 						info->translucency = TRANSLUC75;
+				}
+				if (value[2] & 8)
+				{
+					// info->oflags |= MFO_STEALTH; // not yet implemented
 				}
 			}
 		}
