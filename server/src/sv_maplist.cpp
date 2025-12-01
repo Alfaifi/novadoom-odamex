@@ -681,7 +681,7 @@ BEGIN_COMMAND (maplist) {
 		const auto& [map, _, lastmaps, wads] = *entry;
 		char flag = ' ';
 		if (show_this_map && index == this_index) {
-			flag = '*';
+			flag = '>';
 		} else if (index == next_index) {
 			flag = '+';
 		}

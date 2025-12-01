@@ -383,7 +383,7 @@ void CMD_MaplistCallback(const maplist_qrows_t &result) {
 		const auto& [map, lastmap, _, wads] = *entry;
 		char flag = ' ';
 		if (show_this_map && index == this_index) {
-			flag = '*';
+			flag = '>';
 		} else if (index == next_index) {
 			flag = '+';
 		}
