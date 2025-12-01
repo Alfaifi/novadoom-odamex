@@ -1207,7 +1207,9 @@ bool P_ActorInFOV(const AActor* origin, const AActor* mo , float f, fixed_t dist
 
 AActor* RoughMonsterCheck(AActor* mo, int index, angle_t fov)
 {
-	for (AActor* link = blocklinks[index]; link != nullptr; link = link->bmapnode.Next(0, 0))
+	const int bx = index % bmapwidth;
+	const int by = index / bmapwidth;
+	for (AActor* link = blocklinks[index]; link != nullptr; link = link->bmapnode.Next(bx, by))
 	{
 		// skip non-shootable actors
 		if (!(link->flags & MF_SHOOTABLE))
@@ -1256,7 +1258,9 @@ AActor* RoughMonsterCheck(AActor* mo, int index, angle_t fov)
 
 AActor* RoughTracerCheck(AActor* mo, int index, angle_t fov)
 {
-	for (AActor* link = blocklinks[index]; link != nullptr; link = link->bmapnode.Next(0, 0))
+	const int bx = index % bmapwidth;
+	const int by = index / bmapwidth;
+	for (AActor* link = blocklinks[index]; link != nullptr; link = link->bmapnode.Next(bx, by))
 	{
 		// skip non-shootable actors
 		if (!(link->flags & MF_SHOOTABLE))
