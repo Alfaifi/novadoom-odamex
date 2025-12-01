@@ -259,7 +259,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 	// Randomly select a monster to spawn.
 	const hordeDefine_t::monster_t* monster = NULL;
-	int limit = std::numeric_limits<int>::max();
+	int limit = limits::MAXINT;
 	for (size_t i = 0; i < 5; i++)
 	{
 		monster = P_RandomFloatWeighted(monsters, MonsterChance);
@@ -281,7 +281,7 @@ bool P_HordeSpawnRecipe(hordeRecipe_t& out, const hordeDefine_t& define,
 
 		// Can't fit this monster.
 		monster = NULL;
-		limit = std::numeric_limits<int>::max();
+		limit = limits::MAXINT;
 	}
 
 	if (monster == NULL)
