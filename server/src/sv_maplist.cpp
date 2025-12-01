@@ -527,7 +527,7 @@ void SV_MaplistIndex(player_t &player) {
 		}
 	}
 
-	MSG_WriteSVC(&cl->reliablebuf, SVC_MaplistIndex(count, next_index, this_index));
+	MSG_WriteSVC(&cl->reliablebuf, SVC_MaplistIndex(count, this_index, next_index));
 }
 
 // Send a full maplist update to a specific player
