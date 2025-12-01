@@ -237,7 +237,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 2:
 		// Open Door
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey))
 		{
 			return true;
 			//line->special = 0;
@@ -246,7 +246,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 3:
 		// Close Door
-		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey))
 		{
 			return true;
 			//line->special = 0;
@@ -255,8 +255,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 4:
 		// Raise Door
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_SLOW),
-		              TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::SLOW),
+		              TICS(doors::WAIT), NoKey))
 		{
 			return true;
 			//line->special = 0;
@@ -265,7 +265,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 5:
 		// Raise Floor
-		if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(floors::SLOW),
 		               0, 0, 0))
 		{
 			return true;
@@ -275,8 +275,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 6:
 		// Fast Ceiling Crush & Raise
-		if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(C_NORMAL),
-		                 SPEED(C_NORMAL), 0, true, 0, 0))
+		if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(ceilings::NORMAL),
+		                 SPEED(ceilings::NORMAL), 0, true, 0, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -285,7 +285,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 8:
 		// Build Stairs
-		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT, SPEED(S_SLOW),
+		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT, SPEED(stairs::SLOW),
 		                   TICS(0), 0, 0, 0))
 		{
 			return true;
@@ -295,8 +295,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 10:
 		// PlatDownWaitUp
-		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_FAST),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::FAST),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -319,7 +319,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 16:
 		// Close Door 30
-		if (EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(D_SLOW),
+		if (EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(doors::SLOW),
 		              OCTICS(240), NoKey))
 		{
 			return true;
@@ -336,7 +336,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 19:
 		// Lower Floor
-		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::SLOW),
 		               (128 - 128) * FRACUNIT, 0, 0))
 		{
 			return true;
@@ -346,7 +346,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 22:
 		// Raise floor to nearest height and change texture
-		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(P_SLOW / 2), 0, 0,
+		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(plats::SLOW / 2), 0, 0,
 		              1))
 		{
 			return true;
@@ -356,8 +356,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 25:
 		// Ceiling Crush and Raise
-		if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(C_SLOW),
-		                 SPEED(C_SLOW), 0, true, 0, 0))
+		if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+		                 SPEED(ceilings::SLOW), 0, true, 0, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -367,7 +367,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 	case 30:
 		// Raise floor to shortest texture height
 		//  on either side of lines.
-		if (EV_DoFloor(DFloor::floorRaiseByTexture, line, line->id, SPEED(F_SLOW), 0, 0,
+		if (EV_DoFloor(DFloor::floorRaiseByTexture, line, line->id, SPEED(floors::SLOW), 0, 0,
 		               0))
 		{
 			return true;
@@ -384,7 +384,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 36:
 		// Lower Floor (TURBO)
-		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_FAST),
+		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::FAST),
 		               (136 - 128) * FRACUNIT, 0, 0))
 		{
 			return true;
@@ -394,7 +394,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 37:
 		// LowerAndChange
-		if (EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(floors::SLOW),
 		               0 * FRACUNIT, 0, 0))
 		{
 			return true;
@@ -404,7 +404,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 38:
 		// Lower Floor To Lowest
-		if (EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0,
+		if (EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0, 0,
 		               0))
 		{
 			return true;
@@ -423,7 +423,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 40:
 		// RaiseCeilingLowerFloor -- only raises ceiling
-		EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(C_SLOW), 0, 0, 0,
+		EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(ceilings::SLOW), 0, 0, 0,
 		             0, 0);
 		return true;
 		//line->special = 0;
@@ -431,8 +431,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 44:
 		// Ceiling Crush
-		if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(C_SLOW),
-		                 SPEED(C_SLOW) / 2, 0, true, 0, 0))
+		if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(ceilings::SLOW),
+		                 SPEED(ceilings::SLOW) / 2, 0, true, 0, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -455,8 +455,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 53:
 		// Perpetual Platform Raise
-		if (EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(P_SLOW),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(plats::SLOW),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -472,7 +472,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 56:
 		// Raise Floor Crush
-		if (EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(F_SLOW), 0, true,
+		if (EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(floors::SLOW), 0, true,
 		               0))
 		{
 			return true;
@@ -491,7 +491,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 58:
 		// Raise Floor 24
-		if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 		               FRACUNIT * 24, 0, 0))
 		{
 			return true;
@@ -501,7 +501,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 59:
 		// Raise Floor 24 And Change
-		if (EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(floors::SLOW),
 		               24 * FRACUNIT, 0, 0))
 		{
 			return true;
@@ -511,7 +511,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 100:
 		// Build Stairs Turbo 16
-		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT, SPEED(S_TURBO),
+		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT, SPEED(stairs::TURBO),
 		                   TICS(0), 0, 0, 0))
 		{
 			return true;
@@ -528,8 +528,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 108:
 		// Blazing Door Raise (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_FAST),
-		              TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::FAST),
+		              TICS(doors::WAIT), NoKey))
 		{
 			return true;
 			//line->special = 0;
@@ -538,7 +538,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 109:
 		// Blazing Door Open (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), 0, NoKey))
 		{
 			return true;
 			//line->special = 0;
@@ -547,7 +547,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 110:
 		// Blazing Door Close (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::FAST), 0, NoKey))
 		{
 			return true;
 			//line->special = 0;
@@ -556,7 +556,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 119:
 		// Raise floor to nearest surr. floor
-		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_SLOW), 0, 0,
+		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::SLOW), 0, 0,
 		               0))
 		{
 			return true;
@@ -566,8 +566,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 121:
 		// Blazing PlatDownWaitUpStay
-		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_TURBO),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::TURBO),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -601,7 +601,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 130:
 		// Raise Floor Turbo
-		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_FAST), 0, 0,
+		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::FAST), 0, 0,
 		               0))
 		{
 			return true;
@@ -611,8 +611,8 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 141:
 		// Silent Ceiling Crush & Raise
-		if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(C_SLOW),
-		                 SPEED(C_SLOW), 0, true, 1, 0))
+		if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+		                 SPEED(ceilings::SLOW), 0, true, 1, 0))
 		{
 			return true;
 			//line->special = 0;
@@ -623,14 +623,14 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 72:
 		// Ceiling Crush
-		EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(C_SLOW),
-		             SPEED(C_SLOW) / 2, 0, true, 0, 0);
+		EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(ceilings::SLOW),
+		             SPEED(ceilings::SLOW) / 2, 0, true, 0, 0);
 		return true;
 
 	case 73:
 		// Ceiling Crush and Raise
-		EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(C_SLOW),
-		             SPEED(C_SLOW), 0, true, 0, 0);
+		EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+		             SPEED(ceilings::SLOW), 0, true, 0, 0);
 		return true;
 
 	case 74:
@@ -640,19 +640,19 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 75:
 		// Close Door
-		EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_SLOW), 0, NoKey);
+		EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey);
 		return true;
 
 	case 76:
 		// Close Door 30
-		EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(D_SLOW),
+		EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(doors::SLOW),
 		          OCTICS(240), NoKey);
 		return true;
 
 	case 77:
 		// Fast Ceiling Crush & Raise
-		EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(C_NORMAL),
-		             SPEED(C_NORMAL), 0, true, 0, 0);
+		EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(ceilings::NORMAL),
+		             SPEED(ceilings::NORMAL), 0, true, 0, 0);
 		return true;
 
 	case 79:
@@ -672,36 +672,36 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 82:
 		// Lower Floor To Lowest
-		EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0, 0);
+		EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0, 0, 0);
 		return true;
 
 	case 83:
 		// Lower Floor
-		EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_SLOW),
+		EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::SLOW),
 		           (128 - 128) * FRACUNIT, 0, 0);
 		return true;
 
 	case 84:
 		// LowerAndChange
-		EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(F_SLOW),
+		EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(floors::SLOW),
 		           0 * FRACUNIT, 0, 0);
 		return true;
 
 	case 86:
 		// Open Door
-		EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_SLOW), 0, NoKey);
+		EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey);
 		return true;
 
 	case 87:
 		// Perpetual Platform Raise
-		EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(P_SLOW),
-		          TICS(PLATWAIT), 0 * FRACUNIT, 0);
+		EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(plats::SLOW),
+		          TICS(plats::WAIT), 0 * FRACUNIT, 0);
 		return true;
 
 	case 88:
 		// PlatDownWaitUp
-		EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_FAST),
-		          TICS(PLATWAIT), 0 * FRACUNIT, 0);
+		EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::FAST),
+		          TICS(plats::WAIT), 0 * FRACUNIT, 0);
 		return true;
 
 	case 89:
@@ -711,43 +711,43 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 90:
 		// Raise Door
-		EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_SLOW), TICS(VDOORWAIT),
+		EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::SLOW), TICS(doors::WAIT),
 		          NoKey);
 		return true;
 
 	case 91:
 		// Raise Floor
-		EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(F_SLOW), 0, 0,
+		EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(floors::SLOW), 0, 0,
 		           0);
 		return true;
 
 	case 92:
 		// Raise Floor 24
-		EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+		EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 		           FRACUNIT * 24, 0, 0);
 		return true;
 
 	case 93:
 		// Raise Floor 24 And Change
-		EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(F_SLOW),
+		EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(floors::SLOW),
 		           24 * FRACUNIT, 0, 0);
 		return true;
 
 	case 94:
 		// Raise Floor Crush
-		EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(F_SLOW), 0, true, 0);
+		EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(floors::SLOW), 0, true, 0);
 		return true;
 
 	case 95:
 		// Raise floor to nearest height
 		// and change texture.
-		EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(P_SLOW / 2), 0, 0, 1);
+		EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(plats::SLOW / 2), 0, 0, 1);
 		return true;
 
 	case 96:
 		// Raise floor to shortest texture height
 		// on either side of lines.
-		EV_DoFloor(DFloor::floorRaiseByTexture, line, line->id, SPEED(F_SLOW), 0, 0, 0);
+		EV_DoFloor(DFloor::floorRaiseByTexture, line, line->id, SPEED(floors::SLOW), 0, 0, 0);
 		return true;
 
 	case 97:
@@ -757,30 +757,30 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 98:
 		// Lower Floor (TURBO)
-		EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_FAST),
+		EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::FAST),
 		           (136 - 128) * FRACUNIT, 0, 0);
 		return true;
 
 	case 105:
 		// Blazing Door Raise (faster than TURBO!)
-		EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_FAST), TICS(VDOORWAIT),
+		EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::FAST), TICS(doors::WAIT),
 		          NoKey);
 		return true;
 
 	case 106:
 		// Blazing Door Open (faster than TURBO!)
-		EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), 0, NoKey);
+		EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), 0, NoKey);
 		return true;
 
 	case 107:
 		// Blazing Door Close (faster than TURBO!)
-		EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_FAST), 0, NoKey);
+		EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::FAST), 0, NoKey);
 		return true;
 
 	case 120:
 		// Blazing PlatDownWaitUpStay.
-		EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_TURBO),
-		          TICS(PLATWAIT), 0 * FRACUNIT, 0);
+		EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::TURBO),
+		          TICS(plats::WAIT), 0 * FRACUNIT, 0);
 		return true;
 
 	case 126:
@@ -794,12 +794,12 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 
 	case 128:
 		// Raise To Nearest Floor
-		EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_SLOW), 0, 0, 0);
+		EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::SLOW), 0, 0, 0);
 		return true;
 
 	case 129:
 		// Raise Floor Turbo
-		EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_FAST), 0, 0, 0);
+		EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::FAST), 0, 0, 0);
 		return true;
 
 		// Extended walk triggers
@@ -820,7 +820,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 142:
 			// Raise Floor 512
 			// 142 W1  EV_DoFloor(raiseFloor512)
-			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 			               FRACUNIT * 64 * 8, 0, 0))
 			{
 				return true;
@@ -832,7 +832,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 			// Raise Floor 24 and change
 			// 143 W1  EV_DoPlat(raiseAndChange,24)
 			if (EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 3 * 8,
-			              SPEED(P_SLOW / 2), 0, 0, 2))
+			              SPEED(plats::SLOW / 2), 0, 0, 2))
 			{
 				return true;
 				//line->special = 0;
@@ -843,7 +843,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 			// Raise Floor 32 and change
 			// 144 W1  EV_DoPlat(raiseAndChange,32)
 			if (EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 4 * 8,
-			              SPEED(P_SLOW / 2), 0, 0, 2))
+			              SPEED(plats::SLOW / 2), 0, 0, 2))
 			{
 				return true;
 				//line->special = 0;
@@ -853,7 +853,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 145:
 			// Lower Ceiling to Floor
 			// 145 W1  EV_DoCeiling(lowerToFloor)
-			if (EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(C_SLOW), 0,
+			if (EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(ceilings::SLOW), 0,
 			                 0, 0, 0, 0))
 			{
 				return true;
@@ -874,7 +874,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 199:
 			// Lower ceiling to lowest surrounding ceiling
 			// 199 W1 EV_DoCeiling(lowerToLowest)
-			if (EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(C_SLOW),
+			if (EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(ceilings::SLOW),
 			                 0, 0, 0, 0, 0))
 			{
 				return true;
@@ -886,7 +886,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 			// Lower ceiling to highest surrounding floor
 			// 200 W1 EV_DoCeiling(lowerToMaxFloor)
 			if (EV_DoCeiling(DCeiling::ceilLowerToHighestFloor, line, line->id,
-			                 SPEED(C_SLOW), 0, 0, 0, 0, 0))
+			                 SPEED(ceilings::SLOW), 0, 0, 0, 0, 0))
 			{
 				return true;
 				//line->special = 0;
@@ -926,7 +926,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 219:
 			// Lower floor to next lower neighbor
 			// 219 W1 Lower Floor Next Lower Neighbor
-			if (EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(F_SLOW), 0,
+			if (EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(floors::SLOW), 0,
 			               0, 0))
 			{
 				return true;
@@ -1021,7 +1021,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 147:
 			// Raise Floor 512
 			// 147 WR  EV_DoFloor(raiseFloor512)
-			EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+			EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 			           FRACUNIT * 64 * 8, 0, 0);
 			return true;
 
@@ -1029,37 +1029,37 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 			// Raise Floor 24 and Change
 			// 148 WR  EV_DoPlat(raiseAndChange,24)
 			EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 3 * 8,
-			          SPEED(P_SLOW / 2), 0, 0, 2);
+			          SPEED(plats::SLOW / 2), 0, 0, 2);
 			return true;
 
 		case 149:
 			// Raise Floor 32 and Change
 			// 149 WR  EV_DoPlat(raiseAndChange,32)
 			EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 4 * 8,
-			          SPEED(P_SLOW / 2), 0, 0, 2);
+			          SPEED(plats::SLOW / 2), 0, 0, 2);
 			return true;
 
 		case 150:
 			// Start slow silent crusher
 			// 150 WR  EV_DoCeiling(silentCrushAndRaise)
-			EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(C_SLOW),
-			             SPEED(C_SLOW), 0, true, 1, 0);
+			EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+			             SPEED(ceilings::SLOW), 0, true, 1, 0);
 			return true;
 
 		case 151:
 			// RaiseCeilingLowerFloor
 			// 151 WR  EV_DoCeiling(raiseToHighest),
 			//         EV_DoFloor(lowerFloortoLowest)
-			EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(C_SLOW), 0,
+			EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(ceilings::SLOW), 0,
 			             0, 0, 0, 0);
-			EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0,
+			EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0, 0,
 			           0);
 			return true;
 
 		case 152:
 			// Lower Ceiling to Floor
 			// 152 WR  EV_DoCeiling(lowerToFloor)
-			EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(C_SLOW), 0, 0,
+			EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(ceilings::SLOW), 0, 0,
 			             0, 0, 0);
 			return true;
 
@@ -1067,7 +1067,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 256:
 			// Build stairs, step 8
 			// 256 WR EV_BuildStairs(build8)
-			EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT, SPEED(S_SLOW),
+			EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT, SPEED(stairs::SLOW),
 			               0, 0, 0, 0);
 			return true;
 
@@ -1075,7 +1075,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 257:
 			// Build stairs, step 16
 			// 257 WR EV_BuildStairs(turbo16)
-			EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT, SPEED(S_TURBO),
+			EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT, SPEED(stairs::TURBO),
 			               0, 0, 0, 0);
 			return true;
 
@@ -1100,14 +1100,14 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 201:
 			// Lower ceiling to lowest surrounding ceiling
 			// 201 WR EV_DoCeiling(lowerToLowest)
-			EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(C_SLOW), 0, 0,
+			EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(ceilings::SLOW), 0, 0,
 			             0, 0, 0);
 			return true;
 
 		case 202:
 			// Lower ceiling to highest surrounding floor
 			// 202 WR EV_DoCeiling(lowerToMaxFloor)
-			EV_DoCeiling(DCeiling::ceilLowerToHighestFloor, line, line->id, SPEED(C_SLOW),
+			EV_DoCeiling(DCeiling::ceilLowerToHighestFloor, line, line->id, SPEED(ceilings::SLOW),
 			             0, 0, 0, 0, 0);
 			return true;
 
@@ -1138,7 +1138,7 @@ bool P_CrossCompatibleSpecialLine(line_t* line, int side, AActor* thing,
 		case 220:
 			// Lower floor to next lower neighbor
 			// 220 WR Lower Floor Next Lower Neighbor
-			EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(F_SLOW), 0, 0,
+			EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(floors::SLOW), 0, 0,
 			           0);
 			return true;
 
@@ -2105,46 +2105,46 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	{
 	// Manual doors, push type with no tag
 	case 1:  // Vertical Door
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(D_SLOW),
-		                                TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(doors::SLOW),
+		                                TICS(doors::WAIT), NoKey))
 		{
 			reuse = true;
 			trigger = true;
 		}
 		break;
 	case 26: // Blue Door/Locked
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(D_SLOW),
-		                                TICS(VDOORWAIT), (card_t)(BCard | CardIsSkull)))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(doors::SLOW),
+		                                TICS(doors::WAIT), (card_t)(BCard | CardIsSkull)))
 		{
 			reuse = true;
 			trigger = true;
 		}
 		break;
 	case 27: // Yellow Door /Locked
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(D_SLOW),
-		                                TICS(VDOORWAIT), (card_t)(YCard | CardIsSkull)))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(doors::SLOW),
+		                                TICS(doors::WAIT), (card_t)(YCard | CardIsSkull)))
 		{
 			reuse = true;
 			trigger = true;
 		}
 		break;
 	case 28: // Red Door /Locked
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(D_SLOW),
-		                                TICS(VDOORWAIT), (card_t)(RCard | CardIsSkull)))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(doors::SLOW),
+		                                TICS(doors::WAIT), (card_t)(RCard | CardIsSkull)))
 		{
 			reuse = true;
 			trigger = true;
 		}
 		break;
 	case 31: // Manual door open
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(doors::SLOW), 0, NoKey))
 		{
 			reuse = false;
 			trigger = true;
 		}
 		break;
 	case 32: // Blue locked door open
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(D_SLOW),
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(doors::SLOW),
 			0, (card_t)(BCard | CardIsSkull)))
 		{
 			reuse = false;
@@ -2152,7 +2152,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		}
 		break;
 	case 33: // Red locked door open
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(D_SLOW), 0,
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(doors::SLOW), 0,
 		                                (card_t)(RCard | CardIsSkull)))
 		{
 			reuse = false;
@@ -2160,7 +2160,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		}
 		break;
 	case 34: // Yellow locked door open
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(D_SLOW), 0,
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(doors::SLOW), 0,
 		                                (card_t)(YCard | CardIsSkull)))
 		{
 			reuse = false;
@@ -2169,15 +2169,15 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		break;
 
 	case 117: // Blazing door raise
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(D_FAST),
-		                                TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, 0, SPEED(doors::FAST),
+		                                TICS(doors::WAIT), NoKey))
 		{
 			reuse = true;
 			trigger = true;
 		}
 		break;
 	case 118: // Blazing door open
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, 0, SPEED(doors::FAST), 0, NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2187,7 +2187,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	// Switches (non-retriggerable)
 	case 7:
 		// Build Stairs
-		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT, SPEED(S_SLOW),
+		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT, SPEED(stairs::SLOW),
 		                   0, 0, 0, 0))
 		{
 			reuse = false;
@@ -2227,7 +2227,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	case 14:
 		// Raise Floor 32 and change texture
 		if (EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 4 * 8,
-		              SPEED(P_SLOW / 2), 0, 0, 2))
+		              SPEED(plats::SLOW / 2), 0, 0, 2))
 		{
 			reuse = false;
 			trigger = true;
@@ -2237,7 +2237,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	case 15:
 		// Raise Floor 24 and change texture
 		if (EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 3 * 8,
-		              SPEED(P_SLOW / 2), 0, 0, 2))
+		              SPEED(plats::SLOW / 2), 0, 0, 2))
 		{
 			reuse = false;
 			trigger = true;
@@ -2246,7 +2246,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 18:
 		// Raise Floor to next highest floor
-		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_SLOW), 0, 0, 0))
+		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::SLOW), 0, 0, 0))
 		{
 			reuse = false;
 			trigger = true;
@@ -2255,7 +2255,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 20:
 		// Raise Plat next highest floor and change texture
-		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(P_SLOW / 2), 0, 0, 1))
+		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(plats::SLOW / 2), 0, 0, 1))
 		{
 			reuse = false;
 			trigger = true;
@@ -2264,8 +2264,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 21:
 		// PlatDownWaitUpStay
-		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_FAST),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::FAST),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			reuse = false;
 			trigger = true;
@@ -2274,7 +2274,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 23:
 		// Lower Floor to Lowest
-		if (EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0,
+		if (EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0, 0,
 		               0))
 		{
 			reuse = false;
@@ -2284,8 +2284,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 29:
 		// Raise Door
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_SLOW),
-		              TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::SLOW),
+		              TICS(doors::WAIT), NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2294,7 +2294,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 41:
 		// Lower Ceiling to Floor
-		if (EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(C_SLOW), 0, 0,
+		if (EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(ceilings::SLOW), 0, 0,
 		                 0, 0, 0))
 		{
 			reuse = false;
@@ -2304,7 +2304,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 71:
 		// Turbo Lower Floor
-		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_FAST),
+		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::FAST),
 		               (136 - 128) * FRACUNIT, 0, 0))
 		{
 			reuse = false;
@@ -2314,8 +2314,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 49:
 		// Ceiling Crush And Raise
-		if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(C_SLOW),
-		                 SPEED(C_SLOW), 0, true, 0, 0))
+		if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+		                 SPEED(ceilings::SLOW), 0, true, 0, 0))
 		{
 			reuse = false;
 			trigger = true;
@@ -2324,7 +2324,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 50:
 		// Close Door
-		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2353,7 +2353,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 55:
 		// Raise Floor Crush
-		if (EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(F_SLOW), 0, true,
+		if (EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(floors::SLOW), 0, true,
 		               0))
 		{
 			reuse = false;
@@ -2363,7 +2363,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 101:
 		// Raise Floor
-		if (EV_DoFloor (DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(F_SLOW), 0, 0, 0))
+		if (EV_DoFloor (DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(floors::SLOW), 0, 0, 0))
 		{
 			reuse = false;
 			trigger = true;
@@ -2372,7 +2372,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 102:
 		// Lower Floor to Surrounding floor height
-		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::SLOW),
 		               (128 - 128) * FRACUNIT, 0, 0))
 		{
 			reuse = false;
@@ -2382,7 +2382,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 103:
 		// Open Door
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2391,8 +2391,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 111:
 		// Blazing Door Raise (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_FAST),
-		              TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::FAST),
+		              TICS(doors::WAIT), NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2401,7 +2401,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 112:
 		// Blazing Door Open (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), 0, NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2410,7 +2410,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 113:
 		// Blazing Door Close (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::FAST), 0, NoKey))
 		{
 			reuse = false;
 			trigger = true;
@@ -2419,8 +2419,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 122:
 		// Blazing PlatDownWaitUpStay
-		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_TURBO),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::TURBO),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			reuse = false;
 			trigger = true;
@@ -2429,7 +2429,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 127:
 		// Build Stairs Turbo 16
-		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT, SPEED(S_TURBO),
+		if (EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT, SPEED(stairs::TURBO),
 		                   TICS(0), 0, 0, 0))
 		{
 			reuse = false;
@@ -2439,7 +2439,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 131:
 		// Raise Floor Turbo
-		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_FAST), 0, 0,
+		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::FAST), 0, 0,
 		               0))
 		{
 			reuse = false;
@@ -2450,7 +2450,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	case 133:
 		// BlzOpenDoor BLUE
 		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id,
-		              SPEED(D_FAST), TICS(0), (card_t)(BCard | CardIsSkull)))
+		              SPEED(doors::FAST), TICS(0), (card_t)(BCard | CardIsSkull)))
 		{
 			reuse = false;
 			trigger = true;
@@ -2458,7 +2458,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		break;
 	case 135:
 		// BlzOpenDoor RED
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), TICS(0),
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), TICS(0),
 		              (card_t)(RCard | CardIsSkull)))
 		{
 			reuse = false;
@@ -2467,7 +2467,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		break;
 	case 137:
 		// BlzOpenDoor YELLOW
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), TICS(0),
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), TICS(0),
 		              (card_t)(YCard | CardIsSkull)))
 		{
 			reuse = false;
@@ -2477,7 +2477,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 140:
 		// Raise Floor 512
-		if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 		               FRACUNIT * 64 * 8, 0, 0))
 		{
 			reuse = false;
@@ -2497,7 +2497,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 158:
 			// Raise Floor to shortest lower texture
 			// 158 S1  EV_DoFloor(raiseToTexture), CSW(0)
-			if (EV_DoFloor(DFloor::floorRaiseByTexture, line, line->id, SPEED(F_SLOW), 0,
+			if (EV_DoFloor(DFloor::floorRaiseByTexture, line, line->id, SPEED(floors::SLOW), 0,
 			               false, 0))
 			{
 				reuse = false;
@@ -2508,7 +2508,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 159:
 			// Raise Floor to shortest lower texture
 			// 159 S1  EV_DoFloor(lowerAndChange)
-			if (EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(floors::SLOW),
 			               0 * FRACUNIT, false, 0))
 			{
 				reuse = false;
@@ -2519,7 +2519,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 160:
 			// Raise Floor 24 and change
 			// 160 S1  EV_DoFloor(raiseFloor24AndChange)
-			if (EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(floors::SLOW),
 			               24 * FRACUNIT, 0, 0))
 			{
 				reuse = false;
@@ -2530,7 +2530,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 161:
 			// Raise Floor 24
 			// 161 S1  EV_DoFloor(raiseFloor24)
-			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 			               FRACUNIT * 24, 0, 0))
 			{
 				reuse = false;
@@ -2541,8 +2541,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 162:
 			// Moving floor min n to max n
 			// 162 S1  EV_DoPlat(perpetualRaise,0)
-			if (EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(F_SLOW),
-			              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+			if (EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(floors::SLOW),
+			              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 			{
 				reuse = false;
 				trigger = true;
@@ -2561,8 +2561,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 164:
 			// Start fast crusher
 			// 164 S1  EV_DoCeiling(fastCrushAndRaise)
-			if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(C_NORMAL),
-			                 SPEED(C_NORMAL), 0, true, 0, 0))
+			if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(ceilings::NORMAL),
+			                 SPEED(ceilings::NORMAL), 0, true, 0, 0))
 			{
 				reuse = false;
 				trigger = true;
@@ -2572,8 +2572,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 165:
 			// Start slow silent crusher
 			// 165 S1  EV_DoCeiling(silentCrushAndRaise)
-			if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(C_SLOW),
-			                 SPEED(C_SLOW), 0, true, 1, 0))
+			if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+			                 SPEED(ceilings::SLOW), 0, true, 1, 0))
 			{
 				reuse = false;
 				trigger = true;
@@ -2583,9 +2583,9 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 166:
 			// Raise ceiling, Lower floor
 			// 166 S1 EV_DoCeiling(raiseToHighest), EV_DoFloor(lowerFloortoLowest)
-			if (EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(C_SLOW),
+			if (EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(ceilings::SLOW),
 			                 0, 0, 0, 0, 0) ||
-			    EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0,
+			    EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0,
 			               0, 0))
 			{
 				reuse = false;
@@ -2596,8 +2596,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 167:
 			// Lower ceiling and Crush
 			// 167 S1 EV_DoCeiling(lowerAndCrush)
-			if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(C_SLOW),
-			                 SPEED(C_SLOW) / 2, 0, true, 0, 0))
+			if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(ceilings::SLOW),
+			                 SPEED(ceilings::SLOW) / 2, 0, true, 0, 0))
 			{
 				reuse = false;
 				trigger = true;
@@ -2672,7 +2672,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 175:
 			// Close Door, Open in 30 secs
 			// 175 S1  EV_DoDoor(close30ThenOpen)
-			if (EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(F_SLOW),
+			if (EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(floors::SLOW),
 			              OCTICS(240), NoKey))
 			{
 				reuse = false;
@@ -2693,7 +2693,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 203:
 			// Lower ceiling to lowest surrounding ceiling
 			// 203 S1 EV_DoCeiling(lowerToLowest)
-			if (EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(C_SLOW),
+			if (EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(ceilings::SLOW),
 			                 0, 0, 0, 0, 0))
 			{
 				reuse = false;
@@ -2705,7 +2705,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 			// Lower ceiling to highest surrounding floor
 			// 204 S1 EV_DoCeiling(lowerToMaxFloor)
 			if (EV_DoCeiling(DCeiling::ceilLowerToHighestFloor, line, line->id,
-			                 SPEED(C_SLOW), 0, 0, 0, 0, 0))
+			                 SPEED(ceilings::SLOW), 0, 0, 0, 0, 0))
 			{
 				reuse = false;
 				trigger = true;
@@ -2735,7 +2735,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 221:
 			// Lower floor to next lowest floor
 			// 221 S1 Lower Floor To Nearest Floor
-			if (EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(F_SLOW), 0,
+			if (EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(floors::SLOW), 0,
 			               0, 0))
 			{
 				reuse = false;
@@ -2804,7 +2804,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 177:
 			// Raise Floor to shortest lower texture
 			// 177 SR  EV_DoFloor(lowerAndChange)
-			if (EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorLowerAndChange, line, line->id, SPEED(floors::SLOW),
 			               0 * FRACUNIT, 0, 0))
 			{
 				reuse = true;
@@ -2815,7 +2815,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 178:
 			// Raise Floor 512
 			// 178 SR  EV_DoFloor(raiseFloor512)
-			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 			               FRACUNIT * 64 * 8, 0, 0))
 			{
 				reuse = true;
@@ -2826,7 +2826,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 179:
 			// Raise Floor 24 and change
 			// 179 SR  EV_DoFloor(raiseFloor24AndChange)
-			if (EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorRaiseAndChange, line, line->id, SPEED(floors::SLOW),
 			               24 * FRACUNIT, 0, 0))
 			{
 				reuse = true;
@@ -2837,7 +2837,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 180:
 			// Raise Floor 24
 			// 180 SR  EV_DoFloor(raiseFloor24)
-			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(F_SLOW),
+			if (EV_DoFloor(DFloor::floorRaiseByValue, line, line->id, SPEED(floors::SLOW),
 			               FRACUNIT * 24, 0, 0))
 			{
 				reuse = true;
@@ -2849,8 +2849,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 			// Moving floor min n to max n
 			// 181 SR  EV_DoPlat(perpetualRaise,0)
 
-			EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(F_SLOW),
-			          TICS(PLATWAIT), 0 * FRACUNIT, 0);
+			EV_DoPlat(line->id, line, DPlat::platPerpetualRaise, 0, SPEED(floors::SLOW),
+			          TICS(plats::WAIT), 0 * FRACUNIT, 0);
 			reuse = true;
 			trigger = true;
 
@@ -2868,8 +2868,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 183:
 			// Start fast crusher
 			// 183 SR  EV_DoCeiling(fastCrushAndRaise)
-			if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(C_NORMAL),
-			                 SPEED(C_NORMAL), 0, true, 0, 0))
+			if (EV_DoCeiling(DCeiling::fastCrushAndRaise, line, line->id, SPEED(ceilings::NORMAL),
+			                 SPEED(ceilings::NORMAL), 0, true, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -2879,8 +2879,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 184:
 			// Start slow crusher
 			// 184 SR  EV_DoCeiling(crushAndRaise)
-			if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(C_SLOW),
-			                 SPEED(C_SLOW), 0, true, 0, 0))
+			if (EV_DoCeiling(DCeiling::crushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+			                 SPEED(ceilings::SLOW), 0, true, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -2890,8 +2890,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 185:
 			// Start slow silent crusher
 			// 185 SR  EV_DoCeiling(silentCrushAndRaise)
-			if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(C_SLOW),
-			                 SPEED(C_SLOW), 0, true, 0, 0))
+			if (EV_DoCeiling(DCeiling::silentCrushAndRaise, line, line->id, SPEED(ceilings::SLOW),
+			                 SPEED(ceilings::SLOW), 0, true, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -2901,9 +2901,9 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 186:
 			// Raise ceiling, Lower floor
 			// 186 SR EV_DoCeiling(raiseToHighest), EV_DoFloor(lowerFloortoLowest)
-			if (EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(C_SLOW),
+			if (EV_DoCeiling(DCeiling::ceilRaiseToHighest, line, line->id, SPEED(ceilings::SLOW),
 			                 0, 0, 0, 0, 0) ||
-			    EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0,
+			    EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0,
 			               0, 0))
 			{
 				reuse = true;
@@ -2914,8 +2914,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 187:
 			// Lower ceiling and Crush
 			// 187 SR EV_DoCeiling(lowerAndCrush)
-			if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(C_SLOW),
-			                 SPEED(C_SLOW) / 2, 0, true, 0, 0))
+			if (EV_DoCeiling(DCeiling::lowerAndCrush, line, line->id, SPEED(ceilings::SLOW),
+			                 SPEED(ceilings::SLOW) / 2, 0, true, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -2992,7 +2992,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 196:
 			// Close Door, Open in 30 secs
 			// 196 SR  EV_DoDoor(close30ThenOpen)
-			if (EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(D_SLOW),
+			if (EV_DoDoor(DDoor::doorCloseWaitOpen, line, thing, line->id, SPEED(doors::SLOW),
 			              OCTICS(240), NoKey))
 			{
 				reuse = true;
@@ -3003,7 +3003,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 205:
 			// Lower ceiling to lowest surrounding ceiling
 			// 205 SR EV_DoCeiling(lowerToLowest)
-			if (EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(C_SLOW),
+			if (EV_DoCeiling(DCeiling::ceilLowerToLowest, line, line->id, SPEED(ceilings::SLOW),
 			                 0, 0, 0, 0, 0))
 			{
 				reuse = true;
@@ -3015,7 +3015,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 			// Lower ceiling to highest surrounding floor
 			// 206 SR EV_DoCeiling(lowerToMaxFloor)
 			if (EV_DoCeiling(DCeiling::ceilLowerToHighestFloor, line, line->id,
-			                 SPEED(C_SLOW), 0, 0, 0, 0, 0))
+			                 SPEED(ceilings::SLOW), 0, 0, 0, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -3045,7 +3045,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		case 222:
 			// Lower floor to next lowest floor
 			// 222 SR Lower Floor To Nearest Floor
-			if (EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(F_SLOW), 0,
+			if (EV_DoFloor(DFloor::floorLowerToNearest, line, line->id, SPEED(floors::SLOW), 0,
 			               0, 0))
 			{
 				reuse = true;
@@ -3090,7 +3090,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 			// Build stairs, step 8
 			// 258 SR EV_BuildStairs(build8)
 			if (EV_BuildStairs(line->id, DFloor::buildUp, line, 8 * FRACUNIT,
-			                   SPEED(S_SLOW), 0, 0, 0, 0))
+			                   SPEED(stairs::SLOW), 0, 0, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -3101,7 +3101,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 			// Build stairs, step 16
 			// 259 SR EV_BuildStairs(turbo16)
 			if (EV_BuildStairs(line->id, DFloor::buildUp, line, 16 * FRACUNIT,
-			                   SPEED(S_TURBO), 0, 0, 0, 0))
+			                   SPEED(stairs::TURBO), 0, 0, 0, 0))
 			{
 				reuse = true;
 				trigger = true;
@@ -3115,7 +3115,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	// Buttons (retriggerable switches)
 	case 42:
 		// Close Door
-		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey))
 		{
 			reuse = true;
 			trigger = true;
@@ -3124,7 +3124,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 43:
 		// Lower Ceiling to Floor
-		if (EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(C_SLOW), 0, 0,
+		if (EV_DoCeiling(DCeiling::ceilLowerToFloor, line, line->id, SPEED(ceilings::SLOW), 0, 0,
 		                 false, 0, 0))
 		{
 			reuse = true;
@@ -3134,7 +3134,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 45:
 		// Lower Floor to Surrounding floor height
-		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::SLOW),
 		               (128 - 128) * FRACUNIT, 0, 0))
 		{
 			reuse = true;
@@ -3144,7 +3144,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 60:
 		// Lower Floor to Lowest
-		if (EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(F_SLOW), 0, 0,
+		if (EV_DoFloor(DFloor::floorLowerToLowest, line, line->id, SPEED(floors::SLOW), 0, 0,
 		               0))
 		{
 			reuse = true;
@@ -3154,7 +3154,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 61:
 		// Open Door
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_SLOW), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey))
 		{
 			reuse = true;
 			trigger = true;
@@ -3163,8 +3163,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 62:
 		// PlatDownWaitUpStay
-		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_FAST),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::FAST),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			reuse = true;
 			trigger = true;
@@ -3173,8 +3173,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 63:
 		// Raise Door
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_SLOW),
-		              TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::SLOW),
+		              TICS(doors::WAIT), NoKey))
 		{
 			reuse = true;
 			trigger = true;
@@ -3183,7 +3183,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 64:
 		// Raise Floor to ceiling
-		if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(floors::SLOW),
 		               0, 0, 0))
 		{
 			reuse = true;
@@ -3194,7 +3194,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	case 66:
 		// Raise Floor 24 and change texture
 		if (EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 3 * 8,
-		              SPEED(P_SLOW / 2), 0, 0, 2))
+		              SPEED(plats::SLOW / 2), 0, 0, 2))
 		{
 			reuse = true;
 			trigger = true;
@@ -3204,7 +3204,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 	case 67:
 		// Raise Floor 32 and change texture
 		if (EV_DoPlat(line->id, line, DPlat::platUpByValueStay, FRACUNIT * 4 * 8,
-		              SPEED(P_SLOW / 2), 0, 0, 2))
+		              SPEED(plats::SLOW / 2), 0, 0, 2))
 		{
 			reuse = true;
 			trigger = true;
@@ -3213,7 +3213,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 65:
 		// Raise Floor Crush
-		if (EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(F_SLOW), 0, true,
+		if (EV_DoFloor(DFloor::floorRaiseAndCrush, line, line->id, SPEED(floors::SLOW), 0, true,
 		               0))
 		{
 			reuse = true;
@@ -3223,7 +3223,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 68:
 		// Raise Plat to next highest floor and change texture
-		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(P_SLOW / 2), 0, 0,
+		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(plats::SLOW / 2), 0, 0,
 		              1))
 		{
 			reuse = true;
@@ -3233,7 +3233,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 69:
 		// Raise Floor to next highest floor
-		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_SLOW), 0, 0,
+		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::SLOW), 0, 0,
 		               0))
 		{
 			reuse = true;
@@ -3243,7 +3243,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 70:
 		// Turbo Lower Floor
-		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(F_FAST),
+		if (EV_DoFloor(DFloor::floorLowerToHighest, line, line->id, SPEED(floors::FAST),
 		               (136 - 128) * FRACUNIT, 0, 0))
 		{
 			reuse = true;
@@ -3253,8 +3253,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 114:
 		// Blazing Door Raise (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(D_FAST),
-		              TICS(VDOORWAIT), NoKey))
+		if (EV_DoDoor(DDoor::doorRaise, line, thing, line->id, SPEED(doors::FAST),
+		              TICS(doors::WAIT), NoKey))
 		{
 			reuse = true;
 			trigger = true;
@@ -3263,7 +3263,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 115:
 		// Blazing Door Open (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), 0, NoKey))
 		{
 			reuse = true;
 			trigger = true;
@@ -3272,7 +3272,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 116:
 		// Blazing Door Close (faster than TURBO!)
-		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(D_FAST), 0, NoKey))
+		if (EV_DoDoor(DDoor::doorClose, line, thing, line->id, SPEED(doors::FAST), 0, NoKey))
 		{
 			reuse = true;
 			trigger = true;
@@ -3281,8 +3281,8 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 123:
 		// Blazing PlatDownWaitUpStay
-		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(P_TURBO),
-		              TICS(PLATWAIT), 0 * FRACUNIT, 0))
+		if (EV_DoPlat(line->id, line, DPlat::platDownWaitUpStay, 0, SPEED(plats::TURBO),
+		              TICS(plats::WAIT), 0 * FRACUNIT, 0))
 		{
 			reuse = true;
 			trigger = true;
@@ -3291,7 +3291,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 132:
 		// Raise Floor Turbo
-		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(F_FAST), 0, 0,
+		if (EV_DoFloor(DFloor::floorRaiseToNearest, line, line->id, SPEED(floors::FAST), 0, 0,
 		               0))
 		{
 			reuse = true;
@@ -3301,7 +3301,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 
 	case 99:
 		// BlzOpenDoor BLUE
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), TICS(0),
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), TICS(0),
 		              (card_t)(BCard | CardIsSkull)))
 		{
 			reuse = true;
@@ -3310,7 +3310,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		break;
 	case 134:
 		// BlzOpenDoor RED
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), TICS(0),
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), TICS(0),
 		              (card_t)(RCard | CardIsSkull)))
 		{
 			reuse = true;
@@ -3319,7 +3319,7 @@ bool P_UseCompatibleSpecialLine(AActor* thing, line_t* line, int side,
 		break;
 	case 136:
 		// BlzOpenDoor YELLOW
-		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_FAST), TICS(0),
+		if (EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::FAST), TICS(0),
 		              (card_t)(YCard | CardIsSkull)))
 		{
 			reuse = true;
@@ -3487,7 +3487,7 @@ bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 	{
 	case 24:
 		// 24 G1 raise floor to highest adjacent
-		if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(F_SLOW),
+		if (EV_DoFloor(DFloor::floorRaiseToLowestCeiling, line, line->id, SPEED(floors::SLOW),
 		               0, 0, 0) ||
 		    demoplayback)
 		{
@@ -3497,12 +3497,12 @@ bool P_ShootCompatibleSpecialLine(AActor* thing, line_t* line)
 
 	case 46:
 		// 46 GR open door, stay open
-		EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(D_SLOW), 0, NoKey);
+		EV_DoDoor(DDoor::doorOpen, line, thing, line->id, SPEED(doors::SLOW), 0, NoKey);
 		return true;
 
 	case 47:
 		// 47 G1 raise floor to nearest and change texture and type
-		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(D_SLOW), 0, 0,
+		if (EV_DoPlat(line->id, line, DPlat::platRaiseAndStay, 0, SPEED(doors::SLOW), 0, 0,
 		              1) ||
 		    demoplayback)
 		{
