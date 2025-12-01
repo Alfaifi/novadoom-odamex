@@ -387,7 +387,7 @@ void CMD_MaplistCallback(const maplist_qrows_t &result) {
 		} else if (index == next_index) {
 			flag = '+';
 		}
-		PrintFmt(PRINT_HIGH, "{}{}. {} {}{}\n", flag, index + 1,
+		PrintFmt(PRINT_HIGH, " {}{}. {} {}{}\n", flag, index + 1,
 			   JoinStrings(wads, " "), map,
 			   lastmap.empty() ? "" : fmt::format(" lastmap={}", lastmap));
 	}
