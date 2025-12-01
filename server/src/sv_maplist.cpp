@@ -420,8 +420,8 @@ bool Maplist::set_index(const size_t &index) {
 		return false;
 	}
 
-	this->entered_once = true && gamestate != GS_STARTUP;
-	this->in_maplist = true && gamestate != GS_STARTUP;
+	this->entered_once = true;
+	this->in_maplist = true;
 	this->index = index;
 	this->update_shuffle_index();
 	return true;
