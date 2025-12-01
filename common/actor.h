@@ -473,8 +473,6 @@ public:
 
 	DWORD			effects;			// [RH] see p_effect.h
 
-    // Interaction info, by BLOCKMAP.
-    // Links in blocks (if needed).
 	struct subsector_s		*subsector;
 
     // The closest interval over all contacted Sectors.
@@ -642,6 +640,8 @@ public:
 		AActor		**prev[BLOCKSX * BLOCKSY];
 	};
 
+	// Interaction info, by BLOCKMAP.
+    // Links in blocks (if needed).
 	ActorBlockMapListNode bmapnode;
 };
 
