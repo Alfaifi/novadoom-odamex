@@ -1170,7 +1170,13 @@ static void P_WallBouncy(AActor* mo)
 			}
 		}
 		else
+		{
 			mo->momx = mo->momy = 0;
+		}
+	}
+	else
+	{
+		mo->momx = mo->momy = 0;
 	}
 }
 
