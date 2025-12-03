@@ -496,7 +496,7 @@ static void D_PrintIWADIdentity()
 /**
  * @brief Load all found DEH patches, as well as all found DEHACKED lumps.
  */
-void D_LoadResolvedPatches()
+void D_LoadResolvedPatches(bool reloadStrings)
 {
 	// Load external patch files first.
 	bool chexLoaded = false;
@@ -506,14 +506,14 @@ void D_LoadResolvedPatches()
 		{
 			chexLoaded = true;
 		}
-		D_DoDehPatch(&file, -1);
+		D_DoDehPatch(&file, -1, reloadStrings);
 	}
 
 	// Check WAD files for lumps.
 	int lump = -1;
 	while ((lump = W_FindLump("DEHACKED", lump)) != -1)
 	{
-		D_DoDehPatch(NULL, lump);
+		D_DoDehPatch(NULL, lump, reloadStrings);
 	}
 
 	if (::gamemode == retail_chex && !::multiplayer && !chexLoaded)
