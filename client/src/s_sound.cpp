@@ -1220,7 +1220,8 @@ void S_StopMusic()
 {
 	I_StopSong();
 
-	mus_playing.name = "";
+	musinfo.savedmusic.clear();
+	mus_playing.name.clear();
 }
 
 
