@@ -2433,7 +2433,7 @@ AActor* P_SpawnMissile (AActor *source, AActor *dest, mobjtype_t type)
 	if (source->oflags & MFO_BOSSPOOL)
 	{
 		th->oflags |= MFO_FULLBRIGHT;
-		th->effects = FX_YELLOWFOUNTAIN;
+		th->effects |= FX_YELLOWFOUNTAIN;
 		th->translation = translationref_t(&bosstable[0]);
 	}
 	else if (source->flags & MF_FRIEND)
