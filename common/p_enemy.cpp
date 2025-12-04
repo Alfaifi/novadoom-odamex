@@ -3277,6 +3277,31 @@ CLIENT_ONLY(
 )
 }
 
+#ifdef CLIENT_APP
+CVAR_FUNC_IMPL(cl_showfriends)
+{
+	if (var)
+	{
+		P_FriendlyEffects();
+	}
+	else
+	{
+		// Clear all friendly effects
+		TThinkerIterator<AActor> iterator;
+		AActor* other;
+
+		while ((other = iterator.Next()))
+		{
+			if (other->flags & MF_FRIEND)
+			{
+				other->effects &= ~FX_FRIENDHEARTS;
+				other->translation = 0;
+			}
+		}
+	}
+}
+#endif
+
 // P_RemoveSoulLimit
 bool P_RemoveSoulLimit()
 {
