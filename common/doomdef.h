@@ -134,7 +134,8 @@ enum GameMission_t
   pack_tnt, 			// TNT mission pack
   pack_plut,			// Plutonia pack
   chex,					// Chex Quest
-  chex3,				// Chex Quest 3
+  chex3,				// Chex Quest 3 v2.0
+  chex3v,				// Chex Quest 3 Vanilla Edition
   chex3d2,              // Chex Quest 3 Vanilla Edition Modding Version
   retail_freedoom,
   commercial_freedoom,	// FreeDoom
@@ -144,7 +145,10 @@ enum GameMission_t
 
 inline bool IsChexMission(GameMission_t mission)
 {
-	return mission == chex || mission == chex3 || mission == chex3d2;
+	return mission == chex ||
+	       mission == chex3 ||
+	       mission == chex3v ||
+	       mission == chex3d2;
 }
 
 // If rangecheck is undefined,

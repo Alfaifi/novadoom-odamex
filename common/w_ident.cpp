@@ -1507,7 +1507,7 @@ void W_ConfigureGameInfo(const OResFile& iwad)
 	}
     else if (idname.find(OStringToUpper(OString(CHEX3_PREFIX))) == 0)
 	{
-		gamemission = chex3;
+		gamemission = idname.find("VANILLA") != std::string::npos ? chex3v : chex3;
 		gamemode = registered;
 		gameinfo.flags = GI_MENUHACK_RETAIL;
 		gameinfo.maxSwitch = 2;
