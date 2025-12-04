@@ -3024,6 +3024,7 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		{
 			mthing->args[0] = mthing->type - 9026;
 			type = MT_FOUNTAIN;
+			info = &mobjinfo[type]; // mt_fountain guaranteed to exist
 		}
 	}
 	else
