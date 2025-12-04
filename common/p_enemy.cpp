@@ -3241,7 +3241,7 @@ CLIENT_ONLY(
 		else
 		{
 			other->effects &= ~FX_FRIENDHEARTS;
-			other->translation = 0;
+			other->translation = nullptr;
 		}
 	}
 )
@@ -3272,7 +3272,7 @@ CLIENT_ONLY(
 	else
 	{
 		mo->effects &= ~FX_FRIENDHEARTS;
-		mo->translation = 0;
+		mo->translation = nullptr;
 	}
 )
 }
@@ -3295,7 +3295,7 @@ CVAR_FUNC_IMPL(cl_showfriends)
 			if (other->flags & MF_FRIEND)
 			{
 				other->effects &= ~FX_FRIENDHEARTS;
-				other->translation = 0;
+				other->translation = nullptr;
 			}
 		}
 	}
