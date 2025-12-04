@@ -2820,19 +2820,22 @@ void P_SpawnMapThing (mapthing2_t *mthing, int position)
 		P_ShowSpawns(mthing);
 
 	// only servers control spawning of items
-  // EXCEPT the client must spawn Type 14 (teleport exit).
+	// EXCEPT the client must spawn Type 14 (teleport exit).
 	// otherwise teleporters won't work well.
-	//
-	// Clients also handle spawning of ambient sounds and music changers
-	//
-	if ((mthing->type >= 14001 && mthing->type <= 14065) || (mthing->type >= 14100 && mthing->type <= 14165))
+	// Also spawn sector special things, fixes some other teleport issues.
+	if (!serverside && (mthing->type != 14)
+	                && !(mthing->type >= 9992 && mthing->type <= 9999)
+	                && !(mthing->type >= 9982 && mthing->type <= 9983))
 	{
-		if (!clientside)
-		{
-			return;
-		}
+		return;
 	}
-	else if (!serverside && (mthing->type != 14))
+
+	//
+	// Clients also exclusively handle spawning of ambient sounds and music changers
+	//
+	if (!clientside &&
+	    ((mthing->type >= 14001 && mthing->type <= 14065) ||
+	     (mthing->type >= 14100 && mthing->type <= 14165)))
 	{
 		return;
 	}
