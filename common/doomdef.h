@@ -134,11 +134,18 @@ enum GameMission_t
   pack_tnt, 			// TNT mission pack
   pack_plut,			// Plutonia pack
   chex,					// Chex Quest
+  chex3,				// Chex Quest 3
+  chex3d2,              // Chex Quest 3 Vanilla Edition Modding Version
   retail_freedoom,
   commercial_freedoom,	// FreeDoom
   commercial_hacx,		// HACX
   none
 };
+
+inline bool IsChexMission(GameMission_t mission)
+{
+	return mission == chex || mission == chex3 || mission == chex3d2;
+}
 
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled

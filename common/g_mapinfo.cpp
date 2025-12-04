@@ -1952,6 +1952,12 @@ void G_ParseMapInfo()
 	case chex:
 		baseinfoname = "_CHEXNFO";
 		break;
+	case chex3:
+		baseinfoname = "_CHX3NFO";
+		break;
+	case chex3d2:
+		baseinfoname = "_CHXDNFO";
+		break;
 	case none:
 	default:
 		I_Error("{}: This IWAD is unknown to Odamex", __FUNCTION__);
