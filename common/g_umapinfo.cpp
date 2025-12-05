@@ -445,6 +445,11 @@ bool ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 			break;
 		}
 	}
+	else if (!stricmp(pname.c_str(), "crouching"))
+	{
+		if (ParsePlayerAction(os) == player_action_t::REQUIRE)
+			os.warning("Crouching is not supported in Odamex. Map {} may not work as intended.", mape->mapname);
+	}
 	else
 	{
 		do
