@@ -148,15 +148,20 @@ HUSTR_TALKTOSELF3 = Oh No...
 HUSTR_TALKTOSELF4 = Gotta break free.
 HUSTR_TALKTOSELF5 = Hurry!
 
+# Enemy names
+CC_ZOMBIE  = FLEMOIDUS COMMONUS
+CC_SHOTGUN = FLEMOIDUS BIPEDICUS
+CC_DEMON   = FLEMOIDUS BIPEDICUS WITH ARMOR
+CC_BARON   = THE FLEMBRANE
+
 # Map names
+# These are actually not what Odamex currently uses
+# Instead it loads the CHUSTR_E1Mx strings
+# But this is here for consistency with chex.deh
 HUSTR_E1M1 = E1M1: Landing Zone
 HUSTR_E1M2 = E1M2: Storage Facility
 HUSTR_E1M3 = E1M3: Experimental Lab
 HUSTR_E1M4 = E1M4: Arboretum
 HUSTR_E1M5 = E1M5: Caverns of Bazoik
 
-# Enemy names
-CC_ZOMBIE  = FLEMOIDUS COMMONUS
-CC_SHOTGUN = FLEMOIDUS BIPEDICUS
-CC_DEMON   = FLEMOIDUS BIPEDICUS WITH ARMOR
-CC_BARON   = THE FLEMBRANE
+# Par times are already set in _CHEXNFO
