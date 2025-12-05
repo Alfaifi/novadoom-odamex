@@ -102,7 +102,7 @@ void MustGetIdentifier(OScanner& os)
 
 enum struct player_action_t
 {
-	DISABLE,
+	DISALLOW,
 	ALLOW,
 	REQUIRE,
 };
@@ -110,8 +110,8 @@ enum struct player_action_t
 player_action_t ParsePlayerAction(OScanner& os)
 {
 	MustGetIdentifier(os);
-	if (os.compareTokenNoCase("disable"))
-		return player_action_t::DISABLE;
+	if (os.compareTokenNoCase("disallow"))
+		return player_action_t::DISALLOW;
 
 	if (os.compareTokenNoCase("allow"))
 		return player_action_t::ALLOW;
@@ -415,7 +415,7 @@ bool ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	{
 		switch (ParsePlayerAction(os))
 		{
-		case player_action_t::DISABLE:
+		case player_action_t::DISALLOW:
 			mape->flags |= LEVEL_JUMP_NO;
 			mape->flags &= ~LEVEL_JUMP_YES;
 			break;
@@ -432,7 +432,7 @@ bool ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	{
 		switch (ParsePlayerAction(os))
 		{
-		case player_action_t::DISABLE:
+		case player_action_t::DISALLOW:
 			mape->flags |= LEVEL_FREELOOK_NO;
 			mape->flags &= ~LEVEL_FREELOOK_YES;
 			break;
