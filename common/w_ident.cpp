@@ -1469,7 +1469,7 @@ void W_ConfigureGameInfo(const OResFile& iwad)
     {
 		gamemode = retail;
 		gamemission = doom;
-		gameinfo.flags = GI_MENUHACK_RETAIL | GI_NOCRAZYDEATH;
+		gameinfo.flags = GI_MENUHACK_RETAIL;
 		gameinfo.maxSwitch = 2;
 		gameinfo.titleString = "REKKR";
 	}
@@ -1525,7 +1525,7 @@ void W_ConfigureGameInfo(const OResFile& iwad)
 	{
 		gamemode = retail;
 		gamemission = retail_freedoom;
-		gameinfo.flags = GI_MENUHACK_RETAIL | GI_NOCRAZYDEATH;
+		gameinfo.flags = GI_MENUHACK_RETAIL;
 		gameinfo.maxSwitch = 2;
 		gameinfo.titleString = "FreeDoom: Phase 1";
 	}
