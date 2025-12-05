@@ -1,5 +1,7 @@
 Patch File for DeHackEd v3.0
 
+# Adapted from Simon "fraggle" Howard's chex.deh
+
 Doom version = 21
 Patch format = 6
 
