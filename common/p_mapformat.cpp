@@ -424,7 +424,8 @@ bool P_IsCompatibleLockedDoorLine(const short special)
 		return false;
 
 	return special == 26 || special == 27 || special == 28 || special == 32 ||
-	       special == 33 || special == 34;
+	       special == 33 || special == 34 || special == 99 || special == 133 ||
+		   special == 134 || special == 135 || special == 136 || special == 137;
 }
 
 bool P_IsCompatibleBlueDoorLine(const short special)
@@ -432,13 +433,10 @@ bool P_IsCompatibleBlueDoorLine(const short special)
 	if (map_format.getZDoom())
 		return false;
 
-	int lock = (special & LockedKey) >> LockedKeyShift;
-	bool genericlock = false;
+	const int lock = (special & LockedKey) >> LockedKeyShift;
+	const bool genericlock = lock == BCard || lock == BSkull;
 
-	if (lock == BCard || lock == BSkull)
-		genericlock = true;
-
-	return special == 26 || special == 32 || genericlock;
+	return special == 26 || special == 32 || special == 99 || special == 133 || genericlock;
 }
 
 bool P_IsCompatibleRedDoorLine(const short special)
@@ -446,13 +444,10 @@ bool P_IsCompatibleRedDoorLine(const short special)
 	if (map_format.getZDoom())
 		return false;
 
-	int lock = (special & LockedKey) >> LockedKeyShift;
-	bool genericlock = false;
+	const int lock = (special & LockedKey) >> LockedKeyShift;
+	const bool genericlock = lock == RCard || lock == RSkull;
 
-	if (lock == RCard || lock == RSkull)
-		genericlock = true;
-
-	return special == 28 || special == 33 || genericlock;
+	return special == 28 || special == 33 || special == 134 || special == 135 || genericlock;
 }
 
 bool P_IsCompatibleYellowDoorLine(const short special)
@@ -460,13 +455,10 @@ bool P_IsCompatibleYellowDoorLine(const short special)
 	if (map_format.getZDoom())
 		return false;
 
-	int lock = (special & LockedKey) >> LockedKeyShift;
-	bool genericlock = false;
+	const int lock = (special & LockedKey) >> LockedKeyShift;
+	const bool genericlock = lock == YCard || lock == YSkull;
 
-	if (lock == YCard || lock == YSkull)
-		genericlock = true;
-
-	return special == 27 || special == 34 || genericlock;
+	return special == 27 || special == 34 || special == 136 || special == 137 || genericlock;
 }
 
 bool P_IsLightTagDoorType(const short special)
