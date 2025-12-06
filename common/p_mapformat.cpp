@@ -396,8 +396,8 @@ bool P_IsTeleportLine(const short special)
 
 	return special == 39 || special == 97 || special == 125 || special == 126 ||
 	       special == 174 || special == 195 || special == 207 || special == 208 ||
-	       special == 209 || special == 210 || special == 244 || special == 268 ||
-	       special == 269;
+	       special == 209 || special == 210 || special == 243 || special == 244 ||
+		   (262 <= special && special <= 269);
 }
 
 bool P_IsThingTeleportLine(const short special)
