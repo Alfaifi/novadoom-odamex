@@ -2007,11 +2007,6 @@ void P_KillMobj(AActor *source, AActor *target, AActor *inflictor, bool joinkill
 	if (target->player && level.time)
 		G_LivesCheckEndGame();
 
-	if (gamemode == retail_chex)	// [ML] Chex Quest mode - monsters don't drop items
-    {
-		return;
-    }
-
 	// Drop stuff.
 	// This determines the kind of object spawned
 	// during the death frame of a thing.
