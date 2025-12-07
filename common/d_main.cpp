@@ -501,7 +501,7 @@ void D_LoadResolvedPatches(bool reloadStrings)
 	// Load internal chex.deh if necessary
 	if (::gamemode == retail_chex)
 	{
-		D_DoDehPatch(nullptr, W_GetNumForName("_CHXHACK"));
+		D_DoDehPatch(nullptr, W_GetNumForName("_CHXHACK"), reloadStrings);
 	}
 
 	// Load external patch files first.
