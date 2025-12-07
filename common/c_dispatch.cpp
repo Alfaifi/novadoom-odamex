@@ -645,7 +645,7 @@ std::function<parse_string_result_t()> ParseString(std::string_view data, bool e
 
 	return [base = std::move(base)]() mutable -> parse_string_result_t {
 		auto result = base();
-		if (!result || result.token->empty() || result.token->at(0) == '$')
+		if (!result || result.token->empty() || result.token->at(0) != '$')
 			return result;
 
 		cvar_t *dummy;
