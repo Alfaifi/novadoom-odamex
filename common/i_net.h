@@ -253,7 +253,7 @@ enum svc_t
 	svc_netdemoloadsnap = 102, // netdemos - NullPoint
 };
 
-static constexpr size_t svc_max = 255;
+inline constexpr size_t svc_max = 255;
 
 enum ThinkerType
 {
@@ -302,7 +302,7 @@ inline auto format_as(clc_t clc)
 	return fmt::underlying(clc);
 }
 
-static constexpr size_t clc_max = 255;
+inline constexpr size_t clc_max = 255;
 
 extern msg_info_t clc_info[clc_max + 1];
 extern msg_info_t svc_info[svc_max + 1];
