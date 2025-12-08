@@ -368,6 +368,12 @@ odaproto::svc::SpawnMobj SVC_SpawnMobj(AActor* mo)
 		cur->set_flags(mo->flags);
 	}
 
+	if (mo->flags2 & MF2_DORMANT)
+	{
+		spawnFlags |= SVC_SM_FLAGS2;
+		cur->set_flags2(mo->flags2);
+	}
+
 	// odamex flags - only monster flags for now
 	if (mo->oflags & hordeBossModMask)
 	{
