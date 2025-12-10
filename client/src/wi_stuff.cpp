@@ -1092,14 +1092,27 @@ void WI_initStats()
     cnt_pause = TICRATE;
 }
 
+static int StatPercent(int statValue, int statValueMax)
+{
+	if (statValueMax > 0)
+	{
+		return (statValue * 100) / statValueMax;
+	}
+	return std::max(1, statValue) * 100;    // Report the case where value == max == 0 as a full success.
+}
+
 void WI_updateStats()
 {
+	const int finalKillPercent   = StatPercent(level.killed_monsters, wminfo.maxkills);
+	const int finalItemPercent   = StatPercent(level.found_items,     wminfo.maxitems);
+	const int finalSecretPercent = StatPercent(level.found_secrets,   wminfo.maxsecret);
+
     if (acceleratestage && sp_state != 10)
     {
 		acceleratestage = 0;
-		cnt_kills = (wminfo.maxkills) ? (level.killed_monsters * 100) / wminfo.maxkills : 0;
-		cnt_items = (wminfo.maxitems) ? (level.found_items * 100) / wminfo.maxitems : 0;
-		cnt_secret = (wminfo.maxsecret) ? (level.found_secrets * 100) / wminfo.maxsecret : 0;
+		cnt_kills  = finalKillPercent;
+		cnt_items  = finalItemPercent;
+		cnt_secret = finalSecretPercent;
 		cnt_time = (plrs[me].stime) ? plrs[me].stime / TICRATE : level.time / TICRATE;
 		cnt_par = wminfo.partime / TICRATE;
 		S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
@@ -1112,10 +1125,9 @@ void WI_updateStats()
 		if (!(bcnt&3))
 		    S_Sound (CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
-		if (!gameinfo.intermissionCounter || !wminfo.maxkills ||
-		    cnt_kills >= (level.killed_monsters * 100) / wminfo.maxkills)
+		if (!gameinfo.intermissionCounter || cnt_kills >= finalKillPercent)
 		{
-		    cnt_kills = (wminfo.maxkills) ? (level.killed_monsters * 100) / wminfo.maxkills : 0;
+		    cnt_kills = finalKillPercent;
 		    S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
 		    sp_state++;
 		}
@@ -1127,10 +1139,9 @@ void WI_updateStats()
 		if (!(bcnt&3))
 		    S_Sound (CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
-		if (!gameinfo.intermissionCounter || !wminfo.maxitems ||
-		    cnt_items >= (level.found_items * 100) / wminfo.maxitems)
+		if (!gameinfo.intermissionCounter || cnt_items >= finalItemPercent)
 		{
-		    cnt_items = (wminfo.maxitems) ? (level.found_items * 100) / wminfo.maxitems : 0;
+		    cnt_items = finalItemPercent;
 		    S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
 		    sp_state++;
 		}
@@ -1142,10 +1153,9 @@ void WI_updateStats()
 		if (!(bcnt&3))
 		    S_Sound (CHAN_INTERFACE, "weapons/pistol", 1, ATTN_NONE);
 
-		if (!gameinfo.intermissionCounter || !wminfo.maxsecret ||
-		    cnt_secret >= (level.found_secrets * 100) / wminfo.maxsecret)
+		if (!gameinfo.intermissionCounter || cnt_secret >= finalSecretPercent)
 		{
-		    cnt_secret = (wminfo.maxsecret) ? (level.found_secrets * 100) / wminfo.maxsecret : 0;
+		    cnt_secret = finalSecretPercent;
 		    S_Sound (CHAN_INTERFACE, "world/barrelx", 1, ATTN_NONE);
 		    sp_state++;
 		}
