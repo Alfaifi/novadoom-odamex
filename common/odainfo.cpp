@@ -2284,8 +2284,8 @@ mobjinfo_t odamobjinfo[] = {
     },
     {                 // MT_EXTRALIFE
         MT_EXTRALIFE,
-		590,             // doomednum
-		S_O1UP,        // spawnstate
+		-1,             // doomednum
+		S_O1UP,         // spawnstate
 		1000,           // spawnhealth
 		0,              // gibhealth
 		S_NULL,         // seestate
@@ -2323,7 +2323,7 @@ mobjinfo_t odamobjinfo[] = {
 	},
 	{                 // MT_RESTEAMMATE
         MT_RESTEAMMATE,
-		589,             // doomednum
+		-1,             // doomednum
 		S_RES,          // spawnstate
 		1000,           // spawnhealth
 		0,              // gibhealth
