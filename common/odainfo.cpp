@@ -102,8 +102,16 @@ state_t odastates[] = {
     {S_WPGF2, SPR_WPGF, 1, 1, NULL, S_WPGF1, 0, 0}, // S_WPGF2
 
     {S_CARE, SPR_CARE, 0, -1, NULL, S_NULL, 0, 0},  // S_CARE - Horde Care Package
-    {S_LIVES, SPR_LIVE, 0, -1, NULL, S_NULL, 0, 0}, // S_LIVES - Horde Extra Life Powerup
-    {S_RES, SPR_RSTM, 0, -1, NULL, S_NULL, 0, 0},   // S_RES - Horde Resurrect Powerup
+    {S_O1UP,  SPR_O1UP, 32768, 4, NULL, S_O1UP2, 0, 0},  // S_O1UP - Horde Extra Life Powerup
+    {S_O1UP2, SPR_O1UP, 32769, 4, NULL, S_O1UP3, 0, 0},
+    {S_O1UP3, SPR_O1UP, 32770, 4, NULL, S_O1UP4, 0, 0},
+    {S_O1UP4, SPR_O1UP, 32771, 4, NULL, S_O1UP5, 0, 0},
+    {S_O1UP5, SPR_O1UP, 32770, 4, NULL, S_O1UP6, 0, 0},
+    {S_O1UP6, SPR_O1UP, 32769, 4, NULL, S_O1UP, 0, 0},
+    {S_RES,  SPR_RSTM, 32768, 5, NULL, S_RES2, 0, 0},   // S_RES - Horde Resurrect Powerup
+    {S_RES2, SPR_RSTM, 32769, 5, NULL, S_RES3, 0, 0},
+    {S_RES3, SPR_RSTM, 32770, 5, NULL, S_RES4, 0, 0},
+    {S_RES4, SPR_RSTM, 32771, 5, NULL, S_RES, 0, 0},
 
     {S_NOWEAPONUP, SPR_TNT1, 0, 1, A_Raise, S_NOWEAPON, 0, 0},     // S_NOWEAPONUP
     {S_NOWEAPONDOWN, SPR_TNT1, 0, 1, A_Lower, S_NOWEAPON, 0, 0},   // S_NOWEAPONDOWN
@@ -116,7 +124,7 @@ const char* odasprnames[] = {
     "GIB0", "GIB1", "GIB2", "GIB3", "GIB4", "GIB5", "GIB6", "GIB7", "UNKN",
     //	[Toke - CTF]
     "BSOK", "RSOK", "BFLG", "RFLG", "BDWN", "RDWN", "BCAR", "RCAR", "GSOK", "GFLG",
-    "GDWN", "GCAR", "TLGL", "WPBF", "WPRF", "WPGF", "CARE", "LIVE", "RSTM",};
+    "GDWN", "GCAR", "TLGL", "WPBF", "WPRF", "WPGF", "CARE", "O1UP", "RSTM",};
 
 // reserved odamex mobjinfo
 // ::MT_CAREPACK - ::MT_GIB0 + 1
@@ -2276,8 +2284,8 @@ mobjinfo_t odamobjinfo[] = {
     },
     {                 // MT_EXTRALIFE
         MT_EXTRALIFE,
-		-1,             // doomednum
-		S_LIVES,        // spawnstate
+		590,             // doomednum
+		S_O1UP,        // spawnstate
 		1000,           // spawnhealth
 		0,              // gibhealth
 		S_NULL,         // seestate
@@ -2315,7 +2323,7 @@ mobjinfo_t odamobjinfo[] = {
 	},
 	{                 // MT_RESTEAMMATE
         MT_RESTEAMMATE,
-		-1,             // doomednum
+		589,             // doomednum
 		S_RES,          // spawnstate
 		1000,           // spawnhealth
 		0,              // gibhealth

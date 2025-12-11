@@ -1197,7 +1197,7 @@ void P_GiveSpecial(player_t *player, AActor *special)
 		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_CAREPACKAGE, false);
 			break;
 
-		case SPR_LIVE:
+		case SPR_O1UP:
 		    // Award an extra life to the player who collects this
 		    P_AwardExtraLifePowerUp(player);
 		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_EXTRALIFE, false);
