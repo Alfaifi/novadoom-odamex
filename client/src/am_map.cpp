@@ -1462,23 +1462,49 @@ void AM_drawWalls()
 					if (line.special == Door_LockedRaise || line.special == Generic_Door)
 					{
 						const short lock = line.special == Door_LockedRaise ? line.args[3] : line.args[4];
-						if (lock == (zk_blue_card | zk_blue))
+						switch (lock)
 						{
-							r = doorColors.bluedoor[0];
-							g = doorColors.bluedoor[1];
-							b = doorColors.bluedoor[2];
-						}
-						else if (lock == (zk_yellow_card | zk_yellow))
-						{
-							r = doorColors.yellowdoor[0];
-							g = doorColors.yellowdoor[1];
-							b = doorColors.yellowdoor[2];
-						}
-						else
-						{
-							r = doorColors.reddoor[0];
-							g = doorColors.reddoor[1];
-							b = doorColors.reddoor[2];
+							case zk_blue_card:
+							case zk_blue:
+							case zk_blue_skull:
+							case zk_bluex:
+								r = doorColors.bluedoor[0];
+								g = doorColors.bluedoor[1];
+								b = doorColors.bluedoor[2];
+								break;
+							case zk_yellow_card:
+							case zk_yellow:
+							case zk_yellow_skull:
+							case zk_yellowx:
+								r = doorColors.yellowdoor[0];
+								g = doorColors.yellowdoor[1];
+								b = doorColors.yellowdoor[2];
+								break;
+							case zk_red_card:
+							case zk_red:
+							case zk_red_skull:
+							case zk_redx:
+								r = doorColors.reddoor[0];
+								g = doorColors.reddoor[1];
+								b = doorColors.reddoor[2];
+								break;
+							case zk_all:
+							case zk_any:
+							case zk_each_color:
+								r = doorColors.multidoor[0];
+								g = doorColors.multidoor[1];
+								b = doorColors.multidoor[2];
+								break;
+							case zk_none:
+								r = gameinfo.currentAutomapColors.CDWallColor.rgb.getr();
+								g = gameinfo.currentAutomapColors.CDWallColor.rgb.getg();
+								b = gameinfo.currentAutomapColors.CDWallColor.rgb.getb();
+								break;
+							default:
+								r = gameinfo.currentAutomapColors.LockedColor.rgb.getr();
+								g = gameinfo.currentAutomapColors.LockedColor.rgb.getg();
+								b = gameinfo.currentAutomapColors.LockedColor.rgb.getb();
+								break;
 						}
 
 						AM_drawMline(&l, AM_BestColor(pal->basecolors, r, g, b));
