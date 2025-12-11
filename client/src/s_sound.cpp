@@ -46,6 +46,7 @@
 #include "m_fileio.h"
 #include "gi.h"
 #include "oscanner.h"
+#include "g_musinfo.h"
 
 #define NORM_PITCH		128
 #define NORM_PRIORITY	64
@@ -84,7 +85,7 @@ public:
 		dist = 0;
 		initial_volume = 0.0f;
 		volume = 0.0f;
-		priority = MININT;
+		priority = limits::MININT;
 		loop = false;
 		start_time = 0;
 	}
@@ -186,7 +187,7 @@ void S_NoiseDebug()
 				oy = Channel[i].y;
 			}
 			const int color = Channel[i].loop ? CR_BROWN : CR_GREY;
-			M_StringCopy(temp, lumpinfo[Channel[i].sfxinfo->lumpnum].name, 9);
+			M_StringCopy(temp, lumpinfo[Channel[i].sfxinfo->lumpnum].name.c_str(), 9);
 			screen->DrawText (color, 0, y, temp);
 			snprintf (temp, 16, "%d", ox / FRACUNIT);
 			screen->DrawText (color, 70, y, temp);
@@ -785,6 +786,29 @@ void S_LoopedSoundID(fixed_t *pt, int channel, int sound_id, float volume, int a
 	S_StartSound(pt, 0, 0, channel, sound_id, volume, attenuation, true);
 }
 
+int S_FindGenderedSound(std::string_view name, AActor* ent)
+{
+	static constexpr std::string_view templat = "player/{}/{}";
+	// static constexpr std::string_view genders[] = { "male", "female", "cyborg", "other" };
+	static constexpr std::string_view genders[] = { "male", "male", "male", "male" };
+	player_t *player;
+
+	int sfx_id = -1;
+	if (ent && ent != (AActor *)(~0) && (player = ent->player))
+	{
+		sfx_id = S_FindSound(fmt::format(templat, "base", name).c_str());
+		if (sfx_id == -1)
+		{
+			sfx_id = S_FindSound(fmt::format(templat, genders[player->userinfo.gender], name).c_str());
+		}
+	}
+	if (sfx_id == -1)
+	{
+		sfx_id = S_FindSound(fmt::format(templat, "male", name).c_str());
+	}
+	return sfx_id;
+}
+
 static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, int channel,
                               const char *name, float volume, int attenuation, bool looping,
                               float dist_scale = 0.0f)
@@ -805,30 +829,7 @@ static void S_StartNamedSound(AActor *ent, fixed_t *pt, fixed_t x, fixed_t y, in
 
 	if (soundname[0] == '*')
 	{
-		// Sexed sound
-		char nametemp[128];
-		const char templat[] = "player/%s/%s";
-                // Hacks away! -joek
-		//const char *genders[] = { "male", "female", "cyborg" };
-                const char *genders[] = { "male", "male", "male" };
-		player_t *player;
-
-		sfx_id = -1;
-		if (ent && ent != (AActor *)(~0) && (player = ent->player))
-		{
-			snprintf(nametemp, 128, templat, "base", soundname.substr(1).c_str());
-			sfx_id = S_FindSound(nametemp);
-			if (sfx_id == -1)
-			{
-				snprintf(nametemp, 128, templat, genders[player->userinfo.gender], soundname.substr(1).c_str());
-				sfx_id = S_FindSound(nametemp);
-			}
-		}
-		if (sfx_id == -1)
-		{
-			snprintf(nametemp, 128, templat, "male", soundname.substr(1).c_str());
-			sfx_id = S_FindSound(nametemp);
-		}
+		sfx_id = S_FindGenderedSound(soundname.substr(1), ent);
 	}
 	else
 		sfx_id = S_FindSound(soundname.c_str());
@@ -1162,7 +1163,7 @@ void S_StartMusic(const char *m_id)
 
 // [RH] S_ChangeMusic() now accepts the name of the music lump.
 // It's up to the caller to figure out what that name is.
-void S_ChangeMusic(std::string musicname, bool looping)
+void S_ChangeMusic(std::string musicname, bool looping, int order)
 {
 	// [SL] Avoid caching music lumps if we're not playing music
 	if (snd_musicsystem == MS_NONE)
@@ -1193,7 +1194,7 @@ void S_ChangeMusic(std::string musicname, bool looping)
 
 		data = static_cast<byte*>(W_CacheLumpNum(lumpnum, PU_CACHE));
 		length = W_LumpLength(lumpnum);
-		I_PlaySong({data, length}, looping);
+		I_PlaySong({data, length}, looping, order);
     }
     else
 	{
@@ -1204,7 +1205,7 @@ void S_ChangeMusic(std::string musicname, bool looping)
 
 		if (result == 1)
 		{
-			I_PlaySong({data, length}, looping);
+			I_PlaySong({data, length}, looping, order);
 		}
 		M_Free(data);
 	}
@@ -1216,7 +1217,7 @@ void S_StopMusic()
 {
 	I_StopSong();
 
-	mus_playing.name = "";
+	mus_playing.name.clear();
 }
 
 
@@ -1364,8 +1365,6 @@ void S_AddRandomSound(int owner, std::vector<int>& list)
 // Parses all loaded SNDINFO lumps.
 void S_ParseSndInfo()
 {
-	S_ClearSoundLumps();
-
 	int lump = -1;
 	while ((lump = W_FindLump("SNDINFO", lump)) != -1)
 	{
@@ -1671,7 +1670,7 @@ BEGIN_COMMAND (snd_soundlist)
 		if (S_sfx[i].lumpnum != -1)
 		{
 			const OLumpName lumpname = lumpinfo[S_sfx[i].lumpnum].name;
-			PrintFmt(PRINT_HIGH, "{:>3d}. {} ({})\n", i+1, S_sfx[i].name, lumpname.c_str());
+			PrintFmt(PRINT_HIGH, "{:>3d}. {} ({})\n", i+1, S_sfx[i].name, lumpname);
 		}
 		// todo: check if sounds are multiple lumps rather than just one (i.e. random sounds)
 		else

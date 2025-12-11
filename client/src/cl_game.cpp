@@ -65,10 +65,7 @@
 #include "g_spawninv.h"
 #include "g_gametype.h"
 #include "p_horde.h"
-
-#ifdef _XBOX
-#include "i_xbox.h"
-#endif
+#include "g_musinfo.h"
 
 #include <math.h> // for pow()
 
@@ -195,6 +192,13 @@ CVAR_FUNC_IMPL(cl_mouselook)
 
 	// Nes - update skies
 	R_InitSkyMap ();
+}
+
+CVAR_FUNC_IMPL(joy_freelook)
+{
+	// [RV] - Center view, Update Skies
+	AddCommandString("centerview");
+	R_InitSkyMap();
 }
 
 char			demoname[256];
@@ -1640,6 +1644,7 @@ void G_DoLoadGame (void)
 
 	arc >> level.time;
 
+	P_SerializeMusInfo(arc);
 
 	for (i = 0; i < NUM_WORLDVARS; i++)
 	{
@@ -1698,11 +1703,7 @@ void G_SaveGame (int slot, std::string_view description)
  */
 void G_BuildSaveName(std::string &name, int slot)
 {
-#ifdef _XBOX
-	std::string path = xbox_GetSavePath(name, slot);
-#else
 	std::string path = M_GetUserFileName(name);
-#endif
 	name = fmt::sprintf("%s" PATHSEP "odasv%d.ods", path, slot);
 }
 
@@ -1721,10 +1722,6 @@ void G_DoSaveGame()
 	{
         return;
 	}
-
-#ifdef _XBOX
-	xbox_WriteSaveMeta(name.substr(0, name.rfind(PATHSEPCHAR)), description.c_str());
-#endif
 
 	PrintFmt(PRINT_HIGH, "Saving game to '{}'...\n", name);
 
@@ -1750,6 +1747,7 @@ void G_DoSaveGame()
 	P_SerializeHorde(arc);
 
 	arc << level.time;
+	P_SerializeMusInfo(arc);
 
 	for (int i = 0; i < NUM_WORLDVARS; i++)
 	{
@@ -1774,7 +1772,6 @@ void G_DoSaveGame()
 			arc << val;
 		}
 	}
-
 
 	arc << (BYTE)0x1d;			// consistancy marker
 

@@ -748,6 +748,7 @@ struct spritedef_t
 {
 	int 			numframes;
 	spriteframe_t	*spriteframes;
+	int32_t spritenum;
 };
 
 //

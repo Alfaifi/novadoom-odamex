@@ -31,6 +31,7 @@
 #include "r_defs.h" // line_t
 
 #include <assert.h>
+#include <unordered_map>
 
 #define NUM_MAPVARS				128
 #define NUM_WORLDVARS			256
@@ -204,6 +205,9 @@ struct level_pwad_info_t
 	float			aircontrol = 0.0f;
 	int				airsupply  = 10;
 
+	// MUSINFO
+	std::unordered_map<int, std::string> musinfo_map;
+
 	// The following are necessary for UMAPINFO compatibility
 	OLumpName		exitpic     = "";
 	OLumpName		enterpic    = "";
@@ -299,6 +303,9 @@ struct level_locals_t
 	fixed_t			aircontrol;
 	fixed_t			airfriction;
 	int 			airsupply;
+
+	// MUSINFO
+	std::unordered_map<int, std::string> musinfo_map;
 
 	// The following are all used for ACS scripting
 	FBehavior*		behavior;
@@ -444,8 +451,6 @@ void G_InitLevelLocals();
 void G_AirControlChanged();
 
 OLumpName CalcMapName(int episode, int level);
-
-void G_ParseMusInfo();
 
 void G_ClearSnapshots();
 void G_SnapshotLevel();

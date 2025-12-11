@@ -48,6 +48,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <unordered_set>
 
 //
 // Graphics.
@@ -1143,24 +1144,28 @@ void R_PrecacheLevel (void)
 		}
 	}
 
-	// Precache sprites.
-	memset (hitlist, 0, numsprites);
+	delete[] hitlist;
 
+	// Precache sprites.
 	{
 		AActor *actor;
 		TThinkerIterator<AActor> iterator;
+		std::unordered_set<int32_t> spriteHitlist;
 
+		// generate a unique list of all the sprites we hit in this level
 		while ( (actor = iterator.Next ()) )
-			hitlist[actor->sprite] = 1;
-	}
+		{
+			// [CMB] spritenum_t can now be negative so a new structure is needed
+			// [CMB] sprites is a pointer in order by index
+			spriteHitlist.insert(actor->sprite);
+		}
 
-	for (i = numsprites - 1; i >= 0; i--)
-	{
-		if (hitlist[i])
-			R_CacheSprite (sprites + i);
+		// cache each of the sprites
+		for (auto sprite : spriteHitlist)
+		{
+			R_CacheSprite (&sprites[sprite]);
+		}
 	}
-
-	delete[] hitlist;
 }
 
 // Utility function,

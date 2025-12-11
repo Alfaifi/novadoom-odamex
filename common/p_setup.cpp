@@ -52,6 +52,7 @@
 #include "p_setup.h"
 #include "p_hordespawn.h"
 #include "p_mapformat.h"
+#include "g_musinfo.h"
 #include "r_sky.h"
 
 void SV_PreservePlayer(player_t &player);
@@ -141,11 +142,13 @@ AActor**		blocklinks;		// for thing chains
 byte*			rejectmatrix;
 bool			rejectempty;
 
-
 // Maintain single and multi player starting spots.
 std::vector<mapthing2_t> DeathMatchStarts;
 std::vector<mapthing2_t> playerstarts;
 std::vector<mapthing2_t> voodoostarts;
+
+// Maintain list of helpers to spawn in a given map
+std::vector<HelperSpawns> helperspawns;
 
 namespace {
 
@@ -937,6 +940,7 @@ void P_LoadThings (int lump)
 		}
 		if (flags & BTF_NOTDEATHMATCH)		mt2.flags &= ~MTF_DEATHMATCH;
 		if (flags & BTF_NOTCOOPERATIVE)		mt2.flags &= ~MTF_COOPERATIVE;
+		if (flags & BTF_FRIEND)				mt2.flags |= MTF_FRIENDLY;
 
 		mt2.x = LESHORT(mt->x);
 		mt2.y = LESHORT(mt->y);
@@ -1409,10 +1413,10 @@ void P_CreateBlockMap()
 	int NBlocks;					// number of cells = nrows*ncols
 	DWORD linetotal=0;				// total length of all blocklists
 	int i,j;
-	int map_minx=MAXINT;			// init for map limits search
-	int map_miny=MAXINT;
-	int map_maxx=MININT;
-	int map_maxy=MININT;
+	int map_minx=limits::MAXINT;			// init for map limits search
+	int map_miny=limits::MAXINT;
+	int map_maxx=limits::MININT;
+	int map_maxy=limits::MININT;
 
 	// scan for map limits, which the blockmap must enclose
 
@@ -2138,6 +2142,8 @@ void P_SetupLevel (const char *lumpname, int position)
 	// Make sure all sounds are stopped before Z_FreeTags.
 	S_Start ();
 
+	S_ClearMusInfo();
+
 	// [RH] Clear all ThingID hash chains.
 	AActor::ClearTIDHashes ();
 
@@ -2156,6 +2162,8 @@ void P_SetupLevel (const char *lumpname, int position)
 
 	// [AM] Every new level starts with fresh netids.
 	P_ClearAllNetIds();
+
+	P_ClearHelpers();
 
 	// UNUSED W_Profile ();
 
@@ -2291,6 +2299,8 @@ void P_SetupLevel (const char *lumpname, int position)
 	// set up world state
 	P_SetupWorldState();
 
+	P_SetupHelpers();
+
 	// build subsector connect matrix
 	//	UNUSED P_ConnectSubsectors ();
 
@@ -2304,6 +2314,23 @@ void P_SetupLevel (const char *lumpname, int position)
 	g_ValidLevel = true;
 }
 
+// c++11 semantics moves vector on return
+static std::vector<spriteinfo_t*> P_GetSpriteInfos ()
+{
+	std::vector<spriteinfo_t*> infos;
+	for(auto it = sprnames.begin();it != sprnames.end();++it)
+	{
+		spriteinfo_t* spriteinfo = (spriteinfo_t*) Z_Malloc(sizeof(spriteinfo_t), PU_STATIC, nullptr);
+		spriteinfo->sprite = Z_StrDup(it->second.data(), PU_STATIC);
+		spriteinfo->spritenum = it->first;
+		infos.push_back(spriteinfo);
+	}
+	std::sort(infos.begin(), infos.end(), [](spriteinfo_t* lhs, spriteinfo_t* rhs) {
+		return lhs->spritenum < rhs->spritenum;
+	});
+	return infos;
+}
+
 //
 // P_Init
 //
@@ -2311,7 +2338,9 @@ void P_Init (void)
 {
 	P_InitSwitchList ();
 	P_InitPicAnims ();
-	R_InitSprites (sprnames);
+	// code below ASSUMES the sprites are in-order rather than passing an order down-ward
+	std::vector<spriteinfo_t*> infos = P_GetSpriteInfos ();
+	R_InitSprites(infos);
 	InitTeamInfo();
 	P_InitHorde();
 }
