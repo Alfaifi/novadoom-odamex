@@ -243,7 +243,7 @@ bool P_TeleportMove (AActor *thing, fixed_t x, fixed_t y, fixed_t z, bool telefr
 	validcount++;
 	spechit.clear();
 
-	StompAlwaysFrags = tmthing->player || tmthing->type == MT_AVATAR ||
+	StompAlwaysFrags = P_IsPlayerOrAvatar(*tmthing) ||
 	                   (level.flags & LEVEL_MONSTERSTELEFRAG) || telefrag;
 
 	// stomp on any things contacted
