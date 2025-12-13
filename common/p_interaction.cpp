@@ -1367,7 +1367,7 @@ void P_TouchSpecialThing(AActor *special, AActor *toucher)
 		return;
 
 	// Touchers that aren't players or avatars need not apply.
-	if (!toucher->player && toucher->type != MT_AVATAR)
+	if (!P_IsPlayerOrAvatar(*toucher))
 		return;
 
 	if (predicting)
