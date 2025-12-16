@@ -1200,12 +1200,14 @@ void P_GiveSpecial(player_t *player, AActor *special)
 		case SPR_O1UP:
 		    // Award an extra life to the player who collects this
 		    P_AwardExtraLifePowerUp(*player);
+		    sound = 1;
 		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_EXTRALIFE, false);
 		    break;
 
 		case SPR_RSTM:
 		    // Resurrect a player with this power up
 		    P_ResurrectPlayerPowerUp(*player);
+		    sound = 1;
 		    M_LogWDLPickupEvent(player, special, WDL_PICKUP_RESTEAMMATE, false);
 		    break;
 
