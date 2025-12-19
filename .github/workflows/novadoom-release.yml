@@ -123,6 +123,7 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DENABLE_FLUIDSYNTH=ON \
+            -DENABLE_PORTMIDI=OFF \
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
             -DBUILD_LAUNCHER=OFF \
@@ -130,7 +131,7 @@ jobs:
             -DUSE_INTERNAL_DEUTEX=ON
 
       - name: Build
-        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel 4
 
       - name: Get version
         id: version
