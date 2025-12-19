@@ -35,6 +35,17 @@ jobs:
         run: |
           brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config
 
+      - name: Install DeuTex
+        run: |
+          # Build DeuTex from source for macOS
+          curl -L https://github.com/Doom-Utils/deutex/releases/download/v5.2.2/deutex-5.2.2.tar.gz -o deutex.tar.gz
+          tar xzf deutex.tar.gz
+          cd deutex-5.2.2
+          ./configure --prefix=/usr/local
+          make
+          sudo make install
+          cd ..
+
       - name: Configure CMake
         run: |
           cmake -B build \
@@ -82,6 +93,8 @@ jobs:
   build-windows:
     name: Windows x64
     runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -89,10 +102,9 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: 'c82f74667287d3dc386bce81e44964370c91a289'
+      - name: Create vcpkg cache directory
+        run: mkdir -p ${{ github.workspace }}/vcpkg_cache
+        shell: bash
 
       - name: Install dependencies via vcpkg
         run: |
@@ -102,12 +114,13 @@ jobs:
         run: |
           cmake -B build -A x64 `
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
             -DENABLE_FLUIDSYNTH=ON `
             -DBUILD_CLIENT=ON `
             -DBUILD_SERVER=ON `
             -DBUILD_LAUNCHER=OFF `
-            -DBUILD_MASTER=OFF
+            -DBUILD_MASTER=OFF `
+            -DUSE_INTERNAL_DEUTEX=ON
 
       - name: Build
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -140,7 +153,7 @@ jobs:
           Copy-Item "soundfonts/gzdoom.sf2" "$artifactDir/soundfonts/"
 
           # Copy DLLs from vcpkg
-          $vcpkgBin = "${{ github.workspace }}/vcpkg/installed/x64-windows/bin"
+          $vcpkgBin = "$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin"
           Get-ChildItem "$vcpkgBin/*.dll" | ForEach-Object {
             Copy-Item $_.FullName $artifactDir/
           }
