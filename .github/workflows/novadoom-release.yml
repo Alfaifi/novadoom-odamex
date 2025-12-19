@@ -19,9 +19,9 @@ env:
 
 jobs:
   # ============================================
-  # macOS Builds (ARM64 and x86_64)
+  # macOS Build (ARM64 only - most Macs are ARM now)
   # ============================================
-  build-macos-arm64:
+  build-macos:
     name: macOS ARM64
     runs-on: macos-14
     steps:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config deutex
+          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config
 
       - name: Configure CMake
         run: |
@@ -47,102 +47,6 @@ jobs:
 
       - name: Build
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
-
-      - name: Prepare artifact
-        run: |
-          mkdir -p artifact
-          cp -R build/client/odamex.app artifact/NovaDoom.app
-          cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
-          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
-          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: NovaDoom-macOS-arm64
-          path: artifact/
-
-  build-macos-x86_64:
-    name: macOS x86_64
-    runs-on: macos-13
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-
-      - name: Install dependencies
-        run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config deutex
-
-      - name: Configure CMake
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DENABLE_FLUIDSYNTH=ON \
-            -DBUILD_CLIENT=ON \
-            -DBUILD_SERVER=ON \
-            -DBUILD_LAUNCHER=OFF \
-            -DBUILD_MASTER=OFF
-
-      - name: Build
-        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
-
-      - name: Prepare artifact
-        run: |
-          mkdir -p artifact
-          cp -R build/client/odamex.app artifact/NovaDoom.app
-          cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
-          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
-          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: NovaDoom-macOS-x86_64
-          path: artifact/
-
-  # ============================================
-  # Create macOS Universal Binary
-  # ============================================
-  create-macos-universal:
-    name: macOS Universal Binary
-    needs: [build-macos-arm64, build-macos-x86_64]
-    runs-on: macos-14
-    steps:
-      - name: Download ARM64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: NovaDoom-macOS-arm64
-          path: arm64/
-
-      - name: Download x86_64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: NovaDoom-macOS-x86_64
-          path: x86_64/
-
-      - name: Create Universal Binary
-        run: |
-          mkdir -p universal
-          cp -R arm64/NovaDoom.app universal/NovaDoom.app
-
-          # Create universal binary for main executable
-          lipo -create \
-            arm64/NovaDoom.app/Contents/MacOS/odamex \
-            x86_64/NovaDoom.app/Contents/MacOS/odamex \
-            -output universal/NovaDoom.app/Contents/MacOS/odamex
-
-          # Create universal binary for server
-          lipo -create \
-            arm64/NovaDoom.app/Contents/MacOS/novasrv \
-            x86_64/NovaDoom.app/Contents/MacOS/novasrv \
-            -output universal/NovaDoom.app/Contents/MacOS/novasrv
-
-          # Verify universal binaries
-          file universal/NovaDoom.app/Contents/MacOS/odamex
-          file universal/NovaDoom.app/Contents/MacOS/novasrv
 
       - name: Get version
         id: version
@@ -153,16 +57,24 @@ jobs:
             echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact
+          cp -R build/client/odamex.app artifact/NovaDoom.app
+          cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
+          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
+          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
+
       - name: Create DMG
         run: |
-          hdiutil create -volname "NovaDoom" -srcfolder universal/NovaDoom.app \
-            -ov -format UDZO NovaDoom-macOS-universal-${{ steps.version.outputs.version }}.dmg
+          hdiutil create -volname "NovaDoom" -srcfolder artifact/NovaDoom.app \
+            -ov -format UDZO NovaDoom-macOS-arm64-${{ steps.version.outputs.version }}.dmg
 
-      - name: Upload Universal artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NovaDoom-macOS-universal
-          path: NovaDoom-macOS-universal-*.dmg
+          name: NovaDoom-macOS-arm64
+          path: NovaDoom-macOS-arm64-*.dmg
 
   # ============================================
   # Windows Build
@@ -180,7 +92,7 @@ jobs:
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgGitCommitId: '01f602195983451bc83e72f4214af2cbc495aa94'
+          vcpkgGitCommitId: 'c82f74667287d3dc386bce81e44964370c91a289'
 
       - name: Install dependencies via vcpkg
         run: |
@@ -322,7 +234,7 @@ jobs:
   # ============================================
   create-release:
     name: Create Release
-    needs: [create-macos-universal, build-windows, build-linux-server]
+    needs: [build-macos, build-windows, build-linux-server]
     runs-on: ubuntu-latest
     steps:
       - name: Get version
@@ -351,7 +263,7 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            artifacts/NovaDoom-macOS-universal/*.dmg
+            artifacts/NovaDoom-macOS-arm64/*.dmg
             artifacts/NovaDoom-Win64/*.zip
             artifacts/NovaDoom-Server-Linux-x64/*.tar.gz
         env:
