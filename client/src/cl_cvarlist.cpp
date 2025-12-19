@@ -668,6 +668,53 @@ CVAR_RANGE_FUNC_DECL(	snd_oplchips, "6", "Number of emulated OPL chips",
 CVAR_RANGE_FUNC_DECL(	snd_oplbank, "1", "OPL instrument set",
 				CVARTYPE_INT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 2.0f)
 
+#ifdef FLUIDSYNTH
+CVAR(					snd_fluidsynthsoundfont, "soundfonts/gzdoom.sf2", "FluidSynth soundfont path",
+				CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR_RANGE_FUNC_DECL(	snd_fluidsynthgain, "0.5", "FluidSynth synthesis gain",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 1.0f)
+
+CVAR_FUNC_DECL(			snd_fluidsynthreverb, "0", "FluidSynth reverb effect",
+				CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
+
+CVAR(					snd_fluidsynthreverbroomsize, "0.61", "FluidSynth reverb room size",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthreverbdamping, "0.23", "FluidSynth reverb damping",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthreverbwidth, "0.76", "FluidSynth reverb width",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthreverblevel, "0.57", "FluidSynth reverb level",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR_FUNC_DECL(			snd_fluidsynthchorus, "0", "FluidSynth chorus effect",
+				CVARTYPE_BOOL, CVAR_CLIENTARCHIVE)
+
+CVAR(					snd_fluidsynthchorusvoices, "3", "FluidSynth chorus voices",
+				CVARTYPE_INT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthchoruslevel, "1.2", "FluidSynth chorus level",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthchorusspeed, "0.3", "FluidSynth chorus speed",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthchorusdepth, "8.0", "FluidSynth chorus depth",
+				CVARTYPE_FLOAT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR(					snd_fluidsynthchorustype, "0", "FluidSynth chorus type",
+				CVARTYPE_INT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
+
+CVAR_RANGE_FUNC_DECL(	snd_fluidsynthpolyphony, "128", "FluidSynth max polyphony",
+				CVARTYPE_INT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 32.0f, 256.0f)
+
+CVAR_RANGE_FUNC_DECL(	snd_fluidsynthinterp, "1", "FluidSynth interpolation method",
+				CVARTYPE_INT, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE, 0.0f, 7.0f)
+#endif
+
 //
 // C_GetDefaultMuiscSystem()
 //
@@ -679,15 +726,15 @@ static char *C_GetDefaultMusicSystem()
 	static char str[4];
 
 	MusicSystemType defaultmusicsystem = MS_SDLMIXER;
-	#ifdef OSX
+
+	// FluidSynth is preferred when available (best quality with SoundFont support)
+	#ifdef FLUIDSYNTH
+	defaultmusicsystem = MS_FLUIDSYNTH;
+	#elif defined OSX
 	defaultmusicsystem = MS_AUDIOUNIT;
-	#endif
-
-	#if defined _WIN32
+	#elif defined _WIN32
 	defaultmusicsystem = MS_PORTMIDI;
-	#endif
-
-	#ifdef __linux__
+	#elif defined __linux__
 	defaultmusicsystem = MS_LIBADLMIDI;
 	#endif
 

@@ -39,6 +39,9 @@
 #ifdef PORTMIDI
 #include "i_musicsystem_portmidi.h"
 #endif
+#ifdef FLUIDSYNTH
+#include "i_musicsystem_fluidsynth.h"
+#endif
 #include "i_musicsystem_sdl.h"
 #include "i_musicsystem_adlmidi.h"
 
@@ -205,6 +208,12 @@ void I_InitMusic(MusicSystemType musicsystem_type)
 			musicsystem = new PortMidiMusicSystem();
 			break;
 		#endif	// PORTMIDI
+
+		#ifdef FLUIDSYNTH
+		case MS_FLUIDSYNTH:
+			musicsystem = new FluidSynthMusicSystem();
+			break;
+		#endif	// FLUIDSYNTH
 
 		case MS_LIBADLMIDI:
 			musicsystem = new AdlMidiMusicSystem();

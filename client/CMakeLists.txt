@@ -124,6 +124,21 @@ if(APPLE)
     ${AUDIOUNIT_LIBRARY})
 endif()
 
+# FluidSynth configuration
+option(ENABLE_FLUIDSYNTH "Enable FluidSynth for MIDI playback" ON)
+if(ENABLE_FLUIDSYNTH)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(FLUIDSYNTH fluidsynth)
+  if(FLUIDSYNTH_FOUND)
+    add_definitions(-DFLUIDSYNTH)
+    include_directories(${FLUIDSYNTH_INCLUDE_DIRS})
+    message(STATUS "FluidSynth found: ${FLUIDSYNTH_VERSION}")
+  else()
+    message(STATUS "FluidSynth not found, FluidSynth music system will not be available")
+    set(ENABLE_FLUIDSYNTH OFF)
+  endif()
+endif()
+
 # Client target
 if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
@@ -222,6 +237,12 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
   if(ENABLE_PORTMIDI)
     target_link_libraries(odamex ${PORTMIDI_LIBRARY})
+  endif()
+
+  if(ENABLE_FLUIDSYNTH)
+    target_include_directories(odamex PRIVATE ${FLUIDSYNTH_INCLUDE_DIRS})
+    target_link_directories(odamex PRIVATE ${FLUIDSYNTH_LIBRARY_DIRS})
+    target_link_libraries(odamex ${FLUIDSYNTH_LIBRARIES})
   endif()
 
   target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo cpptrace::cpptrace libADLMIDI::ADLMIDI_static curl_interface)

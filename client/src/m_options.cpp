@@ -169,6 +169,13 @@ EXTERN_CVAR (snd_oplcore)
 EXTERN_CVAR (snd_oplpan)
 EXTERN_CVAR (snd_oplchips)
 EXTERN_CVAR (snd_oplbank)
+#ifdef FLUIDSYNTH
+EXTERN_CVAR (snd_fluidsynthgain)
+EXTERN_CVAR (snd_fluidsynthreverb)
+EXTERN_CVAR (snd_fluidsynthchorus)
+EXTERN_CVAR (snd_fluidsynthpolyphony)
+EXTERN_CVAR (snd_fluidsynthinterp)
+#endif
 EXTERN_CVAR (snd_announcervolume)
 EXTERN_CVAR (snd_sfxvolume)
 EXTERN_CVAR (snd_crossover)
@@ -551,6 +558,9 @@ static value_t MusSys[] = {
 	#ifdef PORTMIDI
 	{ MS_PORTMIDI,	"PortMidi"},
 	#endif	// PORTMIDI
+	#ifdef FLUIDSYNTH
+	{ MS_FLUIDSYNTH,"FluidSynth"},
+	#endif	// FLUIDSYNTH
 };
 
 static value_t MidiReset[] = {
@@ -586,6 +596,9 @@ static value_t ChatSndType[] = {
 
 static void AdvMidiOptions (void);
 static void LibAdlMidiOptions (void);
+#ifdef FLUIDSYNTH
+static void FluidSynthOptions (void);
+#endif
 
 static constexpr float num_mussys = static_cast<float>(ARRAY_LENGTH(MusSys));
 
@@ -622,6 +635,26 @@ static menuitem_t AdvMidiItems[] = {
 	{ discrete  , "OPL instruments"     , {&snd_oplbank} , {3.0}, {0.0}, {0.0}, {OplBank} },
 };
 
+#ifdef FLUIDSYNTH
+static value_t FluidSynthInterp[] = {
+	{ 0.0, "None" },
+	{ 1.0, "Linear" },
+	{ 4.0, "4th Order" },
+	{ 7.0, "7th Order" },
+};
+
+static menuitem_t FluidSynthItems[] = {
+	{ redtext   , " "                     , {NULL}                     , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ yellowtext, "FluidSynth Options"    , {NULL}                     , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ redtext   , " "                     , {NULL}                     , {0.0}, {0.0}, {0.0}, {NULL} },
+	{ slider    , "Synth Gain"            , {&snd_fluidsynthgain}      , {0.0}, {1.0}, {0.05}, {NULL} },
+	{ discrete  , "Reverb"                , {&snd_fluidsynthreverb}    , {2.0}, {0.0}, {0.0}, {OnOff} },
+	{ discrete  , "Chorus"                , {&snd_fluidsynthchorus}    , {2.0}, {0.0}, {0.0}, {OnOff} },
+	{ slider    , "Polyphony"             , {&snd_fluidsynthpolyphony} , {32.0}, {256.0}, {8.0}, {NULL} },
+	{ discrete  , "Interpolation"         , {&snd_fluidsynthinterp}    , {4.0}, {0.0}, {0.0}, {FluidSynthInterp} },
+};
+#endif
+
 static menuitem_t SoundItems[] = {
 	{ redtext   ,   " "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
 	{ yellowtext,   "Sound Levels"             , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
@@ -635,6 +668,9 @@ static menuitem_t SoundItems[] = {
 	{ discrete  ,   "Disable Music"            , {&snd_nomusic},        {2.0},        {0.0}, {0.0},      {YesNo} },
 	{ redtext   ,	" "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
 	{ more      ,   "OPL FM Synth Options"     , {NULL},                {0.0},        {0.0}, {0.0},      {(value_t *)LibAdlMidiOptions}},
+#ifdef FLUIDSYNTH
+	{ more      ,   "FluidSynth Options"       , {NULL},                {0.0},        {0.0}, {0.0},      {(value_t *)FluidSynthOptions}},
+#endif
 	{ more      ,   "Advanced MIDI Options"    , {NULL},                {0.0},        {0.0}, {0.0},      {(value_t *)AdvMidiOptions}},
 	{ redtext   ,   " "                        , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
 	{ yellowtext,   "Sound Options"            , {NULL},                {0.0},        {0.0}, {0.0},      {NULL} },
@@ -667,6 +703,19 @@ menu_t LibAdlMidiMenu = {
 	0,
 	NULL
 };
+
+#ifdef FLUIDSYNTH
+menu_t FluidSynthMenu = {
+	"M_SOUND",
+	3,
+	ARRAY_LENGTH(FluidSynthItems),
+	177,
+	FluidSynthItems,
+	0,
+	0,
+	NULL
+};
+#endif
 
 menu_t SoundMenu = {
 	"M_SOUND",
@@ -2609,6 +2658,13 @@ void LibAdlMidiOptions (void)
 {
 	M_SwitchMenu (&LibAdlMidiMenu);
 }
+
+#ifdef FLUIDSYNTH
+void FluidSynthOptions (void)
+{
+	M_SwitchMenu (&FluidSynthMenu);
+}
+#endif
 
 void SoundOptions (void) // [Ralphis] for sound menu
 {

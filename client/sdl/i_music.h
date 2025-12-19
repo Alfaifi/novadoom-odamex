@@ -40,7 +40,8 @@ typedef enum
 	MS_SDLMIXER		= 1,
 	MS_AUDIOUNIT	= 2,
 	MS_PORTMIDI		= 3,
-	MS_LIBADLMIDI		= 4
+	MS_LIBADLMIDI	= 4,
+	MS_FLUIDSYNTH	= 5
 } MusicSystemType;
 
 bool S_MusicIsMus(byte* data, size_t length);
