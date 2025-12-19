@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config zstd
+          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config zstd fltk
 
       - name: Install DeuTex
         run: |
@@ -48,6 +48,7 @@ jobs:
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DENABLE_FLUIDSYNTH=ON \
+            -DUSE_INTERNAL_FLTK=OFF \
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
             -DBUILD_LAUNCHER=OFF \
@@ -107,6 +108,7 @@ jobs:
             mingw-w64-x86_64-SDL2
             mingw-w64-x86_64-SDL2_mixer
             mingw-w64-x86_64-fluidsynth
+            mingw-w64-x86_64-fltk
             mingw-w64-x86_64-libpng
             mingw-w64-x86_64-zlib
             mingw-w64-x86_64-curl
@@ -124,6 +126,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DENABLE_FLUIDSYNTH=ON \
             -DENABLE_PORTMIDI=OFF \
+            -DUSE_INTERNAL_FLTK=OFF \
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
             -DBUILD_LAUNCHER=OFF \
