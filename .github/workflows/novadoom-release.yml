@@ -1,0 +1,358 @@
+name: NovaDoom Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # ============================================
+  # macOS Builds (ARM64 and x86_64)
+  # ============================================
+  build-macos-arm64:
+    name: macOS ARM64
+    runs-on: macos-14
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config deutex
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DENABLE_FLUIDSYNTH=ON \
+            -DBUILD_CLIENT=ON \
+            -DBUILD_SERVER=ON \
+            -DBUILD_LAUNCHER=OFF \
+            -DBUILD_MASTER=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact
+          cp -R build/client/odamex.app artifact/NovaDoom.app
+          cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
+          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
+          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaDoom-macOS-arm64
+          path: artifact/
+
+  build-macos-x86_64:
+    name: macOS x86_64
+    runs-on: macos-13
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config deutex
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DENABLE_FLUIDSYNTH=ON \
+            -DBUILD_CLIENT=ON \
+            -DBUILD_SERVER=ON \
+            -DBUILD_LAUNCHER=OFF \
+            -DBUILD_MASTER=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p artifact
+          cp -R build/client/odamex.app artifact/NovaDoom.app
+          cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
+          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
+          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaDoom-macOS-x86_64
+          path: artifact/
+
+  # ============================================
+  # Create macOS Universal Binary
+  # ============================================
+  create-macos-universal:
+    name: macOS Universal Binary
+    needs: [build-macos-arm64, build-macos-x86_64]
+    runs-on: macos-14
+    steps:
+      - name: Download ARM64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: NovaDoom-macOS-arm64
+          path: arm64/
+
+      - name: Download x86_64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: NovaDoom-macOS-x86_64
+          path: x86_64/
+
+      - name: Create Universal Binary
+        run: |
+          mkdir -p universal
+          cp -R arm64/NovaDoom.app universal/NovaDoom.app
+
+          # Create universal binary for main executable
+          lipo -create \
+            arm64/NovaDoom.app/Contents/MacOS/odamex \
+            x86_64/NovaDoom.app/Contents/MacOS/odamex \
+            -output universal/NovaDoom.app/Contents/MacOS/odamex
+
+          # Create universal binary for server
+          lipo -create \
+            arm64/NovaDoom.app/Contents/MacOS/novasrv \
+            x86_64/NovaDoom.app/Contents/MacOS/novasrv \
+            -output universal/NovaDoom.app/Contents/MacOS/novasrv
+
+          # Verify universal binaries
+          file universal/NovaDoom.app/Contents/MacOS/odamex
+          file universal/NovaDoom.app/Contents/MacOS/novasrv
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create DMG
+        run: |
+          hdiutil create -volname "NovaDoom" -srcfolder universal/NovaDoom.app \
+            -ov -format UDZO NovaDoom-macOS-universal-${{ steps.version.outputs.version }}.dmg
+
+      - name: Upload Universal artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaDoom-macOS-universal
+          path: NovaDoom-macOS-universal-*.dmg
+
+  # ============================================
+  # Windows Build
+  # ============================================
+  build-windows:
+    name: Windows x64
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: '01f602195983451bc83e72f4214af2cbc495aa94'
+
+      - name: Install dependencies via vcpkg
+        run: |
+          vcpkg install fluidsynth:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows libpng:x64-windows zlib:x64-windows
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -A x64 `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
+            -DENABLE_FLUIDSYNTH=ON `
+            -DBUILD_CLIENT=ON `
+            -DBUILD_SERVER=ON `
+            -DBUILD_LAUNCHER=OFF `
+            -DBUILD_MASTER=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare artifact
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $artifactDir = "NovaDoom-Win64-$version"
+
+          New-Item -ItemType Directory -Force -Path $artifactDir
+          New-Item -ItemType Directory -Force -Path "$artifactDir/soundfonts"
+
+          # Copy binaries
+          Copy-Item "build/client/${{ env.BUILD_TYPE }}/odamex.exe" "$artifactDir/novadoom.exe"
+          Copy-Item "build/server/${{ env.BUILD_TYPE }}/odasrv.exe" "$artifactDir/novasrv.exe"
+          Copy-Item "build/wad/odamex.wad" "$artifactDir/" -ErrorAction SilentlyContinue
+
+          # Copy soundfont
+          Copy-Item "soundfonts/gzdoom.sf2" "$artifactDir/soundfonts/"
+
+          # Copy DLLs from vcpkg
+          $vcpkgBin = "${{ github.workspace }}/vcpkg/installed/x64-windows/bin"
+          Get-ChildItem "$vcpkgBin/*.dll" | ForEach-Object {
+            Copy-Item $_.FullName $artifactDir/
+          }
+
+          # Create ZIP
+          Compress-Archive -Path $artifactDir -DestinationPath "NovaDoom-Win64-$version.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaDoom-Win64
+          path: NovaDoom-Win64-*.zip
+
+  # ============================================
+  # Linux Server Build
+  # ============================================
+  build-linux-server:
+    name: Linux Server x64
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake \
+            libcurl4-openssl-dev \
+            zlib1g-dev \
+            libpng-dev \
+            libprotobuf-dev protobuf-compiler
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DBUILD_CLIENT=OFF \
+            -DBUILD_SERVER=ON \
+            -DBUILD_LAUNCHER=OFF \
+            -DBUILD_MASTER=OFF \
+            -DENABLE_PORTMIDI=OFF \
+            -DENABLE_FLUIDSYNTH=OFF
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARTIFACT_DIR="NovaDoom-Server-Linux-x64-${VERSION}"
+
+          mkdir -p "$ARTIFACT_DIR"
+          cp build/server/odasrv "$ARTIFACT_DIR/novasrv"
+          strip "$ARTIFACT_DIR/novasrv"
+
+          # Create README
+          cat > "$ARTIFACT_DIR/README.txt" << 'EOF'
+          NovaDoom Server for Linux x64
+
+          Installation:
+          1. Copy 'novasrv' to /home/odamex/novadoom-server
+          2. Set permissions: chmod +x /home/odamex/novadoom-server
+          3. Set ownership: chown odamex:odamex /home/odamex/novadoom-server
+
+          Based on Odamex - https://odamex.net
+          EOF
+
+          tar -czvf "NovaDoom-Server-Linux-x64-${VERSION}.tar.gz" "$ARTIFACT_DIR"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NovaDoom-Server-Linux-x64
+          path: NovaDoom-Server-Linux-x64-*.tar.gz
+
+  # ============================================
+  # Create GitHub Release
+  # ============================================
+  create-release:
+    name: Create Release
+    needs: [create-macos-universal, build-windows, build-linux-server]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: List artifacts
+        run: find artifacts/ -type f
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: NovaDoom v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/NovaDoom-macOS-universal/*.dmg
+            artifacts/NovaDoom-Win64/*.zip
+            artifacts/NovaDoom-Server-Linux-x64/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
