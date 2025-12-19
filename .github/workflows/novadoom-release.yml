@@ -124,6 +124,7 @@ jobs:
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_PREFIX_PATH=/mingw64 \
             -DENABLE_FLUIDSYNTH=ON \
             -DENABLE_PORTMIDI=OFF \
             -DUSE_INTERNAL_FLTK=OFF \
