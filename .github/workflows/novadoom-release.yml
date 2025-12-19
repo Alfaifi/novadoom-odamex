@@ -41,10 +41,7 @@ jobs:
           curl -L https://github.com/Doom-Utils/deutex/releases/download/v5.2.3/deutex-5.2.3.tar.zst -o deutex.tar.zst
           zstd -d deutex.tar.zst -o deutex.tar
           tar xf deutex.tar
-          cd deutex-5.2.3
-          make
-          sudo make install
-          cd ..
+          cd deutex-5.2.3 && ./configure && make && sudo make install
 
       - name: Configure CMake
         run: |
