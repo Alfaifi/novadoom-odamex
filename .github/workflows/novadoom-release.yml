@@ -33,15 +33,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config
+          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config zstd
 
       - name: Install DeuTex
         run: |
-          # Build DeuTex from source for macOS
-          curl -L https://github.com/Doom-Utils/deutex/releases/download/v5.2.2/deutex-5.2.2.tar.gz -o deutex.tar.gz
-          tar xzf deutex.tar.gz
-          cd deutex-5.2.2
-          ./configure --prefix=/usr/local
+          # Download and build DeuTex from source for macOS
+          curl -L https://github.com/Doom-Utils/deutex/releases/download/v5.2.3/deutex-5.2.3.tar.zst -o deutex.tar.zst
+          zstd -d deutex.tar.zst -o deutex.tar
+          tar xf deutex.tar
+          cd deutex-5.2.3
           make
           sudo make install
           cd ..
@@ -88,38 +88,48 @@ jobs:
           path: NovaDoom-macOS-arm64-*.dmg
 
   # ============================================
-  # Windows Build
+  # Windows Build (using MSYS2 for FluidSynth)
   # ============================================
   build-windows:
     name: Windows x64
     runs-on: windows-latest
-    env:
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-SDL2
+            mingw-w64-x86_64-SDL2_mixer
+            mingw-w64-x86_64-fluidsynth
+            mingw-w64-x86_64-libpng
+            mingw-w64-x86_64-zlib
+            mingw-w64-x86_64-curl
+            git
+
       - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Checkout submodules
         run: git submodule update --init --recursive
 
-      - name: Create vcpkg cache directory
-        run: mkdir -p ${{ github.workspace }}/vcpkg_cache
-        shell: bash
-
-      - name: Install dependencies via vcpkg
-        run: |
-          vcpkg install fluidsynth:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows libpng:x64-windows zlib:x64-windows
-
       - name: Configure CMake
         run: |
-          cmake -B build -A x64 `
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" `
-            -DENABLE_FLUIDSYNTH=ON `
-            -DBUILD_CLIENT=ON `
-            -DBUILD_SERVER=ON `
-            -DBUILD_LAUNCHER=OFF `
-            -DBUILD_MASTER=OFF `
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DENABLE_FLUIDSYNTH=ON \
+            -DBUILD_CLIENT=ON \
+            -DBUILD_SERVER=ON \
+            -DBUILD_LAUNCHER=OFF \
+            -DBUILD_MASTER=OFF \
             -DUSE_INTERNAL_DEUTEX=ON
 
       - name: Build
@@ -127,7 +137,6 @@ jobs:
 
       - name: Get version
         id: version
-        shell: bash
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
@@ -136,30 +145,38 @@ jobs:
           fi
 
       - name: Prepare artifact
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARTIFACT_DIR="NovaDoom-Win64-${VERSION}"
+
+          mkdir -p "$ARTIFACT_DIR/soundfonts"
+
+          # Copy binaries
+          cp build/client/odamex.exe "$ARTIFACT_DIR/novadoom.exe"
+          cp build/server/odasrv.exe "$ARTIFACT_DIR/novasrv.exe"
+          cp build/wad/odamex.wad "$ARTIFACT_DIR/" 2>/dev/null || true
+
+          # Copy soundfont
+          cp soundfonts/gzdoom.sf2 "$ARTIFACT_DIR/soundfonts/"
+
+          # Copy required DLLs from MSYS2
+          MINGW_BIN="/mingw64/bin"
+          for dll in SDL2.dll SDL2_mixer.dll libfluidsynth-3.dll libglib-2.0-0.dll \
+                     libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll \
+                     libpng16-16.dll zlib1.dll libintl-8.dll libiconv-2.dll \
+                     libpcre2-8-0.dll libsndfile-1.dll libFLAC.dll libogg-0.dll \
+                     libvorbis-0.dll libvorbisenc-2.dll libopus-0.dll libmp3lame-0.dll \
+                     libmpg123-0.dll libreadline8.dll libtermcap-0.dll; do
+            if [ -f "$MINGW_BIN/$dll" ]; then
+              cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
+            fi
+          done
+
+      - name: Create ZIP
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
-          $artifactDir = "NovaDoom-Win64-$version"
-
-          New-Item -ItemType Directory -Force -Path $artifactDir
-          New-Item -ItemType Directory -Force -Path "$artifactDir/soundfonts"
-
-          # Copy binaries
-          Copy-Item "build/client/${{ env.BUILD_TYPE }}/odamex.exe" "$artifactDir/novadoom.exe"
-          Copy-Item "build/server/${{ env.BUILD_TYPE }}/odasrv.exe" "$artifactDir/novasrv.exe"
-          Copy-Item "build/wad/odamex.wad" "$artifactDir/" -ErrorAction SilentlyContinue
-
-          # Copy soundfont
-          Copy-Item "soundfonts/gzdoom.sf2" "$artifactDir/soundfonts/"
-
-          # Copy DLLs from vcpkg
-          $vcpkgBin = "$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows/bin"
-          Get-ChildItem "$vcpkgBin/*.dll" | ForEach-Object {
-            Copy-Item $_.FullName $artifactDir/
-          }
-
-          # Create ZIP
-          Compress-Archive -Path $artifactDir -DestinationPath "NovaDoom-Win64-$version.zip"
+          Compress-Archive -Path "NovaDoom-Win64-$version" -DestinationPath "NovaDoom-Win64-$version.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
