@@ -74,6 +74,10 @@ jobs:
           mkdir -p artifact
           cp -R build/client/odamex.app artifact/NovaDoom.app
           cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
+
+          # Remove any soundfonts from MacOS folder (causes codesign issues)
+          rm -rf artifact/NovaDoom.app/Contents/MacOS/soundfonts
+
           mkdir -p artifact/NovaDoom.app/Contents/Resources/soundfonts
           cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/Resources/soundfonts/
           cp build/wad/odamex.wad artifact/NovaDoom.app/Contents/Resources/
@@ -82,17 +86,35 @@ jobs:
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
           mkdir -p "$FRAMEWORKS_DIR"
 
-          # Function to copy a library from its full path
+          # Function to copy a library from its full path or search for it
           copy_lib_from_path() {
             local fullpath="$1"
             local libname=$(basename "$fullpath")
             if [ -f "$FRAMEWORKS_DIR/$libname" ]; then
               return 0
             fi
+            # Try the exact path first
             if [ -f "$fullpath" ]; then
               cp -L "$fullpath" "$FRAMEWORKS_DIR/"
               chmod 644 "$FRAMEWORKS_DIR/$libname"
               echo "Copied: $libname"
+              return 0
+            fi
+            # Search in common opt locations (for keg-only packages like readline)
+            for pkg in readline gettext glib pcre2 libffi; do
+              if [ -f "/opt/homebrew/opt/$pkg/lib/$libname" ]; then
+                cp -L "/opt/homebrew/opt/$pkg/lib/$libname" "$FRAMEWORKS_DIR/"
+                chmod 644 "$FRAMEWORKS_DIR/$libname"
+                echo "Copied: $libname (from $pkg)"
+                return 0
+              fi
+            done
+            # Last resort: search with find
+            local found=$(find /opt/homebrew/opt -maxdepth 3 -name "$libname" 2>/dev/null | head -1)
+            if [ -n "$found" ]; then
+              cp -L "$found" "$FRAMEWORKS_DIR/"
+              chmod 644 "$FRAMEWORKS_DIR/$libname"
+              echo "Copied: $libname (found via search)"
               return 0
             fi
             return 1
