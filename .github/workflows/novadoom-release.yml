@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng zlib pkg-config zstd fltk protobuf 2>/dev/null || true
+          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf 2>/dev/null || true
 
       - name: Cache CMake build
         uses: actions/cache@v4
