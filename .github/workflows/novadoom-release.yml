@@ -76,6 +76,7 @@ jobs:
           cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
           mkdir -p artifact/NovaDoom.app/Contents/Resources/soundfonts
           cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/Resources/soundfonts/
+          cp build/wad/odamex.wad artifact/NovaDoom.app/Contents/Resources/
 
           # Bundle dylibs into the app
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
