@@ -33,7 +33,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf deutex 2>/dev/null || true
+          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf autoconf automake 2>/dev/null || true
+
+      - name: Build DeuTex
+        run: |
+          # Download and build DeuTex for WAD building
+          curl -L https://github.com/Doom-Utils/deutex/archive/refs/tags/v5.2.3.tar.gz -o deutex.tar.gz
+          tar xzf deutex.tar.gz
+          cd deutex-5.2.3
+          autoreconf -i
+          ./configure
+          make -j4
+          sudo make install
 
       - name: Cache CMake build
         uses: actions/cache@v4
