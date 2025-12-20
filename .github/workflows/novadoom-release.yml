@@ -74,8 +74,8 @@ jobs:
           mkdir -p artifact
           cp -R build/client/odamex.app artifact/NovaDoom.app
           cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
-          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
-          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
+          mkdir -p artifact/NovaDoom.app/Contents/Resources/soundfonts
+          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/Resources/soundfonts/
 
           # Bundle dylibs into the app
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
@@ -94,8 +94,16 @@ jobs:
               chmod 644 "$FRAMEWORKS_DIR/$libname"
               return 0
             fi
-            # Search in /opt/homebrew/opt/*/lib
-            local found=$(find /opt/homebrew/opt -path "*/lib/$libname" 2>/dev/null | head -1)
+            # Check common opt locations directly (faster than find)
+            for prefix in readline glib gettext pcre2 libffi; do
+              if [ -f "/opt/homebrew/opt/$prefix/lib/$libname" ]; then
+                cp -L "/opt/homebrew/opt/$prefix/lib/$libname" "$FRAMEWORKS_DIR/"
+                chmod 644 "$FRAMEWORKS_DIR/$libname"
+                return 0
+              fi
+            done
+            # Search in /opt/homebrew/opt/*/lib as fallback
+            local found=$(find /opt/homebrew/opt -maxdepth 3 -path "*/lib/$libname" 2>/dev/null | head -1)
             if [ -n "$found" ]; then
               cp -L "$found" "$FRAMEWORKS_DIR/"
               chmod 644 "$FRAMEWORKS_DIR/$libname"
