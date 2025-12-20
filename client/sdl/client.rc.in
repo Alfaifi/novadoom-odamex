@@ -12,7 +12,7 @@
 #define NOVADOOM_NAME "NovaDoom Client"
 
 1 ICON "@CMAKE_SOURCE_DIR@/client/sdl/novadoom.ico"
-2 ICON "@CMAKE_SOURCE_DIR@/client/sdl/odademo.ico"
+2 ICON "@CMAKE_SOURCE_DIR@/client/sdl/novadoom.ico"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "@CMAKE_SOURCE_DIR@/client/sdl/manifest.xml"
 
