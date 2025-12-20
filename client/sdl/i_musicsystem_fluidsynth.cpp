@@ -268,6 +268,10 @@ bool FluidSynthMusicSystem::_LoadSoundfont()
 			    basePath + PATHSEP + "soundfonts" + PATHSEP + "gzdoom.sf2",
 			    basePath + PATHSEP + "gzdoom.sf2",
 #ifdef __APPLE__
+			    // macOS app bundle: check Resources folder (../Resources from MacOS)
+			    basePath + PATHSEP + ".." + PATHSEP + "Resources" + PATHSEP +
+			        "soundfonts" + PATHSEP + "gzdoom.sf2",
+			    basePath + PATHSEP + ".." + PATHSEP + "Resources" + PATHSEP + "gzdoom.sf2",
 			    std::string(getenv("HOME") ? getenv("HOME") : "") +
 			        "/Library/Audio/Sounds/Banks/gzdoom.sf2",
 #endif

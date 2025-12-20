@@ -75,12 +75,12 @@ jobs:
           cp -R build/client/novadoom.app artifact/NovaDoom.app
           cp build/server/novasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
 
-          # Copy soundfonts to MacOS folder (where the app expects them)
-          mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
-          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
+          # Copy soundfonts to Resources folder (correct location for data files)
+          mkdir -p artifact/NovaDoom.app/Contents/Resources/soundfonts
+          cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/Resources/soundfonts/
 
-          # Copy WAD to MacOS folder (where the app expects it)
-          cp wad/novadoom.wad artifact/NovaDoom.app/Contents/MacOS/
+          # Copy WAD to Resources folder (correct location for data files)
+          cp wad/novadoom.wad artifact/NovaDoom.app/Contents/Resources/
 
           # Bundle dylibs into the app
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"

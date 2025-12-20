@@ -243,6 +243,11 @@ std::vector<std::string> M_FileSearchDirs()
 	dirs.push_back(M_GetCWD());
 	dirs.push_back(M_GetBinaryDir());
 
+#ifdef __APPLE__
+	// macOS app bundle: add Resources folder (../Resources from MacOS)
+	dirs.push_back(M_CleanPath(M_GetBinaryDir() + PATHSEP ".." PATHSEP "Resources"));
+#endif
+
 #ifdef __SWITCH__
 	dirs.push_back("./wads");
 #endif
