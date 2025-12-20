@@ -33,18 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf autoconf automake 2>/dev/null || true
-
-      - name: Build DeuTex
-        run: |
-          # Download and build DeuTex for WAD building
-          curl -L https://github.com/Doom-Utils/deutex/archive/refs/tags/v5.2.3.tar.gz -o deutex.tar.gz
-          tar xzf deutex.tar.gz
-          cd deutex-5.2.3
-          autoreconf -i
-          ./configure
-          make -j4
-          sudo make install
+          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf 2>/dev/null || true
 
       - name: Cache CMake build
         uses: actions/cache@v4
@@ -92,13 +81,8 @@ jobs:
           mkdir -p artifact/NovaDoom.app/Contents/Resources/soundfonts
           cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/Resources/soundfonts/
 
-          # Copy WAD (required for the game to run)
-          if [ -f "build/wad/odamex.wad" ]; then
-            cp build/wad/odamex.wad artifact/NovaDoom.app/Contents/Resources/
-          else
-            echo "ERROR: odamex.wad not found! DeuTex may have failed to build it."
-            exit 1
-          fi
+          # Copy WAD (required for the game to run - committed to repo)
+          cp wad/odamex.wad artifact/NovaDoom.app/Contents/Resources/
 
           # Bundle dylibs into the app
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
@@ -297,8 +281,7 @@ jobs:
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
             -DBUILD_LAUNCHER=OFF \
-            -DBUILD_MASTER=OFF \
-            -DUSE_INTERNAL_DEUTEX=ON
+            -DBUILD_MASTER=OFF
 
       - name: Build
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel 4
@@ -322,7 +305,9 @@ jobs:
           # Copy binaries
           cp build/client/odamex.exe "$ARTIFACT_DIR/novadoom.exe"
           cp build/server/odasrv.exe "$ARTIFACT_DIR/novasrv.exe"
-          cp build/wad/odamex.wad "$ARTIFACT_DIR/" 2>/dev/null || true
+
+          # Copy WAD (committed to repo)
+          cp wad/odamex.wad "$ARTIFACT_DIR/"
 
           # Copy soundfont
           cp soundfonts/gzdoom.sf2 "$ARTIFACT_DIR/soundfonts/"
