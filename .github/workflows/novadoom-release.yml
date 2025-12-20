@@ -159,6 +159,15 @@ jobs:
             done
           done
 
+          # Re-sign everything after modifications (ad-hoc signing)
+          # This is required because install_name_tool invalidates signatures
+          for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
+            codesign --force --sign - "$dylib" 2>/dev/null || true
+          done
+          codesign --force --sign - "$EXECUTABLE"
+          codesign --force --sign - "$SERVER"
+          codesign --force --deep --sign - "artifact/NovaDoom.app"
+
       - name: Create DMG
         run: |
           hdiutil create -volname "NovaDoom" -srcfolder artifact/NovaDoom.app \
