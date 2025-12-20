@@ -95,7 +95,7 @@ jobs:
               return 0
             fi
             # Check common opt locations directly (faster than find)
-            for prefix in readline glib gettext pcre2 libffi fltk jpeg webp; do
+            for prefix in readline glib gettext pcre2 libffi fltk jpeg webp protobuf abseil; do
               if [ -f "/opt/homebrew/opt/$prefix/lib/$libname" ]; then
                 cp -L "/opt/homebrew/opt/$prefix/lib/$libname" "$FRAMEWORKS_DIR/"
                 chmod 644 "$FRAMEWORKS_DIR/$libname"
@@ -143,7 +143,8 @@ jobs:
                      libmp3lame.0.dylib \
                      libportaudio.2.dylib \
                      libjpeg.8.dylib \
-                     libwebp.7.dylib; do
+                     libwebp.7.dylib \
+                     libprotobuf.33.2.0.dylib; do
             copy_lib "$lib" || echo "Note: $lib not found (may not be needed)"
           done
 
