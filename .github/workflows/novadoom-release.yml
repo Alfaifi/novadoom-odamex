@@ -77,6 +77,88 @@ jobs:
           mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
           cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
 
+          # Bundle dylibs into the app
+          FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
+          mkdir -p "$FRAMEWORKS_DIR"
+
+          # Function to copy a dylib and its dependencies
+          copy_dylib() {
+            local lib="$1"
+            local basename=$(basename "$lib")
+            if [ -f "$lib" ] && [ ! -f "$FRAMEWORKS_DIR/$basename" ]; then
+              cp "$lib" "$FRAMEWORKS_DIR/"
+              chmod 644 "$FRAMEWORKS_DIR/$basename"
+            fi
+          }
+
+          # Copy main dependencies from Homebrew
+          for lib in /opt/homebrew/lib/libSDL2-2.0.0.dylib \
+                     /opt/homebrew/lib/libSDL2_mixer-2.0.0.dylib \
+                     /opt/homebrew/lib/libfltk.1.4.dylib \
+                     /opt/homebrew/lib/libfltk_forms.1.4.dylib \
+                     /opt/homebrew/lib/libfltk_gl.1.4.dylib \
+                     /opt/homebrew/lib/libfltk_images.1.4.dylib \
+                     /opt/homebrew/lib/libfluidsynth.3.dylib \
+                     /opt/homebrew/lib/libpng16.16.dylib \
+                     /opt/homebrew/lib/libprotobuf.dylib; do
+            if [ -f "$lib" ]; then
+              # Follow symlinks to get actual file
+              reallib=$(readlink -f "$lib" 2>/dev/null || greadlink -f "$lib" 2>/dev/null || echo "$lib")
+              cp "$reallib" "$FRAMEWORKS_DIR/$(basename $lib)"
+              chmod 644 "$FRAMEWORKS_DIR/$(basename $lib)"
+            fi
+          done
+
+          # Copy additional dependencies that the main libs need
+          for lib in /opt/homebrew/lib/libglib-2.0.dylib \
+                     /opt/homebrew/lib/libgthread-2.0.dylib \
+                     /opt/homebrew/lib/libintl.dylib \
+                     /opt/homebrew/lib/libogg.dylib \
+                     /opt/homebrew/lib/libvorbis.dylib \
+                     /opt/homebrew/lib/libvorbisfile.dylib \
+                     /opt/homebrew/lib/libFLAC.dylib \
+                     /opt/homebrew/lib/libmpg123.dylib \
+                     /opt/homebrew/lib/libopus.dylib \
+                     /opt/homebrew/lib/libsndfile.dylib \
+                     /opt/homebrew/lib/libpcre2-8.dylib \
+                     /opt/homebrew/lib/libjpeg.dylib \
+                     /opt/homebrew/lib/libwebp.dylib; do
+            if [ -f "$lib" ]; then
+              reallib=$(readlink -f "$lib" 2>/dev/null || greadlink -f "$lib" 2>/dev/null || echo "$lib")
+              cp "$reallib" "$FRAMEWORKS_DIR/$(basename $lib)" 2>/dev/null || true
+              chmod 644 "$FRAMEWORKS_DIR/$(basename $lib)" 2>/dev/null || true
+            fi
+          done
+
+          # Fix library paths in the main executable
+          EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/odamex"
+
+          # Get list of Homebrew dependencies and fix them
+          otool -L "$EXECUTABLE" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
+            libname=$(basename "$dep")
+            install_name_tool -change "$dep" "@executable_path/../Frameworks/$libname" "$EXECUTABLE"
+          done
+
+          # Also fix the server binary
+          SERVER="artifact/NovaDoom.app/Contents/MacOS/novasrv"
+          otool -L "$SERVER" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
+            libname=$(basename "$dep")
+            install_name_tool -change "$dep" "@executable_path/../Frameworks/$libname" "$SERVER"
+          done
+
+          # Fix inter-library dependencies within Frameworks
+          for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
+            # Change the library's own ID
+            libname=$(basename "$dylib")
+            install_name_tool -id "@executable_path/../Frameworks/$libname" "$dylib" 2>/dev/null || true
+
+            # Fix references to other Homebrew libs
+            otool -L "$dylib" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
+              depname=$(basename "$dep")
+              install_name_tool -change "$dep" "@executable_path/../Frameworks/$depname" "$dylib" 2>/dev/null || true
+            done
+          done
+
       - name: Create DMG
         run: |
           hdiutil create -volname "NovaDoom" -srcfolder artifact/NovaDoom.app \
