@@ -81,65 +81,89 @@ jobs:
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
           mkdir -p "$FRAMEWORKS_DIR"
 
-          # Function to copy a dylib and its dependencies
-          copy_dylib() {
-            local lib="$1"
-            local basename=$(basename "$lib")
-            if [ -f "$lib" ] && [ ! -f "$FRAMEWORKS_DIR/$basename" ]; then
-              cp "$lib" "$FRAMEWORKS_DIR/"
-              chmod 644 "$FRAMEWORKS_DIR/$basename"
+          # Function to find and copy a library by name
+          # Searches /opt/homebrew/lib and /opt/homebrew/opt/*/lib
+          copy_lib() {
+            local libname="$1"
+            if [ -f "$FRAMEWORKS_DIR/$libname" ]; then
+              return 0
             fi
+            # Try /opt/homebrew/lib first
+            if [ -f "/opt/homebrew/lib/$libname" ]; then
+              cp -L "/opt/homebrew/lib/$libname" "$FRAMEWORKS_DIR/"
+              chmod 644 "$FRAMEWORKS_DIR/$libname"
+              return 0
+            fi
+            # Search in /opt/homebrew/opt/*/lib
+            local found=$(find /opt/homebrew/opt -path "*/lib/$libname" 2>/dev/null | head -1)
+            if [ -n "$found" ]; then
+              cp -L "$found" "$FRAMEWORKS_DIR/"
+              chmod 644 "$FRAMEWORKS_DIR/$libname"
+              return 0
+            fi
+            return 1
           }
 
-          # Copy main dependencies from Homebrew
-          for lib in /opt/homebrew/lib/libSDL2-2.0.0.dylib \
-                     /opt/homebrew/lib/libSDL2_mixer-2.0.0.dylib \
-                     /opt/homebrew/lib/libfltk.1.4.dylib \
-                     /opt/homebrew/lib/libfltk_forms.1.4.dylib \
-                     /opt/homebrew/lib/libfltk_gl.1.4.dylib \
-                     /opt/homebrew/lib/libfltk_images.1.4.dylib \
-                     /opt/homebrew/lib/libfluidsynth.3.dylib \
-                     /opt/homebrew/lib/libpng16.16.dylib \
-                     /opt/homebrew/lib/libprotobuf.dylib; do
-            if [ -f "$lib" ]; then
-              # Follow symlinks to get actual file
-              reallib=$(readlink -f "$lib" 2>/dev/null || greadlink -f "$lib" 2>/dev/null || echo "$lib")
-              cp "$reallib" "$FRAMEWORKS_DIR/$(basename $lib)"
-              chmod 644 "$FRAMEWORKS_DIR/$(basename $lib)"
-            fi
+          # Copy initial set of libraries (using versioned names where needed)
+          for lib in libSDL2-2.0.0.dylib \
+                     libSDL2_mixer-2.0.0.dylib \
+                     libfluidsynth.3.dylib \
+                     libpng16.16.dylib \
+                     libzstd.1.dylib \
+                     libglib-2.0.0.dylib \
+                     libgthread-2.0.0.dylib \
+                     libintl.8.dylib \
+                     libogg.0.dylib \
+                     libvorbis.0.dylib \
+                     libvorbisfile.3.dylib \
+                     libvorbisenc.2.dylib \
+                     libFLAC.14.dylib \
+                     libmpg123.0.dylib \
+                     libopus.0.dylib \
+                     libopusfile.0.dylib \
+                     libsndfile.1.dylib \
+                     libpcre2-8.0.dylib \
+                     libreadline.8.dylib \
+                     libunistring.5.dylib \
+                     libwavpack.1.dylib \
+                     libgme.0.dylib \
+                     libxmp.4.dylib \
+                     libmp3lame.0.dylib \
+                     libportaudio.2.dylib; do
+            copy_lib "$lib" || echo "Note: $lib not found (may not be needed)"
           done
 
-          # Copy additional dependencies that the main libs need
-          for lib in /opt/homebrew/lib/libglib-2.0.dylib \
-                     /opt/homebrew/lib/libgthread-2.0.dylib \
-                     /opt/homebrew/lib/libintl.dylib \
-                     /opt/homebrew/lib/libogg.dylib \
-                     /opt/homebrew/lib/libvorbis.dylib \
-                     /opt/homebrew/lib/libvorbisfile.dylib \
-                     /opt/homebrew/lib/libFLAC.dylib \
-                     /opt/homebrew/lib/libmpg123.dylib \
-                     /opt/homebrew/lib/libopus.dylib \
-                     /opt/homebrew/lib/libsndfile.dylib \
-                     /opt/homebrew/lib/libpcre2-8.dylib \
-                     /opt/homebrew/lib/libjpeg.dylib \
-                     /opt/homebrew/lib/libwebp.dylib; do
-            if [ -f "$lib" ]; then
-              reallib=$(readlink -f "$lib" 2>/dev/null || greadlink -f "$lib" 2>/dev/null || echo "$lib")
-              cp "$reallib" "$FRAMEWORKS_DIR/$(basename $lib)" 2>/dev/null || true
-              chmod 644 "$FRAMEWORKS_DIR/$(basename $lib)" 2>/dev/null || true
+          # Iteratively find and copy any missing dependencies
+          # Run multiple passes until no new libraries are needed
+          for pass in 1 2 3 4 5; do
+            missing=""
+            for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
+              deps=$(otool -L "$dylib" 2>/dev/null | grep "/opt/homebrew" | awk '{print $1}')
+              for dep in $deps; do
+                depname=$(basename "$dep")
+                if [ ! -f "$FRAMEWORKS_DIR/$depname" ]; then
+                  missing="$missing $depname"
+                fi
+              done
+            done
+            if [ -z "$missing" ]; then
+              echo "Pass $pass: All dependencies satisfied"
+              break
             fi
+            echo "Pass $pass: Copying missing deps:$missing"
+            for lib in $missing; do
+              copy_lib "$lib" || echo "Warning: Could not find $lib"
+            done
           done
 
           # Fix library paths in the main executable
           EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/odamex"
-
-          # Get list of Homebrew dependencies and fix them
           otool -L "$EXECUTABLE" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
             libname=$(basename "$dep")
             install_name_tool -change "$dep" "@executable_path/../Frameworks/$libname" "$EXECUTABLE"
           done
 
-          # Also fix the server binary
+          # Fix the server binary
           SERVER="artifact/NovaDoom.app/Contents/MacOS/novasrv"
           otool -L "$SERVER" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
             libname=$(basename "$dep")
@@ -148,11 +172,8 @@ jobs:
 
           # Fix inter-library dependencies within Frameworks
           for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
-            # Change the library's own ID
             libname=$(basename "$dylib")
             install_name_tool -id "@executable_path/../Frameworks/$libname" "$dylib" 2>/dev/null || true
-
-            # Fix references to other Homebrew libs
             otool -L "$dylib" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
               depname=$(basename "$dep")
               install_name_tool -change "$dep" "@executable_path/../Frameworks/$depname" "$dylib" 2>/dev/null || true
@@ -160,7 +181,6 @@ jobs:
           done
 
           # Re-sign everything after modifications (ad-hoc signing)
-          # This is required because install_name_tool invalidates signatures
           for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
             codesign --force --sign - "$dylib" 2>/dev/null || true
           done
