@@ -1,12 +1,21 @@
 include(OdamexTargetSettings)
 
-# Find the protobuf we just compiled
-find_package(protobuf
-  PATHS
-    "${CMAKE_CURRENT_BINARY_DIR}/../libraries/protobuf-build/cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/../libraries/protobuf-build/lib/cmake/protobuf"
-    "${CMAKE_CURRENT_BINARY_DIR}/../libraries/protobuf-build/lib64/cmake/protobuf"
-  NO_DEFAULT_PATH)
+# Find protobuf - either internal build or system package
+if(USE_INTERNAL_PROTOBUF)
+  # Find the protobuf we just compiled
+  find_package(protobuf
+    PATHS
+      "${CMAKE_CURRENT_BINARY_DIR}/../libraries/protobuf-build/cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/../libraries/protobuf-build/lib/cmake/protobuf"
+      "${CMAKE_CURRENT_BINARY_DIR}/../libraries/protobuf-build/lib64/cmake/protobuf"
+    NO_DEFAULT_PATH)
+else()
+  # Use system protobuf
+  find_package(protobuf CONFIG QUIET)
+  if(NOT protobuf_FOUND)
+    find_package(Protobuf REQUIRED)
+  endif()
+endif()
 
 set(ODAPROTO_PROTOS common.proto server.proto)
 

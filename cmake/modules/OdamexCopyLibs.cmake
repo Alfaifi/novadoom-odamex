@@ -1,26 +1,39 @@
 function(odamex_copy_libs TARGET)
+  # Skip DLL copying if requested (useful for CI where DLLs are copied manually)
+  if(ODAMEX_SKIP_DLL_COPY)
+    return()
+  endif()
+
   set(ODAMEX_DLLS "")
 
   if(WIN32)
     if(MSVC)
       set(SDL2_DLL_DIR "$<TARGET_FILE_DIR:SDL2::SDL2>")
       set(SDL2_MIXER_DLL_DIR "$<TARGET_FILE_DIR:SDL2::mixer>")
+
+      # SDL2
+      list(APPEND ODAMEX_DLLS "${SDL2_DLL_DIR}/SDL2.dll")
+
+      # SDL2_mixer and optional codecs (only for MSVC with downloaded packages)
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libwavpack-1.dll")
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libgme.dll")
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libxmp.dll")
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libogg-0.dll")
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libopus-0.dll")
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libopusfile-0.dll")
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/SDL2_mixer.dll")
     else()
+      # MinGW/MSYS2: Only copy main DLLs, skip optional codecs
+      # (MSYS2 packages have codecs built-in, optional/ folder doesn't exist)
       set(SDL2_DLL_DIR "$<TARGET_FILE_DIR:SDL2::SDL2>/../bin")
       set(SDL2_MIXER_DLL_DIR "$<TARGET_FILE_DIR:SDL2::mixer>/../bin")
+
+      # SDL2
+      list(APPEND ODAMEX_DLLS "${SDL2_DLL_DIR}/SDL2.dll")
+
+      # SDL2_mixer (no optional codecs for MinGW - they're built-in)
+      list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/SDL2_mixer.dll")
     endif()
-
-    # SDL2
-    list(APPEND ODAMEX_DLLS "${SDL2_DLL_DIR}/SDL2.dll")
-
-    # SDL2_mixer
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libwavpack-1.dll")
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libgme.dll")
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libxmp.dll")
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libogg-0.dll")
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libopus-0.dll")
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/optional/libopusfile-0.dll")
-    list(APPEND ODAMEX_DLLS "${SDL2_MIXER_DLL_DIR}/SDL2_mixer.dll")
   endif()
 
   # Copy library files to target directory.
