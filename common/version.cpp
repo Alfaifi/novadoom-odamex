@@ -115,16 +115,16 @@ std::string VersionMessage(const int server, const int client, const char* email
 	BREAKVER(client, cl_maj, cl_min, cl_pat);
 
 	rvo += fmt::sprintf(
-	    "Your version of Odamex %d.%d.%d does not match the server version %d.%d.%d.\n",
+	    "Your version of NovaDoom %d.%d.%d does not match the server version %d.%d.%d.\n",
 	    cl_maj, cl_min, cl_pat, sv_maj, sv_min, sv_pat);
 
 	if (cmp > 0)
 	{
 		rvo += fmt::sprintf(
-		          "Please visit https://odamex.net/ to obtain Odamex %d.%d.%d or "
+		          "Please visit https://novadoom.com/ to obtain NovaDoom %d.%d.%d or "
 		          "newer.\nIf you do not see this version available for download, "
 		          "you are likely attempting to connect to a server running a "
-		          "development version of Odamex.\n",
+		          "development version of NovaDoom.\n",
 		          sv_maj, sv_min, sv_pat);
 	}
 	else
@@ -324,7 +324,7 @@ BEGIN_COMMAND(version)
 	if (argc == 1)
 	{
 		// distribution
-		PrintFmt("Odamex v{} - {}\n", NiceVersion(), COPYRIGHTSTR);
+		PrintFmt("NovaDoom v{} - {}\n", NiceVersion(), COPYRIGHTSTR);
 	}
 	else
 	{

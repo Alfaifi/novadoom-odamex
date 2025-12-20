@@ -46,24 +46,24 @@ if(DEUTEX_EXECUTABLE)
   message(STATUS "Found DeuTex: ${DEUTEX_EXECUTABLE}")
 
   add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/odamex.wad"
-    COMMAND "${DEUTEX_EXECUTABLE}" -overwrite -rgb 0 255 255 -doom2 bootstrap -build wadinfo.txt "${CMAKE_CURRENT_BINARY_DIR}/odamex.wad"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/novadoom.wad"
+    COMMAND "${DEUTEX_EXECUTABLE}" -overwrite -rgb 0 255 255 -doom2 bootstrap -build wadinfo.txt "${CMAKE_CURRENT_BINARY_DIR}/novadoom.wad"
     DEPENDS ${ODAWAD_SOURCES}
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     VERBATIM)
 
   add_custom_target(odawad ALL
-    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/odamex.wad")
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/novadoom.wad")
 
   if(WIN32)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/odamex.wad"
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/novadoom.wad"
       DESTINATION .
       COMPONENT common)
   else()
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/odamex.wad"
-      DESTINATION "${CMAKE_INSTALL_DATADIR}/odamex"
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/novadoom.wad"
+      DESTINATION "${CMAKE_INSTALL_DATADIR}/novadoom"
       COMPONENT common)
   endif()
 else()
-  message(WARNING "Could NOT find DeuTex, ODAMEX.WAD will not be built.")
+  message(WARNING "Could NOT find DeuTex, NOVADOOM.WAD will not be built.")
 endif()

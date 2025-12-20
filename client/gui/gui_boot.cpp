@@ -222,7 +222,7 @@ class BootWindow : public Fl_Window
 				{
 					Fl_Box* o = new Fl_Box(
 					    10, 35, 405, 20,
-					    "Add folders containing WAD files here so Odamex can find them.");
+					    "Add folders containing WAD files here so NovaDoom can find them.");
 					o->align(Fl_Align(132 | FL_ALIGN_INSIDE));
 				} // Fl_Box* o
 				{
@@ -316,7 +316,7 @@ class BootWindow : public Fl_Window
 		if (boot->selectedIWAD() == NULL)
 		{
 			// A valid IWAD isn't selected.
-			fl_message_title("Play Odamex");
+			fl_message_title("Play NovaDoom");
 			fl_alert("Please select a game to play.");
 			return;
 		}
@@ -614,7 +614,7 @@ class BootWindow : public Fl_Window
  */
 static BootWindow* MakeBootWindow()
 {
-	return new BootWindow(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, "Odamex " DOTVERSIONSTR);
+	return new BootWindow(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, "NovaDoom " DOTVERSIONSTR);
 }
 
 #include "m_argv.h"

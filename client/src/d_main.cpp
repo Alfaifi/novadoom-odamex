@@ -1080,9 +1080,9 @@ void D_DoomMain()
 
 	// --- initialization complete ---
 
-	PrintFmt_Bold("\n\35\36\36\36\36 Odamex Client Initialized \36\36\36\36\37\n");
+	PrintFmt_Bold("\n\35\36\36\36\36 NovaDoom Client Initialized \36\36\36\36\37\n");
 	if (gamestate != GS_CONNECTING)
-		PrintFmt(PRINT_HIGH, "Type connect <address> or use the Odamex Launcher to connect to a game.\n");
+		PrintFmt(PRINT_HIGH, "Type connect <address> or use the NovaDoom Launcher to connect to a game.\n");
     PrintFmt(PRINT_HIGH, "\n");
 
 	// Play a demo, start a map, or show the title screen

@@ -25,11 +25,11 @@
 
 
 #if defined(CLIENT_APP)
-#define GAMEEXE "odamex"
+#define GAMEEXE "novadoom"
 #elif defined(SERVER_APP)
-#define GAMEEXE "odasrv"
+#define GAMEEXE "novasrv"
 #else
-#error "Odamex is not client or server"
+#error "NovaDoom is not client or server"
 #endif
 
 /**
@@ -72,12 +72,12 @@
 // Used by configuration files.  upversion.py will update thie field
 // deterministically and unambiguously so newer versions always compare
 // greater.
-#define CONFIGVERSIONSTR "012000"
+#define CONFIGVERSIONSTR "000001"
 
-#define DOTVERSIONSTR "12.0.0"
-#define GAMEVER (MAKEVER(12, 0, 0))
+#define DOTVERSIONSTR "0.0.1"
+#define GAMEVER (MAKEVER(0, 0, 1))
 
-#define COPYRIGHTSTR "Copyright (C) 2006-2025 The Odamex Team"
+#define COPYRIGHTSTR "Copyright (C) 2025 NovaDoom | Based on Odamex by The Odamex Team"
 
 #define SERVERMAJ (VERMAJ(gameversion))
 #define SERVERMIN (VERMIN(gameversion))
@@ -91,7 +91,7 @@
 // earlier than this version.  Needs to be exactly 16 chars long.
 //
 // upversion.py will update thie field deterministically and unambiguously.
-#define SAVESIG "ODAMEXSAVE012000"
+#define SAVESIG "NOVADOOMSAV00001"
 
 #define NETDEMOVER 3
 

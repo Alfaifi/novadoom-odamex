@@ -763,19 +763,19 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 
 	if (::wadfiles.empty())
 	{
-		// If we don't have odamex.wad, resolve it now.
+		// If we don't have novadoom.wad, resolve it now.
 		OWantFile want_odamex;
-		OWantFile::make(want_odamex, "odamex.wad", OFILE_WAD);
+		OWantFile::make(want_odamex, "novadoom.wad", OFILE_WAD);
 		if (!M_ResolveWantedFile(odamex_wad, want_odamex))
 		{
 			I_FatalError("Could not resolve \"{}\".  Please ensure this file is "
-			             "someplace where Odamex can find it.\n",
+			             "someplace where NovaDoom can find it.\n",
 			             want_odamex.getBasename());
 		}
 	}
 	else
 	{
-		// We already have odamex.wad, just make a copy of it.
+		// We already have novadoom.wad, just make a copy of it.
 		odamex_wad = ::wadfiles.at(0);
 	}
 

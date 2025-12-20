@@ -80,7 +80,7 @@ jobs:
           cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/MacOS/soundfonts/
 
           # Copy WAD to MacOS folder (where the app expects it)
-          cp wad/odamex.wad artifact/NovaDoom.app/Contents/MacOS/
+          cp wad/novadoom.wad artifact/NovaDoom.app/Contents/MacOS/
 
           # Bundle dylibs into the app
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
@@ -305,7 +305,7 @@ jobs:
           cp build/server/odasrv.exe "$ARTIFACT_DIR/novasrv.exe"
 
           # Copy WAD (committed to repo)
-          cp wad/odamex.wad "$ARTIFACT_DIR/"
+          cp wad/novadoom.wad "$ARTIFACT_DIR/"
 
           # Copy soundfont
           cp soundfonts/gzdoom.sf2 "$ARTIFACT_DIR/soundfonts/"
