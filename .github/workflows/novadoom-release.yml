@@ -39,9 +39,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build
-          key: macos-arm64-build-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake') }}
+          key: macos-arm64-build-v2-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            macos-arm64-build-
+            macos-arm64-build-v2-
 
       - name: Configure CMake
         run: |
@@ -252,9 +252,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build
-          key: windows-x64-build-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake') }}
+          key: windows-x64-build-v2-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            windows-x64-build-
+            windows-x64-build-v2-
 
       - name: Configure CMake
         run: |
@@ -363,9 +363,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build
-          key: linux-x64-server-build-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake') }}
+          key: linux-x64-server-build-v2-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            linux-x64-server-build-
+            linux-x64-server-build-v2-
 
       - name: Configure CMake
         run: |
