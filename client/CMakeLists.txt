@@ -298,12 +298,12 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   odamex_copy_wad(odamex)
 
   set(MACOSX_BUNDLE_BUNDLE_NAME ${CMAKE_PROJECT_NAME})
-  set(MACOSX_BUNDLE_INFO_STRING "ODAMEX and its likeness © ${PROJECT_COPYRIGHT} Odamex team.")
+  set(MACOSX_BUNDLE_INFO_STRING "NovaDoom © ${PROJECT_COPYRIGHT} NovaDoom Team. Based on Odamex.")
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
-  set(MACOSX_BUNDLE_ICON_FILE odamex.icns)
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER net.odamex.odamex)
+  set(MACOSX_BUNDLE_ICON_FILE novadoom.icns)
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER net.novadoom.client)
 
   if(APPLE)
     add_custom_command(
@@ -316,12 +316,12 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
       add_custom_command(
         TARGET odamex
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/wad/odamex.wad ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS)
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/wad/novadoom.wad ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS)
     endif()
 
     set_directory_properties(
       PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE};${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS/odamex.wad"
+      "${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE};${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS/novadoom.wad"
     )
 
     #****

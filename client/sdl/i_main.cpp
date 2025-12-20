@@ -122,17 +122,17 @@ int main(int argc, char *argv[])
 		if (::Args.CheckParm("--version"))
 		{
 #ifdef _WIN32
-			FILE* fh = fopen("odamex-version.txt", "w");
+			FILE* fh = fopen("novadoom-version.txt", "w");
 			if (!fh)
 				exit(EXIT_FAILURE);
 
-			const int ok = fprintf(fh, "Odamex %s\n", NiceVersion());
+			const int ok = fprintf(fh, "NovaDoom %s\n", NiceVersion());
 			if (!ok)
 				exit(EXIT_FAILURE);
 
 			fclose(fh);
 #else
-			fmt::print("Odamex {}\n", NiceVersion());
+			fmt::print("NovaDoom {}\n", NiceVersion());
 #endif
 			exit(EXIT_SUCCESS);
 		}

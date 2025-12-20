@@ -127,7 +127,7 @@ int __cdecl main(int argc, char *argv[])
 
 		if (::Args.CheckParm("--version"))
 		{
-			fmt::print("Odamex {}\n", NiceVersion());
+			fmt::print("NovaDoom {}\n", NiceVersion());
 			exit(EXIT_SUCCESS);
 		}
 
@@ -236,7 +236,7 @@ int main (int argc, char **argv)
 
 		if (::Args.CheckParm("--version"))
 		{
-			fmt::print("Odamex {}\n", NiceVersion());
+			fmt::print("NovaDoom {}\n", NiceVersion());
 			exit(EXIT_SUCCESS);
 		}
 
