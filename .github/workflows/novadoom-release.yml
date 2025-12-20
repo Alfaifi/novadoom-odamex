@@ -95,7 +95,7 @@ jobs:
               return 0
             fi
             # Check common opt locations directly (faster than find)
-            for prefix in readline glib gettext pcre2 libffi; do
+            for prefix in readline glib gettext pcre2 libffi fltk jpeg webp; do
               if [ -f "/opt/homebrew/opt/$prefix/lib/$libname" ]; then
                 cp -L "/opt/homebrew/opt/$prefix/lib/$libname" "$FRAMEWORKS_DIR/"
                 chmod 644 "$FRAMEWORKS_DIR/$libname"
@@ -118,6 +118,10 @@ jobs:
                      libfluidsynth.3.dylib \
                      libpng16.16.dylib \
                      libzstd.1.dylib \
+                     libfltk.1.4.dylib \
+                     libfltk_forms.1.4.dylib \
+                     libfltk_gl.1.4.dylib \
+                     libfltk_images.1.4.dylib \
                      libglib-2.0.0.dylib \
                      libgthread-2.0.0.dylib \
                      libintl.8.dylib \
@@ -137,7 +141,9 @@ jobs:
                      libgme.0.dylib \
                      libxmp.4.dylib \
                      libmp3lame.0.dylib \
-                     libportaudio.2.dylib; do
+                     libportaudio.2.dylib \
+                     libjpeg.8.dylib \
+                     libwebp.7.dylib; do
             copy_lib "$lib" || echo "Note: $lib not found (may not be needed)"
           done
 
