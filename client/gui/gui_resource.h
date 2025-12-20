@@ -21,5 +21,5 @@
 //
 //-----------------------------------------------------------------------------
 
-extern unsigned char __icon_odamex_128_png[4995];
-extern unsigned int __icon_odamex_128_png_len;
+extern unsigned char __icon_novadoom_128_png[];
+extern unsigned int __icon_novadoom_128_png_len;

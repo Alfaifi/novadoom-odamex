@@ -45,9 +45,9 @@ void GUI_SetIcon(Fl_Window* win) { }
 
 #endif
 
-Fl_Image* GUIRes::icon_odamex_128()
+Fl_Image* GUIRes::icon_novadoom_128()
 {
-	static Fl_Image* image = new Fl_PNG_Image("icon_odamex_128", __icon_odamex_128_png,
-	                                          __icon_odamex_128_png_len);
+	static Fl_Image* image = new Fl_PNG_Image("icon_novadoom_128", __icon_novadoom_128_png,
+	                                          __icon_novadoom_128_png_len);
 	return image;
 }

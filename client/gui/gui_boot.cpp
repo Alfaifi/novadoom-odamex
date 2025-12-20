@@ -150,7 +150,7 @@ class BootWindow : public Fl_Window
 				m_tabIWAD = new Fl_Group(0, 25, 425, 175, "Game Select");
 				{
 					Fl_Box* logo = new Fl_Box(10, 35, 115, 155);
-					logo->image(GUIRes::icon_odamex_128());
+					logo->image(GUIRes::icon_novadoom_128());
 					logo->align(Fl_Align(512));
 				} // Fl_Box* logo
 				{

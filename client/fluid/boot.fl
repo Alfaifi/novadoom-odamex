@@ -16,7 +16,7 @@ widget_class BootWindow {
       xywh {0 25 425 175}
     } {
       Fl_Box logo {
-        image {icon_odamex_128.png} xywh {10 35 115 155} align 512
+        image {icon_novadoom_128.png} xywh {10 35 115 155} align 512
       }
       Fl_Browser iwads {
         xywh {135 35 280 155}

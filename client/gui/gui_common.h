@@ -30,5 +30,5 @@ void GUI_SetIcon(Fl_Window* win);
 
 struct GUIRes
 {
-	static Fl_Image* icon_odamex_128();
+	static Fl_Image* icon_novadoom_128();
 };
