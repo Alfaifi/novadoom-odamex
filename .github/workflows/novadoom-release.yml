@@ -81,76 +81,49 @@ jobs:
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
           mkdir -p "$FRAMEWORKS_DIR"
 
-          # Function to find and copy a library by name
-          # Searches /opt/homebrew/lib and /opt/homebrew/opt/*/lib
-          copy_lib() {
-            local libname="$1"
+          # Function to copy a library from its full path
+          copy_lib_from_path() {
+            local fullpath="$1"
+            local libname=$(basename "$fullpath")
             if [ -f "$FRAMEWORKS_DIR/$libname" ]; then
               return 0
             fi
-            # Try /opt/homebrew/lib first
-            if [ -f "/opt/homebrew/lib/$libname" ]; then
-              cp -L "/opt/homebrew/lib/$libname" "$FRAMEWORKS_DIR/"
+            if [ -f "$fullpath" ]; then
+              cp -L "$fullpath" "$FRAMEWORKS_DIR/"
               chmod 644 "$FRAMEWORKS_DIR/$libname"
-              return 0
-            fi
-            # Check common opt locations directly (faster than find)
-            for prefix in readline glib gettext pcre2 libffi fltk jpeg webp protobuf abseil; do
-              if [ -f "/opt/homebrew/opt/$prefix/lib/$libname" ]; then
-                cp -L "/opt/homebrew/opt/$prefix/lib/$libname" "$FRAMEWORKS_DIR/"
-                chmod 644 "$FRAMEWORKS_DIR/$libname"
-                return 0
-              fi
-            done
-            # Search in /opt/homebrew/opt/*/lib as fallback
-            local found=$(find /opt/homebrew/opt -maxdepth 3 -path "*/lib/$libname" 2>/dev/null | head -1)
-            if [ -n "$found" ]; then
-              cp -L "$found" "$FRAMEWORKS_DIR/"
-              chmod 644 "$FRAMEWORKS_DIR/$libname"
+              echo "Copied: $libname"
               return 0
             fi
             return 1
           }
 
-          # Copy initial set of libraries (using versioned names where needed)
-          for lib in libSDL2-2.0.0.dylib \
-                     libSDL2_mixer-2.0.0.dylib \
-                     libfluidsynth.3.dylib \
-                     libpng16.16.dylib \
-                     libzstd.1.dylib \
-                     libfltk.1.4.dylib \
-                     libfltk_forms.1.4.dylib \
-                     libfltk_gl.1.4.dylib \
-                     libfltk_images.1.4.dylib \
-                     libglib-2.0.0.dylib \
-                     libgthread-2.0.0.dylib \
-                     libintl.8.dylib \
-                     libogg.0.dylib \
-                     libvorbis.0.dylib \
-                     libvorbisfile.3.dylib \
-                     libvorbisenc.2.dylib \
-                     libFLAC.14.dylib \
-                     libmpg123.0.dylib \
-                     libopus.0.dylib \
-                     libopusfile.0.dylib \
-                     libsndfile.1.dylib \
-                     libpcre2-8.0.dylib \
-                     libreadline.8.dylib \
-                     libunistring.5.dylib \
-                     libwavpack.1.dylib \
-                     libgme.0.dylib \
-                     libxmp.4.dylib \
-                     libmp3lame.0.dylib \
-                     libportaudio.2.dylib \
-                     libjpeg.8.dylib \
-                     libwebp.7.dylib \
-                     libprotobuf.33.2.0.dylib; do
-            copy_lib "$lib" || echo "Note: $lib not found (may not be needed)"
+          # Step 1: Copy ALL direct Homebrew dependencies from executables
+          echo "=== Copying direct dependencies from executables ==="
+          EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/odamex"
+          SERVER="artifact/NovaDoom.app/Contents/MacOS/novasrv"
+
+          for binary in "$EXECUTABLE" "$SERVER"; do
+            otool -L "$binary" 2>/dev/null | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
+              copy_lib_from_path "$dep"
+            done
           done
 
-          # Iteratively find and copy any missing dependencies
-          # Run multiple passes until no new libraries are needed
-          for pass in 1 2 3 4 5; do
+          # Step 2: Iteratively copy transitive dependencies (up to 10 passes for deep dep chains)
+          echo "=== Copying transitive dependencies ==="
+          for pass in 1 2 3 4 5 6 7 8 9 10; do
+            copied=0
+            for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
+              otool -L "$dylib" 2>/dev/null | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
+                depname=$(basename "$dep")
+                if [ ! -f "$FRAMEWORKS_DIR/$depname" ]; then
+                  if copy_lib_from_path "$dep"; then
+                    copied=1
+                  fi
+                fi
+              done
+            done
+
+            # Check if all deps are satisfied
             missing=""
             for dylib in "$FRAMEWORKS_DIR"/*.dylib; do
               deps=$(otool -L "$dylib" 2>/dev/null | grep "/opt/homebrew" | awk '{print $1}')
@@ -161,15 +134,16 @@ jobs:
                 fi
               done
             done
+
             if [ -z "$missing" ]; then
-              echo "Pass $pass: All dependencies satisfied"
+              echo "Pass $pass: All dependencies satisfied!"
               break
+            else
+              echo "Pass $pass: Still missing:$missing"
             fi
-            echo "Pass $pass: Copying missing deps:$missing"
-            for lib in $missing; do
-              copy_lib "$lib" || echo "Warning: Could not find $lib"
-            done
           done
+
+          echo "=== Bundled $(ls -1 "$FRAMEWORKS_DIR"/*.dylib 2>/dev/null | wc -l) libraries ==="
 
           # Fix library paths in the main executable
           EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/odamex"
