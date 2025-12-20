@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf 2>/dev/null || true
+          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf deutex 2>/dev/null || true
 
       - name: Cache CMake build
         uses: actions/cache@v4
@@ -51,7 +51,7 @@ jobs:
             -DENABLE_FLUIDSYNTH=ON \
             -DUSE_INTERNAL_FLTK=OFF \
             -DUSE_INTERNAL_PROTOBUF=OFF \
-            -DUSE_INTERNAL_DEUTEX=ON \
+            -DUSE_INTERNAL_DEUTEX=OFF \
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
             -DBUILD_LAUNCHER=OFF \
@@ -80,7 +80,13 @@ jobs:
 
           mkdir -p artifact/NovaDoom.app/Contents/Resources/soundfonts
           cp soundfonts/gzdoom.sf2 artifact/NovaDoom.app/Contents/Resources/soundfonts/
-          cp build/wad/odamex.wad artifact/NovaDoom.app/Contents/Resources/
+
+          # Copy WAD if it was built (DeuTex may not be available)
+          if [ -f "build/wad/odamex.wad" ]; then
+            cp build/wad/odamex.wad artifact/NovaDoom.app/Contents/Resources/
+          else
+            echo "Warning: odamex.wad not found, skipping"
+          fi
 
           # Bundle dylibs into the app
           FRAMEWORKS_DIR="artifact/NovaDoom.app/Contents/Frameworks"
