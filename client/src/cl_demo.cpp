@@ -5,7 +5,8 @@
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +24,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "cl_main.h"
 #include "p_ctf.h"
@@ -539,15 +540,15 @@ bool NetDemo::startPlaying(const std::string &filename)
 			int maj, min, patch;
 			BREAKVER(latestVersion, maj, min, patch);
 			buffer = fmt::sprintf(
-			          "This demo is too old to play in this version of Odamex.  Please "
-			          "visit https://odamex.net/ to obtain Odamex %d.%d.%d or older.",
+			          "This demo is too old to play in this version of NovaDoom.  Please "
+			          "visit https://novadoom.com/ to obtain NovaDoom %d.%d.%d or older.",
 			          maj, min, patch);
 		}
 		else
 		{
 			buffer = fmt::sprintf(
-			          "This demo is too new to play in this version of Odamex.  Please "
-			          "visit https://odamex.net/ to obtain a newer version of Odamex.");
+			          "This demo is too new to play in this version of NovaDoom.  Please "
+			          "visit https://novadoom.com/ to obtain a newer version of NovaDoom.");
 		}
 
 		error(buffer);

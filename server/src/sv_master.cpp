@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 
 #include "d_player.h"
@@ -33,9 +34,9 @@
 
 #define MASTERPORT			15000
 
-// [Russell] - default master list
-// This is here for complete master redundancy, including domain name failure
-static constexpr std::string_view def_masterlist[] = { "master1.odamex.net", "voxelsoft.com", "odamex.electricbrass.net" };
+// Default master list
+// TODO: Replace with novadoom.com API integration
+static constexpr std::string_view def_masterlist[] = { "master.novadoom.com" };
 
 class masterserver
 {

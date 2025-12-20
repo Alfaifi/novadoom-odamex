@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -79,12 +80,11 @@
 // Querying system
 // ---------------
 
-// Default list of master servers, usually official ones
+// Default list of master servers
+// TODO: Replace with novadoom.com API integration
 static const char* def_masterlist[] =
 {
-	"master1.odamex.net:15000"
-	,"voxelsoft.com:15000"
-	,"odamex.electricbrass.net:15000"
+	"master.novadoom.com:15000"
 	,NULL
 };
 

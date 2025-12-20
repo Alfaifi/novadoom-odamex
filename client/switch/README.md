@@ -1,18 +1,18 @@
-![Odamex](https://raw.githubusercontent.com/odamex/odamex/stable/media/logo_128.png?raw=true)
+![NovaDoom](https://raw.githubusercontent.com/Alfaifi/novadoom-odamex/main/media/icon_novadoom_128.png?raw=true)
 
-Informations required for Odamex on Nintendo Switch.
+Information required for NovaDoom on Nintendo Switch.
 
 # IMPORTANT INFO
 - You **NEED** to start the Homebrew with full applet support (= Start the homebrew launcher through an existing application, and NOT the gallery)!
 
 ## Installation
-- Create a folder named **odamex** to the */switch* folder of your microSD Card, and navigate to that folder.
-- Put *odamex.nro* and *odamex.wad* to that folder.
+- Create a folder named **novadoom** to the */switch* folder of your microSD Card, and navigate to that folder.
+- Put *novadoom.nro* and *novadoom.wad* to that folder.
 
 ## Where to add your wads?
 There are several ways to add your *IWADs/PWADs* (DOOM.WAD, DOOM2.WAD, FREEDOOM2.WAD, ...):
-- By putting them inside `/switch/odamex` or `/switch/odamex/wads` ;
-- By putting them in a folder named `.odamex`, located in the **root** of your sd card;
+- By putting them inside `/switch/novadoom` or `/switch/novadoom/wads` ;
+- By putting them in a folder named `.novadoom`, located in the **root** of your sd card;
 
 #### Known Bugs :
 - Loading times makes the game go faster, to keep with uncapped framerates. It could lead to desyncs online until it syncs back after a few seconds. The same behaviour can happen if you go to the home menu, or put the console into sleep mode.
@@ -66,14 +66,14 @@ Then replace all of the libSDL2_mixer.a/.la libraries to $DEVKITPRO
 
 ### Making the required folders & compiling :
 
-go to your odamex folder. 
+go to your novadoom folder. 
 
 ```sh
-mkdir odamex_switch && cd odamex_switch
+mkdir novadoom_switch && cd novadoom_switch
 
 source $DEVKITPRO/switchvars.sh
 
-cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE="$DEVKITPRO/switch.cmake" ../odamex
+cmake -Wno-dev -DCMAKE_TOOLCHAIN_FILE="$DEVKITPRO/switch.cmake" ../novadoom
 
 make
 ```

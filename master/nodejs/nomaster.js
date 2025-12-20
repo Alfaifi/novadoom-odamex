@@ -98,4 +98,4 @@ master.on('message', function(msg, rinfo) {
 	}
 });
 master.bind(options.port);
-util.log("Odamex Master Started");
+util.log("NovaDoom Master Started");

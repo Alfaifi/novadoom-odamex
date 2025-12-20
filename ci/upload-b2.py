@@ -37,8 +37,8 @@ if GITHUB_EVENT_NAME == "pull_request":
     sys.exit(0)
 
 # Skip if on a fork
-if GITHUB_REPOSITORY_OWNER != "odamex":
-    print(f"==> Skipping upload because repo owner is \"{GITHUB_REPOSITORY_OWNER}\" and not \"odamex\".")
+if GITHUB_REPOSITORY_OWNER != "novadoom":
+    print(f"==> Skipping upload because repo owner is \"{GITHUB_REPOSITORY_OWNER}\" and not \"novadoom\".")
     sys.exit(0)
 
 # Load up JSON so we can grab a message

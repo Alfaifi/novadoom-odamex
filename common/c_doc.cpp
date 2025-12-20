@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include <algorithm>
 
@@ -32,9 +33,9 @@
 #include "m_fileio.h"
 
 #ifdef CLIENT_APP
-#define CS_STRING "Odamex Client"
+#define CS_STRING "NovaDoom Client"
 #else
-#define CS_STRING "Odamex Server"
+#define CS_STRING "NovaDoom Server"
 #endif
 
 // A view to a list of Cvars.
@@ -234,9 +235,9 @@ BEGIN_COMMAND(cvardoc)
 	}
 
 #ifdef CLIENT_APP
-	path += "odamex_cvardoc.html";
+	path += "novadoom_cvardoc.html";
 #else
-	path += "odasrv_cvardoc.html";
+	path += "novasrv_cvardoc.html";
 #endif
 
 	// Try and open a file in our write directory.

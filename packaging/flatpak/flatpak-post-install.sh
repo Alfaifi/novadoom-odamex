@@ -15,7 +15,7 @@ mkdir -p /app/etc
 cp -r packaging/flatpak/timidity.cfg /app/etc/timidity.cfg
 
 # Install the AppStream metadata file.
-projectId=net.odamex.Odamex
+projectId=net.novadoom.NovaDoom
 metadataDir=/app/share/metainfo
 mkdir -p $metadataDir
 cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
@@ -23,7 +23,7 @@ cp -r packaging/linux/$projectId.metainfo.xml $metadataDir/
 # Install the odd demo filetype
 iconDir=/app/share/icons/hicolor/512x512/mimetypes
 mkdir -p $iconDir
-cp -r media/icon_odademo_512.png $iconDir/$projectId-application-odamex-demo.png
+cp -r media/icon_novademo_512.png $iconDir/$projectId-application-novadoom-demo.png
 mimeDir=/app/share/mime/packages/
 mkdir -p $mimeDir
 cp -r packaging/linux/$projectId-mime.xml $mimeDir/$projectId-mime.xml
@@ -46,13 +46,13 @@ oda_install() {
 }
 
 # Client app
-oda_install Client odamex client
+oda_install Client novadoom client
 
 # Server app
-oda_install Server odasrv server
+oda_install Server novasrv server
 
 # Launcher app
-oda_install Launcher odalaunch odalaunch
+oda_install Launcher novalaunch odalaunch
 
 # Install helper script
 install -c packaging/flatpak/select-exe.sh /app/bin/select-exe

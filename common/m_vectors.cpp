@@ -5,7 +5,8 @@
 //
 // Copyright (C) 1997-2000 by id Software Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -28,7 +29,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "m_fixed.h"
 #include "m_vectors.h"

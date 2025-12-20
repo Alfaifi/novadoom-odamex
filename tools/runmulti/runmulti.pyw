@@ -17,7 +17,7 @@
 # GNU General Public License for more details.
 #
 # DESCRIPTION:
-#  A tool used to help test odamex/odasrv during development.
+#  A tool used to help test novadoom/novasrv during development.
 #
 # -----------------------------------------------------------------------------
 
@@ -36,27 +36,27 @@ from tkinter import (
 )
 
 BUILD_DIR = Path(__file__).parent.parent.parent / "build"
-ODAMEX_EXE = BUILD_DIR / "client" / "Debug" / "odamex.exe"
-ODAMEX_CWD = ODAMEX_EXE.parent
-ODASRV_EXE = BUILD_DIR / "server" / "Debug" / "odasrv.exe"
-ODASRV_CWD = ODASRV_EXE.parent
+NOVADOOM_EXE = BUILD_DIR / "client" / "Debug" / "novadoom.exe"
+NOVADOOM_CWD = NOVADOOM_EXE.parent
+NOVASRV_EXE = BUILD_DIR / "server" / "Debug" / "novasrv.exe"
+NOVASRV_CWD = NOVASRV_EXE.parent
 CONSOLE_CMD = ["wt.exe", "--window", "-1"]
 
 root = Tk()
 
-odamex_params_sv = StringVar(root)
-odamex_params_sv.set("+connect localhost")
-odasrv_params_sv = StringVar(root)
+novadoom_params_sv = StringVar(root)
+novadoom_params_sv.set("+connect localhost")
+novasrv_params_sv = StringVar(root)
 
 
-def run_odamex():
-    params = shlex.split(odamex_params_sv.get())
-    subprocess.Popen([ODAMEX_EXE, *params], cwd=ODAMEX_CWD)
+def run_novadoom():
+    params = shlex.split(novadoom_params_sv.get())
+    subprocess.Popen([NOVADOOM_EXE, *params], cwd=NOVADOOM_CWD)
 
 
-def run_odasrv():
-    params = shlex.split(odasrv_params_sv.get())
-    subprocess.Popen([*CONSOLE_CMD, ODASRV_EXE, *params], cwd=ODASRV_CWD)
+def run_novasrv():
+    params = shlex.split(novasrv_params_sv.get())
+    subprocess.Popen([*CONSOLE_CMD, NOVASRV_EXE, *params], cwd=NOVASRV_CWD)
 
 
 paths_f = Frame(root)
@@ -64,30 +64,30 @@ paths_f.pack()
 buttons_f = Frame(root)
 buttons_f.pack()
 
-odamex_l = Label(paths_f, text="Odamex")
-odamex_l.grid(row=1, column=1)
-odamex_sv = StringVar()
-odamex_sv.set(str(ODAMEX_EXE))
-odamex_e = Entry(paths_f, state=STATE_DISABLED, textvariable=odamex_sv, width=100)
-odamex_e.grid(row=1, column=2)
+novadoom_l = Label(paths_f, text="NovaDoom")
+novadoom_l.grid(row=1, column=1)
+novadoom_sv = StringVar()
+novadoom_sv.set(str(NOVADOOM_EXE))
+novadoom_e = Entry(paths_f, state=STATE_DISABLED, textvariable=novadoom_sv, width=100)
+novadoom_e.grid(row=1, column=2)
 
-odamex_params_e = Entry(paths_f, textvariable=odamex_params_sv, width=100)
-odamex_params_e.grid(row=2, column=2)
+novadoom_params_e = Entry(paths_f, textvariable=novadoom_params_sv, width=100)
+novadoom_params_e.grid(row=2, column=2)
 
-odasrv_l = Label(paths_f, text="Odasrv")
-odasrv_l.grid(row=3, column=1)
-odasrv_sv = StringVar()
-odasrv_sv.set(str(ODASRV_EXE))
-odasrv_e = Entry(paths_f, state=STATE_DISABLED, textvariable=odasrv_sv, width=100)
-odasrv_e.grid(row=3, column=2)
+novasrv_l = Label(paths_f, text="Novasrv")
+novasrv_l.grid(row=3, column=1)
+novasrv_sv = StringVar()
+novasrv_sv.set(str(NOVASRV_EXE))
+novasrv_e = Entry(paths_f, state=STATE_DISABLED, textvariable=novasrv_sv, width=100)
+novasrv_e.grid(row=3, column=2)
 
-odasrv_params_e = Entry(paths_f, textvariable=odasrv_params_sv, width=100)
-odasrv_params_e.grid(row=4, column=2)
+novasrv_params_e = Entry(paths_f, textvariable=novasrv_params_sv, width=100)
+novasrv_params_e.grid(row=4, column=2)
 
-odamex_b = Button(buttons_f, text="Run Odamex", command=run_odamex)
-odamex_b.pack(side=SIDE_LEFT)
-odasrv_b = Button(buttons_f, text="Run Odasrv", command=run_odasrv)
-odasrv_b.pack(side=SIDE_LEFT)
+novadoom_b = Button(buttons_f, text="Run NovaDoom", command=run_novadoom)
+novadoom_b.pack(side=SIDE_LEFT)
+novasrv_b = Button(buttons_f, text="Run Novasrv", command=run_novasrv)
+novasrv_b.pack(side=SIDE_LEFT)
 
-root.title("Run Built Odamex")
+root.title("Run Built NovaDoom")
 root.mainloop()

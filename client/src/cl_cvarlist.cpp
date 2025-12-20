@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "s_sound.h"
 #include "i_music.h"
@@ -431,25 +432,25 @@ CVAR_FUNC_DECL(		cl_showfriends, "0", "Show an indicator on friendly monsters.",
 // --------------------
 
 // Netdemo format string
-CVAR_FUNC_DECL(		cl_netdemoname, "Odamex_%g_%d_%t_%w_%m",
+CVAR_FUNC_DECL(		cl_netdemoname, "NovaDoom_%g_%d_%t_%w_%m",
 					"Default netdemo name.  Parses the following tokens:\n// " \
 					"%d: date in YYYYMMDD format\n// %t: time in HHMMSS format\n// " \
 					"%n: player name\n// %g: gametype\n// %w: WAD file loaded; " \
 					"either the first PWAD or the IWAD\n// %m: Map lump\n// %%: Literal percent sign",
 					CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-CVAR(				cl_netdemodir, "", "Directory for Odamex to save netdemos to.",
+CVAR(				cl_netdemodir, "", "Directory for NovaDoom to save netdemos to.",
 					CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
 // Screenshot format string
-CVAR_FUNC_DECL(		cl_screenshotname, "Odamex_%g_%d_%t",
+CVAR_FUNC_DECL(		cl_screenshotname, "NovaDoom_%g_%d_%t",
 					"Default screenshot name.  Parses the following tokens:\n// " \
 					"%d: date in YYYYMMDD format\n// %t: time in HHMMSS format\n// " \
 					"%n: player name\n// %g: gametype\n// %w: WAD file loaded; " \
 					"either the first PWAD or the IWAD\n// %m: Map lump\n// %%: Literal percent sign",
 					CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
-CVAR(				cl_screenshotdir, "", "Directory for Odamex to save screenshots to.",
+CVAR(				cl_screenshotdir, "", "Directory for NovaDoom to save screenshots to.",
 					CVARTYPE_STRING, CVAR_CLIENTARCHIVE | CVAR_NOENABLEDISABLE)
 
 CVAR(				cl_autorecord, "0", "Automatically record netdemos",

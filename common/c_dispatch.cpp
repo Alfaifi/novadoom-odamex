@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include <sstream>
 #include <algorithm>
@@ -960,7 +961,7 @@ BEGIN_COMMAND(logfile)
 	time_t rawtime;
 	struct tm* timeinfo;
 	const std::string default_logname =
-	    M_GetUserFileName(::serverside ? "odasrv.log" : "odamex.log");
+	    M_GetUserFileName(::serverside ? "novasrv.log" : "novadoom.log");
 
 	if (::LOG.is_open())
 	{

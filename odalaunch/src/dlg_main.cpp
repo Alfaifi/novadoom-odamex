@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -168,7 +169,7 @@ dlgMain::dlgMain(wxWindow* parent, wxWindowID id)
 
 	// Sets the title of the application with a version string to boot
 	Version = wxString::Format(
-	              "The Odamex Launcher v%d.%d.%d",
+	              "The NovaDoom Launcher v%d.%d.%d",
 	              VERSIONMAJOR(VERSION), VERSIONMINOR(VERSION), VERSIONPATCH(VERSION));
 
 	SetLabel(Version);
@@ -424,7 +425,7 @@ void dlgMain::OnCheckVersion(wxCommandEvent &event)
         return;
     }
 
-    VerMsg = wxString::Format("New! Odamex version %s is available", SiteSrc);
+    VerMsg = wxString::Format("New! NovaDoom version %s is available", SiteSrc);
 
     // Remove version separators
     SiteSrc.erase(std::remove(SiteSrc.begin(), SiteSrc.end(), '.'), SiteSrc.end());
@@ -514,7 +515,7 @@ void dlgMain::OnShowServerFilter(wxCommandEvent& event)
 // This could have other uses, what those are? we do not know yet..
 void dlgMain::GetWebsitePageSource(wxString &SiteSrc)
 {
-    wxURL Https("https://odamex.net/api/app-version");
+    wxURL Https("https://novadoom.com/api/app-version");
     wxInputStream *inStream;
 
     // Get the websites source
@@ -1467,22 +1468,22 @@ void dlgMain::LaunchGame(const wxString& Address, const wxString& ODX_Path,
 	wxString BinName, CmdLine;
 	wxString ExtraCmdLineArgs;
 	wxString MsgStr = "Could not start %s\n\nPlease check that Settings->"
-	                      "File Locations->Odamex Path points to your "
-	                      "Odamex directory";
+	                      "File Locations->NovaDoom Path points to your "
+	                      "NovaDoom directory";
 
 	if(ODX_Path.IsEmpty())
 	{
-		wxMessageBox("Your Odamex path is empty!");
+		wxMessageBox("Your NovaDoom path is empty!");
 
 		return;
 	}
 
 #ifdef __WXMSW__
-	BinName = ODX_Path + '\\' + "odamex.exe";
+	BinName = ODX_Path + '\\' + "novadoom.exe";
 #elif __WXMAC__
-	BinName = ODX_Path + "/odamex.app/Contents/MacOS/odamex";
+	BinName = ODX_Path + "/novadoom.app/Contents/MacOS/novadoom";
 #else
-	BinName = ODX_Path + "/odamex";
+	BinName = ODX_Path + "/novadoom";
 #endif
 
 	CmdLine = BinName;
@@ -1574,31 +1575,31 @@ void dlgMain::OnAbout(wxCommandEvent& event)
 
 void dlgMain::OnOpenWebsite(wxCommandEvent& event)
 {
-	wxLaunchDefaultBrowser("https://odamex.net");
+	wxLaunchDefaultBrowser("https://novadoom.com");
 }
 
 void dlgMain::OnOpenForum(wxCommandEvent& event)
 {
-	wxLaunchDefaultBrowser("https://odamex.net/boards");
+	wxLaunchDefaultBrowser("https://novadoom.com/boards");
 }
 
 void dlgMain::OnOpenWiki(wxCommandEvent& event)
 {
-	wxLaunchDefaultBrowser("https://github.com/odamex/odamex/wiki");
+	wxLaunchDefaultBrowser("https://github.com/Alfaifi/novadoom-odamex/wiki");
 }
 
 void dlgMain::OnOpenChangeLog(wxCommandEvent& event)
 {
-	wxLaunchDefaultBrowser("https://odamex.net/changelog");
+	wxLaunchDefaultBrowser("https://novadoom.com/changelog");
 }
 
 void dlgMain::OnOpenReportBug(wxCommandEvent& event)
 {
-	wxLaunchDefaultBrowser("https://github.com/odamex/odamex/issues/new/choose");
+	wxLaunchDefaultBrowser("https://github.com/Alfaifi/novadoom-odamex/issues/new/choose");
 }
 
 void dlgMain::OnOpenChat(wxCommandEvent& event)
 {
-	wxLaunchDefaultBrowser("https://discord.gg/bvvMJMS");
+	wxLaunchDefaultBrowser("https://discord.gg/2JhVccvq");
 }
 

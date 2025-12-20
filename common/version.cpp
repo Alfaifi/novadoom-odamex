@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,9 +22,9 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "novadoom.h"
 
-#ifndef ODAMEX_NO_GITVER
+#ifndef NOVADOOM_NO_GITVER
 #include "git_describe.h"
 #endif
 
@@ -172,7 +173,7 @@ file_version::file_version(const char *uid, const char *id, const char *pp, int 
  */
 static bool NoGitVersion()
 {
-#if defined(ODAMEX_NO_GITVER) || !defined(GIT_SHORT_HASH) || !defined(GIT_REV_COUNT)
+#if defined(NOVADOOM_NO_GITVER) || !defined(GIT_SHORT_HASH) || !defined(GIT_REV_COUNT)
 	return true;
 #else
 	return false;

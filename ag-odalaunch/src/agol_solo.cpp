@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -228,11 +229,11 @@ void AGOL_Solo::PopulateWadLists()
 				if(dot == string::npos)
 					continue;
 
-				// Compare the file extension to the acceptable extensions for Odamex.
+				// Compare the file extension to the acceptable extensions for NovaDoom.
 				if(curFile.substr(dot + 1, curFile.size()) == "WAD")
 				{
-					// Exclude odamex.wad
-					if(curFile == "ODAMEX.WAD")
+					// Exclude novadoom.wad
+					if(curFile == "NOVADOOM.WAD")
 						continue;
 
 					// If this is an IWAD put it in the IWAD list.

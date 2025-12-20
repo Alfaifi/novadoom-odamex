@@ -37,7 +37,7 @@ proc main {} {
  expect $clientout {=================================} 0
  expect $clientout {DOOM 2: Hell on Earth} 0
  gets $clientout
- expect $clientout {adding odamex.wad} 0
+ expect $clientout {adding novadoom.wad} 0
 }
 
 startClient

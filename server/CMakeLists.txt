@@ -1,5 +1,5 @@
-include(OdamexCopyWad)
-include(OdamexTargetSettings)
+include(NovaDoomCopyWad)
+include(NovaDoomTargetSettings)
 
 # use unquoted #defines
 if(COMMAND cmake_policy)
@@ -37,62 +37,62 @@ if(WIN32 AND NOT MSVC)
   add_definitions(-DWINVER=0x0500)
 endif()
 
-add_executable(odasrv
+add_executable(novasrv
   ${COMMON_SOURCES} ${SERVER_SOURCES} ${SERVER_WIN32_SOURCES})
-odamex_target_settings(odasrv)
+novadoom_target_settings(novasrv)
 
-target_include_directories(odasrv PRIVATE src)
+target_include_directories(novasrv PRIVATE src)
 if(WIN32)
-  target_include_directories(odasrv PRIVATE win32)
+  target_include_directories(novasrv PRIVATE win32)
 endif()
 
-target_link_libraries(odasrv fmt::fmt tinylibs ZLIB::ZLIB odamex-common odaproto minilzo cpptrace::cpptrace)
+target_link_libraries(novasrv fmt::fmt tinylibs ZLIB::ZLIB odamex-common odaproto minilzo cpptrace::cpptrace)
 
 if(USE_INTERNAL_JSONCPP)
-  target_link_libraries(odasrv jsoncpp_static)
+  target_link_libraries(novasrv jsoncpp_static)
 else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
-  target_link_libraries(odasrv PkgConfig::JSONCPP)
+  target_link_libraries(novasrv PkgConfig::JSONCPP)
 endif()
 
 if(USE_MINIUPNP)
   if(USE_INTERNAL_MINIUPNP)
-    target_link_libraries(odasrv miniupnpc::miniupnpc)
+    target_link_libraries(novasrv miniupnpc::miniupnpc)
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(MINIUPNPC miniupnpc REQUIRED IMPORTED_TARGET)
-    target_link_libraries(odasrv PkgConfig::MINIUPNPC)
+    target_link_libraries(novasrv PkgConfig::MINIUPNPC)
   endif()
 endif()
 
 if(WIN32)
-  target_link_libraries(odasrv winmm wsock32 shlwapi)
+  target_link_libraries(novasrv winmm wsock32 shlwapi)
 elseif(SOLARIS)
-  target_link_libraries(odasrv socket nsl)
+  target_link_libraries(novasrv socket nsl)
 elseif(UNIX)
   find_package(Threads REQUIRED)
-  target_link_libraries(odasrv pthread)
+  target_link_libraries(novasrv pthread)
 endif()
 
 if(UNIX AND NOT APPLE)
-  target_link_libraries(odasrv rt)
+  target_link_libraries(novasrv rt)
 endif()
 
-odamex_copy_wad(odasrv)
+novadoom_copy_wad(novasrv)
 
 if(APPLE)
 elseif(WIN32)
-  install(TARGETS odasrv
+  install(TARGETS novasrv
     RUNTIME DESTINATION .
     COMPONENT server)
 else()
-  install(TARGETS odasrv
+  install(TARGETS novasrv
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT server)
 endif()
 
 # [AM] Not needed right now, but could be in the future...
-if(BUILD_OR_FAIL AND NOT TARGET odasrv)
-  message(FATAL_ERROR "Odasrv target could not be generated")
+if(BUILD_OR_FAIL AND NOT TARGET novasrv)
+  message(FATAL_ERROR "NovaSrv target could not be generated")
 endif()

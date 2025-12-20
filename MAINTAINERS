@@ -1,19 +1,21 @@
-Find the Odamex code at: https://github.com/odamex/odamex
-Post bugs to: https://github.com/odamex/odamex/issues
-Read our documentation at: https://github.com/odamex/odamex/wiki
-Visit our Discord server: https://discord.gg/bvvMJMS
+Find the NovaDoom code at: https://github.com/Alfaifi/novadoom-odamex
+Post bugs to: https://github.com/Alfaifi/novadoom-odamex/issues
+Read our documentation at: https://github.com/Alfaifi/novadoom-odamex/wiki
+Visit our Discord server: https://discord.gg/2JhVccvq
 
+NovaDoom is based on Odamex by The Odamex Team.
+Original Odamex contributors:
 electricbrass: electricbrass@proton.me (Programmer, Linux Flatpak Maintainer)
 Hekksy: (Project Manager)
 Hyper_Eye: mwoodj@huntsvegas.org (Programmer, macOS Package Manager)
 KBlair: (Programmer)
 LexiMax: (Programmer)
-Manc: mike@odamex.net (odamex.net Services & Website Administrator, Project Manager)
+Manc: (odamex.net Services & Website Administrator, Project Manager)
 Ralphis: ralphis@gmail.com (Project Manager)
-Sean: sean@odamex.net (Programmer)
+Sean: (Programmer)
 
 Portions of the save/load game system code not
 already present provided by Marisa from zdoom 1.22
 relicensed under the GNU/GPL v2.
 
-Updated October 14, 2025
+Updated December 2025

@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Odamex is a client/server multiplayer source port of DOOM, based on CSDoom 0.62 (itself based on ZDoom 1.22). The codebase is C++ targeting CMake 3.13+.
+NovaDoom is a client/server multiplayer source port of DOOM, based on CSDoom 0.62 (itself based on ZDoom 1.22). The codebase is C++ targeting CMake 3.13+.
 
 ## Build Commands
 
 ```bash
 # Clone with submodules (required)
-git clone https://github.com/odamex/odamex.git --recurse-submodules
+git clone https://github.com/Alfaifi/novadoom-odamex.git --recurse-submodules
 
 # Standard build (creates client, server, and launcher)
 mkdir build && cd build
@@ -28,10 +28,11 @@ cmake .. -DCMAKE_BUILD_TYPE=Debug
 ```
 
 **Build targets:**
-- `odamex` - Game client
-- `odasrv` - Dedicated server
-- `odalaunch` - Server browser/launcher (requires wxWidgets)
-- `odawad` - Resource WAD (requires DeuTex)
+
+- `novadoom` - Game client
+- `novasrv` - Dedicated server
+- `novalaunch` - Server browser/launcher (requires wxWidgets)
+- `novadoomwad` - Resource WAD (requires DeuTex)
 
 **Dependencies:** SDL2, SDL2_mixer, wxWidgets (launcher only), DeuTex (WAD building only). On Windows, libraries auto-download. On Linux/macOS, install via package manager.
 
@@ -59,6 +60,7 @@ tests/      - Tcl-based regression tests
 ```
 
 **Key preprocessor defines:**
+
 - `CLIENT_APP` - Client build
 - `SERVER_APP` - Server build
 
@@ -67,6 +69,7 @@ tests/      - Tcl-based regression tests
 Uses `.clang-format` (Microsoft style base, tabs for indentation, 90 column limit).
 
 **Essential rules:**
+
 - Use `nullptr` (not `NULL` or `0`)
 - Use `std::string` over C-style strings
 - Use C++ casts (`static_cast`, `const_cast`, `reinterpret_cast`)
@@ -76,6 +79,7 @@ Uses `.clang-format` (Microsoft style base, tabs for indentation, 90 column limi
 - Include GPL header in new files
 
 **Avoid:**
+
 - Preprocessor macros and global variables where possible
 - Hungarian notation
 - C-style casts and `goto`
@@ -84,6 +88,7 @@ Uses `.clang-format` (Microsoft style base, tabs for indentation, 90 column limi
 ## Testing
 
 Tests use Tcl scripts in `tests/`:
+
 ```bash
 cd tests
 tclsh all.tcl        # Run all tests

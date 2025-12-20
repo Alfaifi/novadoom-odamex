@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +24,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #ifdef UNIX
 // for getuid and geteuid
@@ -81,7 +82,7 @@ void STACK_ARGS call_terms (void)
 void STACK_ARGS nx_early_init (void)
 {
 	socketInitializeDefault();
-#ifdef ODAMEX_DEBUG
+#ifdef NOVADOOM_DEBUG
 	nxlinkStdio();
 #endif
 }
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
 
 #if defined(UNIX) && !defined(GCONSOLE)
 		if(!getuid() || !geteuid())
-			I_FatalError("root user detected, quitting odamex immediately");
+			I_FatalError("root user detected, quitting novadoom immediately");
 #endif
 
 		// [ML] 2007/9/3: From Eternity (originally chocolate Doom) Thanks SoM & fraggle!

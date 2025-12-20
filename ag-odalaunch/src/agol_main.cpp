@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -64,7 +65,7 @@ AGOL_MainWindow::AGOL_MainWindow(int width, int height) :
 	// make the window plain (no window decorations). No flags for multi-window drivers (glx, wgl)
 	MainWindow = AG_WindowNewNamedS(agDriverSw ? AG_WINDOW_PLAIN : 0, "MainWindow");
 	AG_WindowSetGeometryAligned(MainWindow, AG_WINDOW_MC, width, height);
-	AG_WindowSetCaptionS(MainWindow, "The Odamex Launcher");
+	AG_WindowSetCaptionS(MainWindow, "The NovaDoom Launcher");
 
 	// Load interface resources
 	LoadResources();
@@ -98,8 +99,8 @@ AGOL_MainWindow::AGOL_MainWindow(int width, int height) :
 		RegisterEventHandler((EVENT_FUNC_PTR)&AGOL_MainWindow::SaveWidgetStates));
 
 	// set up the master server information
-	MServer.AddMaster("master1.odamex.net:15000");
-	MServer.AddMaster("voxelsoft.com:15000");
+	// TODO: Replace with novadoom.com API integration
+	MServer.AddMaster("master.novadoom.com:15000");
 
 	// Don't poll the server list by default
 	StopServerListPoll();
@@ -394,7 +395,7 @@ ODA_Statusbar *AGOL_MainWindow::CreateMainStatusbar(void *parent)
 
 	statusbar->statbox = AG_BoxNewHoriz(parent, AG_BOX_HOMOGENOUS | AG_BOX_HFILL);
 
-	statusbar->tooltip = AG_LabelNew(statusbar->statbox, AG_LABEL_EXPAND, "Welcome to Odamex");
+	statusbar->tooltip = AG_LabelNew(statusbar->statbox, AG_LABEL_EXPAND, "Welcome to NovaDoom");
 
 	statusbar->mping = AG_LabelNew(statusbar->statbox, AG_LABEL_EXPAND, "Master Ping: 0");
 
@@ -1104,7 +1105,7 @@ void AGOL_MainWindow::OnCustomServer(AG_Event *event)
 
 void AGOL_MainWindow::OnReportBug(AG_Event *event)
 {
-	AG_TextMsgS(AG_MSG_INFO, "Please report any bugs at: http://odamex.net/bugs/\n\nThank You!");
+	AG_TextMsgS(AG_MSG_INFO, "Please report any bugs at: https://github.com/Alfaifi/novadoom-odamex/issues\n\nThank You!");
 }
 
 void AGOL_MainWindow::OnMouseOverWidget(AG_Event *event)

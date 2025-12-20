@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include <ctime>
 
@@ -161,7 +162,7 @@ static void SetPNGComments(PNGStrings& out, png_struct* png_ptr, png_info* info_
 		pngtext[i].compression = PNG_TEXT_COMPRESSION_NONE;
 
 	pngtext[text_line].key = (png_charp) "Description";
-	pngtext[text_line].text = (png_charp)("Odamex " DOTVERSIONSTR " Screenshot");
+	pngtext[text_line].text = (png_charp)("NovaDoom " DOTVERSIONSTR " Screenshot");
 	text_line++;
 
 	char datebuf[80];

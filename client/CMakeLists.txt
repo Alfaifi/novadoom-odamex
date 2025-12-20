@@ -1,6 +1,6 @@
-include(OdamexCopyLibs)
-include(OdamexCopyWad)
-include(OdamexTargetSettings)
+include(NovaDoomCopyLibs)
+include(NovaDoomCopyWad)
+include(NovaDoomTargetSettings)
 
 # use unquoted #defines
 if(COMMAND cmake_policy)
@@ -28,7 +28,7 @@ if (GCONSOLE)
     set(CLIENT_DIR ${CLIENT_DIR} switch)  # Nintendo Switch
     file(GLOB CLIENT_HEADERS ${CLIENT_HEADERS} switch/*.h)
     file(GLOB CLIENT_SOURCES ${CLIENT_SOURCES} switch/*.cpp)
-    odamex_target_settings_nx(CLIENT_DIR GLOB)
+    novadoom_target_settings_nx(CLIENT_DIR GLOB)
   endif()
 endif()
 
@@ -179,25 +179,25 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     include_directories(../common)
   endif()
 
-  add_executable(odamex MACOSX_BUNDLE WIN32
+  add_executable(novadoom MACOSX_BUNDLE WIN32
     ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES} ${CLIENT_GUI_SOURCES})
-  odamex_target_settings(odamex)
+  novadoom_target_settings(novadoom)
 
   if(USE_DEFAULT_SIMD)
     if(ODAMEX_TARGET_ARCH STREQUAL "amd64")
       message(STATUS "Default SIMD flags not touched for AMD64")
     elseif(ODAMEX_TARGET_ARCH STREQUAL "i386")
       if(NOT MSVC)
-        target_compile_options(odamex PRIVATE -msse2)
+        target_compile_options(novadoom PRIVATE -msse2)
       else()
-        target_compile_options(odamex PRIVATE /arch:SSE2)
+        target_compile_options(novadoom PRIVATE /arch:SSE2)
       endif()
       message(STATUS "Default SIMD flags set to SSE2")
     elseif(ODAMEX_TARGET_ARCH MATCHES "ppc")
       if(APPLE)
-        target_compile_options(odamex PRIVATE -faltivec)
+        target_compile_options(novadoom PRIVATE -faltivec)
       else()
-        target_compile_options(odamex PRIVATE -maltivec)
+        target_compile_options(novadoom PRIVATE -maltivec)
       endif()
       message(STATUS "Default SIMD flags set to AltiVec")
     endif()
@@ -207,98 +207,98 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
   if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     message(STATUS "GNU Detected, forcing GCC to link math.h")
-    target_compile_options(odamex PRIVATE -lm)
+    target_compile_options(novadoom PRIVATE -lm)
   endif()
 
   if(MSVC)
     # We supply our own manifest, don't use the default one.
-    set_target_properties(odamex PROPERTIES LINK_FLAGS "/MANIFEST:NO")
+    set_target_properties(novadoom PROPERTIES LINK_FLAGS "/MANIFEST:NO")
   endif()
 
-  target_link_libraries(odamex ${TEXTSCREEN_LIBRARY})
-  target_link_libraries(odamex odamex-common odaproto tinylibs)
+  target_link_libraries(novadoom ${TEXTSCREEN_LIBRARY})
+  target_link_libraries(novadoom odamex-common odaproto tinylibs)
   if(TARGET SDL::SDL)
-    target_link_libraries(odamex SDL::SDL)
+    target_link_libraries(novadoom SDL::SDL)
     if(TARGET SDL::SDLmain)
-      target_link_libraries(odamex SDL::SDLmain)
+      target_link_libraries(novadoom SDL::SDLmain)
     endif()
-    target_link_libraries(odamex SDL::mixer)
+    target_link_libraries(novadoom SDL::mixer)
   else()
-    target_link_libraries(odamex SDL2::SDL2)
+    target_link_libraries(novadoom SDL2::SDL2)
     if(TARGET SDL2::SDL2main)
-      target_link_libraries(odamex SDL2::SDL2main)
+      target_link_libraries(novadoom SDL2::SDL2main)
     endif()
-    target_link_libraries(odamex SDL2::mixer)
+    target_link_libraries(novadoom SDL2::mixer)
   endif()
 
   if(NOT GCONSOLE)
-    target_include_directories(odamex PRIVATE gui)
+    target_include_directories(novadoom PRIVATE gui)
     if(USE_INTERNAL_FLTK)
-      target_link_libraries(odamex fltk::fltk fltk::images)
+      target_link_libraries(novadoom fltk::fltk fltk::images)
     else()
       # Try CMake CONFIG first (vcpkg), then legacy FindFLTK module (Homebrew, system)
       find_package(FLTK 1.4 CONFIG QUIET)
       if(TARGET fltk::fltk-shared)
-        target_link_libraries(odamex fltk::fltk-shared fltk::images-shared)
+        target_link_libraries(novadoom fltk::fltk-shared fltk::images-shared)
         message(STATUS "FLTK found via CMake config")
       else()
         # Fall back to legacy FindFLTK module
         find_package(FLTK REQUIRED)
-        target_include_directories(odamex PRIVATE ${FLTK_INCLUDE_DIR})
-        target_link_libraries(odamex ${FLTK_LIBRARIES})
+        target_include_directories(novadoom PRIVATE ${FLTK_INCLUDE_DIR})
+        target_link_libraries(novadoom ${FLTK_LIBRARIES})
         message(STATUS "FLTK found via FindFLTK module: ${FLTK_LIBRARIES}")
       endif()
     endif()
   endif()
 
   if(USE_INTERNAL_JSONCPP)
-    target_link_libraries(odamex jsoncpp_static)
+    target_link_libraries(novadoom jsoncpp_static)
   else()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp REQUIRED IMPORTED_TARGET)
-    target_link_libraries(odamex PkgConfig::JSONCPP)
+    target_link_libraries(novadoom PkgConfig::JSONCPP)
   endif()
 
   if(ENABLE_PORTMIDI)
-    target_link_libraries(odamex ${PORTMIDI_LIBRARY})
+    target_link_libraries(novadoom ${PORTMIDI_LIBRARY})
   endif()
 
   if(ENABLE_FLUIDSYNTH)
     if(DEFINED FLUIDSYNTH_TARGET)
       # Link via CMake target (vcpkg)
-      target_link_libraries(odamex ${FLUIDSYNTH_TARGET})
+      target_link_libraries(novadoom ${FLUIDSYNTH_TARGET})
     else()
       # Link via pkg-config variables
-      target_include_directories(odamex PRIVATE ${FLUIDSYNTH_INCLUDE_DIRS})
+      target_include_directories(novadoom PRIVATE ${FLUIDSYNTH_INCLUDE_DIRS})
       target_link_directories(odamex PRIVATE ${FLUIDSYNTH_LIBRARY_DIRS})
-      target_link_libraries(odamex ${FLUIDSYNTH_LIBRARIES})
+      target_link_libraries(novadoom ${FLUIDSYNTH_LIBRARIES})
     endif()
   endif()
 
-  target_link_libraries(odamex ZLIB::ZLIB PNG::PNG fmt::fmt minilzo cpptrace::cpptrace libADLMIDI::ADLMIDI_static curl_interface)
+  target_link_libraries(novadoom ZLIB::ZLIB PNG::PNG fmt::fmt minilzo cpptrace::cpptrace libADLMIDI::ADLMIDI_static curl_interface)
 
   if(WIN32)
-    target_link_libraries(odamex winmm wsock32 shlwapi)
+    target_link_libraries(novadoom winmm wsock32 shlwapi)
   elseif(APPLE)
-    target_link_libraries(odamex ${APPLE_FRAMEWORKS})
+    target_link_libraries(novadoom ${APPLE_FRAMEWORKS})
   elseif(NSWITCH)
-    target_link_libraries(odamex SDL2 mpg123 modplug vorbisfile vorbis opusfile opus ogg EGL glapi drm_nouveau nx m)
+    target_link_libraries(novadoom SDL2 mpg123 modplug vorbisfile vorbis opusfile opus ogg EGL glapi drm_nouveau nx m)
   elseif(SOLARIS)
-    target_link_libraries(odamex socket nsl)
+    target_link_libraries(novadoom socket nsl)
   endif()
 
   if(UNIX AND NOT APPLE)
-    target_link_libraries(odamex rt)
+    target_link_libraries(novadoom rt)
     if(X11_FOUND)
-      target_link_libraries(odamex X11)
+      target_link_libraries(novadoom X11)
     endif()
   endif()
 
-  odamex_copy_libs(odamex)
-  odamex_copy_wad(odamex)
+  novadoom_copy_libs(novadoom)
+  novadoom_copy_wad(novadoom)
 
   set(MACOSX_BUNDLE_BUNDLE_NAME ${CMAKE_PROJECT_NAME})
-  set(MACOSX_BUNDLE_INFO_STRING "NovaDoom © ${PROJECT_COPYRIGHT} NovaDoom Team. Based on Odamex.")
+  set(MACOSX_BUNDLE_INFO_STRING "NovaDoom © ${PROJECT_COPYRIGHT} NovaDoom Team.")
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
@@ -307,21 +307,21 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
   if(APPLE)
     add_custom_command(
-      TARGET odamex
+      TARGET novadoom
       POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Resources
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/media/${MACOSX_BUNDLE_ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Resources
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/Resources
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/media/${MACOSX_BUNDLE_ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/Resources
     )
     if(TARGET odawad)
       add_custom_command(
-        TARGET odamex
+        TARGET novadoom
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/wad/novadoom.wad ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS)
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/wad/novadoom.wad ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/MacOS)
     endif()
 
     set_directory_properties(
       PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE};${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS/novadoom.wad"
+      "${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE};${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/MacOS/novadoom.wad"
     )
 
     #****
@@ -342,41 +342,41 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
     # Install the SDL framework into the bundle
     if(IS_DIRECTORY ${SDL_DIR})
-      install(DIRECTORY ${SDL_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Frameworks)
+      install(DIRECTORY ${SDL_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/Frameworks)
       install(CODE "execute_process(COMMAND
         install_name_tool -change @rpath/SDL.framework/Versions/A/SDL
         @executable_path/../Frameworks/SDL.framework/Versions/A/SDL
-        ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS/odamex)
+        ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/MacOS/novadoom)
         " )
     endif()
 
     # Install the SDL_mixer framework into the bundle
     if(IS_DIRECTORY ${SDLMIXER_DIR})
-      install(DIRECTORY ${SDLMIXER_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Frameworks)
+      install(DIRECTORY ${SDLMIXER_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/Frameworks)
     endif()
 
     # If PortMidi was built in install the PortMidi library into the bundle
     if(PortMidi_FOUND)
-      install(FILES ${PORTMIDI_LIBRARIES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/Frameworks/)
+      install(FILES ${PORTMIDI_LIBRARIES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/Frameworks/)
       install(CODE "execute_process(COMMAND
         install_name_tool -change libportmidi.dylib
         @executable_path/../Frameworks/libportmidi.dylib
-        ${CMAKE_CURRENT_BINARY_DIR}/odamex.app/Contents/MacOS/odamex)
+        ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/MacOS/novadoom)
         " )
     endif()
   elseif(NSWITCH)
     odamex_target_postcompile_nx(odamex)
   elseif(WIN32)
-    install(TARGETS odamex
+    install(TARGETS novadoom
       RUNTIME DESTINATION .
       COMPONENT client)
   else()
-    install(TARGETS odamex
+    install(TARGETS novadoom
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
       COMPONENT client)
   endif()
 endif()
 
-if(BUILD_OR_FAIL AND NOT TARGET odamex)
-  message(FATAL_ERROR "Odamex target could not be generated")
+if(BUILD_OR_FAIL AND NOT TARGET novadoom)
+  message(FATAL_ERROR "NovaDoom target could not be generated")
 endif()

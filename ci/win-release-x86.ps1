@@ -9,24 +9,24 @@
 # These parameters can and should be changed for new versions.
 #
 
-Set-Variable -Name "CurrentDir" -Value (Get-Location) # cd to the base odamex git path before executing
+Set-Variable -Name "CurrentDir" -Value (Get-Location) # cd to the base novadoom git path before executing
 
 if ($env:new_version.length -gt 0)
 {
-    Set-Variable -Name "OdamexVersion" -Value "${env:new_version}"
+    Set-Variable -Name "NovaDoomVersion" -Value "${env:new_version}"
 }
 else
 {
-    Set-Variable -Name "OdamexVersion" -Value "10.2.0"
+    Set-Variable -Name "NovaDoomVersion" -Value "10.2.0"
 }
 
 if ($env:build_number.length -gt 0)
 {
-    Set-Variable -Name "OdamexTestSuffix" -Value "-prerelease.${env:build_number}" # "-prerelease_112"
+    Set-Variable -Name "NovaDoomTestSuffix" -Value "-prerelease.${env:build_number}" # "-prerelease_112"
 }
 else
 {
-    Set-Variable -Name "OdamexTestSuffix" -Value ""
+    Set-Variable -Name "NovaDoomTestSuffix" -Value ""
 }
 
 #
@@ -75,7 +75,7 @@ function CopyFilesX86 {
         -Destination "${CommonDir}\3RD-PARTY-LICENSES.txt"
     Copy-Item -Force -Path "${CurrentDir}\CHANGELOG" `
         -Destination "${CommonDir}\CHANGELOG.txt"
-    Copy-Item -Force -Path "${CurrentDir}\odamex-installed.txt" `
+    Copy-Item -Force -Path "${CurrentDir}\novadoom-installed.txt" `
         -Destination "${CommonDir}"
     Copy-Item -Force -Path "${CurrentDir}\config-samples\*" `
         -Destination "${CommonDir}\config-samples"
@@ -93,7 +93,7 @@ function CopyFilesX86 {
         -Destination "${CommonDir}\MAINTAINERS.txt"
     Copy-Item -Force -Path "${CurrentDir}\README" `
         -Destination "${CommonDir}\README.txt"
-    Copy-Item -Force -Path "${CurrentDir}\BuildX86\wad\odamex.wad" `
+    Copy-Item -Force -Path "${CurrentDir}\BuildX86\wad\novadoom.wad" `
         -Destination "${CommonDir}"
     Copy-Item -Force -Path "${CurrentDir}\BuildX86\libraries\SDL2_mixer-2.8.1\LICENSE.txt" `
         -Destination "${CommonDir}\licenses\COPYING.SDL2_mixer.txt"
@@ -126,17 +126,17 @@ function CopyFilesX86 {
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libogg-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libopus-0.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\libopusfile-0.dll", `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\odamex.exe", `
+        "${CurrentDir}\BuildX86\client\RelWithDebInfo\novadoom.exe", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\SDL2_mixer.dll", `
         "${CurrentDir}\BuildX86\client\RelWithDebInfo\SDL2.dll", `
-        "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\odalaunch.exe", `
+        "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\novalaunch.exe", `
         "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\wxbase315u_net_vc14x.dll", `
         "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\wxbase315u_vc14x.dll", `
         "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\wxbase315u_xml_vc14x.dll", `
         "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\wxmsw315u_core_vc14x.dll", `
         "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\wxmsw315u_html_vc14x.dll", `
         "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\wxmsw315u_xrc_vc14x.dll", `
-        "${CurrentDir}\BuildX86\server\RelWithDebInfo\odasrv.exe" `
+        "${CurrentDir}\BuildX86\server\RelWithDebInfo\novasrv.exe" `
         -Destination "${X86Dir}\"
 
     # Get VC++ Redist
@@ -153,9 +153,9 @@ function OutputsX86 {
 
     # Generate archives
     7z.exe a `
-        "${ZipDir}\odamex-win32-${OdamexVersion}${OdamexTestSuffix}.zip" `
+        "${ZipDir}\novadoom-win32-${NovaDoomVersion}${NovaDoomTestSuffix}.zip" `
         "${CommonDir}\*" "${X86Dir}\*" `
-        "-x!${CommonDir}\odamex-installed.txt"
+        "-x!${CommonDir}\novadoom-installed.txt"
 }
 
 function ZipDebugX86 {
@@ -167,17 +167,17 @@ function ZipDebugX86 {
     New-Item  -Force -ItemType "directory" -Path "${PdbDir}"
     # Copy pdb files into zip.  DO NOT THROW THESE AWAY!
     Copy-Item -Force -Path `
-        "${CurrentDir}\BuildX86\client\RelWithDebInfo\odamex.pdb" `
-        -Destination "${OutputDir}\odamex-x86-${OdamexVersion}${OdamexTestSuffix}.pdb"
+        "${CurrentDir}\BuildX86\client\RelWithDebInfo\novadoom.pdb" `
+        -Destination "${OutputDir}\novadoom-x86-${NovaDoomVersion}${NovaDoomTestSuffix}.pdb"
     Copy-Item -Force -Path `
-        "${CurrentDir}\BuildX86\server\RelWithDebInfo\odasrv.pdb" `
-        -Destination "${OutputDir}\odasrv-x86-${OdamexVersion}${OdamexTestSuffix}.pdb"
+        "${CurrentDir}\BuildX86\server\RelWithDebInfo\novasrv.pdb" `
+        -Destination "${OutputDir}\novasrv-x86-${NovaDoomVersion}${NovaDoomTestSuffix}.pdb"
     Copy-Item -Force -Path `
-        "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\odalaunch.pdb" `
-        -Destination "${OutputDir}\odalaunch-x86-${OdamexVersion}${OdamexTestSuffix}.pdb"
+        "${CurrentDir}\BuildX86\odalaunch\RelWithDebInfo\novalaunch.pdb" `
+        -Destination "${OutputDir}\novalaunch-x86-${NovaDoomVersion}${NovaDoomTestSuffix}.pdb"
 
     7z.exe a `
-        "${PdbDir}\odamex-debug-pdb-${OdamexVersion}${OdamexTestSuffix}-x86.zip" `
+        "${PdbDir}\novadoom-debug-pdb-${NovaDoomVersion}${NovaDoomTestSuffix}-x86.zip" `
         "${OutputDir}\*.pdb"
 
     Remove-Item -Force -Path "${OutputDir}\*.pdb"

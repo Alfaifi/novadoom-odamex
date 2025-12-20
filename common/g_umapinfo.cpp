@@ -1,7 +1,8 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,7 +20,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "g_episode.h"
 #include "oscanner.h"
@@ -448,7 +449,7 @@ bool ParseStandardUmapInfoProperty(OScanner& os, level_pwad_info_t* mape)
 	else if (!stricmp(pname.c_str(), "crouching"))
 	{
 		if (ParsePlayerAction(os) == player_action_t::REQUIRE)
-			os.warning("Crouching is not supported in Odamex. Map {} may not work as intended.", mape->mapname);
+			os.warning("Crouching is not supported in NovaDoom. Map {} may not work as intended.", mape->mapname);
 	}
 	else
 	{

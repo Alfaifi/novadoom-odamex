@@ -1,6 +1,6 @@
 #==========================================
 #
-#	ODAMEX FOR NINTENDO SWITCH CMAKE FILE
+#	NOVADOOM FOR NINTENDO SWITCH CMAKE FILE
 #
 #	Do not forget to run this before even
 #	trying to do ANYTHING (CMake/Compile)!
@@ -22,7 +22,7 @@ set (CMAKE_GENERATOR "Unix Makefiles" CACHE INTERNAL "" FORCE)
 # Build type (Release/Debug)
 set (CMAKE_BUILD_TYPE, "Release")
 
-# Odamex specific settings
+# NovaDoom specific settings
 set (BUILD_CLIENT 1)
 set (BUILD_SERVER 0)
 set (BUILD_MASTER 0)
@@ -35,15 +35,15 @@ set (ENABLE_PORTMIDI 0)
 set (GCONSOLE 1)
 
 # NACP info
-set (APP_TITLE "Odamex for Nintendo Switch")
-set (APP_AUTHOR "The Odamex Team")
+set (APP_TITLE "NovaDoom for Nintendo Switch")
+set (APP_AUTHOR "The NovaDoom Team")
 set (APP_VERSION "12.0.0")
 
 # Compiler stuff
 set(NACP_TOOL "${DEVKITPRO}/tools/bin/nacptool"  CACHE PATH "nacp-tool")
 set(ELF2NRO_TOOL "${DEVKITPRO}/tools/bin/elf2nro"  CACHE PATH "elf2nro")
 
-function (odamex_target_settings_nx _DIRECTORY _FILES)
+function (novadoom_target_settings_nx _DIRECTORY _FILES)
 #    set(${_DIRECTORY} ${CLIENT_DIR} switch)  # Nintendo Switch
 #    file(${_FILES} CLIENT_HEADERS ${CLIENT_HEADERS} switch/*.h)
 #    file(${_FILES} CLIENT_SOURCES ${CLIENT_SOURCES} switch/*.cpp)
@@ -61,7 +61,7 @@ macro(odamex_target_postcompile_nx source)
   )
   # NRO
   add_custom_command(OUTPUT ${source}.nro
-    COMMAND ${ELF2NRO_TOOL} ${source} ${CMAKE_BINARY_DIR}/${source}.nro --icon=${CMAKE_SOURCE_DIR}/client/switch/assets/odamex.jpg --nacp=${source}.nacp
+    COMMAND ${ELF2NRO_TOOL} ${source} ${CMAKE_BINARY_DIR}/${source}.nro --icon=${CMAKE_SOURCE_DIR}/client/switch/assets/novadoom.jpg --nacp=${source}.nacp
     DEPENDS ${source}.nacp
     COMMENT "Generating NRO ${source}.nro"
   )

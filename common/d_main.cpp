@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +24,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 
 #include <sstream>
@@ -588,7 +589,7 @@ static void LoadResolvedFiles(const OResFiles& newwadfiles,
 {
 	if (newwadfiles.size() < 2)
 	{
-		I_FatalError("Tried to load resources without an ODAMEX.WAD or an IWAD.");
+		I_FatalError("Tried to load resources without a NOVADOOM.WAD or an IWAD.");
 	}
 
 	::wadfiles = newwadfiles;
@@ -655,7 +656,7 @@ static bool CommercialIWADWarning(const OWantFile& wanted)
 		return false;
 	}
 
-	PrintFmt("Odamex attempted to load\n> {}.\n\n", info->mIdName);
+	PrintFmt("NovaDoom attempted to load\n> {}.\n\n", info->mIdName);
 
 	// Try to find an IWAD file with a matching name in the user's directories.
 	OWantFile sameNameWant;
@@ -665,9 +666,9 @@ static bool CommercialIWADWarning(const OWantFile& wanted)
 	if (!resolved)
 	{
 		PrintFmt(
-		    "Odamex could not find the data file for this game in any of the locations "
+		    "NovaDoom could not find the data file for this game in any of the locations "
 		    "it searches for WAD files.  If you know you have {} on your hard drive, you "
-		    "can add that path to the 'waddirs' cvar so Odamex can find it.\n\n",
+		    "can add that path to the 'waddirs' cvar so NovaDoom can find it.\n\n",
 		    wanted.getBasename());
 	}
 	else
@@ -676,14 +677,14 @@ static bool CommercialIWADWarning(const OWantFile& wanted)
 		if (curInfo)
 		{
 			// Found a file, but it's the wrong version.
-			PrintFmt("Odamex found a possible data file, but it's the wrong version.\n> "
+			PrintFmt("NovaDoom found a possible data file, but it's the wrong version.\n> "
 			         "{}\n> {}\n\n",
 			         curInfo->mIdName, sameNameRes.getFullpath());
 		}
 		else
 		{
 			// Found a file, but it's not recognized at all.
-			PrintFmt("Odamex found a possible data file, but Odamex does not recognize "
+			PrintFmt("NovaDoom found a possible data file, but NovaDoom does not recognize "
 			         "it.\n> {}\n\n",
 			         sameNameRes.getFullpath());
 		}
@@ -818,7 +819,7 @@ void D_LoadResourceFiles(const OWantFiles& newwadfiles, const OWantFiles& newpat
 	if (!got_next_iwad)
 	{
 		I_FatalError("Could not resolve an IWAD file.  Please ensure at least "
-		             "one IWAD is someplace where Odamex can find it.\n");
+		             "one IWAD is someplace where NovaDoom can find it.\n");
 	}
 
 	resolved_wads.insert(resolved_wads.begin(), odamex_wad);

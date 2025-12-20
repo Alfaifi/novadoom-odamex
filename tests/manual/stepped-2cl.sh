@@ -1,8 +1,9 @@
 #!/bin/bash
 #
-# Odamex demo regression stepped test
+# NovaDoom demo regression stepped test
 #
 # Copyright (C) 2006-2025 by The Odamex Team.
+# Portions Copyright (C) 2025 by The NovaDoom Team.
 # Author: Michael Wood
 #
 # Derived from stepped.sh

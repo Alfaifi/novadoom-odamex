@@ -2,7 +2,7 @@
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
 	<object class="wxFrame" name="dlgMain">
 		<style>wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL</style>
-		<title>The Odamex Launcher</title>
+		<title>NovaDoom Launcher</title>
 		<centered>1</centered>
 		<aui_managed>0</aui_managed>
 		<object class="wxMenuBar" name="8">
@@ -14,8 +14,8 @@
 					<help>Manually connect to a server by specifying Address:Port</help>
 				</object>
 				<object class="wxMenuItem" name="Id_MnuItmRunOffline">
-					<label>Start Odamex (Single Player)</label>
-					<help>Runs the Odamex Client without connecting to a server</help>
+					<label>Start NovaDoom (Single Player)</label>
+					<help>Runs the NovaDoom Client without connecting to a server</help>
 				</object>
 				<object class="separator" />
 				<object class="wxMenuItem" name="wxID_PREFERENCES">
@@ -77,15 +77,15 @@
 				<label>Help</label>
 				<object class="wxMenuItem" name="Id_MnuItmVisitWebsite">
 					<label>Website</label>
-					<help>Go to the Odamex website</help>
+					<help>Go to the NovaDoom website</help>
 				</object>
 				<object class="wxMenuItem" name="Id_MnuItmVisitForum">
 					<label>Forum</label>
-					<help>Visit the Odamex forum</help>
+					<help>Visit the NovaDoom forum</help>
 				</object>
 				<object class="wxMenuItem" name="Id_MnuItmVisitWiki">
 					<label>Wiki</label>
-					<help>Visit the Odamex Wiki</help>
+					<help>Visit the NovaDoom Wiki</help>
 				</object>
 				<object class="separator" />
 				<object class="wxMenuItem" name="Id_MnuItmViewChangelog">
@@ -99,11 +99,11 @@
 				<object class="separator" />
 				<object class="wxMenuItem" name="Id_MnuItmCheckVersion">
 					<label>Check For Updates</label>
-					<help>Check for any new versions of Odamex</help>
+					<help>Check for any new versions of NovaDoom</help>
 				</object>
 				<object class="wxMenuItem" name="wxID_ABOUT">
 					<label>About</label>
-					<help>About the Odamex Launcher</help>
+					<help>About the NovaDoom Launcher</help>
 				</object>
 			</object>
 		</object>
@@ -124,9 +124,9 @@
 				<bitmap>./icons/btnlaunch.png</bitmap>
 			</object>
 			<object class="tool" name="Id_MnuItmRunOffline">
-				<label>Run Odamex</label>
-				<tooltip>Runs the Odamex Client without connecting to a server</tooltip>
-				<longhelp>Runs the Odamex Client without connecting to a server</longhelp>
+				<label>Run NovaDoom</label>
+				<tooltip>Runs the NovaDoom Client without connecting to a server</tooltip>
+				<longhelp>Runs the NovaDoom Client without connecting to a server</longhelp>
 				<bitmap>./icons/btnqlaunch.png</bitmap>
 			</object>
 			<object class="separator" />
@@ -164,8 +164,8 @@
 			</object>
 			<object class="tool" name="wxID_ABOUT">
 				<label>About</label>
-				<tooltip>About the Odamex Launcher</tooltip>
-				<longhelp>About the Odamex Launcher</longhelp>
+				<tooltip>About the NovaDoom Launcher</tooltip>
+				<longhelp>About the NovaDoom Launcher</longhelp>
 				<bitmap>./icons/btnabout.png</bitmap>
 			</object>
 			<object class="separator" />
@@ -908,7 +908,7 @@
 														<border>5</border>
 														<object class="wxStaticBoxSizer">
 															<orient>wxVERTICAL</orient>
-															<label>Odamex Updates</label>
+															<label>NovaDoom Updates</label>
 															<object class="sizeritem">
 																<option>0</option>
 																<flag>wxALL</flag>
@@ -944,14 +944,14 @@
 												<border>5</border>
 												<object class="wxStaticBoxSizer">
 													<orient>wxVERTICAL</orient>
-													<label>Odamex Path</label>
+													<label>NovaDoom Path</label>
 													<object class="sizeritem">
 														<option>0</option>
 														<flag>wxALL|wxEXPAND</flag>
 														<border>5</border>
 														<object class="wxDirPickerCtrl" name="Id_DirCtrlChooseOdamexPath">
 															<value></value>
-															<message>Select your Odamex folder</message>
+															<message>Select your NovaDoom folder</message>
 															<style>wxDIRP_DEFAULT_STYLE</style>
 														</object>
 													</object>
@@ -963,7 +963,7 @@
 												<border>5</border>
 												<object class="wxStaticBoxSizer">
 													<orient>wxVERTICAL</orient>
-													<label>WAD Directories (First path is used by Odamex for saving downloaded files)</label>
+													<label>WAD Directories (First path is used by NovaDoom for saving downloaded files)</label>
 													<object class="sizeritem">
 														<option>1</option>
 														<flag>wxEXPAND</flag>
@@ -1294,7 +1294,7 @@
 														<border>0</border>
 														<object class="wxTextCtrl" name="Id_TxtCtrlExtraCmdLineArgs">
 															<style>wxTE_MULTILINE</style>
-															<tooltip>Extra arguments to pass to the Odamex client when it is run</tooltip>
+															<tooltip>Extra arguments to pass to the NovaDoom client when it is run</tooltip>
 															<value></value>
 															<maxlength>0</maxlength>
 														</object>
@@ -1607,7 +1607,7 @@
 	</object>
 	<object class="wxDialog" name="dlgAbout">
 		<style>wxDEFAULT_DIALOG_STYLE</style>
-		<title>About The Odamex Launcher</title>
+		<title>About NovaDoom Launcher</title>
 		<centered>1</centered>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
@@ -1636,7 +1636,7 @@
 									<flag>wxALIGN_CENTER|wxALL</flag>
 									<border>5</border>
 									<object class="wxStaticBitmap" name="m_bitmap5">
-										<bitmap>../../media/icon_odalaunch_96.png</bitmap>
+										<bitmap>../../media/icon_novalaunch_96.png</bitmap>
 									</object>
 								</object>
 								<object class="sizeritem">
@@ -1656,7 +1656,7 @@
 													<weight>bold</weight>
 													<underlined>0</underlined>
 												</font>
-												<label>The Odamex Launcher</label>
+												<label>NovaDoom Launcher</label>
 												<wrap>-1</wrap>
 											</object>
 										</object>
@@ -1665,7 +1665,7 @@
 											<flag>wxALIGN_CENTER|wxALL</flag>
 											<border>5</border>
 											<object class="wxStaticText" name="Id_StcTxtCopyright">
-												<label>Copyright (C) 2006-2025 The Odamex Team</label>
+												<label>Copyright (C) 2006-2025 The Odamex Team, (C) 2025 The NovaDoom Team</label>
 												<wrap>-1</wrap>
 											</object>
 										</object>
@@ -1684,8 +1684,8 @@
 											<flag>wxALIGN_CENTER</flag>
 											<border>5</border>
 											<object class="wxHyperlinkCtrl" name="Id_HLCtrlWebsite">
-												<label>http://www.odamex.net</label>
-												<url>http://www.odamex.net</url>
+												<label>https://novadoom.com</label>
+												<url>https://novadoom.com</url>
 												<style>wxHL_DEFAULT_STYLE</style>
 											</object>
 										</object>

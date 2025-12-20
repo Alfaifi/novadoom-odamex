@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=NovaDoom
+Exec=novadoom -waddir /usr/share/doom
+Icon=novadoom
+Type=Application
+Comment=A Doom multiplayer game engine
+Categories=Game;ActionGame;

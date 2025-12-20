@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 
 #ifdef SIMULATE_LATENCY
@@ -41,7 +42,7 @@ CVAR(			log_packetdebug, "0", "Print debugging messages for each packet sent",
 // Server administrative settings
 // ------------------------------
 
-CVAR(			sv_motd, "Welcome to Odamex", "Message Of The Day to display to clients upon connecting",
+CVAR(			sv_motd, "Welcome to NovaDoom", "Message Of The Day to display to clients upon connecting",
 				CVARTYPE_STRING, CVAR_SERVERARCHIVE | CVAR_SERVERINFO | CVAR_NOENABLEDISABLE)
 
 CVAR(			sv_email, "email@domain.com", "Administrator email address",

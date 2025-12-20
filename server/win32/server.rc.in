@@ -4,10 +4,10 @@
 #define VOS_NT  0x00040000L
 #define VS_FF_DEBUG 0x00000001L
 
-#define ODASRV_DESC "Odamex Server"
-#define ODASRV_EXE "odasrv.exe"
-#define ODASRV_INTERNAL "odasrv"
-#define ODASRV_NAME "Odamex Server"
+#define NOVASRV_DESC "NovaDoom Server"
+#define NOVASRV_EXE "novasrv.exe"
+#define NOVASRV_INTERNAL "novasrv"
+#define NOVASRV_NAME "NovaDoom Server"
 
 1 ICON "@CMAKE_SOURCE_DIR@/server/win32/odaserv.ico"
 
@@ -30,12 +30,12 @@ FILESUBTYPE 0
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "@PROJECT_COMPANY@"
-      VALUE "FileDescription", ODASRV_DESC
+      VALUE "FileDescription", NOVASRV_DESC
       VALUE "FileVersion", "@PROJECT_VERSION@"
-      VALUE "InternalName", ODASRV_INTERNAL
-      VALUE "LegalCopyright", "ODAMEX and its likeness are Copyright © @PROJECT_COPYRIGHT@ by @PROJECT_COMPANY@."
-      VALUE "OriginalFilename", ODASRV_EXE
-      VALUE "ProductName", ODASRV_NAME
+      VALUE "InternalName", NOVASRV_INTERNAL
+      VALUE "LegalCopyright", "NOVADOOM and its likeness are Copyright Â© @PROJECT_COPYRIGHT@ by @PROJECT_COMPANY@."
+      VALUE "OriginalFilename", NOVASRV_EXE
+      VALUE "ProductName", NOVASRV_NAME
       VALUE "ProductVersion", "@PROJECT_VERSION@"
     }
   }

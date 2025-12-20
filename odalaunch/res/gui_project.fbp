@@ -47,7 +47,7 @@
             <property name="size">-1,-1</property>
             <property name="style">wxDEFAULT_FRAME_STYLE</property>
             <property name="subclass"></property>
-            <property name="title">The Odamex Launcher</property>
+            <property name="title">The NovaDoom Launcher</property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
@@ -9965,7 +9965,7 @@
             <property name="size">-1,-1</property>
             <property name="style">wxDEFAULT_DIALOG_STYLE</property>
             <property name="subclass"></property>
-            <property name="title">About The Odamex Launcher</property>
+            <property name="title">About The NovaDoom Launcher</property>
             <property name="tooltip"></property>
             <property name="window_extra_style"></property>
             <property name="window_name"></property>
@@ -10125,7 +10125,7 @@
                                             <property name="aui_row"></property>
                                             <property name="best_size"></property>
                                             <property name="bg"></property>
-                                            <property name="bitmap">Load From File; ../../media/icon_odalaunch_96.png</property>
+                                            <property name="bitmap">Load From File; ../../media/icon_novalaunch_96.png</property>
                                             <property name="caption"></property>
                                             <property name="caption_visible">1</property>
                                             <property name="center_pane">0</property>
@@ -10232,7 +10232,7 @@
                                                     <property name="gripper">0</property>
                                                     <property name="hidden">0</property>
                                                     <property name="id">wxID_ANY</property>
-                                                    <property name="label">The Odamex Launcher</property>
+                                                    <property name="label">The NovaDoom Launcher</property>
                                                     <property name="max_size"></property>
                                                     <property name="maximize_button">0</property>
                                                     <property name="maximum_size"></property>
@@ -10482,7 +10482,7 @@
                                                     <property name="hidden">0</property>
                                                     <property name="hover_color"></property>
                                                     <property name="id">wxID_ANY</property>
-                                                    <property name="label">http://www.odamex.net</property>
+                                                    <property name="label">https://novadoom.com</property>
                                                     <property name="max_size"></property>
                                                     <property name="maximize_button">0</property>
                                                     <property name="maximum_size"></property>
@@ -10505,7 +10505,7 @@
                                                     <property name="subclass"></property>
                                                     <property name="toolbar_pane">0</property>
                                                     <property name="tooltip"></property>
-                                                    <property name="url">http://www.odamex.net</property>
+                                                    <property name="url">https://novadoom.com</property>
                                                     <property name="visited_color"></property>
                                                     <property name="window_extra_style"></property>
                                                     <property name="window_name"></property>

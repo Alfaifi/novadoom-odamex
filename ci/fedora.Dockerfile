@@ -1,6 +1,6 @@
 FROM fedora:32
 
-WORKDIR odamex
+WORKDIR novadoom
 
 COPY . .
 

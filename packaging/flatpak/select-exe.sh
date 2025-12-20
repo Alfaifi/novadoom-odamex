@@ -1,22 +1,22 @@
 #!/bin/bash
-odamex_client() {
-    command odamex "$@"
+novadoom_client() {
+    command novadoom "$@"
 }
 
-odamex_server() {
-    command odasrv "$@"
+novadoom_server() {
+    command novasrv "$@"
 }
 
-odamex_launcher() {
-    command odalaunch "$@"
+novadoom_launcher() {
+    command novalaunch "$@"
 }
 
-if declare -f "odamex_$1" >/dev/null; then
-    func="odamex_$1"
+if declare -f "novadoom_$1" >/dev/null; then
+    func="novadoom_$1"
     shift
     "$func" "$@"
 else
-    echo -e "\e[4mUsage:\e[0m flatpak run net.odamex.Odamex <COMMAND>"
+    echo -e "\e[4mUsage:\e[0m flatpak run net.novadoom.NovaDoom <COMMAND>"
     echo
     echo -e "\e[4mCommands:\e[0m"
     echo "  client"

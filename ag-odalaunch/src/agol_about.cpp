@@ -52,7 +52,7 @@ static const string license(
 AGOL_About::AGOL_About()
 {
 	AboutDialog = AG_WindowNew(AG_WINDOW_MODAL | AG_WINDOW_DIALOG);
-	AG_WindowSetCaptionS(AboutDialog, "About The Odamex Launcher");
+	AG_WindowSetCaptionS(AboutDialog, "About The NovaDoom Launcher");
 	AG_WindowSetGeometryAligned(AboutDialog, AG_WINDOW_MC, 395, 415);
 
 	TopBox = CreateTopBox(AboutDialog);
@@ -84,14 +84,14 @@ AG_Box *AGOL_About::CreateTopBox(void *parent)
 
 	box = AG_BoxNewHoriz(tbox, 0);
 
-	if((pngdata = AG_OpenConstCore(icon_odalaunch_96, sizeof(icon_odalaunch_96))) != NULL)
+	if((pngdata = AG_OpenConstCore(icon_novalaunch_96, sizeof(icon_novalaunch_96))) != NULL)
 	{
 		AG_PixmapFromSurface(box, AG_PIXMAP_EXPAND, AG_ReadSurfaceFromPNG(pngdata));
 		AG_CloseDataSource(pngdata);
 	}
 
 	box = AG_BoxNewVert(tbox, AG_BOX_HFILL);
-	label = AG_LabelNewS(box, AG_LABEL_HFILL, "The Odamex Launcher");
+	label = AG_LabelNewS(box, AG_LABEL_HFILL, "The NovaDoom Launcher");
 	AG_LabelJustify(label, AG_TEXT_CENTER);
 	label = AG_LabelNewS(box, AG_LABEL_HFILL, "Copyright (C) 2010-2020 by The Odamex Team");
 	AG_LabelJustify(label, AG_TEXT_CENTER);
@@ -99,7 +99,7 @@ AG_Box *AGOL_About::CreateTopBox(void *parent)
 			VERSIONMAJOR(VERSION), VERSIONMINOR(VERSION), VERSIONPATCH(VERSION), PROTOCOL_VERSION);
 
 	AG_LabelJustify(label, AG_TEXT_CENTER);
-	label = AG_LabelNewS(box, AG_LABEL_HFILL, "http://www.odamex.net");
+	label = AG_LabelNewS(box, AG_LABEL_HFILL, "https://novadoom.com");
 	AG_LabelJustify(label, AG_TEXT_CENTER);
 
 	AG_GetVersion(&agv);

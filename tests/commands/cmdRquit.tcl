@@ -20,9 +20,9 @@ proc main {} {
  expect $clientout {connecting to 127.0.0.1:10599} 0
 
  # restart server
- set server [open "|./odasrv -port $port > odasrv.log" w]
+ set server [open "|./novasrv -port $port > novasrv.log" w]
  wait
- set serverout [open odasrv.log r]
+ set serverout [open novasrv.log r]
  clear
 
  # check that client is reconnected

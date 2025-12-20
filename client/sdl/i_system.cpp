@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +24,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include <limits>
 
@@ -975,20 +976,20 @@ bool I_IsHeadless()
 	return headless;
 }
 
-const char* ODAMEX_ERROR_TITLE = "Odamex " DOTVERSIONSTR " Fatal Error";
+const char* NOVADOOM_ERROR_TITLE = "NovaDoom " DOTVERSIONSTR " Fatal Error";
 
 #if defined(SDL20)
 
 void I_ErrorMessageBox(const char* message)
 {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, ODAMEX_ERROR_TITLE, message, NULL);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, NOVADOOM_ERROR_TITLE, message, NULL);
 }
 
 #elif defined(WIN32)
 
 void I_ErrorMessageBox(const char* message)
 {
-	MessageBoxA(NULL, message, ODAMEX_ERROR_TITLE, MB_OK);
+	MessageBoxA(NULL, message, NOVADOOM_ERROR_TITLE, MB_OK);
 }
 
 #elif OSX
@@ -997,7 +998,7 @@ void I_ErrorMessageBox(const char* message)
 {
 	CFStringRef macErrorMessage =
 	    CFStringCreateWithCString(NULL, message, kCFStringEncodingMacRoman);
-	CFUserNotificationDisplayAlert(0, 0, NULL, NULL, NULL, CFSTR(ODAMEX_ERROR_TITLE),
+	CFUserNotificationDisplayAlert(0, 0, NULL, NULL, NULL, CFSTR(NOVADOOM_ERROR_TITLE),
 	                               macErrorMessage, CFSTR("OK"), NULL, NULL, NULL);
 	CFRelease(macErrorMessage);
 }
@@ -1006,7 +1007,7 @@ void I_ErrorMessageBox(const char* message)
 
 void I_ErrorMessageBox(const char* message)
 {
-	fmt::print(stderr, "{}\n{}\n", ODAMEX_ERROR_TITLE, message);
+	fmt::print(stderr, "{}\n{}\n", NOVADOOM_ERROR_TITLE, message);
 }
 
 #endif

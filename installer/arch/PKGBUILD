@@ -1,24 +1,24 @@
 # Contributor: Curtis Smith <kman922002@gmail.com>
-pkgname=odamex-svn
+pkgname=novadoom-svn
 pkgver=477
 pkgrel=5
 pkgdesc="A free client/server multiplayer game engine for the classic FPS Doom"
 arch=(i686 x86_64)
-url="http://odamex.net/"
+url="https://novadoom.com/"
 license="GPL"
-conflicts=('odamex')
-provides=('odamex')
+conflicts=('novadoom')
+provides=('novadoom')
 depends=('wxgtk' 'sdl' 'sdl_mixer>=1.2.6')
 makedepends=('subversion')
-source=(odamex.desktop \
-	odasrv.desktop \
-        odalaunch.desktop )
+source=(novadoom.desktop \
+	novasrv.desktop \
+        novalaunch.desktop )
 md5sums=('b353a68ffb46a61c27272367e625ce50'
          '937a0effa783659dd2c38f3c3ae109f7'
          '0e1555286931a74c172582714756298f')
 
-_svntrunk=http://odamex.net/svn/root/trunk/
-_svnmod=odamex
+_svntrunk=https://github.com/Alfaifi/novadoom-odamex
+_svnmod=novadoom
 
 build() {
 cd $startdir/src
@@ -42,12 +42,12 @@ make || return 1
 cd $startdir/src/$_svnmod-build/
 
 mkdir -p $startdir/pkg/usr/share/applications
-install -m755 -D odalaunch/odalaunch $startdir/pkg/usr/bin/odalaunch
-install -m644 -D odamex.wad $startdir/pkg/usr/share/doom/odamex.wad
-install -m644 -D media/icon_odamex_96.png $startdir/pkg/usr/share/pixmaps/odamex.png
-install -m644 -D media/icon_odasrv_96.png $startdir/pkg/usr/share/pixmaps/odasrv.png
-install -m644 -D media/icon_odalaunch_96.png $startdir/pkg/usr/share/pixmaps/odalaunch.png
-install -m644 $startdir/oda{mex,srv,launch}.desktop $startdir/pkg/usr/share/applications
+install -m755 -D odalaunch/novalaunch $startdir/pkg/usr/bin/novalaunch
+install -m644 -D novadoom.wad $startdir/pkg/usr/share/doom/novadoom.wad
+install -m644 -D media/icon_novadoom_96.png $startdir/pkg/usr/share/pixmaps/novadoom.png
+install -m644 -D media/icon_novasrv_96.png $startdir/pkg/usr/share/pixmaps/novasrv.png
+install -m644 -D media/icon_novalaunch_96.png $startdir/pkg/usr/share/pixmaps/novalaunch.png
+install -m644 $startdir/nova{doom,srv,launch}.desktop $startdir/pkg/usr/share/applications
 
 }
 

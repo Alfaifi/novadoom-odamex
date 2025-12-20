@@ -7,9 +7,9 @@ set numplayers  3; # 255
 
 proc start {} {
  global server client serverout clientout port numplayers
- set server [open "|./odasrv -port $port +logfile odasrv.log > tmp" w]
+ set server [open "|./novasrv -port $port +logfile novasrv.log > tmp" w]
  wait
- set serverout [open odasrv.log r]
+ set serverout [open novasrv.log r]
 
  server "sv_gametype 1"
  server "sv_maxclients $numplayers"
@@ -22,7 +22,7 @@ proc start {} {
 
  array set client ""
  for {set i 0} {$i < $numplayers} {incr i} {
-  set client($i) [open "|./odamex -port [expr 10401+$i] -connect localhost:$port -nosound -novideo +logfile odamex$i.log > tmp" w]
+  set client($i) [open "|./novadoom -port [expr 10401+$i] -connect localhost:$port -nosound -novideo +logfile novadoom$i.log > tmp" w]
   if { $client($i) == "" } {
    puts "FAIL: could not start client $i"
   } else {

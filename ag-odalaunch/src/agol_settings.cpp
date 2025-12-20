@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -162,7 +163,7 @@ AG_Box *AGOL_Settings::CreateOdamexPathBox(void *parent)
 	AG_Box *opbox;
 
 	opbox = AG_BoxNewVert(parent, AG_BOX_HFILL | AG_BOX_FRAME);
-	AG_LabelNewS(opbox, 0, "Odamex Path");
+	AG_LabelNewS(opbox, 0, "NovaDoom Path");
 	opbox = AG_BoxNewHoriz(opbox, AG_BOX_HFILL);
 	AG_BoxSetPadding(opbox, 5);
 	AG_BoxSetSpacing(opbox, 5);
@@ -539,7 +540,7 @@ void AGOL_Settings::OnBrowseOdamexPath(AG_Event *event)
 		return;
 
 	// Create and display a new directory selector dialog
-	DirSel = new AGOL_DirSelector("Select your Odamex folder");
+	DirSel = new AGOL_DirSelector("Select your NovaDoom folder");
 
 	// Register and set the OK and Cancel events
 	DirSelOkHandler = RegisterEventHandler((EVENT_FUNC_PTR)&AGOL_Settings::OdamexPathSelectorOk);

@@ -1,7 +1,8 @@
 // Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,7 +20,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "g_episode.h"
 #include "gi.h"
@@ -1957,7 +1958,7 @@ void G_ParseMapInfo()
 		break;
 	case none:
 	default:
-		I_Error("{}: This IWAD is unknown to Odamex", __FUNCTION__);
+		I_Error("{}: This IWAD is unknown to NovaDoom", __FUNCTION__);
 		break;
 	}
 

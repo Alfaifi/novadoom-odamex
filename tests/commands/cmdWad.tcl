@@ -15,7 +15,7 @@ proc main {} {
  wait 5
 
  expect $serverout {The Ultimate DOOM}
- expect $serverout {adding odamex.wad}
+ expect $serverout {adding novadoom.wad}
  gets $serverout
  gets $serverout
  expect $serverout {(2306 lumps)}
@@ -45,7 +45,7 @@ proc main {} {
  expect $clientout {=================================} 0
  expect $clientout {The Ultimate DOOM} 0
  expect $clientout {} 0
- expect $clientout {adding odamex.wad} 0
+ expect $clientout {adding novadoom.wad} 0
  gets $clientout
  gets $clientout
  expect $clientout {(2306 lumps)} 0

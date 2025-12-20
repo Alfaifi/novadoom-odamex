@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -303,7 +304,7 @@ int32_t BufferedSocket::GetData(const int32_t& Timeout)
 	{
 		m_BadRead = false;
 
-#ifdef ODAMEX_DEBUG
+#ifdef NOVADOOM_DEBUG
 		NET_ReportError("bytes received: %d", m_BufferSize);
 #endif
 

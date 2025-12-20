@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include <algorithm>
 #include <sstream>

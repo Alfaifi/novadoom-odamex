@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 
 // Server settings
@@ -187,7 +188,7 @@ CVAR(				sv_unblockfriendly, "0", "Allows players and friendly monsters to walk 
 						" projectiles to pass thru players and other friendlies.",
 					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_LATCH | CVAR_SERVERINFO)
 
-CVAR(				sv_hostname, "Untitled Odamex Server", "Server name to appear on masters, clients and launchers",
+CVAR(				sv_hostname, "Untitled NovaDoom Server", "Server name to appear on masters, clients and launchers",
 					CVARTYPE_STRING, CVAR_SERVERARCHIVE | CVAR_NOENABLEDISABLE | CVAR_SERVERINFO)
 
 CVAR(				sv_showplayerpowerups, "0", "Show which powerup each player has. (1 = Show all powerups to clients. 0 = Only show Invisibility (vanilla)",

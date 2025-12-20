@@ -21,7 +21,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "hu_drawers.h"
 #include "i_video.h"

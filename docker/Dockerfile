@@ -1,4 +1,4 @@
-# build stage for compiling odamex
+# build stage for compiling novadoom
 FROM ubuntu:20.04 AS build
 WORKDIR /build
 ENV DEBIAN_FRONTEND=noninteractive
@@ -26,9 +26,9 @@ ARG REPO_TAG
 # Clone the repository
 RUN true \
     && test -n "$REPO_URL" && test -n "$REPO_TAG" \
-    && git clone --depth 1 --branch "$REPO_TAG" "$REPO_URL" odamex
+    && git clone --depth 1 --branch "$REPO_TAG" "$REPO_URL" novadoom
 
-WORKDIR /build/odamex
+WORKDIR /build/novadoom
 
 # Apply Manual Patches (make sure they are UTF-8 encoded)
 RUN mkdir /patches
@@ -47,12 +47,12 @@ RUN true \
     && mkdir build
 
 # Build the Wad
-# WORKDIR /build/odamex/wad
+# WORKDIR /build/novadoom/wad
 # RUN true \
-#     && /usr/games/deutex -rgb 0 255 255 -doom2 bootstrap -build wadinfo.txt ../odamex.wad
+#     && /usr/games/deutex -rgb 0 255 255 -doom2 bootstrap -build wadinfo.txt ../novadoom.wad
 
-# Build Odamex
-WORKDIR /build/odamex/build
+# Build NovaDoom
+WORKDIR /build/novadoom/build
 RUN true \
     && cmake -W no-dev \
         -D CMAKE_BUILD_TYPE=Release \
@@ -62,23 +62,23 @@ RUN true \
         -D CMAKE_C_FLAGS="-w" \
         -D CMAKE_CXX_FLAGS="-w" \
         .. \
-    && cmake --build . --parallel 4 --target odasrv
+    && cmake --build . --parallel 4 --target novasrv
 
-# Install Odamex
-ENV INSTALL_DIR=/usr/local/games/odamex
-COPY docker-files/odamex-server.sh /usr/local/bin/odamex-server
+# Install NovaDoom
+ENV INSTALL_DIR=/usr/local/games/novadoom
+COPY docker-files/novadoom-server.sh /usr/local/bin/novadoom-server
 RUN true \
     && COPY_PATTERNS=(\
-        server/odamex.wad \
-        server/odasrv \
+        server/novadoom.wad \
+        server/novasrv \
     ) \
     && mkdir -p "$INSTALL_DIR" \
     && cp "${COPY_PATTERNS[@]}" "$INSTALL_DIR/" \
-    && bin_path=/usr/local/bin/odamex-server \
+    && bin_path=/usr/local/bin/novadoom-server \
     && chmod a+x $bin_path \
     && sed -i "s|INSTALL_DIR|${INSTALL_DIR}|" $bin_path
 
-# Final stage for running the odamex server
+# Final stage for running the novadoom server
 # Copies over everything /usr/local
 FROM ubuntu:20.04
 COPY --from=build /usr/local /usr/local/
@@ -91,9 +91,9 @@ RUN true \
     && rm -rf /var/lib/apt/lists/*
 
 # Environment variables used to map host UID/GID to internal
-# user used to launch odamex-server
-ENV ODAMEX_UID= \
-    ODAMEX_GID=
+# user used to launch novadoom-server
+ENV NOVADOOM_UID= \
+    NOVADOOM_GID=
 
 COPY ./docker-files/entrypoint.sh /
 RUN chmod +x /entrypoint.sh

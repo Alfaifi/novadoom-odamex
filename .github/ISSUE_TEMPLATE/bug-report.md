@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a bug report to help us improve Odamex
+about: Create a bug report to help us improve NovaDoom
 title: "[BUG] Describe Bug Here"
 labels: Type-Bug
 assignees: ''
@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Build that the bug occurred in**
-You can use the 'version' console command in Odamex to find this.
+You can use the 'version' console command in NovaDoom to find this.
 
 **To Reproduce**
 Describe the steps to reproduce this behavior.

@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -44,7 +45,7 @@ misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "i_musicsystem_au.h"
 

@@ -1,5 +1,5 @@
-include(OdalaunchCopyLibs)
-include(OdamexTargetSettings)
+include(NovalaunchCopyLibs)
+include(NovaDoomTargetSettings)
 
 # API
 set(API_DIR ../odalpapi)
@@ -52,52 +52,52 @@ if(wxWidgets_FOUND)
     "${XRCRES_DIR}/icons.xrc" "${XRCRES_DIR}/xrc_resource.xrc"
     VERBATIM)
 
-  add_executable(odalaunch MACOSX_BUNDLE WIN32
+  add_executable(novalaunch MACOSX_BUNDLE WIN32
     ${API_SOURCES} ${API_HEADERS}
     ${LAUNCH_SOURCES} ${LAUNCH_HEADERS}
     ${XRCRES_HEADER} ${LAUNCH_WIN32_RESOURCES})
-  odamex_target_settings(odalaunch)
+  novadoom_target_settings(novalaunch)
 
-  target_link_libraries(odalaunch ${wxWidgets_LIBRARIES})
+  target_link_libraries(novalaunch ${wxWidgets_LIBRARIES})
 
   if(WIN32)
-    target_link_libraries(odalaunch ws2_32)
+    target_link_libraries(novalaunch ws2_32)
   endif()
 
-  odalaunch_copy_libs(odalaunch)
+  odalaunch_copy_libs(novalaunch)
 
-  set(MACOSX_BUNDLE_BUNDLE_NAME OdaLaunch)
-  set(MACOSX_BUNDLE_INFO_STRING "ODAMEX and its likeness © ${PROJECT_COPYRIGHT} Odamex team.")
+  set(MACOSX_BUNDLE_BUNDLE_NAME NovaLaunch)
+  set(MACOSX_BUNDLE_INFO_STRING "NovaDoom © ${PROJECT_COPYRIGHT} NovaDoom Team.")
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
-  set(MACOSX_BUNDLE_ICON_FILE odalaunch.icns)
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER net.odamex.odalaunch)
+  set(MACOSX_BUNDLE_ICON_FILE novalaunch.icns)
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER net.novadoom.launcher)
 
   if(APPLE)
     add_custom_command(
-      TARGET odalaunch
+      TARGET novalaunch
       POST_BUILD
-      COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/odalaunch.app/Contents/Resources"
-      COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/media/${MACOSX_BUNDLE_ICON_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/odalaunch.app/Contents/Resources/"
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/novalaunch.app/Contents/Resources"
+      COMMAND "${CMAKE_COMMAND}" -E copy "${CMAKE_SOURCE_DIR}/media/${MACOSX_BUNDLE_ICON_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/novalaunch.app/Contents/Resources/"
       VERBATIM
     )
 
     set_directory_properties(
       PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/odalaunch.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE}"
+      "${CMAKE_CURRENT_BINARY_DIR}/novalaunch.app/Contents/Resources/${MACOSX_BUNDLE_ICON_FILE}"
     )
   elseif(WIN32)
-    install(TARGETS odalaunch
+    install(TARGETS novalaunch
       RUNTIME DESTINATION .
-      COMPONENT odalaunch)
+      COMPONENT novalaunch)
   else()
-    install(TARGETS odalaunch
+    install(TARGETS novalaunch
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      COMPONENT odalaunch)
+      COMPONENT novalaunch)
   endif()
 endif()
 
-if(BUILD_OR_FAIL AND NOT TARGET odalaunch)
-  message(FATAL_ERROR "Odalaunch target could not be generated")
+if(BUILD_OR_FAIL AND NOT TARGET novalaunch)
+  message(FATAL_ERROR "NovaLaunch target could not be generated")
 endif()

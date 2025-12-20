@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include <math.h>
 #include <cassert>
@@ -114,7 +115,7 @@ shaderef_t::shaderef_t() :
 shaderef_t::shaderef_t(const shademap_t* const colors, const int mapnum) :
 	m_colors(colors), m_mapnum(mapnum)
 {
-	#if ODAMEX_DEBUG
+	#if NOVADOOM_DEBUG
 	// NOTE(jsd): Arbitrary value picked here because we don't record the max number of colormaps for dynamic ones... or do we?
 	if (m_mapnum >= 8192)
 	{

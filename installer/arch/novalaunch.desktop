@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=NovaLaunch
+Exec=novalaunch
+Icon=novalaunch
+Type=Application
+Comment=Server Browser for NovaDoom
+Categories=Game;ActionGame;

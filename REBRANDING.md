@@ -19,7 +19,7 @@ New NovaDoom icons are located in `icons/`:
 |---------|-----|--------|
 | `odamex` | `novadoom` | Done |
 | `odasrv` | `novasrv` | Done |
-| `odalaunch` | `novalaunch` | Pending |
+| `odalaunch` | `novalaunch` | Done |
 | `odamex.wad` | `novadoom.wad` | Done |
 
 ### Core Branding Files - COMPLETED
@@ -34,121 +34,117 @@ New NovaDoom icons are located in `icons/`:
 | `client/src/d_main.cpp:1083` | `"NovaDoom Client Initialized"` | Done |
 | `client/src/d_main.cpp:1085` | `"use the NovaDoom Launcher"` | Done |
 | `client/gui/gui_boot.cpp:617` | Window title `"NovaDoom "` | Done |
+| `client/sdl/i_system.cpp:978` | Error dialog title `"NovaDoom"` | Done |
+| `client/sdl/i_main.cpp` | Version output `"NovaDoom"` | Done |
+| `server/src/i_main.cpp` | Version output `"NovaDoom"` | Done |
 | `README.md` | Rewritten for NovaDoom | Done |
 | `common/d_main.cpp` | WAD references updated | Done |
 | `wad/CMakeLists.txt` | novadoom.wad references | Done |
 | `.github/workflows/novadoom-release.yml` | WAD references updated | Done |
 
-### Windows Resources (.rc.in) - PENDING
+### Windows Resources (.rc.in) - COMPLETED
 
-**Client:** `client/sdl/client.rc.in`
-- Line 9: `#define ODAMEX_DESC "Odamex Client"` → `"NovaDoom Client"`
-- Line 10: `#define ODAMEX_EXE "odamex.exe"` → `"novadoom.exe"`
-- Line 11: `#define ODAMEX_INTERNAL "odamex"` → `"novadoom"`
-- Line 12: `#define ODAMEX_NAME "Odamex Client"` → `"NovaDoom Client"`
-- Line 14: Icon reference `odamex.ico` → `novadoom.ico`
-- Line 41: Update copyright string
+| File | Status |
+|------|--------|
+| `client/sdl/client.rc.in` | Done - Updated to NovaDoom Client |
+| `server/win32/server.rc.in` | Done - Updated to NovaDoom Server |
+| `odalaunch/res/odalaunch.rc.in` | Done - Updated to NovaDoom Launcher |
 
-**Server:** `server/win32/server.rc.in`
-- Line 7: `#define ODASRV_DESC "Odamex Server"` → `"NovaDoom Server"`
-- Line 8: `#define ODASRV_EXE "odasrv.exe"` → `"novasrv.exe"`
-- Line 9: `#define ODASRV_INTERNAL "odasrv"` → `"novasrv"`
-- Line 10: `#define ODASRV_NAME "Odamex Server"` → `"NovaDoom Server"`
-- Line 12: Icon reference → update
-- Line 36: Update copyright string
+### macOS Bundle Config - COMPLETED
 
-**Launcher:** `odalaunch/res/odalaunch.rc.in`
-- Line 7: `#define ODALAUNCH_DESC "Odamex Launcher"` → `"NovaDoom Launcher"`
-- Line 8: `#define ODALAUNCH_EXE "odalaunch.exe"` → `"novalaunch.exe"`
-- Line 9: `#define ODALAUNCH_INTERNAL "odalaunch"` → `"novalaunch"`
-- Line 10: `#define ODALAUNCH_NAME "Odamex Launcher"` → `"NovaDoom Launcher"`
-- Line 12: Icon reference → update
-- Line 36: Update copyright string
+| File | Status |
+|------|--------|
+| `client/CMakeLists.txt` | Done - novadoom.icns, net.novadoom.client |
+| `odalaunch/res/Info.plist` | Done - net.novadoom.launcher |
+| `odalaunch/CMakeLists.txt` | Done - NovaLaunch, net.novadoom.launcher |
+| `ag-odalaunch/CMakeLists.txt` | Done - AG-NovaLaunch, net.novadoom.ag-launcher |
 
-### macOS Bundle Config - PENDING
+### Windows Installer - COMPLETED
 
-**Launcher Plist:** `odalaunch/res/Info.plist`
-- Line 8: `org.odalaunch.app` → `org.novadoom.launcher`
-- Line 12: `OdaLaunch` → `NovaLaunch`
-- Line 14: `odalaunch.icns` → `novalaunch.icns`
-- Line 16: `Odalaunch` → `NovaDoom Launcher`
-- Line 26, 30: Update copyright strings
+| File | Status |
+|------|--------|
+| `installer/windows/novadoom.iss` | Done - Created (replaced odamex.iss) |
 
-**Launcher CMake:** `odalaunch/CMakeLists.txt`
-- Line 69: `MACOSX_BUNDLE_BUNDLE_NAME OdaLaunch` → `NovaLaunch`
-- Line 70: Update `MACOSX_BUNDLE_INFO_STRING` copyright
-- Line 75: `net.odamex.odalaunch` → `net.novadoom.launcher`
+### Linux Packaging - COMPLETED
 
-**AG-Launcher CMake:** `ag-odalaunch/CMakeLists.txt`
-- Line 39: `MACOSX_BUNDLE_BUNDLE_NAME AG-OdaLaunch` → `AG-NovaLaunch`
-- Line 40: Update `MACOSX_BUNDLE_INFO_STRING` copyright
-- Line 45: `net.odamex.ag-odalaunch` → `net.novadoom.ag-launcher`
-
-### Windows Installer - PENDING
-
-**File:** `installer/windows/odamex.iss`
-- Line 9: `#define OdamexName "Odamex"` → `"NovaDoom"`
-- Line 10: `#define OdamexPublisher "Odamex Development Team"` → `"NovaDoom Team"`
-- Line 11: `#define OdamexURL "https://odamex.net/"` → Your NovaDoom URL
-- Line 29: `OutputBaseFilename` → rename output to `novadoom-win-...`
-- Line 38: `UninstallDisplayIcon` → `novadoom.exe`
-- Rename file to `novadoom.iss`
-
-### Linux Packaging - PENDING
-
-**Desktop Files:** (rename files too)
-- `packaging/linux/net.odamex.Odamex.Client.desktop` → `net.novadoom.NovaDoom.Client.desktop`
-- `packaging/linux/net.odamex.Odamex.Server.desktop` → `net.novadoom.NovaDoom.Server.desktop`
-- `packaging/linux/net.odamex.Odamex.Launcher.desktop` → `net.novadoom.NovaDoom.Launcher.desktop`
-- `installer/arch/odamex.desktop` → `novadoom.desktop`
-
-**AppStream Metadata:** `packaging/linux/net.odamex.Odamex.metainfo.xml` → `net.novadoom.NovaDoom.metainfo.xml`
-
-**Flatpak Manifest:** `packaging/flatpak/net.odamex.Odamex.yml` → `net.novadoom.NovaDoom.yml`
+| File | Status |
+|------|--------|
+| `packaging/linux/net.novadoom.NovaDoom.Client.desktop` | Done |
+| `packaging/linux/net.novadoom.NovaDoom.Server.desktop` | Done |
+| `packaging/linux/net.novadoom.NovaDoom.Launcher.desktop` | Done |
+| `packaging/linux/net.novadoom.NovaDoom-mime.xml` | Done |
+| `packaging/linux/net.novadoom.NovaDoom.metainfo.xml` | Done |
+| `packaging/flatpak/net.novadoom.NovaDoom.yml` | Done |
+| `installer/arch/novadoom.desktop` | Done |
+| `installer/arch/novalaunch.desktop` | Done |
+| `installer/arch/novasrv.desktop` | Done |
 
 ---
 
-## Priority 2: Icons & Assets - IN PROGRESS
+## Priority 2: Icons & Assets - COMPLETED
 
-### Icons to Replace
+### Icons Replaced
 
-Use icons from `icons/` folder to create:
+| Target File | Status |
+|-------------|--------|
+| `client/sdl/novadoom.ico` | Done |
+| `media/novadoom.icns` | Done |
+| `media/icon_novadoom_512.png` | Done |
+| `media/icon_novadoom_256.png` | Done |
+| `media/icon_novadoom_128.png` | Done |
+| `media/icon_novadoom_96.png` | Done |
+| `media/novasrv.icns` | Done |
+| `media/icon_novasrv_*.png` | Done |
+| `media/novalaunch.icns` | Done |
+| `media/icon_novalaunch_*.png` | Done |
+| `odalaunch/res/novalaunch.icns` | Done |
+| `ag-odalaunch/res/novalaunch.icns` | Done |
 
-| Target File | Source | Status |
-|-------------|--------|--------|
-| `client/sdl/odamex.ico` → `novadoom.ico` | `icons/ND_favicon.ico` | Pending |
-| `media/odamex.icns` → `novadoom.icns` | Create .icns from ND_*.png | Pending |
-| `media/icon_odamex_512.png` | `icons/ND_512.png` | Pending |
-| `media/icon_odamex_256.png` | `icons/ND_256.png` | Pending |
-| `media/icon_odamex_128.png` | `icons/ND_128.png` | Pending |
-| `media/icon_odamex_96.png` | Resize from ND_128.png | Pending |
-| `media/odasrv.icns` → `novasrv.icns` | Create .icns | Pending |
-| `media/icon_odasrv_*.png` | Copy from ND_*.png | Pending |
-| `media/odalaunch.icns` → `novalaunch.icns` | Create .icns | Pending |
-| `media/icon_odalaunch_*.png` | Copy from ND_*.png | Pending |
-| `odalaunch/res/odalaunch.icns` | Copy from media/ | Pending |
-| `ag-odalaunch/res/odalaunch.icns` | Copy from media/ | Pending |
-| `client/switch/assets/odamex.jpg` → `novadoom.jpg` | Create from ND_512.png | Pending |
+### Embedded Icon in Code - COMPLETED
 
-### Embedded Icon in Code
-
-- `client/gui/icon_odamex_128.png.cpp` - Regenerate with new icon
-- `client/fluid/icon_odamex_128.png` - Replace with new icon
+| File | Status |
+|------|--------|
+| `client/gui/icon_novadoom_128.png.cpp` | Done |
+| `client/fluid/icon_novadoom_128.png` | Done |
+| `client/gui/gui_resource.h` | Done |
+| `client/gui/gui_common.h` | Done |
+| `client/gui/gui_common.cpp` | Done |
+| `client/gui/gui_boot.cpp` | Done |
+| `client/fluid/boot.fl` | Done |
 
 ---
 
-## Priority 3: URLs to Update - PENDING
+## Priority 3: URLs to Update - COMPLETED
 
-| Current | New |
-|---------|-----|
-| `https://odamex.net` | Your NovaDoom website |
-| `https://github.com/odamex/odamex` | `https://github.com/Alfaifi/novadoom-odamex` |
-| `https://odamex.net/wiki/` | Your wiki URL |
-| `https://odamex.net/boards/` | Your forums URL |
-| `https://odamex.net/bugs/` | Your bug tracker URL |
+| Current | New | Status |
+|---------|-----|--------|
+| `https://odamex.net` | `https://novadoom.com` | Done |
+| `https://github.com/odamex/odamex` | `https://github.com/Alfaifi/novadoom-odamex` | Done |
+| `https://odamex.net/wiki/` | `https://github.com/Alfaifi/novadoom-odamex/wiki` | Done |
+| `https://odamex.net/boards/` | `https://novadoom.com/boards` | Done |
+| `https://odamex.net/bugs/` | `https://github.com/Alfaifi/novadoom-odamex/issues` | Done |
 
-**Master Servers** (in `server/src/sv_master.cpp`):
-- `master1.odamex.net` - Keep as fallback or add your own
+**Files Updated:**
+- `server/src/sv_main.cpp` - Version mismatch messages
+- `client/src/cl_demo.cpp` - Demo version messages
+- `common/m_stacktrace.cpp` - Error reporting URL
+- `odalaunch/src/dlg_main.cpp` - All menu URLs
+- `odalaunch/res/xrc_resource.xrc` - About dialog URL
+- `odalaunch/res/gui_project.fbp` - Form builder URL
+- `ag-odalaunch/src/agol_about.cpp` - About dialog URL
+- `ag-odalaunch/src/agol_main.cpp` - Bug report URL
+- `CMakeLists.txt` - Debian package homepage
+- `docker/Makefile` - Repository URL
+- `docker/examples/configs/config.cfg` - Wiki and website URLs
+- `installer/arch/PKGBUILD` - Package URL
+- `config-samples/*.cfg` - All config sample wiki links
+- `.github/FUNDING.yml` - Sponsorship URL
+- `MAINTAINERS` - Project URLs
+- `CLAUDE.md` - Clone URL
+- Removed old `README` file (using `README.md` only)
+
+**Master Servers** (in `server/src/sv_master.cpp` and `odalaunch/src/oda_defs.h`):
+- Kept `master1.odamex.net` as fallback for compatibility
 
 ---
 
@@ -220,23 +216,25 @@ Internal functions like `getOdaMobjinfo()` can remain unchanged as they're not u
 
 ---
 
-## Files to Rename - PARTIAL
+## Files Renamed - COMPLETED
 
-| Current Path | New Path | Status |
-|--------------|----------|--------|
+| Old Path | New Path | Status |
+|----------|----------|--------|
 | `wad/odamex.wad` | `wad/novadoom.wad` | Done |
-| `client/sdl/odamex.ico` | `client/sdl/novadoom.ico` | Pending |
-| `media/odamex.icns` | `media/novadoom.icns` | Pending |
-| `media/odasrv.icns` | `media/novasrv.icns` | Pending |
-| `media/odalaunch.icns` | `media/novalaunch.icns` | Pending |
-| `media/icon_odamex_*.png` | `media/icon_novadoom_*.png` | Pending |
-| `media/icon_odasrv_*.png` | `media/icon_novasrv_*.png` | Pending |
-| `media/icon_odalaunch_*.png` | `media/icon_novalaunch_*.png` | Pending |
-| `installer/windows/odamex.iss` | `installer/windows/novadoom.iss` | Pending |
-| `installer/arch/odamex.desktop` | `installer/arch/novadoom.desktop` | Pending |
-| `packaging/linux/net.odamex.Odamex.*.desktop` | `packaging/linux/net.novadoom.NovaDoom.*.desktop` | Pending |
-| `packaging/linux/net.odamex.Odamex.metainfo.xml` | `packaging/linux/net.novadoom.NovaDoom.metainfo.xml` | Pending |
-| `packaging/flatpak/net.odamex.Odamex.yml` | `packaging/flatpak/net.novadoom.NovaDoom.yml` | Pending |
+| `client/sdl/odamex.ico` | `client/sdl/novadoom.ico` | Done |
+| `media/odamex.icns` | `media/novadoom.icns` | Done |
+| `media/odasrv.icns` | `media/novasrv.icns` | Done |
+| `media/odalaunch.icns` | `media/novalaunch.icns` | Done |
+| `media/icon_odamex_*.png` | `media/icon_novadoom_*.png` | Done |
+| `media/icon_odasrv_*.png` | `media/icon_novasrv_*.png` | Done |
+| `media/icon_odalaunch_*.png` | `media/icon_novalaunch_*.png` | Done |
+| `installer/windows/odamex.iss` | `installer/windows/novadoom.iss` | Done |
+| `installer/arch/odamex.desktop` | `installer/arch/novadoom.desktop` | Done |
+| `installer/arch/odalaunch.desktop` | `installer/arch/novalaunch.desktop` | Done |
+| `installer/arch/odasrv.desktop` | `installer/arch/novasrv.desktop` | Done |
+| `packaging/linux/net.odamex.Odamex.*.desktop` | `packaging/linux/net.novadoom.NovaDoom.*.desktop` | Done |
+| `packaging/linux/net.odamex.Odamex.metainfo.xml` | `packaging/linux/net.novadoom.NovaDoom.metainfo.xml` | Done |
+| `packaging/flatpak/net.odamex.Odamex.yml` | `packaging/flatpak/net.novadoom.NovaDoom.yml` | Done |
 
 ---
 

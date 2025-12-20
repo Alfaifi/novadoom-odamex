@@ -1,0 +1,13 @@
+[Desktop Entry]
+# this is the desktop entry spec version NOT the NovaDoom version
+Version=1.5
+Type=Application
+
+Name=NovaSrv
+Comment=Server to run NovaDoom and play DOOM wads online!
+Categories=Amusement;Game;ActionGame;AdventureGame;ArcadeGame;
+
+Icon=net.novadoom.NovaDoom.Server
+Exec=novasrv
+Terminal=true
+StartupWMClass=novasrv

@@ -23,9 +23,9 @@ set(CMAKE_INSTALL_BINDIR "bin")
 set(CMAKE_INSTALL_DATADIR "share")
 include(GNUInstallDirs OPTIONAL)
 
-option(ODAMEX_NO_GITVER "Don't include git versioning information" 0)
-if(ODAMEX_NO_GITVER)
-  add_definitions(-DODAMEX_NO_GITVER)
+option(NOVADOOM_NO_GITVER "Don't include git versioning information" 0)
+if(NOVADOOM_NO_GITVER)
+  add_definitions(-DNOVADOOM_NO_GITVER)
 endif()
 
 add_definitions(-DINSTALL_BINDIR="${CMAKE_INSTALL_BINDIR}")
@@ -50,8 +50,8 @@ option(BUILD_MASTER "Build master server target" 0)
 option(BUILD_OR_FAIL "Must build the BUILD_* targets or else generation will fail" 0)
 option(USE_INTERNAL_DEUTEX "Use internal DeuTex" ${USE_INTERNAL_LIBS})
 option(USE_LTO "Build Release builds with Link Time Optimization" 1)
-option(ODAMEX_INSTALL_BINDIR "Smart default for bin dir location" "/usr/local/bin")
-option(ODAMEX_INSTALL_DATADIR "Smart default for data dir location" "/usr/local/share")
+option(NOVADOOM_INSTALL_BINDIR "Smart default for bin dir location" "/usr/local/bin")
+option(NOVADOOM_INSTALL_DATADIR "Smart default for data dir location" "/usr/local/share")
 option(USE_EXTERNAL_LIBDWARF "Use external libdwarf for cpptrace" 0)
 cmake_dependent_option( USE_INTERNAL_ZLIB "Use internal zlib" ${USE_INTERNAL_LIBS} BUILD_CLIENT OR BUILD_SERVER 0 )
 cmake_dependent_option( USE_INTERNAL_ZSTD "Use internal zstd" ${USE_INTERNAL_LIBS} BUILD_CLIENT OR BUILD_SERVER 0 )
@@ -68,13 +68,8 @@ cmake_dependent_option( USE_INTERNAL_LIBADLMIDI "Use internal libADLMIDI" 1 BUIL
 cmake_dependent_option( USE_INTERNAL_PROTOBUF "Use internal protobuf" ${USE_INTERNAL_LIBS} BUILD_CLIENT OR BUILD_SERVER 0 )
 
 if(NOT APPLE AND NOT WIN32)
-  add_definitions(-DODAMEX_INSTALL_BINDIR="${ODAMEX_INSTALL_BINDIR}")
-  add_definitions(-DODAMEX_INSTALL_DATADIR="${ODAMEX_INSTALL_DATADIR}")
-endif()
-
-if(NOT APPLE AND NOT WIN32)
-  add_definitions(-DODAMEX_INSTALL_BINDIR="${ODAMEX_INSTALL_BINDIR}")
-  add_definitions(-DODAMEX_INSTALL_DATADIR="${ODAMEX_INSTALL_DATADIR}")
+  add_definitions(-DNOVADOOM_INSTALL_BINDIR="${NOVADOOM_INSTALL_BINDIR}")
+  add_definitions(-DNOVADOOM_INSTALL_DATADIR="${NOVADOOM_INSTALL_DATADIR}")
 endif()
 
 set(PROJECT_COPYRIGHT "2006-2025")
@@ -92,26 +87,26 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # identify the target CPU
 # adapted from the FindJNI.cmake module included with the CMake distribution
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-  set(ODAMEX_TARGET_ARCH "amd64")
+  set(NOVADOOM_TARGET_ARCH "amd64")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
-  set(ODAMEX_TARGET_ARCH "i386")
+  set(NOVADOOM_TARGET_ARCH "i386")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
-  set(ODAMEX_TARGET_ARCH "alpha")
+  set(NOVADOOM_TARGET_ARCH "alpha")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
-  set(ODAMEX_TARGET_ARCH "arm")
+  set(NOVADOOM_TARGET_ARCH "arm")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
-  set(ODAMEX_TARGET_ARCH "ppc64")
+  set(NOVADOOM_TARGET_ARCH "ppc64")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
-  set(ODAMEX_TARGET_ARCH "ppc")
+  set(NOVADOOM_TARGET_ARCH "ppc")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
   # Both flavors can run on the same processor
-  set(ODAMEX_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
+  set(NOVADOOM_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
 else()
-  set(ODAMEX_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
+  set(NOVADOOM_TARGET_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
-list(REMOVE_DUPLICATES ODAMEX_TARGET_ARCH)
-message(STATUS "Target architecture: ${ODAMEX_TARGET_ARCH}")
+list(REMOVE_DUPLICATES NOVADOOM_TARGET_ARCH)
+message(STATUS "Target architecture: ${NOVADOOM_TARGET_ARCH}")
 
 # Default build type
 if(NOT CMAKE_CONFIGURATION_TYPES)
@@ -182,7 +177,7 @@ add_subdirectory(libraries)
 # WAD building
 add_subdirectory(wad)
 
-# Subdirectories for Odamex projects
+# Subdirectories for NovaDoom projects
 if(BUILD_CLIENT OR BUILD_SERVER)
   add_subdirectory(common)
   add_subdirectory(odaproto)
@@ -203,9 +198,9 @@ if(NOT BUILD_CLIENT AND NOT BUILD_SERVER AND NOT BUILD_MASTER AND NOT BUILD_LAUN
   message(FATAL_ERROR "No target chosen, doing nothing.")
 endif()
 
-# Disable the ag-odalaunch target completely: -DNO_AG-ODALAUNCH_TARGET
+# Disable the ag-odalaunch target completely: -DNO_AG-NOVALAUNCH_TARGET
 # This is only really useful when setting up a universal build.
-if(NOT NO_AG-ODALAUNCH_TARGET)
+if(NOT NO_AG-NOVALAUNCH_TARGET)
   add_subdirectory(ag-odalaunch)
 endif()
 
@@ -213,21 +208,21 @@ endif()
 # TODO: Integrate OSX stuff into here.
 if(NOT APPLE)
   set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY Odamex)
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY NovaDoom)
   set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE)
 
-  set(CPACK_COMPONENTS_ALL client server odalaunch common)
+  set(CPACK_COMPONENTS_ALL client server novalaunch common)
   set(CPACK_COMPONENT_CLIENT_DEPENDS common)
-  set(CPACK_COMPONENT_CLIENT_DISPLAY_NAME "Odamex")
+  set(CPACK_COMPONENT_CLIENT_DISPLAY_NAME "NovaDoom")
   set(CPACK_COMPONENT_SERVER_DEPENDS common)
-  set(CPACK_COMPONENT_SERVER_DISPLAY_NAME "Odamex Dedicated Server")
-  set(CPACK_COMPONENT_ODALAUNCH_DEPENDS client)
-  set(CPACK_COMPONENT_ODALAUNCH_DISPLAY_NAME "Odalaunch Odamex Server Browser and Launcher")
+  set(CPACK_COMPONENT_SERVER_DISPLAY_NAME "NovaDoom Dedicated Server")
+  set(CPACK_COMPONENT_NOVALAUNCH_DEPENDS client)
+  set(CPACK_COMPONENT_NOVALAUNCH_DISPLAY_NAME "NovaDoom Launcher")
   set(CPACK_COMPONENT_COMMON_DISPLAY_NAME "Support files")
 
   file(GLOB CONFIG_SAMPLES config-samples/*.cfg)
   if(WIN32)
-    install(FILES LICENSE README
+    install(FILES LICENSE README.md
       DESTINATION .
       COMPONENT common)
     install(FILES ${CONFIG_SAMPLES}
@@ -237,15 +232,15 @@ if(NOT APPLE)
     # Windows ZIP packages are "tarbombs" by default.
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
   else()
-    install(FILES LICENSE README
-      DESTINATION ${CMAKE_INSTALL_DATADIR}/odamex
+    install(FILES LICENSE README.md
+      DESTINATION ${CMAKE_INSTALL_DATADIR}/novadoom
       COMPONENT common)
     install(FILES ${CONFIG_SAMPLES}
-      DESTINATION ${CMAKE_INSTALL_DATADIR}/odamex/config-samples
+      DESTINATION ${CMAKE_INSTALL_DATADIR}/novadoom/config-samples
       COMPONENT common)
 
-    option(ODAMEX_COMPONENT_PACKAGES "Create several rpm/deb packages for repository maintainers." OFF)
-    if(ODAMEX_COMPONENT_PACKAGES)
+    option(NOVADOOM_COMPONENT_PACKAGES "Create several rpm/deb packages for repository maintainers." OFF)
+    if(NOVADOOM_COMPONENT_PACKAGES)
       set(CPACK_RPM_COMPONENT_INSTALL YES)
       # TODO: RPM Dependencies
 
@@ -259,12 +254,12 @@ if(NOT APPLE)
     endif()
 
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A free, cross-platform modification of the Doom engine that allows players to easily join servers dedicated to playing Doom online.")
-    set(CPACK_PACKAGE_VENDOR "Odamex Development Team")
+    set(CPACK_PACKAGE_VENDOR "NovaDoom Team")
     set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
     set(CPACK_RPM_PACKAGE_LICENSE "GPLv2+")
 
-    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://odamex.net")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://novadoom.com")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Alex Mayfield <alexmax2742@gmail.com>")
     set(CPACK_DEBIAN_PACKAGE_SECTION Games)
   endif()

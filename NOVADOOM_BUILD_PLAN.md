@@ -8,11 +8,11 @@ This document outlines the plan to build and distribute custom Odamex binaries f
 
 ## Target Binaries
 
-| Binary | Platform | Purpose | Bundle Contents |
-|--------|----------|---------|-----------------|
-| `NovaDoom.app` | macOS Universal (ARM64 + x86_64) | Client for Mac players | FluidSynth, SDL2, soundfont |
-| `NovaDoom.exe` | Windows x64 | Client for Windows players | FluidSynth DLL, SDL2 DLLs, soundfont |
-| `novasrv` | Linux x86_64 (Ubuntu) | Dedicated server for NovaDoom | Minimal deps, statically linked |
+| Binary         | Platform                         | Purpose                       | Bundle Contents                      |
+| -------------- | -------------------------------- | ----------------------------- | ------------------------------------ |
+| `NovaDoom.app` | macOS Universal (ARM64 + x86_64) | Client for Mac players        | FluidSynth, SDL2, soundfont          |
+| `NovaDoom.exe` | Windows x64                      | Client for Windows players    | FluidSynth DLL, SDL2 DLLs, soundfont |
+| `novasrv`      | Linux x86_64 (Ubuntu)            | Dedicated server for NovaDoom | Minimal deps, statically linked      |
 
 ---
 
@@ -38,21 +38,23 @@ novadoom-odamex/                    # Private fork of Odamex
 ## GitHub Actions Workflow
 
 ### Triggers
+
 - **Manual dispatch** (`workflow_dispatch`) with version input
 - **Tag push** (e.g., `v1.0.0-novadoom`)
 
 ### Build Jobs
 
 #### 1. macOS Universal Binary
+
 ```yaml
 jobs:
   build-macos:
     strategy:
       matrix:
         include:
-          - runner: macos-14          # ARM64 (M1/M2/M3)
+          - runner: macos-14 # ARM64 (M1/M2/M3)
             arch: arm64
-          - runner: macos-13          # Intel x86_64
+          - runner: macos-13 # Intel x86_64
             arch: x86_64
     steps:
       - Install dependencies (brew: fluidsynth, sdl2, sdl2_mixer)
@@ -70,29 +72,31 @@ jobs:
 ```
 
 #### 2. Windows x64
+
 ```yaml
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - Install vcpkg dependencies (fluidsynth, sdl2, sdl2-mixer)
-      - Configure CMake with Visual Studio
-      - Build odamex (RelWithDebInfo)
-      - Bundle DLLs and soundfont
-      - Create ZIP archive
-      - Upload to GitHub Release
+build-windows:
+  runs-on: windows-latest
+  steps:
+    - Install vcpkg dependencies (fluidsynth, sdl2, sdl2-mixer)
+    - Configure CMake with Visual Studio
+    - Build novadoom (RelWithDebInfo)
+    - Bundle DLLs and soundfont
+    - Create ZIP archive
+    - Upload to GitHub Release
 ```
 
-#### 3. Linux Server (odasrv only)
+#### 3. Linux Server (novasrv only)
+
 ```yaml
-  build-linux-server:
-    runs-on: ubuntu-22.04
-    steps:
-      - Install minimal dependencies (no GUI, no audio)
-      - Configure CMake with -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON
-      - Build odasrv
-      - Strip binary for size
-      - Create tar.gz archive
-      - Upload to GitHub Release
+build-linux-server:
+  runs-on: ubuntu-22.04
+  steps:
+    - Install minimal dependencies (no GUI, no audio)
+    - Configure CMake with -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON
+    - Build novasrv
+    - Strip binary for size
+    - Create tar.gz archive
+    - Upload to GitHub Release
 ```
 
 ---
@@ -102,6 +106,7 @@ jobs:
 ### CMake Options
 
 **Client Builds (macOS/Windows):**
+
 ```bash
 cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
@@ -113,6 +118,7 @@ cmake .. \
 ```
 
 **Server Build (Linux):**
+
 ```bash
 cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
@@ -129,16 +135,19 @@ cmake .. \
 ## Dependency Installation
 
 ### macOS (Homebrew)
+
 ```bash
 brew install fluidsynth sdl2 sdl2_mixer libpng zlib
 ```
 
 ### Windows (vcpkg)
+
 ```powershell
 vcpkg install fluidsynth:x64-windows sdl2:x64-windows sdl2-mixer:x64-windows
 ```
 
 ### Linux Server (apt)
+
 ```bash
 # Minimal - no audio/video dependencies
 sudo apt-get install build-essential cmake libcurl4-openssl-dev zlib1g-dev
@@ -149,6 +158,7 @@ sudo apt-get install build-essential cmake libcurl4-openssl-dev zlib1g-dev
 ## Artifact Bundling
 
 ### macOS .app Bundle
+
 ```
 NovaDoom.app/
 ├── Contents/
@@ -168,6 +178,7 @@ NovaDoom.app/
 ```
 
 ### Windows ZIP
+
 ```
 NovaDoom-Win64/
 ├── novadoom.exe
@@ -182,6 +193,7 @@ NovaDoom-Win64/
 ```
 
 ### Linux Server tar.gz
+
 ```
 novadoom-server-linux-x64/
 ├── novasrv                # Statically linked server binary
@@ -194,28 +206,31 @@ novadoom-server-linux-x64/
 
 Each release will produce:
 
-| Artifact | Filename | Size (est.) |
-|----------|----------|-------------|
-| macOS DMG | `NovaDoom-macOS-universal-{version}.dmg` | ~80MB |
-| Windows ZIP | `NovaDoom-Win64-{version}.zip` | ~60MB |
-| Linux Server | `NovaDoom-Server-Linux-x64-{version}.tar.gz` | ~5MB |
+| Artifact     | Filename                                     | Size (est.) |
+| ------------ | -------------------------------------------- | ----------- |
+| macOS DMG    | `NovaDoom-macOS-universal-{version}.dmg`     | ~80MB       |
+| Windows ZIP  | `NovaDoom-Win64-{version}.zip`               | ~60MB       |
+| Linux Server | `NovaDoom-Server-Linux-x64-{version}.tar.gz` | ~5MB        |
 
 ---
 
 ## Integration with NovaDoom Platform
 
 ### Current Setup
+
 - Binary path: `/home/odamex/novadoom-server`
 - Process user: `odamex`
 - Port range: 10666-10676
 
 ### Deployment Steps
+
 1. Download `NovaDoom-Server-Linux-x64-{version}.tar.gz` from release
 2. Extract to `/home/odamex/`
 3. Rename/symlink `novasrv` to `novadoom-server`
 4. Set permissions: `chown odamex:odamex /home/odamex/novadoom-server`
 
 ### Future: Auto-Update (Phase 4+)
+
 - Add version endpoint to NovaDoom backend
 - Check GitHub Releases API for new versions
 - Download and swap binary with zero-downtime
@@ -224,15 +239,15 @@ Each release will produce:
 
 ## Timeline
 
-| Step | Task | Status |
-|------|------|--------|
-| 1 | Create `novadoom-release.yml` workflow | Pending |
-| 2 | Create/modify CI build scripts | Pending |
-| 3 | Test macOS Universal build | Pending |
-| 4 | Test Windows build with FluidSynth | Pending |
-| 5 | Test Linux server build | Pending |
-| 6 | Create first release | Pending |
-| 7 | Deploy to NovaDoom production | Pending |
+| Step | Task                                   | Status  |
+| ---- | -------------------------------------- | ------- |
+| 1    | Create `novadoom-release.yml` workflow | Pending |
+| 2    | Create/modify CI build scripts         | Pending |
+| 3    | Test macOS Universal build             | Pending |
+| 4    | Test Windows build with FluidSynth     | Pending |
+| 5    | Test Linux server build                | Pending |
+| 6    | Create first release                   | Pending |
+| 7    | Deploy to NovaDoom production          | Pending |
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: Change Request
-about: Suggest a change request for Odamex
+about: Suggest a change request for NovaDoom
 title: "[CHANGE] Describe Change Here"
 labels: Type-Change
 assignees: ''

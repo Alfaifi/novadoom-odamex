@@ -3,7 +3,7 @@
 exec tclsh "$0" "$@"
 
 #
-# runs ./odamex -nosound -novideo +demotest DEMONAME[.LMP] -file WADFILE.WAD
+# runs ./novadoom -nosound -novideo +demotest DEMONAME[.LMP] -file WADFILE.WAD
 # against list of demos in the DEMOLIST file
 #
 # assumes file input format:
@@ -55,18 +55,18 @@ while { ![eof $file] } {
 	} else {
 		append args " +demotest $lump"
 	}
-	append args " +logfile odamex.log"
+	append args " +logfile novadoom.log"
 
 	set demotest "CRASHED"
 	catch {
-		if [file exists odamex.exe] {
-			eval exec odamex.exe [split $args] > tmp
-		} elseif [file exists ./odamex] {
-			eval exec ./odamex [split $args] > tmp
+		if [file exists novadoom.exe] {
+			eval exec novadoom.exe [split $args] > tmp
+		} elseif [file exists ./novadoom] {
+			eval exec ./novadoom [split $args] > tmp
 		} else {
-			eval exec ./build/client/odamex [split $args] > tmp
+			eval exec ./build/client/novadoom [split $args] > tmp
 		}
-		set log [open odamex.log r]
+		set log [open novadoom.log r]
 		while { ![eof $log] } {
 			set line [gets $log]
 			if { [string range $line 0 8] == "demotest:" } {

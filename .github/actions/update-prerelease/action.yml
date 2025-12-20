@@ -49,7 +49,7 @@ runs:
       with:
         tag_name: prerelease
         target_commitish: ${{ github.sha }}
-        name: "Odamex ${{ inputs.new_version }} Prerelease ${{ inputs.build_number }}"
+        name: "NovaDoom ${{ inputs.new_version }} Prerelease ${{ inputs.build_number }}"
         prerelease: true
         make_latest: false
         draft: false

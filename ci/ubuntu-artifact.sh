@@ -10,5 +10,5 @@ set -x
 mkdir -p build/artifact && cd build
 
 cp -aR \
-    "client/odamex" "server/odasrv" "odalaunch/odalaunch" \
-    "wad/odamex.wad" artifact/
+    "client/novadoom" "server/novasrv" "odalaunch/novalaunch" \
+    "wad/novadoom.wad" artifact/

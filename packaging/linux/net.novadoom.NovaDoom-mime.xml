@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/novadoom-demo">
+    <comment>NovaDoom netdemo files</comment>
+    <glob pattern="*.odd"/>
+    <generic-icon name="net.novadoom.NovaDoom-application-novadoom-demo"/>
+  </mime-type>
+</mime-info>

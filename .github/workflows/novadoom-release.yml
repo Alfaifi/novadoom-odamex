@@ -72,8 +72,8 @@ jobs:
       - name: Prepare artifact
         run: |
           mkdir -p artifact
-          cp -R build/client/odamex.app artifact/NovaDoom.app
-          cp build/server/odasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
+          cp -R build/client/novadoom.app artifact/NovaDoom.app
+          cp build/server/novasrv artifact/NovaDoom.app/Contents/MacOS/novasrv
 
           # Copy soundfonts to MacOS folder (where the app expects them)
           mkdir -p artifact/NovaDoom.app/Contents/MacOS/soundfonts
@@ -122,7 +122,7 @@ jobs:
 
           # Step 1: Copy ALL direct Homebrew dependencies from executables
           echo "=== Copying direct dependencies from executables ==="
-          EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/odamex"
+          EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/novadoom"
           SERVER="artifact/NovaDoom.app/Contents/MacOS/novasrv"
 
           for binary in "$EXECUTABLE" "$SERVER"; do
@@ -169,7 +169,7 @@ jobs:
           echo "=== Bundled $(ls -1 "$FRAMEWORKS_DIR"/*.dylib 2>/dev/null | wc -l) libraries ==="
 
           # Fix library paths in the main executable
-          EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/odamex"
+          EXECUTABLE="artifact/NovaDoom.app/Contents/MacOS/novadoom"
           otool -L "$EXECUTABLE" | grep "/opt/homebrew" | awk '{print $1}' | while read dep; do
             libname=$(basename "$dep")
             install_name_tool -change "$dep" "@executable_path/../Frameworks/$libname" "$EXECUTABLE"
@@ -270,7 +270,7 @@ jobs:
             -DUSE_INTERNAL_CURL=OFF \
             -DUSE_INTERNAL_PROTOBUF=OFF \
             -DUSE_INTERNAL_JSONCPP=OFF \
-            -DODAMEX_SKIP_DLL_COPY=ON \
+            -DNOVADOOM_SKIP_DLL_COPY=ON \
             -DSDL2_INCLUDE_DIR=/mingw64/include/SDL2 \
             -DSDL2_LIBRARY=/mingw64/lib/libSDL2.dll.a \
             -DSDL2MAIN_LIBRARY=/mingw64/lib/libSDL2main.a \
@@ -301,8 +301,8 @@ jobs:
           mkdir -p "$ARTIFACT_DIR/soundfonts"
 
           # Copy binaries
-          cp build/client/odamex.exe "$ARTIFACT_DIR/novadoom.exe"
-          cp build/server/odasrv.exe "$ARTIFACT_DIR/novasrv.exe"
+          cp build/client/novadoom.exe "$ARTIFACT_DIR/novadoom.exe"
+          cp build/server/novasrv.exe "$ARTIFACT_DIR/novasrv.exe"
 
           # Copy WAD (committed to repo)
           cp wad/novadoom.wad "$ARTIFACT_DIR/"
@@ -398,7 +398,7 @@ jobs:
           ARTIFACT_DIR="NovaDoom-Server-Linux-x64-${VERSION}"
 
           mkdir -p "$ARTIFACT_DIR"
-          cp build/server/odasrv "$ARTIFACT_DIR/novasrv"
+          cp build/server/novasrv "$ARTIFACT_DIR/novasrv"
           strip "$ARTIFACT_DIR/novasrv"
 
           # Create README
@@ -406,9 +406,9 @@ jobs:
           NovaDoom Server for Linux x64
 
           Installation:
-          1. Copy 'novasrv' to /home/odamex/novadoom-server
-          2. Set permissions: chmod +x /home/odamex/novadoom-server
-          3. Set ownership: chown odamex:odamex /home/odamex/novadoom-server
+          1. Copy 'novasrv' to /home/novadoom/novasrv
+          2. Set permissions: chmod +x /home/novadoom/novasrv
+          3. Set ownership: chown novadoom:novadoom /home/novadoom/novasrv
 
           Based on Odamex - https://odamex.net
           EOF

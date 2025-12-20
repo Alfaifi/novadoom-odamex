@@ -1,33 +1,33 @@
-Set-Variable -Name "CurrentDir" -Value (Get-Location) # cd to the base odamex git path before executing
+Set-Variable -Name "CurrentDir" -Value (Get-Location) # cd to the base novadoom git path before executing
 Set-Variable -Name "CommonDir" -Value "${CurrentDir}\OutCommon"
 Set-Variable -Name "OutX86" -Value "${CurrentDir}\OutX86"
 Set-Variable -Name "OutX64" -Value "${CurrentDir}\OutX64"
-Set-Variable -Name "UnzippedX64" -Value "${CurrentDir}\Odamex-Win-x64"
-Set-Variable -Name "UnzippedX86" -Value "${CurrentDir}\Odamex-Win-x86"
+Set-Variable -Name "UnzippedX64" -Value "${CurrentDir}\NovaDoom-Win-x64"
+Set-Variable -Name "UnzippedX86" -Value "${CurrentDir}\NovaDoom-Win-x86"
 Set-Variable -Name "OutputDir" -Value "${CurrentDir}\Output"
 
 
 if ($env:new_version.length -gt 0)
 {
-    Set-Variable -Name "OdamexVersion" -Value "${env:new_version}"
+    Set-Variable -Name "NovaDoomVersion" -Value "${env:new_version}"
 }
 else
 {
-    Set-Variable -Name "OdamexVersion" -Value "10.6.0"
+    Set-Variable -Name "NovaDoomVersion" -Value "10.6.0"
 }
 
 if ($env:build_number.length -gt 0)
 {
-    Set-Variable -Name "OdamexTestSuffix" -Value "-prerelease.${env:build_number}" # "-prerelease_112"
+    Set-Variable -Name "NovaDoomTestSuffix" -Value "-prerelease.${env:build_number}" # "-prerelease_112"
 }
 else
 {
-    Set-Variable -Name "OdamexTestSuffix" -Value ""
+    Set-Variable -Name "NovaDoomTestSuffix" -Value ""
 }
 
 function UnzipArtifacts {
-    7z.exe x odamex-win64-*.zip "-o${UnzippedX64}"
-    7z.exe x odamex-win32-*.zip "-o${UnzippedX86}"
+    7z.exe x novadoom-win64-*.zip "-o${UnzippedX64}"
+    7z.exe x novadoom-win32-*.zip "-o${UnzippedX86}"
 }
 
 # Lay files out in a path that Inno Setup expects.
@@ -44,7 +44,7 @@ function BuildOutCommon {
         -Destination "${CommonDir}\3RD-PARTY-LICENSES.txt"
     Copy-Item -Force -Path "${CurrentDir}\CHANGELOG" `
         -Destination "${CommonDir}\CHANGELOG.txt"
-    Copy-Item -Force -Path "${CurrentDir}\odamex-installed.txt" `
+    Copy-Item -Force -Path "${CurrentDir}\novadoom-installed.txt" `
         -Destination "${CommonDir}"
     Copy-Item -Force -Path "${CurrentDir}\config-samples\*" `
         -Destination "${CommonDir}\config-samples"
@@ -62,7 +62,7 @@ function BuildOutCommon {
         -Destination "${CommonDir}\MAINTAINERS.txt"
     Copy-Item -Force -Path "${CurrentDir}\README" `
         -Destination "${CommonDir}\README.txt"
-    Copy-Item -Force -Path "${UnzippedX64}\odamex.wad" `
+    Copy-Item -Force -Path "${UnzippedX64}\novadoom.wad" `
         -Destination "${CommonDir}"
     Copy-Item -Force -Path "${UnzippedX64}\licenses\COPYING.SDL2_mixer.txt" `
         -Destination "${CommonDir}\licenses"
@@ -98,17 +98,17 @@ function BuildOutX86 {
         "${UnzippedX86}\libogg-0.dll", `
         "${UnzippedX86}\libopus-0.dll", `
         "${UnzippedX86}\libopusfile-0.dll", `
-        "${UnzippedX86}\odamex.exe", `
+        "${UnzippedX86}\novadoom.exe", `
         "${UnzippedX86}\SDL2_mixer.dll", `
         "${UnzippedX86}\SDL2.dll", `
-        "${UnzippedX86}\odalaunch.exe", `
+        "${UnzippedX86}\novalaunch.exe", `
         "${UnzippedX86}\wxbase315u_net_vc14x.dll", `
         "${UnzippedX86}\wxbase315u_vc14x.dll", `
         "${UnzippedX86}\wxbase315u_xml_vc14x.dll", `
         "${UnzippedX86}\wxmsw315u_core_vc14x.dll", `
         "${UnzippedX86}\wxmsw315u_html_vc14x.dll", `
         "${UnzippedX86}\wxmsw315u_xrc_vc14x.dll", `
-        "${UnzippedX86}\odasrv.exe" `
+        "${UnzippedX86}\novasrv.exe" `
         -Destination "${OutX86}\"
 
     Copy-Item -Force -Path `
@@ -132,17 +132,17 @@ function BuildOutX64 {
         "${UnzippedX64}\libogg-0.dll", `
         "${UnzippedX64}\libopus-0.dll", `
         "${UnzippedX64}\libopusfile-0.dll", `
-        "${UnzippedX64}\odamex.exe", `
+        "${UnzippedX64}\novadoom.exe", `
         "${UnzippedX64}\SDL2_mixer.dll", `
         "${UnzippedX64}\SDL2.dll", `
-        "${UnzippedX64}\odalaunch.exe", `
+        "${UnzippedX64}\novalaunch.exe", `
         "${UnzippedX64}\wxbase315u_net_vc14x_x64.dll", `
         "${UnzippedX64}\wxbase315u_vc14x_x64.dll", `
         "${UnzippedX64}\wxbase315u_xml_vc14x_x64.dll", `
         "${UnzippedX64}\wxmsw315u_core_vc14x_x64.dll", `
         "${UnzippedX64}\wxmsw315u_html_vc14x_x64.dll", `
         "${UnzippedX64}\wxmsw315u_xrc_vc14x_x64.dll", `
-        "${UnzippedX64}\odasrv.exe" `
+        "${UnzippedX64}\novasrv.exe" `
         -Destination "${OutX64}\"
 
     Copy-Item -Force -Path `
@@ -158,9 +158,9 @@ function CompileSetup {
 
     New-Item  -Force -ItemType "directory" -Path "${OutputDir}"
     # Generate installer
-    ISCC.exe "${CurrentDir}\installer\windows\odamex.iss" `
-        /DOdamexVersion=${OdamexVersion} `
-        /DOdamexTestSuffix=${OdamexTestSuffix} `
+    ISCC.exe "${CurrentDir}\installer\windows\novadoom.iss" `
+        /DNovaDoomVersion=${NovaDoomVersion} `
+        /DNovaDoomTestSuffix=${NovaDoomTestSuffix} `
         /DSourcePath=${CurrentDir} `
         /O${OutputDir}
 }

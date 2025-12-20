@@ -7,5 +7,5 @@ IFS=$'\n\t'
 
 set -x
 
-docker build -t odamex -f ci/ubuntu-focal.Dockerfile .
-docker run --rm odamex
+docker build -t novadoom -f ci/ubuntu-focal.Dockerfile .
+docker run --rm novadoom

@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +24,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "p_local.h"
 #include "p_lnspec.h"
@@ -1436,7 +1437,7 @@ FUNC(LS_Scroll_Wall)
 	if (arg4)
 	{
 		PrintFmt(PRINT_HIGH,
-		       "Warning: Odamex can only scroll entire sidedefs (special 52)\n");
+		       "Warning: NovaDoom can only scroll entire sidedefs (special 52)\n");
 	}
 	if (arg0)
 	{
@@ -1459,7 +1460,7 @@ FUNC(LS_Line_SetTextureOffset)
 	if (arg4 & 7)
 	{
 		PrintFmt(PRINT_HIGH,
-		       "Warning: Odamex can only offset entire sidedefs (special 53)\n");
+		       "Warning: NovaDoom can only offset entire sidedefs (special 53)\n");
 	}
 	if (arg0 && arg3 <= 1)
 	{

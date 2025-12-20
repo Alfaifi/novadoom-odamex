@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=NovaDoom Server
+Exec=novasrv
+Icon=novasrv
+Type=Application
+Terminal=true
+Comment=Run a NovaDoom game server
+Categories=Network;

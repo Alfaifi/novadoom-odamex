@@ -9,10 +9,10 @@ set port 10599
 proc startServer {} {
  global server serverout port servercon
 
- set server [open odasrv.con w]
- set servercon [open "|./odasrv -port $port +logfile odasrv.log -confile odasrv.con > tmp" w]
+ set server [open novasrv.con w]
+ set servercon [open "|./novasrv -port $port +logfile novasrv.log -confile novasrv.con > tmp" w]
  wait
- set serverout [open odasrv.log r]
+ set serverout [open novasrv.log r]
 
  server "sv_usemasters 0"
  server "sv_gametype 1"
@@ -28,14 +28,14 @@ proc startServer {} {
 proc startClient { {serverPort none} } {
  global client clientout clientcon
 
- set client [open odamex.con w]
+ set client [open novadoom.con w]
 
  if { $serverPort != "none" } {
-  set clientcon [open "|./odamex -port 10501 -connect localhost:$serverPort -nosound -novideo +logfile odamex.log -confile odamex.con > tmp" w]
+  set clientcon [open "|./novadoom -port 10501 -connect localhost:$serverPort -nosound -novideo +logfile novadoom.log -confile novadoom.con > tmp" w]
  } else {
-  set clientcon [open "|./odamex -port 10501 -nosound -novideo +logfile odamex.log -confile odamex.con > tmp" w]
+  set clientcon [open "|./novadoom -port 10501 -nosound -novideo +logfile novadoom.log -confile novadoom.con > tmp" w]
  }
- set clientout [open odamex.log r]
+ set clientout [open novadoom.log r]
 
  wait 5
 

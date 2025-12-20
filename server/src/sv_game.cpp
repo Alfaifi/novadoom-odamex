@@ -5,7 +5,8 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2006 by Randy Heit (ZDoom).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -23,7 +24,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "minilzo.h"
 #include "d_netinf.h"
@@ -62,7 +63,7 @@ gamestate_t 	gamestate = GS_STARTUP;
 bool 			paused;
 bool 			sendpause;				// send a pause event next tic
 
-bool			timingdemo; 			// FIXME : delete this variable for odasrv ?
+bool			timingdemo; 			// FIXME : delete this variable for novasrv ?
 bool	 		viewactive;
 
 bool			network_game;			// Describes if a network game is being played

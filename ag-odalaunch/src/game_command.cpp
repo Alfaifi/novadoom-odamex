@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -83,9 +84,9 @@ int GameCommand::Launch()
 
 	// Add the bin to the path
 #ifdef _WIN32
-	cmd += "odamex.exe";
+	cmd += "novadoom.exe";
 #else
-	cmd += "odamex";
+	cmd += "novadoom";
 #endif
 
 	// The path with bin tacked on is the first arg
@@ -99,7 +100,7 @@ int GameCommand::Launch()
 	argv[argc] = NULL;
 
 #ifdef GCONSOLE
-	// Game consoles will not return from this method if Odamex is successfully
+	// Game consoles will not return from this method if NovaDoom is successfully
 	// launched as the launcher will terminate. On game consoles the main windows
 	// widget states need to be saved before launch or changes will be lost.
 	AG_Driver *drv;
@@ -118,11 +119,11 @@ int GameCommand::Launch()
 	GuiConfig::Save();
 #endif
 
-	// Launch Odamex
+	// Launch NovaDoom
 	if((pid = AG_Execute(*argv, argv)) == -1)
 	{
-		AG_TextErrorS("Failed to launch Odamex.\n"
-			"Please verify that your Odamex path is set correctly.");
+		AG_TextErrorS("Failed to launch NovaDoom.\n"
+			"Please verify that your NovaDoom path is set correctly.");
 		return -1;
 	}
 
@@ -135,8 +136,8 @@ int GameCommand::Launch()
 	// Perform a non-blocking wait to find out if the launch failed.
 	if(AG_WaitOnProcess(pid, AG_EXEC_WAIT_IMMEDIATE) == -1)
 	{
-		AG_TextErrorS("Failed to launch Odamex.\n"
-			"Please verify that your Odamex path is set correctly.");
+		AG_TextErrorS("Failed to launch NovaDoom.\n"
+			"Please verify that your NovaDoom path is set correctly.");
 		return -1;
 	}
 
@@ -155,9 +156,9 @@ void *GameCommand::Cleanup(void *vpPID)
 		AG_ProcessID pid = *(AG_ProcessID*)vpPID;
 
 		if((AG_WaitOnProcess(pid, AG_EXEC_WAIT_INFINITE)) == pid)
-			cout << "Odamex client (" << pid << ") exited cleanly." << endl;
+			cout << "NovaDoom client (" << pid << ") exited cleanly." << endl;
 		else
-			cout << "Odamex client (" << pid << ") exited with error: " << AG_GetError() << endl;
+			cout << "NovaDoom client (" << pid << ") exited with error: " << AG_GetError() << endl;
 
 		// It is most likely that the instance of the GameCommand class that launched
 		// this thread doesn't exist anymore so freeing this here is the only option.

@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -24,7 +25,7 @@
 
 #if defined UNIX && defined HAVE_BACKTRACE && !defined GCONSOLE
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #define CRASH_DIR_LEN 1024
 
@@ -197,9 +198,9 @@ u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
 
 void __libnx_exception_handler(ThreadExceptionDump *ctx)
 {
-	fmt::print(stderr, "FATAL CRASH! See odamex_crash.log for details\n");
+	fmt::print(stderr, "FATAL CRASH! See novadoom_crash.log for details\n");
 
-	FILE *f = fopen("./odamex_crash.log", "w");
+	FILE *f = fopen("./novadoom_crash.log", "w");
 	if (f == NULL) return;
 
 	fmt::fprintf(f, "error_desc: 0x%x\n", ctx->error_desc);

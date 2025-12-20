@@ -5,29 +5,29 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.odalaunch.app</string>
+	<string>net.novadoom.launcher</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>OdaLaunch</string>
+	<string>NovaLaunch</string>
 	<key>CFBundleIconFile</key>
-	<string>odalaunch.icns</string>
+	<string>novalaunch.icns</string>
 	<key>CFBundleName</key>
-	<string>Odalaunch</string>
+	<string>NovaDoom Launcher</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>12.0.0</string>
+	<string>0.0.1</string>
 	<key>CFBundleShortVersionString</key>
-	<string>12.0.0</string>
+	<string>0.0.1</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Copyright © 2006-2025 The Odamex Team</string>
+	<string>Copyright © 2025 NovaDoom</string>
 	<key>CFBundleLongVersionString</key>
-	<string>12.0.0</string>
+	<string>0.0.1</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2006-2025 The Odamex Team</string>
+	<string>Copyright © 2025 NovaDoom</string>
 	<key>LSRequiresCarbon</key>
 	<true/>
 </dict>

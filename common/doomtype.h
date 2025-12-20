@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -420,7 +421,7 @@ public:
 
 forceinline palindex_t translationref_t::tlate(const byte c) const
 {
-	#if ODAMEX_DEBUG
+	#if NOVADOOM_DEBUG
 	if (m_table == NULL)
 		throw CFatalError("translationref_t::tlate() called with NULL m_table");
 	#endif
@@ -498,7 +499,7 @@ forceinline shaderef_t shaderef_t::with(const int mapnum) const
 
 forceinline palindex_t shaderef_t::index(const palindex_t c) const
 {
-	#if ODAMEX_DEBUG
+	#if NOVADOOM_DEBUG
 	if (m_colors == NULL)
 		throw CFatalError("shaderef_t::index(): Bad shaderef_t");
 	if (m_colors->colormap == NULL)
@@ -510,7 +511,7 @@ forceinline palindex_t shaderef_t::index(const palindex_t c) const
 
 forceinline argb_t shaderef_t::shade(const palindex_t c) const
 {
-	#if ODAMEX_DEBUG
+	#if NOVADOOM_DEBUG
 	if (m_colors == NULL)
 		throw CFatalError("shaderef_t::shade(): Bad shaderef_t");
 	if (m_colors->shademap == NULL)

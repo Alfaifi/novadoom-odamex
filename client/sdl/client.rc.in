@@ -6,12 +6,12 @@
 #define VOS_NT  0x00040000L
 #define VS_FF_DEBUG 0x00000001L
 
-#define ODAMEX_DESC "Odamex Client"
-#define ODAMEX_EXE "odamex.exe"
-#define ODAMEX_INTERNAL "odamex"
-#define ODAMEX_NAME "Odamex Client"
+#define NOVADOOM_DESC "NovaDoom Client"
+#define NOVADOOM_EXE "novadoom.exe"
+#define NOVADOOM_INTERNAL "novadoom"
+#define NOVADOOM_NAME "NovaDoom Client"
 
-1 ICON "@CMAKE_SOURCE_DIR@/client/sdl/odamex.ico"
+1 ICON "@CMAKE_SOURCE_DIR@/client/sdl/novadoom.ico"
 2 ICON "@CMAKE_SOURCE_DIR@/client/sdl/odademo.ico"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "@CMAKE_SOURCE_DIR@/client/sdl/manifest.xml"
@@ -35,12 +35,12 @@ FILESUBTYPE 0
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "@PROJECT_COMPANY@"
-      VALUE "FileDescription", ODAMEX_DESC
+      VALUE "FileDescription", NOVADOOM_DESC
       VALUE "FileVersion", "@PROJECT_VERSION@"
-      VALUE "InternalName", ODAMEX_INTERNAL
-      VALUE "LegalCopyright", "ODAMEX and its likeness are Copyright © @PROJECT_COPYRIGHT@ by @PROJECT_COMPANY@."
-      VALUE "OriginalFilename", ODAMEX_EXE
-      VALUE "ProductName", ODAMEX_NAME
+      VALUE "InternalName", NOVADOOM_INTERNAL
+      VALUE "LegalCopyright", "NOVADOOM and its likeness are Copyright Â© @PROJECT_COPYRIGHT@ by @PROJECT_COMPANY@."
+      VALUE "OriginalFilename", NOVADOOM_EXE
+      VALUE "ProductName", NOVADOOM_NAME
       VALUE "ProductVersion", "@PROJECT_VERSION@"
     }
   }

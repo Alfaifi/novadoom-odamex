@@ -3,7 +3,8 @@
 //
 // $Id$
 //
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 // Copyright (C) 2024-2025 by Christian Bernard.
 //
 // This program is free software; you can redistribute it and/or
@@ -21,7 +22,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "odamex.h"
+#include "novadoom.h"
 #include "m_fixed.h"
 #include "actor.h"
 #include "info.h"

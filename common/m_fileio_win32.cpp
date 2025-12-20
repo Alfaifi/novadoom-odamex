@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -28,7 +29,7 @@
 #error "_WIN32 is mutually exclusive with UNIX"
 #endif
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "m_fileio.h"
 
@@ -88,13 +89,13 @@ std::string M_GetUserDir()
 
 	CoTaskMemFree(folderPath);
 
-	return (path / "My Games" / "Odamex").string();
+	return (path / "My Games" / "NovaDoom").string();
 }
 
 std::string M_GetWriteDir()
 {
-	// Has Odamex been installed?
-	std::string installed = M_GetBinaryDir() + PATHSEP "odamex-installed.txt";
+	// Has NovaDoom been installed?
+	std::string installed = M_GetBinaryDir() + PATHSEP "novadoom-installed.txt";
 	if (M_FileExists(installed))
 	{
 		// Does the user folder exist?

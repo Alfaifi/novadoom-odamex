@@ -385,7 +385,7 @@ int main()
 
 	daemon_init();
 
-	printf("Odamex Master Started\n");
+	printf("NovaDoom Master Started\n");
 
 	while (true)
 	{

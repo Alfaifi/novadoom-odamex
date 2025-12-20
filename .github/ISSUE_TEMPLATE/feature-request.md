@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a feature or idea for Odamex
+about: Suggest a feature or idea for NovaDoom
 title: "[FEATURE] Describe Feature Here"
 labels: Type-Feature
 assignees: ''

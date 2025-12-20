@@ -175,7 +175,7 @@ public:
 					{
 						Copy(in, out, 1+ 16);
 						unsigned short type = in.ReadShort();
-						out.WriteShort(type); // todo: if this line is missing, odamex client crashes
+						out.WriteShort(type); // todo: if this line is missing, novadoom client crashes
 						Copy(in, out, 5);
 						if(type == 0x10000/*MF_MISSILE*/)
 						{

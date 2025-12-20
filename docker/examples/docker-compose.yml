@@ -1,15 +1,15 @@
 # use .env later
 services:
-    odamex:
-        container_name: odamex
-        image: "docker.io/odamex-team/odamex-server:testing"
+    novadoom:
+        container_name: novadoom
+        image: "docker.io/novadoom/novadoom-server:testing"
         restart: unless-stopped
         network_mode: host
         volumes:
             - doomIWADS:/wads
             - doomWADS:/other_wads
             - ./configs:/configs:ro
-            - odahome:/home/doomguy/.odamex
+            - novahome:/home/doomguy/.novadoom
         command: >
             -iwad /wads/DOOM2.WAD
             -waddir /other_wads
@@ -28,9 +28,9 @@ volumes:
             o: bind
             type: none
             device: "${DOOM_BASE}/WADS"
-    odahome:
+    novahome:
         driver: local
         driver_opts:
             o: bind
             type: none
-            device: "./odahome"
+            device: "./novahome"

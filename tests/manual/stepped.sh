@@ -1,8 +1,9 @@
 #!/bin/bash
 #
-# Odamex Client-Server demo regression test
+# NovaDoom Client-Server demo regression test
 #
 # Copyright (C) 2006-2025 by The Odamex Team.
+# Portions Copyright (C) 2025 by The NovaDoom Team.
 # Author: Denis Lukianov
 #
 # This script connects a client to a server
@@ -54,7 +55,7 @@ sleep 1
 
 # launch server
 echo "starting server"
-tail -f -s 0.001 $svr | ./odasrv -stepmode > $svro 2> $svre &
+tail -f -s 0.001 $svr | ./novasrv -stepmode > $svro 2> $svre &
 sleep 2
 
 echo sv_gametype	0   >> $svr
@@ -68,13 +69,13 @@ sleep 0.1
 
 # launch client
 echo "starting client"
-tail -f -s 0.001 $cln | ./odamex -nomouse -nosound -stepmode -connect localhost > $clno 2> $clne &
+tail -f -s 0.001 $cln | ./novadoom -nomouse -nosound -stepmode -connect localhost > $clno 2> $clne &
 sleep 2
 echo "set print_stdout 1" >> $cln;
 
 # launch offline client
 echo "starting offline client"
-tail -f -s 0.001 $cln2 | ./odamex -nomouse -nosound -stepmode > $clno2 2> $clne2 &
+tail -f -s 0.001 $cln2 | ./novadoom -nomouse -nosound -stepmode > $clno2 2> $clne2 &
 echo "step" >> $cln2;
 sleep 2
 echo "set print_stdout 1" >> $cln2;

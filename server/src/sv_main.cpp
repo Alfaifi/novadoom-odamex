@@ -4,7 +4,8 @@
 // $Id$
 //
 // Copyright (C) 2000-2006 by Sergey Makovkin (CSDoom .62).
-// Copyright (C) 2006-2025 by The Odamex Team.
+// Copyright (C) 2006-2025 by The Odamex Team
+// Portions Copyright (C) 2025 by The NovaDoom Team.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#include "odamex.h"
+#include "novadoom.h"
 
 #include "win32inc.h"
 #ifdef _WIN32
@@ -1651,8 +1652,8 @@ bool SV_CheckClientVersion(client_t *cl, Players::iterator it)
 		{
 			// Failsafe.
 			msg = fmt::sprintf(
-			    "Your version of Odamex does not match the server %s.\nFor updates, "
-			    "visit https://odamex.net/\n",
+			    "Your version of NovaDoom does not match the server %s.\nFor updates, "
+			    "visit https://novadoom.com/\n",
 			    DOTVERSIONSTR);
 		}
 
@@ -1701,8 +1702,8 @@ static void SV_DisconnectOldClient()
 	{
 		// Failsafe.
 		msg = fmt::sprintf(
-		          "Your version of Odamex does not match the server %s.\nFor updates, "
-		          "visit https://odamex.net/\n",
+		          "Your version of NovaDoom does not match the server %s.\nFor updates, "
+		          "visit https://novadoom.com/\n",
 		          DOTVERSIONSTR);
 	}
 
@@ -3537,7 +3538,7 @@ void SV_SetReady(player_t &player, bool setting, bool silent)
 static void HelpCmd(player_t& player)
 {
 	SV_PlayerPrintFmt(PRINT_HIGH, player.id,
-	                  "odasrv v{}\n\n"
+	                  "novasrv v{}\n\n"
 	                  "This server has no custom commands\n",
 	                  GitShortHash());
 }

@@ -3,18 +3,18 @@
 
 
 
-NS ?= odamex-team
+NS ?= novadoom
 
-IMAGE_NAME ?= odamex-server
-CONTAINER_NAME ?= odamex-server
+IMAGE_NAME ?= novadoom-server
+CONTAINER_NAME ?= novadoom-server
 CONTAINER_INSTANCE ?= default
-REPO_URL ?= https://github.com/odamex/odamex.git
+REPO_URL ?= https://github.com/Alfaifi/novadoom-odamex.git
 
 VCS_REF := $(strip $(shell git rev-parse --short HEAD))
 BUILD_DATE := $(strip $(shell date -u +"%Y-%m-%dT%H:%M:%SZ"))
 VERSION := $(strip $(shell cat VERSION))
 REPO_TAG := $(VERSION)
-ODA_TARGET ?= odasrv
+NOVA_TARGET ?= novasrv
 
 ifndef VERSION
 $(error You need to create a VERSION file to build a release)
