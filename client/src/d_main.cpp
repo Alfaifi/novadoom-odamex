@@ -151,19 +151,7 @@ void M_ModeFlashTestText();
 
 void D_SetPlatform(void)
 {
-#ifdef GCONSOLE
-	#ifdef _XBOX
-		platform = PF_XBOX;
-	#elif defined(GEKKO)
-		platform = PF_WII;
-	#elif defined(__SWITCH__)
-		platform = PF_SWITCH;
-	#else
-		platform = PF_UNKNOWN;
-	#endif
-#else
 	platform = PF_PC;
-#endif
 }
 
 //

@@ -46,7 +46,6 @@ $majminpatchFiles = @(
 '.\CMakeLists.txt',
 '.\common\version.h',
 '.\odalaunch\res\Info.plist',
-'.\switch.cmake',
 '.\tools\upversion\upversion.ini'
 )
 

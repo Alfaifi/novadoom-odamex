@@ -76,11 +76,6 @@ set(PROJECT_COPYRIGHT "2006-2025")
 set(PROJECT_RC_VERSION "0,0,1,0")
 set(PROJECT_COMPANY "NovaDoom")
 
-# Include early required commands for specific systems
-if (NSWITCH)
-	include("switch.cmake" REQUIRED)  # Nintendo Switch
-endif()
-
 # Ensure that we can use folders in projects.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

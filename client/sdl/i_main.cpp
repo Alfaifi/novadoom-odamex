@@ -30,9 +30,6 @@
 // for getuid and geteuid
 #include <unistd.h>
 #include <sys/types.h>
-#ifdef __SWITCH__
-#include "nx_system.h"
-#endif
 #endif
 
 #include <new>
@@ -55,7 +52,7 @@
 #include "z_zone.h"
 
 // Use main() on windows for msvc
-#if defined(_MSC_VER) && !defined(GCONSOLE)
+#if defined(_MSC_VER)
 #    pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
 #endif
 
@@ -78,26 +75,7 @@ void STACK_ARGS call_terms (void)
 		TermFuncs.top().first(), TermFuncs.pop();
 }
 
-#ifdef __SWITCH__
-void STACK_ARGS nx_early_init (void)
-{
-	socketInitializeDefault();
-#ifdef NOVADOOM_DEBUG
-	nxlinkStdio();
-#endif
-}
-void STACK_ARGS nx_early_deinit (void)
-{
-	socketExit();
-}
-#endif
-
-
-#if defined GCONSOLE && !defined __SWITCH__
-int I_Main(int argc, char *argv[])
-#else
 int main(int argc, char *argv[])
-#endif
 {
 	// [AM] Set crash callbacks, so we get something useful from crashes.
 #ifdef NDEBUG
@@ -107,12 +85,7 @@ int main(int argc, char *argv[])
 	try
 	{
 
-#if defined(__SWITCH__)
-		nx_early_init();
-		atterm(nx_early_deinit);
-#endif
-
-#if defined(UNIX) && !defined(GCONSOLE)
+#if defined(UNIX)
 		if(!getuid() || !geteuid())
 			I_FatalError("root user detected, quitting novadoom immediately");
 #endif

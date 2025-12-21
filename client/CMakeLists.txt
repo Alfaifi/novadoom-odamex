@@ -22,20 +22,8 @@ if(WIN32)
   list(APPEND CLIENT_SDL_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/client.rc")
 endif()
 
-# Include console folders if compiling
-if (GCONSOLE)
-  if (NSWITCH)
-    set(CLIENT_DIR ${CLIENT_DIR} switch)  # Nintendo Switch
-    file(GLOB CLIENT_HEADERS ${CLIENT_HEADERS} switch/*.h)
-    file(GLOB CLIENT_SOURCES ${CLIENT_SOURCES} switch/*.cpp)
-    novadoom_target_settings_nx(CLIENT_DIR GLOB)
-  endif()
-endif()
-
-if(NOT GCONSOLE)
-  # Only non-consoles can use the client GUI.
-  file(GLOB CLIENT_GUI_SOURCES gui/*.cpp gui/*.h)
-endif()
+# Client GUI sources
+file(GLOB CLIENT_GUI_SOURCES gui/*.cpp gui/*.h)
 
 # Tag source files with correct directories
 get_target_property(COMMON_SOURCES odamex-common INTERFACE_SOURCES)
@@ -156,16 +144,14 @@ endif()
 # Client target
 if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
 
-  if (NOT GCONSOLE)
-    # Textscreen
-    set(TEXTSCREEN_LIBRARY "textscreen")
-    set(TEXTSCREEN_DIR ../libraries/textscreen)
-    set(TEXTSCREEN_HEADERS ${TEXTSCREEN_DIR}/txt_sdl.h ${TEXTSCREEN_DIR}/txt_main.h)
-    set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.cpp)
+  # Textscreen
+  set(TEXTSCREEN_LIBRARY "textscreen")
+  set(TEXTSCREEN_DIR ../libraries/textscreen)
+  set(TEXTSCREEN_HEADERS ${TEXTSCREEN_DIR}/txt_sdl.h ${TEXTSCREEN_DIR}/txt_main.h)
+  set(TEXTSCREEN_SOURCES ${TEXTSCREEN_DIR}/txt_sdl.cpp)
 
-    include_directories(${TEXTSCREEN_DIR})
-    add_library(${TEXTSCREEN_LIBRARY} STATIC ${TEXTSCREEN_SOURCES} ${TEXTSCREEN_HEADERS})
-  endif()
+  include_directories(${TEXTSCREEN_DIR})
+  add_library(${TEXTSCREEN_LIBRARY} STATIC ${TEXTSCREEN_SOURCES} ${TEXTSCREEN_HEADERS})
 
   if(TARGET SDL::SDL)
     target_link_libraries(${TEXTSCREEN_LIBRARY} SDL::SDL)
@@ -173,11 +159,7 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     target_link_libraries(${TEXTSCREEN_LIBRARY} SDL2::SDL2)
   endif()
 
-  if (NOT GCONSOLE)
-    target_include_directories(${TEXTSCREEN_LIBRARY} PRIVATE ../common)
-  else()
-    include_directories(../common)
-  endif()
+  target_include_directories(${TEXTSCREEN_LIBRARY} PRIVATE ../common)
 
   add_executable(novadoom MACOSX_BUNDLE WIN32
     ${CLIENT_SOURCES} ${CLIENT_SDL_SOURCES} ${COMMON_SOURCES} ${CLIENT_GUI_SOURCES})
@@ -231,23 +213,21 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     target_link_libraries(novadoom SDL2::mixer)
   endif()
 
-  if(NOT GCONSOLE)
-    target_include_directories(novadoom PRIVATE gui)
-    if(USE_INTERNAL_FLTK)
-      target_link_libraries(novadoom fltk::fltk fltk::images)
+  target_include_directories(novadoom PRIVATE gui)
+  if(USE_INTERNAL_FLTK)
+    target_link_libraries(novadoom fltk::fltk fltk::images)
+  else()
+    # Try CMake CONFIG first (vcpkg), then legacy FindFLTK module (Homebrew, system)
+    find_package(FLTK 1.4 CONFIG QUIET)
+    if(TARGET fltk::fltk-shared)
+      target_link_libraries(novadoom fltk::fltk-shared fltk::images-shared)
+      message(STATUS "FLTK found via CMake config")
     else()
-      # Try CMake CONFIG first (vcpkg), then legacy FindFLTK module (Homebrew, system)
-      find_package(FLTK 1.4 CONFIG QUIET)
-      if(TARGET fltk::fltk-shared)
-        target_link_libraries(novadoom fltk::fltk-shared fltk::images-shared)
-        message(STATUS "FLTK found via CMake config")
-      else()
-        # Fall back to legacy FindFLTK module
-        find_package(FLTK REQUIRED)
-        target_include_directories(novadoom PRIVATE ${FLTK_INCLUDE_DIR})
-        target_link_libraries(novadoom ${FLTK_LIBRARIES})
-        message(STATUS "FLTK found via FindFLTK module: ${FLTK_LIBRARIES}")
-      endif()
+      # Fall back to legacy FindFLTK module
+      find_package(FLTK REQUIRED)
+      target_include_directories(novadoom PRIVATE ${FLTK_INCLUDE_DIR})
+      target_link_libraries(novadoom ${FLTK_LIBRARIES})
+      message(STATUS "FLTK found via FindFLTK module: ${FLTK_LIBRARIES}")
     endif()
   endif()
 
@@ -281,8 +261,6 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
     target_link_libraries(novadoom winmm wsock32 shlwapi)
   elseif(APPLE)
     target_link_libraries(novadoom ${APPLE_FRAMEWORKS})
-  elseif(NSWITCH)
-    target_link_libraries(novadoom SDL2 mpg123 modplug vorbisfile vorbis opusfile opus ogg EGL glapi drm_nouveau nx m)
   elseif(SOLARIS)
     target_link_libraries(novadoom socket nsl)
   endif()
@@ -364,8 +342,6 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
         ${CMAKE_CURRENT_BINARY_DIR}/novadoom.app/Contents/MacOS/novadoom)
         " )
     endif()
-  elseif(NSWITCH)
-    odamex_target_postcompile_nx(odamex)
   elseif(WIN32)
     install(TARGETS novadoom
       RUNTIME DESTINATION .

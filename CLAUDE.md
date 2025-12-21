@@ -100,4 +100,3 @@ The project also has demo playback tests for vanilla compatibility (requires enc
 ## Platform Support
 
 Primary: Windows, macOS, Linux
-Additional: Nintendo Switch (`switch.cmake`)
