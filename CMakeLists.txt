@@ -198,12 +198,6 @@ if(NOT BUILD_CLIENT AND NOT BUILD_SERVER AND NOT BUILD_MASTER AND NOT BUILD_LAUN
   message(FATAL_ERROR "No target chosen, doing nothing.")
 endif()
 
-# Disable the ag-odalaunch target completely: -DNO_AG-NOVALAUNCH_TARGET
-# This is only really useful when setting up a universal build.
-if(NOT NO_AG-NOVALAUNCH_TARGET)
-  add_subdirectory(ag-odalaunch)
-endif()
-
 # Packaging options.
 # TODO: Integrate OSX stuff into here.
 if(NOT APPLE)

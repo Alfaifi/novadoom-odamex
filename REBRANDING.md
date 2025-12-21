@@ -57,7 +57,6 @@ New NovaDoom icons are located in `icons/`:
 | `client/CMakeLists.txt` | Done - novadoom.icns, net.novadoom.client |
 | `odalaunch/res/Info.plist` | Done - net.novadoom.launcher |
 | `odalaunch/CMakeLists.txt` | Done - NovaLaunch, net.novadoom.launcher |
-| `ag-odalaunch/CMakeLists.txt` | Done - AG-NovaLaunch, net.novadoom.ag-launcher |
 
 ### Windows Installer - COMPLETED
 
@@ -98,7 +97,6 @@ New NovaDoom icons are located in `icons/`:
 | `media/novalaunch.icns` | Done |
 | `media/icon_novalaunch_*.png` | Done |
 | `odalaunch/res/novalaunch.icns` | Done |
-| `ag-odalaunch/res/novalaunch.icns` | Done |
 
 ### Embedded Icon in Code - COMPLETED
 
@@ -131,8 +129,6 @@ New NovaDoom icons are located in `icons/`:
 - `odalaunch/src/dlg_main.cpp` - All menu URLs
 - `odalaunch/res/xrc_resource.xrc` - About dialog URL
 - `odalaunch/res/gui_project.fbp` - Form builder URL
-- `ag-odalaunch/src/agol_about.cpp` - About dialog URL
-- `ag-odalaunch/src/agol_main.cpp` - Bug report URL
 - `CMakeLists.txt` - Debian package homepage
 - `docker/Makefile` - Repository URL
 - `docker/examples/configs/config.cfg` - Wiki and website URLs
