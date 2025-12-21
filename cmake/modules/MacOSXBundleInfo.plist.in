@@ -34,5 +34,16 @@
 	<string>NSApplication</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>NovaDoom Connect</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>novadoom</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

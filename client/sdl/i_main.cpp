@@ -155,22 +155,56 @@ int main(int argc, char *argv[])
 			CON.open(CON_FILE, std::ios::in);
 		}
 
-		// denis - if argv[1] starts with "odamex://"
+		// Handle novadoom:// protocol URLs (e.g., novadoom://connect/host:port?password=xxx)
 		if(argc == 2 && argv && argv[1])
 		{
-			static constexpr std::string_view protocol = "odamex://";
+			static constexpr std::string_view protocol = "novadoom://";
 			std::string_view uri = argv[1];
 
 			if(uri.substr(0, protocol.length()) == protocol)
 			{
-				std::string_view location = uri.substr(protocol.length());
-				size_t term = location.find_first_of('/');
+				std::string_view remainder = uri.substr(protocol.length());
 
-				if(term == std::string::npos)
-					term = location.length();
+				// Check for "connect/" prefix (optional, for future extensibility)
+				static constexpr std::string_view connect_prefix = "connect/";
+				if(remainder.substr(0, connect_prefix.length()) == connect_prefix)
+				{
+					remainder = remainder.substr(connect_prefix.length());
+				}
 
-				Args.AppendArg("-connect");
-				Args.AppendArg(std::string(location.substr(0, term)).c_str());
+				// Split on '?' to separate host:port from query params
+				size_t query_pos = remainder.find('?');
+				std::string_view host_port = remainder.substr(0, query_pos);
+				std::string_view query = (query_pos != std::string::npos)
+					? remainder.substr(query_pos + 1)
+					: std::string_view{};
+
+				// Remove any trailing slashes from host:port
+				while(!host_port.empty() && host_port.back() == '/')
+					host_port.remove_suffix(1);
+
+				if(!host_port.empty())
+				{
+					Args.AppendArg("-connect");
+					Args.AppendArg(std::string(host_port).c_str());
+
+					// Parse password from query string (password=xxx)
+					static constexpr std::string_view pwd_prefix = "password=";
+					size_t pwd_pos = query.find(pwd_prefix);
+					if(pwd_pos != std::string::npos)
+					{
+						std::string_view password = query.substr(pwd_pos + pwd_prefix.length());
+						// Find end of password value (& or end of string)
+						size_t pwd_end = password.find('&');
+						if(pwd_end != std::string::npos)
+							password = password.substr(0, pwd_end);
+
+						if(!password.empty())
+						{
+							Args.AppendArg(std::string(password).c_str());
+						}
+					}
+				}
 			}
 		}
 
