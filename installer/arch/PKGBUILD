@@ -8,14 +8,12 @@ url="https://novadoom.com/"
 license="GPL"
 conflicts=('novadoom')
 provides=('novadoom')
-depends=('wxgtk' 'sdl' 'sdl_mixer>=1.2.6')
+depends=('sdl2' 'sdl2_mixer')
 makedepends=('subversion')
 source=(novadoom.desktop \
-	novasrv.desktop \
-        novalaunch.desktop )
+	novasrv.desktop)
 md5sums=('b353a68ffb46a61c27272367e625ce50'
-         '937a0effa783659dd2c38f3c3ae109f7'
-         '0e1555286931a74c172582714756298f')
+         '937a0effa783659dd2c38f3c3ae109f7')
 
 _svntrunk=https://github.com/Alfaifi/novadoom-odamex
 _svnmod=novadoom
@@ -37,17 +35,11 @@ sed -i 's|getenv("DOOMWADDIR")|"/usr/share/doom"|g' {client,server}/src/d_main.c
 make || return 1
 make INSTALLDIR=$startdir/pkg/usr/bin install
 
-cd $startdir/src/$_svnmod-build/odalaunch
-make || return 1
-cd $startdir/src/$_svnmod-build/
-
 mkdir -p $startdir/pkg/usr/share/applications
-install -m755 -D odalaunch/novalaunch $startdir/pkg/usr/bin/novalaunch
 install -m644 -D novadoom.wad $startdir/pkg/usr/share/doom/novadoom.wad
 install -m644 -D media/icon_novadoom_96.png $startdir/pkg/usr/share/pixmaps/novadoom.png
 install -m644 -D media/icon_novasrv_96.png $startdir/pkg/usr/share/pixmaps/novasrv.png
-install -m644 -D media/icon_novalaunch_96.png $startdir/pkg/usr/share/pixmaps/novalaunch.png
-install -m644 $startdir/nova{doom,srv,launch}.desktop $startdir/pkg/usr/share/applications
+install -m644 $startdir/nova{doom,srv}.desktop $startdir/pkg/usr/share/applications
 
 }
 

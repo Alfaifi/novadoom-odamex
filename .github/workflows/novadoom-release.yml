@@ -54,7 +54,6 @@ jobs:
             -DUSE_INTERNAL_DEUTEX=OFF \
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
-            -DBUILD_LAUNCHER=OFF \
             -DBUILD_MASTER=OFF
 
       - name: Build
@@ -278,7 +277,6 @@ jobs:
             -DSDL2_MIXER_LIBRARY=/mingw64/lib/libSDL2_mixer.dll.a \
             -DBUILD_CLIENT=ON \
             -DBUILD_SERVER=ON \
-            -DBUILD_LAUNCHER=OFF \
             -DBUILD_MASTER=OFF
 
       - name: Build
@@ -374,7 +372,6 @@ jobs:
             -DUSE_LTO=ON \
             -DBUILD_CLIENT=OFF \
             -DBUILD_SERVER=ON \
-            -DBUILD_LAUNCHER=OFF \
             -DBUILD_MASTER=OFF \
             -DENABLE_PORTMIDI=OFF \
             -DENABLE_FLUIDSYNTH=OFF \

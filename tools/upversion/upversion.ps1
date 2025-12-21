@@ -45,7 +45,6 @@ $majminpatchFiles = @(
 '.\README',
 '.\CMakeLists.txt',
 '.\common\version.h',
-'.\odalaunch\res\Info.plist',
 '.\tools\upversion\upversion.ini'
 )
 
@@ -54,7 +53,6 @@ $majminpatchCfgs = Get-ChildItem '.\config-samples' -Filter "*.cfg"
 $yearFiles = (Get-ChildItem . -Recurse -File) | ? {($_.FullName -notmatch "build") -and ($_.FullName -notmatch "out") -and ($_.FullName -notmatch "libraries")}
 
 $majminpatchCommaFiles = @(
-'.\odalpapi\net_packet.h',
 '.\common\version.h'
 )
 

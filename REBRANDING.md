@@ -19,7 +19,7 @@ New NovaDoom icons are located in `icons/`:
 |---------|-----|--------|
 | `odamex` | `novadoom` | Done |
 | `odasrv` | `novasrv` | Done |
-| `odalaunch` | `novalaunch` | Done |
+| `odalaunch` | Removed | Replaced with Tauri-based launcher (novalaunch-tauri/) |
 | `odamex.wad` | `novadoom.wad` | Done |
 
 ### Core Branding Files - COMPLETED
@@ -48,15 +48,12 @@ New NovaDoom icons are located in `icons/`:
 |------|--------|
 | `client/sdl/client.rc.in` | Done - Updated to NovaDoom Client |
 | `server/win32/server.rc.in` | Done - Updated to NovaDoom Server |
-| `odalaunch/res/odalaunch.rc.in` | Done - Updated to NovaDoom Launcher |
 
 ### macOS Bundle Config - COMPLETED
 
 | File | Status |
 |------|--------|
 | `client/CMakeLists.txt` | Done - novadoom.icns, net.novadoom.client |
-| `odalaunch/res/Info.plist` | Done - net.novadoom.launcher |
-| `odalaunch/CMakeLists.txt` | Done - NovaLaunch, net.novadoom.launcher |
 
 ### Windows Installer - COMPLETED
 
@@ -70,12 +67,10 @@ New NovaDoom icons are located in `icons/`:
 |------|--------|
 | `packaging/linux/net.novadoom.NovaDoom.Client.desktop` | Done |
 | `packaging/linux/net.novadoom.NovaDoom.Server.desktop` | Done |
-| `packaging/linux/net.novadoom.NovaDoom.Launcher.desktop` | Done |
 | `packaging/linux/net.novadoom.NovaDoom-mime.xml` | Done |
 | `packaging/linux/net.novadoom.NovaDoom.metainfo.xml` | Done |
 | `packaging/flatpak/net.novadoom.NovaDoom.yml` | Done |
 | `installer/arch/novadoom.desktop` | Done |
-| `installer/arch/novalaunch.desktop` | Done |
 | `installer/arch/novasrv.desktop` | Done |
 
 ---
@@ -94,9 +89,6 @@ New NovaDoom icons are located in `icons/`:
 | `media/icon_novadoom_96.png` | Done |
 | `media/novasrv.icns` | Done |
 | `media/icon_novasrv_*.png` | Done |
-| `media/novalaunch.icns` | Done |
-| `media/icon_novalaunch_*.png` | Done |
-| `odalaunch/res/novalaunch.icns` | Done |
 
 ### Embedded Icon in Code - COMPLETED
 
@@ -126,9 +118,6 @@ New NovaDoom icons are located in `icons/`:
 - `server/src/sv_main.cpp` - Version mismatch messages
 - `client/src/cl_demo.cpp` - Demo version messages
 - `common/m_stacktrace.cpp` - Error reporting URL
-- `odalaunch/src/dlg_main.cpp` - All menu URLs
-- `odalaunch/res/xrc_resource.xrc` - About dialog URL
-- `odalaunch/res/gui_project.fbp` - Form builder URL
 - `CMakeLists.txt` - Debian package homepage
 - `docker/Makefile` - Repository URL
 - `docker/examples/configs/config.cfg` - Wiki and website URLs
@@ -139,7 +128,7 @@ New NovaDoom icons are located in `icons/`:
 - `CLAUDE.md` - Clone URL
 - Removed old `README` file (using `README.md` only)
 
-**Master Servers** (in `server/src/sv_master.cpp` and `odalaunch/src/oda_defs.h`):
+**Master Servers** (in `server/src/sv_master.cpp`):
 - Kept `master1.odamex.net` as fallback for compatibility
 
 ---
@@ -161,24 +150,22 @@ New NovaDoom icons are located in `icons/`:
 | 216 | `CPACK_PACKAGE_INSTALL_DIRECTORY Odamex` → `NovaDoom` | Pending |
 | 221 | `CPACK_COMPONENT_CLIENT_DISPLAY_NAME "Odamex"` → `"NovaDoom"` | Pending |
 | 223 | `"Odamex Dedicated Server"` → `"NovaDoom Dedicated Server"` | Pending |
-| 225 | `"Odalaunch Odamex Server Browser..."` → `"NovaDoom Launcher..."` | Pending |
+| 225 | Launcher component removed | N/A |
 | 241, 244 | `odamex` directory → `novadoom` | Pending |
 | 262 | `CPACK_PACKAGE_VENDOR` → `"NovaDoom Team"` | Pending |
 | 267 | `CPACK_DEBIAN_PACKAGE_HOMEPAGE` → Your URL | Pending |
 
-### Target CMakeLists - PENDING
+### Target CMakeLists - COMPLETED
 
-**Client:** `client/CMakeLists.txt`
+**Client:** `client/CMakeLists.txt` - Done
 - Executable name `odamex` → `novadoom`
 
-**Server:** `server/CMakeLists.txt`
-- Line 40: `add_executable(odasrv ...)` → `add_executable(novasrv ...)`
-- Line 97: Error message update
+**Server:** `server/CMakeLists.txt` - Done
+- `add_executable(odasrv ...)` → `add_executable(novasrv ...)`
 
-**Launcher:** `odalaunch/CMakeLists.txt`
-- Line 55: `add_executable(odalaunch ...)` → `add_executable(novalaunch ...)`
+**Launcher:** Removed (replaced with Tauri-based launcher in `novalaunch-tauri/`)
 
-**WAD:** `wad/CMakeLists.txt` - DONE
+**WAD:** `wad/CMakeLists.txt` - Done
 
 ---
 
@@ -220,17 +207,22 @@ Internal functions like `getOdaMobjinfo()` can remain unchanged as they're not u
 | `client/sdl/odamex.ico` | `client/sdl/novadoom.ico` | Done |
 | `media/odamex.icns` | `media/novadoom.icns` | Done |
 | `media/odasrv.icns` | `media/novasrv.icns` | Done |
-| `media/odalaunch.icns` | `media/novalaunch.icns` | Done |
 | `media/icon_odamex_*.png` | `media/icon_novadoom_*.png` | Done |
 | `media/icon_odasrv_*.png` | `media/icon_novasrv_*.png` | Done |
-| `media/icon_odalaunch_*.png` | `media/icon_novalaunch_*.png` | Done |
 | `installer/windows/odamex.iss` | `installer/windows/novadoom.iss` | Done |
 | `installer/arch/odamex.desktop` | `installer/arch/novadoom.desktop` | Done |
-| `installer/arch/odalaunch.desktop` | `installer/arch/novalaunch.desktop` | Done |
 | `installer/arch/odasrv.desktop` | `installer/arch/novasrv.desktop` | Done |
 | `packaging/linux/net.odamex.Odamex.*.desktop` | `packaging/linux/net.novadoom.NovaDoom.*.desktop` | Done |
 | `packaging/linux/net.odamex.Odamex.metainfo.xml` | `packaging/linux/net.novadoom.NovaDoom.metainfo.xml` | Done |
 | `packaging/flatpak/net.odamex.Odamex.yml` | `packaging/flatpak/net.novadoom.NovaDoom.yml` | Done |
+
+## Directories Removed
+
+| Directory | Reason |
+|-----------|--------|
+| `odalaunch/` | Replaced with Tauri-based launcher (`novalaunch-tauri/`) |
+| `odalpapi/` | Server query API no longer needed (web platform handles this) |
+| `ag-odalaunch/` | Legacy Agar-based launcher |
 
 ---
 
@@ -238,6 +230,7 @@ Internal functions like `getOdaMobjinfo()` can remain unchanged as they're not u
 
 The GitHub Actions workflow (`.github/workflows/novadoom-release.yml`):
 - Names the release "NovaDoom" - Done
-- Renames executables to `novadoom.exe` / `novasrv.exe` / `novasrv` - Done
-- Creates `NovaDoom.app` bundle - Done
+- Builds `novadoom` (client) and `novasrv` (server) - Done
+- Creates `NovaDoom.app` bundle for macOS - Done
 - Uses `wad/novadoom.wad` - Done
+- No launcher build (handled separately via Tauri)

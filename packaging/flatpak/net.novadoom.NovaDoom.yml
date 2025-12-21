@@ -51,20 +51,6 @@ modules:
       - type: git
         url: https://github.com/jeremy-rifkin/libdwarf-lite.git
         tag: v2.1.0
-  # NovaLaunch dependencies
-  - name: WxWidgets
-    buildsystem: autotools
-    config-opts:
-      - --enable-unicode
-      - --with-gtk3
-    cleanup:
-      - '/lib/wx'
-      - '/share/aclocal'
-      - '/share/bakefile'
-    sources:
-      - type: archive
-        url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.0.5/wxWidgets-3.0.5.tar.bz2
-        sha256: 8aacd56b462f42fb6e33b4d8f5d40be5abc3d3b41348ea968aa515cc8285d813
   # NovaDoom (combined)
   - name: NovaDoom
     buildsystem: cmake-ninja
@@ -73,10 +59,8 @@ modules:
       - -D BUILD_OR_FAIL=1
       - -D BUILD_CLIENT=1
       - -D BUILD_SERVER=1
-      - -D BUILD_LAUNCHER=1
       - -D BUILD_MASTER=0
       - -D USE_INTERNAL_LIBS=0
-      - -D USE_INTERNAL_WXWIDGETS=1
       - -D USE_INTERNAL_DEUTEX=1
       - -D NOVADOOM_INSTALL_BINDIR=/app/bin
       - -D NOVADOOM_INSTALL_DATADIR=/run/host/usr/share
@@ -86,7 +70,6 @@ modules:
       - chmod +x ./flatpak-post-install.sh
       - "./flatpak-post-install.sh"
       # delete files that cleanup can't see
-      - rm -rf /app/bin/wx*
       - rm -rf /app/lib/cmake
       - rm -rf /app/lib/pkgconfig
       - rm -rf /app/lib64/cmake
