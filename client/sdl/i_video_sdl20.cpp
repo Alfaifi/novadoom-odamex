@@ -138,19 +138,6 @@ ISDL20VideoCapabilities::ISDL20VideoCapabilities() :
 	I_AddSDL20VideoModes(&mModeList, 8);
 	I_AddSDL20VideoModes(&mModeList, 32);
 
-#ifdef __SWITCH__
-	// add some lower res fullscreen modes for scaling
-	mModeList.push_back(IVideoMode(640, 360, 32, WINDOW_Fullscreen));
-	mModeList.push_back(IVideoMode(640, 400, 32, WINDOW_Fullscreen));
-	mModeList.push_back(IVideoMode(640, 480, 32, WINDOW_Fullscreen));
-	mModeList.push_back(IVideoMode(960, 540, 32, WINDOW_Fullscreen));
-
-	mModeList.push_back(IVideoMode(640, 360, 8, WINDOW_Fullscreen));
-	mModeList.push_back(IVideoMode(640, 400, 8, WINDOW_Fullscreen));
-	mModeList.push_back(IVideoMode(640, 480, 8, WINDOW_Fullscreen));
-	mModeList.push_back(IVideoMode(960, 540, 8, WINDOW_Fullscreen));
-#endif
-
 	// always add the following windowed modes (if windowed modes are supported)
 	if (supportsWindowed())
 	{
@@ -883,11 +870,7 @@ bool ISDL20Window::setMode(const IVideoMode& video_mode)
 		argb_t::setChannels(format.getAPos(), format.getRPos(), format.getGPos(), format.getBPos());
 	else
 	{
-#if defined(__SWITCH__)
-		argb_t::setChannels(0, 3, 2, 1);
-#else
 		argb_t::setChannels(3, 2, 1, 0);
-#endif
 	}
 	mVideoMode.bpp = format.getBitsPerPixel();
 

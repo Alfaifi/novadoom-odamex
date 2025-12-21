@@ -137,11 +137,7 @@ void M_FixPathSep(std::string& path)
  */
 std::string M_GetCWD()
 {
-#ifdef __SWITCH__
-	return "./";
-#else
 	return fs::current_path().string();
-#endif
 }
 
 
@@ -403,10 +399,6 @@ std::string M_CleanPath(std::string path)
 
 std::string M_GetUserFileName(const std::string& file)
 {
-#ifdef __SWITCH__
-	std::string path = file;
-	return M_CleanPath(path);
-#else
 	fs::path path(file);
 	// Is absolute path?  If so, stop here.
 	if (path.is_absolute())
@@ -429,7 +421,6 @@ std::string M_GetUserFileName(const std::string& file)
 	path = M_GetWriteDir();
 
 	return (path / file).string();
-#endif
 }
 
 std::string M_GetWriteSubDir(std::string_view folder)
@@ -465,9 +456,6 @@ std::string M_GetNetDemoDir()
 
 std::string M_GetScreenshotFileName(const std::string& file, const std::string& altpath)
 {
-#ifdef __SWITCH__
-	fs::path path = file;
-#else
 	fs::path path;
 	if (!altpath.empty())
 	{
@@ -490,15 +478,11 @@ std::string M_GetScreenshotFileName(const std::string& file, const std::string& 
 		path = M_GetScreenshotDir();
 	}
 	path /= file;
-#endif
 	return M_CleanPath(path.string());
 }
 
 std::string M_GetNetDemoFileName(const std::string& file, const std::string& altpath)
 {
-#ifdef __SWITCH__
-	fs::path path = file;
-#else
 	fs::path path;
 	if (!altpath.empty())
 	{
@@ -521,7 +505,6 @@ std::string M_GetNetDemoFileName(const std::string& file, const std::string& alt
 		path = M_GetNetDemoDir();
 	}
 	path /= file;
-#endif
 	return M_CleanPath(path.string());
 }
 
@@ -667,10 +650,6 @@ std::vector<std::string> M_PWADFilesScanDir(std::string dir)
 
 bool M_GetAbsPath(const std::string& path, std::string& out)
 {
-#ifdef __SWITCH__
-	out = path;
-	return true;
-#else
 	try
 	{
 		out = fs::absolute(path).string();
@@ -681,7 +660,6 @@ bool M_GetAbsPath(const std::string& path, std::string& out)
 		PrintFmt(PRINT_HIGH, "{}: {}\n", __FUNCTION__, e.what());
 		return false;
 	}
-#endif
 }
 
 VERSION_CONTROL(m_fileio_cpp, "$Id$")

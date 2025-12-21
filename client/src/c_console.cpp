@@ -53,10 +53,6 @@
 #include <list>
 #include <algorithm>
 
-#ifdef __SWITCH__
-#include "nx_io.h"
-#endif
-
 #include "cl_demo.h"
 
 extern NetDemo netdemo;
@@ -1996,30 +1992,6 @@ static bool C_HandleKey(const event_t* ev)
 		C_ToggleConsole();
 		return true;
 	}
-
-#ifdef __SWITCH__
-	if (ev->data1 == OKEY_JOY3)
-	{
-		char oldtext[64], text[64], fulltext[65];
-
-		M_StringCopy(text, CmdLine.text.c_str(), 64);
-
-		// Initiate the console
-		NX_SetKeyboard(text, 64);
-
-		// No action if no text or same as earlier
-		if (!strlen(text) || !strcmp(oldtext, text))
-			return true;
-
-				// add command line text to history
-		History.addString(text);
-		History.resetPosition();
-
-		PrintFmt(127, "]{}\n", text);
-		AddCommandString(text);
-		CmdLine.clear();
-	}
-#endif
 
 	// Add modifiers for these keys
 	KeysCtrl = (ev->mod & OMOD_CTRL);

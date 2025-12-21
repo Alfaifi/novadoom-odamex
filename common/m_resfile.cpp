@@ -248,10 +248,6 @@ std::vector<std::string> M_FileSearchDirs()
 	dirs.push_back(M_CleanPath(M_GetBinaryDir() + PATHSEP ".." PATHSEP "Resources"));
 #endif
 
-#ifdef __SWITCH__
-	dirs.push_back("./wads");
-#endif
-
 	// [AM] Search additional paths based on platform
 	D_AddPlatformSearchDirs(dirs);
 

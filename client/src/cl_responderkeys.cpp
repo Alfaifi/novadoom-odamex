@@ -340,18 +340,3 @@ bool Key_IsTabulationKey(int key)
 
     return (keyboard);
 }
-
-/*#ifdef GCONSOLE
-bool FResponderKey::IsOSKeyboardKey(int key)
-{
-    switch (platform)
-    {
-    case PF_SWITCH:
-        return OKEY_JOY3;
-    default:
-        break;
-    }
-    return false;
-}
-#endif
-*/

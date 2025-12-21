@@ -57,9 +57,6 @@ namespace fs = std::filesystem;
 
 std::string M_GetBinaryDir()
 {
-#if defined(__SWITCH__)
-	return "./";
-#else
 	std::string ret;
 
 	if (!Args[0])
@@ -104,7 +101,6 @@ std::string M_GetBinaryDir()
 		return "";
 	else
 		return ret.substr(0, slash);
-#endif
 }
 
 std::string M_GetHomeDir(const std::string& user)
@@ -112,7 +108,6 @@ std::string M_GetHomeDir(const std::string& user)
 	const char* envhome = getenv("HOME");
 	std::string home = (envhome != NULL) ? envhome : "";
 
-#ifndef __SWITCH__
 	if (!home.length())
 	{
 		// try the uid way
@@ -132,7 +127,6 @@ std::string M_GetHomeDir(const std::string& user)
 	{
 		home += PATHSEP;
 	}
-#endif
 
 	return home;
 }

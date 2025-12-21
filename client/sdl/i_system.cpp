@@ -89,15 +89,13 @@
 #include "m_fileio.h"
 #include "txt_main.h"
 
-#ifndef GCONSOLE // I will add this back later -- Hyper_Eye
-	// For libtextscreen to link properly
-	extern "C"
-	{
-	#include "txt_main.h"
-	}
-	#define ENDOOM_W 80
-	#define ENDOOM_H 25
-#endif // GCONSOLE
+// For libtextscreen to link properly
+extern "C"
+{
+#include "txt_main.h"
+}
+#define ENDOOM_W 80
+#define ENDOOM_H 25
 
 EXTERN_CVAR (r_loadicon)
 EXTERN_CVAR (r_showendoom)
@@ -110,11 +108,7 @@ ticcmd_t *I_BaseTiccmd(void)
 
 /* [Russell] - Modified to accomodate a minimal allowable heap size */
 // These values are in megabytes
-#if defined(GCONSOLE) && !defined(__SWITCH__)
-size_t def_heapsize = 16;
-#else
 size_t def_heapsize = 128;
-#endif
 constexpr size_t min_heapsize = 8;
 
 // The size we got back from I_ZoneBase in megabytes
@@ -431,8 +425,6 @@ void I_FinishClockCalibration()
 
 void I_Endoom()
 {
-#ifndef GCONSOLE // I will return to this -- Hyper_Eye
-
 	if (!r_showendoom || Args.CheckParm ("-novideo"))
 		return;
 
@@ -492,7 +484,6 @@ void I_Endoom()
 	TXT_Shutdown();
 
 	in_endoom = false;
-#endif // Hyper_Eye
 }
 
 //

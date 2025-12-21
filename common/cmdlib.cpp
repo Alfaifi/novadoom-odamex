@@ -41,10 +41,6 @@
 
 #include "fmt/ranges.h"
 
-#ifdef __SWITCH__
-#include "nx_system.h"
-#endif
-
 // Safe string copy function that works like OpenBSD's strlcpy().
 // Returns true if the string was not truncated.
 // from Chocolate Doom m_misc.cpp

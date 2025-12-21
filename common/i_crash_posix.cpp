@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 
 
-#if defined UNIX && defined HAVE_BACKTRACE && !defined GCONSOLE
+#if defined UNIX && defined HAVE_BACKTRACE
 
 #include "novadoom.h"
 
@@ -181,54 +181,6 @@ void I_SetCrashDir(const char* crashdir)
 
 	// Copy the crash directory.
 	memcpy(::gCrashDir, crashdir, len);
-}
-
-#endif
-
-#if defined(__SWITCH__)
-
-#include <switch.h>
-#include <stdlib.h>
-
-extern "C"
-{
-
-alignas(16) u8 __nx_exception_stack[0x1000];
-u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
-
-void __libnx_exception_handler(ThreadExceptionDump *ctx)
-{
-	fmt::print(stderr, "FATAL CRASH! See novadoom_crash.log for details\n");
-
-	FILE *f = fopen("./novadoom_crash.log", "w");
-	if (f == NULL) return;
-
-	fmt::fprintf(f, "error_desc: 0x%x\n", ctx->error_desc);
-	for(int i = 0; i < 29; i++)
-		fmt::fprintf(f, "[X%d]: 0x%lx\n", i, ctx->cpu_gprs[i].x);
-
-	fmt::fprintf(f, "fp: 0x%lx\n", ctx->fp.x);
-	fmt::fprintf(f, "lr: 0x%lx\n", ctx->lr.x);
-	fmt::fprintf(f, "sp: 0x%lx\n", ctx->sp.x);
-	fmt::fprintf(f, "pc: 0x%lx\n", ctx->pc.x);
-
-	fmt::fprintf(f, "pstate: 0x%x\n", ctx->pstate);
-	fmt::fprintf(f, "afsr0: 0x%x\n", ctx->afsr0);
-	fmt::fprintf(f, "afsr1: 0x%x\n", ctx->afsr1);
-	fmt::fprintf(f, "esr: 0x%x\n", ctx->esr);
-
-	fmt::fprintf(f, "far: 0x%lx\n", ctx->far.x);
-
-	fclose(f);
-}
-}
-
-void I_SetCrashCallbacks()
-{
-}
-
-void I_SetCrashDir(const char* crashdir)
-{
 }
 
 #endif

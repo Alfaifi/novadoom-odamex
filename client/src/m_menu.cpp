@@ -757,11 +757,7 @@ void M_SaveSelect (int choice)
 	saveSlot = choice;
 	M_StringCopy(saveOldString, savegamestrings[choice], SAVESTRINGSIZE);
 
-	// If on a game console, auto-fill with date and time to save name
-
-#ifndef GCONSOLE
 	if (!LoadSavegameMenu[choice].status)
-#endif
 	{
 		strncpy(savegamestrings[choice], asctime(lt) + 4, 20);
 	}
