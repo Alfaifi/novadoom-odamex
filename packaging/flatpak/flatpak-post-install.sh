@@ -51,8 +51,5 @@ oda_install Client novadoom client
 # Server app
 oda_install Server novasrv server
 
-# Launcher app
-oda_install Launcher novalaunch odalaunch
-
 # Install helper script
 install -c packaging/flatpak/select-exe.sh /app/bin/select-exe
