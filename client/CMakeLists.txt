@@ -283,6 +283,11 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   set(MACOSX_BUNDLE_ICON_FILE novadoom.icns)
   set(MACOSX_BUNDLE_GUI_IDENTIFIER net.novadoom.client)
 
+  # Use custom Info.plist template that includes URL scheme handler (novadoom://)
+  set_target_properties(novadoom PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/cmake/modules/MacOSXBundleInfo.plist.in"
+  )
+
   if(APPLE)
     add_custom_command(
       TARGET novadoom
