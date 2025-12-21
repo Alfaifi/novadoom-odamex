@@ -919,6 +919,7 @@ void P_LoadThings (int lump)
 
 		// [RH] Need to translate the spawn flags to Hexen format.
 		short flags = LESHORT(mt->options);
+		if (flags & BTF_RESERVED || demoplayback) flags &= BTF_RESERVED_MASK;
 		mt2.flags = (short)((flags & 0xf) | 0x7e0);
 		if (flags & BTF_NOTSINGLE)
 		{
