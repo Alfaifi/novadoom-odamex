@@ -1255,6 +1255,16 @@ static struct AmbientSound {
 
 void S_HashSounds()
 {
+	if (S_sfx.empty())
+		return;
+
+	if (S_sfx.size() == 1)
+	{
+		S_sfx[0].index = 0;
+		S_sfx[0].next  = ~0u;
+		return;
+	}
+
 	// Mark all buckets as empty
 	for (auto& sfx : S_sfx)
 		sfx.index = ~0;
