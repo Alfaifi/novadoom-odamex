@@ -345,12 +345,14 @@ void S_ParseSndInfo()
 	}
 	S_HashSounds();
 
-	CLIENT_ONLY(({
-		extern int sfx_empty, sfx_noway, sfx_oof;
+	CLIENT_ONLY(
+		extern int sfx_empty;
+		extern int sfx_noway;
+		extern int sfx_oof;
 
 		sfx_empty = W_CheckNumForName("dsempty");
 		sfx_noway = S_FindSoundByLump(W_CheckNumForName("dsnoway"));
 		sfx_oof = S_FindSoundByLump(W_CheckNumForName("dsoof"));
-	}));
+	);
 
 }
