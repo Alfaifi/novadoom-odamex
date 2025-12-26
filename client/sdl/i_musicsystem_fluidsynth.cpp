@@ -164,7 +164,6 @@ FluidSynthMusicSystem::FluidSynthMusicSystem() : m_mutex()
 		interpMethod = FLUID_INTERP_7THORDER;
 		break;
 	}
-	fluid_settings_setint(m_settings, "synth.interpolation", interpMethod);
 
 	// Create synthesizer
 	m_synth = new_fluid_synth(m_settings);
@@ -175,6 +174,10 @@ FluidSynthMusicSystem::FluidSynthMusicSystem() : m_mutex()
 		m_settings = nullptr;
 		return;
 	}
+
+	// Set interpolation method on the synth (FluidSynth 2.x API)
+	// -1 applies to all MIDI channels
+	fluid_synth_set_interp_method(m_synth, -1, interpMethod);
 
 	// Configure reverb (GZDoom defaults)
 	fluid_synth_reverb_on(m_synth, -1, snd_fluidsynthreverb ? 1 : 0);
@@ -229,7 +232,7 @@ FluidSynthMusicSystem::~FluidSynthMusicSystem()
 	if (m_synth)
 	{
 		if (m_soundfontId >= 0)
-			fluid_synth_sfunload(m_synth, m_soundfontId, 1);
+			fluid_synth_sfunload(m_synth, m_soundfontId, 0);  // reset=0 to avoid "No preset found" warnings
 		delete_fluid_synth(m_synth);
 		m_synth = nullptr;
 	}
@@ -302,6 +305,8 @@ bool FluidSynthMusicSystem::_LoadSoundfont()
 		return false;
 	}
 
+	// Load soundfont with reset=1 (like GZDoom does)
+	// This automatically sets up default presets for all channels
 	m_soundfontId = fluid_synth_sfload(m_synth, fullPath.c_str(), 1);
 	if (m_soundfontId < 0)
 	{
@@ -357,10 +362,15 @@ void FluidSynthMusicSystem::_StopSong()
 		m_player = nullptr;
 	}
 
-	// Reset all channels
+	// Stop all notes on all channels (without resetting program/bank selections)
+	// Using all_notes_off instead of system_reset to avoid "No preset found" warnings
 	if (m_synth)
 	{
-		fluid_synth_system_reset(m_synth);
+		for (int chan = 0; chan < 16; chan++)
+		{
+			fluid_synth_all_notes_off(m_synth, chan);
+			fluid_synth_all_sounds_off(m_synth, chan);
+		}
 	}
 }
 

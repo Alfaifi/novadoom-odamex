@@ -43,6 +43,12 @@
 #undef main
 #endif // WIN32
 
+// On macOS, SDLMain.m provides the entry point and calls SDL_main
+#ifdef __APPLE__
+#define main SDL_main
+extern "C" int SDL_main(int argc, char *argv[]);
+#endif
+
 
 #include "m_argv.h"
 #include "m_fileio.h"

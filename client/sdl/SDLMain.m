@@ -52,6 +52,7 @@ static int    gArgc;
 static char  **gArgv;
 static bool   gFinderLaunch;
 static bool   gCalledAppMainline = false;
+static bool   gURLProcessed = false;  /* Set when URL has been parsed in main() */
 
 static NSString *getApplicationName(void)
 {
@@ -76,10 +77,12 @@ static NSString *getApplicationName(void)
 @end
 #endif
 
-@interface SDLApplication : NSApplication
+/* Custom application class to handle quit properly - renamed to avoid conflict
+   with SDL2's own SDLApplication class */
+@interface NovaDoomApplication : NSApplication
 @end
 
-@implementation SDLApplication
+@implementation NovaDoomApplication
 /* Invoked from the Quit menu item */
 - (void)terminate:(id)sender
 {
@@ -215,7 +218,7 @@ static void CustomApplicationMain (int argc, char **argv)
     SDLMain				*sdlMain;
 
     /* Ensure the application object is initialised */
-    [SDLApplication sharedApplication];
+    [NovaDoomApplication sharedApplication];
 
 #ifdef SDL_USE_CPS
     {
@@ -224,7 +227,7 @@ static void CustomApplicationMain (int argc, char **argv)
         if (!CPSGetCurrentProcess(&PSN))
             if (!CPSEnableForegroundOperation(&PSN,0x03,0x3C,0x2C,0x1103))
                 if (!CPSSetFrontProcess(&PSN))
-                    [SDLApplication sharedApplication];
+                    [NovaDoomApplication sharedApplication];
     }
 #endif /* SDL_USE_CPS */
 
@@ -277,6 +280,10 @@ static void CustomApplicationMain (int argc, char **argv)
 
     /* Check if this is a novadoom:// URL (passed as a "file") */
     if ([filename hasPrefix:@"novadoom://"]) {
+        /* Skip if URL was already processed in main() */
+        if (gURLProcessed) {
+            return true;
+        }
         /* Parse the URL and convert to -connect argument */
         NSString *remainder = [filename substringFromIndex:[@"novadoom://" length]];
 
@@ -376,7 +383,6 @@ static void CustomApplicationMain (int argc, char **argv)
             if (gCalledAppMainline) {
                 /* App already started - we can't modify argv anymore */
                 /* The SDL_DROPFILE handler in i_video_sdl20.cpp will handle this */
-                /* Push a synthetic SDL event (SDL will do this automatically for URLs) */
                 return;
             }
 
@@ -527,16 +533,119 @@ int main (int argc, char **argv)
         gArgc = 1;
         gFinderLaunch = YES;
     } else {
-        int i;
-        gArgc = argc;
-        gArgv = (char **) SDL_malloc(sizeof (char *) * (argc+1));
-        for (i = 0; i <= argc; i++)
-            gArgv[i] = argv[i];
-        gFinderLaunch = NO;
+        /* Check if any argument is a novadoom:// URL and parse it */
+        int urlArgIndex = -1;
+        for (int i = 1; i < argc; i++) {
+            if (argv[i] && strncmp(argv[i], "novadoom://", 11) == 0) {
+                urlArgIndex = i;
+                break;
+            }
+        }
+
+        if (urlArgIndex >= 0) {
+            /* Found a novadoom:// URL - parse it and convert to -connect */
+            NSString *urlStr = [NSString stringWithUTF8String:argv[urlArgIndex]];
+            NSString *remainder = [urlStr substringFromIndex:[@"novadoom://" length]];
+
+            /* Remove "connect/" prefix if present */
+            if ([remainder hasPrefix:@"connect/"]) {
+                remainder = [remainder substringFromIndex:[@"connect/" length]];
+            }
+
+            /* Split on '?' to separate host:port from query params */
+            NSRange queryRange = [remainder rangeOfString:@"?"];
+            NSString *hostPort;
+            NSString *query = @"";
+            if (queryRange.location != NSNotFound) {
+                hostPort = [remainder substringToIndex:queryRange.location];
+                query = [remainder substringFromIndex:queryRange.location + 1];
+            } else {
+                hostPort = remainder;
+            }
+
+            /* Remove trailing slashes */
+            while ([hostPort hasSuffix:@"/"]) {
+                hostPort = [hostPort substringToIndex:[hostPort length] - 1];
+            }
+
+            if ([hostPort length] > 0) {
+                const char *hostPortCStr = [hostPort UTF8String];
+
+                /* Allocate gArgv with room for: program, -connect, host:port, [password], NULL */
+                int extraArgs = 2; /* -connect and host:port */
+
+                /* Check for password in query string */
+                NSString *password = nil;
+                NSRange pwdRange = [query rangeOfString:@"password="];
+                if (pwdRange.location != NSNotFound) {
+                    password = [query substringFromIndex:pwdRange.location + [@"password=" length]];
+                    NSRange ampRange = [password rangeOfString:@"&"];
+                    if (ampRange.location != NSNotFound) {
+                        password = [password substringToIndex:ampRange.location];
+                    }
+                    if ([password length] > 0) {
+                        extraArgs++; /* Add room for password */
+                    } else {
+                        password = nil;
+                    }
+                }
+
+                /* Build new argument list: program name, other args (except URL), -connect, host:port, [password] */
+                gArgv = (char **) SDL_malloc(sizeof(char *) * (argc + extraArgs + 1));
+                gArgc = 0;
+
+                /* Copy program name */
+                gArgv[gArgc++] = argv[0];
+
+                /* Copy other arguments except the URL */
+                for (int i = 1; i < argc; i++) {
+                    if (i != urlArgIndex) {
+                        gArgv[gArgc++] = argv[i];
+                    }
+                }
+
+                /* Add -connect argument */
+                char *connectArg = (char *) SDL_malloc(strlen("-connect") + 1);
+                strcpy(connectArg, "-connect");
+                gArgv[gArgc++] = connectArg;
+
+                /* Add host:port argument */
+                char *hostPortArg = (char *) SDL_malloc(strlen(hostPortCStr) + 1);
+                strcpy(hostPortArg, hostPortCStr);
+                gArgv[gArgc++] = hostPortArg;
+
+                /* Add password if present */
+                if (password) {
+                    const char *pwdCStr = [password UTF8String];
+                    char *pwdArg = (char *) SDL_malloc(strlen(pwdCStr) + 1);
+                    strcpy(pwdArg, pwdCStr);
+                    gArgv[gArgc++] = pwdArg;
+                }
+
+                gArgv[gArgc] = NULL;
+                gFinderLaunch = YES;  /* Treat as Finder launch to set up working directory correctly */
+                gURLProcessed = YES;  /* Mark URL as already processed */
+            } else {
+                /* Invalid URL, fall back to default behavior */
+                gArgc = argc;
+                gArgv = (char **) SDL_malloc(sizeof(char *) * (argc + 1));
+                for (int i = 0; i <= argc; i++)
+                    gArgv[i] = argv[i];
+                gFinderLaunch = NO;
+            }
+        } else {
+            /* No URL argument, default behavior */
+            int i;
+            gArgc = argc;
+            gArgv = (char **) SDL_malloc(sizeof (char *) * (argc+1));
+            for (i = 0; i <= argc; i++)
+                gArgv[i] = argv[i];
+            gFinderLaunch = NO;
+        }
     }
 
 #if SDL_USE_NIB_FILE
-    [SDLApplication poseAsClass:[NSApplication class]];
+    [NovaDoomApplication poseAsClass:[NSApplication class]];
     NSApplicationMain (argc, argv);
 #else
     CustomApplicationMain (argc, argv);

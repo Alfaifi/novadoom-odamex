@@ -21,6 +21,10 @@ if(WIN32)
   configure_file(sdl/client.rc.in "${CMAKE_CURRENT_BINARY_DIR}/client.rc" @ONLY)
   list(APPEND CLIENT_SDL_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/client.rc")
 endif()
+if(APPLE)
+  # Include SDLMain.m for macOS - provides Cocoa application delegate for URL scheme handling
+  list(APPEND CLIENT_SDL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/sdl/SDLMain.m")
+endif()
 
 # Client GUI sources
 file(GLOB CLIENT_GUI_SOURCES gui/*.cpp gui/*.h)
@@ -201,13 +205,15 @@ if(TARGET SDL2::SDL2 OR TARGET SDL::SDL)
   target_link_libraries(novadoom odamex-common odaproto tinylibs)
   if(TARGET SDL::SDL)
     target_link_libraries(novadoom SDL::SDL)
-    if(TARGET SDL::SDLmain)
+    # On macOS we provide our own SDLMain.m, so don't link SDLmain
+    if(TARGET SDL::SDLmain AND NOT APPLE)
       target_link_libraries(novadoom SDL::SDLmain)
     endif()
     target_link_libraries(novadoom SDL::mixer)
   else()
     target_link_libraries(novadoom SDL2::SDL2)
-    if(TARGET SDL2::SDL2main)
+    # On macOS we provide our own SDLMain.m, so don't link SDL2main
+    if(TARGET SDL2::SDL2main AND NOT APPLE)
       target_link_libraries(novadoom SDL2::SDL2main)
     endif()
     target_link_libraries(novadoom SDL2::mixer)
