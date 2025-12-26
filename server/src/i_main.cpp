@@ -22,11 +22,12 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "win32inc.h"
 #include "novadoom.h"
 
 #include <stack>
 #include <iostream>
+
+#include "win32inc.h"
 #ifdef _WIN32
     #include "resource.h"
 	#include "mmsystem.h"
