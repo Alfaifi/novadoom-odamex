@@ -44,6 +44,11 @@ novadoom_target_settings(novasrv)
 target_include_directories(novasrv PRIVATE src)
 if(WIN32)
   target_include_directories(novasrv PRIVATE win32)
+
+  # We need to call SetProcessInformation to disable power throttling,
+  # but the API itself doesn't exist until Windows 8.  Here we set the minimum
+  # Windows version to 8.  (Windows Server 2012, BTW)
+  target_compile_definitions(novasrv PRIVATE _WIN32_WINNT=0x0602)
 endif()
 
 target_link_libraries(novasrv fmt::fmt tinylibs ZLIB::ZLIB odamex-common odaproto minilzo cpptrace::cpptrace)

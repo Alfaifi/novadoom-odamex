@@ -22,17 +22,11 @@
 //
 //-----------------------------------------------------------------------------
 
-// We need to call SetProcessInformation to disable power throttling,
-// but the API itself doesn't exist until Windows 8.  Here we set the minimum
-// Windows version to 8.  (Windows Server 2012, BTW)
-#define _WIN32_WINNT 0x0602 // _WIN32_WINNT_WIN8
 #include "win32inc.h"
-
 #include "novadoom.h"
 
 #include <stack>
 #include <iostream>
-
 #ifdef _WIN32
     #include "resource.h"
 	#include "mmsystem.h"
