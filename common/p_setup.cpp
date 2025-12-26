@@ -257,10 +257,8 @@ void P_LoadSegs (int lump, bool isdeepbsp = false)
 		seg_t *li = segs+i;
 		if (isdeepbsp)
 		{
-			mapseg_deepbsp_t *ml = (mapseg_deepbsp_t*) data+i;
-			int v;
-
-			v = LELONG(ml->v1);
+			const mapseg_deepbsp_t *ml = (mapseg_deepbsp_t*) data+i;
+			uint32_t v = LELONG(ml->v1);
 
 			if(v >= numvertexes)
 				I_Error("P_LoadSegs: invalid vertex {}", v);
@@ -278,10 +276,8 @@ void P_LoadSegs (int lump, bool isdeepbsp = false)
 		}
 		else
 		{
-			mapseg_t *ml = (mapseg_t*) data+i;
-			short v;
-
-			v = LESHORT(ml->v1);
+			const mapseg_t *ml = (mapseg_t*) data+i;
+			uint16_t v = LESHORT(ml->v1);
 
 			if(v >= numvertexes)
 				I_Error("P_LoadSegs: invalid vertex {}", v);
