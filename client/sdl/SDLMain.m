@@ -275,6 +275,73 @@ static void CustomApplicationMain (int argc, char **argv)
     if (gCalledAppMainline)  /* app has started, ignore this document. */
         return false;
 
+    /* Check if this is a novadoom:// URL (passed as a "file") */
+    if ([filename hasPrefix:@"novadoom://"]) {
+        /* Parse the URL and convert to -connect argument */
+        NSString *remainder = [filename substringFromIndex:[@"novadoom://" length]];
+
+        /* Remove "connect/" prefix if present */
+        if ([remainder hasPrefix:@"connect/"]) {
+            remainder = [remainder substringFromIndex:[@"connect/" length]];
+        }
+
+        /* Split on '?' to separate host:port from query params */
+        NSRange queryRange = [remainder rangeOfString:@"?"];
+        NSString *hostPort;
+        NSString *query = @"";
+        if (queryRange.location != NSNotFound) {
+            hostPort = [remainder substringToIndex:queryRange.location];
+            query = [remainder substringFromIndex:queryRange.location + 1];
+        } else {
+            hostPort = remainder;
+        }
+
+        /* Remove trailing slashes */
+        while ([hostPort hasSuffix:@"/"]) {
+            hostPort = [hostPort substringToIndex:[hostPort length] - 1];
+        }
+
+        if ([hostPort length] > 0) {
+            /* Add -connect argument */
+            const char *connectArg = "-connect";
+            char *arg1 = (char *) SDL_malloc(strlen(connectArg) + 1);
+            strcpy(arg1, connectArg);
+
+            const char *hostPortCStr = [hostPort UTF8String];
+            char *arg2 = (char *) SDL_malloc(strlen(hostPortCStr) + 1);
+            strcpy(arg2, hostPortCStr);
+
+            char **newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 3));
+            if (newargv) {
+                gArgv = newargv;
+                gArgv[gArgc++] = arg1;
+                gArgv[gArgc++] = arg2;
+
+                /* Check for password in query string */
+                NSRange pwdRange = [query rangeOfString:@"password="];
+                if (pwdRange.location != NSNotFound) {
+                    NSString *password = [query substringFromIndex:pwdRange.location + [@"password=" length]];
+                    NSRange ampRange = [password rangeOfString:@"&"];
+                    if (ampRange.location != NSNotFound) {
+                        password = [password substringToIndex:ampRange.location];
+                    }
+                    if ([password length] > 0) {
+                        const char *pwdCStr = [password UTF8String];
+                        char *arg3 = (char *) SDL_malloc(strlen(pwdCStr) + 1);
+                        strcpy(arg3, pwdCStr);
+                        newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 2));
+                        if (newargv) {
+                            gArgv = newargv;
+                            gArgv[gArgc++] = arg3;
+                        }
+                    }
+                }
+                gArgv[gArgc] = NULL;
+            }
+        }
+        return true;
+    }
+
     temparg = [filename UTF8String];
     arglen = SDL_strlen(temparg) + 1;
     arg = (char *) SDL_malloc(arglen);
@@ -295,6 +362,89 @@ static void CustomApplicationMain (int argc, char **argv)
     return true;
 }
 
+
+/*
+ * Handle URL scheme events (novadoom://connect/host:port)
+ * This is called when clicking a novadoom:// link in the browser
+ */
+- (void)application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls
+{
+    for (NSURL *url in urls) {
+        if ([[url scheme] isEqualToString:@"novadoom"]) {
+            NSString *urlString = [url absoluteString];
+
+            if (gCalledAppMainline) {
+                /* App already started - we can't modify argv anymore */
+                /* The SDL_DROPFILE handler in i_video_sdl20.cpp will handle this */
+                /* Push a synthetic SDL event (SDL will do this automatically for URLs) */
+                return;
+            }
+
+            /* Parse the URL and add to argv */
+            NSString *remainder = [urlString substringFromIndex:[@"novadoom://" length]];
+
+            /* Remove "connect/" prefix if present */
+            if ([remainder hasPrefix:@"connect/"]) {
+                remainder = [remainder substringFromIndex:[@"connect/" length]];
+            }
+
+            /* Split on '?' to separate host:port from query params */
+            NSRange queryRange = [remainder rangeOfString:@"?"];
+            NSString *hostPort;
+            NSString *query = @"";
+            if (queryRange.location != NSNotFound) {
+                hostPort = [remainder substringToIndex:queryRange.location];
+                query = [remainder substringFromIndex:queryRange.location + 1];
+            } else {
+                hostPort = remainder;
+            }
+
+            /* Remove trailing slashes */
+            while ([hostPort hasSuffix:@"/"]) {
+                hostPort = [hostPort substringToIndex:[hostPort length] - 1];
+            }
+
+            if ([hostPort length] > 0) {
+                /* Add -connect argument */
+                const char *connectArg = "-connect";
+                char *arg1 = (char *) SDL_malloc(strlen(connectArg) + 1);
+                strcpy(arg1, connectArg);
+
+                const char *hostPortCStr = [hostPort UTF8String];
+                char *arg2 = (char *) SDL_malloc(strlen(hostPortCStr) + 1);
+                strcpy(arg2, hostPortCStr);
+
+                char **newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 3));
+                if (newargv) {
+                    gArgv = newargv;
+                    gArgv[gArgc++] = arg1;
+                    gArgv[gArgc++] = arg2;
+
+                    /* Check for password in query string */
+                    NSRange pwdRange = [query rangeOfString:@"password="];
+                    if (pwdRange.location != NSNotFound) {
+                        NSString *password = [query substringFromIndex:pwdRange.location + [@"password=" length]];
+                        NSRange ampRange = [password rangeOfString:@"&"];
+                        if (ampRange.location != NSNotFound) {
+                            password = [password substringToIndex:ampRange.location];
+                        }
+                        if ([password length] > 0) {
+                            const char *pwdCStr = [password UTF8String];
+                            char *arg3 = (char *) SDL_malloc(strlen(pwdCStr) + 1);
+                            strcpy(arg3, pwdCStr);
+                            newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 2));
+                            if (newargv) {
+                                gArgv = newargv;
+                                gArgv[gArgc++] = arg3;
+                            }
+                        }
+                    }
+                    gArgv[gArgc] = NULL;
+                }
+            }
+        }
+    }
+}
 
 /* Called when the internal event loop has just started running */
 - (void) applicationDidFinishLaunching: (NSNotification *) note
