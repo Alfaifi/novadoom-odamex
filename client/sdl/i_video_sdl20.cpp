@@ -597,6 +597,68 @@ void ISDL20Window::getEvents()
 			}
 		}
 	}
+
+	// Handle SDL_DROPFILE events (used for URL schemes on macOS)
+	// When user clicks novadoom://connect/host:port, macOS sends it as a drop event
+	SDL_Event drop_events[16];
+	while ((num_events = SDL_PeepEvents(drop_events, 16, SDL_GETEVENT, SDL_DROPFILE, SDL_DROPTEXT)))
+	{
+		for (int i = 0; i < num_events; i++)
+		{
+			const SDL_Event& sdl_ev = drop_events[i];
+			if (sdl_ev.type == SDL_DROPFILE && sdl_ev.drop.file)
+			{
+				std::string dropped = sdl_ev.drop.file;
+				SDL_free(sdl_ev.drop.file);
+
+				// Check for novadoom:// protocol URL
+				static const std::string protocol = "novadoom://";
+				if (dropped.compare(0, protocol.length(), protocol) == 0)
+				{
+					std::string remainder = dropped.substr(protocol.length());
+
+					// Check for "connect/" prefix
+					static const std::string connect_prefix = "connect/";
+					if (remainder.compare(0, connect_prefix.length(), connect_prefix) == 0)
+					{
+						remainder = remainder.substr(connect_prefix.length());
+					}
+
+					// Split on '?' to separate host:port from query params
+					size_t query_pos = remainder.find('?');
+					std::string host_port = remainder.substr(0, query_pos);
+					std::string query = (query_pos != std::string::npos)
+						? remainder.substr(query_pos + 1)
+						: "";
+
+					// Remove trailing slashes
+					while (!host_port.empty() && host_port.back() == '/')
+						host_port.pop_back();
+
+					if (!host_port.empty())
+					{
+						// Parse password from query string (password=xxx)
+						std::string password;
+						static const std::string pwd_prefix = "password=";
+						size_t pwd_pos = query.find(pwd_prefix);
+						if (pwd_pos != std::string::npos)
+						{
+							password = query.substr(pwd_pos + pwd_prefix.length());
+							size_t pwd_end = password.find('&');
+							if (pwd_end != std::string::npos)
+								password = password.substr(0, pwd_end);
+						}
+
+						// Execute connect command
+						if (password.empty())
+							AddCommandString(fmt::format("connect {}", host_port));
+						else
+							AddCommandString(fmt::format("connect {} {}", host_port, password));
+					}
+				}
+			}
+		}
+	}
 }
 
 
