@@ -397,7 +397,11 @@ Root: HKA; Subkey: {#"Software\Classes\" + NovaDoomDemoFile + "\DefaultIcon"}; V
 Root: HKA; Subkey: {#"Software\Classes\" + NovaDoomDemoFile + "\shell\open\command"}; ValueType: string; ValueName: ""; ValueData: """{app}\novadoom.exe"" ""%1"""
 Root: HKA; Subkey: "Software\Classes\Applications\novadoom.exe\SupportedTypes"; ValueType: string; ValueName: {#NovaDoomDemoExt}; ValueData: ""
 
-; novadoom:// URI scheme
-Root: HKA; Subkey: "Software\Classes\novadoom"; ValueType: string; ValueName: ""; ValueData: "URL:NovaDoom Protocol"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\novadoom"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\novadoom\Shell\Open\Command"; ValueType: string; ValueName: ""; ValueData: """{app}\novadoom.exe"" ""%1"""; Flags: uninsdeletekey
+; novadoom:// URI scheme - register in both HKCU and HKCR for maximum compatibility
+; HKCR entries (merged view of HKLM\Software\Classes and HKCU\Software\Classes)
+Root: HKCR; Subkey: "novadoom"; ValueType: string; ValueName: ""; ValueData: "URL:NovaDoom Protocol"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "novadoom"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKCR; Subkey: "novadoom\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: """{app}\novadoom.exe"",0"
+Root: HKCR; Subkey: "novadoom\shell"; ValueType: string; ValueName: ""; ValueData: "open"
+Root: HKCR; Subkey: "novadoom\shell\open"; ValueType: string; ValueName: ""; ValueData: "Open with NovaDoom"
+Root: HKCR; Subkey: "novadoom\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\novadoom.exe"" ""%1"""

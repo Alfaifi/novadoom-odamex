@@ -57,6 +57,85 @@ extern "C" int SDL_main(int argc, char *argv[]);
 #include "c_console.h"
 #include "z_zone.h"
 
+#ifdef _WIN32
+#include "win32inc.h"
+#include <shlwapi.h>
+
+// Register novadoom:// URL protocol handler in Windows Registry
+static bool RegisterURLHandler()
+{
+	char exePath[MAX_PATH];
+	if (GetModuleFileNameA(NULL, exePath, MAX_PATH) == 0)
+		return false;
+
+	// Create the protocol key
+	HKEY hKey;
+	LONG result = RegCreateKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom", 0, NULL,
+		REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+	if (result != ERROR_SUCCESS)
+		return false;
+
+	// Set default value
+	const char* protocolDesc = "URL:NovaDoom Protocol";
+	RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE*)protocolDesc, strlen(protocolDesc) + 1);
+
+	// Set URL Protocol (empty string indicates this is a URL protocol)
+	RegSetValueExA(hKey, "URL Protocol", 0, REG_SZ, (BYTE*)"", 1);
+	RegCloseKey(hKey);
+
+	// Create DefaultIcon key
+	result = RegCreateKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom\\DefaultIcon", 0, NULL,
+		REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+	if (result == ERROR_SUCCESS)
+	{
+		char iconPath[MAX_PATH + 8];
+		snprintf(iconPath, sizeof(iconPath), "\"%s\",0", exePath);
+		RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE*)iconPath, strlen(iconPath) + 1);
+		RegCloseKey(hKey);
+	}
+
+	// Create shell\open\command key
+	result = RegCreateKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom\\shell\\open\\command", 0, NULL,
+		REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+	if (result != ERROR_SUCCESS)
+		return false;
+
+	// Set command: "C:\path\to\novadoom.exe" "%1"
+	char command[MAX_PATH * 2];
+	snprintf(command, sizeof(command), "\"%s\" \"%%1\"", exePath);
+	RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE*)command, strlen(command) + 1);
+	RegCloseKey(hKey);
+
+	return true;
+}
+
+// Unregister novadoom:// URL protocol handler
+static bool UnregisterURLHandler()
+{
+	// Delete the entire novadoom key tree
+	LONG result = RegDeleteTreeA(HKEY_CURRENT_USER, "Software\\Classes\\novadoom");
+	return (result == ERROR_SUCCESS || result == ERROR_FILE_NOT_FOUND);
+}
+
+// Check if URL handler is registered
+static bool IsURLHandlerRegistered()
+{
+	HKEY hKey;
+	LONG result = RegOpenKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom\\shell\\open\\command",
+		0, KEY_READ, &hKey);
+	if (result == ERROR_SUCCESS)
+	{
+		RegCloseKey(hKey);
+		return true;
+	}
+	return false;
+}
+#endif // _WIN32
+
 // Use main() on windows for msvc
 #if defined(_MSC_VER)
 #    pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
@@ -116,6 +195,43 @@ int main(int argc, char *argv[])
 #endif
 			exit(EXIT_SUCCESS);
 		}
+
+#ifdef _WIN32
+		// Handle URL protocol registration commands
+		if (::Args.CheckParm("--register-url") || ::Args.CheckParm("-registerurl"))
+		{
+			if (RegisterURLHandler())
+			{
+				MessageBoxA(NULL, "NovaDoom URL handler registered successfully!\n\n"
+					"You can now click novadoom:// links in your browser to connect to servers.",
+					"NovaDoom", MB_OK | MB_ICONINFORMATION);
+				exit(EXIT_SUCCESS);
+			}
+			else
+			{
+				MessageBoxA(NULL, "Failed to register URL handler.\n\n"
+					"Try running NovaDoom as administrator.",
+					"NovaDoom", MB_OK | MB_ICONERROR);
+				exit(EXIT_FAILURE);
+			}
+		}
+
+		if (::Args.CheckParm("--unregister-url") || ::Args.CheckParm("-unregisterurl"))
+		{
+			if (UnregisterURLHandler())
+			{
+				MessageBoxA(NULL, "NovaDoom URL handler unregistered successfully.",
+					"NovaDoom", MB_OK | MB_ICONINFORMATION);
+				exit(EXIT_SUCCESS);
+			}
+			else
+			{
+				MessageBoxA(NULL, "Failed to unregister URL handler.",
+					"NovaDoom", MB_OK | MB_ICONERROR);
+				exit(EXIT_FAILURE);
+			}
+		}
+#endif
 
 		const char* crashdir = ::Args.CheckValue("-crashdir");
 		if (crashdir)
