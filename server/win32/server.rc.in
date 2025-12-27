@@ -9,7 +9,7 @@
 #define NOVASRV_INTERNAL "novasrv"
 #define NOVASRV_NAME "NovaDoom Server"
 
-1 ICON "@CMAKE_SOURCE_DIR@/server/win32/odaserv.ico"
+1 ICON "@CMAKE_SOURCE_DIR@/client/sdl/novadoom.ico"
 
 1 VERSIONINFO
 FILEVERSION @PROJECT_RC_VERSION@

@@ -199,10 +199,22 @@ jobs:
           codesign --force --sign - "$SERVER"
           codesign --force --deep --sign - "artifact/NovaDoom.app"
 
-      - name: Create DMG
+      - name: Create DMG with Applications shortcut
         run: |
-          hdiutil create -volname "NovaDoom" -srcfolder artifact/NovaDoom.app \
-            -ov -format UDZO NovaDoom-macOS-arm64-${{ steps.version.outputs.version }}.dmg
+          # Install create-dmg for nice DMG with drag-to-Applications
+          brew install create-dmg
+
+          # Create DMG with Applications folder shortcut
+          create-dmg \
+            --volname "NovaDoom" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "NovaDoom.app" 150 185 \
+            --app-drop-link 450 185 \
+            --hide-extension "NovaDoom.app" \
+            "NovaDoom-macOS-arm64-${{ steps.version.outputs.version }}.dmg" \
+            "artifact/NovaDoom.app"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -239,6 +251,8 @@ jobs:
             mingw-w64-x86_64-curl
             mingw-w64-x86_64-protobuf
             mingw-w64-x86_64-jsoncpp
+            mingw-w64-x86_64-ntldd
+            mingw-w64-x86_64-nsis
             git
 
       - name: Checkout source
@@ -308,31 +322,138 @@ jobs:
           # Copy soundfont
           cp soundfonts/gzdoom.sf2 "$ARTIFACT_DIR/soundfonts/"
 
-          # Copy required DLLs from MSYS2
+          # Automatically discover and copy required DLLs (like macOS does with otool)
+          # This is more robust than a manual list
           MINGW_BIN="/mingw64/bin"
-          for dll in SDL2.dll SDL2_mixer.dll libfluidsynth-3.dll libglib-2.0-0.dll \
-                     libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll \
-                     libpng16-16.dll zlib1.dll libintl-8.dll libiconv-2.dll \
-                     libpcre2-8-0.dll libsndfile-1.dll libFLAC.dll libogg-0.dll \
-                     libvorbis-0.dll libvorbisenc-2.dll libopus-0.dll libmp3lame-0.dll \
-                     libmpg123-0.dll libreadline8.dll libtermcap-0.dll \
-                     libprotobuf.dll libjsoncpp.dll; do
-            if [ -f "$MINGW_BIN/$dll" ]; then
-              cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
+
+          copy_dll_deps() {
+            local binary="$1"
+            local dest="$2"
+            # Use ntldd to find all DLL dependencies, filter for mingw64 ones
+            ntldd -R "$binary" 2>/dev/null | grep -i "mingw64" | awk '{print $3}' | while read dll; do
+              if [ -f "$dll" ]; then
+                dllname=$(basename "$dll")
+                if [ ! -f "$dest/$dllname" ]; then
+                  cp "$dll" "$dest/"
+                  echo "Copied: $dllname"
+                fi
+              fi
+            done
+          }
+
+          # Copy dependencies for both executables
+          echo "=== Discovering DLL dependencies ==="
+          copy_dll_deps "$ARTIFACT_DIR/novadoom.exe" "$ARTIFACT_DIR"
+          copy_dll_deps "$ARTIFACT_DIR/novasrv.exe" "$ARTIFACT_DIR"
+
+          # Iteratively copy transitive dependencies (DLLs that depend on other DLLs)
+          echo "=== Copying transitive dependencies ==="
+          for pass in 1 2 3 4 5; do
+            count_before=$(ls -1 "$ARTIFACT_DIR"/*.dll 2>/dev/null | wc -l)
+            for dll in "$ARTIFACT_DIR"/*.dll; do
+              copy_dll_deps "$dll" "$ARTIFACT_DIR"
+            done
+            count_after=$(ls -1 "$ARTIFACT_DIR"/*.dll 2>/dev/null | wc -l)
+            echo "Pass $pass: $count_after DLLs"
+            if [ "$count_before" -eq "$count_after" ]; then
+              echo "All dependencies satisfied!"
+              break
             fi
           done
 
-      - name: Create ZIP
+          echo "=== Bundled $(ls -1 "$ARTIFACT_DIR"/*.dll 2>/dev/null | wc -l) DLLs ==="
+
+      - name: Create ZIP (portable version)
         shell: pwsh
         run: |
           $version = "${{ steps.version.outputs.version }}"
           Compress-Archive -Path "NovaDoom-Win64-$version" -DestinationPath "NovaDoom-Win64-$version.zip"
 
-      - name: Upload artifact
+      - name: Create NSIS Installer
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          ARTIFACT_DIR="NovaDoom-Win64-${VERSION}"
+
+          # Create NSIS installer script
+          cat > installer.nsi << 'NSIS_EOF'
+          !include "MUI2.nsh"
+
+          Name "NovaDoom"
+          OutFile "NovaDoom-Win64-${VERSION}-Setup.exe"
+          InstallDir "$PROGRAMFILES64\NovaDoom"
+          InstallDirRegKey HKLM "Software\NovaDoom" "InstallDir"
+          RequestExecutionLevel admin
+
+          # Modern UI settings
+          !define MUI_ABORTWARNING
+          !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+          !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+
+          # Pages
+          !insertmacro MUI_PAGE_WELCOME
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_PAGE_FINISH
+
+          !insertmacro MUI_UNPAGE_CONFIRM
+          !insertmacro MUI_UNPAGE_INSTFILES
+
+          !insertmacro MUI_LANGUAGE "English"
+
+          Section "Install"
+            SetOutPath "$INSTDIR"
+
+            # Install all files from artifact directory
+            File /r "${ARTIFACT_DIR}\*.*"
+
+            # Create uninstaller
+            WriteUninstaller "$INSTDIR\Uninstall.exe"
+
+            # Start menu shortcuts
+            CreateDirectory "$SMPROGRAMS\NovaDoom"
+            CreateShortcut "$SMPROGRAMS\NovaDoom\NovaDoom.lnk" "$INSTDIR\novadoom.exe"
+            CreateShortcut "$SMPROGRAMS\NovaDoom\NovaDoom Server.lnk" "$INSTDIR\novasrv.exe"
+            CreateShortcut "$SMPROGRAMS\NovaDoom\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+
+            # Desktop shortcut
+            CreateShortcut "$DESKTOP\NovaDoom.lnk" "$INSTDIR\novadoom.exe"
+
+            # Registry entries for Add/Remove Programs
+            WriteRegStr HKLM "Software\NovaDoom" "InstallDir" "$INSTDIR"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NovaDoom" "DisplayName" "NovaDoom"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NovaDoom" "UninstallString" "$INSTDIR\Uninstall.exe"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NovaDoom" "DisplayVersion" "${VERSION}"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NovaDoom" "Publisher" "NovaDoom Team"
+          SectionEnd
+
+          Section "Uninstall"
+            # Remove files
+            RMDir /r "$INSTDIR"
+
+            # Remove shortcuts
+            RMDir /r "$SMPROGRAMS\NovaDoom"
+            Delete "$DESKTOP\NovaDoom.lnk"
+
+            # Remove registry entries
+            DeleteRegKey HKLM "Software\NovaDoom"
+            DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NovaDoom"
+          SectionEnd
+          NSIS_EOF
+
+          # Replace variables in the script
+          sed -i "s|\${VERSION}|${VERSION}|g" installer.nsi
+          sed -i "s|\${ARTIFACT_DIR}|${ARTIFACT_DIR}|g" installer.nsi
+
+          # Build installer
+          makensis installer.nsi
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: NovaDoom-Win64
-          path: NovaDoom-Win64-*.zip
+          path: |
+            NovaDoom-Win64-*.zip
+            NovaDoom-Win64-*-Setup.exe
 
   # ============================================
   # Linux Server Build
@@ -454,6 +575,7 @@ jobs:
           files: |
             artifacts/NovaDoom-macOS-arm64/*.dmg
             artifacts/NovaDoom-Win64/*.zip
+            artifacts/NovaDoom-Win64/*-Setup.exe
             artifacts/NovaDoom-Server-Linux-x64/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
