@@ -98,6 +98,11 @@ bool step_mode = false;
 
 std::set<byte> free_player_ids;
 
+// RCON-only sessions (no player slot consumed)
+// Used by NovaDoom platform for server management
+std::vector<rcon_session_t> rcon_sessions;
+static const int RCON_SESSION_TIMEOUT = 35 * 60 * 5; // 5 minutes in tics
+
 bool keysfound[NUMCARDS];		// Ch0wW : Found keys
 
 // General server settings
@@ -544,6 +549,138 @@ player_t &SV_FindPlayerByAddr(void)
 }
 
 //
+// SV_FindRconSession
+// Find an RCON session by address
+//
+rcon_session_t* SV_FindRconSession(const netadr_t& addr)
+{
+	for (auto& session : rcon_sessions)
+	{
+		if (NET_CompareAdr(session.address, addr))
+			return &session;
+	}
+	return nullptr;
+}
+
+//
+// SV_CleanupRconSessions
+// Remove expired RCON sessions
+//
+void SV_CleanupRconSessions()
+{
+	rcon_sessions.erase(
+		std::remove_if(rcon_sessions.begin(), rcon_sessions.end(),
+			[](const rcon_session_t& session) {
+				return (gametic - session.last_activity) > RCON_SESSION_TIMEOUT;
+			}),
+		rcon_sessions.end());
+}
+
+//
+// SV_HandleRconChallenge
+// Handle RCON-only connection request (no player slot consumed)
+//
+void SV_HandleRconChallenge()
+{
+	if (!SV_IsValidToken(MSG_ReadLong()))
+		return;
+
+	PrintFmt("RCON session request from {}\n", NET_AdrToString(net_from));
+
+	// Check if session already exists
+	rcon_session_t* existing = SV_FindRconSession(net_from);
+	if (existing)
+	{
+		// Refresh existing session
+		existing->last_activity = gametic;
+	}
+	else
+	{
+		// Create new RCON session
+		rcon_session_t session;
+		session.address = net_from;
+		session.last_activity = gametic;
+		session.authenticated = false;
+
+		// Generate digest (same algorithm as player connections)
+		std::stringstream ss;
+		ss << time(NULL) << level.time << VERSION << NET_AdrToString(net_from);
+		session.digest = MD5SUM(ss.str());
+
+		rcon_sessions.push_back(session);
+		existing = &rcon_sessions.back();
+	}
+
+	// Send digest response
+	// Format: RCON_CHALLENGE (4 bytes) + digest (null-terminated string)
+	static buf_t response(256);
+	SZ_Clear(&response);
+	MSG_WriteLong(&response, RCON_CHALLENGE);
+	MSG_WriteString(&response, existing->digest.c_str());
+	NET_SendPacket(response, net_from);
+}
+
+//
+// SV_RconSessionPassword
+// Handle RCON password authentication for RCON-only sessions
+//
+void SV_RconSessionPassword(rcon_session_t& session)
+{
+	std::string challenge = MSG_ReadString();
+	std::string password = rcon_password.cstring();
+
+	if (session.authenticated)
+		return; // Already authenticated
+
+	if (!password.empty() && MD5SUM(password + session.digest) == challenge)
+	{
+		session.authenticated = true;
+		session.last_activity = gametic;
+		PrintFmt("RCON session authenticated from {}\n", NET_AdrToString(session.address));
+
+		// Send success response
+		static buf_t response(64);
+		SZ_Clear(&response);
+		MSG_WriteLong(&response, 0); // sequence
+		MSG_WriteByte(&response, 0); // flags
+		MSG_WriteMarker(&response, svc_print);
+		MSG_WriteByte(&response, PRINT_HIGH);
+		MSG_WriteString(&response, "RCON authenticated\n");
+		NET_SendPacket(response, session.address);
+	}
+	else
+	{
+		PrintFmt("RCON session auth failure from {}\n", NET_AdrToString(session.address));
+
+		static buf_t response(64);
+		SZ_Clear(&response);
+		MSG_WriteLong(&response, 0);
+		MSG_WriteByte(&response, 0);
+		MSG_WriteMarker(&response, svc_print);
+		MSG_WriteByte(&response, PRINT_HIGH);
+		MSG_WriteString(&response, "Bad password\n");
+		NET_SendPacket(response, session.address);
+	}
+}
+
+//
+// SV_RconSessionCommand
+// Handle RCON command from RCON-only session
+//
+void SV_RconSessionCommand(rcon_session_t& session)
+{
+	std::string cmd(MSG_ReadString());
+	StripColorCodes(cmd);
+
+	if (session.authenticated)
+	{
+		session.last_activity = gametic;
+		PrintFmt("RCON command from {} -> {}\n", NET_AdrToString(session.address), cmd);
+		AddCommandString(cmd);
+	}
+}
+
+//
 // SV_CheckTimeouts
 // If a packet has not been received from a client in CLIENT_TIMEOUT
 // seconds, drop the conneciton.
@@ -623,6 +760,39 @@ void SV_GetPackets()
 
 		if (!validplayer(player)) // no client with net_from address
 		{
+			// Check if this is an RCON-only session
+			rcon_session_t* rcon_session = SV_FindRconSession(net_from);
+			if (rcon_session)
+			{
+				// Handle RCON session packets
+				// Read sequence number and flags (standard packet header)
+				MSG_ReadLong(); // sequence
+				MSG_ReadByte(); // flags
+
+				while (MSG_BytesLeft() > 0)
+				{
+					byte cmd = MSG_ReadByte();
+					if (cmd == clc_rcon_password)
+					{
+						bool login = MSG_ReadByte();
+						if (login)
+							SV_RconSessionPassword(*rcon_session);
+						else
+							rcon_session->authenticated = false;
+					}
+					else if (cmd == clc_rcon)
+					{
+						SV_RconSessionCommand(*rcon_session);
+					}
+					else
+					{
+						// Unknown command for RCON session, skip
+						break;
+					}
+				}
+				continue;
+			}
+
 			// apparently, someone is trying to connect
 			if (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION)
 				SV_ConnectClient();
@@ -1746,6 +1916,13 @@ void SV_ConnectClient()
 	if (challenge == LAUNCHER_CHALLENGE)  // for Launcher
 	{
 		SV_SendServerInfo();
+		return;
+	}
+
+	// RCON-only connection (no player slot consumed)
+	if (challenge == RCON_CHALLENGE)
+	{
+		SV_HandleRconChallenge();
 		return;
 	}
 
@@ -4054,6 +4231,7 @@ void SV_StepTics(QWORD count)
 		SV_SendPackets();
 		SV_ClearClientsBPS();
 		SV_CheckTimeouts();
+		SV_CleanupRconSessions();
 		SV_DestroyFinishedMovingSectors();
 
 		// increment player_t::GameTime for all players once a second
