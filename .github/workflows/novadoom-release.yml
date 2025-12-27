@@ -330,15 +330,17 @@ jobs:
 
           # Automatically discover and copy ALL required DLLs using ntldd
           # ntldd output format: "name.dll => /path/to/dll (0x00000000)"
+          # IMPORTANT: Only copy DLLs from /mingw64/, NOT Windows system DLLs!
 
           copy_deps() {
             local binary="$1"
             local dest="$2"
 
-            # Parse ntldd output: get lines with "=>", exclude "not found", extract path
+            # Parse ntldd output: get mingw64 DLLs only (not Windows system DLLs)
             ntldd -R "$binary" 2>&1 | \
               grep "=>" | \
               grep -v "not found" | \
+              grep "/mingw64/" | \
               sed 's/.*=> \(.*\) (.*/\1/' | \
               while read -r dllpath; do
                 if [ -f "$dllpath" ]; then
