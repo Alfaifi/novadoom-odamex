@@ -204,17 +204,23 @@ jobs:
           # Install create-dmg for nice DMG with drag-to-Applications
           brew install create-dmg
 
-          # Create DMG with Applications folder shortcut
+          # Create staging folder with app and Applications symlink
+          mkdir -p dmg_staging
+          cp -R artifact/NovaDoom.app dmg_staging/
+          ln -s /Applications dmg_staging/Applications
+
+          # Create DMG with proper layout
           create-dmg \
             --volname "NovaDoom" \
             --window-pos 200 120 \
             --window-size 600 400 \
             --icon-size 100 \
             --icon "NovaDoom.app" 150 185 \
-            --app-drop-link 450 185 \
+            --icon "Applications" 450 185 \
             --hide-extension "NovaDoom.app" \
+            --no-internet-enable \
             "NovaDoom-macOS-arm64-${{ steps.version.outputs.version }}.dmg" \
-            "artifact/NovaDoom.app"
+            "dmg_staging"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
