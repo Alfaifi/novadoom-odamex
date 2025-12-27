@@ -271,9 +271,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build
-          key: windows-x64-build-v2-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
+          key: windows-x64-build-v3-static-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            windows-x64-build-v2-
+            windows-x64-build-v3-static-
 
       - name: Configure CMake
         run: |
@@ -281,14 +281,15 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_PREFIX_PATH=/mingw64 \
             -DUSE_LTO=ON \
+            -DUSE_STATIC_STDLIB=ON \
             -DENABLE_FLUIDSYNTH=ON \
             -DENABLE_PORTMIDI=OFF \
-            -DUSE_INTERNAL_FLTK=OFF \
-            -DUSE_INTERNAL_ZLIB=OFF \
-            -DUSE_INTERNAL_PNG=OFF \
-            -DUSE_INTERNAL_CURL=OFF \
-            -DUSE_INTERNAL_PROTOBUF=OFF \
-            -DUSE_INTERNAL_JSONCPP=OFF \
+            -DUSE_INTERNAL_FLTK=ON \
+            -DUSE_INTERNAL_ZLIB=ON \
+            -DUSE_INTERNAL_PNG=ON \
+            -DUSE_INTERNAL_CURL=ON \
+            -DUSE_INTERNAL_PROTOBUF=ON \
+            -DUSE_INTERNAL_JSONCPP=ON \
             -DNOVADOOM_SKIP_DLL_COPY=ON \
             -DSDL2_INCLUDE_DIR=/mingw64/include/SDL2 \
             -DSDL2_LIBRARY=/mingw64/lib/libSDL2.dll.a \

@@ -37,11 +37,44 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <nonstd/scope.hpp>
+#include <cstdio>
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
 #include "i_system.h"
+
+/**
+ * @brief Helper to create the user directory and return its path.
+ */
+static std::string CreateAndGetUserDir()
+{
+	std::string userPath = M_GetUserDir();
+	int ok = SHCreateDirectoryEx(NULL, userPath.c_str(), NULL);
+	if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
+	{
+		return M_CleanPath(userPath);
+	}
+	// I_FatalError does not return
+	I_FatalError("Failed to create {} directory.\n", userPath);
+	return "";  // Unreachable, but silences compiler warning
+}
+
+/**
+ * @brief Test if we can write to the given directory.
+ */
+static bool CanWriteToDir(const std::string& dir)
+{
+	std::string testFile = dir + PATHSEP ".novadoom-write-test";
+	FILE* f = fopen(testFile.c_str(), "w");
+	if (f)
+	{
+		fclose(f);
+		remove(testFile.c_str());
+		return true;
+	}
+	return false;
+}
 
 std::string M_GetBinaryDir()
 {
@@ -94,27 +127,33 @@ std::string M_GetUserDir()
 
 std::string M_GetWriteDir()
 {
-	// Has NovaDoom been installed?
-	std::string installed = M_GetBinaryDir() + PATHSEP "novadoom-installed.txt";
+	std::string binDir = M_GetBinaryDir();
+
+	// Check for explicit installed mode marker file
+	std::string installed = binDir + PATHSEP "novadoom-installed.txt";
 	if (M_FileExists(installed))
 	{
-		// Does the user folder exist?
-		std::string userPath = M_GetUserDir();
-		int ok = SHCreateDirectoryEx(NULL, userPath.c_str(), NULL);
-		if (ok == ERROR_SUCCESS || ok == ERROR_ALREADY_EXISTS)
-		{
-			return M_CleanPath(userPath);
-		}
-		else
-		{
-			I_FatalError("Failed to create {} directory.\n", userPath);
-		}
+		return CreateAndGetUserDir();
 	}
 
-	// Our path is relative to the binary directory.
-	// [AM] Don't change this back to CWD because this means your write dir
-	//      depends on where you launch it from, which is not great.
-	return M_CleanPath(M_GetBinaryDir());
+	// Check for explicit portable mode marker file
+	// If this exists, always use binary directory (for USB drives, etc.)
+	std::string portable = binDir + PATHSEP "novadoom-portable.txt";
+	if (M_FileExists(portable))
+	{
+		return M_CleanPath(binDir);
+	}
+
+	// Auto-detect: Try to write to the binary directory
+	// If we can't write (e.g., Program Files), fall back to Documents folder
+	// This prevents UAC virtualization issues where config ends up in VirtualStore
+	if (CanWriteToDir(binDir))
+	{
+		return M_CleanPath(binDir);
+	}
+
+	// Can't write to binary directory, use Documents folder
+	return CreateAndGetUserDir();
 }
 
 #endif
