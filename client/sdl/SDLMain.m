@@ -16,7 +16,7 @@ Feel free to customize this file to suit your needs
 
 #import <Cocoa/Cocoa.h>
 
-@interface SDLMain : NSObject
+@interface SDLMain : NSObject <NSApplicationDelegate>
 @end
 
 #import <sys/param.h> /* for MAXPATHLEN */
@@ -96,6 +96,85 @@ static NSString *getApplicationName(void)
 /* The main class of the application, the application's delegate */
 @implementation SDLMain
 
+/*
+ * Handle GetURL Apple Events (primary way URLs are delivered on macOS)
+ * This is called when the app is launched via a URL scheme like novadoom://
+ */
+- (void)handleGetURLEvent:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)replyEvent
+{
+    NSString *urlString = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+
+    if (gCalledAppMainline) {
+        /* App already started - we can't modify argv anymore */
+        return;
+    }
+
+    if ([urlString hasPrefix:@"novadoom://"]) {
+        /* Parse the URL and add to argv */
+        NSString *remainder = [urlString substringFromIndex:[@"novadoom://" length]];
+
+        /* Remove "connect/" prefix if present */
+        if ([remainder hasPrefix:@"connect/"]) {
+            remainder = [remainder substringFromIndex:[@"connect/" length]];
+        }
+
+        /* Split on '?' to separate host:port from query params */
+        NSRange queryRange = [remainder rangeOfString:@"?"];
+        NSString *hostPort;
+        NSString *query = @"";
+        if (queryRange.location != NSNotFound) {
+            hostPort = [remainder substringToIndex:queryRange.location];
+            query = [remainder substringFromIndex:queryRange.location + 1];
+        } else {
+            hostPort = remainder;
+        }
+
+        /* Remove trailing slashes */
+        while ([hostPort hasSuffix:@"/"]) {
+            hostPort = [hostPort substringToIndex:[hostPort length] - 1];
+        }
+
+        if ([hostPort length] > 0) {
+            /* Add -connect argument */
+            const char *connectArg = "-connect";
+            char *arg1 = (char *) SDL_malloc(strlen(connectArg) + 1);
+            strcpy(arg1, connectArg);
+
+            const char *hostPortCStr = [hostPort UTF8String];
+            char *arg2 = (char *) SDL_malloc(strlen(hostPortCStr) + 1);
+            strcpy(arg2, hostPortCStr);
+
+            char **newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 3));
+            if (newargv) {
+                gArgv = newargv;
+                gArgv[gArgc++] = arg1;
+                gArgv[gArgc++] = arg2;
+
+                /* Check for password in query string */
+                NSRange pwdRange = [query rangeOfString:@"password="];
+                if (pwdRange.location != NSNotFound) {
+                    NSString *password = [query substringFromIndex:pwdRange.location + [@"password=" length]];
+                    NSRange ampRange = [password rangeOfString:@"&"];
+                    if (ampRange.location != NSNotFound) {
+                        password = [password substringToIndex:ampRange.location];
+                    }
+                    if ([password length] > 0) {
+                        const char *pwdCStr = [password UTF8String];
+                        char *arg3 = (char *) SDL_malloc(strlen(pwdCStr) + 1);
+                        strcpy(arg3, pwdCStr);
+                        newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 2));
+                        if (newargv) {
+                            gArgv = newargv;
+                            gArgv[gArgc++] = arg3;
+                        }
+                    }
+                }
+                gArgv[gArgc] = NULL;
+            }
+        }
+    }
+}
+
 /* Set the working directory to the .app's parent directory */
 - (void) setupWorkingDirectory:(bool)shouldChdir
 {
@@ -161,7 +240,7 @@ static void setApplicationMenu(void)
     [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
 
     menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
-    [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+    [menuItem setKeyEquivalentModifierMask:(NSEventModifierFlagOption|NSEventModifierFlagCommand)];
 
     [appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
 
@@ -220,6 +299,16 @@ static void CustomApplicationMain (int argc, char **argv)
     /* Ensure the application object is initialised */
     [NovaDoomApplication sharedApplication];
 
+    /* Create SDLMain early so we can register it for Apple Events */
+    sdlMain = [[SDLMain alloc] init];
+
+    /* Register for GetURL Apple Events (handles novadoom:// URLs) */
+    [[NSAppleEventManager sharedAppleEventManager]
+        setEventHandler:sdlMain
+        andSelector:@selector(handleGetURLEvent:withReplyEvent:)
+        forEventClass:kInternetEventClass
+        andEventID:kAEGetURL];
+
 #ifdef SDL_USE_CPS
     {
         CPSProcessSerNum PSN;
@@ -236,8 +325,7 @@ static void CustomApplicationMain (int argc, char **argv)
     setApplicationMenu();
     setupWindowMenu();
 
-    /* Create SDLMain and make it the app delegate */
-    sdlMain = [[SDLMain alloc] init];
+    /* Set SDLMain as the app delegate (already created earlier for Apple Event registration) */
     [NSApp setDelegate:sdlMain];
 
     /* Start the main event loop */
@@ -280,7 +368,7 @@ static void CustomApplicationMain (int argc, char **argv)
 
     /* Check if this is a novadoom:// URL (passed as a "file") */
     if ([filename hasPrefix:@"novadoom://"]) {
-        /* Skip if URL was already processed in main() */
+        /* Skip if URL was already processed in main() or via Apple Event */
         if (gURLProcessed) {
             return true;
         }
@@ -373,6 +461,7 @@ static void CustomApplicationMain (int argc, char **argv)
 /*
  * Handle URL scheme events (novadoom://connect/host:port)
  * This is called when clicking a novadoom:// link in the browser
+ * Note: On modern macOS, URLs are typically delivered via handleGetURLEvent: instead
  */
 - (void)application:(NSApplication *)application openURLs:(NSArray<NSURL *> *)urls
 {
