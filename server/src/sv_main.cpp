@@ -643,7 +643,7 @@ void SV_RconSessionPassword(rcon_session_t& session)
 		SZ_Clear(&response);
 		MSG_WriteLong(&response, 0); // sequence
 		MSG_WriteByte(&response, 0); // flags
-		MSG_WriteMarker(&response, svc_print);
+		MSG_WriteByte(&response, static_cast<byte>(svc_print));
 		MSG_WriteByte(&response, PRINT_HIGH);
 		MSG_WriteString(&response, "RCON authenticated\n");
 		NET_SendPacket(response, session.address);
@@ -656,7 +656,7 @@ void SV_RconSessionPassword(rcon_session_t& session)
 		SZ_Clear(&response);
 		MSG_WriteLong(&response, 0);
 		MSG_WriteByte(&response, 0);
-		MSG_WriteMarker(&response, svc_print);
+		MSG_WriteByte(&response, static_cast<byte>(svc_print));
 		MSG_WriteByte(&response, PRINT_HIGH);
 		MSG_WriteString(&response, "Bad password\n");
 		NET_SendPacket(response, session.address);

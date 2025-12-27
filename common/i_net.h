@@ -45,25 +45,6 @@
 #define VERSION 65                // GhostlyDeath -- this should remain static from now on
 
 /**
- * @brief Lightweight RCON session for platform management.
- *
- * This allows RCON connections without consuming a player slot.
- * Used by the NovaDoom platform for server management.
- */
-struct rcon_session_t
-{
-	netadr_t address;           // Client address
-	std::string digest;         // Challenge digest for auth
-	bool authenticated;         // RCON auth successful
-	int last_activity;          // Gametic of last activity (for timeout)
-
-	rcon_session_t() : authenticated(false), last_activity(0)
-	{
-		memset(&address, 0, sizeof(netadr_t));
-	}
-};
-
-/**
  * @brief Types of client buffers.
  */
 enum clientBuf_e
@@ -350,6 +331,24 @@ typedef struct
 
 extern  netadr_t  net_from;  // address of who sent the packet
 
+/**
+ * @brief Lightweight RCON session for platform management.
+ *
+ * This allows RCON connections without consuming a player slot.
+ * Used by the NovaDoom platform for server management.
+ */
+struct rcon_session_t
+{
+	netadr_t address;           // Client address
+	std::string digest;         // Challenge digest for auth
+	bool authenticated;         // RCON auth successful
+	int last_activity;          // Gametic of last activity (for timeout)
+
+	rcon_session_t() : authenticated(false), last_activity(0)
+	{
+		memset(&address, 0, sizeof(netadr_t));
+	}
+};
 
 class buf_t
 {
