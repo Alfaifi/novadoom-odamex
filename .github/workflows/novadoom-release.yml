@@ -336,11 +336,17 @@ jobs:
             local binary="$1"
             local dest="$2"
 
+            # Debug: show first few lines of ntldd output to understand the format
+            echo "DEBUG: ntldd output sample for $binary:"
+            ntldd "$binary" 2>&1 | head -5
+
             # Parse ntldd output: get mingw64 DLLs only (not Windows system DLLs)
+            # Handle both Unix (/mingw64/) and Windows (mingw64\\) path formats
+            # Use || true to prevent grep from failing when no matches
             ntldd -R "$binary" 2>&1 | \
               grep "=>" | \
               grep -v "not found" | \
-              grep "/mingw64/" | \
+              grep -iE "(mingw64|clang64|ucrt64)" | \
               sed 's/.*=> \(.*\) (.*/\1/' | \
               while read -r dllpath; do
                 if [ -f "$dllpath" ]; then
@@ -350,7 +356,7 @@ jobs:
                     echo "Copied: $dllname"
                   fi
                 fi
-              done
+              done || true
           }
 
           echo "=== Discovering DLL dependencies for novadoom.exe ==="
