@@ -45,6 +45,69 @@
 #include "i_system.h"
 #include "w_ident.h"
 
+#ifdef _WIN32
+#include "win32inc.h"
+
+// Check if novadoom:// URL handler is registered for current user
+static bool IsURLHandlerRegistered()
+{
+	HKEY hKey;
+	LONG result = RegOpenKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom\\shell\\open\\command",
+		0, KEY_READ, &hKey);
+	if (result == ERROR_SUCCESS)
+	{
+		RegCloseKey(hKey);
+		return true;
+	}
+	return false;
+}
+
+// Register novadoom:// URL protocol handler (silent, no message box)
+static bool RegisterURLHandlerSilent()
+{
+	char exePath[MAX_PATH];
+	if (GetModuleFileNameA(NULL, exePath, MAX_PATH) == 0)
+		return false;
+
+	HKEY hKey;
+	LONG result = RegCreateKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom", 0, NULL,
+		REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+	if (result != ERROR_SUCCESS)
+		return false;
+
+	const char* protocolDesc = "URL:NovaDoom Protocol";
+	RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE*)protocolDesc, strlen(protocolDesc) + 1);
+	RegSetValueExA(hKey, "URL Protocol", 0, REG_SZ, (BYTE*)"", 1);
+	RegCloseKey(hKey);
+
+	result = RegCreateKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom\\DefaultIcon", 0, NULL,
+		REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+	if (result == ERROR_SUCCESS)
+	{
+		char iconPath[MAX_PATH + 8];
+		snprintf(iconPath, sizeof(iconPath), "\"%s\",0", exePath);
+		RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE*)iconPath, strlen(iconPath) + 1);
+		RegCloseKey(hKey);
+	}
+
+	result = RegCreateKeyExA(HKEY_CURRENT_USER,
+		"Software\\Classes\\novadoom\\shell\\open\\command", 0, NULL,
+		REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+	if (result != ERROR_SUCCESS)
+		return false;
+
+	char command[MAX_PATH * 2];
+	snprintf(command, sizeof(command), "\"%s\" \"%%1\"", exePath);
+	RegSetValueExA(hKey, NULL, 0, REG_SZ, (BYTE*)command, strlen(command) + 1);
+	RegCloseKey(hKey);
+
+	return true;
+}
+#endif // _WIN32
+
 // -- Externals --
 
 void CL_QuitCommand();
@@ -645,6 +708,21 @@ scannedWADs_t GUI_BootWindow()
 	if (rawargs != nullptr)
 		for (auto& arg : TokenizeString(rawargs, " "))
 			fltkargs.AppendArg(arg.c_str());
+
+#ifdef _WIN32
+	// Auto-register novadoom:// URL handler if not already registered
+	// This enables browser-to-game server joining for portable installations
+	if (!IsURLHandlerRegistered())
+	{
+		if (RegisterURLHandlerSilent())
+		{
+			fl_message_title("NovaDoom");
+			fl_message("NovaDoom URL handler registered!\n\n"
+				"You can now click novadoom:// links in your browser\n"
+				"to connect directly to game servers.");
+		}
+	}
+#endif
 
 	BootWindow* win = MakeBootWindow();
 	win->initWADDirs();
