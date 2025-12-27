@@ -41,7 +41,27 @@
 #define PROTO_CHALLENGE -5560020  // Signals challenger wants protobufs.
 #define MSG_CHALLENGE 5560020     // Signals challenger wants MSG protocol.
 #define LAUNCHER_CHALLENGE 777123 // csdl challenge
+#define RCON_CHALLENGE -5560021   // RCON-only connection (no player slot)
 #define VERSION 65                // GhostlyDeath -- this should remain static from now on
+
+/**
+ * @brief Lightweight RCON session for platform management.
+ *
+ * This allows RCON connections without consuming a player slot.
+ * Used by the NovaDoom platform for server management.
+ */
+struct rcon_session_t
+{
+	netadr_t address;           // Client address
+	std::string digest;         // Challenge digest for auth
+	bool authenticated;         // RCON auth successful
+	int last_activity;          // Gametic of last activity (for timeout)
+
+	rcon_session_t() : authenticated(false), last_activity(0)
+	{
+		memset(&address, 0, sizeof(netadr_t));
+	}
+};
 
 /**
  * @brief Types of client buffers.
