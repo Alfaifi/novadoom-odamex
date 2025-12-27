@@ -413,6 +413,8 @@ class BootWindow : public Fl_Window
 			boot->m_WADDirs.push_back(chooser.filename());
 			boot->setWADDirs();
 			boot->updateWADDirBrowser();
+			// Immediately rescan IWADs when a new directory is added
+			boot->rescanIWADs();
 			break;
 		}
 	}
@@ -459,6 +461,8 @@ class BootWindow : public Fl_Window
 		boot->m_WADDirs.erase(boot->m_WADDirs.begin() + val);
 		boot->setWADDirs();
 		boot->updateWADDirBrowser();
+		// Immediately rescan IWADs when a directory is removed
+		boot->rescanIWADs();
 	}
 
 	void rescanIWADs()
