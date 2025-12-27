@@ -149,6 +149,25 @@ size_t C_BasePrint(const int printlevel, const char* color_code, const std::stri
 		}
 	}
 
+	// Send to RCON-only sessions (platform integration)
+	if (printlevel == PRINT_HIGH || printlevel == PRINT_WARNING || printlevel == PRINT_ERROR)
+	{
+		for (auto& session : rcon_sessions)
+		{
+			if (session.authenticated)
+			{
+				static buf_t response(MAX_UDP_SIZE);
+				SZ_Clear(&response);
+				MSG_WriteLong(&response, 0); // sequence
+				MSG_WriteByte(&response, 0); // flags
+				MSG_WriteByte(&response, static_cast<byte>(svc_print));
+				MSG_WriteByte(&response, PRINT_HIGH);
+				MSG_WriteString(&response, newStr.c_str());
+				NET_SendPacket(response, session.address);
+			}
+		}
+	}
+
 	return PrintString(printlevel, newStr);
 }
 

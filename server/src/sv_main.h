@@ -31,8 +31,12 @@
 #include "g_gametype.h"
 
 #include <json/json.h>
+#include <vector>
 
 extern bool keysfound[NUMCARDS];
+
+// RCON-only sessions (no player slot consumed)
+extern std::vector<rcon_session_t> rcon_sessions;
 
 class client_c
 {
