@@ -21,33 +21,43 @@ RCON allows the NovaDoom platform to send administrative commands to running gam
 | Max Packet Size | 8192 bytes |
 | Safe Packet Size | 1200 bytes |
 
-### Message Types
+### Message Types (Client-to-Server)
 
 ```
-clc_rcon_password (0x0D) - Authentication message
-clc_rcon          (0x0C) - Command execution message
+clc_rcon          (0x09) - Command execution message
+clc_rcon_password (0x0A) - Authentication message
+```
+
+### Message Types (Server-to-Client)
+
+```
+svc_consoleplayer (0x0B) - Initial connection response (contains digest)
+svc_print         (0x15) - Command output response
 ```
 
 ---
 
 ## 2. Authentication Flow
 
-RCON uses a challenge-response authentication mechanism:
+RCON uses a challenge-response authentication mechanism. **The digest is delivered automatically when a client connects to the server via the `svc_consoleplayer` message.**
 
 ```
 ┌─────────────────┐                      ┌─────────────────┐
 │  NovaDoom API   │                      │   Game Server   │
 └────────┬────────┘                      └────────┬────────┘
          │                                        │
-         │  1. Connect to server                  │
+         │  1. Send connection request            │
+         │     (PROTO_CHALLENGE + token + info)   │
          │ ──────────────────────────────────────>│
          │                                        │
-         │  2. Server sends unique digest         │
+         │  2. Server responds with               │
+         │     svc_consoleplayer message          │
+         │     containing player_id + digest      │
          │ <──────────────────────────────────────│
-         │     (32-byte random string)            │
+         │     (digest is 32-char MD5 hex string) │
          │                                        │
-         │  3. Send login request                 │
-         │     clc_rcon_password                  │
+         │  3. Send RCON login request            │
+         │     clc_rcon_password (0x0A)           │
          │     login=1                            │
          │     challenge=MD5(password + digest)   │
          │ ──────────────────────────────────────>│
@@ -56,14 +66,14 @@ RCON uses a challenge-response authentication mechanism:
          │     MD5(rcon_password + client_digest) │
          │     == challenge                       │
          │                                        │
-         │  5. Auth success - allow_rcon=true     │
-         │ <──────────────────────────────────────│
+         │  5. Auth success (no explicit response │
+         │     unless failure - "Bad password")   │
          │                                        │
          │  6. Send RCON command                  │
-         │     clc_rcon + command_string          │
+         │     clc_rcon (0x09) + command_string   │
          │ ──────────────────────────────────────>│
          │                                        │
-         │  7. Command output via SVC_Print       │
+         │  7. Command output via svc_print       │
          │ <──────────────────────────────────────│
          │                                        │
 ```
@@ -88,16 +98,143 @@ if challenge == expected:
     allow_rcon = True
 ```
 
+### How to Receive the Digest (Critical for Platform Integration)
+
+The digest is **only sent once** during the initial connection handshake. The platform must:
+
+1. **Connect as a game client** by sending a connection packet with `PROTO_CHALLENGE` (-5560020)
+2. **Parse the `svc_consoleplayer` response** to extract the digest
+3. **Store the digest** for the duration of the session
+
+**Source code references:**
+- Server generates digest: `server/src/sv_main.cpp:1815`
+- Server sends digest: `server/src/sv_main.cpp:1874`
+- Client receives digest: `client/src/cl_parse.cpp:924`
+- Client stores digest: `client/src/cl_main.cpp:122`
+
+**Digest characteristics:**
+- 32-character lowercase hexadecimal string (MD5 hash)
+- Unique per connection (changes if client reconnects)
+- Generated from: `MD5(unix_timestamp + level.time + VERSION + client_IP)`
+
+### Step 1: Get Server Token (Launcher Query)
+
+Before connecting, you must first query the server to get a valid `server_token`. Send a launcher challenge:
+
+```
+Offset  Size    Field               Value
+──────────────────────────────────────────────────────────────
+0       4       challenge           LAUNCHER_CHALLENGE (777123, int32 LE)
+```
+
+**Server responds with:**
+```
+Offset  Size    Field               Description
+──────────────────────────────────────────────────────────────
+0       4       challenge           MSG_CHALLENGE (5560020)
+4       4       server_token        Token to use in connection packet (int32 LE)
+8       ...     hostname            Server hostname (null-terminated)
+...     1       players             Current player count
+...     1       max_players         Max players
+...     ...     mapname             Current map (null-terminated)
+...     ...     wad_info            WAD file information
+```
+
+The `server_token` is required for connection. Tokens are tied to your IP address and expire after a short time.
+
+**Source:** `server/src/sv_sqpold.cpp:141` (SV_SendServerInfo)
+
+### Step 2: Connection Packet Format (Required to Receive Digest)
+
+The initial connection packet must be sent to receive the digest. Format from `client/src/cl_main.cpp:1863-1884`:
+
+```
+Offset  Size    Field               Value/Description
+──────────────────────────────────────────────────────────────
+0       4       challenge           PROTO_CHALLENGE (-5560020, signed int32 LE)
+4       4       server_token        Token from launcher query (int32 LE, use 0 for direct connect)
+8       2       version             Protocol version (65, int16 LE)
+10      1       connection_type     0x00 = play, 0x01 = spectate, etc.
+11      4       game_version        GAMEVER (e.g., 0x000A0003 for 10.3.0, int32 LE)
+15      ...     userinfo            clc_userinfo message (see below)
+...     4       rate                Deprecated, send 0xFFFF (int32 LE)
+...     ...     password_hash       MD5 of join_password if server is passworded (null-terminated)
+```
+
+**Userinfo format (clc_userinfo = 0x05):**
+```
+Offset  Size    Field               Description
+──────────────────────────────────────────────────────────────
+0       1       marker              0x05 (clc_userinfo)
+1       ...     netname             Player name (null-terminated string)
+...     1       team                Team number (byte)
+...     4       gender              Gender setting (int32 LE)
+...     4       color               RGBA color (4 bytes)
+...     ...     skin                Skin name (null-terminated, send empty "")
+...     4       aimdist             Aim distance (int32 LE)
+...     1       unlag               Deprecated, send 0x01 (bool)
+...     1       predict_weapons     Weapon prediction (bool)
+...     1       switchweapon        Weapon switch mode (byte)
+...     9       weapon_prefs        Weapon preference order (9 bytes)
+```
+
+**Example connection packet (hex):**
+```
+EC AB AB FF    # PROTO_CHALLENGE (-5560020 as signed int32 LE)
+00 00 00 00    # server_token (0 for direct connect)
+41 00          # version (65 as int16 LE)
+00             # connection_type (0 = play)
+03 00 0A 00    # game_version (10.3.0)
+05             # clc_userinfo marker
+52 43 4F 4E 00 # netname "RCON\0"
+00             # team (0)
+00 00 00 00    # gender (0)
+00 00 00 FF    # color (black with full alpha)
+00             # skin (empty string)
+00 00 00 00    # aimdist (0)
+01             # unlag (true)
+01             # predict_weapons (true)
+00             # switchweapon (0)
+01 02 03 04 05 06 07 08 09  # weapon_prefs
+FF FF FF FF    # rate (deprecated, max value)
+00             # password_hash (empty = no password)
+```
+
 ---
 
 ## 3. Packet Format
+
+**Important:** NovaDoom uses Protocol Buffers for message serialization. Messages are prefixed with a varint-encoded length followed by the protobuf payload.
+
+### Digest Delivery Packet (svc_consoleplayer)
+
+The server sends this packet immediately after successful connection. **This is how the platform receives the digest needed for RCON authentication.**
+
+```
+Byte   Field         Description
+─────────────────────────────────────────
+0      marker        0x0B (svc_consoleplayer)
+1+     length        Varint-encoded protobuf message length
+...    protobuf      ConsolePlayer message:
+                       - pid (int32): Player ID assigned by server
+                       - digest (string): 32-char MD5 hex string for RCON auth
+```
+
+**Protobuf Definition (from `odaproto/server.proto`):**
+```protobuf
+// svc_consoleplayer
+message ConsolePlayer {
+    int32 pid = 1;
+    string digest = 2;
+}
+```
 
 ### Login Packet (clc_rcon_password)
 
 ```
 Byte   Field         Description
 ─────────────────────────────────────────
-0      marker        0x0D (clc_rcon_password)
+0      marker        0x0A (clc_rcon_password)
 1      login         0x01 (login) or 0x00 (logout)
 2+     challenge     MD5 hash string (null-terminated)
 ```
@@ -107,18 +244,20 @@ Byte   Field         Description
 ```
 Byte   Field         Description
 ─────────────────────────────────────────
-0      marker        0x0C (clc_rcon)
+0      marker        0x09 (clc_rcon)
 1+     command       Command string (null-terminated)
 ```
 
-### Response Packet (SVC_Print)
+### Response Packet (svc_print)
 
 ```
 Byte   Field         Description
 ─────────────────────────────────────────
-0      marker        SVC_Print marker
-1      level         Print level (1=HIGH, 3=CHAT, etc.)
-2+     message       Response text (null-terminated)
+0      marker        0x15 (svc_print)
+1+     length        Varint-encoded protobuf message length
+...    protobuf      Print message:
+                       - level (int32): Print level (2=HIGH, 4=CHAT, etc.)
+                       - message (string): Response text
 ```
 
 ---
@@ -276,8 +415,25 @@ import hashlib
 import struct
 
 class NovaDoomRCON:
-    CLC_RCON = 0x0C
-    CLC_RCON_PASSWORD = 0x0D
+    """
+    RCON client for NovaDoom game servers.
+
+    Important: This client must connect as a regular game client first to
+    receive the digest from the server via svc_consoleplayer message.
+    The digest is required for RCON authentication.
+    """
+
+    # Client-to-Server message types (from common/i_net.h)
+    CLC_RCON = 0x09
+    CLC_RCON_PASSWORD = 0x0A
+
+    # Server-to-Client message types
+    SVC_CONSOLEPLAYER = 0x0B
+    SVC_PRINT = 0x15
+
+    # Connection constants
+    PROTO_CHALLENGE = -5560020
+    VERSION = 65
 
     def __init__(self, host: str, port: int, password: str):
         self.host = host
@@ -286,65 +442,149 @@ class NovaDoomRCON:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.settimeout(5.0)
         self.digest = None
+        self.player_id = None
         self.authenticated = False
-
-    def connect(self):
-        """Connect and receive server digest."""
-        # Send initial connection packet
-        # Server will respond with digest in player info
-        pass  # Implementation depends on full protocol
 
     def _md5(self, data: str) -> str:
         """Calculate MD5 hash."""
         return hashlib.md5(data.encode()).hexdigest()
 
+    def _read_varint(self, data: bytes, offset: int) -> tuple[int, int]:
+        """Read a varint from bytes, return (value, new_offset)."""
+        result = 0
+        shift = 0
+        while True:
+            if offset >= len(data):
+                raise ValueError("Incomplete varint")
+            byte = data[offset]
+            offset += 1
+            result |= (byte & 0x7F) << shift
+            if not (byte & 0x80):
+                break
+            shift += 7
+        return result, offset
+
+    def connect_and_get_digest(self) -> str:
+        """
+        Connect to server and extract digest from svc_consoleplayer response.
+
+        Returns the digest string needed for RCON authentication.
+
+        Note: Full connection requires sending userinfo and handling the
+        complete handshake. This is a simplified example - the platform
+        should implement the full connection protocol.
+        """
+        # The digest is sent in the svc_consoleplayer message after
+        # successful connection. The full connection protocol involves:
+        # 1. Send PROTO_CHALLENGE + token + version + userinfo
+        # 2. Receive svc_consoleplayer with player_id and digest
+        # 3. Receive additional game state messages
+
+        # For platform integration, you need to:
+        # - Parse incoming packets for svc_consoleplayer (0x0B)
+        # - Extract the protobuf ConsolePlayer message
+        # - The digest field contains the 32-char MD5 hex string
+
+        raise NotImplementedError(
+            "Full connection protocol required. "
+            "See server/src/sv_main.cpp:SV_ConnectClient() for details."
+        )
+
     def authenticate(self, server_digest: str) -> bool:
-        """Authenticate with RCON password."""
+        """
+        Authenticate with RCON password using server-provided digest.
+
+        Args:
+            server_digest: The 32-char MD5 hex string from svc_consoleplayer
+
+        Returns:
+            True if authentication successful (no "Bad password" response)
+        """
+        self.digest = server_digest
         challenge = self._md5(self.password + server_digest)
 
-        # Build login packet
+        # Build login packet: marker + login_flag + challenge_string
         packet = bytes([self.CLC_RCON_PASSWORD, 0x01])  # login=true
         packet += challenge.encode() + b'\x00'
 
         self.socket.sendto(packet, (self.host, self.port))
 
-        # Wait for response
+        # Server only responds on failure with "Bad password" message
+        # No response typically means success
         try:
             response, _ = self.socket.recvfrom(8192)
+            # Check if response contains error
+            if b"Bad password" in response:
+                return False
             self.authenticated = True
             return True
         except socket.timeout:
-            return False
+            # Timeout usually means success (no error response)
+            self.authenticated = True
+            return True
 
     def send_command(self, command: str) -> str:
         """Send RCON command and receive response."""
         if not self.authenticated:
-            raise Exception("Not authenticated")
+            raise Exception("Not authenticated - call authenticate() first")
 
-        # Build command packet
+        # Build command packet: marker + command_string
         packet = bytes([self.CLC_RCON])
         packet += command.encode() + b'\x00'
 
         self.socket.sendto(packet, (self.host, self.port))
 
-        # Collect responses
+        # Collect responses (commands may generate multiple print messages)
         responses = []
         try:
             while True:
                 data, _ = self.socket.recvfrom(8192)
-                responses.append(self._parse_response(data))
+                parsed = self._parse_response(data)
+                if parsed:
+                    responses.append(parsed)
         except socket.timeout:
             pass
 
         return '\n'.join(responses)
 
     def _parse_response(self, data: bytes) -> str:
-        """Parse SVC_Print response."""
-        # Skip marker and print level
-        return data[2:].decode('utf-8', errors='ignore').rstrip('\x00')
+        """
+        Parse server response packet.
+
+        Server responses use protobuf encoding. The svc_print message
+        contains the command output.
+        """
+        if len(data) < 5:  # minimum: 4-byte sequence + 1-byte flags
+            return ""
+
+        # Skip 4-byte sequence number and 1-byte flags
+        offset = 5
+
+        while offset < len(data):
+            if data[offset] == self.SVC_PRINT:
+                offset += 1
+                # Read varint length
+                length, offset = self._read_varint(data, offset)
+                # Extract protobuf message (simplified - just get the string)
+                proto_data = data[offset:offset + length]
+                # The message field is typically the last field in Print proto
+                # This is a simplified extraction - use proper protobuf parsing
+                # for production code
+                try:
+                    text = proto_data.decode('utf-8', errors='ignore')
+                    # Filter out non-printable characters
+                    return ''.join(c for c in text if c.isprintable() or c in '\n\r\t')
+                except:
+                    pass
+                offset += length
+            else:
+                # Skip other message types
+                break
+
+        return ""
 
     def logout(self):
-        """Logout from RCON."""
+        """Logout from RCON session."""
         packet = bytes([self.CLC_RCON_PASSWORD, 0x00])  # login=false
         packet += b'\x00'
         self.socket.sendto(packet, (self.host, self.port))
@@ -358,15 +598,23 @@ class NovaDoomRCON:
 
 
 # Usage example
-rcon = NovaDoomRCON("game1.novadoom.com", 10666, "secretpassword")
-rcon.connect()
-rcon.authenticate(server_digest)
+# Note: In practice, you need to connect as a game client first
+# to receive the digest from svc_consoleplayer
 
-# Execute commands
-print(rcon.send_command("playerlist"))
-print(rcon.send_command("sv_fraglimit 30"))
-print(rcon.send_command("kick 3 AFK"))
-print(rcon.send_command("map MAP02"))
+rcon = NovaDoomRCON("game1.novadoom.com", 10666, "secretpassword")
+
+# The digest comes from svc_consoleplayer after connecting
+# For testing, you can get it from the game client's console
+server_digest = "abc123..."  # 32-char MD5 hex string from server
+
+if rcon.authenticate(server_digest):
+    print("RCON authenticated!")
+
+    # Execute commands
+    print(rcon.send_command("playerlist"))
+    print(rcon.send_command("sv_fraglimit 30"))
+    print(rcon.send_command("kick 3 AFK"))
+    print(rcon.send_command("map MAP02"))
 
 rcon.close()
 ```
@@ -542,4 +790,296 @@ See `server/src/sv_cvarlist.cpp` for the complete list of server CVARs.
 
 ## Appendix B: Network Protocol Reference
 
-See `common/i_net.h` for protocol buffer definitions and message types.
+| File | Description |
+|------|-------------|
+| `common/i_net.h` | Message type enums (`svc_t`, `clc_t`) and buffer utilities |
+| `common/i_net.cpp` | Network message info tables |
+| `odaproto/server.proto` | Protobuf definitions for server-to-client messages |
+| `common/svc_message.cpp` | Server message construction functions |
+| `common/svc_message.h` | Server message function declarations |
+| `server/src/sv_main.cpp` | Server connection and RCON handling |
+| `client/src/cl_main.cpp` | Client RCON password command implementation |
+| `client/src/cl_parse.cpp` | Client message parsing (including `svc_consoleplayer`) |
+
+## Appendix C: Key Constants
+
+```cpp
+// From common/i_net.h
+#define MAX_UDP_PACKET 8192       // Max buffer size
+#define MAX_UDP_SIZE 1200         // Safe transmission size
+#define SERVERPORT 10666          // Default server port
+#define PROTO_CHALLENGE -5560020  // Protobuf connection challenge
+#define VERSION 65                // Protocol version
+
+// Message type values (0-indexed enums)
+// clc_t (client-to-server):
+//   clc_rcon = 9 (0x09)
+//   clc_rcon_password = 10 (0x0A)
+//
+// svc_t (server-to-client):
+//   svc_consoleplayer = 11 (0x0B)
+//   svc_print = 21 (0x15)
+```
+
+## Appendix D: Troubleshooting
+
+### "Why does authentication work from game client but not platform?"
+
+- Ensure you're sending packets from the same IP that connected (digest is IP-specific)
+- Verify the digest hasn't changed (reconnection generates new digest)
+- Check packet format matches exactly (null-terminated strings, correct byte order)
+
+--- 
+
+## Appendix E: RCON-Only Connection (Slot-less, Implemented)
+
+### Feature Status: IMPLEMENTED
+
+The NovaDoom engine now supports **RCON-only connections** that:
+- Do NOT consume a player slot
+- Are NOT visible in the player list
+- Provide a lightweight authenticated RCON session
+- Are ideal for platform/web-based server management
+
+### Protocol: RCON_CHALLENGE
+
+A new challenge constant has been added:
+
+```cpp
+#define RCON_CHALLENGE -5560021   // RCON-only connection (no player slot)
+```
+
+### How It Works
+
+```
+┌─────────────────┐                      ┌─────────────────┐
+│  NovaDoom API   │                      │   Game Server   │
+└────────┬────────┘                      └────────┬────────┘
+         │                                        │
+         │  1. Get server token (same as before)  │
+         │     LAUNCHER_CHALLENGE (777123)        │
+         │ ──────────────────────────────────────>│
+         │                                        │
+         │  2. Receive token                      │
+         │ <──────────────────────────────────────│
+         │                                        │
+         │  3. Send RCON challenge                │
+         │     RCON_CHALLENGE (-5560021) + token  │
+         │ ──────────────────────────────────────>│
+         │                                        │
+         │  4. Receive digest (no player slot!)   │
+         │     RCON_CHALLENGE + digest string     │
+         │ <──────────────────────────────────────│
+         │                                        │
+         │  5. Authenticate RCON                  │
+         │     clc_rcon_password (0x0A)           │
+         │ ──────────────────────────────────────>│
+         │                                        │
+         │  6. Receive auth result                │
+         │     "RCON authenticated" or error      │
+         │ <──────────────────────────────────────│
+         │                                        │
+         │  7. Send RCON commands                 │
+         │     clc_rcon (0x09) + command          │
+         │ ──────────────────────────────────────>│
+         │                                        │
+```
+
+### Packet Formats
+
+#### RCON Challenge Request
+```
+Offset  Size    Field               Value
+──────────────────────────────────────────────────────────────
+0       4       challenge           RCON_CHALLENGE (-5560021, signed int32 LE)
+4       4       server_token        Token from launcher query (int32 LE)
+```
+
+#### RCON Challenge Response
+```
+Offset  Size    Field               Description
+──────────────────────────────────────────────────────────────
+0       4       challenge           RCON_CHALLENGE (-5560021)
+4       ...     digest              32-char MD5 hex string (null-terminated)
+```
+
+#### RCON Auth/Command Packets (same as regular RCON)
+```
+Offset  Size    Field               Description
+──────────────────────────────────────────────────────────────
+0       4       sequence            Packet sequence (use 0)
+4       1       flags               Packet flags (use 0)
+5       1       marker              clc_rcon_password (0x0A) or clc_rcon (0x09)
+6       ...     payload             Auth: login_byte + MD5_string
+                                    Command: command_string (null-terminated)
+```
+
+### Python Implementation (Complete)
+
+```python
+import socket
+import hashlib
+from struct import pack, unpack
+
+class NovaDoomRCON:
+    """
+    RCON client using the new slot-less RCON_CHALLENGE protocol.
+    Does NOT consume a player slot on the server.
+    """
+
+    LAUNCHER_CHALLENGE = 777123
+    RCON_CHALLENGE = -5560021  # Signed int32
+    CLC_RCON = 0x09
+    CLC_RCON_PASSWORD = 0x0A
+
+    def __init__(self, host: str, port: int, password: str):
+        self.host = host
+        self.port = port
+        self.password = password
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.settimeout(5.0)
+        self.digest = None
+        self.authenticated = False
+
+    def connect(self) -> bool:
+        """
+        Establish RCON-only session (no player slot consumed).
+        Returns True if digest was received successfully.
+        """
+        # Step 1: Get server token
+        self.socket.sendto(pack('<I', self.LAUNCHER_CHALLENGE), (self.host, self.port))
+        data, _ = self.socket.recvfrom(8192)
+        _, token = unpack('<II', data[:8])
+
+        # Step 2: Send RCON challenge (slot-less connection)
+        packet = pack('<i', self.RCON_CHALLENGE)  # Signed int32
+        packet += pack('<I', token)
+        self.socket.sendto(packet, (self.host, self.port))
+
+        # Step 3: Receive digest
+        data, _ = self.socket.recvfrom(8192)
+        challenge_response = unpack('<i', data[:4])[0]
+        if challenge_response != self.RCON_CHALLENGE:
+            return False
+
+        # Extract null-terminated digest string
+        self.digest = data[4:].split(b'\x00')[0].decode('utf-8')
+        return len(self.digest) == 32
+
+    def authenticate(self) -> bool:
+        """Authenticate with RCON password."""
+        if not self.digest:
+            raise Exception("Must call connect() first")
+
+        challenge = hashlib.md5((self.password + self.digest).encode()).hexdigest()
+
+        # Build auth packet
+        packet = pack('<I', 0)  # sequence
+        packet += pack('<B', 0)  # flags
+        packet += pack('<B', self.CLC_RCON_PASSWORD)
+        packet += pack('<B', 1)  # login = true
+        packet += challenge.encode() + b'\x00'
+
+        self.socket.sendto(packet, (self.host, self.port))
+
+        try:
+            response, _ = self.socket.recvfrom(8192)
+            if b"RCON authenticated" in response:
+                self.authenticated = True
+                return True
+            elif b"Bad password" in response:
+                return False
+        except socket.timeout:
+            pass
+
+        return False
+
+    def command(self, cmd: str) -> str:
+        """Send RCON command and receive response."""
+        if not self.authenticated:
+            raise Exception("Must authenticate first")
+
+        packet = pack('<I', 0)  # sequence
+        packet += pack('<B', 0)  # flags
+        packet += pack('<B', self.CLC_RCON)
+        packet += cmd.encode() + b'\x00'
+
+        self.socket.sendto(packet, (self.host, self.port))
+
+        # Collect responses
+        responses = []
+        try:
+            while True:
+                data, _ = self.socket.recvfrom(8192)
+                # Simple extraction - find printable text after header
+                text = data[7:].decode('utf-8', errors='ignore').split('\x00')[0]
+                if text:
+                    responses.append(text)
+        except socket.timeout:
+            pass
+
+        return '\n'.join(responses)
+
+    def close(self):
+        """Close the connection."""
+        self.socket.close()
+
+
+# Usage example
+if __name__ == "__main__":
+    rcon = NovaDoomRCON("localhost", 10666, "secretpassword")
+
+    if rcon.connect():
+        print(f"Connected! Digest: {rcon.digest}")
+
+        if rcon.authenticate():
+            print("Authenticated!")
+
+            # Execute commands
+            print(rcon.command("playerlist"))
+            print(rcon.command("sv_hostname"))
+
+    rcon.close()
+```
+
+### Session Management
+
+RCON sessions are automatically cleaned up:
+- Sessions timeout after **5 minutes** of inactivity
+- Each command resets the activity timer
+- Multiple RCON sessions can exist simultaneously
+- Sessions are tracked separately from players
+
+### Implementation Files
+
+| File | Changes |
+|------|---------|
+| `common/i_net.h` | Added `RCON_CHALLENGE` constant and `rcon_session_t` struct |
+| `server/src/sv_main.cpp` | Added RCON session handling functions |
+
+### Key Functions Added
+
+```cpp
+// Find RCON session by network address
+rcon_session_t* SV_FindRconSession(const netadr_t& addr);
+
+// Remove expired RCON sessions (called every tick)
+void SV_CleanupRconSessions();
+
+// Handle RCON_CHALLENGE connection request
+void SV_HandleRconChallenge();
+
+// Handle RCON password auth for sessions
+void SV_RconSessionPassword(rcon_session_t& session);
+
+// Handle RCON command from session
+void SV_RconSessionCommand(rcon_session_t& session);
+```
+
+### Benefits for Platform Team
+
+1. **No player slot consumed** - RCON sessions don't count against `sv_maxclients`
+2. **Not visible in player list** - Clean separation from actual players
+3. **Lightweight protocol** - No game state sync, just auth + commands
+4. **Simple implementation** - ~100 lines of Python vs full game client
+5. **Multiple sessions** - Platform can maintain connections to many servers
