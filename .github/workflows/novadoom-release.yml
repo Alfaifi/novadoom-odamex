@@ -257,6 +257,7 @@ jobs:
             mingw-w64-x86_64-curl
             mingw-w64-x86_64-protobuf
             mingw-w64-x86_64-jsoncpp
+            mingw-w64-x86_64-ntldd
             mingw-w64-x86_64-nsis
             git
 
@@ -327,58 +328,57 @@ jobs:
           # Copy soundfont
           cp soundfonts/gzdoom.sf2 "$ARTIFACT_DIR/soundfonts/"
 
-          # Copy required DLLs from MSYS2
-          MINGW_BIN="/mingw64/bin"
+          # Automatically discover and copy ALL required DLLs using ntldd
+          # ntldd output format: "name.dll => /path/to/dll (0x00000000)"
 
-          # Core runtime and SDL
-          for dll in SDL2.dll SDL2_mixer.dll \
-                     libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll; do
-            [ -f "$MINGW_BIN/$dll" ] && cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
-          done
+          copy_deps() {
+            local binary="$1"
+            local dest="$2"
 
-          # FluidSynth and audio dependencies
-          for dll in libfluidsynth-3.dll libglib-2.0-0.dll libgobject-2.0-0.dll \
-                     libintl-8.dll libiconv-2.dll libpcre2-8-0.dll libffi-8.dll \
-                     libsndfile-1.dll libFLAC.dll libogg-0.dll \
-                     libvorbis-0.dll libvorbisenc-2.dll libopus-0.dll \
-                     libmp3lame-0.dll libmpg123-0.dll libout123-0.dll libsyn123-0.dll \
-                     libreadline8.dll libtermcap-0.dll; do
-            [ -f "$MINGW_BIN/$dll" ] && cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
-          done
+            # Parse ntldd output: get lines with "=>", exclude "not found", extract path
+            ntldd -R "$binary" 2>&1 | \
+              grep "=>" | \
+              grep -v "not found" | \
+              sed 's/.*=> \(.*\) (.*/\1/' | \
+              while read -r dllpath; do
+                if [ -f "$dllpath" ]; then
+                  dllname=$(basename "$dllpath")
+                  if [ ! -f "$dest/$dllname" ]; then
+                    cp "$dllpath" "$dest/"
+                    echo "Copied: $dllname"
+                  fi
+                fi
+              done
+          }
 
-          # Image and compression libraries
-          for dll in libpng16-16.dll zlib1.dll libzstd.dll \
-                     libjpeg-8.dll libwebp-7.dll libsharpyuv-0.dll \
-                     libtiff-6.dll libdeflate.dll liblzma-5.dll \
-                     libLerc.dll libjbig-0.dll; do
-            [ -f "$MINGW_BIN/$dll" ] && cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
-          done
+          echo "=== Discovering DLL dependencies for novadoom.exe ==="
+          copy_deps "$ARTIFACT_DIR/novadoom.exe" "$ARTIFACT_DIR"
 
-          # Protobuf and JSON
-          for dll in libprotobuf.dll libjsoncpp.dll libutf8_range.dll; do
-            [ -f "$MINGW_BIN/$dll" ] && cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
-          done
+          echo "=== Discovering DLL dependencies for novasrv.exe ==="
+          copy_deps "$ARTIFACT_DIR/novasrv.exe" "$ARTIFACT_DIR"
 
-          # Networking (curl and dependencies)
-          for dll in libcurl-4.dll libssh2-1.dll \
-                     libssl-3-x64.dll libcrypto-3-x64.dll \
-                     libbrotlidec.dll libbrotlicommon.dll \
-                     libnghttp2-14.dll libnghttp3-9.dll \
-                     libidn2-0.dll libpsl-5.dll libunistring-5.dll; do
-            [ -f "$MINGW_BIN/$dll" ] && cp "$MINGW_BIN/$dll" "$ARTIFACT_DIR/"
-          done
+          # Iterate to catch transitive dependencies (DLLs that depend on other DLLs)
+          echo "=== Resolving transitive dependencies ==="
+          for pass in 1 2 3 4 5 6 7 8; do
+            count_before=$(ls -1 "$ARTIFACT_DIR"/*.dll 2>/dev/null | wc -l)
 
-          # FLTK GUI libraries (use wildcards for version flexibility)
-          for dll in "$MINGW_BIN"/libfltk*.dll; do
-            [ -f "$dll" ] && cp "$dll" "$ARTIFACT_DIR/"
-          done
+            # Check each DLL for its dependencies
+            for dll in "$ARTIFACT_DIR"/*.dll; do
+              [ -f "$dll" ] && copy_deps "$dll" "$ARTIFACT_DIR"
+            done
 
-          # Abseil libraries (required by protobuf v22+)
-          for dll in "$MINGW_BIN"/libabsl_*.dll; do
-            [ -f "$dll" ] && cp "$dll" "$ARTIFACT_DIR/"
+            count_after=$(ls -1 "$ARTIFACT_DIR"/*.dll 2>/dev/null | wc -l)
+            echo "Pass $pass: $count_after DLLs total"
+
+            # Stop if no new DLLs were added
+            if [ "$count_before" -eq "$count_after" ]; then
+              echo "All dependencies resolved!"
+              break
+            fi
           done
 
           echo "=== Bundled $(ls -1 "$ARTIFACT_DIR"/*.dll 2>/dev/null | wc -l) DLLs ==="
+          ls -1 "$ARTIFACT_DIR"/*.dll | xargs -n1 basename | sort
 
       - name: Create ZIP (portable version)
         shell: pwsh
