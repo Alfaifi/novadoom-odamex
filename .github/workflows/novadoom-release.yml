@@ -271,9 +271,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build
-          key: windows-x64-build-v3-static-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
+          key: windows-x64-build-v4-static-fluidsynth-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            windows-x64-build-v3-static-
+            windows-x64-build-v4-static-fluidsynth-
 
       - name: Configure CMake
         run: |
@@ -283,6 +283,7 @@ jobs:
             -DUSE_LTO=ON \
             -DUSE_STATIC_STDLIB=ON \
             -DENABLE_FLUIDSYNTH=ON \
+            -DUSE_INTERNAL_FLUIDSYNTH=ON \
             -DENABLE_PORTMIDI=OFF \
             -DUSE_INTERNAL_FLTK=ON \
             -DUSE_INTERNAL_ZLIB=ON \
