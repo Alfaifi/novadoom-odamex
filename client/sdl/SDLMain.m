@@ -109,6 +109,11 @@ static NSString *getApplicationName(void)
         return;
     }
 
+    /* Skip if URL was already processed in main() */
+    if (gURLProcessed) {
+        return;
+    }
+
     if ([urlString hasPrefix:@"novadoom://"]) {
         /* Parse the URL and add to argv */
         NSString *remainder = [urlString substringFromIndex:[@"novadoom://" length]];
@@ -170,6 +175,7 @@ static NSString *getApplicationName(void)
                     }
                 }
                 gArgv[gArgc] = NULL;
+                gURLProcessed = YES;  /* Mark URL as processed */
             }
         }
     }
@@ -553,6 +559,27 @@ static void CustomApplicationMain (int argc, char **argv)
     /* Set the main menu to contain the real app name instead of "SDL App" */
     [self fixMenu:[NSApp mainMenu] withAppName:getApplicationName()];
 #endif
+
+    /*
+     * Process any pending Apple Events before proceeding.
+     * When launched via URL scheme (novadoom://), macOS sends the URL as an
+     * Apple Event. This event may arrive after applicationDidFinishLaunching:
+     * is called, causing a race condition where we'd miss the URL.
+     *
+     * By running the event loop briefly here, we ensure any pending GetURL
+     * events are processed before we set gCalledAppMainline and call SDL_main.
+     */
+    NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:0.1];
+    while ([[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:deadline]) {
+        /* Check if we've received a URL - if so, we can proceed */
+        if (gURLProcessed) {
+            break;
+        }
+        /* Also check if the deadline has passed */
+        if ([deadline timeIntervalSinceNow] <= 0) {
+            break;
+        }
+    }
 
     /* Hand off to main application code */
     gCalledAppMainline = true;
