@@ -48,10 +48,10 @@ jobs:
       - name: Cache ccache
         uses: actions/cache@v4
         with:
-          path: ~/.ccache
-          key: macos-ccache-v1-${{ github.sha }}
+          path: ~/Library/Caches/ccache
+          key: macos-ccache-v2-${{ github.sha }}
           restore-keys: |
-            macos-ccache-v1-
+            macos-ccache-v2-
 
       - name: Cache CMake build
         uses: actions/cache@v4
