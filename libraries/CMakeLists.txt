@@ -76,6 +76,11 @@ function(lib_buildgen)
     list(APPEND _COMMAND "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON")
     # Force CMP0069 policy to NEW so INTERPROCEDURAL_OPTIMIZATION is enforced
     list(APPEND _COMMAND "-DCMAKE_POLICY_DEFAULT_CMP0069=NEW")
+    # Also pass LTO flags directly to ensure they're used
+    if(APPLE)
+      list(APPEND _COMMAND "-DCMAKE_CXX_FLAGS=-flto=thin")
+      list(APPEND _COMMAND "-DCMAKE_C_FLAGS=-flto=thin")
+    endif()
   endif()
 
   if(_CXXFLAGS)
