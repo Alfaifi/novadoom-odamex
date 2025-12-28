@@ -10,6 +10,9 @@ if(BUILD_CLIENT OR BUILD_SERVER)
            "-DFMT_TEST=OFF")
   lib_build(LIBRARY fmt)
 
-  find_package(fmt REQUIRED)
+  # Force find_package to use our internal fmt, not any system-installed version
+  find_package(fmt REQUIRED
+    PATHS "${CMAKE_CURRENT_BINARY_DIR}/local"
+    NO_DEFAULT_PATH)
   set_target_properties(fmt::fmt PROPERTIES IMPORTED_GLOBAL TRUE)
 endif()
