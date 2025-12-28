@@ -57,9 +57,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build
-          key: macos-arm64-build-v3-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
+          key: macos-arm64-build-v4-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            macos-arm64-build-v3-
+            macos-arm64-build-v4-
 
       - name: Configure CMake
         run: |
