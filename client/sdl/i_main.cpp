@@ -299,6 +299,26 @@ int main(int argc, char *argv[])
 							Args.AppendArg(std::string(password).c_str());
 						}
 					}
+
+					// Parse player name from query string (name=xxx)
+					static constexpr std::string_view name_prefix = "name=";
+					size_t name_pos = query.find(name_prefix);
+					if(name_pos != std::string::npos)
+					{
+						std::string_view name = query.substr(name_pos + name_prefix.length());
+						// Find end of name value (& or end of string)
+						size_t name_end = name.find('&');
+						if(name_end != std::string::npos)
+							name = name.substr(0, name_end);
+
+						if(!name.empty())
+						{
+							// Set cl_name CVAR via command line
+							Args.AppendArg("+set");
+							Args.AppendArg("cl_name");
+							Args.AppendArg(std::string(name).c_str());
+						}
+					}
 				}
 			}
 		}
