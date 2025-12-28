@@ -74,6 +74,8 @@ function(lib_buildgen)
   # Pass LTO/IPO settings to internal libraries to avoid linker symbol mismatches
   if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
     list(APPEND _COMMAND "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON")
+    # Force CMP0069 policy to NEW so INTERPROCEDURAL_OPTIMIZATION is enforced
+    list(APPEND _COMMAND "-DCMAKE_POLICY_DEFAULT_CMP0069=NEW")
   endif()
 
   if(_CXXFLAGS)
