@@ -71,6 +71,11 @@ function(lib_buildgen)
     list(APPEND _COMMAND "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
   endif()
 
+  # Pass LTO/IPO settings to internal libraries to avoid linker symbol mismatches
+  if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    list(APPEND _COMMAND "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON")
+  endif()
+
   if(_CXXFLAGS)
     set(_ENVCMD ${CMAKE_COMMAND} -E env CXXFLAGS=${_CXXFLAGS})
   endif()

@@ -149,6 +149,8 @@ if(USE_LTO)
   check_ipo_supported(RESULT HAS_LTO OUTPUT HAS_LTO_ERROR)
   if(HAS_LTO)
     message(STATUS "Link Time Optimization: ON")
+    # Set globally so internal libraries are also built with LTO
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
   else()
     message(STATUS "Link Time Optimization: OFF")
   endif()
