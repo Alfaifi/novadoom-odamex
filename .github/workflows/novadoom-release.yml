@@ -68,7 +68,7 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DUSE_LTO=ON \
+            -DUSE_LTO=OFF \
             -DENABLE_FLUIDSYNTH=ON \
             -DUSE_INTERNAL_FLTK=OFF \
             -DUSE_INTERNAL_PROTOBUF=OFF \
