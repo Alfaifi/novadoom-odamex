@@ -172,8 +172,12 @@ std::string OTransferCheck::escapeFileName(const std::string& filename)
  */
 bool OTransferCheck::start()
 {
-	curl_easy_setopt(m_curl, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+	// Don't use FAILONERROR - we handle response codes manually to support
+	// presigned URL redirects (R2/S3) where HEAD on the redirect target fails
+	curl_easy_setopt(m_curl, CURLOPT_FAILONERROR, 0L);
+	// Don't follow redirects on HEAD - presigned URLs are GET-only and will
+	// return 403 on HEAD. A 3xx redirect means the file exists.
+	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 0L);
 	curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 5L);
 	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, curlHeader);
 	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, ::ODAMEX_USERAGENT);
@@ -255,15 +259,35 @@ bool OTransferCheck::tick()
 		return false;
 	}
 
-	// Make sure we didn't find an HTML file - those are only okay on redirects.
-	if (stricmp(info.contentType.c_str(), "text/html") == 0)
+	// Check HTTP response code manually (we disabled FAILONERROR to support
+	// presigned URL redirects from R2/S3/Azure/GCS)
+	if (info.code >= 200 && info.code < 300)
 	{
-		m_errorProc("Only found an HTML file");
+		// 2xx - File exists at this URL
+		// Make sure we didn't find an HTML file - those are only okay on redirects.
+		if (stricmp(info.contentType.c_str(), "text/html") == 0)
+		{
+			m_errorProc("Only found an HTML file");
+			return false;
+		}
+		m_doneProc(info);
 		return false;
 	}
-
-	m_doneProc(info);
-	return false;
+	else if (info.code >= 300 && info.code < 400)
+	{
+		// 3xx - Redirect response means file exists (API confirmed it).
+		// The subsequent GET request will follow the redirect.
+		// This supports presigned URL systems where HEAD fails on the
+		// redirect target but GET works.
+		m_doneProc(info);
+		return false;
+	}
+	else
+	{
+		// 4xx/5xx - File not found at this mirror
+		m_errorProc("File not found at mirror");
+		return false;
+	}
 }
 
 // // OTransfer // //
