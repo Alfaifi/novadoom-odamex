@@ -43,19 +43,30 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf 2>/dev/null || true
+          brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf ccache ninja 2>/dev/null || true
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: macos-ccache-v1-${{ github.sha }}
+          restore-keys: |
+            macos-ccache-v1-
 
       - name: Cache CMake build
         uses: actions/cache@v4
         with:
           path: build
-          key: macos-arm64-build-v2-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
+          key: macos-arm64-build-v3-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            macos-arm64-build-v2-
+            macos-arm64-build-v3-
 
       - name: Configure CMake
         run: |
-          cmake -B build \
+          export PATH="/opt/homebrew/opt/ccache/libexec:$PATH"
+          cmake -B build -G Ninja \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DUSE_LTO=ON \
             -DENABLE_FLUIDSYNTH=ON \
@@ -262,6 +273,7 @@ jobs:
             mingw-w64-x86_64-SDL2_mixer
             mingw-w64-x86_64-ntldd
             mingw-w64-x86_64-nsis
+            mingw-w64-x86_64-ccache
             git
 
       - name: Checkout source
@@ -270,17 +282,27 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive --depth 1
 
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: windows-ccache-v1-${{ github.sha }}
+          restore-keys: |
+            windows-ccache-v1-
+
       - name: Cache CMake build
         uses: actions/cache@v4
         with:
           path: build
-          key: windows-x64-build-v4-static-fluidsynth-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
+          key: windows-x64-build-v5-ccache-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            windows-x64-build-v4-static-fluidsynth-
+            windows-x64-build-v5-ccache-
 
       - name: Configure CMake
         run: |
           cmake -B build -G Ninja \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_PREFIX_PATH=/mingw64 \
             -DUSE_LTO=ON \
@@ -502,23 +524,33 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake ninja-build \
+            build-essential cmake ninja-build ccache \
             libcurl4-openssl-dev \
             zlib1g-dev \
             libpng-dev \
             libprotobuf-dev protobuf-compiler
 
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: linux-ccache-v1-${{ github.sha }}
+          restore-keys: |
+            linux-ccache-v1-
+
       - name: Cache CMake build
         uses: actions/cache@v4
         with:
           path: build
-          key: linux-x64-server-build-v2-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
+          key: linux-x64-server-build-v3-${{ hashFiles('**/CMakeLists.txt', 'libraries/**/*.cmake', '**/*.rc.in') }}
           restore-keys: |
-            linux-x64-server-build-v2-
+            linux-x64-server-build-v3-
 
       - name: Configure CMake
         run: |
           cmake -B build -G Ninja \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DUSE_LTO=ON \
             -DBUILD_CLIENT=OFF \
