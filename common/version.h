@@ -73,10 +73,10 @@
 // Used by configuration files.  upversion.py will update thie field
 // deterministically and unambiguously so newer versions always compare
 // greater.
-#define CONFIGVERSIONSTR "000005"
+#define CONFIGVERSIONSTR "000006"
 
-#define DOTVERSIONSTR "0.0.5"
-#define GAMEVER (MAKEVER(0, 0, 5))
+#define DOTVERSIONSTR "0.0.6"
+#define GAMEVER (MAKEVER(0, 0, 6))
 
 #define COPYRIGHTSTR "Copyright (C) 2025 NovaDoom | Based on Odamex by The Odamex Team"
 

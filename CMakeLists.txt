@@ -14,7 +14,7 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(NovaDoom VERSION 0.0.5)
+project(NovaDoom VERSION 0.0.6)
 
 # Enable Objective-C for macOS (needed for SDLMain.m and URL scheme handling)
 if(APPLE)
@@ -76,7 +76,7 @@ if(NOT APPLE AND NOT WIN32)
 endif()
 
 set(PROJECT_COPYRIGHT "2006-2025")
-set(PROJECT_RC_VERSION "0,0,5,0")
+set(PROJECT_RC_VERSION "0,0,6,0")
 set(PROJECT_COMPANY "NovaDoom")
 
 # Ensure that we can use folders in projects.
