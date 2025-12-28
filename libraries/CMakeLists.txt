@@ -62,6 +62,11 @@ function(lib_buildgen)
     list(APPEND _COMMAND "-DCMAKE_LINKER=${CMAKE_LINKER}")
   endif()
 
+  # Pass macOS architecture to ensure internal libraries match main project
+  if(CMAKE_OSX_ARCHITECTURES)
+    list(APPEND _COMMAND "-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}")
+  endif()
+
   if(CMAKE_RC_COMPILER)
     list(APPEND _COMMAND "-DCMAKE_RC_COMPILER=${CMAKE_RC_COMPILER}")
   endif()
