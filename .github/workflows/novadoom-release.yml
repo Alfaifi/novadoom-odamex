@@ -256,6 +256,8 @@ jobs:
   build-windows:
     name: Windows x64
     runs-on: windows-latest
+    env:
+      CCACHE_DIR: D:/a/_ccache
     defaults:
       run:
         shell: msys2 {0}
@@ -286,10 +288,10 @@ jobs:
       - name: Cache ccache
         uses: actions/cache@v4
         with:
-          path: ~/.ccache
-          key: windows-ccache-v1-${{ github.sha }}
+          path: D:/a/_ccache
+          key: windows-ccache-v2-${{ github.sha }}
           restore-keys: |
-            windows-ccache-v1-
+            windows-ccache-v2-
 
       - name: Cache CMake build
         uses: actions/cache@v4
