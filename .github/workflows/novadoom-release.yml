@@ -43,7 +43,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # Install packages (may be cached in Cellar already)
           brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf ccache ninja 2>/dev/null || true
+          # Recreate symlinks in /opt/homebrew/opt/ (needed after cache restore)
+          brew link --overwrite ccache 2>/dev/null || true
 
       - name: Cache ccache
         uses: actions/cache@v4
