@@ -46,8 +46,8 @@ jobs:
           # Install packages (may be cached in Cellar already)
           brew install fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf ccache ninja 2>/dev/null || true
           # Recreate symlinks in /opt/homebrew/opt/ (needed after cache restore)
-          # Must link ccache AND its dependencies (blake3, fmt, hiredis, xxhash)
-          brew link --overwrite ccache blake3 fmt hiredis xxhash 2>/dev/null || true
+          # Must link all packages and their dependencies
+          brew link --overwrite fluidsynth sdl2 sdl2_mixer libpng pkg-config zstd fltk protobuf ccache ninja blake3 fmt hiredis xxhash 2>/dev/null || true
 
       - name: Cache ccache
         uses: actions/cache@v4
