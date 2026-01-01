@@ -63,6 +63,10 @@ jobs:
 
       - name: Configure CMake
         run: |
+          # Remove stale CMakeCache if it references non-existent compiler paths
+          if [ -f build/CMakeCache.txt ]; then
+            rm -f build/CMakeCache.txt
+          fi
           export PATH="/opt/homebrew/opt/ccache/libexec:$PATH"
           cmake -B build -G Ninja \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
