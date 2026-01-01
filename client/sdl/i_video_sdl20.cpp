@@ -649,6 +649,22 @@ void ISDL20Window::getEvents()
 								password = password.substr(0, pwd_end);
 						}
 
+						// Parse player name from query string (name=xxx)
+						std::string player_name;
+						static const std::string name_prefix = "name=";
+						size_t name_pos = query.find(name_prefix);
+						if (name_pos != std::string::npos)
+						{
+							player_name = query.substr(name_pos + name_prefix.length());
+							size_t name_end = player_name.find('&');
+							if (name_end != std::string::npos)
+								player_name = player_name.substr(0, name_end);
+						}
+
+						// Set player name if provided
+						if (!player_name.empty())
+							AddCommandString(fmt::format("set cl_name \"{}\"", player_name));
+
 						// Execute connect command
 						if (password.empty())
 							AddCommandString(fmt::format("connect {}", host_port));
