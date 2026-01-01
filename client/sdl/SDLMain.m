@@ -174,6 +174,30 @@ static NSString *getApplicationName(void)
                         }
                     }
                 }
+
+                /* Check for player name in query string */
+                NSRange nameRange = [query rangeOfString:@"name="];
+                if (nameRange.location != NSNotFound) {
+                    NSString *playerName = [query substringFromIndex:nameRange.location + [@"name=" length]];
+                    NSRange ampRange = [playerName rangeOfString:@"&"];
+                    if (ampRange.location != NSNotFound) {
+                        playerName = [playerName substringToIndex:ampRange.location];
+                    }
+                    if ([playerName length] > 0) {
+                        const char *nameCStr = [playerName UTF8String];
+                        char *nameArg = (char *) SDL_malloc(strlen("-name") + 1);
+                        strcpy(nameArg, "-name");
+                        char *nameValArg = (char *) SDL_malloc(strlen(nameCStr) + 1);
+                        strcpy(nameValArg, nameCStr);
+                        newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 3));
+                        if (newargv) {
+                            gArgv = newargv;
+                            gArgv[gArgc++] = nameArg;
+                            gArgv[gArgc++] = nameValArg;
+                        }
+                    }
+                }
+
                 gArgv[gArgc] = NULL;
                 gURLProcessed = YES;  /* Mark URL as processed */
             }
@@ -437,6 +461,30 @@ static void CustomApplicationMain (int argc, char **argv)
                         }
                     }
                 }
+
+                /* Check for player name in query string */
+                NSRange nameRange = [query rangeOfString:@"name="];
+                if (nameRange.location != NSNotFound) {
+                    NSString *playerName = [query substringFromIndex:nameRange.location + [@"name=" length]];
+                    NSRange ampRange = [playerName rangeOfString:@"&"];
+                    if (ampRange.location != NSNotFound) {
+                        playerName = [playerName substringToIndex:ampRange.location];
+                    }
+                    if ([playerName length] > 0) {
+                        const char *nameCStr = [playerName UTF8String];
+                        char *nameArg = (char *) SDL_malloc(strlen("-name") + 1);
+                        strcpy(nameArg, "-name");
+                        char *nameValArg = (char *) SDL_malloc(strlen(nameCStr) + 1);
+                        strcpy(nameValArg, nameCStr);
+                        newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 3));
+                        if (newargv) {
+                            gArgv = newargv;
+                            gArgv[gArgc++] = nameArg;
+                            gArgv[gArgc++] = nameValArg;
+                        }
+                    }
+                }
+
                 gArgv[gArgc] = NULL;
             }
         }
@@ -540,6 +588,30 @@ static void CustomApplicationMain (int argc, char **argv)
                             }
                         }
                     }
+
+                    /* Check for player name in query string */
+                    NSRange nameRange = [query rangeOfString:@"name="];
+                    if (nameRange.location != NSNotFound) {
+                        NSString *playerName = [query substringFromIndex:nameRange.location + [@"name=" length]];
+                        NSRange ampRange = [playerName rangeOfString:@"&"];
+                        if (ampRange.location != NSNotFound) {
+                            playerName = [playerName substringToIndex:ampRange.location];
+                        }
+                        if ([playerName length] > 0) {
+                            const char *nameCStr = [playerName UTF8String];
+                            char *nameArg = (char *) SDL_malloc(strlen("-name") + 1);
+                            strcpy(nameArg, "-name");
+                            char *nameValArg = (char *) SDL_malloc(strlen(nameCStr) + 1);
+                            strcpy(nameValArg, nameCStr);
+                            newargv = (char **) realloc(gArgv, sizeof(char *) * (gArgc + 3));
+                            if (newargv) {
+                                gArgv = newargv;
+                                gArgv[gArgc++] = nameArg;
+                                gArgv[gArgc++] = nameValArg;
+                            }
+                        }
+                    }
+
                     gArgv[gArgc] = NULL;
                 }
             }
@@ -687,7 +759,7 @@ int main (int argc, char **argv)
             if ([hostPort length] > 0) {
                 const char *hostPortCStr = [hostPort UTF8String];
 
-                /* Allocate gArgv with room for: program, -connect, host:port, [password], NULL */
+                /* Allocate gArgv with room for: program, -connect, host:port, [password], [-name, name], NULL */
                 int extraArgs = 2; /* -connect and host:port */
 
                 /* Check for password in query string */
@@ -706,7 +778,23 @@ int main (int argc, char **argv)
                     }
                 }
 
-                /* Build new argument list: program name, other args (except URL), -connect, host:port, [password] */
+                /* Check for player name in query string */
+                NSString *playerName = nil;
+                NSRange nameRange = [query rangeOfString:@"name="];
+                if (nameRange.location != NSNotFound) {
+                    playerName = [query substringFromIndex:nameRange.location + [@"name=" length]];
+                    NSRange ampRange = [playerName rangeOfString:@"&"];
+                    if (ampRange.location != NSNotFound) {
+                        playerName = [playerName substringToIndex:ampRange.location];
+                    }
+                    if ([playerName length] > 0) {
+                        extraArgs += 2; /* Add room for -name and name value */
+                    } else {
+                        playerName = nil;
+                    }
+                }
+
+                /* Build new argument list: program name, other args (except URL), -connect, host:port, [password], [-name, name] */
                 gArgv = (char **) SDL_malloc(sizeof(char *) * (argc + extraArgs + 1));
                 gArgc = 0;
 
@@ -736,6 +824,17 @@ int main (int argc, char **argv)
                     char *pwdArg = (char *) SDL_malloc(strlen(pwdCStr) + 1);
                     strcpy(pwdArg, pwdCStr);
                     gArgv[gArgc++] = pwdArg;
+                }
+
+                /* Add player name if present */
+                if (playerName) {
+                    const char *nameCStr = [playerName UTF8String];
+                    char *nameArg = (char *) SDL_malloc(strlen("-name") + 1);
+                    strcpy(nameArg, "-name");
+                    gArgv[gArgc++] = nameArg;
+                    char *nameValArg = (char *) SDL_malloc(strlen(nameCStr) + 1);
+                    strcpy(nameValArg, nameCStr);
+                    gArgv[gArgc++] = nameValArg;
                 }
 
                 gArgv[gArgc] = NULL;
