@@ -313,9 +313,8 @@ int main(int argc, char *argv[])
 
 						if(!name.empty())
 						{
-							// Set cl_name CVAR via command line
-							Args.AppendArg("+set");
-							Args.AppendArg("cl_name");
+							// Use -name parameter for explicit handling
+							Args.AppendArg("-name");
 							Args.AppendArg(std::string(name).c_str());
 						}
 					}

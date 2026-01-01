@@ -34,6 +34,9 @@
 #include "cl_main.h"
 #include "m_argv.h"
 #include "cl_demo.h"
+#include "c_cvars.h"
+
+EXTERN_CVAR (cl_name)
 
 extern NetDemo netdemo;
 
@@ -72,6 +75,18 @@ void NetUpdate (void)
 void D_CheckNetGame (void)
 {
     CL_InitNetwork ();
+
+    // Handle -name parameter from URL or command line
+    // This must be done before D_SetupUserInfo() reads cl_name
+    size_t nameIndex = Args.CheckParm("-name");
+    if (nameIndex)
+    {
+        const char* name = Args.GetArg(nameIndex + 1);
+        if (name && name[0] != '-' && name[0] != '+')
+        {
+            cl_name.Set(name);
+        }
+    }
 
     D_SetupUserInfo();
 
