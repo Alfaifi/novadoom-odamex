@@ -251,6 +251,23 @@ EXTERN_CVAR (sv_friendlyfire)
 // Survival
 EXTERN_CVAR (g_lives)
 
+// Additional CVARs for serverinfo command
+EXTERN_CVAR (sv_maxclients)
+EXTERN_CVAR (sv_maxplayers)
+EXTERN_CVAR (sv_gametype)
+EXTERN_CVAR (sv_skill)
+EXTERN_CVAR (sv_nomonsters)
+EXTERN_CVAR (sv_fastmonsters)
+EXTERN_CVAR (sv_monstersrespawn)
+EXTERN_CVAR (sv_itemsrespawn)
+EXTERN_CVAR (sv_weaponstay)
+EXTERN_CVAR (g_winlimit)
+EXTERN_CVAR (g_rounds)
+EXTERN_CVAR (ctf_manualreturn)
+EXTERN_CVAR (ctf_flagathometoscore)
+EXTERN_CVAR (ctf_flagtimeout)
+EXTERN_CVAR (sv_warmup_autostart)
+
 // Private server settings
 CVAR_FUNC_IMPL (join_password)
 {
@@ -4510,6 +4527,185 @@ BEGIN_COMMAND (players)
 	AddCommandString("playerlist");
 }
 END_COMMAND (players)
+
+//
+// Helper function to escape strings for JSON output
+//
+static std::string EscapeJsonString(std::string_view input)
+{
+	std::string output;
+	output.reserve(input.size());
+	for (char c : input)
+	{
+		switch (c)
+		{
+			case '"':  output += "\\\""; break;
+			case '\\': output += "\\\\"; break;
+			case '\n': output += "\\n"; break;
+			case '\r': output += "\\r"; break;
+			case '\t': output += "\\t"; break;
+			default:   output += c; break;
+		}
+	}
+	return output;
+}
+
+//
+// mapstats
+// Returns map statistics in JSON format for platform integration
+//
+BEGIN_COMMAND(mapstats)
+{
+	PrintFmt("{{");
+	PrintFmt("\"map\":\"{}\",", EscapeJsonString(level.mapname));
+	PrintFmt("\"map_name\":\"{}\",", EscapeJsonString(level.level_name));
+	PrintFmt("\"time_tics\":{},", level.time);
+	PrintFmt("\"time_seconds\":{},", level.time / TICRATE);
+	PrintFmt("\"partime\":{},", level.partime);
+	PrintFmt("\"monsters\":{{\"total\":{},\"killed\":{},\"respawned\":{}}},",
+		level.total_monsters, level.killed_monsters, level.respawned_monsters);
+	PrintFmt("\"items\":{{\"total\":{},\"found\":{}}},",
+		level.total_items, level.found_items);
+	PrintFmt("\"secrets\":{{\"total\":{},\"found\":{}}}",
+		level.total_secrets, level.found_secrets);
+	PrintFmt("}}\n");
+}
+END_COMMAND(mapstats)
+
+//
+// serverinfo
+// Returns comprehensive server information in JSON format for platform integration
+//
+BEGIN_COMMAND(serverinfo)
+{
+	// Count players and spectators
+	int clientCount = 0, playerCount = 0, spectatorCount = 0;
+	for (const auto& player : players)
+	{
+		if (player.ingame())
+		{
+			clientCount++;
+			if (player.spectator)
+				spectatorCount++;
+			else
+				playerCount++;
+		}
+	}
+
+	// Get gametype name (GM_COOP=0, GM_DM=1, GM_TEAMDM=2, GM_CTF=3, GM_HORDE=4)
+	const char* gametypeName = "";
+	switch (sv_gametype.asInt())
+	{
+		case 0:  gametypeName = "Cooperative"; break;
+		case 1:  gametypeName = "Deathmatch"; break;
+		case 2:  gametypeName = "Team Deathmatch"; break;
+		case 3:  gametypeName = "CTF"; break;
+		case 4:  gametypeName = "Horde"; break;
+		default: gametypeName = "Unknown"; break;
+	}
+
+	// Get game state name
+	const char* stateName = "";
+	switch (gamestate)
+	{
+		case GS_LEVEL:        stateName = "playing"; break;
+		case GS_INTERMISSION: stateName = "intermission"; break;
+		case GS_FINALE:       stateName = "finale"; break;
+		case GS_FULLCONSOLE:  stateName = "console"; break;
+		default:              stateName = "unknown"; break;
+	}
+
+	// Calculate time left (in seconds)
+	int timeleftSeconds = 0;
+	if (sv_timelimit.asInt() > 0)
+	{
+		int timelimitTics = sv_timelimit.asInt() * 60 * TICRATE;
+		int remaining = timelimitTics - level.time;
+		timeleftSeconds = (remaining > 0) ? remaining / TICRATE : 0;
+	}
+
+	// Build JSON output
+	PrintFmt("{{");
+
+	// Server section
+	PrintFmt("\"server\":{{");
+	PrintFmt("\"hostname\":\"{}\",", EscapeJsonString(sv_hostname.str()));
+	PrintFmt("\"motd\":\"{}\",", EscapeJsonString(sv_motd.str()));
+	PrintFmt("\"email\":\"{}\",", EscapeJsonString(sv_email.str()));
+	PrintFmt("\"version\":\"{}\"", NiceVersion());
+	PrintFmt("}},");
+
+	// Connection section
+	PrintFmt("\"connection\":{{");
+	PrintFmt("\"clients\":{},", clientCount);
+	PrintFmt("\"max_clients\":{},", sv_maxclients.asInt());
+	PrintFmt("\"players\":{},", playerCount);
+	PrintFmt("\"max_players\":{},", sv_maxplayers.asInt());
+	PrintFmt("\"spectators\":{}", spectatorCount);
+	PrintFmt("}},");
+
+	// Game section
+	PrintFmt("\"game\":{{");
+	PrintFmt("\"gametype\":{},", sv_gametype.asInt());
+	PrintFmt("\"gametype_name\":\"{}\",", gametypeName);
+	PrintFmt("\"skill\":{},", sv_skill.asInt());
+	PrintFmt("\"map\":\"{}\",", EscapeJsonString(level.mapname));
+	PrintFmt("\"map_name\":\"{}\",", EscapeJsonString(level.level_name));
+	PrintFmt("\"state\":\"{}\"", stateName);
+	PrintFmt("}},");
+
+	// Limits section
+	PrintFmt("\"limits\":{{");
+	PrintFmt("\"timelimit\":{},", sv_timelimit.asInt());
+	PrintFmt("\"fraglimit\":{},", sv_fraglimit.asInt());
+	PrintFmt("\"scorelimit\":{},", sv_scorelimit.asInt());
+	PrintFmt("\"winlimit\":{}", g_winlimit.asInt());
+	PrintFmt("}},");
+
+	// Settings section
+	PrintFmt("\"settings\":{{");
+	PrintFmt("\"friendlyfire\":{},", sv_friendlyfire.asInt() ? "true" : "false");
+	PrintFmt("\"allowjump\":{},", sv_allowjump.asInt() ? "true" : "false");
+	PrintFmt("\"allowcheats\":{},", sv_allowcheats.asInt() ? "true" : "false");
+	PrintFmt("\"freelook\":{},", sv_freelook.asInt() ? "true" : "false");
+	PrintFmt("\"nomonsters\":{},", sv_nomonsters.asInt() ? "true" : "false");
+	PrintFmt("\"fastmonsters\":{},", sv_fastmonsters.asInt() ? "true" : "false");
+	PrintFmt("\"monstersrespawn\":{},", sv_monstersrespawn.asInt() ? "true" : "false");
+	PrintFmt("\"itemsrespawn\":{},", sv_itemsrespawn.asInt() ? "true" : "false");
+	PrintFmt("\"weaponstay\":{},", sv_weaponstay.asInt() ? "true" : "false");
+	PrintFmt("\"infiniteammo\":{}", sv_infiniteammo.asInt() ? "true" : "false");
+	PrintFmt("}},");
+
+	// CTF section
+	PrintFmt("\"ctf\":{{");
+	PrintFmt("\"manualreturn\":{},", ctf_manualreturn.asInt() ? "true" : "false");
+	PrintFmt("\"flagathometoscore\":{},", ctf_flagathometoscore.asInt() ? "true" : "false");
+	PrintFmt("\"flagtimeout\":{}", ctf_flagtimeout.asInt());
+	PrintFmt("}},");
+
+	// Warmup section
+	PrintFmt("\"warmup\":{{");
+	PrintFmt("\"enabled\":{},", sv_warmup.asInt() ? "true" : "false");
+	PrintFmt("\"autostart\":{}", sv_warmup_autostart.value());
+	PrintFmt("}},");
+
+	// Lives/Rounds section
+	PrintFmt("\"game_rules\":{{");
+	PrintFmt("\"lives\":{},", g_lives.asInt());
+	PrintFmt("\"rounds\":{},", g_rounds.asInt() ? "true" : "false");
+	PrintFmt("\"teams_in_play\":{}", sv_teamsinplay.asInt());
+	PrintFmt("}},");
+
+	// Time section
+	PrintFmt("\"time\":{{");
+	PrintFmt("\"level_time_tics\":{},", level.time);
+	PrintFmt("\"level_time_seconds\":{},", level.time / TICRATE);
+	PrintFmt("\"timeleft_seconds\":{}", timeleftSeconds);
+	PrintFmt("}}");
+
+	PrintFmt("}}\n");
+}
+END_COMMAND(serverinfo)
 
 void OnChangedSwitchTexture (line_t *line, int useAgain)
 {
